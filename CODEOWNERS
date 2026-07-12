@@ -1,0 +1,18 @@
+# Replace the placeholder below with the founder's GitHub username before enforcement.
+# FOUNDER_GITHUB_USERNAME is intentionally not a real account.
+
+# Repository-level documentation
+/README.md                 @FOUNDER_GITHUB_USERNAME
+/CONTRIBUTING.md           @FOUNDER_GITHUB_USERNAME
+/SECURITY.md               @FOUNDER_GITHUB_USERNAME
+/CODEOWNERS                @FOUNDER_GITHUB_USERNAME
+/docs/                     @FOUNDER_GITHUB_USERNAME
+
+# GitHub governance and automation
+/.github/                  @FOUNDER_GITHUB_USERNAME
+
+# Future critical monorepo paths (these paths are not created by this issue)
+/apps/                     @FOUNDER_GITHUB_USERNAME
+/packages/                 @FOUNDER_GITHUB_USERNAME
+/package.json              @FOUNDER_GITHUB_USERNAME
+/pnpm-workspace.yaml       @FOUNDER_GITHUB_USERNAME
