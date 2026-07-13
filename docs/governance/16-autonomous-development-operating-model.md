@@ -2,11 +2,11 @@
 id: DOC-16
 title: Vocanova Autonomous Development Operating Model
 version: 1.0
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/governance/16-autonomous-development-operating-model.md
-approved_at: null
-approval_evidence: pending-github-pull-request
+approved_at: 2026-07-13
+approval_evidence: PR-3-founder-approval-comment-4961029533-reviewed-commit-09f97341ff093fd20a70683d88b772e154979330
 last_reviewed_at: 2026-07-13
 review_cycle: quarterly
 supersedes: null
@@ -41,10 +41,11 @@ The governing documents are:
    [protected areas](protected-areas.md), and [approval matrix](approval-matrix.md)
    for operational enforcement.
 
-The operating direction was supplied as approved founder intent, but this repository
-artifact remains `proposed` until founder approval is attributable to the reviewed
-GitHub revision and the pull request is merged. Its metadata must be changed to
-`approved` only through that recorded review flow.
+Founder approval was recorded on PR #3 against reviewed commit
+`09f97341ff093fd20a70683d88b772e154979330` in issue comment `4961029533`. PR #3 was
+merged into `develop` on 2026-07-13. DOC-16 is approved canonical governance. The
+one-time bootstrap exception expired with that merge and no later change may reuse
+it.
 
 ## Repository conventions
 
@@ -72,37 +73,38 @@ own permissions, review rules, release gates, protected paths, or credentials.
 
 ## Initial governance bootstrap adoption
 
-The first pull request that adopts DOC-16 and Amendment A-002 is a one-time bootstrap
-exception because Vocanova has not yet appointed a qualified human technical
-steward. That pull request may be approved and merged into `develop` only through:
+PR #3 was the first pull request adopting DOC-16 and Amendment A-002. At that time,
+Vocanova had not yet appointed a qualified human technical steward, so its one-time
+bootstrap exception required:
 
 1. founder approval bound to the reviewed GitHub revision;
 2. independent Claude Code verification with no unresolved Critical or High finding;
    and
 3. passing repository validation.
 
-The bootstrap pull request remains R4 because it establishes consequential
-governance. Founder approval and independent verification are required. The absence
-of steward approval for this one pull request must be recorded as this bootstrap
-exception—not as satisfied technical-steward approval.
+The bootstrap pull request remained R4 because it established consequential
+governance. Founder approval and independent verification were required. The absence
+of steward approval for PR #3 was recorded as the bootstrap exception—not as
+satisfied technical-steward approval.
 
-This exception applies only to the initial adoption of DOC-16 and A-002. It does not
+The exception applied only to the initial adoption of DOC-16 and A-002. It did not
 authorize production deployment, autonomous production releases, any R3 protected
-technical change, or bypass of future technical-steward approval. It grants no
+technical change, or bypass of future technical-steward approval. It granted no
 technical-steward status or authority to Claude Code or another AI agent.
 
-The technical-steward requirement becomes effective immediately when the governance
-framework is merged. Until a qualified human steward is appointed and GitHub
-enforcement is configured:
+The technical-steward requirement became effective immediately when PR #3 merged.
+The qualified human steward is recorded in
+[technical-steward-appointment.md](technical-steward-appointment.md). Until remaining
+GitHub enforcement is configured:
 
 - R3 changes remain blocked from production;
-- protected technical approvals remain unsatisfied;
+- protected technical approvals must be explicitly recorded in the steward capacity;
 - AI agents must not impersonate or substitute for the steward; and
 - autonomous production release remains disabled.
 
-R4 decisions continue to require founder approval. The bootstrap exception expires
-on merge and cannot be reused for later governance, workflow, application, or release
-changes.
+R4 decisions continue to require founder approval. The bootstrap exception expired
+when PR #3 merged and cannot be reused for later governance, workflow, application,
+or release changes.
 
 ## Required lifecycle and traceability
 

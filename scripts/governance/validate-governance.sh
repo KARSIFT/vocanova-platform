@@ -4,6 +4,7 @@ set -euo pipefail
 required_files=(
   AGENTS.md
   CLAUDE.md
+  SECURITY.md
   .github/CODEOWNERS
   .github/pull_request_template.md
   docs/governance/16-autonomous-development-operating-model.md
@@ -13,6 +14,7 @@ required_files=(
   docs/governance/protected-areas.md
   docs/governance/post-merge-activation-checklist.md
   docs/governance/repository-settings.md
+  docs/governance/technical-steward-appointment.md
   docs/templates/change-specification.md
   docs/templates/acceptance-criteria.md
   docs/templates/founder-decision-card.md
@@ -55,11 +57,75 @@ for field in "${required_pr_fields[@]}"; do
 done
 
 amendment=docs/governance/amendments/A-002-governed-autonomous-releases.md
+operating_model=docs/governance/16-autonomous-development-operating-model.md
+appointment=docs/governance/technical-steward-appointment.md
+activation=docs/governance/post-merge-activation-checklist.md
+
+grep -Fqx "status: approved" "$operating_model" || {
+  echo "DOC-16 must have status: approved." >&2
+  exit 1
+}
+grep -Fqx "approved_at: 2026-07-13" "$operating_model" || {
+  echo "DOC-16 must record approved_at: 2026-07-13." >&2
+  exit 1
+}
+grep -Fqx "status: approved" "$amendment" || {
+  echo "A-002 must have status: approved." >&2
+  exit 1
+}
+grep -Fqx "approved_at: 2026-07-13" "$amendment" || {
+  echo "A-002 must record approved_at: 2026-07-13." >&2
+  exit 1
+}
+if grep -Fq "approval_evidence: pending-github-pull-request" "$operating_model" "$amendment"; then
+  echo "Canonical governance contains stale pending approval evidence." >&2
+  exit 1
+fi
+
+grep -Fq 'Founder GitHub identity: `@m-e-h-r-d-a-a-d`' "$appointment" || {
+  echo "The appointment must identify the founder GitHub account." >&2
+  exit 1
+}
+grep -Fq 'Appointed qualified human technical steward: `@m-e-h-r-d-a-a-d`' "$appointment" || {
+  echo "The appointment must identify the qualified human technical steward." >&2
+  exit 1
+}
+grep -Fqi "dual-role human appointment" "$appointment" || {
+  echo "The appointment must record its dual-role human nature." >&2
+  exit 1
+}
+grep -Fqi "both capacities" "$appointment" || {
+  echo "The appointment must define combined approval evidence." >&2
+  exit 1
+}
+if grep -Eqi '^[[:space:]-]*(appointed )?(qualified human )?technical[- ]steward:[[:space:]]*`?@?[^[:space:]]*(claude|codex|bot|automation)' "$appointment"; then
+  echo "An AI or automation identity must not be appointed technical steward." >&2
+  exit 1
+fi
+
+if grep -Eqi 'no qualified (human )?technical[- ]steward( identity or team)? exists' .github/CODEOWNERS; then
+  echo "CODEOWNERS contains stale commentary saying no steward exists." >&2
+  exit 1
+fi
+
+grep -Fqx "Status: Not activated" "$activation" || {
+  echo "Governance activation status must remain Not activated." >&2
+  exit 1
+}
+grep -Fq "autonomous production release remains disabled" "$activation" || {
+  echo "The activation checklist must keep autonomous production release disabled." >&2
+  exit 1
+}
+if grep -Eqi '^[[:space:]]*Status:[[:space:]]*Activated|^- \[x\].*(autonomous|production release).*(enable|activat)' "$activation"; then
+  echo "The activation checklist must not claim autonomous release activation." >&2
+  exit 1
+fi
+
 grep -Fq "Low-risk, reversible R0-R1 production releases may merge" "$amendment"
 grep -Fq "technical steward" "$amendment"
 grep -Fq "require founder approval" "$amendment"
 grep -Fq "initial public launch" "$amendment"
-grep -Fq "Initial governance bootstrap adoption" docs/governance/16-autonomous-development-operating-model.md
+grep -Fq "Initial governance bootstrap adoption" "$operating_model"
 grep -Fq "Initial adoption exception" "$amendment"
 grep -Fq "Initial DOC-16/A-002 governance adoption" docs/governance/approval-matrix.md
 grep -Fq "R3 production changes remain" docs/governance/post-merge-activation-checklist.md

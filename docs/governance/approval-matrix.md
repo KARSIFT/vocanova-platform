@@ -3,6 +3,20 @@
 Verification answers whether evidence supports the change. Approval answers whether
 an accountable authority authorizes it. Both may be required.
 
+## Current authority assignment
+
+- Founder: `@m-e-h-r-d-a-a-d`
+- Qualified Human Technical Steward: `@m-e-h-r-d-a-a-d`
+- Current relationship: the same verified human serves in two explicitly separate
+  capacities, as recorded in
+  [technical-steward-appointment.md](technical-steward-appointment.md)
+
+R3 approval is available from the recorded steward. R4 founder approval remains
+independently required. A combined R3/R4 change requires explicit approval in both
+capacities; the same account may evidence both only when the approval text names both
+roles and the exact reviewed revision. The builder and independent verifier remain
+separate from both human approval capacities.
+
 | Change/action | Builder | Independent verifier | Technical steward | Founder | Automation permission |
 |---|---|---|---|---|---|
 | R0 non-behavioral change | May implement | Required, lightweight for trivial changes | Not required | Not required | Merge/release after applicable checks |
@@ -27,8 +41,8 @@ only when repository policy formally records that dual capacity.
 
 The initial DOC-16/A-002 bootstrap row is the only exception to an otherwise
 applicable steward requirement. It expires when that initial pull request merges.
-After merge, lack of an appointed steward blocks R3 production changes; it does not
-convert founder or Claude Code review into steward approval.
+The later appointment of a steward does not retroactively change PR #3 evidence and
+does not convert Claude Code review into steward approval.
 
 ## Independent verifier result
 

@@ -9,8 +9,9 @@ Where release-authority language conflicts, Amendment A-002 takes precedence.
 
 | Document | Purpose |
 |---|---|
-| [DOC-16](16-autonomous-development-operating-model.md) | Current implementation profile for autonomous development and release |
-| [Amendment A-002](amendments/A-002-governed-autonomous-releases.md) | Approved release-authority change |
+| [DOC-16](16-autonomous-development-operating-model.md) | Approved canonical autonomous-development operating model |
+| [Amendment A-002](amendments/A-002-governed-autonomous-releases.md) | Approved canonical release-authority amendment |
+| [Technical-steward appointment](technical-steward-appointment.md) | Current qualified human technical-steward authority and scope |
 | [Change risk classification](change-risk-classification.md) | R0-R4 classification and verification requirements |
 | [Protected areas](protected-areas.md) | Sensitive paths and change types |
 | [Approval matrix](approval-matrix.md) | Required decision, technical, verification, and release authorities |

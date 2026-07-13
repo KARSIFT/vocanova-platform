@@ -9,8 +9,10 @@ Record an evidence link, accountable human, and completion date for every item.
 
 ## Human authority and GitHub identities
 
-- [ ] Appoint a qualified, accountable human technical steward and record the scope
-      of that appointment.
+- [x] Appoint a qualified, accountable human technical steward and record the scope.
+      Evidence: [technical-steward-appointment.md](technical-steward-appointment.md)
+      and the required final dual-capacity approval bound to the exact head revision
+      of the appointment pull request before merge.
 - [ ] Create a GitHub technical-steward team containing only verified qualified human
       identities.
 - [ ] Add the verified team slug to protected CODEOWNERS patterns and remove any

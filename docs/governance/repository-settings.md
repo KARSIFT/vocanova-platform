@@ -67,16 +67,18 @@ Enable repository security settings when available:
 - Actions restricted to reviewed, immutable action SHAs; and
 - minimal default workflow token permissions.
 
-The bootstrap CODEOWNERS file uses only the verified human repository identity
-`@m-e-h-r-d-a-a-d`. It intentionally does not claim that a technical-steward identity
-or team exists. After a qualified steward is appointed, create and verify the GitHub
-team, add its real slug to the protected patterns, and activate required-review rules.
-Never use an AI or bot identity as the steward.
+The verified human repository identity `@m-e-h-r-d-a-a-d` is formally recorded as
+both founder and qualified human technical steward in
+[technical-steward-appointment.md](technical-steward-appointment.md). Direct account
+routing is currently used. A separate steward team and its hosted enforcement are not
+yet configured. After a real team is created and verified, its slug may replace direct
+routing in the protected patterns. Never use an AI or bot identity as the steward.
 
 ## Required identities and credentials
 
 - Distinct Codex implementation and Claude Code verification identities.
-- A human founder identity and a qualified human technical-steward identity/team.
+- The recorded human founder and technical-steward identity; a separate steward team
+  remains unconfigured.
 - GitHub App or OIDC-based credentials with least privilege and short expiry.
 - Separate Cloudflare preview, staging, and production projects/accounts or clearly
   isolated environments.
@@ -105,7 +107,9 @@ Before deployment automation is added, record and validate:
 
 The repository currently has no application, package manifest, pnpm lockfile,
 workspace, test/build scripts, database tooling, Cloudflare configuration, deployment
-credentials, monitoring endpoints, or verifier integration. DOC-15's broader
+credentials, monitoring endpoints, distinct Codex/Claude GitHub identities, or
+verifier integration. Branch and non-self-referential ruleset enforcement is not
+recorded as active. DOC-15's broader
 knowledge-system bootstrap is also incomplete: verified sources for DOC-00 through
 DOC-14, `docs/migration-manifest.yaml`, and `docs/document-graph.yaml` are not yet
 available. They require a separate preservation-first migration change; this work
@@ -114,11 +118,12 @@ does not invent their content. Therefore:
 - only the dependency-free governance policy check can run today;
 - application CI, previews, staging, production, and rollback cannot truthfully be
   automated yet; and
-- autonomous merge/release must remain disabled until the missing gates are
-  implemented and validated through a non-production rehearsal.
+- autonomous merge and autonomous production release must remain disabled until the
+  missing gates are implemented and validated through a non-production rehearsal.
 
-The initial governance bootstrap may merge to `develop` with founder approval,
-independent Claude Code verification, and passing repository validation. It does not
-remove any blocker above, authorize deployment, or mark steward approval satisfied.
-After that merge, R3 production remains blocked until the steward identity and its
-non-self-referential enforcement are active.
+The initial governance bootstrap merged through PR #3 and its one-time exception has
+expired. A qualified human steward is now formally appointed, and the same verified
+account presently serves as founder and steward in separate capacities. This current
+state does not remove any blocker above, activate hosted enforcement, authorize
+deployment, or enable autonomous release. R3 approvals must explicitly identify the
+steward capacity; combined R3/R4 approvals must identify both capacities.

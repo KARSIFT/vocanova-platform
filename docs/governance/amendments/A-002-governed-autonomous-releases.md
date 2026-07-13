@@ -2,11 +2,11 @@
 id: A-002
 title: Governed Autonomous Releases
 version: 1.0
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/governance/amendments/A-002-governed-autonomous-releases.md
-approved_at: null
-approval_evidence: pending-github-pull-request
+approved_at: 2026-07-13
+approval_evidence: PR-3-founder-approval-comment-4961029533-reviewed-commit-09f97341ff093fd20a70683d88b772e154979330
 last_reviewed_at: 2026-07-13
 review_cycle: quarterly
 supersedes:
@@ -20,29 +20,30 @@ related_decisions: []
 
 # Amendment A-002 — Governed Autonomous Releases
 
-This text records the approved founder direction supplied for implementation, but the
-repository amendment remains `proposed` until the founder approves the reviewed
-GitHub revision and it is merged. That repository approval is the evidence required
-to mark the amendment `approved` and activate it as canonical policy.
+Founder approval was recorded on PR #3 against reviewed commit
+`09f97341ff093fd20a70683d88b772e154979330` in issue comment `4961029533`. PR #3 was
+merged into `develop` on 2026-07-13. Amendment A-002 is approved canonical governance.
 
 ## Initial adoption exception
 
-The initial pull request adopting DOC-16 and A-002 may merge without
-technical-steward approval because no qualified human steward has yet been appointed.
-This one-time exception requires founder approval, independent Claude Code
-verification, and passing repository validation. It must be recorded as a bootstrap
-exception; technical-steward approval must not be marked as received or satisfied.
+PR #3 adopted DOC-16 and A-002 without technical-steward approval because no
+qualified human steward had yet been appointed. The one-time exception required
+founder approval, independent Claude Code verification, and passing repository
+validation. It was recorded as a bootstrap exception; technical-steward approval was
+not marked as received or satisfied.
 
-The exception authorizes only adoption of the governance text. It does not authorize
+The exception authorized only adoption of the governance text. It did not authorize
 production deployment, autonomous production releases, R3 protected technical
 changes, or any future bypass of steward approval. Claude Code remains an independent
-verifier and does not become the accountable human technical steward.
+verifier and did not become the accountable human technical steward.
 
-The technical-steward requirement becomes effective immediately after this framework
-is merged. Until a qualified human steward is appointed and enforcement is activated,
-R3 changes remain blocked from production and autonomous production release remains
-disabled. R4 decisions continue to require founder approval. This exception expires
-when the initial governance pull request merges and cannot be reused.
+The technical-steward requirement became effective immediately when PR #3 merged.
+The qualified human steward is now recorded in
+[technical-steward-appointment.md](../technical-steward-appointment.md), while hosted
+enforcement remains a separate activation requirement. R3 changes require explicit
+steward approval, R4 decisions continue to require founder approval, and autonomous
+production release remains disabled. The exception expired when PR #3 merged and
+cannot be reused.
 
 ## Decision
 
