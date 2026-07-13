@@ -1,7 +1,9 @@
-# Bootstrap review routing uses the verified human account @m-e-h-r-d-a-a-d.
-# No qualified technical-steward identity or team exists yet. These entries route
-# review to the current human maintainer; they do not satisfy future R3 steward
-# approval. Add only a verified human steward team after appointment and activation.
+# @m-e-h-r-d-a-a-d is the verified human founder and recorded qualified human
+# technical steward. Direct account routing is currently used. A future verified
+# technical-steward team may replace direct routing, but no unverified or nonexistent
+# team slug may be added. Codex, Claude Code, bots, and automation identities must not
+# be added as technical-steward owners. CODEOWNERS routes review; it does not itself
+# prove that every conditional R3/R4 approval was satisfied.
 
 # Review routing for governance-critical paths; effective R3/R4 classification is
 # determined by the risk classifier and semantic independent review.
