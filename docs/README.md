@@ -6,3 +6,6 @@ Project documentation is organized by purpose:
 - [`architecture/`](architecture/) describes system structure, boundaries, and technical design.
 - [`planning/`](planning/) contains delivery plans, milestones, and issue-level planning material.
 - [`decisions/`](decisions/) contains Architecture Decision Records for significant technical decisions.
+- [`operations/`](operations/) contains the approved baseline operating model.
+- [`governance/`](governance/) contains current risk, approval, protected-area, and autonomous-release controls. Amendment A-002 supersedes conflicting founder-only production-release language in DOC-15/A-001.
+- [`templates/`](templates/) contains reusable specification, approval, verification, release, and rollback records.
