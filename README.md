@@ -11,6 +11,8 @@ The repository is currently in the foundation phase. Application architecture an
 - [Architecture documentation](docs/architecture/)
 - [Planning documentation](docs/planning/)
 - [Architecture Decision Records](docs/decisions/README.md)
+- [Autonomous development governance](docs/governance/README.md)
+- [Workflow templates](docs/templates/README.md)
 - [GitHub repository configuration](.github/README.md)
 - [Contribution guidelines](CONTRIBUTING.md)
 - [Security policy](SECURITY.md)

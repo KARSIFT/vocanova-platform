@@ -1777,7 +1777,7 @@ Conceptual areas:
 
 ```text
 /docs/product/
-/decisions/product/
+/docs/decisions/
 /packages/auth/
 /packages/database/
 /infrastructure/
@@ -3321,4 +3321,3 @@ After this document is merged into the canonical repository:
 This document is approved as **Vocanova AI-Native Product and Engineering Operating Model v1.0**.
 
 It is the canonical operating model for the Vocanova MVP and includes Amendment A-001.
-

@@ -10,7 +10,49 @@ Create working branches from the appropriate protected branch using these prefix
 - `feature/` for new capabilities
 - `fix/` for corrections
 - `docs/` for documentation changes
+- `refactor/` for behavior-preserving code changes
+- `infra/` for infrastructure changes
+- `security/` for security changes
+- `hotfix/` for an approved emergency path
 
-Meaningful changes require a pull request and review. Squash merge is the only approved merge strategy.
+Use a stable `VOC-###` identifier in the branch name when one exists. Work in an
+isolated branch or worktree and target `develop`; release pull requests promote
+`develop` to `main`. Working branches are normally squash-merged. Release promotions
+use an identifiable merge commit.
 
-Repository protections apply to every contributor and automation actor. Contributors and AI agents must not bypass branch protections, required reviews, or other repository controls.
+Meaningful changes require a linked approved requirement or decision, risk
+classification, applicable tests, independent verification, and a pull request.
+Follow the [autonomous development model](docs/governance/16-autonomous-development-operating-model.md)
+and [risk classification](docs/governance/change-risk-classification.md).
+
+The pull-request template provides two paths:
+
+- `Standard` for behavioral, protected, or otherwise meaningful changes.
+- `Lightweight R0` for non-behavioral, non-policy documentation and small maintenance
+  changes. It still records objective, scope, risk, relevant checks, and verifier
+  evidence, but irrelevant sections may be marked `N/A` with a reason.
+
+Run every installed validation relevant to the change. This repository currently has
+no package manifest or application scripts; governance changes run:
+
+```bash
+bash scripts/governance/validate-governance.sh
+bash scripts/governance/classify-change-risk.sh
+git diff --check
+```
+
+When pnpm and application scripts are introduced through an approved foundation
+change, use the exact checked-in scripts with a frozen lockfile. Do not claim an
+unavailable tool or external deployment passed.
+
+R3 changes require a qualified human technical steward. R4 decisions and initial or
+major launches require the founder. Claude Code is the independent verifier, not the
+human technical steward. Repository protections apply to contributors and automation
+actors alike; never bypass failed checks, required review, branch protection, or
+production gates.
+
+The one-time initial DOC-16/A-002 bootstrap may merge with founder approval,
+independent Claude Code verification, and passing repository validation. It does not
+mark steward approval satisfied or authorize production. The exception expires on
+merge; R3 production remains blocked until a qualified human steward is appointed and
+enforcement is active.
