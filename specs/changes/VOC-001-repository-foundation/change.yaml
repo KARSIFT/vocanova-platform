@@ -1,0 +1,161 @@
+schema_version: 1
+
+id: VOC-001
+slug: repository-foundation
+title: Repository Foundation
+
+type: infrastructure
+status: implementing
+risk: R4
+
+canonical_path: specs/changes/VOC-001-repository-foundation
+
+owners:
+  decision: founder
+  specification: chatgpt
+  implementation: codex
+  independent_verification: claude-code
+  qualified_human_technical_steward: m-e-h-r-d-a-a-d
+
+approvals:
+  reconciled_package:
+    status: approved
+    approved_by: founder
+    approved_on: 2026-07-14
+    evidence: github-issue-6-founder-authorization
+  implementation_authorization:
+    status: approved
+    approved_by: founder
+    approved_on: 2026-07-14
+    evidence: github-issue-6-founder-authorization
+  final_r4_founder:
+    status: pending-exact-head-review
+    approved_by: null
+    approved_on: null
+    evidence: null
+  final_r3_technical_steward:
+    status: pending-exact-head-review
+    approved_by: null
+    approved_on: null
+    evidence: null
+  claude_verification:
+    status: pending-final-implementation-revision
+    approved_by: null
+    approved_on: null
+    evidence: null
+
+repository_grounding:
+  repository: KARSIFT/vocanova-platform
+  issue: 6
+  starting_branch: develop
+  starting_commit: 0211d75f28a4986694555f584dd8b84a3228a2ad
+  implementation_branch: chore/VOC-001-repository-foundation
+  target_branch: develop
+  pr_5_governance_present: true
+  founder_github_login: m-e-h-r-d-a-a-d
+  qualified_human_technical_steward: m-e-h-r-d-a-a-d
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-001-DEP-01
+    status: resolved
+  - id: VOC-001-DEP-02
+    status: resolved
+  - id: VOC-001-DEP-03
+    status: resolved
+  - id: VOC-001-DEP-04
+    status: resolved-by-direct-verified-steward
+  - id: VOC-001-DEP-05
+    status: phase-4-closure-required
+  - id: VOC-001-DEP-06
+    status: resolved
+  - id: VOC-001-DEP-07
+    status: repository-implementation-authorized
+  - id: VOC-001-DEP-08
+    status: resolved
+
+superseded_assumptions:
+  - id: VOC-001-AM-01
+    original: root-decisions-directory
+    replacement: docs-decisions-directory
+  - id: VOC-001-AM-02
+    original: uppercase-pull-request-template
+    replacement: lowercase-pull-request-template
+  - id: VOC-001-AM-03
+    original: unverified-governance-team
+    replacement: direct-verified-human-steward
+  - id: VOC-001-AM-04
+    original: voc-001-bootstrap-exception
+    replacement: normal-doc-16-a-002-r3-r4-approval
+  - id: VOC-001-AM-05
+    original: hosted-controls-as-implementation-blockers
+    replacement: phase-4-closure-and-activation-requirements
+
+related_documents:
+  - DOC-13
+  - DOC-15
+  - DOC-16
+
+related_decisions:
+  - A-001
+  - A-002
+
+affected_areas:
+  - AGENTS.md
+  - CLAUDE.md
+  - README.md
+  - docs/README.md
+  - docs/decisions/README.md
+  - specs
+  - tooling/governance
+  - scripts/governance
+  - .github
+
+governance:
+  protected_change: true
+  protected_technical_effect: R3
+  founder_approval_required: true
+  qualified_human_technical_steward_approval_required: true
+  automatic_merge_allowed: false
+  manual_squash_merge_only: true
+  codex_may_merge: false
+
+implementation:
+  authorized: true
+  required: true
+  target_branch: develop
+  branch: chore/VOC-001-repository-foundation
+  issue: 6
+  pull_request: null
+
+release:
+  required: false
+  mode: repository-only
+  target_branch: develop
+  production_impact: none
+  automatic_merge: false
+  feature_flag: false
+  migration_required: false
+  rollback_required: true
+  rollback: revert-the-voc-001-squash-commit-from-develop
+
+blocking_reasons: null
+
+phase_4_closure_requirements:
+  - separate-steward-github-team
+  - distinct-codex-and-claude-identities
+  - branch-and-ruleset-activation
+  - required-check-activation-after-merged-success
+  - negative-and-positive-hosted-enforcement-proof
+  - issue-4-activation-evidence
+  - independent-hosted-control-verification
+  - founder-approved-package-closure

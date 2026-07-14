@@ -1,7 +1,9 @@
 # Architecture Decision Records
 
-This established directory is the canonical location for Vocanova Architecture
-Decision Records (ADRs). ADRs preserve why a significant technical choice was made;
+This established directory is the canonical location for Vocanova material decision
+rationale, including Architecture Decision Records (ADRs). It is not a legacy or
+transitional path, and no duplicate root-level `decisions/` directory is permitted.
+ADRs preserve why a significant technical choice was made;
 accepted records are superseded by a new ADR rather than silently rewritten.
 
 ## Naming and lifecycle
