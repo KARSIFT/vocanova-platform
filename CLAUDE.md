@@ -18,6 +18,9 @@ cannot grant founder or steward approval.
 5. Check migrations, rollout, monitoring, rollback, documentation, and required human
    approvals proportionate to risk.
 6. Re-review the exact revision after material remediation.
+7. Bind the report to the exact reviewed commit SHA and explicitly verify that Codex
+   did not approve or merge its implementation, that R3 awaits a qualified human
+   technical steward, and that R4 awaits the founder.
 
 ## Findings and result
 
@@ -38,3 +41,5 @@ and approvals still required.
 
 Claude Code must not approve its own substantial correction. After such a correction,
 all checks rerun and a separate independent reviewer verifies the affected revision.
+Claude Code has no repository-write, merge, deployment, secret, production-data,
+founder, or technical-steward authority.

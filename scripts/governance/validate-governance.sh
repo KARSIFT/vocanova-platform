@@ -7,6 +7,8 @@ required_files=(
   SECURITY.md
   .github/CODEOWNERS
   .github/pull_request_template.md
+  .github/approved-policy/protected-paths.yaml
+  .github/workflows/repository-governance.yml
   docs/governance/16-autonomous-development-operating-model.md
   docs/governance/amendments/A-002-governed-autonomous-releases.md
   docs/governance/approval-matrix.md
@@ -22,6 +24,11 @@ required_files=(
   docs/templates/verification-report.md
   docs/templates/release-record.md
   docs/templates/rollback-report.md
+  specs/README.md
+  specs/templates/change-package/change.yaml
+  specs/changes/VOC-001-repository-foundation/change.yaml
+  tooling/governance/validate_repository_foundation.py
+  tooling/governance/tests/test_validate_repository_foundation.py
 )
 
 for file in "${required_files[@]}"; do
@@ -182,4 +189,5 @@ for path in "${r4_ruleset_paths[@]}"; do
 done
 
 bash -n scripts/governance/classify-change-risk.sh
+python3 tooling/governance/validate_repository_foundation.py --repository-root .
 echo "Governance structure validation passed."

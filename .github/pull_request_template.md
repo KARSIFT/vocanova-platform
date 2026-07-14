@@ -3,6 +3,9 @@
 - Business/product objective:
 - Approved Vocanova requirement or decision:
 - Linked issue/specification (`VOC-###` where applicable):
+- Change-package status and canonical path:
+- Requirement source:
+- Stable acceptance-criteria mapping:
 - Implementation tasks/commits:
 
 Change mode: <!-- Standard | Lightweight R0 -->
@@ -18,6 +21,15 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - In scope:
 - Out of scope:
 
+## Existing-file reconciliation
+
+| Path | Classification | Preserved content | Reconciliation |
+|---|---|---|---|
+| path | present-compatible / present-needs-reconciliation / absent-approved-to-create / material-conflict |  |  |
+
+- Previous governance control:
+- Proposed governance control:
+
 ## Risk and approvals
 
 - Risk rationale:
@@ -27,10 +39,11 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
   - [ ] R0-R2 — independent verifier and applicable gates
   - [ ] R3 — qualified human technical steward
   - [ ] R4 — founder (plus steward if technically protected)
-  - [ ] Initial DOC-16/A-002 bootstrap — founder + Claude verification + repository
-        validation; no steward approval claimed and no production authorized
+  - Historical initial DOC-16/A-002 bootstrap — expired with PR #3 and unavailable
+    to later changes; no checkbox or waiver exists
 - Technical-steward approval link/name or `N/A`:
 - Founder approval link/name or `N/A`:
+- Exact reviewed head SHA:
 
 ## Acceptance-criteria evidence
 
@@ -44,6 +57,8 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - CI run:
 - Preview deployment URL/status or `N/A` with reason:
 - Independent-verifier report/result:
+- Implementer provenance:
+- Verifier provenance:
 
 ## Impact assessments
 
@@ -60,6 +75,8 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - Release/feature-flag plan:
 - Monitoring and post-release outcome owner:
 - Known limitations/follow-up issues:
+- Hosted activation status:
+- Package closure status:
 
 ## Author checklist
 

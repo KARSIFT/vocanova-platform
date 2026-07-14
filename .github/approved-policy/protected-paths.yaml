@@ -1,0 +1,49 @@
+schema_version: 1
+policy: repository-protected-paths
+status: approved-for-voc-001
+direct_human_steward: m-e-h-r-d-a-a-d
+default_risk: R1
+
+paths:
+  - path: AGENTS.md
+    minimum_risk: R3
+  - path: CLAUDE.md
+    minimum_risk: R3
+  - path: .github/CODEOWNERS
+    minimum_risk: R4
+  - path: .github/pull_request_template.md
+    minimum_risk: R3
+  - path: .github/workflows/
+    minimum_risk: R3
+  - path: .github/approved-policy/
+    minimum_risk: R4
+  - path: scripts/governance/
+    minimum_risk: R4
+  - path: tooling/governance/
+    minimum_risk: R4
+  - path: docs/governance/
+    minimum_risk: R3
+  - path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
+    minimum_risk: R4
+  - path: docs/decisions/
+    minimum_risk: R2
+  - path: specs/README.md
+    minimum_risk: R3
+  - path: specs/templates/
+    minimum_risk: R3
+  - path: specs/changes/VOC-001-repository-foundation/
+    minimum_risk: R4
+  - path: apps/**/auth/
+    minimum_risk: R3
+  - path: packages/auth/
+    minimum_risk: R3
+  - path: packages/database/
+    minimum_risk: R3
+  - path: migrations/
+    minimum_risk: R3
+  - path: infrastructure/
+    minimum_risk: R3
+
+hosted_enforcement_status: not-activated
+automatic_merge_allowed: false
+autonomous_production_release: disabled

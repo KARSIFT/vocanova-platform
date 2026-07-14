@@ -1,5 +1,10 @@
 # Documentation
 
+`docs/` contains approved living documentation. It is distinct from
+`docs/decisions/`, which preserves material decision rationale, and from the
+repository-root [`specs/`](../specs/README.md), which contains bounded executable
+change packages.
+
 Project documentation is organized by purpose:
 
 - [`product/`](product/) defines the product vision, user needs, and functional scope.
@@ -9,3 +14,7 @@ Project documentation is organized by purpose:
 - [`operations/`](operations/) contains the approved baseline operating model.
 - [`governance/`](governance/) contains current risk, approval, protected-area, and autonomous-release controls. Amendment A-002 supersedes conflicting founder-only production-release language in DOC-15/A-001.
 - [`templates/`](templates/) contains reusable specification, approval, verification, release, and rollback records.
+
+This index does not claim that Documents 00–14 have been migrated. Their
+preservation-first migration, including any manifest or document graph, remains
+separate future work.
