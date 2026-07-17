@@ -1,0 +1,22 @@
+schema_version: 1
+id: VOC-003
+slug: a003-lifecycle-sync
+title: A-003 Lifecycle State Synchronization
+type: governance
+status: implementing
+risk: R4
+canonical_path: specs/changes/VOC-003-a003-lifecycle-sync
+base_branch: develop
+base_sha: 9d5b4bc1d4a72e313b013047601265ee837c34f2
+authority_model: a003-active
+post_activation_sync: true
+new_activation_event: false
+automatic_merge: false
+autonomous_merge: false
+rl1_technical_activation: false
+rl2_technical_activation: false
+production_deployment: false
+autonomous_production_release: disabled
+doc_17_repository_adoption: false
+doc_18_repository_adoption: false
+control_plane_implementation: false

@@ -5,11 +5,13 @@ architecture, security, privacy, data migrations, accessibility, CI/CD, deployme
 rollback, and documentation consistency. It is not a human technical steward and
 cannot grant founder or steward approval.
 
-A-003 is currently inactive. VOC-002 must be reviewed under pre-A-003 authority and
-requires exact-revision R4 founder and one-time R3 technical-steward approvals after
-Claude passes. After valid activation, routine R3 no longer requires standing steward
-or founder approval merely because it is R3; Claude still cannot self-approve or
-substitute for R4 founder authority or exceptional qualified human review.
+A-003 has been effectively active since `2026-07-17T16:44:34Z`. Routine R3 no longer
+requires standing technical-steward or founder approval merely because it is R3;
+strengthened applicable controls and independent verification remain required. R4
+founder authority is unchanged, EHR is exceptional, and Claude still cannot
+self-approve or substitute for founder or qualified-human authority where separately
+required. The one-time VOC-002 migration approval is exhausted and must never be
+reused.
 
 ## Required review
 

@@ -90,52 +90,12 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         self.assertIn(old, text)
         path.write_text(text.replace(old, new, 1), encoding="utf-8")
 
-    def activate_a003_fixture(self) -> None:
-        state_replacements = (
-            ("authority_model: pre-a003", "authority_model: a003-active"),
-            ("transition_stage: pre-merge-transition", "transition_stage: effectively-active"),
-            ("formal_founder_approval_status: pending-exact-revision-github-evidence", "formal_founder_approval_status: approved-exact-revision"),
-            ("technical_steward_migration_approval_status: pending-exact-revision-github-evidence", "technical_steward_migration_approval_status: approved-exact-revision-one-time"),
-            ("independent_verification_status: pending-exact-revision-claude-evidence", "independent_verification_status: passed-exact-revision"),
-            ("repository_adoption_status: pending", "repository_adoption_status: adopted"),
-            ("effective_activation_status: inactive", "effective_activation_status: active"),
-            ("approved_pr_head_sha: null", "approved_pr_head_sha: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"),
-            ("adopted_develop_sha: null", "adopted_develop_sha: bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"),
-            ("post_merge_validation_status: not-run", "post_merge_validation_status: passed"),
-            ("post_merge_validation_evidence: null", "post_merge_validation_evidence: github-actions-run-100"),
-            ("activation_evidence: null", "activation_evidence: github-issue-comment-200"),
-            ("canonical_lifecycle_sync_status: pending-post-activation", "canonical_lifecycle_sync_status: complete"),
-            ("migration_approval_status: pending-one-time-use", "migration_approval_status: exhausted-non-reusable"),
-            ("migration_approval_exhausted: false", "migration_approval_exhausted: true"),
-            ("technical_steward_routine_authority_status: current-until-valid-activation", "technical_steward_routine_authority_status: historical-retired"),
-            ("exceptional_human_review_mode: exceptional-only-after-valid-activation", "exceptional_human_review_mode: exceptional-only"),
-        )
-        for old, new in state_replacements:
-            self.replace("docs/governance/a003-transition-state.yaml", old, new)
-        metadata_replacements = (
-            ("status: proposed", "status: approved"),
-            ("formal_founder_approval_status: pending-exact-revision-github-evidence", "formal_founder_approval_status: approved-exact-revision-github-evidence"),
-            ("repository_adoption_status: pending", "repository_adoption_status: adopted"),
-            ("effective_activation_status: inactive", "effective_activation_status: active"),
-            ("approved_at: null", "approved_at: 2026-07-18"),
-            ("adopted_at: null", "adopted_at: 2026-07-18"),
-            ("effective_at: null", "effective_at: 2026-07-18"),
-            ("approval_evidence: null", "approval_evidence: github-pr-exact-revision"),
-        )
-        for old, new in metadata_replacements:
-            self.replace(
-                "docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md",
-                old,
-                new,
-            )
-
     def test_valid_repository_passes(self) -> None:
         result = self.run_validator()
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertIn("validation passed", result.stdout)
 
-    def test_valid_evidence_backed_a003_activation_passes(self) -> None:
-        self.activate_a003_fixture()
+    def test_valid_evidence_backed_a003_active_state_passes(self) -> None:
         result = self.run_validator()
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
@@ -165,6 +125,10 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         (self.root / "specs/changes/VOC-002-a003-governance-transition/tasks.md").unlink()
         self.assert_failure("must contain exactly nine files")
 
+    def test_incomplete_voc_003_package_fails(self) -> None:
+        (self.root / "specs/changes/VOC-003-a003-lifecycle-sync/tasks.md").unlink()
+        self.assert_failure("must contain exactly nine files")
+
     def test_voc_002_classifier_floor_is_r4(self) -> None:
         result = self.run_classifier_for_path(
             "specs/changes/VOC-002-a003-governance-transition/README.md", "R4"
@@ -179,6 +143,13 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         self.assertEqual(1, result.returncode, result.stdout + result.stderr)
         self.assertIn("below the detected floor R4", result.stderr)
 
+    def test_voc_003_classifier_floor_is_r4(self) -> None:
+        result = self.run_classifier_for_path(
+            "specs/changes/VOC-003-a003-lifecycle-sync/README.md", "R4"
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("Detected path-based risk floor: R4", result.stdout)
+
     def test_a003_frozen_body_change_fails(self) -> None:
         self.replace(
             "docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md",
@@ -187,37 +158,69 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assert_failure("frozen A-003 substantive body checksum mismatch")
 
-    def test_a003_premature_activation_fails(self) -> None:
+    def test_a003_authority_rollback_without_governed_record_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "effective_activation_status: inactive",
-            "effective_activation_status: active",
+            "authority_model: a003-active",
+            "authority_model: pre-a003",
         )
         self.assert_failure("active A-003 requires")
 
-    def test_a003_missing_exact_revision_evidence_fails(self) -> None:
+    def test_a003_missing_approved_pr_head_sha_fails(self) -> None:
         self.replace(
-            "docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md",
-            "effective_activation_status: inactive",
-            "effective_activation_status: active",
+            "docs/governance/a003-transition-state.yaml",
+            "approved_pr_head_sha: c858ebff3d97da88fea830bc32a74f69f59a9ad2",
+            "approved_pr_head_sha: null",
         )
-        self.assert_failure("active A-003 requires")
+        self.assert_failure("full approved_pr_head_sha")
+
+    def test_a003_missing_adopted_develop_sha_fails(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "adopted_develop_sha: 9d5b4bc1d4a72e313b013047601265ee837c34f2",
+            "adopted_develop_sha: null",
+        )
+        self.assert_failure("full adopted_develop_sha")
+
+    def test_a003_conflated_revision_shas_fail(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "adopted_develop_sha: 9d5b4bc1d4a72e313b013047601265ee837c34f2",
+            "adopted_develop_sha: c858ebff3d97da88fea830bc32a74f69f59a9ad2",
+        )
+        self.assert_failure("must be distinct records")
+
+    def test_a003_missing_activation_evidence_fails(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            'activation_evidence: "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622"',
+            "activation_evidence: null",
+        )
+        self.assert_failure("exact activation_evidence")
+
+    def test_a003_incomplete_post_merge_validation_fails(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "post_merge_validation_status: passed",
+            "post_merge_validation_status: incomplete",
+        )
+        self.assert_failure("post_merge_validation_status: passed")
 
     def test_a003_migration_approval_reuse_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "migration_approval_status: pending-one-time-use",
+            "migration_approval_status: exhausted-non-reusable",
             "migration_approval_status: reusable",
         )
-        self.assert_failure("pending-one-time-use")
+        self.assert_failure("exhausted-non-reusable")
 
     def test_a003_permanent_ehr_layer_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "exceptional_human_review_mode: exceptional-only-after-valid-activation",
+            "exceptional_human_review_mode: exceptional-only",
             "exceptional_human_review_mode: permanent-routine-approval",
         )
-        self.assert_failure("exceptional-only-after-valid-activation")
+        self.assert_failure("exceptional-only")
 
     def test_a003_historical_steward_falsification_fails(self) -> None:
         self.replace(
@@ -243,6 +246,30 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assert_failure("rl2_technical_activation must remain false")
 
+    def test_a003_rl1_false_activation_fails(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "rl1_technical_activation: false",
+            "rl1_technical_activation: true",
+        )
+        self.assert_failure("rl1_technical_activation must remain false")
+
+    def test_a003_automatic_merge_enablement_fails(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "automatic_merge_allowed: false",
+            "automatic_merge_allowed: true",
+        )
+        self.assert_failure("automatic_merge_allowed must remain false")
+
+    def test_a003_autonomous_merge_enablement_fails(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "autonomous_merge_allowed: false",
+            "autonomous_merge_allowed: true",
+        )
+        self.assert_failure("autonomous_merge_allowed must remain false")
+
     def test_a003_autonomous_production_enablement_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
@@ -258,6 +285,14 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
             "doc_17_repository_adoption: true",
         )
         self.assert_failure("doc_17_repository_adoption must remain false")
+
+    def test_a003_doc_18_adoption_fails(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "doc_18_repository_adoption: false",
+            "doc_18_repository_adoption: true",
+        )
+        self.assert_failure("doc_18_repository_adoption must remain false")
 
     def test_package_path_id_mismatch_fails(self) -> None:
         self.replace(

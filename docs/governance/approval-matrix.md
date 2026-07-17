@@ -3,53 +3,34 @@
 Verification answers whether evidence supports the change. Approval answers whether
 an accountable authority authorizes it. Both may be required.
 
-## Current pre-A-003 authority assignment
+## Current active A-003 authority assignment
 
 - Founder: `@m-e-h-r-d-a-a-d`
-- Qualified Human Technical Steward: `@m-e-h-r-d-a-a-d`
-- Current relationship: the same verified human serves in two explicitly separate
-  capacities, as recorded in
+- Historical Qualified Human Technical Steward: `@m-e-h-r-d-a-a-d`
+- Historical relationship: the same verified human served in two explicitly separate
+  capacities for the completed VOC-002 migration, as recorded in
   [technical-steward-appointment.md](technical-steward-appointment.md)
 
-R3 approval is available from the recorded steward. R4 founder approval remains
-independently required. A combined R3/R4 change requires explicit approval in both
-capacities; the same account may evidence both only when the approval text names both
-roles and the exact reviewed revision. The builder and independent verifier remain
-separate from both human approval capacities.
+A-003 is effectively active. The historical steward role is retired as routine R3
+approval authority. Routine R3 does not require founder approval merely because it is
+R3. R4 founder authority remains independently required, and EHR applies only when an
+actual exceptional trigger exists.
 
-A-003 is not effectively active. The current rows below govern VOC-002 itself. The
-VOC-002 transition is R4 with an R3 protected effect and therefore requires exact-SHA
-independent Claude verification, founder approval, and technical-steward approval.
-The same verified human may evidence both human capacities only by expressly naming
-both and binding both to the exact reviewed revision.
-
-| Change/action | Builder | Independent verifier | Technical steward | Founder | Automation permission |
-|---|---|---|---|---|---|
-| R0 non-behavioral change | May implement | Required, lightweight for trivial changes | Not required | Not required | Merge/release after applicable checks |
-| R1 reversible implementation | May implement approved spec | Required | Not required | Not required | Merge/release after all gates |
-| R2 moderate implementation | May implement approved spec | Required with relevant specialist coverage | Optional domain review; required if verifier detects protected effect | Not required | Merge/release only after stronger checks and rollback evidence |
-| R3 protected technical change | May implement; cannot self-approve | Required | Required from a qualified accountable human | Not required unless also R4 | No protected merge/release before steward approval |
-| R4 consequential decision/change | May implement only after decision approval | Required | Required if technically protected | Required | No protected merge/release before founder approval |
-| Initial public or major launch | May prepare release | Required release review | Required for included R3 changes | Required go/no-go | Publish only after recorded founder approval |
-| Initial DOC-16/A-002 governance adoption | May prepare the one bootstrap PR | Required Claude Code verification with no unresolved Critical/High finding | One-time exception because no steward exists; must be recorded as unsatisfied, not approved | Required | Merge to `develop` only; no production deployment or autonomous release authority |
-| Emergency protective rollback using approved runbook | May execute only through authorized workflow | Post-action verification required | Pre-authorized runbook owner or incident authority | Notify; approval required for any new R4 decision | May run automatically when predefined trigger and safer-than-waiting condition are met |
-| Change to CI/CD, ownership, approval, agent authority, or this matrix | May propose | Independent governance/security review required | Required | Required when authority or R4 policy changes | Cannot self-modify into effect |
-| VOC-002 A-003 transition only | May prepare; cannot self-approve or merge | Exact-SHA Claude verdict required | Required once under pre-A-003 governance | Required as R4 | Manual adoption only; no activation or production authority |
-
-## Authority after valid A-003 activation
-
-This section is conditional and does not describe the authority active during the
-VOC-002 adoption PR.
+Builders may implement approved work but cannot self-approve or merge it. Independent
+verification remains separate from every human authority.
 
 | Change/action | Independent verification and controls | Human authority | Automation permission |
 |---|---|---|---|
 | Routine R0-R2 | Proportionate deterministic and independent verification | No founder or standing technical-steward approval | Only where separately implemented and proven |
 | Routine R3 protected technical work | Strengthened risk-specific controls and independent verification | No standing technical-steward approval; no founder approval merely because work is R3 | Only where every applicable technical gate is implemented and proven |
 | R4 consequential decision/change | R3 controls too when technically protected | Founder approval required | Cannot bypass founder authority |
+| Initial public or predefined major launch | Independent release review and every applicable technical gate | Founder go/no-go required | Publish only after recorded founder approval and technical activation |
+| Emergency protective rollback using approved runbook | Post-action verification and permanent evidence | Pre-authorized runbook/incident authority; founder only for a new R4 decision | Only a predefined safer-than-waiting action may execute automatically |
+| Change to CI/CD, ownership, approval, agent authority, or this matrix | Independent governance/security review and fail-closed validation | Founder approval when the change is R4; no standing steward approval solely for R3 | Cannot self-modify into effect |
 | EHR escalation | Operation stops and qualified expertise is recorded | Exceptional qualified human review for the triggered matter only | Not a routine approval layer |
 
-The one-time VOC-002 migration approval is exhausted after valid activation and must
-never be reused. CODEOWNERS remains review routing and is not approval evidence.
+The one-time VOC-002 migration approval is exhausted and must never be reused.
+CODEOWNERS remains review routing and is not approval evidence.
 R4 founder authority remains unchanged. The migration record must never be reused as
 approval for later work.
 
@@ -59,18 +40,17 @@ An approval is valid only when it is attributable to the configured GitHub ident
 bound to the reviewed commit or pull-request revision, recorded in GitHub, and not
 dismissed by later material changes. Private chat approval is insufficient.
 
-If one person serves as both founder and qualified technical steward, the release
-record must state both roles explicitly. One GitHub approval may evidence both roles
-only when repository policy formally records that dual capacity.
+The completed VOC-002 approval explicitly named both founder and technical-steward
+capacities and remains historical evidence only; it cannot approve later work.
 
-The initial DOC-16/A-002 bootstrap row is the only exception to an otherwise
-applicable steward requirement. It expires when that initial pull request merges.
+The historical initial DOC-16/A-002 bootstrap row was the only exception to the
+steward requirement then applicable. It expired when that initial pull request merged.
 The later appointment of a steward does not retroactively change PR #3 evidence and
 does not convert Claude Code review into steward approval.
 
-VOC-002 is not an exception: it uses the pre-A-003 requirements in full. Its
-technical-steward approval is a one-time migration requirement, not a standing future
-rule, and is exhausted only after valid activation evidence exists.
+VOC-002 was not an exception: it used the pre-A-003 requirements in full. Its
+technical-steward approval was a one-time migration requirement, is now exhausted,
+and is not a standing future rule.
 
 ## Independent verifier result
 

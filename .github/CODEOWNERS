@@ -1,7 +1,7 @@
-# @m-e-h-r-d-a-a-d is the verified founder and current pre-A-003 technical steward.
-# Direct account routing is review routing only: it never proves R3/R4 approval. After
-# valid A-003 activation it may remain useful routing but must not recreate standing
-# steward or founder approval for routine R3. No replacement steward team is implied.
+# @m-e-h-r-d-a-a-d is the verified founder and historical pre-A-003 technical steward.
+# Direct account routing is review routing only: it never proves R3/R4 approval. Under
+# active A-003 it must not recreate standing steward or founder approval for routine
+# R3. No replacement steward team is implied.
 # Codex, Claude Code, bots, and automation identities must not be human authorities.
 
 # Review routing for governance-critical paths; effective R3/R4 classification is
@@ -23,6 +23,7 @@
 /specs/templates/                          @m-e-h-r-d-a-a-d
 /specs/changes/VOC-001-repository-foundation/ @m-e-h-r-d-a-a-d
 /specs/changes/VOC-002-a003-governance-transition/ @m-e-h-r-d-a-a-d
+/specs/changes/VOC-003-a003-lifecycle-sync/ @m-e-h-r-d-a-a-d
 /tooling/governance/                       @m-e-h-r-d-a-a-d
 
 # Product direction and consequential decisions

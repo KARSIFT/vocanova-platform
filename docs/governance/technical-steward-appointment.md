@@ -2,13 +2,13 @@
 
 ## Lifecycle under the A-003 transition
 
-This appointment is current while A-003 remains inactive. It governs the one-time
-VOC-002 transition under pre-A-003 rules and must not be deleted, falsified, or
-rewritten. Only after valid A-003 activation is evidenced does it become a historical
-appointment, permanently retired as routine R3 approval authority. Its appointment,
-scope, acceptance, and exact evidence below remain permanent audit history.
+This appointment governed the one-time VOC-002 transition under pre-A-003 rules and
+must not be deleted, falsified, or rewritten. Since A-003 became effectively active
+at `2026-07-17T16:44:34Z`, it is a historical appointment, permanently retired as
+routine R3 approval authority. Its appointment, scope, acceptance, and exact evidence
+below remain permanent audit history.
 
-The one-time VOC-002 approval is exhausted after valid activation and is not reusable.
+The one-time VOC-002 approval is exhausted and is not reusable.
 Future EHR engagement is exceptional and must not recreate this permanent role under
 another name.
 

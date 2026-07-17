@@ -27,6 +27,7 @@ A003_STATE_PATH = "docs/governance/a003-transition-state.yaml"
 A003_FROZEN_SHA256 = "f2b454653a33e6cb76a0eab37c01d48b0174227450c9ea255474f6aac59b4f83"
 A003_FROZEN_BODY_SHA256 = "ad05cc8c92047002288245574bc3b76e1cce6f54d43805039ad53393534af4e7"
 VOC002_PATH = "specs/changes/VOC-002-a003-governance-transition"
+VOC003_PATH = "specs/changes/VOC-003-a003-lifecycle-sync"
 
 REQUIRED_FILES = (
     "AGENTS.md",
@@ -45,6 +46,7 @@ REQUIRED_FILES = (
     "scripts/governance/validate-governance.sh",
     "specs/README.md",
     f"{VOC002_PATH}/change.yaml",
+    f"{VOC003_PATH}/change.yaml",
     "tooling/governance/validate_repository_foundation.py",
     "tooling/governance/tests/test_validate_repository_foundation.py",
 )
@@ -65,6 +67,7 @@ PROTECTED_PATHS = (
     "specs/templates/",
     "specs/changes/VOC-001-repository-foundation/",
     "specs/changes/VOC-002-a003-governance-transition/",
+    "specs/changes/VOC-003-a003-lifecycle-sync/",
 )
 
 TEMPLATE_MARKERS = {
@@ -119,6 +122,19 @@ class Validation:
             return ""
 
 
+def strip_restricted_yaml_comment(raw: str) -> str:
+    quote = ""
+    for index, character in enumerate(raw):
+        if character in {"\"", "'"}:
+            if not quote:
+                quote = character
+            elif quote == character:
+                quote = ""
+        elif character == "#" and not quote:
+            return raw[:index].rstrip()
+    return raw.rstrip()
+
+
 def validate_restricted_yaml(validation: Validation, relative: str) -> dict[str, str]:
     text = validation.read(relative)
     top_level: dict[str, str] = {}
@@ -129,7 +145,7 @@ def validate_restricted_yaml(validation: Validation, relative: str) -> dict[str,
     for number, raw in enumerate(text.splitlines(), 1):
         if "\t" in raw:
             validation.error(relative, f"line {number}: tabs are not allowed in restricted YAML")
-        content = raw.split("#", 1)[0].rstrip()
+        content = strip_restricted_yaml_comment(raw)
         if not content.strip():
             continue
         if re.search(r"(^|\s)[&*!][A-Za-z0-9_-]+", content) or any(x in content for x in ("{", "}", "[", "]")):
@@ -338,6 +354,53 @@ def validate_voc_002_package(validation: Validation) -> None:
             validation.error(relative, f"missing VOC-002 transition marker: {marker}")
 
 
+def validate_voc_003_package(validation: Validation) -> None:
+    relative = VOC003_PATH
+    require_complete_directory(validation, relative)
+    values = validate_restricted_yaml(validation, f"{relative}/change.yaml")
+    expected = {
+        "schema_version": "1",
+        "id": "VOC-003",
+        "slug": "a003-lifecycle-sync",
+        "title": "A-003 Lifecycle State Synchronization",
+        "type": "governance",
+        "status": "implementing",
+        "risk": "R4",
+        "canonical_path": relative,
+        "base_sha": "9d5b4bc1d4a72e313b013047601265ee837c34f2",
+        "authority_model": "a003-active",
+        "post_activation_sync": "true",
+        "new_activation_event": "false",
+        "automatic_merge": "false",
+        "autonomous_merge": "false",
+        "rl1_technical_activation": "false",
+        "rl2_technical_activation": "false",
+        "production_deployment": "false",
+        "autonomous_production_release": "disabled",
+        "doc_17_repository_adoption": "false",
+        "doc_18_repository_adoption": "false",
+        "control_plane_implementation": "false",
+    }
+    for key, value in expected.items():
+        if values.get(key) != value:
+            validation.error(f"{relative}/change.yaml", f"{key} must equal {value!r}")
+    combined = "\n".join(validation.read(f"{relative}/{name}") for name in PACKAGE_FILES)
+    for marker in (
+        "post-activation canonical synchronization",
+        "c858ebff3d97da88fea830bc32a74f69f59a9ad2",
+        "9d5b4bc1d4a72e313b013047601265ee837c34f2",
+        "2026-07-17T16:44:34Z",
+        "R4",
+        "exhausted",
+        "DOC-17",
+        "DOC-18",
+        "Control Plane",
+        "autonomous production release",
+    ):
+        if marker not in combined:
+            validation.error(relative, f"missing VOC-003 synchronization marker: {marker}")
+
+
 def frontmatter_values(text: str) -> dict[str, str]:
     if not text.startswith("---\n") or "\n---\n" not in text[4:]:
         return {}
@@ -423,9 +486,23 @@ def validate_a003_lifecycle(validation: Validation) -> None:
                 validation.error(A003_STATE_PATH, f"active A-003 requires a full {key}")
         if state.get("approved_pr_head_sha") == state.get("adopted_develop_sha"):
             validation.error(A003_STATE_PATH, "approved PR head SHA and adopted develop SHA must be distinct records")
-        for key in ("post_merge_validation_evidence", "activation_evidence"):
-            if state.get(key) in {None, "", "null"}:
-                validation.error(A003_STATE_PATH, f"active A-003 requires {key}")
+        exact_active_state = {
+            "approved_pr_head_sha": "c858ebff3d97da88fea830bc32a74f69f59a9ad2",
+            "adopted_develop_sha": "9d5b4bc1d4a72e313b013047601265ee837c34f2",
+            "approved_adopted_tree_sha": "07ef24cbb8602f540600dcea551306ed51a6215f",
+            "formal_founder_approval_at": "2026-07-17T16:37:38Z",
+            "formal_founder_approval_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067",
+            "technical_steward_migration_approval_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067",
+            "independent_verification_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005293621",
+            "repository_adoption_at": "2026-07-17T16:41:32Z",
+            "repository_adoption_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005429197",
+            "effective_activation_at": "2026-07-17T16:44:34Z",
+            "post_merge_validation_evidence": "https://github.com/KARSIFT/vocanova-platform/actions/runs/29597154713",
+            "activation_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622",
+        }
+        for key, value in exact_active_state.items():
+            if state.get(key) != value:
+                validation.error(A003_STATE_PATH, f"active A-003 requires exact {key}: {value}")
         active_metadata = {
             "status": "approved",
             "formal_founder_approval_status": "approved-exact-revision-github-evidence",
@@ -435,13 +512,34 @@ def validate_a003_lifecycle(validation: Validation) -> None:
         for key, value in active_metadata.items():
             if metadata.get(key) != value:
                 validation.error(A003_PATH, f"active transition requires synchronized {key}: {value}")
-        for key in ("approved_at", "adopted_at", "effective_at", "approval_evidence"):
-            if metadata.get(key) in {None, "", "null"}:
-                validation.error(A003_PATH, f"active transition requires synchronized {key}")
+        exact_metadata = {
+            "approved_at": "2026-07-17T16:37:38Z",
+            "adopted_at": "2026-07-17T16:41:32Z",
+            "effective_at": "2026-07-17T16:44:34Z",
+            "approved_pr_head_sha": "c858ebff3d97da88fea830bc32a74f69f59a9ad2",
+            "adopted_develop_sha": "9d5b4bc1d4a72e313b013047601265ee837c34f2",
+            "approval_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067",
+            "independent_verification_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005293621",
+            "repository_adoption_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005429197",
+            "activation_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622",
+        }
+        for key, value in exact_metadata.items():
+            if metadata.get(key) != value:
+                validation.error(A003_PATH, f"active transition requires exact {key}: {value}")
 
-    for key in ("rl1_technical_activation", "rl2_technical_activation", "automatic_merge_allowed", "doc_17_repository_adoption", "doc_18_repository_adoption"):
+    for key in (
+        "rl1_technical_activation",
+        "rl2_technical_activation",
+        "automatic_merge_allowed",
+        "autonomous_merge_allowed",
+        "doc_17_repository_adoption",
+        "doc_18_repository_adoption",
+        "control_plane_implementation",
+    ):
         if state.get(key) != "false":
-            validation.error(A003_STATE_PATH, f"{key} must remain false in VOC-002")
+            validation.error(A003_STATE_PATH, f"{key} must remain false")
+    if state.get("production_deployment") != "disabled":
+        validation.error(A003_STATE_PATH, "production deployment must remain disabled")
     if state.get("autonomous_production_release") != "disabled":
         validation.error(A003_STATE_PATH, "autonomous production release must remain disabled")
 
@@ -450,7 +548,7 @@ def validate_a003_lifecycle(validation: Validation) -> None:
         "Appointed qualified human technical steward: `@m-e-h-r-d-a-a-d`",
         "same verified human presently serves in two explicitly separate",
         "permanent audit history",
-        "one-time VOC-002 approval is exhausted after valid activation and is not reusable",
+        "one-time VOC-002 approval is exhausted and is not reusable",
     ):
         if marker not in appointment:
             validation.error("docs/governance/technical-steward-appointment.md", f"missing historical evidence marker: {marker}")
@@ -469,8 +567,25 @@ def validate_a003_lifecycle(validation: Validation) -> None:
 
 def validate_ownership(validation: Validation) -> None:
     policy_path = ".github/approved-policy/protected-paths.yaml"
-    validate_restricted_yaml(validation, policy_path)
+    policy_values = validate_restricted_yaml(validation, policy_path)
     policy = validation.read(policy_path)
+    expected_policy_state = {
+        "status": "approved-a003-active",
+        "authority_model": "a003-active",
+        "hosted_enforcement_status": "not-activated",
+        "automatic_merge_allowed": "false",
+        "autonomous_merge_allowed": "false",
+        "production_deployment": "disabled",
+        "autonomous_production_release": "disabled",
+        "rl1_technical_activation": "false",
+        "rl2_technical_activation": "false",
+        "doc_17_repository_adoption": "false",
+        "doc_18_repository_adoption": "false",
+        "control_plane_implementation": "false",
+    }
+    for key, value in expected_policy_state.items():
+        if policy_values.get(key) != value:
+            validation.error(policy_path, f"canonical protected policy requires {key}: {value}")
     owners = validation.read(".github/CODEOWNERS")
     listed = set(re.findall(r"^\s*-\s+path:\s*([^\s#]+)", policy, re.MULTILINE))
     for path in PROTECTED_PATHS:
@@ -555,6 +670,7 @@ def validate_repository(root: Path) -> list[str]:
     validate_templates(validation)
     validate_package(validation)
     validate_voc_002_package(validation)
+    validate_voc_003_package(validation)
     validate_a003_lifecycle(validation)
     validate_ownership(validation)
     validate_workflow(validation)

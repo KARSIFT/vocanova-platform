@@ -1,8 +1,8 @@
 schema_version: 1
 policy: repository-protected-paths
-status: approved-pre-a003-transition
+status: approved-a003-active
 review_routing_identity: m-e-h-r-d-a-a-d
-authority_model: pre-a003
+authority_model: a003-active
 default_risk: R1
 
 paths:
@@ -40,6 +40,8 @@ paths:
     minimum_risk: R4
   - path: specs/changes/VOC-002-a003-governance-transition/
     minimum_risk: R4
+  - path: specs/changes/VOC-003-a003-lifecycle-sync/
+    minimum_risk: R4
   - path: apps/**/auth/
     minimum_risk: R3
   - path: packages/auth/
@@ -53,6 +55,11 @@ paths:
 
 hosted_enforcement_status: not-activated
 automatic_merge_allowed: false
+autonomous_merge_allowed: false
+production_deployment: disabled
 autonomous_production_release: disabled
 rl1_technical_activation: false
 rl2_technical_activation: false
+doc_17_repository_adoption: false
+doc_18_repository_adoption: false
+control_plane_implementation: false

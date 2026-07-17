@@ -20,11 +20,10 @@ related_decisions: []
 
 # Amendment A-002 — Governed Autonomous Releases
 
-> **A-003 transition notice:** A-003 is proposed and inactive. A-002 continues to
-> govern VOC-002 and all releases until valid A-003 activation. After activation,
-> A-003 partially supersedes only A-002's standing technical-steward requirements for
-> routine R3 merges and releases. A-002's adoption history and all non-conflicting
-> controls remain authoritative audit evidence.
+> **A-003 active-authority notice:** A-003 has been effectively active since
+> `2026-07-17T16:44:34Z` and partially supersedes only A-002's standing
+> technical-steward requirements for routine R3 merges and releases. A-002's adoption
+> history and all non-conflicting controls remain authoritative audit evidence.
 
 Founder approval was recorded on PR #3 against reviewed commit
 `09f97341ff093fd20a70683d88b772e154979330` in issue comment `4961029533`. PR #3 was
@@ -43,13 +42,14 @@ production deployment, autonomous production releases, R3 protected technical
 changes, or any future bypass of steward approval. Claude Code remains an independent
 verifier and did not become the accountable human technical steward.
 
-The technical-steward requirement became effective immediately when PR #3 merged.
-The qualified human steward is now recorded in
+The technical-steward requirement became effective immediately when PR #3 merged and
+remained effective until A-003 activation. The historical qualified human steward is
+recorded in
 [technical-steward-appointment.md](../technical-steward-appointment.md), while hosted
-enforcement remains a separate activation requirement. R3 changes require explicit
-steward approval, R4 decisions continue to require founder approval, and autonomous
-production release remains disabled. The exception expired when PR #3 merged and
-cannot be reused.
+enforcement remains a separate activation requirement. Under active A-003, routine R3
+does not require standing steward or founder approval solely because it is R3; R4
+decisions continue to require founder approval, and autonomous production release
+remains disabled. The exception expired when PR #3 merged and cannot be reused.
 
 ## Decision
 
@@ -64,7 +64,8 @@ publication is superseded.
    release policy explicitly permits that change type.
 3. Protected technical R3 changes require approval from a qualified, accountable
    human technical steward before merge to the protected destination and before
-   production release.
+   production release. Active A-003 supersedes this standing-approval clause for
+   routine R3 work while preserving all non-conflicting controls.
 4. Consequential R4 business, financial, legal, strategic, product-direction,
    privacy, user-trust, or difficult-to-reverse decisions require founder approval.
 5. The initial public launch and every major launch decision require founder approval

@@ -17,5 +17,6 @@ tooling and external configuration that do not yet exist. See
 [`docs/governance/repository-settings.md`](../docs/governance/repository-settings.md)
 for the required administrator settings and credentials.
 
-A-003 is proposed and inactive. These files do not activate RL1/RL2, automatic merge,
-autonomous production release, DOC-17, or DOC-18.
+A-003 governance authority is active. These files do not technically activate RL1 or
+RL2, automatic/autonomous merge, production deployment, autonomous production
+release, DOC-17, or DOC-18.

@@ -3,19 +3,24 @@ id: A-003
 title: Governed Autonomous Engineering Authority
 version: 1.0
 document_type: governance-amendment
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md
 
 founder_direction_status: approved
-formal_founder_approval_status: pending-exact-revision-github-evidence
-repository_adoption_status: pending
-effective_activation_status: inactive
+formal_founder_approval_status: approved-exact-revision-github-evidence
+repository_adoption_status: adopted
+effective_activation_status: active
 
-approved_at: null
-adopted_at: null
-effective_at: null
-approval_evidence: null
+approved_at: 2026-07-17T16:37:38Z
+adopted_at: 2026-07-17T16:41:32Z
+effective_at: 2026-07-17T16:44:34Z
+approved_pr_head_sha: c858ebff3d97da88fea830bc32a74f69f59a9ad2
+adopted_develop_sha: 9d5b4bc1d4a72e313b013047601265ee837c34f2
+approval_evidence: https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067
+independent_verification_evidence: https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005293621
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005429197
+activation_evidence: https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622
 
 supersedes:
   - id: DOC-16

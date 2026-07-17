@@ -3,29 +3,40 @@ amendment: A-003
 transition: VOC-002
 frozen_source_sha256: f2b454653a33e6cb76a0eab37c01d48b0174227450c9ea255474f6aac59b4f83
 
-authority_model: pre-a003
-transition_stage: pre-merge-transition
-formal_founder_approval_status: pending-exact-revision-github-evidence
-technical_steward_migration_approval_status: pending-exact-revision-github-evidence
-independent_verification_status: pending-exact-revision-claude-evidence
-repository_adoption_status: pending
-effective_activation_status: inactive
+authority_model: a003-active
+transition_stage: effectively-active
+formal_founder_approval_status: approved-exact-revision
+technical_steward_migration_approval_status: approved-exact-revision-one-time
+independent_verification_status: passed-exact-revision
+repository_adoption_status: adopted
+effective_activation_status: active
 
-approved_pr_head_sha: null
-adopted_develop_sha: null
-post_merge_validation_status: not-run
-post_merge_validation_evidence: null
-activation_evidence: null
-canonical_lifecycle_sync_status: pending-post-activation
+approved_pr_head_sha: c858ebff3d97da88fea830bc32a74f69f59a9ad2
+adopted_develop_sha: 9d5b4bc1d4a72e313b013047601265ee837c34f2
+approved_adopted_tree_sha: 07ef24cbb8602f540600dcea551306ed51a6215f
+formal_founder_approval_at: 2026-07-17T16:37:38Z
+formal_founder_approval_evidence: "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067"
+technical_steward_migration_approval_evidence: "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067"
+independent_verification_evidence: "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005293621"
+repository_adoption_at: 2026-07-17T16:41:32Z
+repository_adoption_evidence: "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005429197"
+effective_activation_at: 2026-07-17T16:44:34Z
+post_merge_validation_status: passed
+post_merge_validation_evidence: https://github.com/KARSIFT/vocanova-platform/actions/runs/29597154713
+activation_evidence: "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622"
+canonical_lifecycle_sync_status: complete
 
-migration_approval_status: pending-one-time-use
-migration_approval_exhausted: false
-technical_steward_routine_authority_status: current-until-valid-activation
-exceptional_human_review_mode: exceptional-only-after-valid-activation
+migration_approval_status: exhausted-non-reusable
+migration_approval_exhausted: true
+technical_steward_routine_authority_status: historical-retired
+exceptional_human_review_mode: exceptional-only
 
 rl1_technical_activation: false
 rl2_technical_activation: false
 automatic_merge_allowed: false
+autonomous_merge_allowed: false
+production_deployment: disabled
 autonomous_production_release: disabled
 doc_17_repository_adoption: false
 doc_18_repository_adoption: false
+control_plane_implementation: false

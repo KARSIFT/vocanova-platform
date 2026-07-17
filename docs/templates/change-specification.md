@@ -130,7 +130,7 @@ tool as required unless it exists or the implementation task includes installing
 - Declared risk: R#
 - Path-detected floor: pending CI
 - Protected areas:
-- Active governance model: pre-A-003 / active-A-003
+- Active governance model: active-A-003 / separately governed rollback reference
 - Independent verifier required: Yes
 - Standing technical-steward approval required: Yes/No and governing reason
 - EHR triggered: Yes/No and evidence
