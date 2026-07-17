@@ -25,7 +25,8 @@ Current packages:
 - [`VOC-003 — A-003 Lifecycle State Synchronization`](changes/VOC-003-a003-lifecycle-sync/README.md)
   — `implementing`; R4 post-activation canonical synchronization.
 - [`VOC-004 — Canonical Adoption of DOC-17 and DOC-18`](changes/VOC-004-canonical-adoption-doc-17-doc-18/README.md)
-  — `implementing`; R4 atomic canonical-document adoption with all technical autonomy
-  remaining inactive.
+  — `completed`; R4 atomic canonical-document adoption with all technical autonomy
+  remaining inactive, adopted through PR #11 at canonical `develop` commit
+  `2b5ecb19b532a9b23250e1255ff1e7fb9a78ef77`.
 
 This index makes no claim that Documents 00–14 have been migrated.
