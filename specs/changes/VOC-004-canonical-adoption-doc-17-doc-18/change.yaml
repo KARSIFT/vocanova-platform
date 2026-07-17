@@ -1,0 +1,24 @@
+schema_version: 1
+id: VOC-004
+slug: canonical-adoption-doc-17-doc-18
+title: Canonical Adoption of DOC-17 and DOC-18
+type: governance
+status: implementing
+risk: R4
+canonical_path: specs/changes/VOC-004-canonical-adoption-doc-17-doc-18
+base_branch: develop
+base_sha: 873038735aea30b754a8c57b3522e1ff41f6d89c
+authority_model: a003-active
+doc_17_source_sha256: 8c9fd7b714e84d39f4b5e9d5c8a4cf8f00a3231b269e2d6dadf6e0ff7707693a
+doc_18_source_sha256: 717c33649f49cedca64cc4744d8121f4b6f5a371c9760076bfa8134c050a8664
+doc_17_repository_adoption: true
+doc_18_repository_adoption: true
+control_plane_implementation: false
+rl1_technical_activation: false
+rl2_technical_activation: false
+automatic_merge: false
+autonomous_merge: false
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-applicable

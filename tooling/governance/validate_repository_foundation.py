@@ -26,8 +26,15 @@ A003_PATH = "docs/governance/amendments/A-003-governed-autonomous-engineering-au
 A003_STATE_PATH = "docs/governance/a003-transition-state.yaml"
 A003_FROZEN_SHA256 = "f2b454653a33e6cb76a0eab37c01d48b0174227450c9ea255474f6aac59b4f83"
 A003_FROZEN_BODY_SHA256 = "ad05cc8c92047002288245574bc3b76e1cce6f54d43805039ad53393534af4e7"
+DOC17_PATH = "docs/architecture/17-autonomous-development-architecture.md"
+DOC18_PATH = "docs/planning/18-autonomous-development-implementation-roadmap.md"
+DOC17_SOURCE_SHA256 = "8c9fd7b714e84d39f4b5e9d5c8a4cf8f00a3231b269e2d6dadf6e0ff7707693a"
+DOC18_SOURCE_SHA256 = "717c33649f49cedca64cc4744d8121f4b6f5a371c9760076bfa8134c050a8664"
+DOC17_BODY_SHA256 = "b3a157557210f0afecbb5ed4ff53cd2738f50c451c39ef0d012363a6d8df7a40"
+DOC18_BODY_SHA256 = "3d578186804cc2b3b500eec72809b26c03d9f236a4a22d3534daa1e2ba34c451"
 VOC002_PATH = "specs/changes/VOC-002-a003-governance-transition"
 VOC003_PATH = "specs/changes/VOC-003-a003-lifecycle-sync"
+VOC004_PATH = "specs/changes/VOC-004-canonical-adoption-doc-17-doc-18"
 
 REQUIRED_FILES = (
     "AGENTS.md",
@@ -39,6 +46,8 @@ REQUIRED_FILES = (
     ".github/workflows/governance-policy.yml",
     ".github/workflows/repository-governance.yml",
     "docs/README.md",
+    DOC17_PATH,
+    DOC18_PATH,
     A003_PATH,
     A003_STATE_PATH,
     "docs/decisions/README.md",
@@ -47,6 +56,7 @@ REQUIRED_FILES = (
     "specs/README.md",
     f"{VOC002_PATH}/change.yaml",
     f"{VOC003_PATH}/change.yaml",
+    f"{VOC004_PATH}/change.yaml",
     "tooling/governance/validate_repository_foundation.py",
     "tooling/governance/tests/test_validate_repository_foundation.py",
 )
@@ -61,6 +71,8 @@ PROTECTED_PATHS = (
     "scripts/governance/",
     "tooling/governance/",
     "docs/governance/",
+    DOC17_PATH,
+    DOC18_PATH,
     "docs/operations/15-ai-native-product-and-engineering-operating-model.md",
     "docs/decisions/",
     "specs/README.md",
@@ -68,6 +80,7 @@ PROTECTED_PATHS = (
     "specs/changes/VOC-001-repository-foundation/",
     "specs/changes/VOC-002-a003-governance-transition/",
     "specs/changes/VOC-003-a003-lifecycle-sync/",
+    "specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/",
 )
 
 TEMPLATE_MARKERS = {
@@ -401,6 +414,94 @@ def validate_voc_003_package(validation: Validation) -> None:
             validation.error(relative, f"missing VOC-003 synchronization marker: {marker}")
 
 
+def validate_voc_004_package(validation: Validation) -> None:
+    relative = VOC004_PATH
+    require_complete_directory(validation, relative)
+    values = validate_restricted_yaml(validation, f"{relative}/change.yaml")
+    expected = {
+        "schema_version": "1",
+        "id": "VOC-004",
+        "slug": "canonical-adoption-doc-17-doc-18",
+        "title": "Canonical Adoption of DOC-17 and DOC-18",
+        "type": "governance",
+        "status": "implementing",
+        "risk": "R4",
+        "canonical_path": relative,
+        "base_branch": "develop",
+        "base_sha": "873038735aea30b754a8c57b3522e1ff41f6d89c",
+        "authority_model": "a003-active",
+        "doc_17_source_sha256": DOC17_SOURCE_SHA256,
+        "doc_18_source_sha256": DOC18_SOURCE_SHA256,
+        "doc_17_repository_adoption": "true",
+        "doc_18_repository_adoption": "true",
+        "control_plane_implementation": "false",
+        "rl1_technical_activation": "false",
+        "rl2_technical_activation": "false",
+        "automatic_merge": "false",
+        "autonomous_merge": "false",
+        "production_deployment": "disabled",
+        "autonomous_production_release": "disabled",
+        "ehr": "not-triggered",
+        "standing_technical_steward_approval": "not-applicable",
+    }
+    for key, value in expected.items():
+        if values.get(key) != value:
+            validation.error(f"{relative}/change.yaml", f"{key} must equal {value!r}")
+
+    package = {
+        name: validation.read(f"{relative}/{name}")
+        for name in PACKAGE_FILES
+        if name.endswith(".md")
+    }
+    patterns = {
+        "specification.md": re.compile(r"^- \*\*(VOC-004-R\d+):?\*\*", re.MULTILINE),
+        "acceptance-criteria.md": re.compile(r"^## (VOC-004-AC-\d+)", re.MULTILINE),
+        "impact-analysis.md": re.compile(r"^## (VOC-004-IMP-\d+)", re.MULTILINE),
+        "tasks.md": re.compile(r"^## (VOC-004-T\d+)", re.MULTILINE),
+        "test-plan.md": re.compile(r"^## (VOC-004-TEST-\d+)", re.MULTILINE),
+    }
+    definitions: list[str] = []
+    for name, pattern in patterns.items():
+        definitions.extend(pattern.findall(package[name]))
+    duplicates = sorted(item for item in set(definitions) if definitions.count(item) > 1)
+    if duplicates:
+        validation.error(relative, f"duplicate VOC-004 stable identifier definitions: {duplicates}")
+    required = {
+        *(f"VOC-004-R{i:02d}" for i in range(1, 13)),
+        *(f"VOC-004-AC-{i:02d}" for i in range(1, 11)),
+        *(f"VOC-004-IMP-{i:02d}" for i in range(1, 8)),
+        *(f"VOC-004-T{i:02d}" for i in range(1, 11)),
+        *(f"VOC-004-TEST-{i:02d}" for i in range(1, 11)),
+    }
+    missing = sorted(required - set(definitions))
+    if missing:
+        validation.error(relative, f"missing VOC-004 stable identifier definitions: {missing}")
+    combined = "\n".join(package.values())
+    references = set(
+        re.findall(r"VOC-004-(?:R\d+|AC-\d+|IMP-\d+|T\d+|TEST-\d+)", combined)
+    )
+    unresolved = sorted(references - set(definitions))
+    if unresolved:
+        validation.error(relative, f"unresolved VOC-004 stable identifier references: {unresolved}")
+    for marker in (
+        "/home/mehrdad/project/vocanova-source/DOC-17-vocanova-autonomous-development-architecture-v1.md",
+        "/home/mehrdad/project/vocanova-source/DOC-18-vocanova-autonomous-development-implementation-roadmap.md",
+        DOC17_SOURCE_SHA256,
+        DOC18_SOURCE_SHA256,
+        DOC17_PATH,
+        DOC18_PATH,
+        "R4",
+        "exact-SHA Claude Code",
+        "exact-SHA founder R4 approval",
+        "EHR is not triggered",
+        "standing technical-steward approval",
+        "exhausted",
+        "VocaNova MVP",
+    ):
+        if marker not in combined:
+            validation.error(relative, f"missing VOC-004 adoption marker: {marker}")
+
+
 def frontmatter_values(text: str) -> dict[str, str]:
     if not text.startswith("---\n") or "\n---\n" not in text[4:]:
         return {}
@@ -411,6 +512,58 @@ def frontmatter_values(text: str) -> dict[str, str]:
         if match:
             values[match.group(1)] = match.group(2).strip().strip("\"'")
     return values
+
+
+def validate_doc_17_doc_18_adoption(validation: Validation) -> None:
+    expected_documents = {
+        DOC17_PATH: {
+            "id": "DOC-17",
+            "status": "approved",
+            "canonical_path": DOC17_PATH,
+            "founder_direction_status": "approved",
+            "formal_repository_approval_status": "pending-exact-revision-founder-approval",
+            "repository_adoption_status": "candidate-pending-merge",
+            "technical_activation_status": "inactive",
+            "frozen_source_sha256": DOC17_SOURCE_SHA256,
+            "frozen_substantive_body_sha256": DOC17_BODY_SHA256,
+            "adoption_change": "VOC-004",
+        },
+        DOC18_PATH: {
+            "id": "DOC-18",
+            "status": "approved",
+            "canonical_path": DOC18_PATH,
+            "founder_direction_status": "approved",
+            "formal_repository_approval_status": "pending-exact-revision-founder-approval",
+            "repository_adoption_status": "candidate-pending-merge",
+            "technical_activation_status": "inactive",
+            "frozen_source_sha256": DOC18_SOURCE_SHA256,
+            "frozen_substantive_body_sha256": DOC18_BODY_SHA256,
+            "adoption_change": "VOC-004",
+        },
+    }
+    body_hashes = {DOC17_PATH: DOC17_BODY_SHA256, DOC18_PATH: DOC18_BODY_SHA256}
+    for relative, expected in expected_documents.items():
+        text = validation.read(relative)
+        metadata = frontmatter_values(text)
+        for key, value in expected.items():
+            if metadata.get(key) != value:
+                validation.error(relative, f"canonical adoption requires {key}: {value}")
+        body = text.split("---", 2)[2] if text.count("---") >= 2 else ""
+        if hashlib.sha256(body.encode("utf-8")).hexdigest() != body_hashes[relative]:
+            validation.error(relative, "frozen substantive body checksum mismatch")
+
+    architecture_index = validation.read("docs/architecture/README.md")
+    planning_index = validation.read("docs/planning/README.md")
+    root_index = validation.read("docs/README.md")
+    specs_index = validation.read("specs/README.md")
+    for relative, text, marker in (
+        ("docs/architecture/README.md", architecture_index, "17-autonomous-development-architecture.md"),
+        ("docs/planning/README.md", planning_index, "18-autonomous-development-implementation-roadmap.md"),
+        ("docs/README.md", root_index, "DOC-17 and DOC-18 are adopted together"),
+        ("specs/README.md", specs_index, "VOC-004 — Canonical Adoption of DOC-17 and DOC-18"),
+    ):
+        if marker not in text:
+            validation.error(relative, f"missing canonical adoption index marker: {marker}")
 
 
 def validate_a003_lifecycle(validation: Validation) -> None:
@@ -532,12 +685,13 @@ def validate_a003_lifecycle(validation: Validation) -> None:
         "rl2_technical_activation",
         "automatic_merge_allowed",
         "autonomous_merge_allowed",
-        "doc_17_repository_adoption",
-        "doc_18_repository_adoption",
         "control_plane_implementation",
     ):
         if state.get(key) != "false":
             validation.error(A003_STATE_PATH, f"{key} must remain false")
+    for key in ("doc_17_repository_adoption", "doc_18_repository_adoption"):
+        if state.get(key) != "true":
+            validation.error(A003_STATE_PATH, f"{key} must be true for atomic VOC-004 adoption")
     if state.get("production_deployment") != "disabled":
         validation.error(A003_STATE_PATH, "production deployment must remain disabled")
     if state.get("autonomous_production_release") != "disabled":
@@ -579,8 +733,8 @@ def validate_ownership(validation: Validation) -> None:
         "autonomous_production_release": "disabled",
         "rl1_technical_activation": "false",
         "rl2_technical_activation": "false",
-        "doc_17_repository_adoption": "false",
-        "doc_18_repository_adoption": "false",
+        "doc_17_repository_adoption": "true",
+        "doc_18_repository_adoption": "true",
         "control_plane_implementation": "false",
     }
     for key, value in expected_policy_state.items():
@@ -671,6 +825,8 @@ def validate_repository(root: Path) -> list[str]:
     validate_package(validation)
     validate_voc_002_package(validation)
     validate_voc_003_package(validation)
+    validate_voc_004_package(validation)
+    validate_doc_17_doc_18_adoption(validation)
     validate_a003_lifecycle(validation)
     validate_ownership(validation)
     validate_workflow(validation)

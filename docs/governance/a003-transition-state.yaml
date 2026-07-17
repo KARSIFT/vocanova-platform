@@ -37,6 +37,6 @@ automatic_merge_allowed: false
 autonomous_merge_allowed: false
 production_deployment: disabled
 autonomous_production_release: disabled
-doc_17_repository_adoption: false
-doc_18_repository_adoption: false
+doc_17_repository_adoption: true
+doc_18_repository_adoption: true
 control_plane_implementation: false

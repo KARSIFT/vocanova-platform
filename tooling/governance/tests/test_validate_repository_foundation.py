@@ -129,6 +129,10 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         (self.root / "specs/changes/VOC-003-a003-lifecycle-sync/tasks.md").unlink()
         self.assert_failure("must contain exactly nine files")
 
+    def test_incomplete_voc_004_package_fails(self) -> None:
+        (self.root / "specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/tasks.md").unlink()
+        self.assert_failure("must contain exactly nine files")
+
     def test_voc_002_classifier_floor_is_r4(self) -> None:
         result = self.run_classifier_for_path(
             "specs/changes/VOC-002-a003-governance-transition/README.md", "R4"
@@ -149,6 +153,20 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
         self.assertIn("Detected path-based risk floor: R4", result.stdout)
+
+    def test_voc_004_classifier_floor_is_r4(self) -> None:
+        result = self.run_classifier_for_path(
+            "specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/README.md", "R4"
+        )
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+        self.assertIn("Detected path-based risk floor: R4", result.stdout)
+
+    def test_voc_004_classifier_rejects_r3(self) -> None:
+        result = self.run_classifier_for_path(
+            "docs/architecture/17-autonomous-development-architecture.md", "R3"
+        )
+        self.assertEqual(1, result.returncode, result.stdout + result.stderr)
+        self.assertIn("below the detected floor R4", result.stderr)
 
     def test_a003_frozen_body_change_fails(self) -> None:
         self.replace(
@@ -281,18 +299,66 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
     def test_a003_doc_17_adoption_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "doc_17_repository_adoption: false",
             "doc_17_repository_adoption: true",
+            "doc_17_repository_adoption: false",
         )
-        self.assert_failure("doc_17_repository_adoption must remain false")
+        self.assert_failure("doc_17_repository_adoption must be true")
 
     def test_a003_doc_18_adoption_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "doc_18_repository_adoption: false",
             "doc_18_repository_adoption: true",
+            "doc_18_repository_adoption: false",
         )
-        self.assert_failure("doc_18_repository_adoption must remain false")
+        self.assert_failure("doc_18_repository_adoption must be true")
+
+    def test_doc_17_frozen_body_change_fails(self) -> None:
+        self.replace(
+            "docs/architecture/17-autonomous-development-architecture.md",
+            "AI workers are replaceable.",
+            "AI workers are permanent.",
+        )
+        self.assert_failure("frozen substantive body checksum mismatch")
+
+    def test_doc_18_frozen_body_change_fails(self) -> None:
+        self.replace(
+            "docs/planning/18-autonomous-development-implementation-roadmap.md",
+            "Production autonomy is not activated early.",
+            "Production autonomy is activated early.",
+        )
+        self.assert_failure("frozen substantive body checksum mismatch")
+
+    def test_doc_17_false_technical_activation_fails(self) -> None:
+        self.replace(
+            "docs/architecture/17-autonomous-development-architecture.md",
+            "technical_activation_status: inactive",
+            "technical_activation_status: active",
+        )
+        self.assert_failure("technical_activation_status: inactive")
+
+    def test_control_plane_false_implementation_fails(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "control_plane_implementation: false",
+            "control_plane_implementation: true",
+        )
+        self.assert_failure("control_plane_implementation must remain false")
+
+    def test_production_deployment_enablement_fails(self) -> None:
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "production_deployment: disabled",
+            "production_deployment: enabled",
+        )
+        self.assert_failure("production deployment must remain disabled")
+
+    def test_protected_policy_partial_adoption_fails(self) -> None:
+        self.replace(
+            ".github/approved-policy/protected-paths.yaml",
+            "doc_18_repository_adoption: true",
+            "doc_18_repository_adoption: false",
+        )
+        self.assert_failure("canonical protected policy requires doc_18_repository_adoption")
 
     def test_package_path_id_mismatch_fails(self) -> None:
         self.replace(

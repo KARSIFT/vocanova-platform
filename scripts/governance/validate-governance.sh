@@ -19,6 +19,8 @@ required_files=(
   docs/governance/post-merge-activation-checklist.md
   docs/governance/repository-settings.md
   docs/governance/technical-steward-appointment.md
+  docs/architecture/17-autonomous-development-architecture.md
+  docs/planning/18-autonomous-development-implementation-roadmap.md
   docs/templates/change-specification.md
   docs/templates/acceptance-criteria.md
   docs/templates/founder-decision-card.md
@@ -31,6 +33,7 @@ required_files=(
   specs/changes/VOC-001-repository-foundation/change.yaml
   specs/changes/VOC-002-a003-governance-transition/change.yaml
   specs/changes/VOC-003-a003-lifecycle-sync/change.yaml
+  specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/change.yaml
   tooling/governance/validate_repository_foundation.py
   tooling/governance/tests/test_validate_repository_foundation.py
 )
@@ -180,8 +183,11 @@ r4_ruleset_paths=(
   /docs/governance/amendments/
   /docs/governance/a003-transition-state.yaml
   /docs/governance/16-autonomous-development-operating-model.md
+  /docs/architecture/17-autonomous-development-architecture.md
+  /docs/planning/18-autonomous-development-implementation-roadmap.md
   /specs/changes/VOC-002-a003-governance-transition/
   /specs/changes/VOC-003-a003-lifecycle-sync/
+  /specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/
 )
 
 for path in "${r4_ruleset_paths[@]}"; do

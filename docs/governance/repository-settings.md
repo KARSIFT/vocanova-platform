@@ -36,8 +36,11 @@ Configure a non-self-referential R4 control for these exact paths:
 /docs/governance/amendments/
 /docs/governance/a003-transition-state.yaml
 /docs/governance/16-autonomous-development-operating-model.md
+/docs/architecture/17-autonomous-development-architecture.md
+/docs/planning/18-autonomous-development-implementation-roadmap.md
 /specs/changes/VOC-002-a003-governance-transition/
 /specs/changes/VOC-003-a003-lifecycle-sync/
+/specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/
 ```
 
 Under active A-003, that ruleset must continue non-self-referential verification and
