@@ -3,7 +3,7 @@
 ## Identity and lifecycle
 
 - Change ID: `VOC-004`
-- Status: `implementing`
+- Status: `completed`
 - Risk: `R4`
 - Requirement source: GitHub issue #10, founder planning approval
 - Base branch: `develop`
@@ -37,16 +37,19 @@ bodies remain byte-for-byte unchanged and are protected by deterministic body ha
 
 ## Boundaries
 
-The candidate sets both repository-adoption flags to true while Control Plane
+The adopted baseline keeps both repository-adoption flags true while Control Plane
 implementation, RL1, RL2, automatic merge, autonomous merge, production deployment,
-and autonomous production release remain false, inactive, or disabled. DOC-17 and
-DOC-18 remain adoption candidates until merge. The automation system exists to support
-building VocaNova; it must not become a reason to postpone the VocaNova MVP.
+and autonomous production release remain false, inactive, or disabled. The automation
+system exists to support building VocaNova; it must not become a reason to postpone the
+VocaNova MVP.
 
 ## Verification, approvals, release, and closure
 
-Applicable deterministic validation, independent exact-SHA Claude Code verification,
-resolution of blocking findings, and exact-SHA founder R4 approval are required before
-merge. EHR is not triggered. No standing technical-steward approval is required under
-active A-003, and the exhausted VOC-002 migration approval must never be reused. This
-package grants no merge, auto-merge, deployment, release, or activation authorization.
+PR #11 merged the exact candidate
+`89013e6a8fab4cee45935e700d9eb3e49d3d39ed` into `develop` as canonical commit
+`2b5ecb19b532a9b23250e1255ff1e7fb9a78ef77`. Claude Code independently verified the
+candidate with `PASS WITH NON-BLOCKING FINDINGS`, and the founder granted exact-SHA R4
+approval; both evidence records are linked from `change.yaml`. EHR was not triggered,
+no standing technical-steward approval was required under active A-003, and the
+exhausted VOC-002 migration approval was not reused. This completed adoption grants no
+auto-merge, deployment, release, or technical-activation authorization.
