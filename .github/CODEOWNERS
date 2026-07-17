@@ -13,6 +13,8 @@
 /CONTRIBUTING.md                           @m-e-h-r-d-a-a-d
 /SECURITY.md                               @m-e-h-r-d-a-a-d
 /docs/governance/                          @m-e-h-r-d-a-a-d
+/docs/architecture/17-autonomous-development-architecture.md @m-e-h-r-d-a-a-d
+/docs/planning/18-autonomous-development-implementation-roadmap.md @m-e-h-r-d-a-a-d
 /docs/operations/15-ai-native-product-and-engineering-operating-model.md @m-e-h-r-d-a-a-d
 /scripts/governance/                       @m-e-h-r-d-a-a-d
 
@@ -24,6 +26,7 @@
 /specs/changes/VOC-001-repository-foundation/ @m-e-h-r-d-a-a-d
 /specs/changes/VOC-002-a003-governance-transition/ @m-e-h-r-d-a-a-d
 /specs/changes/VOC-003-a003-lifecycle-sync/ @m-e-h-r-d-a-a-d
+/specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/ @m-e-h-r-d-a-a-d
 /tooling/governance/                       @m-e-h-r-d-a-a-d
 
 # Product direction and consequential decisions

@@ -18,3 +18,8 @@ Project documentation is organized by purpose:
 This index does not claim that Documents 00–14 have been migrated. Their
 preservation-first migration, including any manifest or document graph, remains
 separate future work.
+
+DOC-17 and DOC-18 are adopted together as the canonical autonomous-development
+architecture-and-roadmap baseline. Their adoption records approved documentation; it
+does not implement the Control Plane, activate RL1/RL2, permit automatic or autonomous
+merge, or enable production deployment or autonomous production release.
