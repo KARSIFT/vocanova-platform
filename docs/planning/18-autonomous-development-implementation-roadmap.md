@@ -8,12 +8,20 @@ owner: founder
 canonical_path: docs/planning/18-autonomous-development-implementation-roadmap.md
 
 founder_direction_status: approved
-formal_repository_approval_status: pending-exact-revision-founder-approval
-repository_adoption_status: candidate-pending-merge
+formal_repository_approval_status: approved-exact-revision
+repository_adoption_status: adopted
 technical_activation_status: inactive
 frozen_source_sha256: 717c33649f49cedca64cc4744d8121f4b6f5a371c9760076bfa8134c050a8664
 frozen_substantive_body_sha256: 3d578186804cc2b3b500eec72809b26c03d9f236a4a22d3534daa1e2ba34c451
 adoption_change: VOC-004
+approved_candidate_sha: 89013e6a8fab4cee45935e700d9eb3e49d3d39ed
+independent_verification_status: passed-exact-revision-with-non-blocking-findings
+independent_verification_evidence: https://github.com/KARSIFT/vocanova-platform/pull/11#issuecomment-5007950942
+founder_r4_approval_status: approved-exact-revision
+founder_r4_approval_evidence: https://github.com/KARSIFT/vocanova-platform/pull/11#issuecomment-5007966020
+adoption_pr: 11
+adopted_develop_sha: 2b5ecb19b532a9b23250e1255ff1e7fb9a78ef77
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/11
 
 related_documents:
   - DOC-17

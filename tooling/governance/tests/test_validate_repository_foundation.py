@@ -336,6 +336,30 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assert_failure("technical_activation_status: inactive")
 
+    def test_doc_17_pre_merge_lifecycle_fails(self) -> None:
+        self.replace(
+            "docs/architecture/17-autonomous-development-architecture.md",
+            "repository_adoption_status: adopted",
+            "repository_adoption_status: candidate-pending-merge",
+        )
+        self.assert_failure("repository_adoption_status: adopted")
+
+    def test_doc_18_missing_adopted_develop_sha_fails(self) -> None:
+        self.replace(
+            "docs/planning/18-autonomous-development-implementation-roadmap.md",
+            "adopted_develop_sha: 2b5ecb19b532a9b23250e1255ff1e7fb9a78ef77",
+            "adopted_develop_sha: null",
+        )
+        self.assert_failure("adopted_develop_sha: 2b5ecb19b532a9b23250e1255ff1e7fb9a78ef77")
+
+    def test_voc_004_incomplete_lifecycle_sync_fails(self) -> None:
+        self.replace(
+            "specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/change.yaml",
+            "canonical_lifecycle_sync_status: complete",
+            "canonical_lifecycle_sync_status: pending",
+        )
+        self.assert_failure("canonical_lifecycle_sync_status must equal 'complete'")
+
     def test_control_plane_false_implementation_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
