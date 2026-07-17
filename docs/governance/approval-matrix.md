@@ -3,7 +3,7 @@
 Verification answers whether evidence supports the change. Approval answers whether
 an accountable authority authorizes it. Both may be required.
 
-## Current authority assignment
+## Current pre-A-003 authority assignment
 
 - Founder: `@m-e-h-r-d-a-a-d`
 - Qualified Human Technical Steward: `@m-e-h-r-d-a-a-d`
@@ -17,6 +17,12 @@ capacities; the same account may evidence both only when the approval text names
 roles and the exact reviewed revision. The builder and independent verifier remain
 separate from both human approval capacities.
 
+A-003 is not effectively active. The current rows below govern VOC-002 itself. The
+VOC-002 transition is R4 with an R3 protected effect and therefore requires exact-SHA
+independent Claude verification, founder approval, and technical-steward approval.
+The same verified human may evidence both human capacities only by expressly naming
+both and binding both to the exact reviewed revision.
+
 | Change/action | Builder | Independent verifier | Technical steward | Founder | Automation permission |
 |---|---|---|---|---|---|
 | R0 non-behavioral change | May implement | Required, lightweight for trivial changes | Not required | Not required | Merge/release after applicable checks |
@@ -28,6 +34,24 @@ separate from both human approval capacities.
 | Initial DOC-16/A-002 governance adoption | May prepare the one bootstrap PR | Required Claude Code verification with no unresolved Critical/High finding | One-time exception because no steward exists; must be recorded as unsatisfied, not approved | Required | Merge to `develop` only; no production deployment or autonomous release authority |
 | Emergency protective rollback using approved runbook | May execute only through authorized workflow | Post-action verification required | Pre-authorized runbook owner or incident authority | Notify; approval required for any new R4 decision | May run automatically when predefined trigger and safer-than-waiting condition are met |
 | Change to CI/CD, ownership, approval, agent authority, or this matrix | May propose | Independent governance/security review required | Required | Required when authority or R4 policy changes | Cannot self-modify into effect |
+| VOC-002 A-003 transition only | May prepare; cannot self-approve or merge | Exact-SHA Claude verdict required | Required once under pre-A-003 governance | Required as R4 | Manual adoption only; no activation or production authority |
+
+## Authority after valid A-003 activation
+
+This section is conditional and does not describe the authority active during the
+VOC-002 adoption PR.
+
+| Change/action | Independent verification and controls | Human authority | Automation permission |
+|---|---|---|---|
+| Routine R0-R2 | Proportionate deterministic and independent verification | No founder or standing technical-steward approval | Only where separately implemented and proven |
+| Routine R3 protected technical work | Strengthened risk-specific controls and independent verification | No standing technical-steward approval; no founder approval merely because work is R3 | Only where every applicable technical gate is implemented and proven |
+| R4 consequential decision/change | R3 controls too when technically protected | Founder approval required | Cannot bypass founder authority |
+| EHR escalation | Operation stops and qualified expertise is recorded | Exceptional qualified human review for the triggered matter only | Not a routine approval layer |
+
+The one-time VOC-002 migration approval is exhausted after valid activation and must
+never be reused. CODEOWNERS remains review routing and is not approval evidence.
+R4 founder authority remains unchanged. The migration record must never be reused as
+approval for later work.
 
 ## Approval evidence
 
@@ -43,6 +67,10 @@ The initial DOC-16/A-002 bootstrap row is the only exception to an otherwise
 applicable steward requirement. It expires when that initial pull request merges.
 The later appointment of a steward does not retroactively change PR #3 evidence and
 does not convert Claude Code review into steward approval.
+
+VOC-002 is not an exception: it uses the pre-A-003 requirements in full. Its
+technical-steward approval is a one-time migration requirement, not a standing future
+rule, and is exhausted only after valid activation evidence exists.
 
 ## Independent verifier result
 

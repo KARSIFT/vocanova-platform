@@ -5,6 +5,11 @@ settings, create Cloudflare projects, or provision credentials. A repository
 administrator must configure and record the following before autonomous merge or
 release is enabled.
 
+A-003 is currently inactive. Pre-A-003 human approval rules govern VOC-002. The
+conditional post-activation configuration below must not be represented as hosted or
+technical activation; automatic merge and autonomous production release remain
+disabled.
+
 ## GitHub rulesets
 
 Configure `develop`:
@@ -29,12 +34,16 @@ Configure a non-self-referential R4 control for these exact paths:
 /docs/governance/protected-areas.md
 /docs/governance/post-merge-activation-checklist.md
 /docs/governance/amendments/
+/docs/governance/a003-transition-state.yaml
 /docs/governance/16-autonomous-development-operating-model.md
+/specs/changes/VOC-002-a003-governance-transition/
 ```
 
-After the initial bootstrap PR merges, that ruleset must require founder approval and
+Until valid A-003 activation, that ruleset must require founder approval and
 technical-steward review without depending on the pull-request version of the
-classifier it protects. Where the GitHub plan supports organization-required
+classifier it protects. After activation, it must continue non-self-referential
+verification and R4 founder enforcement but must not impose routine standing steward
+or founder approval merely because a change is R3. Where the GitHub plan supports organization-required
 workflows, run the policy gate from a separately protected default-branch or
 organization source. A status name produced solely by a workflow that the same pull
 request can rewrite is not sufficient protection.
@@ -45,7 +54,9 @@ Configure `main`:
 - accept only release pull requests from `develop` or the documented emergency path;
 - require release, staging, migration, rollback, and health-check gates;
 - require technical-steward approval for R3 and founder approval for R4 through
-  rulesets/environments or a reviewed approval-gate integration;
+  rulesets/environments or a reviewed approval-gate integration while A-003 remains
+  inactive; after activation enforce strengthened R3 gates without a standing
+  steward/founder requirement solely for R3;
 - use merge commits for release promotion; and
 - prevent an AI or release-bot identity from bypassing required approvals.
 
@@ -70,15 +81,16 @@ Enable repository security settings when available:
 The verified human repository identity `@m-e-h-r-d-a-a-d` is formally recorded as
 both founder and qualified human technical steward in
 [technical-steward-appointment.md](technical-steward-appointment.md). Direct account
-routing is currently used. A separate steward team and its hosted enforcement are not
-yet configured. After a real team is created and verified, its slug may replace direct
-routing in the protected patterns. Never use an AI or bot identity as the steward.
+routing is currently used. A steward team is not a prerequisite to A-003 activation
+and must not be created as a replacement permanent authority. Direct routing may
+remain for review routing, but never proves conditional approval. Never use an AI or
+bot identity as human authority.
 
 ## Required identities and credentials
 
 - Distinct Codex implementation and Claude Code verification identities.
-- The recorded human founder and technical-steward identity; a separate steward team
-  remains unconfigured.
+- The recorded human founder identity and preserved historical/current-until-A-003
+  technical-steward identity; no replacement standing steward team is required.
 - GitHub App or OIDC-based credentials with least privilege and short expiry.
 - Separate Cloudflare preview, staging, and production projects/accounts or clearly
   isolated environments.
@@ -126,4 +138,8 @@ expired. A qualified human steward is now formally appointed, and the same verif
 account presently serves as founder and steward in separate capacities. This current
 state does not remove any blocker above, activate hosted enforcement, authorize
 deployment, or enable autonomous release. R3 approvals must explicitly identify the
-steward capacity; combined R3/R4 approvals must identify both capacities.
+steward capacity; combined R3/R4 approvals must identify both capacities. After valid
+A-003 activation, routine R3 instead uses strengthened technical gates and independent
+verification, while R4 founder authority remains unchanged. RL1/RL2 technical
+activation, automatic merge, and autonomous production release remain disabled until
+separately implemented, tested, and proven.

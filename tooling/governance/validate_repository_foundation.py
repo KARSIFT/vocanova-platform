@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 from collections import defaultdict
@@ -21,6 +22,12 @@ PACKAGE_FILES = (
     "test-plan.md",
 )
 
+A003_PATH = "docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md"
+A003_STATE_PATH = "docs/governance/a003-transition-state.yaml"
+A003_FROZEN_SHA256 = "f2b454653a33e6cb76a0eab37c01d48b0174227450c9ea255474f6aac59b4f83"
+A003_FROZEN_BODY_SHA256 = "ad05cc8c92047002288245574bc3b76e1cce6f54d43805039ad53393534af4e7"
+VOC002_PATH = "specs/changes/VOC-002-a003-governance-transition"
+
 REQUIRED_FILES = (
     "AGENTS.md",
     "CLAUDE.md",
@@ -31,10 +38,13 @@ REQUIRED_FILES = (
     ".github/workflows/governance-policy.yml",
     ".github/workflows/repository-governance.yml",
     "docs/README.md",
+    A003_PATH,
+    A003_STATE_PATH,
     "docs/decisions/README.md",
     "scripts/governance/classify-change-risk.sh",
     "scripts/governance/validate-governance.sh",
     "specs/README.md",
+    f"{VOC002_PATH}/change.yaml",
     "tooling/governance/validate_repository_foundation.py",
     "tooling/governance/tests/test_validate_repository_foundation.py",
 )
@@ -54,6 +64,7 @@ PROTECTED_PATHS = (
     "specs/README.md",
     "specs/templates/",
     "specs/changes/VOC-001-repository-foundation/",
+    "specs/changes/VOC-002-a003-governance-transition/",
 )
 
 TEMPLATE_MARKERS = {
@@ -80,6 +91,9 @@ PR_MARKERS = (
     "Exact reviewed head SHA",
     "Hosted activation status",
     "Package closure status",
+    "Active authority model",
+    "Effective-activation evidence",
+    "Automatic-merge status",
     "Lightweight R0",
 )
 
@@ -258,6 +272,201 @@ def validate_package(validation: Validation) -> None:
             validation.error(relative, f"missing reconciled evidence marker: {marker}")
 
 
+def validate_voc_002_package(validation: Validation) -> None:
+    relative = VOC002_PATH
+    require_complete_directory(validation, relative)
+    values = validate_restricted_yaml(validation, f"{relative}/change.yaml")
+    expected = {
+        "schema_version": "1",
+        "id": "VOC-002",
+        "slug": "a003-governance-transition",
+        "title": "A-003 Governance Transition",
+        "type": "governance",
+        "status": "implementing",
+        "risk": "R4",
+        "protected_technical_effect": "R3",
+        "canonical_path": relative,
+    }
+    for key, value in expected.items():
+        if values.get(key) != value:
+            validation.error(f"{relative}/change.yaml", f"{key} must equal {value!r}")
+
+    package = {name: validation.read(f"{relative}/{name}") for name in PACKAGE_FILES if name.endswith(".md")}
+    combined = "\n".join(package.values())
+    patterns = {
+        "specification.md": re.compile(r"^- \*\*(VOC-002-R\d+):?\*\*", re.MULTILINE),
+        "acceptance-criteria.md": re.compile(r"^## (VOC-002-AC-\d+)", re.MULTILINE),
+        "impact-analysis.md": re.compile(r"^## (VOC-002-IMP-\d+)", re.MULTILINE),
+        "tasks.md": re.compile(r"^## (VOC-002-T\d+)", re.MULTILINE),
+        "test-plan.md": re.compile(r"^## (VOC-002-TEST-\d+)", re.MULTILINE),
+    }
+    definitions: list[str] = []
+    for name, pattern in patterns.items():
+        definitions.extend(pattern.findall(package[name]))
+    duplicates = sorted(item for item in set(definitions) if definitions.count(item) > 1)
+    if duplicates:
+        validation.error(relative, f"duplicate VOC-002 stable identifier definitions: {duplicates}")
+    required = {
+        *(f"VOC-002-R{i:02d}" for i in range(1, 17)),
+        *(f"VOC-002-AC-{i:02d}" for i in range(1, 13)),
+        *(f"VOC-002-IMP-{i:02d}" for i in range(1, 9)),
+        *(f"VOC-002-T{i:02d}" for i in range(1, 9)),
+        *(f"VOC-002-TEST-{i:02d}" for i in range(1, 13)),
+    }
+    missing = sorted(required - set(definitions))
+    if missing:
+        validation.error(relative, f"missing VOC-002 stable identifier definitions: {missing}")
+    references = set(re.findall(r"VOC-002-(?:R\d+|AC-\d+|IMP-\d+|T\d+|TEST-\d+)", combined))
+    unresolved = sorted(references - set(definitions))
+    if unresolved:
+        validation.error(relative, f"unresolved VOC-002 stable identifier references: {unresolved}")
+    for marker in (
+        A003_FROZEN_SHA256,
+        "pre-A-003",
+        "R4",
+        "R3",
+        "exact-SHA Claude",
+        "approved PR head SHA",
+        "adopted `develop` SHA",
+        "one-time",
+        "DOC-17",
+        "DOC-18",
+        "automatic merge",
+        "autonomous production release",
+    ):
+        if marker not in combined:
+            validation.error(relative, f"missing VOC-002 transition marker: {marker}")
+
+
+def frontmatter_values(text: str) -> dict[str, str]:
+    if not text.startswith("---\n") or "\n---\n" not in text[4:]:
+        return {}
+    frontmatter = text[4:].split("\n---\n", 1)[0]
+    values: dict[str, str] = {}
+    for line in frontmatter.splitlines():
+        match = re.match(r"^([A-Za-z_][A-Za-z0-9_-]*):\s*(.*)$", line)
+        if match:
+            values[match.group(1)] = match.group(2).strip().strip("\"'")
+    return values
+
+
+def validate_a003_lifecycle(validation: Validation) -> None:
+    amendment = validation.read(A003_PATH)
+    state = validate_restricted_yaml(validation, A003_STATE_PATH)
+    metadata = frontmatter_values(amendment)
+    full_sha = hashlib.sha256(amendment.encode("utf-8")).hexdigest()
+    body = amendment.split("---", 2)[2] if amendment.count("---") >= 2 else ""
+    body_sha = hashlib.sha256(body.encode("utf-8")).hexdigest()
+
+    if body_sha != A003_FROZEN_BODY_SHA256:
+        validation.error(A003_PATH, "frozen A-003 substantive body checksum mismatch")
+    if state.get("frozen_source_sha256") != A003_FROZEN_SHA256:
+        validation.error(A003_STATE_PATH, "frozen A-003 source checksum identifier is missing or changed")
+
+    active = state.get("effective_activation_status") == "active" or metadata.get("effective_activation_status") == "active"
+    if not active:
+        if full_sha != A003_FROZEN_SHA256:
+            validation.error(A003_PATH, "inactive adoption candidate must match the exact frozen A-003 source")
+        expected_inactive = {
+            "authority_model": "pre-a003",
+            "transition_stage": "pre-merge-transition",
+            "formal_founder_approval_status": "pending-exact-revision-github-evidence",
+            "technical_steward_migration_approval_status": "pending-exact-revision-github-evidence",
+            "independent_verification_status": "pending-exact-revision-claude-evidence",
+            "repository_adoption_status": "pending",
+            "effective_activation_status": "inactive",
+            "approved_pr_head_sha": "null",
+            "adopted_develop_sha": "null",
+            "post_merge_validation_status": "not-run",
+            "activation_evidence": "null",
+            "migration_approval_status": "pending-one-time-use",
+            "migration_approval_exhausted": "false",
+            "technical_steward_routine_authority_status": "current-until-valid-activation",
+            "exceptional_human_review_mode": "exceptional-only-after-valid-activation",
+        }
+        for key, value in expected_inactive.items():
+            if state.get(key) != value:
+                validation.error(A003_STATE_PATH, f"inactive transition requires {key}: {value}")
+        for key, value in {
+            "status": "proposed",
+            "formal_founder_approval_status": "pending-exact-revision-github-evidence",
+            "repository_adoption_status": "pending",
+            "effective_activation_status": "inactive",
+            "approved_at": "null",
+            "adopted_at": "null",
+            "effective_at": "null",
+            "approval_evidence": "null",
+        }.items():
+            if metadata.get(key) != value:
+                validation.error(A003_PATH, f"pre-merge A-003 metadata requires {key}: {value}")
+    else:
+        required_active = {
+            "authority_model": "a003-active",
+            "transition_stage": "effectively-active",
+            "formal_founder_approval_status": "approved-exact-revision",
+            "technical_steward_migration_approval_status": "approved-exact-revision-one-time",
+            "independent_verification_status": "passed-exact-revision",
+            "repository_adoption_status": "adopted",
+            "effective_activation_status": "active",
+            "post_merge_validation_status": "passed",
+            "migration_approval_status": "exhausted-non-reusable",
+            "migration_approval_exhausted": "true",
+            "technical_steward_routine_authority_status": "historical-retired",
+            "exceptional_human_review_mode": "exceptional-only",
+            "canonical_lifecycle_sync_status": "complete",
+        }
+        for key, value in required_active.items():
+            if state.get(key) != value:
+                validation.error(A003_STATE_PATH, f"active A-003 requires {key}: {value}")
+        for key in ("approved_pr_head_sha", "adopted_develop_sha"):
+            if not re.fullmatch(r"[0-9a-f]{40}", state.get(key, "")):
+                validation.error(A003_STATE_PATH, f"active A-003 requires a full {key}")
+        if state.get("approved_pr_head_sha") == state.get("adopted_develop_sha"):
+            validation.error(A003_STATE_PATH, "approved PR head SHA and adopted develop SHA must be distinct records")
+        for key in ("post_merge_validation_evidence", "activation_evidence"):
+            if state.get(key) in {None, "", "null"}:
+                validation.error(A003_STATE_PATH, f"active A-003 requires {key}")
+        active_metadata = {
+            "status": "approved",
+            "formal_founder_approval_status": "approved-exact-revision-github-evidence",
+            "repository_adoption_status": "adopted",
+            "effective_activation_status": "active",
+        }
+        for key, value in active_metadata.items():
+            if metadata.get(key) != value:
+                validation.error(A003_PATH, f"active transition requires synchronized {key}: {value}")
+        for key in ("approved_at", "adopted_at", "effective_at", "approval_evidence"):
+            if metadata.get(key) in {None, "", "null"}:
+                validation.error(A003_PATH, f"active transition requires synchronized {key}")
+
+    for key in ("rl1_technical_activation", "rl2_technical_activation", "automatic_merge_allowed", "doc_17_repository_adoption", "doc_18_repository_adoption"):
+        if state.get(key) != "false":
+            validation.error(A003_STATE_PATH, f"{key} must remain false in VOC-002")
+    if state.get("autonomous_production_release") != "disabled":
+        validation.error(A003_STATE_PATH, "autonomous production release must remain disabled")
+
+    appointment = validation.read("docs/governance/technical-steward-appointment.md")
+    for marker in (
+        "Appointed qualified human technical steward: `@m-e-h-r-d-a-a-d`",
+        "same verified human presently serves in two explicitly separate",
+        "permanent audit history",
+        "one-time VOC-002 approval is exhausted after valid activation and is not reusable",
+    ):
+        if marker not in appointment:
+            validation.error("docs/governance/technical-steward-appointment.md", f"missing historical evidence marker: {marker}")
+
+    authority = validation.read("docs/governance/approval-matrix.md")
+    for marker in (
+        "No standing technical-steward approval; no founder approval merely because work is R3",
+        "R4 founder authority remains unchanged",
+        "EHR",
+        "must never be reused",
+        "CODEOWNERS remains review routing and is not approval evidence",
+    ):
+        if marker not in authority:
+            validation.error("docs/governance/approval-matrix.md", f"missing A-003 authority marker: {marker}")
+
+
 def validate_ownership(validation: Validation) -> None:
     policy_path = ".github/approved-policy/protected-paths.yaml"
     validate_restricted_yaml(validation, policy_path)
@@ -345,6 +554,8 @@ def validate_repository(root: Path) -> list[str]:
         validation.error(".github/PULL_REQUEST_TEMPLATE.md", "uppercase duplicate PR template is prohibited")
     validate_templates(validation)
     validate_package(validation)
+    validate_voc_002_package(validation)
+    validate_a003_lifecycle(validation)
     validate_ownership(validation)
     validate_workflow(validation)
     validate_governance_language(validation)

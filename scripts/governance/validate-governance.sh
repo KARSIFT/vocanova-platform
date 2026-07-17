@@ -11,6 +11,8 @@ required_files=(
   .github/workflows/repository-governance.yml
   docs/governance/16-autonomous-development-operating-model.md
   docs/governance/amendments/A-002-governed-autonomous-releases.md
+  docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md
+  docs/governance/a003-transition-state.yaml
   docs/governance/approval-matrix.md
   docs/governance/change-risk-classification.md
   docs/governance/protected-areas.md
@@ -27,6 +29,7 @@ required_files=(
   specs/README.md
   specs/templates/change-package/change.yaml
   specs/changes/VOC-001-repository-foundation/change.yaml
+  specs/changes/VOC-002-a003-governance-transition/change.yaml
   tooling/governance/validate_repository_foundation.py
   tooling/governance/tests/test_validate_repository_foundation.py
 )
@@ -174,7 +177,9 @@ r4_ruleset_paths=(
   /docs/governance/protected-areas.md
   /docs/governance/post-merge-activation-checklist.md
   /docs/governance/amendments/
+  /docs/governance/a003-transition-state.yaml
   /docs/governance/16-autonomous-development-operating-model.md
+  /specs/changes/VOC-002-a003-governance-transition/
 )
 
 for path in "${r4_ruleset_paths[@]}"; do

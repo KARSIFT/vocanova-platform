@@ -130,10 +130,16 @@ tool as required unless it exists or the implementation task includes installing
 - Declared risk: R#
 - Path-detected floor: pending CI
 - Protected areas:
+- Active governance model: pre-A-003 / active-A-003
 - Independent verifier required: Yes
-- Technical-steward approval required: Yes/No
+- Standing technical-steward approval required: Yes/No and governing reason
+- EHR triggered: Yes/No and evidence
 - Founder decision required: Yes/No
 - Approval evidence:
+
+Under active A-003, routine R3 does not require standing steward or founder approval
+merely because it is R3. Record strengthened technical gates. R4 founder authority
+and any triggered EHR remain independently applicable.
 
 ## Assumptions and open questions
 

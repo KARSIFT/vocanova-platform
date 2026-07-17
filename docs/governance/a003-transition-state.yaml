@@ -1,0 +1,31 @@
+schema_version: 1
+amendment: A-003
+transition: VOC-002
+frozen_source_sha256: f2b454653a33e6cb76a0eab37c01d48b0174227450c9ea255474f6aac59b4f83
+
+authority_model: pre-a003
+transition_stage: pre-merge-transition
+formal_founder_approval_status: pending-exact-revision-github-evidence
+technical_steward_migration_approval_status: pending-exact-revision-github-evidence
+independent_verification_status: pending-exact-revision-claude-evidence
+repository_adoption_status: pending
+effective_activation_status: inactive
+
+approved_pr_head_sha: null
+adopted_develop_sha: null
+post_merge_validation_status: not-run
+post_merge_validation_evidence: null
+activation_evidence: null
+canonical_lifecycle_sync_status: pending-post-activation
+
+migration_approval_status: pending-one-time-use
+migration_approval_exhausted: false
+technical_steward_routine_authority_status: current-until-valid-activation
+exceptional_human_review_mode: exceptional-only-after-valid-activation
+
+rl1_technical_activation: false
+rl2_technical_activation: false
+automatic_merge_allowed: false
+autonomous_production_release: disabled
+doc_17_repository_adoption: false
+doc_18_repository_adoption: false
