@@ -34,10 +34,15 @@ The following are R4 by decision type even when no protected path is changed:
 ## Ownership
 
 `CODEOWNERS` routes review; it does not prove that the reviewer is qualified and does
-not express every required approval combination. Repository rulesets must require the
-human technical-steward and founder approvals specified in the approval matrix.
-Claude Code may independently verify any protected change but must not be listed or
-represented as the accountable human technical steward.
+not express every required approval combination. While A-003 remains inactive,
+repository controls must enforce the human technical-steward and founder approvals
+specified in the approval matrix. After valid A-003 activation, routine R3 ownership
+routing must not be interpreted as standing steward or founder approval. R4 founder
+authority remains unchanged. Claude Code may independently verify protected changes
+but is never a human approval authority.
+
+EHR may obtain qualified human expertise for an exceptional triggered matter. It
+must not become permanent ownership or a routine replacement approval layer.
 
 ## Bootstrap boundary
 

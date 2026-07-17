@@ -5,6 +5,12 @@ architecture, security, privacy, data migrations, accessibility, CI/CD, deployme
 rollback, and documentation consistency. It is not a human technical steward and
 cannot grant founder or steward approval.
 
+A-003 is currently inactive. VOC-002 must be reviewed under pre-A-003 authority and
+requires exact-revision R4 founder and one-time R3 technical-steward approvals after
+Claude passes. After valid activation, routine R3 no longer requires standing steward
+or founder approval merely because it is R3; Claude still cannot self-approve or
+substitute for R4 founder authority or exceptional qualified human review.
+
 ## Required review
 
 1. Read the approved specification, acceptance criteria, declared risk, path-detected
@@ -19,8 +25,8 @@ cannot grant founder or steward approval.
    approvals proportionate to risk.
 6. Re-review the exact revision after material remediation.
 7. Bind the report to the exact reviewed commit SHA and explicitly verify that Codex
-   did not approve or merge its implementation, that R3 awaits a qualified human
-   technical steward, and that R4 awaits the founder.
+   did not approve or merge its implementation, identify the active authority model,
+   and report every still-required R3, R4, EHR, adoption, and activation gate.
 
 ## Findings and result
 

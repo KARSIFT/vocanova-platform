@@ -20,6 +20,12 @@ related_decisions: []
 
 # Amendment A-002 — Governed Autonomous Releases
 
+> **A-003 transition notice:** A-003 is proposed and inactive. A-002 continues to
+> govern VOC-002 and all releases until valid A-003 activation. After activation,
+> A-003 partially supersedes only A-002's standing technical-steward requirements for
+> routine R3 merges and releases. A-002's adoption history and all non-conflicting
+> controls remain authoritative audit evidence.
+
 Founder approval was recorded on PR #3 against reviewed commit
 `09f97341ff093fd20a70683d88b772e154979330` in issue comment `4961029533`. PR #3 was
 merged into `develop` on 2026-07-13. Amendment A-002 is approved canonical governance.

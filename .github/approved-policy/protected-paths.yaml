@@ -1,7 +1,8 @@
 schema_version: 1
 policy: repository-protected-paths
-status: approved-for-voc-001
-direct_human_steward: m-e-h-r-d-a-a-d
+status: approved-pre-a003-transition
+review_routing_identity: m-e-h-r-d-a-a-d
+authority_model: pre-a003
 default_risk: R1
 
 paths:
@@ -23,6 +24,10 @@ paths:
     minimum_risk: R4
   - path: docs/governance/
     minimum_risk: R3
+  - path: docs/governance/amendments/
+    minimum_risk: R4
+  - path: docs/governance/a003-transition-state.yaml
+    minimum_risk: R4
   - path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
     minimum_risk: R4
   - path: docs/decisions/
@@ -32,6 +37,8 @@ paths:
   - path: specs/templates/
     minimum_risk: R3
   - path: specs/changes/VOC-001-repository-foundation/
+    minimum_risk: R4
+  - path: specs/changes/VOC-002-a003-governance-transition/
     minimum_risk: R4
   - path: apps/**/auth/
     minimum_risk: R3
@@ -47,3 +54,5 @@ paths:
 hosted_enforcement_status: not-activated
 automatic_merge_allowed: false
 autonomous_production_release: disabled
+rl1_technical_activation: false
+rl2_technical_activation: false

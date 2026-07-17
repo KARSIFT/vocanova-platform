@@ -31,6 +31,9 @@ Describe the current problem and the observable result.
 - Security/privacy/data impact:
 - Migration/deployment/rollback impact:
 - Documentation/analytics/accessibility impact:
+- Active authority model and lifecycle impact:
+- EHR trigger assessment:
+- Automatic-merge, production-release, and RL1/RL2 technical-activation impact:
 
 The final class is the highest builder, path-check, independent-verifier, steward, or
 founder assessment. Do not include secrets or private vulnerability details; follow

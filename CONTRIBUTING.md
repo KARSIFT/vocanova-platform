@@ -45,14 +45,22 @@ When pnpm and application scripts are introduced through an approved foundation
 change, use the exact checked-in scripts with a frozen lockfile. Do not claim an
 unavailable tool or external deployment passed.
 
-R3 changes require a qualified human technical steward. R4 decisions and initial or
-major launches require the founder. Claude Code is the independent verifier, not the
-human technical steward. Repository protections apply to contributors and automation
-actors alike; never bypass failed checks, required review, branch protection, or
-production gates.
+While A-003 remains inactive, R3 changes require a qualified human technical steward.
+R4 decisions and initial or major launches require the founder. After valid A-003
+activation, routine R3 requires strengthened applicable controls and independent
+verification, not standing steward or founder approval merely because it is R3. R4
+founder authority remains unchanged and EHR remains exceptional. Claude Code is an
+independent verifier, never human authority. Repository protections apply to
+contributors and automation actors alike; never bypass failed checks, required
+review, branch protection, or production gates.
 
 The one-time initial DOC-16/A-002 bootstrap may merge with founder approval,
 independent Claude Code verification, and passing repository validation. It does not
 mark steward approval satisfied or authorize production. The exception expires on
 merge; R3 production remains blocked until a qualified human steward is appointed and
 enforcement is active.
+
+VOC-002 is not a bootstrap exception. It is a one-time A-003 migration governed by
+pre-A-003 R4 founder and R3 technical-steward approval bound to the exact revision.
+Its approval cannot be reused after activation. Automatic merge and autonomous
+production release remain disabled.

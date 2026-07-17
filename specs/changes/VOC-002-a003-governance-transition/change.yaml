@@ -1,0 +1,64 @@
+schema_version: 1
+
+id: VOC-002
+slug: a003-governance-transition
+title: A-003 Governance Transition
+type: governance
+status: implementing
+risk: R4
+protected_technical_effect: R3
+canonical_path: specs/changes/VOC-002-a003-governance-transition
+
+owners:
+  decision: founder
+  implementation: codex
+  independent_verification: claude-code
+  transition_technical_steward: m-e-h-r-d-a-a-d
+
+authority:
+  current: pre-a003-doc-15-doc-16-a-002
+  transition: pre-a003-r4-plus-r3-protected-governance
+  post_activation: a003
+
+source:
+  amendment: A-003
+  filename: A-003-governed-autonomous-engineering-authority.md
+  origin: founder-provided-frozen-local-source
+  frozen_sha256: f2b454653a33e6cb76a0eab37c01d48b0174227450c9ea255474f6aac59b4f83
+  founder_direction_status: approved
+  formal_exact_revision_status: pending
+
+repository:
+  organization: KARSIFT
+  name: vocanova-platform
+  base_branch: develop
+  base_sha: c64382f34c06b6b59ca8546930311db3fa249e94
+  implementation_branch: governance/VOC-002-a003-transition
+  target_branch: develop
+  pull_request: null
+
+approvals:
+  independent_claude_exact_revision: pending
+  founder_r4_exact_revision: pending
+  technical_steward_r3_exact_revision: pending-one-time-transition
+  approved_pr_head_sha: null
+
+activation:
+  adopted_develop_sha: null
+  post_merge_validation: not-run
+  evidence: null
+  effective: false
+  lifecycle_sync: pending-post-activation
+
+controls:
+  migration_approval_reusable: false
+  automatic_merge: false
+  autonomous_production_release: false
+  rl1_technical_activation: false
+  rl2_technical_activation: false
+  doc_17_adopted: false
+  doc_18_adopted: false
+
+rollback:
+  mode: revert-adoption-before-dependent-a003-work
+  production_effect: none

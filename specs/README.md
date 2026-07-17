@@ -19,5 +19,8 @@ Current packages:
 
 - [`VOC-001 — Repository Foundation`](changes/VOC-001-repository-foundation/README.md)
   — `implementing`; repository-file work only; issue #6.
+- [`VOC-002 — A-003 Governance Transition`](changes/VOC-002-a003-governance-transition/README.md)
+  — `implementing`; R4/R3 transition; A-003 remains inactive pending exact-revision
+  approval, adoption, and post-merge activation evidence.
 
 This index makes no claim that Documents 00–14 have been migrated.

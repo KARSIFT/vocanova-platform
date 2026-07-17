@@ -29,6 +29,8 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 
 - Previous governance control:
 - Proposed governance control:
+- Active authority model (`pre-A-003` unless valid activation evidence exists):
+- Governance lifecycle impact (`none` or direction/approval/adoption/activation/sync):
 
 ## Risk and approvals
 
@@ -39,11 +41,15 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
   - [ ] R0-R2 — independent verifier and applicable gates
   - [ ] R3 — qualified human technical steward
   - [ ] R4 — founder (plus steward if technically protected)
+  - [ ] VOC-002 only — pre-A-003 exact-SHA R4 founder plus one-time R3 steward;
+        migration approval is non-reusable
   - Historical initial DOC-16/A-002 bootstrap — expired with PR #3 and unavailable
     to later changes; no checkbox or waiver exists
 - Technical-steward approval link/name or `N/A`:
 - Founder approval link/name or `N/A`:
 - Exact reviewed head SHA:
+- Adopted `develop` SHA or `N/A — pre-merge`:
+- Effective-activation evidence or `N/A — inactive`:
 
 ## Acceptance-criteria evidence
 
@@ -76,6 +82,9 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - Monitoring and post-release outcome owner:
 - Known limitations/follow-up issues:
 - Hosted activation status:
+- Automatic-merge status:
+- Autonomous-production-release status:
+- RL1/RL2 technical-activation status:
 - Package closure status:
 
 ## Author checklist

@@ -6,7 +6,12 @@ technical_steward: replace-with-accountable-human
 reviewed_revision: replace-with-commit-sha
 ---
 
-# Technical-Steward Approval Request — Change title
+# Legacy/Exceptional Technical Review Request — Change title
+
+This template defines current pre-A-003 technical-steward evidence, including the
+one-time VOC-002 migration approval. After valid A-003 activation it must not be used
+as a routine R3 approval layer. It may preserve history or record qualified external
+review for a specifically triggered EHR/independent requirement.
 
 ## Protected change
 
@@ -41,6 +46,9 @@ reviewed_revision: replace-with-commit-sha
 - GitHub approval link:
 - Reviewed commit SHA:
 - Date:
+- Authority basis: pre-A-003 / VOC-002 one-time migration / EHR / other explicit rule
+- EHR trigger and bounded scope, if applicable:
+- One-time migration approval exhausted after activation: Yes/No/N/A
 
 Claude Code or another AI verifier may supply review evidence but must not be named as
 the accountable human technical steward.

@@ -19,6 +19,12 @@ related_decisions:
 
 # 16 — Vocanova Autonomous Development Operating Model
 
+> **A-003 transition notice:** A-003 is proposed and not effectively active. DOC-16
+> and A-002 continue to govern VOC-002 and all other work until valid A-003
+> activation is recorded. After that activation, A-003 partially supersedes only the
+> standing qualified-human technical-steward approval requirements for routine R3
+> work. This notice does not alter the historical DOC-16 adoption evidence below.
+
 ## Status and precedence
 
 This document implements the approved autonomous-development decisions without
@@ -67,6 +73,11 @@ artifact categories or authority hierarchy.
 | Technical steward | Qualified, accountable human approval for protected technical changes | Cannot substitute for the founder on R4 decisions unless formally delegated in writing |
 | GitHub Actions | Deterministic checks, traceability, gates, and deployment orchestration | Cannot make product or business decisions |
 | Cloudflare | Isolated preview, staging, production deployment, monitoring, and rollback infrastructure | Must not decide whether a release is authorized |
+
+After valid A-003 activation, the Technical steward row becomes historical for
+routine authority. Qualified external human expertise remains available only through
+Exceptional Human Review (EHR) or another independently applicable requirement; EHR
+must not become a replacement standing approval layer.
 
 No builder, agent, reviewer, or workflow may self-approve a change that modifies its
 own permissions, review rules, release gates, protected paths, or credentials.

@@ -16,7 +16,9 @@ State the approved objective and canonical documents or decisions that authorize
 ## Scope, non-goals, risk, and protected areas
 
 Define bounded scope, explicit exclusions, protected paths, production effect, and
-the highest applicable R0–R4 class.
+the highest applicable R0–R4 class. Record the active governance model, any EHR
+trigger, and whether human authority arises from R4 or another explicit rule rather
+than assuming ownership routing proves approval.
 
 ## Verification, approvals, release, and closure
 

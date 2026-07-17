@@ -18,3 +18,5 @@ last-known-good reference.
 
 Record verifier result, R3/R4 approvals, remaining hosted controls, and explicit
 closure evidence. Do not conflate repository merge, release, activation, or closure.
+Under active A-003, replace routine R3 steward approval with strengthened applicable
+technical evidence; preserve R4 founder authority and triggered EHR evidence.
