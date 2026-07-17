@@ -10,19 +10,19 @@ steward, or founder.
 | R0 | Documentation, comments, formatting, tests, or metadata with no behavioral, policy, authority, security, or release effect | Policy check; applicable document/link checks; independent verification proportionate to the change | No founder or technical-steward approval unless a protected policy is affected | May release automatically; revert commit or redeploy prior artifact |
 | R1 | Low-risk behavioral implementation; small blast radius; no sensitive data; backward compatible; independently reversible | Full installed baseline CI, acceptance evidence, independent verifier, preview when relevant | No founder or technical-steward approval | May release automatically after gates; tested revert, flag, or prior-artifact redeploy |
 | R2 | Moderate blast radius, cross-component change, non-destructive schema addition, API addition, significant dependency update, or operational change with tested recovery | R1 plus integration/contract, accessibility, migration, security, performance, or staging checks as applicable | Independent verifier; designated domain review may be required | May release automatically only with staged evidence, monitoring, named rollback owner, and tested recovery |
-| R3 | Authentication/authorization; sensitive-data handling; schema migrations; billing implementation; secrets; production infrastructure; AI-provider controls; audio/voice storage; backups; CI/CD, rollback, security, governance enforcement, or agent authority | All applicable CI; specialist security/architecture/migration/deployment review; independent verifier; explicit protected-area evidence | Qualified, accountable human technical steward | Steward approval required; controlled rollout and tested rollback/recovery required; destructive operations require restore evidence |
-| R4 | New or changed strategy, pricing, financial commitment, legal position, privacy policy, material product direction, public promise, user-trust posture, difficult-to-reverse action, initial public launch, or major launch | R3 checks when technical areas are affected; decision record; impact analysis; independent verification | Founder; technical steward additionally when R3 areas are affected | Founder approval required; explicit go/no-go and rollback or contingency plan |
+| R3 | Authentication/authorization; sensitive-data handling; schema migrations; billing implementation; secrets; production infrastructure; AI-provider controls; audio/voice storage; backups; CI/CD, rollback, security, governance enforcement, or agent authority | All applicable CI; specialist security/architecture/migration/deployment review; independent verifier; explicit protected-area evidence | No standing technical-steward or founder approval solely because work is R3; EHR only when exceptionally triggered | Strengthened controls required; controlled rollout and tested rollback/recovery required; destructive operations require restore evidence |
+| R4 | New or changed strategy, pricing, financial commitment, legal position, privacy policy, material product direction, public promise, user-trust posture, difficult-to-reverse action, initial public launch, or major launch | R3 checks when technical areas are affected; decision record; impact analysis; independent verification | Founder | Founder approval required; explicit go/no-go and rollback or contingency plan |
 
-The table above is the current pre-A-003 authority. After valid A-003 activation, the
-R0-R4 risk definitions and verification requirements remain, but routine R3 no
-longer requires standing technical-steward approval or founder approval merely
-because it is R3. R3 instead requires strengthened applicable technical controls and
-independent verification. R4 remains founder-controlled. EHR is an exceptional
-escalation condition, not a routine approval layer or risk class.
+The table above is the current active-A-003 authority. The R0-R4 risk definitions and
+verification requirements remain, but routine R3 does not require standing
+technical-steward approval or founder approval merely because it is R3. R4 remains
+founder-controlled. EHR is an exceptional escalation condition, not a routine
+approval layer or risk class.
 
-The A-003 transition itself is fixed at R4 with an R3 protected governance/authority
-effect. It is classified and approved under pre-A-003 governance; a classifier change
-inside VOC-002 cannot downgrade or authorize that same transition.
+The completed A-003 transition was fixed at R4 with an R3 protected
+governance/authority effect and was approved under pre-A-003 governance. Its one-time
+migration approval is exhausted and cannot authorize another change. Canonical A-003
+lifecycle state and amendment paths retain an R4 floor.
 
 ## Classification tests
 
@@ -66,14 +66,13 @@ reviewed pull request. A comment, label, or approval cannot simply suppress the
 detected floor.
 
 Path classification remains a risk floor, not proof of a human approval requirement.
-After valid A-003 activation, an R3 path does not by itself require founder or
-standing technical-steward approval.
+Under active A-003, an R3 path does not by itself require founder or standing
+technical-steward approval.
 
 ## Waivers
 
 Required deterministic security checks and R4 founder approval are not
-builder-waivable. While A-003 remains inactive, required R3 steward approval is also
-not builder-waivable. After valid activation, no waiver may recreate routine steward
+builder-waivable. Under active A-003, no waiver may recreate routine steward
 approval; EHR and independently applicable controls remain mandatory when triggered.
 A time-limited waiver for another blocking check must name
 the authority, reason, scope, expiry, compensating control, follow-up issue, and

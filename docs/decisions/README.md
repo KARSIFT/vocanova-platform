@@ -10,8 +10,10 @@ accepted records are superseded by a new ADR rather than silently rewritten.
 
 Use `ADR-####-short-title.md` and one of: `proposed`, `accepted`, `deprecated`, or
 `superseded`. Link the approved change specification and every affected living
-document. Architecture decisions that create R3 protected changes require a human
-technical steward; consequential R4 decisions also require the founder.
+document. Architecture decisions that create R3 protected changes require strengthened
+applicable controls and independent verification. Under active A-003 they do not
+require standing technical-steward or founder approval merely because they are R3;
+consequential R4 decisions require the founder and EHR remains exceptional.
 
 ## Template
 

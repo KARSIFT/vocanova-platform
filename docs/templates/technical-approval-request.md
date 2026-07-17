@@ -2,16 +2,16 @@
 change_id: VOC-###
 risk: R3
 status: requested
-technical_steward: replace-with-accountable-human
+qualified_human_reviewer: replace-with-accountable-human
 reviewed_revision: replace-with-commit-sha
 ---
 
 # Legacy/Exceptional Technical Review Request — Change title
 
-This template defines current pre-A-003 technical-steward evidence, including the
-one-time VOC-002 migration approval. After valid A-003 activation it must not be used
-as a routine R3 approval layer. It may preserve history or record qualified external
-review for a specifically triggered EHR/independent requirement.
+This legacy/exceptional template must not be used as a routine R3 approval layer
+under active A-003. It may preserve historical evidence or record qualified external
+review for a specifically triggered EHR or another independently applicable
+requirement. The one-time VOC-002 migration approval is exhausted and non-reusable.
 
 ## Protected change
 
@@ -42,13 +42,13 @@ review for a specifically triggered EHR/independent requirement.
 
 - Decision: Approved / Changes required / Escalated
 - Conditions:
-- Qualified human technical steward:
+- Qualified human reviewer:
 - GitHub approval link:
 - Reviewed commit SHA:
 - Date:
-- Authority basis: pre-A-003 / VOC-002 one-time migration / EHR / other explicit rule
+- Authority basis: historical record / EHR / other explicit rule
 - EHR trigger and bounded scope, if applicable:
-- One-time migration approval exhausted after activation: Yes/No/N/A
+- One-time migration approval: exhausted-non-reusable / N/A
 
 Claude Code or another AI verifier may supply review evidence but must not be named as
-the accountable human technical steward.
+the accountable qualified human reviewer.

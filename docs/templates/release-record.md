@@ -25,7 +25,7 @@ date: YYYY-MM-DD
 | Migrations and data integrity |  |  |
 | Accessibility |  |  |
 | Analytics and documentation |  |  |
-| Pre-A-003 steward approval or active-A-003 strengthened R3 gates |  |  |
+| Active-A-003 strengthened R3 gates |  |  |
 | Founder approval when R4/major launch |  |  |
 | EHR status and evidence when triggered |  |  |
 | RL1/RL2 technical activation evidence; policy permission is insufficient |  |  |

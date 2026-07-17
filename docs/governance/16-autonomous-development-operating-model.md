@@ -19,11 +19,10 @@ related_decisions:
 
 # 16 — Vocanova Autonomous Development Operating Model
 
-> **A-003 transition notice:** A-003 is proposed and not effectively active. DOC-16
-> and A-002 continue to govern VOC-002 and all other work until valid A-003
-> activation is recorded. After that activation, A-003 partially supersedes only the
-> standing qualified-human technical-steward approval requirements for routine R3
-> work. This notice does not alter the historical DOC-16 adoption evidence below.
+> **A-003 active-authority notice:** A-003 has been effectively active since
+> `2026-07-17T16:44:34Z`. It partially supersedes only the standing qualified-human
+> technical-steward approval requirements for routine R3 work in DOC-16 and A-002.
+> This notice does not alter the historical DOC-16 adoption evidence below.
 
 ## Status and precedence
 
@@ -32,10 +31,11 @@ restating or changing Vocanova's product strategy. DOC-15 remains authoritative 
 the artifact lifecycle, agent boundaries, traceability, security, and engineering
 principles. Amendment A-002 supersedes DOC-15 and A-001 only where they require
 founder approval for every `develop` to `main` merge or every production publication.
-DOC-16 and A-002 also supersede conflicting DOC-15/A-001 language that permits an R3
-protected technical change to merge into `develop` with CI and Claude Code approval
-alone. After the one-time bootstrap, R3 approval by a qualified human technical
-steward is required before merge into a protected destination and before production.
+DOC-16 and A-002 also superseded conflicting DOC-15/A-001 language that permitted an
+R3 protected technical change to merge into `develop` with CI and Claude Code
+approval alone. Active A-003 now supersedes DOC-16/A-002 standing-steward clauses:
+routine R3 uses strengthened applicable controls and independent verification without
+standing steward or founder approval merely because it is R3.
 
 The governing documents are:
 
@@ -70,12 +70,12 @@ artifact categories or authority hierarchy.
 | ChatGPT | Product analysis, specifications, architecture proposals, governance drafting, and decision routing | Cannot approve founder-controlled decisions or implementation |
 | Codex | Implementation of approved, implementation-ready changes and applicable tests and documentation | Cannot approve its own work, expand scope, or deploy directly to production |
 | Claude Code | Independent specification, code, architecture, security, and CI/CD verification | Is not a human technical steward and cannot assume legal or organizational accountability |
-| Technical steward | Qualified, accountable human approval for protected technical changes | Cannot substitute for the founder on R4 decisions unless formally delegated in writing |
+| Technical steward (historical) | Preserved evidence of the pre-A-003 routine R3 and one-time migration authority | Retired as routine approval authority; cannot substitute for founder authority or become a standing EHR layer |
 | GitHub Actions | Deterministic checks, traceability, gates, and deployment orchestration | Cannot make product or business decisions |
 | Cloudflare | Isolated preview, staging, production deployment, monitoring, and rollback infrastructure | Must not decide whether a release is authorized |
 
-After valid A-003 activation, the Technical steward row becomes historical for
-routine authority. Qualified external human expertise remains available only through
+The Technical steward row is historical for routine authority. Qualified external
+human expertise remains available only through
 Exceptional Human Review (EHR) or another independently applicable requirement; EHR
 must not become a replacement standing approval layer.
 
@@ -103,14 +103,15 @@ authorize production deployment, autonomous production releases, any R3 protecte
 technical change, or bypass of future technical-steward approval. It granted no
 technical-steward status or authority to Claude Code or another AI agent.
 
-The technical-steward requirement became effective immediately when PR #3 merged.
-The qualified human steward is recorded in
+The technical-steward requirement became effective immediately when PR #3 merged and
+remained effective until A-003 activation. The historical qualified human steward is
+recorded in
 [technical-steward-appointment.md](technical-steward-appointment.md). Until remaining
 GitHub enforcement is configured:
 
 - R3 changes remain blocked from production;
-- protected technical approvals must be explicitly recorded in the steward capacity;
-- AI agents must not impersonate or substitute for the steward; and
+- strengthened active-A-003 controls and independent verification remain required;
+- AI agents must not impersonate founder or qualified-human authority; and
 - autonomous production release remains disabled.
 
 R4 decisions continue to require founder approval. The bootstrap exception expired
@@ -156,10 +157,9 @@ evidence, and risk.
   only when it is reversible, its stronger checks pass, and the approved release
   policy explicitly permits that change type. Automation is permission, not an
   obligation; a gate may always hold a release for investigation.
-- After the initial governance bootstrap described above, R3 requires
-  technical-steward approval. R4 requires founder approval. A change that
-  is both R3 and R4 requires both unless the founder is also the recorded qualified
-  technical steward.
+- Under active A-003, routine R3 requires strengthened applicable controls and
+  independent verification without standing steward or founder approval solely for
+  being R3. R4 requires founder approval.
 - The initial public launch and major launch decisions always require founder
   approval.
 - Direct pushes to `develop` and `main`, unverified merges, and local production
@@ -213,7 +213,8 @@ A production release is eligible only when all applicable evidence is attached t
 - successful preview or staging evidence where applicable;
 - security, privacy, accessibility, analytics, migration, and documentation impact;
 - rollback mechanism, trigger, owner, and last known-good reference;
-- all R3 technical-steward and R4 founder approvals;
+- all independently applicable approvals, including R4 founder approval and any
+  actually triggered exceptional human review;
 - protected production environment approval rules satisfied; and
 - post-deployment health checks and outcome-observation owner defined.
 

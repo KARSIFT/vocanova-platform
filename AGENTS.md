@@ -6,8 +6,9 @@ may refine them but may not weaken governance or security.
 ## Authority and scope
 
 - Follow DOC-15, DOC-16, effective amendments, accepted decisions, and approved
-  implementation-ready change specifications in that order. A-003 is present but is
-  not effective until its lifecycle record contains valid activation evidence.
+  implementation-ready change specifications in that order. A-003 has been effectively
+  active since `2026-07-17T16:44:34Z` and supersedes DOC-16 and A-002 only where it
+  retires standing technical-steward approval for routine R3 work.
 - GitHub is the canonical repository record. Meaningful implementation requires an
   approved `VOC-###` change package with stable requirements and acceptance criteria;
   a chat prompt or issue alone is not implementation authority.
@@ -51,19 +52,18 @@ an unavailable check as passing.
 - Never commit secrets, credentials, production configuration, or unnecessary
   personal data.
 - Agents do not receive production secrets and do not deploy directly to production.
-- R3 requires a qualified accountable human technical steward while A-003 remains
-  inactive. R4 requires the founder. AI verification satisfies neither human
-  approval. After valid A-003 activation, routine R3 uses strengthened controls and
-  independent verification without standing steward or founder approval merely for
-  being R3; R4 remains founder-controlled and EHR remains exceptional.
+- Under active A-003, routine R3 uses strengthened controls and independent
+  verification without standing technical-steward or founder approval merely for
+  being R3. R4 remains founder-controlled. EHR is exceptional and must not become a
+  standing approval layer.
 - The only bootstrap exception is the initial DOC-16/A-002 adoption defined in
   DOC-16. It permits founder approval, independent Claude Code verification, and
   repository validation to adopt the framework without claiming steward approval.
   It authorized no production action, expired when PR #3 merged, and cannot be
   reused.
-- The A-003 transition is separately R4 with an R3 protected effect and requires the
-  pre-A-003 exact-revision founder and technical-steward approvals. That migration
-  approval is one-time and must not become a future routine approval requirement.
+- The completed A-003 transition was R4 with an R3 protected effect. Its pre-A-003
+  exact-revision founder and technical-steward migration approval is exhausted,
+  permanently non-reusable, and must remain preserved as historical evidence.
 - Automatic merge, RL1/RL2 technical activation, and autonomous production release
   remain disabled until separately implemented, tested, and proven.
 - Preserve existing work, avoid unrelated refactoring, and keep changes reversible.

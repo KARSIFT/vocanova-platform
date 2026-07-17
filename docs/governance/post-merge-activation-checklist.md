@@ -2,27 +2,32 @@
 
 Status: Not activated
 
+The status above refers to technical autonomous merge/release capability, not A-003
+governance authority. A-003 became effectively active at `2026-07-17T16:44:34Z`;
+automatic/autonomous merge, RL1/RL2 technical activation, production deployment, and
+autonomous production release remain disabled or unimplemented.
+
 ## A-003 adoption and effective-activation boundary
 
-A-003 is not effectively active. The VOC-002 adoption PR cannot check or pre-populate
-any post-merge item below.
+A-003 adoption and activation are completed historical facts:
 
-- [ ] Record the exact approved VOC-002 PR head SHA.
-- [ ] Record the distinct resulting adopted `develop` SHA; do not conflate it with a
-      squash-merged PR head.
-- [ ] Confirm exact-SHA pre-A-003 Claude verification, R4 founder approval, and R3
-      technical-steward transition approval existed before adoption.
-- [ ] Run deterministic governance validation on the adopted `develop` state and
-      preserve the run evidence against that adopted SHA.
-- [ ] Record effective-activation evidence and mark the one-time migration approval
-      exhausted and non-reusable.
-- [ ] Reconcile canonical lifecycle fields in a later bounded PR without changing
-      frozen A-003 substantive policy.
+- [x] Approved VOC-002 PR head SHA:
+      `c858ebff3d97da88fea830bc32a74f69f59a9ad2`.
+- [x] Distinct adopted `develop` SHA:
+      `9d5b4bc1d4a72e313b013047601265ee837c34f2`.
+- [x] Exact-SHA independent verification and one-time dual-capacity approval existed
+      before adoption. Evidence: PR #8 comments `5005293621` and `5005389067`.
+- [x] Deterministic post-merge validation passed on the adopted state. Evidence:
+      https://github.com/KARSIFT/vocanova-platform/actions/runs/29597154713
+- [x] Effective activation was recorded and the migration approval became exhausted
+      and non-reusable. Evidence:
+      https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622
+- [x] VOC-003 synchronizes canonical lifecycle fields without changing frozen A-003
+      substantive policy.
 
-Until all six items are evidenced, pre-A-003 authority remains current. After valid
-activation, routine R3 does not require a standing technical steward or founder
-approval merely because it is R3; R4 remains founder-controlled and EHR remains
-exceptional-only.
+Under active A-003, routine R3 does not require a standing technical steward or
+founder approval merely because it is R3; R4 remains founder-controlled and EHR
+remains exceptional-only.
 
 This checklist begins after the initial DOC-16/A-002 governance pull request merges.
 The bootstrap exception expires on that merge. No unchecked item is implied to be
@@ -35,8 +40,8 @@ Record an evidence link, accountable human, and completion date for every item.
       Evidence: [technical-steward-appointment.md](technical-steward-appointment.md)
       and the required final dual-capacity approval bound to the exact head revision
       of the appointment pull request before merge.
-- [ ] Preserve the current direct review routing while A-003 is inactive. Do not
-      create a replacement standing technical-steward team as an activation condition.
+- [x] Preserve direct review routing without treating it as approval evidence. Do not
+      create a replacement standing technical-steward team.
 - [ ] Verify that no founder, steward, Codex, Claude, or automation identity
       placeholder remains in executable repository controls.
 - [ ] Configure distinct, least-privilege Codex implementation and Claude Code
@@ -52,9 +57,8 @@ Record an evidence link, accountable human, and completion date for every item.
       force pushes, and conditional R3/R4 approvals.
 - [ ] Configure a non-self-referential governance ruleset for the fixed R4 paths in
       [repository-settings.md](repository-settings.md).
-- [ ] Before A-003 activation, test current R3 steward and R4 founder enforcement.
-      After activation, test strengthened R3 gates without routine steward/founder
-      approval and unchanged R4 founder enforcement.
+- [ ] Test strengthened R3 gates without routine steward/founder approval and unchanged
+      R4 founder enforcement before enabling any technical automation.
 
 ## Engineering and deployment gates
 

@@ -29,7 +29,7 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 
 - Previous governance control:
 - Proposed governance control:
-- Active authority model (`pre-A-003` unless valid activation evidence exists):
+- Active authority model (`A-003 active` unless a governed rollback is evidenced):
 - Governance lifecycle impact (`none` or direction/approval/adoption/activation/sync):
 
 ## Risk and approvals
@@ -39,13 +39,13 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - Affected protected areas (or `None`):
 - Required approval class:
   - [ ] R0-R2 — independent verifier and applicable gates
-  - [ ] R3 — qualified human technical steward
-  - [ ] R4 — founder (plus steward if technically protected)
-  - [ ] VOC-002 only — pre-A-003 exact-SHA R4 founder plus one-time R3 steward;
-        migration approval is non-reusable
+  - [ ] R3 — strengthened applicable controls and independent verification; no
+        standing steward/founder approval solely because work is R3
+  - [ ] R4 — exact-revision founder approval
+  - Historical VOC-002 migration — exhausted and permanently non-reusable
   - Historical initial DOC-16/A-002 bootstrap — expired with PR #3 and unavailable
     to later changes; no checkbox or waiver exists
-- Technical-steward approval link/name or `N/A`:
+- Exceptional-human-review evidence or `N/A — no EHR trigger`:
 - Founder approval link/name or `N/A`:
 - Exact reviewed head SHA:
 - Adopted `develop` SHA or `N/A — pre-merge`:

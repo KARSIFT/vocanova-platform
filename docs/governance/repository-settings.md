@@ -5,10 +5,10 @@ settings, create Cloudflare projects, or provision credentials. A repository
 administrator must configure and record the following before autonomous merge or
 release is enabled.
 
-A-003 is currently inactive. Pre-A-003 human approval rules govern VOC-002. The
-conditional post-activation configuration below must not be represented as hosted or
-technical activation; automatic merge and autonomous production release remain
-disabled.
+A-003 governance authority is active. That activation must not be represented as
+hosted or technical activation; automatic/autonomous merge, RL1/RL2 technical
+activation, production deployment, and autonomous production release remain disabled
+or unimplemented.
 
 ## GitHub rulesets
 
@@ -37,13 +37,12 @@ Configure a non-self-referential R4 control for these exact paths:
 /docs/governance/a003-transition-state.yaml
 /docs/governance/16-autonomous-development-operating-model.md
 /specs/changes/VOC-002-a003-governance-transition/
+/specs/changes/VOC-003-a003-lifecycle-sync/
 ```
 
-Until valid A-003 activation, that ruleset must require founder approval and
-technical-steward review without depending on the pull-request version of the
-classifier it protects. After activation, it must continue non-self-referential
-verification and R4 founder enforcement but must not impose routine standing steward
-or founder approval merely because a change is R3. Where the GitHub plan supports organization-required
+Under active A-003, that ruleset must continue non-self-referential verification and
+R4 founder enforcement but must not impose routine standing steward or founder
+approval merely because a change is R3. Where the GitHub plan supports organization-required
 workflows, run the policy gate from a separately protected default-branch or
 organization source. A status name produced solely by a workflow that the same pull
 request can rewrite is not sufficient protection.
@@ -53,10 +52,9 @@ Configure `main`:
 - include all `develop` protections;
 - accept only release pull requests from `develop` or the documented emergency path;
 - require release, staging, migration, rollback, and health-check gates;
-- require technical-steward approval for R3 and founder approval for R4 through
-  rulesets/environments or a reviewed approval-gate integration while A-003 remains
-  inactive; after activation enforce strengthened R3 gates without a standing
-  steward/founder requirement solely for R3;
+- enforce strengthened R3 gates without a standing steward/founder requirement solely
+  for R3, and require founder approval for R4 through rulesets/environments or a
+  reviewed approval-gate integration;
 - use merge commits for release promotion; and
 - prevent an AI or release-bot identity from bypassing required approvals.
 
@@ -67,8 +65,9 @@ disabled until that gate is tested.
 
 Multiple owners on one CODEOWNERS pattern are alternatives: one matching owner can
 satisfy GitHub's native code-owner review requirement. They do not mean that every
-listed owner must approve. Enforce combined founder-and-steward requirements for
-R4-plus-R3 changes in the non-self-referential ruleset or approval gate above.
+listed owner must approve. Under active A-003, enforce R4 founder authority and
+strengthened R3 gates independently; do not recreate a combined standing
+founder-and-steward requirement merely because both risk effects exist.
 
 Enable repository security settings when available:
 
@@ -79,7 +78,7 @@ Enable repository security settings when available:
 - minimal default workflow token permissions.
 
 The verified human repository identity `@m-e-h-r-d-a-a-d` is formally recorded as
-both founder and qualified human technical steward in
+founder and as the historical pre-A-003 qualified human technical steward in
 [technical-steward-appointment.md](technical-steward-appointment.md). Direct account
 routing is currently used. A steward team is not a prerequisite to A-003 activation
 and must not be created as a replacement permanent authority. Direct routing may
@@ -89,8 +88,8 @@ bot identity as human authority.
 ## Required identities and credentials
 
 - Distinct Codex implementation and Claude Code verification identities.
-- The recorded human founder identity and preserved historical/current-until-A-003
-  technical-steward identity; no replacement standing steward team is required.
+- The recorded human founder identity and preserved historical technical-steward
+  identity; no replacement standing steward team is required.
 - GitHub App or OIDC-based credentials with least privilege and short expiry.
 - Separate Cloudflare preview, staging, and production projects/accounts or clearly
   isolated environments.
@@ -134,12 +133,12 @@ does not invent their content. Therefore:
   missing gates are implemented and validated through a non-production rehearsal.
 
 The initial governance bootstrap merged through PR #3 and its one-time exception has
-expired. A qualified human steward is now formally appointed, and the same verified
-account presently serves as founder and steward in separate capacities. This current
-state does not remove any blocker above, activate hosted enforcement, authorize
-deployment, or enable autonomous release. R3 approvals must explicitly identify the
-steward capacity; combined R3/R4 approvals must identify both capacities. After valid
-A-003 activation, routine R3 instead uses strengthened technical gates and independent
-verification, while R4 founder authority remains unchanged. RL1/RL2 technical
+expired. The historical technical-steward appointment and completed dual-capacity
+VOC-002 approval remain permanent evidence, but the role is retired as routine R3
+authority and that migration approval cannot be reused. This current state does not
+remove any blocker above, activate hosted enforcement, authorize deployment, or
+enable autonomous release. Under active A-003, routine R3 uses strengthened technical
+gates and independent verification, while R4 founder authority remains unchanged.
+RL1/RL2 technical
 activation, automatic merge, and autonomous production release remain disabled until
 separately implemented, tested, and proven.

@@ -12,7 +12,7 @@ Project documentation is organized by purpose:
 - [`planning/`](planning/) contains delivery plans, milestones, and issue-level planning material.
 - [`decisions/`](decisions/) contains Architecture Decision Records for significant technical decisions.
 - [`operations/`](operations/) contains the approved baseline operating model.
-- [`governance/`](governance/) contains current risk, approval, protected-area, and autonomous-release controls. A-003 is present as a proposed inactive amendment; DOC-16/A-002 remain effective until its separately evidenced activation.
+- [`governance/`](governance/) contains current risk, approval, protected-area, and autonomous-release controls. A-003 is active and supersedes DOC-16/A-002 only where it retires standing technical-steward approval for routine R3 work.
 - [`templates/`](templates/) contains reusable specification, approval, verification, release, and rollback records.
 
 This index does not claim that Documents 00–14 have been migrated. Their

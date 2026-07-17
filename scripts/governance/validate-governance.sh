@@ -30,6 +30,7 @@ required_files=(
   specs/templates/change-package/change.yaml
   specs/changes/VOC-001-repository-foundation/change.yaml
   specs/changes/VOC-002-a003-governance-transition/change.yaml
+  specs/changes/VOC-003-a003-lifecycle-sync/change.yaml
   tooling/governance/validate_repository_foundation.py
   tooling/governance/tests/test_validate_repository_foundation.py
 )
@@ -137,7 +138,7 @@ grep -Fq "require founder approval" "$amendment"
 grep -Fq "initial public launch" "$amendment"
 grep -Fq "Initial governance bootstrap adoption" "$operating_model"
 grep -Fq "Initial adoption exception" "$amendment"
-grep -Fq "Initial DOC-16/A-002 governance adoption" docs/governance/approval-matrix.md
+grep -Fq "historical initial DOC-16/A-002 bootstrap" docs/governance/approval-matrix.md
 grep -Fq "R3 production changes remain" docs/governance/post-merge-activation-checklist.md
 
 if grep -Eq 'FOUNDER_GITHUB_USERNAME|TECHNICAL_STEWARD_GITHUB_USERNAME' .github/CODEOWNERS; then
@@ -180,6 +181,7 @@ r4_ruleset_paths=(
   /docs/governance/a003-transition-state.yaml
   /docs/governance/16-autonomous-development-operating-model.md
   /specs/changes/VOC-002-a003-governance-transition/
+  /specs/changes/VOC-003-a003-lifecycle-sync/
 )
 
 for path in "${r4_ruleset_paths[@]}"; do
