@@ -2,4 +2,7 @@ packages:
   - apps/web
   - packages/*
 
+allowBuilds:
+  sharp: false
+
 strictDepBuilds: true

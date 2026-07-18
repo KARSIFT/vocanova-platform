@@ -1,5 +1,7 @@
 node_modules/
 dist/
+.next/
+apps/web/next-env.d.ts
 *.tsbuildinfo
 .pnpm-store/
 .DS_Store
