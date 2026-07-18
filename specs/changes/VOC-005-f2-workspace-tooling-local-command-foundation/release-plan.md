@@ -14,24 +14,25 @@ remains insufficient authority.
 
 ## Implementation integration
 
-After adoption, implementation occurs on a new short-lived branch and separate draft
-PR. The actual implementation diff determines effective risk. Expected protected
-paths make R3 the anticipated floor, but any higher path, semantic, security, verifier,
-or authority assessment controls. Active A-003 requires strengthened applicable
-controls and independent verification for routine R3 without standing steward or
-founder approval merely because it is R3. R4 remains founder-controlled.
+PR #17 implemented only F2-I01 and F2-I02 on a separate short-lived branch. Its exact
+candidate `2100c6c1dc0fd70df516e7564b9dd5b5667cd60b` was classified R3, passed the
+applicable deterministic and hosted controls, and received independent Claude Code
+verdict `PASS`. The authorized manual squash merge completed on
+`2026-07-18T10:03:36Z`; canonical implementation adoption on `develop` is
+`d7ad6066dcb3b6467b8ad8fdbce5410ffb3542f0`.
 
-No implementation merge is performed as part of VOC-005 package adoption. Automatic
-merge, deployment, staging, production release, RL1/RL2, and autonomous release remain
-disabled.
+This completes the bounded VOC-005 implementation. It does not implement F2-I03 or
+later F2 work and does not enable automatic merge, deployment, staging, production
+release, RL1/RL2, or autonomous release.
 
 ## Rollback
 
-Before package merge, rollback is closure of the draft PR and retention of issue
-history. After package merge but before implementation, revert the VOC-005 package
-adoption commit through a separately governed PR, return lifecycle to blocked or
-superseded, and do not begin implementation. After a later implementation merge,
-revert that implementation squash commit through its governed rollback path.
+Package adoption and implementation are historical merged events. Any implementation
+rollback now requires a separately governed revert of canonical implementation squash
+commit `d7ad6066dcb3b6467b8ad8fdbce5410ffb3542f0`, followed by the previously valid
+application-foundation and governance checks. Any lifecycle-record correction must
+preserve the distinct package candidate/adoption and implementation
+candidate/review/adoption evidence.
 
 Rollback triggers include a material contradiction with issue #14, invalid package
 traceability, incorrect risk/authority claim, missing required package file, blocking
@@ -47,7 +48,13 @@ evidence, and the merge record; canonical adopted `develop` SHA is
 founder or technical-steward approval applied merely because this was routine R3
 under active A-003.
 
-Package adoption is not implementation completion, deployment, release, or closure.
-The separate implementation PR must produce `VOC-005-EV-03` through
-`VOC-005-EV-11`. No production outcome or rollback action exists for this package-only
-change.
+Implementation evidence `VOC-005-EV-03` through `VOC-005-EV-11` is complete through
+PR #17, including exact candidate
+`2100c6c1dc0fd70df516e7564b9dd5b5667cd60b`, independent Claude Code verdict `PASS`
+and its evidence, and canonical adopted `develop` commit
+`d7ad6066dcb3b6467b8ad8fdbce5410ffb3542f0`. F2-I01 and F2-I02 are complete.
+
+Issue #14 remains open during preparation and closes only when this final lifecycle
+synchronization PR is validly merged using GitHub closing syntax. No production
+outcome, deployment, release, later F2 implementation, or technical-autonomy
+activation is implied.
