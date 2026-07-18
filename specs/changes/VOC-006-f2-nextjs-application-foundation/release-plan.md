@@ -12,19 +12,31 @@ required no standing founder or technical-steward approval solely because this w
 routine R3; EHR was not triggered.
 
 The valid adoption made this package implementation authority for unchanged F2-I03
-through active issue #19. Package adoption is not implementation completion, issue
-closure, deployment, release, production activation, automatic or autonomous merge
-authority, RL1/RL2 activation, or F2-I04 or later authorization. Codex did not approve
-or merge its own package work.
+through issue #19. Package adoption was not implementation completion, issue closure,
+deployment, release, production activation, automatic or autonomous merge authority,
+RL1/RL2 activation, or F2-I04 or later authorization. Codex did not approve or merge
+its own package work.
 
-## Later implementation integration
+## Package lifecycle synchronization
 
-Future implementation must use a separate short-lived branch and separate draft PR
-for only F2-I03. Its actual diff must receive classification, pass the complete test
-plan, deterministic and hosted checks, and receive its own exact-SHA independent
-Claude Code review where required before a separate authorized human merge. The
-implementation PR must not close issue #19; final issue closure waits for valid
-implementation adoption and lifecycle synchronization.
+PR #21 synchronized the completed PR #20 package adoption into canonical lifecycle
+records at `b1005adc7922c544b8773ff0b7af5b72bf7c6693`. It did not implement F2-I03,
+alter the package history, or expand authority.
+
+## Implementation integration
+
+PR #22 implemented only F2-I03 on a separate short-lived branch. Its exact candidate
+`bda66e379065a59b52a88758933e912d22bf7a38` was independently confirmed as R2,
+passed the applicable deterministic and hosted controls, and received independent
+Claude Code verdict `PASS WITH NON-BLOCKING FINDINGS`; evidence is
+<https://github.com/KARSIFT/vocanova-platform/pull/22#issuecomment-5012828387>. The
+authorized manual squash merge completed on `2026-07-18T21:02:34Z`; canonical
+implementation adoption on `develop` is
+`857a700faebbdd6b0095f2236419ae8016cea91f`.
+
+This completes only F2-I03. It does not authorize or implement F2-I04 or later work
+and does not enable deployment, production release, automatic merge, RL1/RL2, or
+autonomous release.
 
 ## Deployment and activation
 
@@ -35,19 +47,32 @@ environment.
 
 ## Rollback
 
-Before package merge, rollback is closing the draft and deleting the branch. After
-package adoption but before implementation, rollback is a separately governed revert
-of the package adoption commit, which removes unused authority without application or
-data effects. After a later implementation merge, rollback is a governed revert of
-that implementation commit followed by frozen install and all prior web/workspace/
-governance checks. No database, migration, secret, learner-data, or environment
-rollback applies.
+Package adoption, package lifecycle synchronization, and implementation are distinct
+historical merged events. Any implementation rollback now requires a separately
+governed revert of canonical implementation squash commit
+`857a700faebbdd6b0095f2236419ae8016cea91f`, followed by frozen install and all prior
+web, workspace, and governance checks. Any lifecycle correction must preserve the
+distinct package candidate/adoption and implementation candidate/review/adoption
+evidence. No database, migration, secret, learner-data, or environment rollback
+applies.
 
 ## Evidence and closure
 
 Package adoption evidence `VOC-006-EV-12` is complete: PR #20 records the complete
 package diff, classifier, deterministic and hosted validation, exact candidate
 `2d6996234c2c9132bef2f59a018008788809a71c`, Claude verdict `PASS` and its evidence,
-and canonical adoption `b02327e995c7d0e754ea1a2a0a9ad331cb67145f`. Implementation
-evidence `VOC-006-EV-03` through `VOC-006-EV-11` is collected only later. Package
-adoption does not claim those later tests passed or that F2-I03 is complete.
+and canonical adoption `b02327e995c7d0e754ea1a2a0a9ad331cb67145f`. Package lifecycle
+synchronization completed separately through PR #21 without changing that package
+evidence or implementing F2-I03.
+
+Implementation evidence `VOC-006-EV-03` through `VOC-006-EV-11` is complete through
+PR #22, including exact candidate
+`bda66e379065a59b52a88758933e912d22bf7a38`, independent Claude Code verdict `PASS
+WITH NON-BLOCKING FINDINGS` and its evidence, independently confirmed R2 risk, and
+canonical adopted `develop` commit `857a700faebbdd6b0095f2236419ae8016cea91f`.
+F2-I03 is complete; F2-I04 and later work remain unauthorized and unimplemented.
+
+Issue #19 remains open during preparation and closes only when this final lifecycle
+synchronization PR is validly merged using GitHub closing syntax. No deployment,
+production release, automatic merge, RL1/RL2 activation, or autonomous release is
+implied.

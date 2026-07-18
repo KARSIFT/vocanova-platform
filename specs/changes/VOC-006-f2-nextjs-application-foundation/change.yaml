@@ -4,7 +4,7 @@ id: VOC-006
 slug: f2-nextjs-application-foundation
 title: F2 Next.js Application Foundation
 type: infrastructure
-status: implementation-ready
+status: completed
 risk: R3
 planned_implementation_risk_floor: R2
 canonical_path: specs/changes/VOC-006-f2-nextjs-application-foundation
@@ -34,6 +34,11 @@ approvals:
   package_founder:
     status: not-required-routine-r3
     evidence: active-a003
+  implementation_independent_verification:
+    status: passed-exact-revision
+    verdict: PASS WITH NON-BLOCKING FINDINGS
+    candidate_sha: bda66e379065a59b52a88758933e912d22bf7a38
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/22#issuecomment-5012828387
 
 artifacts:
   readme: README.md
@@ -68,10 +73,19 @@ affected_areas:
 implementation:
   authorized: true
   authority_issue: 19
-  required: true
+  authority_status: validly-exercised
+  required: false
+  status: completed
   issue: 19
   target_branch: develop
-  pull_request: null
+  pull_request: 22
+  candidate_sha: bda66e379065a59b52a88758933e912d22bf7a38
+  independent_verification_verdict: PASS WITH NON-BLOCKING FINDINGS
+  independent_verification_evidence: https://github.com/KARSIFT/vocanova-platform/pull/22#issuecomment-5012828387
+  merge_mode: manual-squash
+  merged_at: 2026-07-18T21:02:34Z
+  adopted_develop_sha: 857a700faebbdd6b0095f2236419ae8016cea91f
+  adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/22
 
 release:
   required: false
@@ -88,7 +102,11 @@ adopted_develop_sha: b02327e995c7d0e754ea1a2a0a9ad331cb67145f
 repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/20
 package_adoption_evidence_id: VOC-006-EV-12
 implementation_authority_before_adoption: false
-implementation_authority_status: active
+implementation_authority_status: exercised-complete
+implementation_completion_status: complete
+completed_increments:
+  - F2-I03
+issue_closure_status: closes-on-valid-lifecycle-sync-merge
 automatic_merge_allowed: false
 production_deployment: disabled
 autonomous_production_release: disabled

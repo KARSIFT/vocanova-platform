@@ -3,7 +3,7 @@
 ## Identity and lifecycle
 
 - Change ID: `VOC-006`
-- Status: `implementation-ready`
+- Status: `completed`
 - Package-adoption risk: `R3`
 - Expected implementation risk floor: `R2`, subject to the actual implementation diff
 - Requirement source: founder-approved GitHub issue #19
@@ -18,10 +18,18 @@ PR #20 adopted the exact package candidate
 applicable routine-R3 controls, and exact-revision Claude Code verification returned
 `PASS`. The verification evidence is
 <https://github.com/KARSIFT/vocanova-platform/pull/20#issuecomment-5011433552>.
-That valid adoption makes VOC-006 implementation authority only for bounded F2-I03
-through active issue #19. Implementation has not begun or completed. Adoption grants
-no automatic future implementation merge, deployment, production release, autonomous
-development, RL1/RL2 activation, or F2-I04 or later authority.
+PR #21 then synchronized that completed package-adoption history into the canonical
+lifecycle records at `b1005adc7922c544b8773ff0b7af5b72bf7c6693` without changing
+the package scope or implementing F2-I03.
+
+PR #22 implemented only F2-I03. Claude Code independently reviewed exact
+implementation candidate `bda66e379065a59b52a88758933e912d22bf7a38` and returned
+`PASS WITH NON-BLOCKING FINDINGS`; the PR was manually squash-merged into `develop`
+on `2026-07-18T21:02:34Z` as canonical implementation adoption
+`857a700faebbdd6b0095f2236419ae8016cea91f`. F2-I03 implementation is complete.
+Issue #19 closes only when the final lifecycle synchronization PR is validly merged.
+These events grant no deployment, production release, automatic merge, autonomous
+release, RL1/RL2 activation, or F2-I04 or later authority.
 
 ## Objective
 
@@ -46,16 +54,16 @@ not fake product UI. The frontend never accesses PostgreSQL directly.
 
 ## Risk, verification, and adoption
 
-This package changes protected `specs/README.md`, establishing an R3 package-adoption
-path floor. The later implementation is expected to have at least an R2 path floor
-because it changes dependency manifests and the lockfile, but its effective risk is
-the highest path, semantic, builder, verifier, security, or authority assessment of
-the actual diff.
+This package changed protected `specs/README.md`, establishing an R3 package-adoption
+path floor. The implementation reached R2 because it changed dependency manifests and
+the lockfile; independent review confirmed R2 as the highest path, semantic, builder,
+verifier, security, or authority assessment of the exact implementation diff.
 
-Package adoption completed through PR #20 after deterministic validation, applicable
-hosted R3 controls, and exact-SHA Claude Code verification with no finding. Active
-A-003 did not require standing founder or technical-steward approval merely because
-this was routine R3; R4 remains founder-controlled and EHR was not triggered. The
-adoption and its evidence grant no automatic merge, deployment, release, F2-I04 or
-later work, RL1/RL2, or autonomous-development activation. Codex may not approve or
-merge its own future implementation work.
+Package adoption completed through PR #20, its lifecycle was synchronized through PR
+#21, and bounded F2-I03 implementation completed through PR #22 after their respective
+deterministic and hosted checks and exact-SHA Claude Code verification. The
+implementation verdict was `PASS WITH NON-BLOCKING FINDINGS`. Active A-003 did not
+require standing founder or technical-steward approval merely because package work
+was routine R3; R4 remains founder-controlled and EHR was not triggered. The completed
+F2-I03 implementation grants no automatic merge, deployment, release, F2-I04 or later
+work, RL1/RL2, or autonomous-development activation.
