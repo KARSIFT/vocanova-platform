@@ -22,12 +22,12 @@ official Go toolchain distribution and no repository secret.
 
 | Command             | Purpose                                                                         |
 | ------------------- | ------------------------------------------------------------------------------- |
-| `pnpm dev`          | Run the framework-neutral web TypeScript compiler in watch mode.                |
+| `pnpm dev`          | Run the Next.js web development server.                                         |
 | `pnpm validate`     | Run workspace, format, lint/vet, type, test, and build validation.              |
-| `pnpm lint`         | Run ESLint for JavaScript/TypeScript and `go vet` for the API.                  |
-| `pnpm typecheck`    | Type-check the web and initialized TypeScript packages.                         |
+| `pnpm lint`         | Run Next.js-aware web lint, package ESLint, and `go vet` for the API.           |
+| `pnpm typecheck`    | Generate Next.js route types and type-check the web and shared packages.        |
 | `pnpm test`         | Run workspace foundation tests and API tests.                                   |
-| `pnpm build`        | Build the web, TypeScript packages, and Go API skeleton.                        |
+| `pnpm build`        | Build the Next.js web app, TypeScript packages, and Go API skeleton.            |
 | `pnpm format:check` | Check Prettier and `gofmt` formatting without writing.                          |
 | `pnpm format`       | Apply Prettier and `gofmt` formatting.                                          |
 | `pnpm audit`        | Fail when the pnpm production dependency graph has a high or critical advisory. |
@@ -37,8 +37,9 @@ all reported advisories remain visible and must be recorded in the pull request.
 
 ## Project-specific commands
 
-Use `pnpm --filter @vocanova/web build`, `lint`, or `typecheck` for the web skeleton.
-The web foundation is deliberately framework-neutral; it contains no product UI.
+Use `pnpm --filter @vocanova/web dev`, `build`, `start`, `lint`, or `typecheck` for
+the Next.js application. `start` serves a prior production build. The root page is a
+technical framework-validation placeholder and contains no product UI.
 
 Run API commands from `apps/api`:
 
