@@ -33,7 +33,12 @@ Current packages:
   `84e096c35bc811c276ce29dc2ecc7dd967983e4b`, then bounded F2-I01/F2-I02
   implementation completed through PR #17 at canonical `develop` commit
   `d7ad6066dcb3b6467b8ad8fdbce5410ffb3542f0` after exact-revision independent
-  verification returned `PASS`. Issue #14 closes only when the final lifecycle
-  synchronization PR is validly merged.
+  verification returned `PASS`; issue #14 closed after lifecycle synchronization
+  merged through PR #18.
+- [`VOC-006 — F2 Next.js Application Foundation`](changes/VOC-006-f2-nextjs-application-foundation/README.md)
+  — proposed `implementation-ready` package for F2-I03 only, sourced from founder-
+  approved issue #19; adoption remains pending exact-revision independent verification,
+  applicable R3 controls, and merge into `develop`. No Next.js implementation is
+  authorized while this package exists only on a branch or pull request.
 
 This index makes no claim that Documents 00–14 have been migrated.
