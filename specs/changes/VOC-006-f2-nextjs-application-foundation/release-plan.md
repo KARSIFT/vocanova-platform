@@ -2,23 +2,29 @@
 
 ## Package adoption
 
-This package-preparation PR creates implementation authority but implements and
-releases nothing. Adoption requires deterministic validation, applicable hosted R3
-controls, exact-SHA Claude Code verification with no blocking finding, and an
-authorized merge into `develop`. Active A-003 requires no standing founder or
-technical-steward approval solely because this is routine R3; EHR is not triggered.
+PR #20 prepared repository implementation authority without implementing or releasing
+F2. Deterministic and hosted checks passed, applicable R3 controls completed, exact-SHA
+Claude Code verification returned verdict `PASS`, and the authorized merge into
+`develop` completed.
+The exact package candidate was `2d6996234c2c9132bef2f59a018008788809a71c`;
+canonical adoption is `b02327e995c7d0e754ea1a2a0a9ad331cb67145f`. Active A-003
+required no standing founder or technical-steward approval solely because this was
+routine R3; EHR was not triggered.
 
-Until adoption, `implementation-ready` is the proposed post-adoption lifecycle. Issue
-#19, the package branch, and the draft PR do not independently authorize application
-edits. Codex does not approve or merge its own work.
+The valid adoption made this package implementation authority for unchanged F2-I03
+through active issue #19. Package adoption is not implementation completion, issue
+closure, deployment, release, production activation, automatic or autonomous merge
+authority, RL1/RL2 activation, or F2-I04 or later authorization. Codex did not approve
+or merge its own package work.
 
 ## Later implementation integration
 
-After valid package adoption, a separate short-lived branch and draft PR may implement
-only F2-I03. It must pass the complete test plan, actual risk gates, hosted checks, and
-exact-SHA independent review before an authorized human merge. The implementation PR
-must not close issue #19; final issue closure waits for valid implementation adoption
-and lifecycle synchronization.
+Future implementation must use a separate short-lived branch and separate draft PR
+for only F2-I03. Its actual diff must receive classification, pass the complete test
+plan, deterministic and hosted checks, and receive its own exact-SHA independent
+Claude Code review where required before a separate authorized human merge. The
+implementation PR must not close issue #19; final issue closure waits for valid
+implementation adoption and lifecycle synchronization.
 
 ## Deployment and activation
 
@@ -39,8 +45,9 @@ rollback applies.
 
 ## Evidence and closure
 
-Package evidence `VOC-006-EV-12` must bind the complete package diff, exact candidate,
-classifier, deterministic and hosted validation, exact-SHA independent verdict, and
-canonical adoption. Implementation evidence `VOC-006-EV-03` through
-`VOC-006-EV-11` is collected only later. Package adoption does not claim those later
-tests passed or that F2-I03 is complete.
+Package adoption evidence `VOC-006-EV-12` is complete: PR #20 records the complete
+package diff, classifier, deterministic and hosted validation, exact candidate
+`2d6996234c2c9132bef2f59a018008788809a71c`, Claude verdict `PASS` and its evidence,
+and canonical adoption `b02327e995c7d0e754ea1a2a0a9ad331cb67145f`. Implementation
+evidence `VOC-006-EV-03` through `VOC-006-EV-11` is collected only later. Package
+adoption does not claim those later tests passed or that F2-I03 is complete.
