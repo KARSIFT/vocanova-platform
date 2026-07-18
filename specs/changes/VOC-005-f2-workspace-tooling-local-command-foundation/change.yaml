@@ -4,7 +4,7 @@ id: VOC-005
 slug: f2-workspace-tooling-local-command-foundation
 title: F2 Workspace, Tooling, and Local Command Foundation
 type: infrastructure
-status: implementation-ready
+status: completed
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-005-f2-workspace-tooling-local-command-foundation
@@ -32,6 +32,11 @@ approvals:
   package_founder:
     status: not-required-routine-r3
     evidence: active-a003
+  implementation_independent_verification:
+    status: passed-exact-revision
+    verdict: PASS
+    candidate_sha: 2100c6c1dc0fd70df516e7564b9dd5b5667cd60b
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/17#issuecomment-5010781346
 
 artifacts:
   readme: README.md
@@ -69,10 +74,19 @@ affected_areas:
 implementation:
   authorized: true
   authority_issue: 14
-  required: true
+  authority_status: validly-exercised
+  required: false
+  status: completed
   issue: 14
   target_branch: develop
-  pull_request: null
+  pull_request: 17
+  candidate_sha: 2100c6c1dc0fd70df516e7564b9dd5b5667cd60b
+  independent_verification_verdict: PASS
+  independent_verification_evidence: https://github.com/KARSIFT/vocanova-platform/pull/17#issuecomment-5010781346
+  merge_mode: manual-squash
+  merged_at: 2026-07-18T10:03:36Z
+  adopted_develop_sha: d7ad6066dcb3b6467b8ad8fdbce5410ffb3542f0
+  adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/17
 
 release:
   required: false
@@ -89,7 +103,12 @@ adopted_develop_sha: 84e096c35bc811c276ce29dc2ecc7dd967983e4b
 repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/15
 package_adoption_evidence_id: VOC-005-EV-12
 implementation_authority_before_adoption: false
-implementation_authority_status: active
+implementation_authority_status: exercised-complete
+implementation_completion_status: complete
+completed_increments:
+  - F2-I01
+  - F2-I02
+issue_closure_status: closes-on-valid-lifecycle-sync-merge
 automatic_merge_allowed: false
 production_deployment: disabled
 autonomous_production_release: disabled
