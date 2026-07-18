@@ -3,7 +3,7 @@
 ## Identity and lifecycle
 
 - Change ID: `VOC-006`
-- Proposed lifecycle after valid adoption: `implementation-ready`
+- Status: `implementation-ready`
 - Package-adoption risk: `R3`
 - Expected implementation risk floor: `R2`, subject to the actual implementation diff
 - Requirement source: founder-approved GitHub issue #19
@@ -12,10 +12,16 @@
 - Exact grounded base: `e97cce408c19312d1f88afb8be4bffa697d98a82`
 - Canonical path: `specs/changes/VOC-006-f2-nextjs-application-foundation`
 
-This package is a candidate until deterministic and hosted validation, exact-revision
-independent verification, applicable routine-R3 controls, and an authorized merge into
-canonical `develop` complete. A branch, issue, draft pull request, or review alone
-grants no implementation, merge, deployment, release, or production authority.
+PR #20 adopted the exact package candidate
+`2d6996234c2c9132bef2f59a018008788809a71c` into canonical `develop` at
+`b02327e995c7d0e754ea1a2a0a9ad331cb67145f` after deterministic and hosted checks,
+applicable routine-R3 controls, and exact-revision Claude Code verification returned
+`PASS`. The verification evidence is
+<https://github.com/KARSIFT/vocanova-platform/pull/20#issuecomment-5011433552>.
+That valid adoption makes VOC-006 implementation authority only for bounded F2-I03
+through active issue #19. Implementation has not begun or completed. Adoption grants
+no automatic future implementation merge, deployment, production release, autonomous
+development, RL1/RL2 activation, or F2-I04 or later authority.
 
 ## Objective
 
@@ -46,8 +52,10 @@ because it changes dependency manifests and the lockfile, but its effective risk
 the highest path, semantic, builder, verifier, security, or authority assessment of
 the actual diff.
 
-Active A-003 requires strengthened applicable controls and exact-SHA Claude Code
-verification for routine R3. It does not impose standing founder or technical-steward
-approval merely because work is R3. R4 remains founder-controlled; EHR is not
-triggered. Codex may not approve, merge, enable auto-merge, deploy, or activate
-technical autonomy.
+Package adoption completed through PR #20 after deterministic validation, applicable
+hosted R3 controls, and exact-SHA Claude Code verification with no finding. Active
+A-003 did not require standing founder or technical-steward approval merely because
+this was routine R3; R4 remains founder-controlled and EHR was not triggered. The
+adoption and its evidence grant no automatic merge, deployment, release, F2-I04 or
+later work, RL1/RL2, or autonomous-development activation. Codex may not approve or
+merge its own future implementation work.
