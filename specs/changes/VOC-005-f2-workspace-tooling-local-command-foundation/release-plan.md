@@ -2,14 +2,15 @@
 
 ## Package adoption authorization
 
-This PR prepares repository implementation authority; it does not implement or release
-F2. Package adoption requires all deterministic and hosted checks, exact-SHA Claude
-verification with no blocking finding, all applicable R3 controls, and an authorized
-merge into `develop`. Codex must not approve, merge, enable auto-merge, deploy, or
-represent founder approval.
+PR #15 prepared repository implementation authority without implementing or releasing
+F2. All deterministic and hosted checks, exact-SHA Claude verification with no
+finding, applicable R3 controls, and the authorized merge into `develop` completed.
+Codex did not approve, merge, enable auto-merge, deploy, or represent founder
+approval.
 
-The package becomes implementation authority only after valid adoption on canonical
-`develop`. A branch, draft PR, Claude verdict, or issue by itself is insufficient.
+The valid adoption made this package implementation authority for its unchanged scope
+through active issue #14. A branch, draft PR, Claude verdict, or issue by itself
+remains insufficient authority.
 
 ## Implementation integration
 
@@ -38,11 +39,13 @@ independent finding, unauthorized architecture choice, or scope expansion.
 
 ## Evidence and closure
 
-Package adoption evidence is `VOC-005-EV-12`: issue/base verification, exact changed
-files, deterministic commands, hosted checks, exact candidate SHA, Claude verdict,
-PR merge record, and adopted `develop` SHA. EHR is not triggered; no standing founder
-or technical-steward approval applies merely because this is routine R3 under active
-A-003.
+Package adoption evidence `VOC-005-EV-12` is complete: PR #15 records issue/base
+verification, exact changed files, deterministic commands, hosted checks, exact
+candidate `271c3e9fe0f202f468995c0af5a87c729186b746`, Claude verdict `PASS` and its
+evidence, and the merge record; canonical adopted `develop` SHA is
+`84e096c35bc811c276ce29dc2ecc7dd967983e4b`. EHR was not triggered; no standing
+founder or technical-steward approval applied merely because this was routine R3
+under active A-003.
 
 Package adoption is not implementation completion, deployment, release, or closure.
 The separate implementation PR must produce `VOC-005-EV-03` through

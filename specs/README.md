@@ -29,9 +29,9 @@ Current packages:
   remaining inactive, adopted through PR #11 at canonical `develop` commit
   `2b5ecb19b532a9b23250e1255ff1e7fb9a78ef77`.
 - [`VOC-005 — F2 Workspace, Tooling, and Local Command Foundation`](changes/VOC-005-f2-workspace-tooling-local-command-foundation/README.md)
-  — proposed `implementation-ready` F2 package sourced from founder-approved GitHub
-  issue #14; package adoption remains pending exact-revision independent verification,
-  all applicable R3 controls, and merge into `develop`, and no application
-  implementation is authorized before that adoption.
+  — adopted `implementation-ready` F2 package sourced from founder-approved GitHub
+  issue #14; adopted through PR #15 at canonical `develop` commit
+  `84e096c35bc811c276ce29dc2ecc7dd967983e4b` after exact-revision independent
+  verification. Issue #14 remains the active implementation issue.
 
 This index makes no claim that Documents 00–14 have been migrated.
