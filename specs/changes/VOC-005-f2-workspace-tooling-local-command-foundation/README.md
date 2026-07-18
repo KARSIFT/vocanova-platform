@@ -3,7 +3,7 @@
 ## Identity and lifecycle
 
 - Change ID: `VOC-005`
-- Proposed lifecycle after valid adoption: `implementation-ready`
+- Status: `implementation-ready`
 - Package-adoption risk: `R3`
 - Expected implementation risk floor: `R3`, subject to the actual implementation diff
 - Requirement source: founder-approved GitHub issue #14
@@ -12,10 +12,13 @@
 - Canonical path:
   `specs/changes/VOC-005-f2-workspace-tooling-local-command-foundation`
 
-The package is a candidate until strengthened applicable R3 controls, exact-revision
-independent verification, and merge into canonical `develop`. It grants no
-implementation, merge, deployment, release, or production authority while it exists
-only on a branch or pull request.
+PR #15 adopted the exact package candidate
+`271c3e9fe0f202f468995c0af5a87c729186b746` into canonical `develop` at
+`84e096c35bc811c276ce29dc2ecc7dd967983e4b` after strengthened applicable R3
+controls and exact-revision Claude Code verification returned `PASS`. VOC-005 is now
+implementation authority for only the bounded work below through active issue #14;
+it grants no merge, deployment, release, production, or autonomous-development
+authority.
 
 ## Objective
 
@@ -46,8 +49,8 @@ approved `infra/` and backend `migrations/` foundations are protected paths; its
 risk is the highest path, semantic, builder, verifier, security, or authority
 assessment of the actual diff.
 
-Package adoption requires deterministic validation, exact-SHA Claude Code
-verification with no blocking finding, all applicable hosted checks, and an authorized
-merge into `develop`. Active A-003 does not require standing founder or technical-
-steward approval merely because this is routine R3; EHR is not triggered. No merge,
-auto-merge, or deployment is authorized by this package-preparation PR.
+Package adoption completed through PR #15 after deterministic validation, applicable
+hosted R3 controls, and exact-SHA Claude Code verification with no finding. Active
+A-003 did not require standing founder or technical-steward approval merely because
+this was routine R3; EHR was not triggered. The adoption and its evidence grant no
+automatic merge, deployment, release, or autonomous-development activation.

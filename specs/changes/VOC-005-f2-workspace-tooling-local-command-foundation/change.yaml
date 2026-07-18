@@ -15,6 +15,7 @@ requirement_approval_status: founder-approved
 base_branch: develop
 base_sha: 76d5ab47cd847a5634f3b8f429247726bd72a579
 target_branch: develop
+approved_candidate_sha: 271c3e9fe0f202f468995c0af5a87c729186b746
 
 owners:
   decision: founder
@@ -24,8 +25,10 @@ owners:
 
 approvals:
   package_independent_verification:
-    status: pending-exact-revision
-    evidence: null
+    status: passed-exact-revision
+    verdict: PASS
+    candidate_sha: 271c3e9fe0f202f468995c0af5a87c729186b746
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/15#issuecomment-5008525324
   package_founder:
     status: not-required-routine-r3
     evidence: active-a003
@@ -64,7 +67,8 @@ affected_areas:
   - scripts
 
 implementation:
-  authorized: true-after-valid-repository-adoption
+  authorized: true
+  authority_issue: 14
   required: true
   issue: 14
   target_branch: develop
@@ -79,8 +83,13 @@ release:
   migration_required: false
   rollback_required: true
 
-repository_adoption_status: pending
+repository_adoption_status: adopted
+adoption_pr: 15
+adopted_develop_sha: 84e096c35bc811c276ce29dc2ecc7dd967983e4b
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/15
+package_adoption_evidence_id: VOC-005-EV-12
 implementation_authority_before_adoption: false
+implementation_authority_status: active
 automatic_merge_allowed: false
 production_deployment: disabled
 autonomous_production_release: disabled
