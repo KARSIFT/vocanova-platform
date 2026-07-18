@@ -1,0 +1,89 @@
+schema_version: 1
+
+id: VOC-006
+slug: f2-nextjs-application-foundation
+title: F2 Next.js Application Foundation
+type: infrastructure
+status: implementation-ready
+risk: R3
+planned_implementation_risk_floor: R2
+canonical_path: specs/changes/VOC-006-f2-nextjs-application-foundation
+
+authority_model: a003-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/19
+requirement_approval_status: founder-approved
+roadmap_increment: F2-I03
+planned_pr_group: PR-F2-02
+base_branch: develop
+base_sha: e97cce408c19312d1f88afb8be4bffa697d98a82
+target_branch: develop
+
+owners:
+  decision: founder
+  package_preparation: codex
+  implementation: codex
+  independent_verification: claude-code
+
+approvals:
+  package_independent_verification:
+    status: pending-exact-revision
+    evidence: null
+  package_founder:
+    status: not-required-routine-r3
+    evidence: active-a003
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-006-DEP-01
+    status: resolved-by-issue-19
+  - id: VOC-006-DEP-02
+    status: resolved-at-base-sha
+  - id: VOC-006-DEP-03
+    status: resolved-by-active-a003-governance
+  - id: VOC-006-DEP-04
+    status: resolved-by-voc-005-completion
+  - id: VOC-006-DEP-05
+    status: implementation-time-version-resolution-required
+
+affected_areas:
+  - apps/web
+  - packages/eslint-config
+  - packages/typescript-config
+  - package.json
+  - pnpm-lock.yaml
+  - docs/development.md
+
+implementation:
+  authorized: true-after-valid-repository-adoption
+  required: true
+  status: pending-package-adoption
+  issue: 19
+  target_branch: develop
+  pull_request: null
+
+release:
+  required: false
+  mode: repository-application-foundation-only
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+
+repository_adoption_status: pending
+implementation_authority_before_adoption: false
+automatic_merge_allowed: false
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-applicable
+blocking_reasons: null
