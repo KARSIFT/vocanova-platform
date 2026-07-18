@@ -1,8 +1,13 @@
 # Vocanova
 
-Vocanova is an AI-powered platform for practical English learning. It is maintained by KARSIFT as a private monorepo and is intended to use pnpm as the repository evolves.
+Vocanova is an AI-powered platform for practical English learning. It is maintained
+by KARSIFT as a private pnpm and Go monorepo.
 
-The repository is currently in the foundation phase. Application architecture and application code will be introduced through later foundation issues; no application code belongs in the current phase.
+The repository is in the application-foundation phase. Its canonical roots are
+`apps/web`, `apps/api`, and the four approved shared packages under `packages/`.
+VOC-005 establishes buildable framework-neutral and Go skeletons only; product
+behavior remains subject to later approved changes. See the
+[local development guide](docs/development.md) for exact tools and commands.
 
 ## Documentation
 

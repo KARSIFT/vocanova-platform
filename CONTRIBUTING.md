@@ -32,8 +32,16 @@ The pull-request template provides two paths:
   changes. It still records objective, scope, risk, relevant checks, and verifier
   evidence, but irrelevant sections may be marked `N/A` with a reason.
 
-Run every installed validation relevant to the change. This repository currently has
-no package manifest or application scripts; governance changes run:
+Run every installed validation relevant to the change. After the frozen installation
+described in the [local development guide](docs/development.md), application-
+foundation changes run the applicable root commands, normally beginning with:
+
+```bash
+pnpm validate
+pnpm audit
+```
+
+Governance validation remains independently required where applicable:
 
 ```bash
 bash scripts/governance/validate-governance.sh
@@ -41,9 +49,8 @@ bash scripts/governance/classify-change-risk.sh
 git diff --check
 ```
 
-When pnpm and application scripts are introduced through an approved foundation
-change, use the exact checked-in scripts with a frozen lockfile. Do not claim an
-unavailable tool or external deployment passed.
+Use the exact checked-in tool versions and scripts with a frozen lockfile. Do not claim
+an unavailable tool or external deployment passed.
 
 Under active A-003, routine R3 requires strengthened applicable controls and
 independent verification, not standing technical-steward or founder approval merely
