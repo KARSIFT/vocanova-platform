@@ -2,23 +2,27 @@
 
 ## Package adoption
 
-This package-preparation PR creates possible future documentation-migration authority
-but migrates and releases nothing. Adoption requires deterministic and hosted checks,
-exact-SHA Claude Code verification with no blocking finding, exact-SHA founder R4
-approval, and an authorized human merge into `develop`.
+PR #26 prepared repository implementation authority without migrating or releasing
+Documents 00–14. Deterministic and hosted checks passed, exact-SHA Claude Code
+verification returned `PASS WITH NON-BLOCKING FINDINGS`, exact-SHA founder R4 approval
+was recorded, and an authorized human squash merge into `develop` completed. Exact
+candidate `3ac87f883463da6bc7aebffa65a977f234812064` was adopted at canonical
+`develop` commit `87bd1bc916891cc4644b24201ab991529d7d9194`.
 
-Until adoption, `implementation-ready` is only the proposed post-adoption lifecycle.
-Issue #25 approval authorizes package preparation, not migration. Codex does not
-approve or merge its own work. No historical bootstrap or VOC-002 migration approval
-is reusable.
+The valid adoption makes this package implementation authority for only the bounded
+documentation migration through open issue #25. It does not approve future proposed
+living documents, claim migration completion, close the issue, authorize deployment
+or production action, or activate automatic/autonomous merge, RL1/RL2, or autonomous
+release. Codex did not approve or merge its own package work. No historical bootstrap
+or VOC-002 migration approval was reused.
 
 ## Later implementation integration
 
-After valid package adoption, a separate isolated branch and draft PR may implement
-only this documentation migration. Its actual diff must pass the complete test plan,
-R4 gates, hosted checks, exact-SHA independent review, and exact-SHA founder approval
-before an authorized human merge. The implementation PR must not close issue #25;
-completion and any lifecycle/adoption synchronization remain separate.
+Future implementation must use a separate isolated branch and draft PR for only this
+documentation migration. Its actual diff must pass the complete test plan, R4 gates,
+hosted checks, exact-SHA independent review, and exact-SHA founder approval before an
+authorized human merge. The implementation PR must not close issue #25; completion
+and any living-document adoption or lifecycle synchronization remain separate.
 
 ## Deployment and activation
 
@@ -38,9 +42,11 @@ rollback applies.
 
 ## Evidence and closure
 
-Package evidence `VOC-007-EV-14` must bind the complete package diff, exact candidate,
-classifier, deterministic and hosted validation, exact-SHA independent verdict,
-exact-SHA founder approval, authorized merge, and canonical adoption. Implementation
-evidence `VOC-007-EV-03` through `VOC-007-EV-13` is collected only later. Package
-adoption does not claim Documents 00–14 are migrated, approved, or implementation
-authority, and it does not close issue #25.
+Package evidence `VOC-007-EV-14` is complete: PR #26 records the complete package
+diff, classifier, deterministic and hosted validation, exact candidate
+`3ac87f883463da6bc7aebffa65a977f234812064`, Claude verdict and evidence,
+exact-revision founder approval, and canonical adoption
+`87bd1bc916891cc4644b24201ab991529d7d9194`. Implementation evidence
+`VOC-007-EV-03` through `VOC-007-EV-13` is collected only later. Package adoption
+does not claim Documents 00–14 are migrated or approved, and it does not close issue
+#25.

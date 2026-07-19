@@ -3,7 +3,7 @@
 ## Identity and lifecycle
 
 - Change ID: `VOC-007`
-- Proposed lifecycle after valid adoption: `implementation-ready`
+- Status: `implementation-ready`
 - Package-adoption risk: `R4`
 - Planned implementation risk: `R4`, subject to the exact implementation diff
 - Requirement source: founder-approved GitHub issue #25
@@ -13,11 +13,18 @@
 - Canonical path:
   `specs/changes/VOC-007-canonical-product-technical-documentation-migration`
 
-This package is a candidate until deterministic and hosted validation, exact-revision
-Claude Code verification, exact-revision founder approval, and an authorized merge
-into canonical `develop` complete. Issue approval authorizes package preparation
-only. A branch, pull request, review, or package file outside canonical `develop`
-grants no migration, merge, deployment, release, or production authority.
+PR #26 adopted exact package candidate
+`3ac87f883463da6bc7aebffa65a977f234812064` into canonical `develop` at
+`87bd1bc916891cc4644b24201ab991529d7d9194` after deterministic and hosted
+validation, exact-revision Claude Code verification returned `PASS WITH NON-BLOCKING
+FINDINGS`, and exact-revision founder R4 approval was recorded. Verification evidence
+is <https://github.com/KARSIFT/vocanova-platform/pull/26#issuecomment-5015746797>;
+founder approval evidence is
+<https://github.com/KARSIFT/vocanova-platform/pull/26#issuecomment-5015754538>.
+That adoption makes VOC-007 implementation authority only for the bounded migration
+through open issue #25. It does not approve the future proposed living documents,
+complete the migration, authorize deployment or release, or activate technical
+autonomy.
 
 ## Objective
 
@@ -45,8 +52,9 @@ governance authority.
 The package changes protected `specs/README.md`, creating at least an R3 path floor.
 It is declared R4 because the later migration proposes canonical product direction,
 material user-facing scope, AI/user-trust behavior, architecture, and delivery plans.
-R4 requires founder approval bound to the exact final package revision, in addition
-to independent verification and every applicable control. Active A-003 does not add
-standing technical-steward approval, EHR is not presently triggered, and automatic
-or autonomous merge remains technically disabled. Codex may not approve or merge its
-own work.
+The R4 package was validly adopted with exact-revision founder approval, independent
+verification, and applicable controls. Active A-003 added no standing
+technical-steward approval, EHR was not triggered, and automatic or autonomous merge
+remains technically disabled. The approved package bounds later implementation but
+does not pre-approve its exact document content. Codex may not approve or merge its
+own implementation work.
