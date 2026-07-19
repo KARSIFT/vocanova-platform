@@ -47,5 +47,11 @@ Current packages:
   commit `87bd1bc916891cc4644b24201ab991529d7d9194` after exact-revision
   independent verification and founder R4 approval. Issue #25 remains open for the
   separate migration; no Documents 00–14 implementation completion is claimed.
+- [`VOC-008 — DOC-00 through DOC-12 Canonical Adoption`](changes/VOC-008-doc-00-doc-12-canonical-adoption/README.md)
+  — proposed R4 package sourced from founder-approved issue #29 and comment
+  `5017746234`. Package preparation does not approve the documents or authorize their
+  adoption, application implementation, deployment, automatic merge, or production
+  release; exact-revision independent verification, founder approval, and authorized
+  human merge remain pending.
 
 This index makes no claim that Documents 00–14 have been migrated.
