@@ -42,9 +42,10 @@ Current packages:
   verification returned `PASS`. Issue #19 remains the active implementation issue;
   no Next.js implementation completion is claimed.
 - [`VOC-007 — Canonical Product and Technical Documentation Migration`](changes/VOC-007-canonical-product-technical-documentation-migration/README.md)
-  — proposed `implementation-ready` preservation-first migration package sourced
-  from founder-approved issue #25. Package adoption is R4-candidate and remains
-  pending exact-revision independent verification, founder approval, and merge into
-  `develop`; no Documents 00–14 migration is authorized before valid adoption.
+  — adopted `implementation-ready` preservation-first migration package sourced
+  from founder-approved issue #25; adopted through PR #26 at canonical `develop`
+  commit `87bd1bc916891cc4644b24201ab991529d7d9194` after exact-revision
+  independent verification and founder R4 approval. Issue #25 remains open for the
+  separate migration; no Documents 00–14 implementation completion is claimed.
 
 This index makes no claim that Documents 00–14 have been migrated.
