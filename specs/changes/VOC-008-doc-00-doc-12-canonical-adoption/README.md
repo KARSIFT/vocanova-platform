@@ -3,7 +3,7 @@
 ## Identity and lifecycle
 
 - Change ID: `VOC-008`
-- Status: `proposed`
+- Status: `implementation-ready`
 - Package-adoption risk: `R4`
 - Planned implementation risk: `R4`, subject to the exact adoption diff
 - Requirement source: founder-approved GitHub issue #29
@@ -19,9 +19,18 @@ adoption of proposed DOC-00 through DOC-12. The later adoption establishes the
 product, research, UX, architecture, data, backend, API, web, AI, workflow, DevOps,
 and MVP-roadmap baseline from which bounded application packages may be derived.
 
-This package proposal does not approve any document and does not authorize the later
-adoption until this exact package is independently verified, receives exact-revision
-founder R4 approval, and is validly merged into canonical `develop`.
+PR #30 adopted exact package candidate
+`24ffa1260a4b3a94e10f9e681b77cf35695d100e` into canonical `develop` at
+`f7bc58461aaafa4c8504ea3534a96f522fd8bb07` after deterministic and hosted
+validation, exact-revision Claude Code verification returned `PASS WITH NON-BLOCKING
+FINDINGS`, and exact-revision founder R4 approval was recorded. Verification evidence
+is <https://github.com/KARSIFT/vocanova-platform/pull/30#issuecomment-5019871231>;
+founder approval evidence is
+<https://github.com/KARSIFT/vocanova-platform/pull/30#issuecomment-5021660542>.
+That adoption makes VOC-008 implementation authority only for the bounded review and
+adoption of DOC-00 through DOC-12 through open issue #29. It does not approve those
+documents, authorize application implementation, close the issue, or activate any
+deployment, release, merge-automation, or technical-autonomy capability.
 
 ## Boundaries
 
@@ -42,7 +51,10 @@ specification-path floor. Effective risk is R4 because the planned adoption sett
 material product direction, learner-data behavior, AI user-trust posture, technical
 architecture, infrastructure direction, and implementation sequencing.
 
-EHR is not triggered by package preparation. Active A-003 adds no standing steward
-approval; founder R4 approval remains required. Automatic/autonomous merge, RL1/RL2,
-production deployment, and autonomous production release remain technically disabled.
-Codex must stop at a draft PR and cannot verify, approve, or merge its own package.
+The R4 package was validly adopted with exact-revision founder approval, independent
+verification, and applicable controls. EHR was not triggered, active A-003 added no
+standing technical-steward approval, and no historical approval was reused.
+Automatic/autonomous merge, RL1/RL2, production deployment, and autonomous production
+release remain technically disabled. The adopted package bounds the later document
+work but does not pre-approve its exact content; Codex cannot verify, approve, or merge
+its own implementation.

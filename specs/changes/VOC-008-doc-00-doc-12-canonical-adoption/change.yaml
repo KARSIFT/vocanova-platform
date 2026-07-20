@@ -4,7 +4,7 @@ id: VOC-008
 slug: doc-00-doc-12-canonical-adoption
 title: DOC-00 through DOC-12 Canonical Adoption
 type: documentation-adoption
-status: proposed
+status: implementation-ready
 risk: R4
 planned_implementation_risk_floor: R4
 canonical_path: specs/changes/VOC-008-doc-00-doc-12-canonical-adoption
@@ -16,7 +16,7 @@ requirement_approval_evidence: https://github.com/KARSIFT/vocanova-platform/issu
 base_branch: develop
 base_sha: d04e3d1a95b069612414667a8f74a01af7ef271f
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: 24ffa1260a4b3a94e10f9e681b77cf35695d100e
 
 owners:
   decision: founder
@@ -26,14 +26,14 @@ owners:
 
 approvals:
   package_independent_verification:
-    status: pending
-    verdict: null
-    candidate_sha: null
-    evidence: null
+    status: passed-exact-revision
+    verdict: PASS-WITH-NON-BLOCKING-FINDINGS
+    candidate_sha: 24ffa1260a4b3a94e10f9e681b77cf35695d100e
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/30#issuecomment-5019871231
   package_founder:
-    status: pending-exact-revision
-    candidate_sha: null
-    evidence: null
+    status: approved-exact-revision
+    candidate_sha: 24ffa1260a4b3a94e10f9e681b77cf35695d100e
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/30#issuecomment-5021660542
 
 artifacts:
   readme: README.md
@@ -68,7 +68,7 @@ affected_areas:
   - docs/document-graph.yaml
 
 implementation:
-  authorized: false
+  authorized: true
   authority_issue: 29
   required: true
   issue: 29
@@ -84,18 +84,16 @@ release:
   migration_required: true
   rollback_required: true
 
-repository_adoption_status: pending
-adoption_pr: null
-adopted_develop_sha: null
-repository_adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 30
+adopted_develop_sha: f7bc58461aaafa4c8504ea3534a96f522fd8bb07
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/30
+package_adoption_evidence_id: VOC-008-EV-14
 implementation_authority_before_adoption: false
-implementation_authority_status: inactive-pending-package-adoption
+implementation_authority_status: active
 automatic_merge_allowed: false
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-applicable
-blocking_reasons:
-  - exact-revision-independent-verification
-  - exact-revision-founder-r4-approval
-  - authorized-human-merge
+blocking_reasons: null
