@@ -3,25 +3,23 @@ id: DOC-02
 title: VocaNova Market Research
 version: 1.0
 document_type: market-research
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/research/02-market-research.md
-approved_at: null
-last_reviewed_at: 2026-07-19
+approved_at: 2026-07-21
+last_reviewed_at: 2026-07-21
 review_cycle: when-needed
 supersedes: null
 related_documents:
   - DOC-00
   - DOC-01
 related_decisions: []
-adoption_change: VOC-007
+adoption_change: VOC-008
 source_files:
   - path: 02-market-research.md
     sha256: 6de75b467781bb90297b2a663c16be613cddd24b0efafa58cefe6de395e314c5
 ---
 # 02 — VocaNova Market Research
-
-> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## Positioning
 

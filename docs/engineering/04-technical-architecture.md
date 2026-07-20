@@ -3,11 +3,11 @@ id: DOC-04
 title: VocaNova Technical Architecture
 version: 1.0
 document_type: technical-architecture
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/engineering/04-technical-architecture.md
-approved_at: null
-last_reviewed_at: 2026-07-19
+approved_at: 2026-07-21
+last_reviewed_at: 2026-07-21
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -20,14 +20,12 @@ related_documents:
   - DOC-11
   - DOC-17
 related_decisions: []
-adoption_change: VOC-007
+adoption_change: VOC-008
 source_files:
   - path: 04-technical-architecture.md
     sha256: 50ba0901ee5e877e98e7071c6930f809b0ebc6074858fd20e1ac7deae12403dc
 ---
 # 04 — VocaNova Technical Architecture
-
-> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## 1. Purpose and goals
 
@@ -58,7 +56,7 @@ Next.js Web Application
 Go Backend API
    |
    +-- PostgreSQL
-   +-- Clerk-family auth (see 06/07: Google OAuth + email magic link, PostgreSQL sessions)
+   +-- Google OAuth + email magic-link delivery, with PostgreSQL-backed sessions
    +-- AI Provider
    +-- Feature flags
    +-- Observability
@@ -104,10 +102,10 @@ auth SDKs, or AI SDKs directly.
 
 ## 8. API architecture
 
-REST, JSON, versioned under `/api/v1`. Huma generates OpenAPI 3.1 (no committed OpenAPI file
-required for MVP — see §11 in [06](06-backend-design.md) for the later, more specific decision that a
-generated OpenAPI artifact *is* used for TypeScript codegen and drift detection); chi handles
-routing/middleware.
+REST, JSON, versioned under `/api/v1`. Huma generates OpenAPI 3.1. The generated artifact is
+committed at `apps/api/openapi/vocanova.openapi.json` for TypeScript code generation and drift
+detection; [06](06-backend-design.md) §5 and [07](07-api-contract-and-dto-design.md) define the
+contract workflow. chi handles routing and middleware.
 
 ## 9. Authentication
 
@@ -123,7 +121,7 @@ storage, IANA timezone strings for user-facing daily logic. Full schema in [05](
 ## 11. Spaced repetition
 
 Deterministic stage-based scheduling (not FSRS in MVP). Rating scale, exact step mechanics, and
-reset rule are canonical in [05](05-database-design.md) §12–13 — see
+reset rule are canonical in [05](05-database-design.md) §9 — see
 [the migration notes](../product/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how the various
 draft rating scales across documents were reconciled into one. Future algorithms can replace the
 scheduler behind a stable interface.
@@ -146,7 +144,7 @@ call, validate structured output, retry safely (bounded), store feedback history
 
 Backend owns Confidence Points, streaks, mission completion, and progress summaries. Points use an
 event-based ledger with idempotency keys and transactional updates (see [05](05-database-design.md)
-§16.1). Streak advances only after mission completion, uses local timezone, has gentle reset
+§12). Streak advances only after mission completion, uses local timezone, has gentle reset
 behavior (grace days).
 
 ## 15. Background jobs
@@ -170,7 +168,7 @@ errors, database health, AI usage, job failures.
 
 Backend: unit, PostgreSQL integration, migration, API tests. Frontend: Vitest, React Testing
 Library, Playwright. AI: fake-provider tests, evaluation dataset, controlled live tests (never a
-paid provider in normal CI — see [09](09-ai-features.md) §56 Phase 1). Coverage is risk-based, not a flat
+paid provider in normal CI — see [09](09-ai-features.md) §23 Phase 1). Coverage is risk-based, not a flat
 percentage target.
 
 ## 19. GitHub workflow

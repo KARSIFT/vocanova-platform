@@ -3,11 +3,11 @@ id: DOC-10
 title: VocaNova Development Workflow
 version: 1.0
 document_type: engineering-workflow
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/operations/10-development-workflow.md
-approved_at: null
-last_reviewed_at: 2026-07-19
+approved_at: 2026-07-21
+last_reviewed_at: 2026-07-21
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -16,14 +16,12 @@ related_documents:
   - DOC-16
   - DOC-19
 related_decisions: []
-adoption_change: VOC-007
+adoption_change: VOC-008
 source_files:
   - path: 10-development-workflow.md
     sha256: 7fdd38cb7f877051907cc68e0930ece507fe3466dab3e008795c2827eeb21aaf
 ---
 # 10 — VocaNova Development Workflow
-
-> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## 1. Principles
 
@@ -45,11 +43,12 @@ structure:
 ```text
 vocanova-platform/
 ├── apps/web/                      # Next.js
-├── services/api/ent/schema/       # Go backend
-├── packages/{api-client,config,ui}/
-├── api/openapi/vocanova.openapi.json
-├── database/{migrations,testdata,atlas.hcl}/
-├── docs/{product,architecture/adr,engineering,api,security,operations}/
+├── apps/api/                      # Go backend module
+│   ├── ent/schema/
+│   ├── migrations/
+│   └── openapi/vocanova.openapi.json
+├── packages/{api-client,design-tokens,eslint-config,typescript-config}/
+├── docs/{product,research,design,engineering,operations,architecture,planning,governance}/
 ├── scripts/
 ├── .github/{workflows,ISSUE_TEMPLATE,ai}/
 ├── AGENTS.md
@@ -57,8 +56,8 @@ vocanova-platform/
 ├── REVIEW.md
 ```
 
-Product documents (this folder's contents) live under `docs/product/`. The Go backend remains a
-normal Go module, not part of the pnpm workspace.
+The canonical document corpus is split by category and indexed in [docs/README.md](../README.md).
+The Go backend remains a normal module at `apps/api`, not part of the pnpm workspace.
 
 ## 3. Branch strategy
 
@@ -66,7 +65,7 @@ The intended topology has two permanent branches: `develop` (default integration
 staging source) and `main` (production source, accepting governed release changes plus emergency
 hotfixes). No `release/*` branch is planned for MVP; a `develop → main` PR represents a release
 candidate, subject to the live authority and release-class rules. Automatic staging deployment,
-automatic merge, and production deployment are not technically active as of 2026-07-19; consult
+automatic merge, and production deployment are not technically active as of 2026-07-21; consult
 [the A-003 transition state](../governance/a003-transition-state.yaml) rather than inferring
 activation from this topology.
 

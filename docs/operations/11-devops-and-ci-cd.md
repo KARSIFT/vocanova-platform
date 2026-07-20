@@ -3,11 +3,11 @@ id: DOC-11
 title: VocaNova DevOps and CI/CD Plan
 version: 1.0
 document_type: operations-plan
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/operations/11-devops-and-ci-cd.md
-approved_at: null
-last_reviewed_at: 2026-07-19
+approved_at: 2026-07-21
+last_reviewed_at: 2026-07-21
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -15,21 +15,19 @@ related_documents:
   - DOC-16
   - DOC-19
 related_decisions: []
-adoption_change: VOC-007
+adoption_change: VOC-008
 source_files:
   - path: 10-development-workflow.md
     sha256: 7fdd38cb7f877051907cc68e0930ece507fe3466dab3e008795c2827eeb21aaf
 ---
 # 11 — VocaNova DevOps and CI/CD Plan
 
-> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
-
 ## 1. Environments and infrastructure
 
 Canonical environments: Local, Preview (per-PR, temporary, isolated, no production data/secrets),
 Staging (from `develop`), Production (from `main`).
 
-**Proposed infrastructure baseline** (concrete source decision — supersedes any vaguer "managed containers"
+**Target infrastructure baseline** (concrete source decision — supersedes any vaguer "managed containers"
 placeholder in earlier architecture drafts):
 
 | Area | Decision |
@@ -43,6 +41,10 @@ placeholder in earlier architecture drafts):
 | Error monitoring | Sentry |
 | Uptime monitoring | Better Stack / UptimeRobot |
 | Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP |
+
+This table is an implementation target, not authority to procure vendors, incur spend, create
+infrastructure, deploy, or release. Each such action requires its own approved change package and
+the authority applicable at execution time.
 
 Domains: `vocanova.com` (marketing), `app.vocanova.com` (web app), `api.vocanova.com` (Go API),
 staging equivalents `staging.vocanova.com` / `api-staging.vocanova.com`. Separate Google OAuth
