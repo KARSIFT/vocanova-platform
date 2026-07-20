@@ -2,19 +2,24 @@
 
 ## Package adoption
 
-This proposal prepares repository implementation authority without approving or
-editing DOC-00 through DOC-12. Package adoption requires deterministic and hosted
-checks, exact-revision independent verification with no blocking finding,
-exact-revision founder R4 approval, and authorized human merge into `develop`.
+PR #30 prepared repository implementation authority without approving or editing
+DOC-00 through DOC-12. Deterministic and hosted checks passed, exact-revision Claude
+Code verification returned `PASS WITH NON-BLOCKING FINDINGS`, exact-revision founder
+R4 approval was recorded, and an authorized human merge into `develop` completed.
+Exact candidate `24ffa1260a4b3a94e10f9e681b77cf35695d100e` was adopted at canonical
+`develop` commit `f7bc58461aaafa4c8504ea3534a96f522fd8bb07`.
 
-After valid adoption, the package authorizes only the bounded document-review and
-adoption implementation described here. It does not pre-approve the final content,
-close issue #29, authorize application implementation, create vendor/spend authority,
-or enable deployment, release, merge automation, or technical autonomy.
+The valid adoption authorizes only the bounded document review and adoption described
+by this package through open issue #29. It does not pre-approve final document
+content, close the issue, authorize application implementation, create vendor/spend
+authority, or enable deployment, release, merge automation, or technical autonomy.
+Codex did not approve or merge its own package work. No historical approval was
+reused.
 
 ## Later document adoption
 
-Use a separate branch and draft PR from the then-current `develop`. Resolve the full
+Future implementation uses a separate branch and draft PR from current `develop`.
+Resolve the full
 contradiction register, review the entire 13-document candidate, update lifecycle and
 derived metadata atomically, run the complete test plan, and obtain a fresh
 exact-revision independent report and founder R4 approval. An authorized human performs
@@ -28,15 +33,17 @@ release. Governance permission and technical activation remain separate.
 
 ## Rollback
 
-Before package merge, close the draft and delete the branch if abandonment is
-authorized. After package adoption but before document adoption, revert the package
-through a separately governed change. After document adoption, use a separately
-governed R4 revert restoring all document content/statuses and derived metadata while
-preserving audit history. No external or runtime rollback applies.
+After package adoption but before document adoption, revert the package through a
+separately governed change. After document adoption, use a separately governed R4
+revert restoring all document content/statuses and derived metadata while preserving
+audit history. No external or runtime rollback applies.
 
 ## Evidence and closure
 
-Record package PR/base/head/checks/verifier/founder/merge evidence first. Record the
-later adoption's document hashes, reconciliation log, full diff, checks, verifier,
-founder approval, and canonical merge separately. Package adoption does not close
-issue #29; close only after document adoption and truthful lifecycle synchronization.
+Package evidence is complete: PR #30 records the complete package diff, exact base and
+candidate, deterministic and hosted validation, independent verdict, exact-revision
+founder approval, and canonical adoption
+`f7bc58461aaafa4c8504ea3534a96f522fd8bb07`. Record the later adoption's document
+hashes, reconciliation log, full diff, checks, verifier, founder approval, and
+canonical merge separately. Package adoption does not close issue #29; close only
+after document adoption and truthful lifecycle synchronization.
