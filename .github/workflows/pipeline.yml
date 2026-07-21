@@ -1,0 +1,121 @@
+name: pipeline
+
+# Thin file. All real logic lives in KARSIFT/karsift-ai-infra's reusable
+# workflows - this just wires triggers to them. Runs alongside (not instead
+# of) this repo's own governance/risk-classification workflows, if any.
+#
+# There is deliberately no "plan" job here yet: turning a request into an
+# approved, implementation-ready change package is still a human+chat-session
+# process in most projects today. What's automated starts one step later: an
+# already-adopted package's task gets implemented, checked, and independently
+# reviewed - a human still opens the implementation issue and still triggers
+# `implement` by hand via workflow_dispatch.
+#
+# Copy this file into a project repo and fill in:
+#   - founder_username below (whose "approved" comment is a valid merge decision)
+#   - auto_merge_enabled, only once you have real evidence for this project's loop
+#   - integration_branch below - "develop" if this project splits develop/main,
+#     "main" if it's GitHub-flow-only (a single long-lived branch). Get this
+#     wrong and the very first checkout step fails outright.
+#   - your project's own PR-body convention for "Risk classification: R#" and
+#     "Package path: `...`" if it differs from the defaults this template assumes
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      change_id:
+        description: 'Adopted package to implement from, e.g. "VOC-007"'
+        required: true
+        type: string
+      package_path:
+        description: 'Path to the package directory, e.g. "specs/changes/VOC-007-some-slug"'
+        required: true
+        type: string
+      task_id:
+        description: "Task ID from the package's task list"
+        required: true
+        type: string
+      issue_number:
+        description: "GitHub issue carrying implementation authority"
+        required: true
+        type: string
+      attempt:
+        description: "1 or 2"
+        required: false
+        type: string
+        default: "1"
+
+jobs:
+  implement:
+    if: github.event_name == 'workflow_dispatch'
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/implement.yml@main
+    with:
+      change_id: ${{ inputs.change_id }}
+      package_path: ${{ inputs.package_path }}
+      task_id: ${{ inputs.task_id }}
+      issue_number: ${{ inputs.issue_number }}
+      attempt: ${{ inputs.attempt }}
+      integration_branch: "develop"   # "main" for a GitHub-flow-only project
+    secrets: inherit
+
+  ci:
+    if: github.event_name == 'pull_request'
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/ci.yml@main
+
+  extract-package-path:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    outputs:
+      package_path: ${{ steps.extract.outputs.package_path }}
+    steps:
+      # PR_BODY goes through env:, never ${{ }}-interpolated directly into
+      # the script - a PR body is text anyone who can open a PR controls,
+      # and splicing it raw into a bash source before bash parses it is a
+      # script-injection vector (a body containing a backtick is enough).
+      - name: Parse package path from PR body
+        id: extract
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          path=$(echo "$PR_BODY" | grep -oP '(?<=Package path: `)[^`]+')
+          if [ -z "$path" ]; then
+            echo "No 'Package path: \`...\`' line found in the PR body - review cannot run without it." >&2
+            exit 1
+          fi
+          echo "package_path=$path" >> "$GITHUB_OUTPUT"
+
+  review:
+    needs: [ci, extract-package-path]
+    if: github.event_name == 'pull_request'
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/review.yml@main
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      package_path: ${{ needs.extract-package-path.outputs.package_path }}
+      integration_branch: "develop"   # match the value used for implement, above
+    secrets: inherit
+
+  # Runs after every review. A no-op unless the verdict is FAIL - then it
+  # either re-dispatches the implementer once (with the findings attached)
+  # or, if that retry already happened, escalates to the authority issue
+  # instead of trying a third time. See remediate.yml for the exact rule.
+  remediate:
+    needs: [review, extract-package-path]
+    if: github.event_name == 'pull_request'
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/remediate.yml@main
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+      package_path: ${{ needs.extract-package-path.outputs.package_path }}
+      integration_branch: "develop"   # match the value used for implement, above
+    secrets: inherit
+
+  merge-gate:
+    if: github.event_name == 'issue_comment' || github.event_name == 'pull_request'
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/merge-gate.yml@main
+    with:
+      founder_username: "m-e-h-r-d-a-a-d"   # the GitHub login whose "approved" comment is a valid merge decision
+      auto_merge_enabled: "false"     # flip only after real evidence for this project's loop
+    secrets: inherit
