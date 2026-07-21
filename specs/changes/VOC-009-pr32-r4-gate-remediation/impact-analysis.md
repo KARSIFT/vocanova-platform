@@ -56,7 +56,11 @@ repository authority state. EHR is not triggered.
   failure and substantive-review evidence, not approval.
 - **VOC-009-DEP-04:** Active A-003 governance and disabled technical activation —
   resolved and binding; recheck before every candidate.
-- **VOC-009-DEP-05:** Valid VOC-009 adoption — pending and required before revert work.
+- **VOC-009-DEP-05:** Valid VOC-009 adoption — resolved by exact candidate
+  `3a9da8ded7e79711fc5ea0b8dbc83155b23dff41`, independent `PASS` comment
+  `5031390973`, founder R4 approval comment `5032416230`, and PR #33 merge
+  `f28b670c0ea41577a91379e7d29618db38dd8a0a`. Revert preparation remains blocked
+  until this lifecycle synchronization merges.
 
 ## Evidence register
 
