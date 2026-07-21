@@ -55,9 +55,12 @@ Current packages:
   candidate before the required independent verification and founder R4 approval;
   DOC-00 through DOC-12 are non-authoritative pending founder-directed remediation.
 - [`VOC-009 — PR #32 R4 Gate Remediation`](changes/VOC-009-pr32-r4-gate-remediation/README.md)
-  — proposed R4 package sourced from issue #29 comment `5031045639`; prepares a
-  separately governed exact revert followed by a fresh, fully gated adoption while
-  preserving the complete PR #32 failure record. No remediation implementation is
-  authorized before this package is validly adopted.
+  — adopted `implementation-ready` R4 package sourced from issue #29 comment
+  `5031045639`; exact package candidate `3a9da8ded7e79711fc5ea0b8dbc83155b23dff41`
+  passed independent verification and founder R4 approval before PR #33 merged at
+  canonical `develop` commit `f28b670c0ea41577a91379e7d29618db38dd8a0a`.
+  Package authority is limited to preparing the separately gated revert after this
+  lifecycle synchronization; DOC-00 through DOC-12 remain non-authoritative pending
+  remediation.
 
 This index makes no claim that DOC-00 through DOC-12 are currently authoritative.

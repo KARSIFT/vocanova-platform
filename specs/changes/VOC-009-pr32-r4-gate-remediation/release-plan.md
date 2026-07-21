@@ -2,15 +2,21 @@
 
 ## Package adoption
 
-This proposed package authorizes nothing before its own valid adoption. Publish it as
-a draft PR to `develop`, declare R4, run deterministic and hosted validation, obtain
-exact-revision independent verification with no blocking finding, obtain exact-revision
-founder R4 approval, and stop for authorized human merge. After merge, synchronize
-package lifecycle evidence before preparing the revert.
+PR #33 adopted exact package candidate
+`3a9da8ded7e79711fc5ea0b8dbc83155b23dff41` at canonical `develop` commit
+`f28b670c0ea41577a91379e7d29618db38dd8a0a`. Deterministic and hosted validation
+passed, exact-revision independent verification returned `PASS` in comment
+`5031390973`, exact-revision founder R4 approval was recorded in comment `5032416230`,
+and the authorized human merge followed those gates. Codex did not approve or merge
+the package.
+
+After this lifecycle synchronization is validly merged, package authority becomes
+active only for preparation of the separate governed revert candidate. Package
+adoption does not retroactively validate PR #32 and does not approve the revert.
 
 ## Revert
 
-The revert is a separate R4 repository-documentation PR restoring the exact PR #32 base
+The next stage is a separate R4 repository-documentation PR restoring the exact PR #32 base
 state for all 22 paths. It has no deployment or external release. Independent
 verification and founder approval must precede its authorized human merge.
 
@@ -29,7 +35,8 @@ production release. Technical flags remain false/disabled.
 
 ## Evidence and closure
 
-Preserve PR #32 and its `FAIL` permanently. Final lifecycle synchronization records
+Package evidence is recorded in PR #33 and this lifecycle sync. Preserve PR #32 and
+its `FAIL` permanently. Final lifecycle synchronization records
 the package, revert, fresh adoption, all exact evidence, canonical merges, and final
 document status. Issue #29 remains open until that synchronization is validly merged.
 

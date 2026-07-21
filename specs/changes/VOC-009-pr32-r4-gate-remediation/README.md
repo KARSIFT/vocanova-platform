@@ -3,7 +3,7 @@
 ## Identity and lifecycle
 
 - Change ID: `VOC-009`
-- Status: `proposed`
+- Status: `implementation-ready`
 - Package-adoption risk: `R4`
 - Planned remediation risk: `R4` for both the revert and fresh adoption revisions
 - Requirement source: founder remediation direction on issue #29
@@ -31,15 +31,23 @@ Founder direction explicitly does not retroactively approve that merge. DOC-00 t
 DOC-12 must therefore be treated as non-authoritative pending remediation even though
 their currently merged metadata says `approved`.
 
+PR #33 validly adopted exact package candidate
+`3a9da8ded7e79711fc5ea0b8dbc83155b23dff41` into canonical `develop` at
+`f28b670c0ea41577a91379e7d29618db38dd8a0a`. Deterministic and hosted checks
+passed, exact-revision independent verification returned `PASS` in comment
+`5031390973`, and exact-revision founder R4 approval was recorded in comment
+`5032416230` before the authorized human merge. This evidence does not retroactively
+validate PR #32.
+
 ## Boundaries and next gate
 
-This package preparation does not revert or re-adopt any document. It changes only the
-package index and this nine-file proposed package. Package adoption itself requires
-deterministic and hosted checks, exact-revision independent verification with no
-blocking finding, exact-revision founder R4 approval, and authorized human merge.
+This package adoption does not revert or re-adopt any document. It authorizes only
+preparation of the separate revert candidate after this lifecycle synchronization is
+validly merged.
 
-Only after valid package adoption may Codex prepare the separate revert candidate.
+Codex may then prepare the separate revert candidate.
 The revert and later fresh adoption each require their own exact-revision independent
 verification and founder R4 approval before an authorized human merge. Automatic and
 autonomous merge, deployment, production release, and RL1/RL2 activation remain
-disabled. No historical approval or retrospective claim may satisfy a future gate.
+disabled. No historical approval, PR #33 evidence, or retrospective claim may satisfy
+a future revert or fresh-adoption gate.
