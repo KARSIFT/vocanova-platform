@@ -51,7 +51,13 @@ Current packages:
   — adopted `implementation-ready` R4 package sourced from founder-approved issue #29
   and comment `5017746234`; adopted through PR #30 at canonical `develop` commit
   `f7bc58461aaafa4c8504ea3534a96f522fd8bb07` after exact-revision independent
-  verification and founder R4 approval. Issue #29 remains open for the separate
-  document adoption; DOC-00 through DOC-12 remain proposed.
+  verification and founder R4 approval. PR #32 later merged its document-adoption
+  candidate before the required independent verification and founder R4 approval;
+  DOC-00 through DOC-12 are non-authoritative pending founder-directed remediation.
+- [`VOC-009 — PR #32 R4 Gate Remediation`](changes/VOC-009-pr32-r4-gate-remediation/README.md)
+  — proposed R4 package sourced from issue #29 comment `5031045639`; prepares a
+  separately governed exact revert followed by a fresh, fully gated adoption while
+  preserving the complete PR #32 failure record. No remediation implementation is
+  authorized before this package is validly adopted.
 
-This index makes no claim that Documents 00–14 have been migrated.
+This index makes no claim that DOC-00 through DOC-12 are currently authoritative.
