@@ -1,0 +1,96 @@
+schema_version: 1
+
+id: VOC-013
+slug: design-tokens-motion-scale
+title: Design Tokens — Motion Scale (Duration + Easing)
+
+type: feature
+status: implementation-ready
+risk: R1
+planned_implementation_risk_floor: R1
+canonical_path: specs/changes/VOC-013-design-tokens-motion-scale
+
+authority_model: a003-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform-sandbox/issues/7
+requirement_approval_status: founder-approved
+base_branch: develop
+base_sha: 0f55dfb419133a1ea060826d957480263a109ac0
+target_branch: develop
+approved_candidate_sha: TBD-set-at-package-adoption
+
+owners:
+  decision: founder
+  package_preparation: claude-code
+  implementation: claude-code
+  independent_verification: claude-code
+
+# KNOWN COMPROMISE (documented, not silent): package_preparation, implementation,
+# and independent_verification are all Claude Code on this run - see VOC-010's
+# change.yaml for the full note; same compromise applies here.
+
+# DELIBERATE PROCESS EXPERIMENT (documented, not accidental): this package's
+# tasks.md intentionally splits one tightly-coupled two-file change across
+# VOC-013-T00 and VOC-013-T01, the exact shape VOC-010 originally used before
+# it was consolidated into a single task after a real review FAIL (see
+# VOC-010's tasks.md history). Only VOC-013-T00 is dispatched first, on
+# purpose - the goal is to exercise remediate.yml's automatic retry-after-FAIL
+# path with a real, reproducible FAIL, not to work around it. Do not
+# "helpfully" consolidate this into one task before that run happens.
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-013-DEP-01
+    status: resolved-by-issue-7
+  - id: VOC-013-DEP-02
+    status: resolved-at-base-sha
+  - id: VOC-013-DEP-03
+    status: resolved-by-voc-010-merge
+
+affected_areas:
+  - packages/design-tokens
+
+implementation:
+  authorized: true
+  authority_issue: 7
+  authority_status: validly-exercised
+  required: true
+  status: implementation-ready
+  issue: 7
+  target_branch: develop
+  pull_request: null
+
+release:
+  required: false
+  mode: package-addition-only
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+
+repository_adoption_status: adopted
+adoption_pr: null
+adoption_evidence: direct-commit-to-develop-by-founder-with-ai-assistance
+implementation_authority_before_adoption: false
+implementation_authority_status: exercised-pending-first-run
+automatic_merge_allowed: false
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-applicable
+blocking_reasons: null
+
+# `automatic_merge_allowed: false` here is deliberate, unlike VOC-012: this
+# package's actual purpose is to reach a FAIL verdict and retry, not to
+# merge quickly, and keeping the founder's manual "approved" comment as the
+# eventual merge path keeps a human in the loop for a run whose CI/PR
+# behavior hasn't been observed live before.

@@ -1,0 +1,89 @@
+schema_version: 1
+
+id: VOC-012
+slug: design-tokens-radius-scale
+title: Design Tokens — Border Radius Scale
+
+type: feature
+status: implementation-ready
+risk: R1
+planned_implementation_risk_floor: R1
+canonical_path: specs/changes/VOC-012-design-tokens-radius-scale
+
+authority_model: a003-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform-sandbox/issues/6
+requirement_approval_status: founder-approved
+base_branch: develop
+base_sha: 0f55dfb419133a1ea060826d957480263a109ac0
+target_branch: develop
+approved_candidate_sha: TBD-set-at-package-adoption
+
+owners:
+  decision: founder
+  package_preparation: claude-code
+  implementation: claude-code
+  independent_verification: claude-code
+
+# KNOWN COMPROMISE (documented, not silent): package_preparation, implementation,
+# and independent_verification are all Claude Code on this run - see VOC-010's
+# change.yaml for the full note; same compromise applies here.
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-012-DEP-01
+    status: resolved-by-issue-6
+  - id: VOC-012-DEP-02
+    status: resolved-at-base-sha
+  - id: VOC-012-DEP-03
+    status: resolved-by-voc-010-merge
+
+affected_areas:
+  - packages/design-tokens
+
+implementation:
+  authorized: true
+  authority_issue: 6
+  authority_status: validly-exercised
+  required: true
+  status: implementation-ready
+  issue: 6
+  target_branch: develop
+  pull_request: null
+
+release:
+  required: false
+  mode: package-addition-only
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+
+repository_adoption_status: adopted
+adoption_pr: null
+adoption_evidence: direct-commit-to-develop-by-founder-with-ai-assistance
+implementation_authority_before_adoption: false
+implementation_authority_status: exercised-pending-first-run
+automatic_merge_allowed: true
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-applicable
+blocking_reasons: null
+
+# NOTE: `automatic_merge_allowed: true` here documents the *intent* for this
+# package - the actual auto-merge decision is made by merge-gate.yml purely
+# from the PR's declared risk class, CI status, and review verdict, gated by
+# pipeline.yml's `auto_merge_enabled: "true"` (already flipped for this repo).
+# This field is descriptive, not something the workflow reads. VOC-012 was
+# deliberately chosen to be routine and low-risk specifically to exercise
+# that auto-merge path for the first time with a real, unattended PR.
