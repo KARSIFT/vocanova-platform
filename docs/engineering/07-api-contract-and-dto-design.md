@@ -3,11 +3,11 @@ id: DOC-07
 title: VocaNova API Contract and DTO Design
 version: 1.0
 document_type: api-contract
-status: approved
+status: proposed
 owner: founder
 canonical_path: docs/engineering/07-api-contract-and-dto-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+approved_at: null
+last_reviewed_at: 2026-07-19
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -17,12 +17,14 @@ related_documents:
   - DOC-08
   - DOC-09
 related_decisions: []
-adoption_change: VOC-008
+adoption_change: VOC-007
 source_files:
   - path: 07-api-contract-and-dto-design.md
     sha256: c1b44de8d2edd02a98098b03b6839f553c594a8225e7371952751a8e19f6883e
 ---
 # 07 — VocaNova API Contract and DTO Design
+
+> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## Core API decisions
 
@@ -62,9 +64,7 @@ Pagination: cursor-based, default limit 20, max 50, opaque cursors, no generic s
 
 **CSRF**: `X-CSRF-Token` required for POST/PATCH/DELETE.
 
-**Idempotency** (header `Idempotency-Key`, 24h retention) is scoped to the authenticated user and
-operation; the same key used by different users must remain isolated. It is required for:
-`POST /api/v1/user-words`,
+**Idempotency** (header `Idempotency-Key`, 24h retention) required for: `POST /api/v1/user-words`,
 `POST /api/v1/reviews/submissions`, `POST /api/v1/learner-sentences`,
 `POST /api/v1/account-deletion-requests`.
 
@@ -77,10 +77,9 @@ POST /api/v1/reviews/submissions
 
 Prompt types: `meaning_choice`, `word_choice`, `self_check` (see [05](05-database-design.md) §9 for the
 full prompt-type list including `typing`/`sentence_usage`, which are a later superset — these three
-were the initial MVP set). `result` and `rating` are distinct. Objective incorrect answers record
-`Again`; objective correct answers allow Hard/Good/Easy; self-check result derives from the rating.
-Again steps back with a floor of 0, two consecutive incorrect/Again attempts reset to 0, Hard stays,
-and Good/Easy step forward with a cap of 7. The backend owns scheduling logic.
+were the initial MVP set). Scheduling: correct answer moves one step forward; incorrect answer moves
+one step back; **two incorrect answers in a row reset to step 0** (reconciled — see above); backend
+owns scheduling logic.
 
 ## Daily mission
 
@@ -88,9 +87,7 @@ and Good/Easy step forward with a cap of 7. The backend owns scheduling logic.
 GET /api/v1/daily-mission
 ```
 
-The persisted snapshot always contains a review target/counter and policy version. New-word and
-sentence-practice targets/counters are optional bonuses and do not block core completion unless a
-later policy version says otherwise. Uses learner-local dates and timezone.
+Targets: reviews, new words, learner sentences. Uses learner-local dates and timezone.
 
 ## Progress and gamification
 
@@ -105,24 +102,18 @@ GET  /api/v1/learner-sentences
 GET  /api/v1/learner-sentences/{id}
 ```
 
-Feedback is async-capable. Public processing statuses are
-`pending`/`completed`/`failed`/`skipped`; only `completed` carries a learning result of
-`correct`/`needs_improvement`/`incorrect`. Persistence uses attempt states
-`pending`/`succeeded`/`failed`/`cancelled`. The frontend never sees model names, prompts, or
-token/cost data. The full field contract is defined in
-[09](09-ai-features.md) §9–10 — that is the canonical source, not restated here.
+Feedback is async-capable; statuses: `pending`/`completed`/`failed`/`skipped`. The frontend never
+sees model names, prompts, or token/cost data. The learning-facing feedback status enum
+(`correct`/`needs_improvement`/`incorrect`) and full field contract are defined in
+[09](09-ai-features.md) §10 — that is the canonical source, not restated here.
 
 ## Account deletion
 
-The API immediately deactivates the account and revokes sessions, then reports progress for a
-staged, retryable purge/anonymization. It must not promise synchronous completion. Learner content,
-AI feedback, reports, and identifiers are deleted or irreversibly anonymized; only de-identified,
-unlinkable aggregates may remain, subject to legal review.
+Immediate anonymization, session revocation, remove personal information, preserve anonymized
+analytics data where needed.
 
 ## OpenAPI rules
 
-The generated OpenAPI 3.1 artifact is committed at
-`apps/api/openapi/vocanova.openapi.json` and is the input to client generation and CI drift checks.
 Operation IDs: `<Verb><Resource>` (e.g. `GetCurrentUser`, `SubmitReview`,
 `CreateLearnerSentence`). Must include examples, validation metadata, error responses, stable
 operation IDs.
