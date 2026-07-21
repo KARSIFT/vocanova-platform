@@ -3,11 +3,11 @@ id: DOC-01
 title: VocaNova MVP PRD
 version: 1.0
 document_type: product-requirements
-status: approved
+status: proposed
 owner: founder
 canonical_path: docs/product/01-mvp-prd.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+approved_at: null
+last_reviewed_at: 2026-07-19
 review_cycle: monthly
 supersedes: null
 related_documents:
@@ -17,12 +17,14 @@ related_documents:
   - DOC-09
   - DOC-12
 related_decisions: []
-adoption_change: VOC-008
+adoption_change: VOC-007
 source_files:
   - path: 01-product-bible-and-prd.md
     sha256: ffafedf6bb6e1ff6c7e04f8ce67c23478592dd099a543a648d970bf5733f8009
 ---
 # 01 — VocaNova MVP PRD
+
+> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## 1. Product baseline
 
@@ -65,4 +67,4 @@ The MVP is done when an authenticated A2–B1 learner can, on a responsive mobil
 Native mobile app (React Native/Expo — architected for, not built), leaderboards, badges, social
 challenges, rewards store, subscriptions/monetization, teacher dashboards, multi-provider AI
 routing, model fine-tuning, complex microservices, message queues without a proven need. Full list
-in [DOC-12](12-mvp-implementation-plan.md) §10.
+in [12](12-mvp-implementation-plan.md) §21 (carried from source doc 12 §21).
