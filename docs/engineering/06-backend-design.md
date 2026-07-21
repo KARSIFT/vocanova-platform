@@ -3,11 +3,11 @@ id: DOC-06
 title: VocaNova Backend Design
 version: 1.0
 document_type: backend-design
-status: approved
+status: proposed
 owner: founder
 canonical_path: docs/engineering/06-backend-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+approved_at: null
+last_reviewed_at: 2026-07-19
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -17,12 +17,14 @@ related_documents:
   - DOC-09
   - DOC-10
 related_decisions: []
-adoption_change: VOC-008
+adoption_change: VOC-007
 source_files:
   - path: 06-backend-design.md
     sha256: f2f5dd0159cbefc96df37d9a1fd78adb34e22680fa18fe356973ec76a69d2578
 ---
 # 06 — VocaNova Backend Design
+
+> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## 1. Overview
 
@@ -44,22 +46,21 @@ coordination happens through services, not direct cross-module table access.
 ## 4. Project structure
 
 ```text
-apps/api/
+backend/
   cmd/api/
   app/{bootstrap,api}/
   business/{identity,users,content,learning,reviews,missions,gamification,writingai,accounts}/
   foundation/{database,auth,web,idempotency,audit,clock,timezone,config,log}/
   ent/schema/
   migrations/
-  openapi/vocanova.openapi.json
 ```
 
 ## 5. API design
 
-Huma v2 + chi, `/api/v1` prefix, dynamic OpenAPI generation from Huma. The generated contract is
-committed at `apps/api/openapi/vocanova.openapi.json` for TypeScript code generation and drift
-detection; [07](07-api-contract-and-dto-design.md) defines its stability rules. Main groups: auth,
-current user, discovery, user words, reviews, daily missions,
+Huma v2 + chi, `/api/v1` prefix, dynamic OpenAPI generation from Huma (no committed OpenAPI file
+required purely for this reason — but see [07](07-api-contract-and-dto-design.md): a generated OpenAPI
+artifact is committed for TypeScript codegen and drift detection, which is a separate, later
+decision). Main groups: auth, current user, discovery, user words, reviews, daily missions,
 gamification, learner sentences, account lifecycle.
 
 ## 6. Authentication
@@ -85,24 +86,18 @@ deletion, reward creation.
 ## 9. Idempotency
 
 Required for: review submission, adding words, learner sentences, AI feedback, account deletion.
-Storage: idempotency key + authenticated-user scope + operation scope + request fingerprint,
-unique on `(user_id, scope, key)`. The same key from different users is isolated. Duplicate
-processing for the same user and scope (reused key with a different fingerprint or still in
-progress) returns `409`.
+Storage: idempotency key + user scope + request fingerprint. Duplicate processing (reused key or
+still in progress) returns `409`.
 
 ## 10. Core learning workflows
 
-**Review ratings (canonical — see reconciliation note above): Again / Hard / Good / Easy.** Result
-and rating are distinct. Objective incorrect answers record `Again`; objective correct answers
-allow Hard/Good/Easy; self-check result is derived from the rating. MVP movement: Again → step back
-with a floor of 0; two consecutive incorrect/Again attempts → reset to step 0; Hard → same step;
-Good/Easy → step forward with a cap of 7 (matches [05](05-database-design.md) §9). Word addition:
+**Review ratings (canonical — see reconciliation note above): Again / Hard / Good / Easy.** MVP
+movement: Again → step back; two consecutive Agains → reset to step 0 (matches
+[05](05-database-design.md) §9 exactly); Hard → same step; Good/Easy → step forward. Word addition:
 creates `user_words`, starts at review step 1 in the UI-visible sense (backend detail: initial
 `review_step=0` per the DB check constraint, first review moves it forward), `next_review_at = now`,
-awards a Confidence Point reward once. Daily mission snapshots always include the review target and
-counter; they may also include versioned new-word and sentence-practice targets/counters. Optional
-goals do not block core mission or streak completion unless a later policy version says otherwise.
-Snapshots are created lazily using the user's timezone.
+awards a Confidence Point reward once. Daily mission goals: review N words (default 20), add up to 5
+new words, optional sentence-practice bonus — created lazily using the user's timezone.
 
 ## 11. Gamification
 
@@ -126,9 +121,10 @@ days, maximum balance 2 (matches `grace_day_ledger` semantics).
 ## 12. AI feedback
 
 Workflow: save learner sentence → request AI feedback → store feedback attempt → reward completion.
-Provider abstraction: `FeedbackProvider` interface. Rules: 8-second provider timeout and 10-second
-total request budget (see [09](09-ai-features.md) §18, the authoritative timeout/retry policy), no
-real AI calls in CI, fake provider for tests, rate limits applied.
+Provider abstraction: `FeedbackProvider` interface. Rules: 12-second provider timeout (see
+[09](09-ai-features.md) §28 for the more precise 8s-provider/10s-total figures — that document is the
+authoritative source for AI timeout/retry policy; treat this as an earlier, slightly looser draft of
+the same rule), no real AI calls in CI, fake provider for tests, rate limits applied.
 
 ## 13. Timezone
 
@@ -138,10 +134,9 @@ fallback.
 
 ## 14. Account deletion
 
-Immediately deactivate the account and revoke all sessions, then complete a staged, retryable,
-verified purge/anonymization. Delete or irreversibly anonymize identifiers, learner-generated text,
-AI feedback, and reports. Retain history only when de-identified and no longer linkable to the
-learner. Legal review is required before production; see [05](05-database-design.md) §16.
+Deletion means anonymization + deactivation: remove email, avatar, OAuth identifiers, sessions,
+learner-generated text; keep anonymized learning history where required (matches
+[05](05-database-design.md) §16 exactly).
 
 ## 15. Background jobs
 

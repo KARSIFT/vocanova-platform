@@ -3,11 +3,11 @@ id: DOC-05
 title: VocaNova Database Design
 version: 1.0
 document_type: database-design
-status: approved
+status: proposed
 owner: founder
 canonical_path: docs/engineering/05-database-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+approved_at: null
+last_reviewed_at: 2026-07-19
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -16,12 +16,14 @@ related_documents:
   - DOC-07
   - DOC-09
 related_decisions: []
-adoption_change: VOC-008
+adoption_change: VOC-007
 source_files:
   - path: 05-database-design.md
     sha256: cc2efd5b6356f41bfc9075bd58297b301e6274a708943c16369600e6f0d5d1c9
 ---
 # 05 — VocaNova Database Design
+
+> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## 1. Direction
 
@@ -153,8 +155,7 @@ learner's `user_words`, ordered by `is_core desc, display_order, relevance_score
 One row per user × saved meaning. `status` (`new`/`learning`/`reviewing`/`mastered`/`ignored`/
 `archived`), `source` (`journey`/`search`/`ai_suggestion`/`manual`/`seed`), `review_step integer
 default 0` **(check between 0 and 7)**, `next_review_at`, `last_reviewed_at`, `last_result`
-(`correct`/`incorrect`/`skipped`, nullable), `last_rating`
-(`again`/`hard`/`good`/`easy`, nullable), `consecutive_correct_count`,
+(`correct`/`incorrect`/`skipped`, nullable), `consecutive_correct_count`,
 `consecutive_incorrect_count`, `total_review_count`, `correct_review_count` (check `<=`
 `total_review_count`), `added_at`, `mastered_at`, `ignored_at`, `deleted_at`. Unique on
 `(user_id, meaning_id) where deleted_at is null`.
@@ -162,23 +163,19 @@ default 0` **(check between 0 and 7)**, `next_review_at`, `last_reviewed_at`, `l
 **Review-step rule** (see
 [the migration notes](../product/README-migration-notes.md#2-review-rating-and-scheduling-conflict)
 for why this table was selected over other drafts):
-`result` records objective correctness while `rating` records the scheduling choice. For objective
-prompts, an incorrect answer records `Again`; a correct answer permits Hard/Good/Easy. For
-self-check prompts, the selected rating derives the result (`Again` is incorrect; Hard/Good/Easy
-are correct). `Again` moves back one step with a floor of 0, and two consecutive
-incorrect/`Again` attempts reset to 0; `Hard` stays on the current step; `Good` and `Easy` move
-forward one step with a cap of 7. The backend owns the interval-to-step mapping.
+correct answer moves forward one step; incorrect answer moves back one step; **two incorrect answers
+in a row reset the step to 0.** The backend owns exact interval-to-step mapping; learner-facing
+rating labels ("Again/Hard/Good/Easy," per [08](../design/08-web-app-design.md)) map onto this same step mechanic
+and don't introduce a separate schema concept.
 
 A word is "due" when `status in ('new','learning','reviewing') and deleted_at is null and
 (next_review_at is null or next_review_at <= now())`.
 
 ### `review_attempts`
-Immutable review history, one row per submitted answer. `user_id`, `user_word_id`, `meaning_id`,
+Immutable review history, one row per submitted answer. `user_word_id`, `meaning_id`,
 `attempt_type` (`review`/`practice`/`placement`/`mission`), `prompt_type`
 (`multiple_choice`/`self_check`/`typing`/`sentence_usage` — MVP implements `multiple_choice` and
-`self_check` first), `result` (`correct`/`incorrect`/`skipped`), `rating`
-(`again`/`hard`/`good`/`easy`, nullable only when no rating applies),
-`review_step_before/_after` (0–7),
+`self_check` first), `result` (`correct`/`incorrect`/`skipped`), `review_step_before/_after` (0–7),
 `answered_at`, `response_time_ms`, `selected_option_meaning_id`, `typed_answer`, `was_hint_used`,
 `source` (`daily_review`/`word_detail`/`journey_practice`/`manual_practice`), `client_attempt_id`,
 `metadata jsonb`. Unique on `(user_id, client_attempt_id) where client_attempt_id is not null` — this
@@ -198,12 +195,8 @@ merged.
 ### `daily_mission_snapshots`
 One row per user per local date. `local_date date`, `timezone text` (copied from settings at
 creation), `review_target integer` (5–100), `reviews_completed integer` (`<=` `review_target`),
-optional `new_word_target`/`new_words_completed`, optional
-`sentence_practice_target`/`sentence_practices_completed`, `policy_version`,
 `status` (`open`/`completed`/`missed`/`protected`), `completed_at` (required when
 `status='completed'`), `grace_applied boolean`, `grace_day_id`. Unique on `(user_id, local_date)`.
-Optional goals are bonus goals and do not block core mission or streak completion unless a later,
-versioned policy explicitly changes that rule.
 
 ### `daily_activity_summaries`
 One row per user per local date. Counters: `reviews_attempted/_correct/_skipped`,
@@ -223,7 +216,7 @@ Two tables, deliberately separate: `learner_sentences` (user-written content) vs
 (`word_detail`/`review`/`daily_mission`/`free_practice`), `status`
 (`submitted`/`feedback_ready`/`feedback_failed`/`archived`), `submitted_at`, `deleted_at`. Check:
 `char_length(sentence_text) <= 1000` at the DB layer (the API-level limit is stricter — 300
-characters — see [07](07-api-contract-and-dto-design.md) and [09](09-ai-features.md) §6).
+characters — see [07](07-api-contract-and-dto-design.md) and [09](09-ai-features.md) §7.1).
 
 ### `ai_feedback_attempts`
 `learner_sentence_id`, `status` (`pending`/`succeeded`/`failed`/`cancelled`), `provider`, `model`,
@@ -233,10 +226,9 @@ required when `status='failed'`).
 
 **Feedback status model** (see
 [the migration notes](../product/README-migration-notes.md#1-ai-feedback-label-conflict)): the
-attempt status is operational (`pending`/`succeeded`/`failed`/`cancelled`). The public processing
-status maps to `pending`/`completed`/`failed`/`skipped`; only a completed response carries the
-learning result `correct`/`needs_improvement`/`incorrect`. These layers are defined precisely in
-[09](09-ai-features.md) §7–10 and must not be restated with different
+learning-facing status that
+`feedback_json`/the public API expose is one of `correct` / `needs_improvement` / `incorrect` —
+this is defined precisely in [09](09-ai-features.md) §8–10 and must not be restated with different
 wording anywhere else (earlier drafts used "Good/Almost/Needs work" or "Great/Almost/Try again";
 those are retired).
 
@@ -271,13 +263,11 @@ Append-only. `amount` (nonzero), `balance_after`, `reason`
 ## 13. Idempotency and audit records
 
 ### `idempotency_keys`
-`user_id`, `key text`, `scope text` (`review_submission`/`daily_mission_completion`/`word_addition`/
+`key text`, `scope text` (`review_submission`/`daily_mission_completion`/`word_addition`/
 `sentence_submission`/`ai_feedback_request`/`point_award`/`grace_day_application`),
 `request_hash`, `response_status`, `response_body jsonb`, `status`
 (`processing`/`completed`/`failed`/`expired`), `locked_until`, `expires_at`. Unique on
-`(user_id, scope, key)`. Idempotency is deliberately scoped to the authenticated user: two users
-may safely send the same key without sharing a response or blocking one another. Expired records
-are safe to hard-delete.
+`(scope, key)` — deliberately not `(user_id, scope, key)`. Expired records are safe to hard-delete.
 
 ### `feature_audit_logs`
 Lightweight operational audit trail (not event sourcing). `action`, `entity_type`, `entity_id`,
@@ -308,23 +298,20 @@ log entry).
 
 ## 16. Deletion, anonymization, retention
 
-- **Soft-delete pending purge**: `users`, `external_identities`, `user_words`, `learner_sentences`.
+- **Soft-delete**: `users`, `external_identities`, `user_words`, `learner_sentences`.
 - **Status lifecycle instead of deletion**: `canonical_words`, `word_meanings`, `word_examples`,
   `usage_notes`, `journey_situations` (draft/active/archived).
-- **Immutable during the active-account lifecycle**: `review_attempts`, `ai_feedback_attempts`,
-  `confidence_point_ledger`, `grace_day_ledger`, `feature_audit_logs`; deletion processing must
-  delete or irreversibly de-identify learner-linked content as described below.
-- **Deletion-dependent**: `user_onboarding_profiles`, `user_settings`, `daily_mission_snapshots`,
-  `daily_activity_summaries`, `streak_states`; retain only if irreversibly de-identified and
-  unlinkable, otherwise delete.
+- **Append-only/immutable**: `review_attempts`, `ai_feedback_attempts`, `confidence_point_ledger`,
+  `grace_day_ledger`, `feature_audit_logs`.
+- **Retained unless anonymized**: `user_onboarding_profiles`, `user_settings`,
+  `daily_mission_snapshots`, `daily_activity_summaries`, `streak_states`.
 - **Hard-delete eligible**: expired idempotency keys, non-production test data.
 
-**Account deletion workflow:** immediately deactivate the account and revoke all sessions, then run
-a staged, retryable, verified purge/anonymization job. Delete or irreversibly anonymize identifiers,
-external identities, learner sentences, AI feedback, and user reports. Learning history and
-aggregates may be retained only when de-identified and no longer linkable to the learner; otherwise
-delete them. Record lifecycle audit events without retaining deleted learner content. The default
-completion target is 30 days, subject to legal review before production.
+**Account deletion workflow:** set `users.status='deleted'` + `deleted_at` → clear/anonymize
+email/display_name/avatar → soft-delete + anonymize external identities → soft-delete + anonymize
+learner sentences (placeholder: `[deleted user content]`) → clear/anonymize AI feedback containing
+learner text → **keep** review attempts, daily records, point ledger, streak state, grace ledger
+tied to the anonymized user id → audit log `account_deleted`.
 
 No automatic `ON DELETE CASCADE` for core business tables — accidental cascades could destroy
 learning history. Cascade only where explicitly justified.
@@ -368,8 +355,7 @@ active email rejected, duplicate provider identity rejected, duplicate normalize
 discovery excludes already-saved meanings, duplicate `client_attempt_id` doesn't duplicate an
 attempt, two consecutive incorrect reviews reset `review_step` to 0, only one mission snapshot per
 user per local date and it doesn't rewrite historical timezone on settings change, point/grace ledger
-amounts can't be zero, account deletion immediately revokes access and completes a verified
-purge/anonymization without retaining linkable learner content).
+amounts can't be zero, account deletion anonymizes PII while preserving anonymized history).
 
 ## 21. Final summary
 
