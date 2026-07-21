@@ -3,11 +3,11 @@ id: DOC-00
 title: VocaNova Product Bible
 version: 1.0
 document_type: product-bible
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/product/00-product-bible.md
-approved_at: null
-last_reviewed_at: 2026-07-19
+approved_at: 2026-07-21
+last_reviewed_at: 2026-07-21
 review_cycle: semiannual
 supersedes: null
 related_documents:
@@ -18,14 +18,12 @@ related_documents:
   - DOC-09
   - DOC-12
 related_decisions: []
-adoption_change: VOC-007
+adoption_change: VOC-008
 source_files:
   - path: 01-product-bible-and-prd.md
     sha256: ffafedf6bb6e1ff6c7e04f8ce67c23478592dd099a543a648d970bf5733f8009
 ---
 # 00 — VocaNova Product Bible
-
-> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## 1. What Vocanova is
 
@@ -57,7 +55,7 @@ narrowly focused on correct use of the one target word, not general essay gradin
 
 - **Confidence Points** — the product's point/reward currency, earned for reviews, word additions,
   daily-mission completion, and sentence submissions. Source of truth is an append-only ledger
-  (`confidence_point_ledger`), not a mutable balance field — see [05](../engineering/05-database-design.md) §16.1.
+  (`confidence_point_ledger`), not a mutable balance field — see [05](../engineering/05-database-design.md) §12.
 - **Streak** — advances only after a full daily mission is completed, uses the learner's local
   timezone, and has a gentle reset (grace days) rather than a hard break. A grace day is earned
   every 7 completed days, capped at a balance of 2.
@@ -70,7 +68,7 @@ narrowly focused on correct use of the one target word, not general essay gradin
 MVP uses deterministic, step-based scheduling (steps 0–7), not a probabilistic algorithm like FSRS —
 that's an explicit future swap point behind a stable scheduling interface, not an MVP requirement.
 Learner-facing rating scale, exact schedule mechanics, and the reset rule are defined precisely in
-[05](../engineering/05-database-design.md) §12 and §13, and [08](../design/08-web-app-design.md). See
+[05](../engineering/05-database-design.md) §9, and [08](../design/08-web-app-design.md). See
 [the migration notes](README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how the four
 different rating-scale drafts across the source docs were reconciled — the two-word summary is:
 **"Again / Hard / Good / Easy" ratings, `review_step` 0–7, two consecutive incorrect answers reset to
@@ -87,7 +85,7 @@ source of truth for AI behavior; don't restate feedback-label wording elsewhere 
 
 Explicit MVP non-goals: open-ended AI chat, general AI tutor, essay correction, pronunciation
 scoring, speech recognition, roleplay, AI-generated vocabulary as the authoritative content source,
-user-selectable models. Full non-goal list in [09](../engineering/09-ai-features.md) §5.
+user-selectable models. Full non-goal list in [09](../engineering/09-ai-features.md) §4.
 
 ## 6. Product authority boundary
 

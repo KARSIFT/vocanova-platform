@@ -3,11 +3,11 @@ id: DOC-09
 title: VocaNova AI Features
 version: 1.0
 document_type: ai-feature-design
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/engineering/09-ai-features.md
-approved_at: null
-last_reviewed_at: 2026-07-19
+approved_at: 2026-07-21
+last_reviewed_at: 2026-07-21
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -18,14 +18,12 @@ related_documents:
   - DOC-06
   - DOC-07
 related_decisions: []
-adoption_change: VOC-007
+adoption_change: VOC-008
 source_files:
   - path: 09-ai-features.md
     sha256: 57e798e3f2d259b18a1710e6c5a67a3a1c2d790133501d6aa9bf785ed7f61f74
 ---
 # 09 — VocaNova AI Features
-
-> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## 1. Purpose and product principle
 
@@ -110,6 +108,12 @@ Exactly three learning statuses, separate from operational/validation/safety out
   breaks the sentence, or the sentence isn't reliably understandable, or doesn't demonstrate
   meaningful knowledge of the target vocabulary. Behavior: stay encouraging, state the central issue,
   provide a corrected sentence, explain one important distinction, don't list every error.
+
+The three state layers must not be collapsed. Persistence uses operational attempt states
+`pending`/`succeeded`/`failed`/`cancelled`. The public processing envelope maps these to
+`pending`/`completed`/`failed`/`skipped` as appropriate. Only `completed` carries one of the three
+learning results above. Mission completion is evaluated only after the successful feedback and
+mission update transaction commits.
 
 ## 8. Mission completion rule
 
@@ -329,9 +333,12 @@ synthetic reproductions. Codex and Claude Code may receive schemas, interfaces, 
 prompt templates, redacted errors, and approved evaluation fixtures — **never real production learner
 sentences by default.**
 
-Account deletion removes/irreversibly anonymizes learner sentences, corrected sentences, AI feedback,
-related operation records, reports, and relevant mission records (aggregated non-identifiable metrics
-may remain). Future data export includes learner-visible AI history but excludes hidden prompts,
+Account deletion immediately deactivates the account and revokes sessions, then uses a staged,
+retryable, verified process to remove or irreversibly anonymize learner sentences, corrected
+sentences, AI feedback, related operation records, reports, identifiers, and relevant mission
+records. Aggregates may remain only when de-identified and no longer linkable to the learner. The
+default completion target is 30 days, subject to legal review before production. Future data export
+includes learner-visible AI history but excludes hidden prompts,
 provider credentials, internal abuse signals, and security classifications.
 
 ## 23. Evaluation
