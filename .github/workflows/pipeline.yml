@@ -117,5 +117,5 @@ jobs:
     uses: KARSIFT/karsift-ai-infra/.github/workflows/merge-gate.yml@main
     with:
       founder_username: "m-e-h-r-d-a-a-d"   # the GitHub login whose "approved" comment is a valid merge decision
-      auto_merge_enabled: "false"     # flip only after real evidence for this project's loop
+      auto_merge_enabled: "true"     # flip only after real evidence for this project's loop
     secrets: inherit
