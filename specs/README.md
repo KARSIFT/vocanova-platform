@@ -75,6 +75,13 @@ Current packages:
   PR #24 as closed-unmerged history and granting no F2-I04, application, deployment,
   production, or autonomous-operation authority.
 
+- [`VOC-011 — PR #40 R3 Gate Remediation`](changes/VOC-011-pr40-r3-gate-remediation/README.md)
+  — `proposed` R3 remediation package sourced from issue #39 founder direction comment
+  `5047420157`. PR #40 merged VOC-010 without canonical pre-merge exact-SHA independent
+  verification evidence; no retroactive validation is permitted. VOC-011 requires a
+  governed revert, fresh independently verified VOC-010 adoption, and final lifecycle
+  synchronization before any VOC-006 correction may begin.
+
 This final synchronization records DOC-00 through DOC-12 as validly re-adopted and
 authoritative upon its canonical merge; it grants no application, deployment,
 production, release, or autonomous-operation authority.
