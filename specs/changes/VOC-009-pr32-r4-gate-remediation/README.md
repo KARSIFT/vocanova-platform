@@ -3,7 +3,7 @@
 ## Identity and lifecycle
 
 - Change ID: `VOC-009`
-- Status: `implementation-ready`
+- Status: `completed`
 - Package-adoption risk: `R4`
 - Planned remediation risk: `R4` for both the revert and fresh adoption revisions
 - Requirement source: founder remediation direction on issue #29
@@ -27,9 +27,9 @@ PR #32 candidate `c2154042ebe8cad2452717a10ab0958455bf5fa3` merged as canonical
 `develop` commit `b591ee7d4034d62fa4da6edeb85fb8cf68bcbddc`. The merged tree is
 byte-identical to the candidate and the later independent review found the content
 thorough, but returned `FAIL` because the R4 merge occurred before its required gates.
-Founder direction explicitly does not retroactively approve that merge. DOC-00 through
-DOC-12 must therefore be treated as non-authoritative pending remediation even though
-their currently merged metadata says `approved`.
+Founder direction explicitly does not retroactively approve that merge. PR #32 remains
+permanently recorded as procedurally invalid even though its content later returned
+through a new valid adoption sequence.
 
 PR #33 validly adopted exact package candidate
 `3a9da8ded7e79711fc5ea0b8dbc83155b23dff41` into canonical `develop` at
@@ -39,15 +39,27 @@ passed, exact-revision independent verification returned `PASS` in comment
 `5032416230` before the authorized human merge. This evidence does not retroactively
 validate PR #32.
 
-## Boundaries and next gate
+PR #36 then reverted the complete 22-path PR #32 change. Exact candidate
+`f846c54f19d5dcf45f30e584e84581d49539bd2e` received independent `PASS` in comment
+`5038800736` and founder R4 approval in comment `5038911442` before its authorized
+human merge at canonical `develop` commit
+`8b88ea42de83f741f46555c3771eb26163f90a3d`.
 
-This package adoption does not revert or re-adopt any document. It authorizes only
-preparation of the separate revert candidate after this lifecycle synchronization is
-validly merged.
+PR #37 freshly re-presented the reviewed reconciliation with zero differences across
+the 22 authorized paths. Exact candidate
+`33fc2d9765cc50ff59a5a877e7a48b7e6fa8df4f` received independent `PASS` in comment
+`5040056721` and founder R4 approval in comment `5042722711` before its authorized
+human merge at canonical `develop` commit
+`95408cc6e7dada087ec44d9d3a22bb3728820a06`.
 
-Codex may then prepare the separate revert candidate.
-The revert and later fresh adoption each require their own exact-revision independent
-verification and founder R4 approval before an authorized human merge. Automatic and
-autonomous merge, deployment, production release, and RL1/RL2 activation remain
-disabled. No historical approval, PR #33 evidence, or retrospective claim may satisfy
-a future revert or fresh-adoption gate.
+## Completion and closure gate
+
+The governed revert and fresh adoption are complete. Their verification and approval
+evidence is distinct and no evidence retroactively validates PR #32. DOC-00 through
+DOC-12 become authoritative only when this final lifecycle synchronization is validly
+merged; downstream application planning remains paused until then.
+
+Issue #29 remains open until that merge and may then close. Automatic/autonomous
+merge, deployment, production release, RL1/RL2 activation, and autonomous production
+release remain disabled. This completion grants no application implementation or
+external-action authority.

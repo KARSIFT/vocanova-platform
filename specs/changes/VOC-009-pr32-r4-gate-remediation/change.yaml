@@ -4,7 +4,7 @@ id: VOC-009
 slug: pr32-r4-gate-remediation
 title: PR #32 R4 Gate Remediation
 type: governance-process-remediation
-status: implementation-ready
+status: completed
 risk: R4
 planned_implementation_risk_floor: R4
 canonical_path: specs/changes/VOC-009-pr32-r4-gate-remediation
@@ -34,6 +34,24 @@ approvals:
     status: approved-exact-revision
     candidate_sha: 3a9da8ded7e79711fc5ea0b8dbc83155b23dff41
     evidence: https://github.com/KARSIFT/vocanova-platform/pull/33#issuecomment-5032416230
+  revert_independent_verification:
+    status: passed-exact-revision
+    verdict: PASS
+    candidate_sha: f846c54f19d5dcf45f30e584e84581d49539bd2e
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/36#issuecomment-5038800736
+  revert_founder:
+    status: approved-exact-revision
+    candidate_sha: f846c54f19d5dcf45f30e584e84581d49539bd2e
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/36#issuecomment-5038911442
+  fresh_adoption_independent_verification:
+    status: passed-exact-revision
+    verdict: PASS
+    candidate_sha: 33fc2d9765cc50ff59a5a877e7a48b7e6fa8df4f
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/37#issuecomment-5040056721
+  fresh_adoption_founder:
+    status: approved-exact-revision
+    candidate_sha: 33fc2d9765cc50ff59a5a877e7a48b7e6fa8df4f
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/37#issuecomment-5042722711
 
 artifacts:
   readme: README.md
@@ -64,10 +82,33 @@ affected_areas:
 implementation:
   authorized: true
   authority_issue: 29
-  required: true
+  authority_status: validly-exercised
+  required: false
+  status: completed
   issue: 29
   target_branch: develop
-  pull_request: null
+  pull_request: 37
+
+remediation:
+  revert:
+    status: adopted
+    pull_request: 36
+    base_sha: 3a553f13d10a9e51a77a848734d2d64b2cfbcb39
+    candidate_sha: f846c54f19d5dcf45f30e584e84581d49539bd2e
+    independent_verification_evidence: https://github.com/KARSIFT/vocanova-platform/pull/36#issuecomment-5038800736
+    founder_approval_evidence: https://github.com/KARSIFT/vocanova-platform/pull/36#issuecomment-5038911442
+    merged_at: 2026-07-21T20:50:17Z
+    adopted_develop_sha: 8b88ea42de83f741f46555c3771eb26163f90a3d
+  fresh_adoption:
+    status: adopted
+    pull_request: 37
+    base_sha: 8b88ea42de83f741f46555c3771eb26163f90a3d
+    candidate_sha: 33fc2d9765cc50ff59a5a877e7a48b7e6fa8df4f
+    difference_from_pr32_candidate: none
+    independent_verification_evidence: https://github.com/KARSIFT/vocanova-platform/pull/37#issuecomment-5040056721
+    founder_approval_evidence: https://github.com/KARSIFT/vocanova-platform/pull/37#issuecomment-5042722711
+    merged_at: 2026-07-22T06:40:52Z
+    adopted_develop_sha: 95408cc6e7dada087ec44d9d3a22bb3728820a06
 
 release:
   required: false
@@ -83,10 +124,12 @@ adoption_pr: 33
 adopted_develop_sha: f28b670c0ea41577a91379e7d29618db38dd8a0a
 repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/33
 implementation_authority_before_adoption: false
-implementation_authority_status: active-revert-preparation-only
-next_stage: governed-revert-candidate
-next_stage_independent_verification: pending-exact-revision
-next_stage_founder_r4_approval: pending-exact-revision
+implementation_authority_status: exercised-complete
+implementation_completion_status: complete
+final_sync_risk: R3
+final_sync_independent_verification: pending-exact-revision
+final_sync_founder_approval: not-required-routine-r3
+issue_closure_status: closes-on-valid-final-sync-merge
 automatic_merge_allowed: false
 production_deployment: disabled
 autonomous_production_release: disabled
