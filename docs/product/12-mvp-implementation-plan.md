@@ -3,11 +3,11 @@ id: DOC-12
 title: VocaNova MVP Implementation Plan
 version: 1.0
 document_type: implementation-plan
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/product/12-mvp-implementation-plan.md
-approved_at: null
-last_reviewed_at: 2026-07-19
+approved_at: 2026-07-21
+last_reviewed_at: 2026-07-21
 review_cycle: monthly
 supersedes: null
 related_documents:
@@ -20,14 +20,12 @@ related_documents:
   - DOC-13
   - DOC-18
 related_decisions: []
-adoption_change: VOC-007
+adoption_change: VOC-008
 source_files:
   - path: 11-implementation-roadmap.md
     sha256: e4745ab74e3951004d20e6fd580c56ee7939a316bb427adbc2a9b09ae54b05a3
 ---
 # 12 — VocaNova MVP Implementation Plan
-
-> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
 
 ## 1. Product outcome
 
@@ -42,7 +40,7 @@ criteria; this document is about *sequencing* the build, not restating what "don
 (PR-<MILESTONE>-<n>)`. One PR = one coherent architectural/product change; unrelated issues are never
 combined just to reduce PR count.
 
-## 3. Proposed milestone roadmap
+## 3. Milestone roadmap
 
 | # | Milestone | Outcome | Depends on |
 |---:|---|---|---|
@@ -59,10 +57,14 @@ combined just to reduce PR count.
 | 11 | **R2** Production Readiness | Production, legal, security, ops readiness | R1 |
 | 12 | **L1** Controlled Launch | Gradual, reversible, monitored MVP release | R2 |
 
-Within this proposed plan, the order is intentional; work may be prepared early, but a milestone
+Within this plan, the order is intentional; work may be prepared early, but a milestone
 can't be *accepted* before its
 dependency passes. A milestone is never "done" merely because its code merged — its acceptance gate
 must pass (see §5).
+
+As of this adoption, F1 and portions of the F2 scaffold exist in the repository, but the F2 gate
+has not passed. This roadmap describes the target sequence; current completion must be evidenced by
+separate adopted change packages and their acceptance records.
 
 ## 4. Roles (summary — authority comes from the [approval matrix](../governance/approval-matrix.md)
 and its linked canonical governance; [DOC-19](../operations/19-governance-reconciliation-notes.md)
@@ -193,7 +195,7 @@ is blocking whenever failure could affect learner data, auth, authorization, lea
 correctness, database integrity, API compatibility, safety, privacy, or launch reliability — never
 bypassed just to hit a milestone deadline.
 
-## 10. MVP exclusions (roadmap-level — product-level list is in [DOC-01](01-mvp-prd.md) §8)
+## 10. MVP exclusions (roadmap-level — product-level list is in [DOC-01](01-mvp-prd.md) §4)
 
 Native React Native/Expo app, open-ended AI chat/general tutor, pronunciation/speech features,
 essay correction, complete grammar curriculum, teacher dashboards, social/leaderboard features,
