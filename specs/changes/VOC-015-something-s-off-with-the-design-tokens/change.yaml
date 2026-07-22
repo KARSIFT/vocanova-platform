@@ -46,7 +46,7 @@ affected_areas:
 - packages/design-tokens
 implementation:
   authorized: true
-  authority_issue: 15
+  authority_issue: 17
   authority_status: validly-exercised
   required: true
   status: implementation-ready
