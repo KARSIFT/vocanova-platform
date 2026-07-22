@@ -10,11 +10,11 @@ for the package, revert, and fresh adoption exact revisions.
 
 ## Product and engineering
 
-There is no runtime behavior change. While remediation is incomplete, DOC-00 through
-DOC-12 cannot be used as authority for new application packages. The temporary pause
-prevents implementation from inheriting a procedurally invalid baseline. The fresh
-adoption is expected to restore the substantively reviewed PR #32 content after proper
-gates, but no content outcome is pre-approved by this package.
+There is no runtime behavior change. PR #36 validly restored the proposed baseline,
+and PR #37 then freshly adopted the substantively reviewed reconciliation after new
+exact-revision verification and founder approval. DOC-00 through DOC-12 become
+authoritative only when this final lifecycle synchronization is validly merged. The
+temporary downstream pause remains in force until then.
 
 ## Security, privacy, data, AI, accessibility, and operations
 
@@ -59,8 +59,13 @@ repository authority state. EHR is not triggered.
 - **VOC-009-DEP-05:** Valid VOC-009 adoption — resolved by exact candidate
   `3a9da8ded7e79711fc5ea0b8dbc83155b23dff41`, independent `PASS` comment
   `5031390973`, founder R4 approval comment `5032416230`, and PR #33 merge
-  `f28b670c0ea41577a91379e7d29618db38dd8a0a`. Revert preparation remains blocked
-  until this lifecycle synchronization merges.
+  `f28b670c0ea41577a91379e7d29618db38dd8a0a`.
+
+The governed revert and fresh-adoption sequence is resolved by PR #36 candidate
+`f846c54f19d5dcf45f30e584e84581d49539bd2e`, review `5038800736`, approval
+`5038911442`, merge `8b88ea42de83f741f46555c3771eb26163f90a3d`; and PR #37 candidate
+`33fc2d9765cc50ff59a5a877e7a48b7e6fa8df4f`, review `5040056721`, approval
+`5042722711`, merge `95408cc6e7dada087ec44d9d3a22bb3728820a06`.
 
 ## Evidence register
 
@@ -72,13 +77,18 @@ repository authority state. EHR is not triggered.
 - **VOC-009-EV-06:** Non-authoritative containment statement and open issue state.
 - **VOC-009-EV-07:** Exact revert file list and reverse diff.
 - **VOC-009-EV-08:** Post-revert tree equality and lifecycle inventory.
-- **VOC-009-EV-09:** Exact revert independent verification.
-- **VOC-009-EV-10:** Exact revert founder R4 approval and canonical merge.
-- **VOC-009-EV-11:** Fresh adoption diff/equivalence and semantic evidence.
-- **VOC-009-EV-12:** Exact fresh adoption independent verification.
-- **VOC-009-EV-13:** Exact fresh adoption founder R4 approval and canonical merge.
-- **VOC-009-EV-14:** Complete immutable GitHub/repository evidence chain.
+- **VOC-009-EV-09:** Exact revert independent `PASS` comment `5038800736`.
+- **VOC-009-EV-10:** Exact revert founder R4 approval comment `5038911442` and
+  canonical merge `8b88ea42de83f741f46555c3771eb26163f90a3d`.
+- **VOC-009-EV-11:** PR #37 zero-difference equivalence and semantic evidence for
+  candidate `33fc2d9765cc50ff59a5a877e7a48b7e6fa8df4f`.
+- **VOC-009-EV-12:** Exact fresh-adoption independent `PASS` comment `5040056721`.
+- **VOC-009-EV-13:** Exact fresh-adoption founder R4 approval comment `5042722711`
+  and canonical merge `95408cc6e7dada087ec44d9d3a22bb3728820a06`.
+- **VOC-009-EV-14:** Complete immutable GitHub/repository evidence chain through
+  PR #37.
 - **VOC-009-EV-15:** Protected/runtime/external-effect exclusion.
 - **VOC-009-EV-16:** Deterministic and hosted validation for every exact revision.
-- **VOC-009-EV-17:** Final lifecycle synchronization and issue closure evidence.
+- **VOC-009-EV-17:** This final lifecycle synchronization; issue #29 closes only
+  after its valid merge.
 - **VOC-009-EV-18:** Reviewed rollback evidence for each phase.

@@ -52,15 +52,21 @@ Current packages:
   and comment `5017746234`; adopted through PR #30 at canonical `develop` commit
   `f7bc58461aaafa4c8504ea3534a96f522fd8bb07` after exact-revision independent
   verification and founder R4 approval. PR #32 later merged its document-adoption
-  candidate before the required independent verification and founder R4 approval;
-  DOC-00 through DOC-12 are non-authoritative pending founder-directed remediation.
+  candidate before the required independent verification and founder R4 approval.
+  VOC-009 then validly reverted that merge through PR #36 and freshly re-adopted the
+  reviewed reconciliation through PR #37; DOC-00 through DOC-12 become authoritative
+  only when the final VOC-009 lifecycle synchronization is validly merged.
 - [`VOC-009 — PR #32 R4 Gate Remediation`](changes/VOC-009-pr32-r4-gate-remediation/README.md)
-  — adopted `implementation-ready` R4 package sourced from issue #29 comment
+  — `completed` R4 remediation package sourced from issue #29 comment
   `5031045639`; exact package candidate `3a9da8ded7e79711fc5ea0b8dbc83155b23dff41`
   passed independent verification and founder R4 approval before PR #33 merged at
   canonical `develop` commit `f28b670c0ea41577a91379e7d29618db38dd8a0a`.
-  Package authority is limited to preparing the separately gated revert after this
-  lifecycle synchronization; DOC-00 through DOC-12 remain non-authoritative pending
-  remediation.
+  The separately gated revert merged through PR #36 at `8b88ea42de83f741f46555c3771eb26163f90a3d`,
+  and the separately gated fresh adoption merged through PR #37 at
+  `95408cc6e7dada087ec44d9d3a22bb3728820a06`, each after new exact-revision
+  independent verification and founder R4 approval. Issue #29 closes only after this
+  final lifecycle synchronization is validly merged.
 
-This index makes no claim that DOC-00 through DOC-12 are currently authoritative.
+This final synchronization records DOC-00 through DOC-12 as validly re-adopted and
+authoritative upon its canonical merge; it grants no application, deployment,
+production, release, or autonomous-operation authority.
