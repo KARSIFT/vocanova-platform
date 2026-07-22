@@ -67,6 +67,14 @@ Current packages:
   independent verification and founder R4 approval. Issue #29 closes only after this
   final lifecycle synchronization is validly merged.
 
+- [`VOC-010 — VOC-006 Implementation Lifecycle Reconciliation`](changes/VOC-010-voc-006-lifecycle-reconciliation/README.md)
+  — `proposed` R3 package sourced from corrected issue #39 and founder scope-approval
+  comment `5045859897`; it authorizes no correction until valid package adoption. Its
+  later separately gated scope is limited to reconciling stale VOC-006 lifecycle
+  records with the valid F2-I03 implementation merged through PR #22, while preserving
+  PR #24 as closed-unmerged history and granting no F2-I04, application, deployment,
+  production, or autonomous-operation authority.
+
 This final synchronization records DOC-00 through DOC-12 as validly re-adopted and
 authoritative upon its canonical merge; it grants no application, deployment,
 production, release, or autonomous-operation authority.
