@@ -1,0 +1,111 @@
+schema_version: 1
+
+id: VOC-011
+slug: pr40-r3-gate-remediation
+title: PR #40 R3 Gate Remediation
+type: governance-process-remediation
+status: proposed
+risk: R3
+planned_implementation_risk_floor: R3
+canonical_path: specs/changes/VOC-011-pr40-r3-gate-remediation
+
+authority_model: a003-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/39
+requirement_approval_status: founder-approved-package-preparation-only
+requirement_approval_evidence: https://github.com/KARSIFT/vocanova-platform/issues/39#issuecomment-5047420157
+base_branch: develop
+base_sha: 8de351bd97818ea7488616ceaa0a4f3d853f415c
+target_branch: develop
+approved_candidate_sha: null
+
+owners:
+  decision: founder
+  package_preparation: codex
+  implementation: codex
+  independent_verification: claude-code
+
+approvals:
+  package_independent_verification:
+    status: pending
+    candidate_sha: null
+    evidence: null
+  package_founder:
+    status: not-required-routine-r3
+    evidence: active-a003
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+failure_record:
+  pull_request: 40
+  base_sha: a22affd5732a00ba41361c4dc84c8685272e5a6e
+  candidate_sha: e302d0911287c2a8b6c74d1296d5069f5e36a5c3
+  merged_develop_sha: 8de351bd97818ea7488616ceaa0a4f3d853f415c
+  merged_at: 2026-07-22T14:23:47Z
+  candidate_and_merge_tree_sha: 0aca913b5ee2a0e49cac901bfbeb484da396b99a
+  github_comment_count: 0
+  github_review_count: 0
+  hosted_checks: passed
+  canonical_independent_verification_before_merge: absent
+  external_report_reuse: prohibited
+
+dependencies:
+  - id: VOC-011-DEP-01
+    status: resolved-by-issue-39-comment-5047420157
+  - id: VOC-011-DEP-02
+    status: resolved-at-base-sha
+  - id: VOC-011-DEP-03
+    status: resolved-by-pr40-github-and-git-evidence
+  - id: VOC-011-DEP-04
+    status: resolved-by-active-a003-governance
+  - id: VOC-011-DEP-05
+    status: package-adoption-and-sync-required-before-revert
+
+package_adoption_affected_areas:
+  - specs/README.md
+  - specs/changes/VOC-011-pr40-r3-gate-remediation
+
+planned_remediation_affected_areas:
+  - specs/README.md
+  - specs/changes/VOC-010-voc-006-lifecycle-reconciliation
+  - specs/changes/VOC-011-pr40-r3-gate-remediation
+
+implementation:
+  authorized: false
+  authority_issue: 39
+  required: true
+  target_branch: develop
+  stages:
+    - governed-pr40-revert
+    - fresh-voc010-package-adoption
+    - final-lifecycle-synchronization
+
+release:
+  required: false
+  mode: repository-specification-remediation-only
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+
+repository_adoption_status: pending
+implementation_authority_before_adoption: false
+implementation_authority_status: blocked-pending-package-adoption-and-sync
+voc_006_correction_status: prohibited-pending-remediation
+issue_closure_status: blocked-pending-remediation-and-voc010-lifecycle
+automatic_merge_allowed: false
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-applicable
+blocking_reasons:
+  - exact-revision-independent-verification-pending
+  - authorized-human-merge-pending
