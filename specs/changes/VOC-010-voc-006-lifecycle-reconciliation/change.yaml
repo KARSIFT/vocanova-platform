@@ -1,0 +1,116 @@
+schema_version: 1
+
+id: VOC-010
+slug: voc-006-lifecycle-reconciliation
+title: VOC-006 Implementation Lifecycle Reconciliation
+type: documentation-lifecycle-reconciliation
+status: proposed
+risk: R3
+planned_implementation_risk_floor: R3
+canonical_path: specs/changes/VOC-010-voc-006-lifecycle-reconciliation
+
+authority_model: a003-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/39
+requirement_approval_status: founder-approved-package-preparation-only
+requirement_approval_evidence: https://github.com/KARSIFT/vocanova-platform/issues/39#issuecomment-5045859897
+superseded_requirement_approval_evidence: https://github.com/KARSIFT/vocanova-platform/issues/39#issuecomment-5045604851
+base_branch: develop
+base_sha: a22affd5732a00ba41361c4dc84c8685272e5a6e
+target_branch: develop
+approved_candidate_sha: null
+
+owners:
+  decision: founder
+  package_preparation: codex
+  implementation: codex
+  independent_verification: claude-code
+
+approvals:
+  package_independent_verification:
+    status: pending
+    candidate_sha: null
+    evidence: null
+  package_founder:
+    status: not-required-routine-r3
+    evidence: active-a003
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+historical_evidence:
+  voc_006_package_adoption_pr: 20
+  voc_006_package_adopted_develop_sha: b02327e995c7d0e754ea1a2a0a9ad331cb67145f
+  voc_006_package_sync_pr: 21
+  voc_006_package_sync_develop_sha: b1005adc7922c544b8773ff0b7af5b72bf7c6693
+  implementation_pr: 22
+  implementation_base_sha: b1005adc7922c544b8773ff0b7af5b72bf7c6693
+  implementation_candidate_sha: bda66e379065a59b52a88758933e912d22bf7a38
+  implementation_verdict: PASS WITH NON-BLOCKING FINDINGS
+  implementation_verification_evidence: https://github.com/KARSIFT/vocanova-platform/pull/22#issuecomment-5012828387
+  implementation_merged_at: 2026-07-18T21:02:34Z
+  implementation_adopted_develop_sha: 857a700faebbdd6b0095f2236419ae8016cea91f
+  abandoned_sync_pr: 24
+  abandoned_sync_candidate_sha: 793cbd7fae833a70cde5854a60156afad449663c
+  abandoned_sync_status: closed-unmerged-non-canonical
+  abandoned_sync_evidence: https://github.com/KARSIFT/vocanova-platform/pull/24#issuecomment-5017706108
+  historical_issue: 19
+  historical_issue_status: closed-not-planned
+  historical_issue_closure_evidence: https://github.com/KARSIFT/vocanova-platform/issues/19#issuecomment-5017706258
+
+dependencies:
+  - id: VOC-010-DEP-01
+    status: resolved-by-issue-39-comment-5045859897
+  - id: VOC-010-DEP-02
+    status: resolved-at-base-sha
+  - id: VOC-010-DEP-03
+    status: resolved-by-pr20-pr21-pr22-history
+  - id: VOC-010-DEP-04
+    status: resolved-by-pr24-and-issue19-closure-evidence
+  - id: VOC-010-DEP-05
+    status: resolved-by-active-a003-governance
+  - id: VOC-010-DEP-06
+    status: package-adoption-required-before-lifecycle-correction
+
+package_adoption_affected_areas:
+  - specs/README.md
+  - specs/changes/VOC-010-voc-006-lifecycle-reconciliation
+
+planned_implementation_affected_areas:
+  - specs/README.md
+  - specs/changes/VOC-006-f2-nextjs-application-foundation
+
+implementation:
+  authorized: false
+  authority_issue: 39
+  required: true
+  target_branch: develop
+  pull_request: null
+
+release:
+  required: false
+  mode: repository-specification-lifecycle-reconciliation-only
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+
+repository_adoption_status: pending
+implementation_authority_before_adoption: false
+implementation_authority_status: blocked-pending-package-adoption
+issue_closure_status: blocked-pending-final-lifecycle-sync
+automatic_merge_allowed: false
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-applicable
+blocking_reasons:
+  - exact-revision-independent-verification-pending
+  - authorized-human-merge-pending
