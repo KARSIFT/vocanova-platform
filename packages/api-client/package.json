@@ -1,0 +1,11 @@
+{
+  "name": "@vocanova/api-client",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b --pretty false",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit --pretty false"
+  }
+}

@@ -1,0 +1,16 @@
+schema_version: 1
+
+id: VOC-000
+slug: replace-with-approved-slug
+title: REPLACE WITH APPROVED TITLE
+
+type: placeholder
+status: draft
+risk: R0
+canonical_path: specs/changes/VOC-000-replace-with-approved-slug
+
+approval_status: not-approved
+implementation_authorized: false
+automatic_merge_allowed: false
+production_impact: unknown
+rollback_required: true

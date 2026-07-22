@@ -1,0 +1,71 @@
+schema_version: 1
+policy: repository-protected-paths
+status: approved-a003-active
+review_routing_identity: m-e-h-r-d-a-a-d
+authority_model: a003-active
+default_risk: R1
+
+paths:
+  - path: AGENTS.md
+    minimum_risk: R3
+  - path: CLAUDE.md
+    minimum_risk: R3
+  - path: .github/CODEOWNERS
+    minimum_risk: R4
+  - path: .github/pull_request_template.md
+    minimum_risk: R3
+  - path: .github/workflows/
+    minimum_risk: R3
+  - path: .github/approved-policy/
+    minimum_risk: R4
+  - path: scripts/governance/
+    minimum_risk: R4
+  - path: tooling/governance/
+    minimum_risk: R4
+  - path: docs/governance/
+    minimum_risk: R3
+  - path: docs/governance/amendments/
+    minimum_risk: R4
+  - path: docs/governance/a003-transition-state.yaml
+    minimum_risk: R4
+  - path: docs/architecture/17-autonomous-development-architecture.md
+    minimum_risk: R4
+  - path: docs/planning/18-autonomous-development-implementation-roadmap.md
+    minimum_risk: R4
+  - path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
+    minimum_risk: R4
+  - path: docs/decisions/
+    minimum_risk: R2
+  - path: specs/README.md
+    minimum_risk: R3
+  - path: specs/templates/
+    minimum_risk: R3
+  - path: specs/changes/VOC-001-repository-foundation/
+    minimum_risk: R4
+  - path: specs/changes/VOC-002-a003-governance-transition/
+    minimum_risk: R4
+  - path: specs/changes/VOC-003-a003-lifecycle-sync/
+    minimum_risk: R4
+  - path: specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/
+    minimum_risk: R4
+  - path: apps/**/auth/
+    minimum_risk: R3
+  - path: packages/auth/
+    minimum_risk: R3
+  - path: packages/database/
+    minimum_risk: R3
+  - path: migrations/
+    minimum_risk: R3
+  - path: infrastructure/
+    minimum_risk: R3
+
+hosted_enforcement_status: not-activated
+automatic_merge_allowed: false
+autonomous_merge_allowed: false
+production_deployment: disabled
+autonomous_production_release: disabled
+rl1_technical_activation: false
+rl2_technical_activation: false
+doc_17_repository_adoption: true
+doc_18_repository_adoption: true
+control_plane_implementation: false

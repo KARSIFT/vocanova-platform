@@ -1,0 +1,49 @@
+name: Governance policy
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+
+concurrency:
+  group: governance-policy-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  policy:
+    name: governance-policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # actions/checkout v4.2.2, pinned to the immutable commit documented at
+      # https://github.com/actions/checkout/releases/tag/v4.2.2
+      - name: Check out reviewed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Validate governance structure
+        run: bash scripts/governance/validate-governance.sh
+
+      - name: Record pull-request body safely
+        run: jq -r '.pull_request.body // ""' "$GITHUB_EVENT_PATH" > "$RUNNER_TEMP/pr-body.md"
+
+      - name: Enforce path-based risk floor
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: >-
+          bash scripts/governance/classify-change-risk.sh
+          --base "$BASE_SHA"
+          --head "$HEAD_SHA"
+          --pr-body-file "$RUNNER_TEMP/pr-body.md"
+          --require-declaration

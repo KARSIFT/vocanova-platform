@@ -1,0 +1,65 @@
+# @m-e-h-r-d-a-a-d is the verified founder and historical pre-A-003 technical steward.
+# Direct account routing is review routing only: it never proves R3/R4 approval. Under
+# active A-003 it must not recreate standing steward or founder approval for routine
+# R3. No replacement steward team is implied.
+# Codex, Claude Code, bots, and automation identities must not be human authorities.
+
+# Review routing for governance-critical paths; effective R3/R4 classification is
+# determined by the risk classifier and semantic independent review.
+/.github/CODEOWNERS                         @m-e-h-r-d-a-a-d
+/.github/approved-policy/                   @m-e-h-r-d-a-a-d
+/.github/pull_request_template.md           @m-e-h-r-d-a-a-d
+/.github/workflows/                        @m-e-h-r-d-a-a-d
+/CONTRIBUTING.md                           @m-e-h-r-d-a-a-d
+/SECURITY.md                               @m-e-h-r-d-a-a-d
+/docs/governance/                          @m-e-h-r-d-a-a-d
+/docs/architecture/17-autonomous-development-architecture.md @m-e-h-r-d-a-a-d
+/docs/planning/18-autonomous-development-implementation-roadmap.md @m-e-h-r-d-a-a-d
+/docs/operations/15-ai-native-product-and-engineering-operating-model.md @m-e-h-r-d-a-a-d
+/scripts/governance/                       @m-e-h-r-d-a-a-d
+
+# Agent authority and executable change controls
+/AGENTS.md                                 @m-e-h-r-d-a-a-d
+/CLAUDE.md                                 @m-e-h-r-d-a-a-d
+/specs/README.md                           @m-e-h-r-d-a-a-d
+/specs/templates/                          @m-e-h-r-d-a-a-d
+/specs/changes/VOC-001-repository-foundation/ @m-e-h-r-d-a-a-d
+/specs/changes/VOC-002-a003-governance-transition/ @m-e-h-r-d-a-a-d
+/specs/changes/VOC-003-a003-lifecycle-sync/ @m-e-h-r-d-a-a-d
+/specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/ @m-e-h-r-d-a-a-d
+/tooling/governance/                       @m-e-h-r-d-a-a-d
+
+# Product direction and consequential decisions
+/docs/product/                             @m-e-h-r-d-a-a-d
+/docs/decisions/                           @m-e-h-r-d-a-a-d
+
+# Protected technical areas, including anticipated monorepo paths
+/apps/**/auth/                             @m-e-h-r-d-a-a-d
+/packages/auth/                            @m-e-h-r-d-a-a-d
+/packages/database/                        @m-e-h-r-d-a-a-d
+/packages/billing/                         @m-e-h-r-d-a-a-d
+/packages/ai/                              @m-e-h-r-d-a-a-d
+/packages/audio/                           @m-e-h-r-d-a-a-d
+/packages/voice/                           @m-e-h-r-d-a-a-d
+/packages/storage/                         @m-e-h-r-d-a-a-d
+/database/                                 @m-e-h-r-d-a-a-d
+/db/                                       @m-e-h-r-d-a-a-d
+/migrations/                               @m-e-h-r-d-a-a-d
+/backups/                                  @m-e-h-r-d-a-a-d
+/scripts/backup/                           @m-e-h-r-d-a-a-d
+/scripts/restore/                          @m-e-h-r-d-a-a-d
+/scripts/deploy/                           @m-e-h-r-d-a-a-d
+/scripts/release/                          @m-e-h-r-d-a-a-d
+/scripts/rollback/                         @m-e-h-r-d-a-a-d
+/infrastructure/                           @m-e-h-r-d-a-a-d
+/infra/                                    @m-e-h-r-d-a-a-d
+/wrangler.json                             @m-e-h-r-d-a-a-d
+/wrangler.jsonc                            @m-e-h-r-d-a-a-d
+/wrangler.toml                             @m-e-h-r-d-a-a-d
+/.env                                      @m-e-h-r-d-a-a-d
+/.env.*                                    @m-e-h-r-d-a-a-d
+
+# Future monorepo foundations and dependency controls
+/package.json                              @m-e-h-r-d-a-a-d
+/pnpm-lock.yaml                            @m-e-h-r-d-a-a-d
+/pnpm-workspace.yaml                       @m-e-h-r-d-a-a-d

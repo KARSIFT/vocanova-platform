@@ -1,0 +1,37 @@
+{
+  "name": "vocanova-platform",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.14.0",
+  "engines": {
+    "node": "24.18.0",
+    "pnpm": "11.14.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @vocanova/web dev",
+    "validate": "pnpm run validate:workspace && pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
+    "validate:workspace": "node scripts/foundation/validate-workspace.mjs",
+    "lint": "pnpm run lint:web && pnpm run lint:packages && pnpm run lint:api",
+    "lint:web": "pnpm --filter @vocanova/web lint",
+    "lint:packages": "eslint packages eslint.config.js",
+    "lint:api": "cd apps/api && go vet ./...",
+    "typecheck": "pnpm run typecheck:web && pnpm run typecheck:packages",
+    "typecheck:web": "pnpm --filter @vocanova/web typecheck",
+    "typecheck:packages": "tsc -b packages/api-client packages/design-tokens --pretty false",
+    "test": "node --test scripts/foundation/*.test.mjs && pnpm run test:api",
+    "test:api": "cd apps/api && go test ./...",
+    "build": "pnpm run build:web && pnpm run build:packages && pnpm run build:api",
+    "build:web": "pnpm --filter @vocanova/web build",
+    "build:packages": "tsc -b packages/api-client packages/design-tokens --pretty false",
+    "build:api": "cd apps/api && go build ./...",
+    "format:check": "prettier --check package.json pnpm-workspace.yaml eslint.config.js apps/web packages scripts/foundation docs/development.md infra/README.md && node scripts/foundation/check-go-format.mjs",
+    "format": "prettier --write package.json pnpm-workspace.yaml eslint.config.js apps/web packages scripts/foundation docs/development.md infra/README.md && cd apps/api && gofmt -w .",
+    "audit": "pnpm audit --audit-level high"
+  },
+  "devDependencies": {
+    "eslint": "10.7.0",
+    "prettier": "3.9.5",
+    "typescript": "6.0.3"
+  }
+}

@@ -1,0 +1,117 @@
+schema_version: 1
+
+id: VOC-005
+slug: f2-workspace-tooling-local-command-foundation
+title: F2 Workspace, Tooling, and Local Command Foundation
+type: infrastructure
+status: completed
+risk: R3
+planned_implementation_risk_floor: R3
+canonical_path: specs/changes/VOC-005-f2-workspace-tooling-local-command-foundation
+
+authority_model: a003-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/14
+requirement_approval_status: founder-approved
+base_branch: develop
+base_sha: 76d5ab47cd847a5634f3b8f429247726bd72a579
+target_branch: develop
+approved_candidate_sha: 271c3e9fe0f202f468995c0af5a87c729186b746
+
+owners:
+  decision: founder
+  package_preparation: codex
+  implementation: codex
+  independent_verification: claude-code
+
+approvals:
+  package_independent_verification:
+    status: passed-exact-revision
+    verdict: PASS
+    candidate_sha: 271c3e9fe0f202f468995c0af5a87c729186b746
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/15#issuecomment-5008525324
+  package_founder:
+    status: not-required-routine-r3
+    evidence: active-a003
+  implementation_independent_verification:
+    status: passed-exact-revision
+    verdict: PASS
+    candidate_sha: 2100c6c1dc0fd70df516e7564b9dd5b5667cd60b
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/17#issuecomment-5010781346
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-005-DEP-01
+    status: resolved-by-issue-14
+  - id: VOC-005-DEP-02
+    status: resolved-at-base-sha
+  - id: VOC-005-DEP-03
+    status: resolved-by-active-a003-governance
+  - id: VOC-005-DEP-04
+    status: implementation-time-version-resolution-required
+
+affected_areas:
+  - apps/web
+  - apps/api
+  - packages/api-client
+  - packages/design-tokens
+  - packages/eslint-config
+  - packages/typescript-config
+  - package.json
+  - pnpm-workspace.yaml
+  - pnpm-lock.yaml
+  - infra
+  - scripts
+
+implementation:
+  authorized: true
+  authority_issue: 14
+  authority_status: validly-exercised
+  required: false
+  status: completed
+  issue: 14
+  target_branch: develop
+  pull_request: 17
+  candidate_sha: 2100c6c1dc0fd70df516e7564b9dd5b5667cd60b
+  independent_verification_verdict: PASS
+  independent_verification_evidence: https://github.com/KARSIFT/vocanova-platform/pull/17#issuecomment-5010781346
+  merge_mode: manual-squash
+  merged_at: 2026-07-18T10:03:36Z
+  adopted_develop_sha: d7ad6066dcb3b6467b8ad8fdbce5410ffb3542f0
+  adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/17
+
+release:
+  required: false
+  mode: repository-foundation-only
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+
+repository_adoption_status: adopted
+adoption_pr: 15
+adopted_develop_sha: 84e096c35bc811c276ce29dc2ecc7dd967983e4b
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/15
+package_adoption_evidence_id: VOC-005-EV-12
+implementation_authority_before_adoption: false
+implementation_authority_status: exercised-complete
+implementation_completion_status: complete
+completed_increments:
+  - F2-I01
+  - F2-I02
+issue_closure_status: closes-on-valid-lifecycle-sync-merge
+automatic_merge_allowed: false
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-applicable
+blocking_reasons: null

@@ -1,0 +1,172 @@
+# GENERATED FILE — DO NOT EDIT MANUALLY
+schema_version: 1
+generated_by: VOC-008
+authority: derived-impact-aid-only
+nodes:
+  - id: DOC-00
+    path: docs/product/00-product-bible.md
+    status: approved
+    related:
+      - DOC-01
+      - DOC-02
+      - DOC-03
+      - DOC-05
+      - DOC-09
+      - DOC-12
+  - id: DOC-01
+    path: docs/product/01-mvp-prd.md
+    status: approved
+    related:
+      - DOC-00
+      - DOC-03
+      - DOC-08
+      - DOC-09
+      - DOC-12
+  - id: DOC-02
+    path: docs/research/02-market-research.md
+    status: approved
+    related:
+      - DOC-00
+      - DOC-01
+  - id: DOC-03
+    path: docs/design/03-ui-ux-design.md
+    status: approved
+    related:
+      - DOC-00
+      - DOC-01
+      - DOC-08
+      - DOC-09
+  - id: DOC-04
+    path: docs/engineering/04-technical-architecture.md
+    status: approved
+    related:
+      - DOC-05
+      - DOC-06
+      - DOC-07
+      - DOC-08
+      - DOC-09
+      - DOC-10
+      - DOC-11
+      - DOC-17
+  - id: DOC-05
+    path: docs/engineering/05-database-design.md
+    status: approved
+    related:
+      - DOC-04
+      - DOC-06
+      - DOC-07
+      - DOC-09
+  - id: DOC-06
+    path: docs/engineering/06-backend-design.md
+    status: approved
+    related:
+      - DOC-04
+      - DOC-05
+      - DOC-07
+      - DOC-09
+      - DOC-10
+  - id: DOC-07
+    path: docs/engineering/07-api-contract-and-dto-design.md
+    status: approved
+    related:
+      - DOC-04
+      - DOC-05
+      - DOC-06
+      - DOC-08
+      - DOC-09
+  - id: DOC-08
+    path: docs/design/08-web-app-design.md
+    status: approved
+    related:
+      - DOC-03
+      - DOC-04
+      - DOC-07
+      - DOC-09
+  - id: DOC-09
+    path: docs/engineering/09-ai-features.md
+    status: approved
+    related:
+      - DOC-00
+      - DOC-01
+      - DOC-04
+      - DOC-05
+      - DOC-06
+      - DOC-07
+  - id: DOC-10
+    path: docs/operations/10-development-workflow.md
+    status: approved
+    related:
+      - DOC-11
+      - DOC-15
+      - DOC-16
+      - DOC-19
+  - id: DOC-11
+    path: docs/operations/11-devops-and-ci-cd.md
+    status: approved
+    related:
+      - DOC-10
+      - DOC-16
+      - DOC-19
+  - id: DOC-12
+    path: docs/product/12-mvp-implementation-plan.md
+    status: approved
+    related:
+      - DOC-00
+      - DOC-01
+      - DOC-03
+      - DOC-04
+      - DOC-10
+      - DOC-11
+      - DOC-13
+      - DOC-18
+  - id: DOC-13
+    path: docs/operations/13-f1-repository-foundation-execution-package.md
+    status: proposed
+    related:
+      - DOC-10
+      - DOC-12
+      - DOC-15
+      - DOC-16
+  - id: DOC-14
+    path: null
+    status: not-adopted
+    related:
+      - DOC-19
+  - id: DOC-15
+    path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
+    status: approved
+    related:
+      - DOC-16
+      - DOC-19
+  - id: DOC-16
+    path: docs/governance/16-autonomous-development-operating-model.md
+    status: approved
+    related:
+      - DOC-15
+      - DOC-17
+      - DOC-19
+  - id: DOC-17
+    path: docs/architecture/17-autonomous-development-architecture.md
+    status: approved
+    related:
+      - DOC-16
+      - DOC-18
+      - DOC-19
+  - id: DOC-18
+    path: docs/planning/18-autonomous-development-implementation-roadmap.md
+    status: approved
+    related:
+      - DOC-17
+      - DOC-19
+  - id: DOC-19
+    path: docs/operations/19-governance-reconciliation-notes.md
+    status: proposed
+    related:
+      - DOC-10
+      - DOC-11
+      - DOC-15
+      - DOC-16
+      - DOC-17
+      - DOC-18
+      - A-002
+      - A-003
