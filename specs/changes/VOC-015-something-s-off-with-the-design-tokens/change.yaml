@@ -1,0 +1,73 @@
+schema_version: 1
+id: VOC-015
+slug: something-s-off-with-the-design-tokens
+title: "Design Tokens — Brand Color Scale (primary / secondary)"
+type: feature
+status: implementation-ready
+risk: R1
+planned_implementation_risk_floor: R1
+canonical_path: specs/changes/VOC-015-something-s-off-with-the-design-tokens
+authority_model: a003-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform-sandbox/issues/15
+requirement_approval_status: founder-approved
+base_branch: develop
+base_sha: 4c7d4dac8c774a5de9f47844b78318f26c86ffef
+target_branch: develop
+approved_candidate_sha: TBD-set-at-package-adoption
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: false
+production_impact: none
+rollback_required: true
+owners:
+  decision: founder
+  package_preparation: claude-code-planner
+  implementation: claude-code
+  independent_verification: claude-code
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+- id: VOC-015-DEP-01
+  status: founder-approved
+- id: VOC-015-DEP-02
+  status: resolve-base-sha-at-adoption
+- id: VOC-015-DEP-03
+  status: requires-voc-010-through-voc-014-exports-on-develop
+- id: VOC-015-DEP-04
+  status: founder-confirmed-hue-values-as-proposed
+affected_areas:
+- packages/design-tokens
+implementation:
+  authorized: true
+  authority_issue: 15
+  authority_status: validly-exercised
+  required: true
+  status: implementation-ready
+  issue: 15
+  target_branch: develop
+  pull_request: null
+release:
+  required: false
+  mode: package-addition-only
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: adopted
+adoption_pr: 16
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/16
+implementation_authority_before_adoption: false
+implementation_authority_status: exercised-pending-first-run
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-applicable
+blocking_reasons: null
