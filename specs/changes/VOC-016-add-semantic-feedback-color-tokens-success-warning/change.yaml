@@ -1,7 +1,7 @@
 schema_version: 1
 id: VOC-016
 slug: add-semantic-feedback-color-tokens-success-warning
-title: "Design Tokens — Semantic Feedback Color Scale (success / warning / error)"
+title: "Design Tokens \u2014 Semantic Feedback Color Scale (success / warning / error)"
 type: feature
 status: implementation-ready
 risk: R1
@@ -54,6 +54,7 @@ implementation:
   requirement_source: docs/design/03-ui-ux-design.md
   target_branch: develop
   pull_request: null
+  authority_issue: 24
 release:
   required: false
   mode: package-addition-only
