@@ -42,7 +42,8 @@ dependencies:
 - id: VOC-017-DEP-03
   status: requires-nextjs-web-foundation-on-develop
 - id: VOC-017-DEP-04
-  status: "founder-resolved: route /discover (matches DOC-08's canonical routing table), nav label text stays Journey (matches DOC-03)"
+  status: 'founder-resolved: route /discover (matches DOC-08''s canonical routing
+    table), nav label text stays Journey (matches DOC-03)'
 - id: VOC-017-DEP-05
   status: open-decision-web-test-infrastructure-follow-up
 affected_areas:
@@ -54,6 +55,7 @@ implementation:
   status: implementation-ready
   target_branch: develop
   pull_request: null
+  authority_issue: 28
 release:
   required: false
   mode: app-shell-addition-only
