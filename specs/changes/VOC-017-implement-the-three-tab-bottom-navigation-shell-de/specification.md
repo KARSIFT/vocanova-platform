@@ -1,4 +1,4 @@
-# VOC-016 — Three-Tab Bottom Navigation Shell (Home / Journey / Progress): Specification
+# VOC-017 — Three-Tab Bottom Navigation Shell (Home / Journey / Progress): Specification
 
 ## Objective and requirement source
 
@@ -58,15 +58,15 @@ dimension, not a formality. No protected areas are touched.
 
 ## Decisions, contradictions, security, and privacy
 
-`VOC-016-D00` — **Route-group structure.** The shell is a Next.js App Router
+`VOC-017-D00` — **Route-group structure.** The shell is a Next.js App Router
 route group `apps/web/src/app/(app)/` containing `layout.tsx` (the shared shell)
 and one folder per tab. This matches DOC-08's declared route groups
 (`(public)`, `(onboarding)`, `(app)`) and keeps the shell layout scoped to the
 authenticated app tabs, leaving the root layout and the `/` foundation page
 untouched. The route-group segment `(app)` is not part of the URL path.
 
-`VOC-016-D01` — **Tab routes = `/home`, `/journey`, `/progress`** (OPEN DECISION,
-`VOC-016-DEP-04`). The three tab names come verbatim from DOC-03 §2. `/home` and
+`VOC-017-D01` — **Tab routes = `/home`, `/journey`, `/progress`** (OPEN DECISION,
+`VOC-017-DEP-04`). The three tab names come verbatim from DOC-03 §2. `/home` and
 `/progress` match DOC-08's routing table directly. The **Journey** tab is the
 contradiction to record, not silently resolve: DOC-03 §2 names the tab
 "Journey" (situation-based discovery **and** saved-word management), while DOC-08's
@@ -79,7 +79,7 @@ confirm `/journey` or substitute `/discover` at adoption; if substituted, only t
 route folder name and the `BottomNav` href for that one tab change — the shell
 structure, layout, accessibility, and tests are unaffected.
 
-`VOC-016-D02` — **Component split.** The shell `layout.tsx` is a **server
+`VOC-017-D02` — **Component split.** The shell `layout.tsx` is a **server
 component** (no client state). `BottomNav` is a **client component**
 (`"use client"`) because it reads the active route via `usePathname()` to mark
 the current tab. `BottomNav` is colocated at
@@ -89,7 +89,7 @@ components shared across features; since the shell nav is currently consumed onl
 by the `(app)` layout, colocation is appropriate now, and it can move to
 `src/shared/` when a second consumer appears.
 
-`VOC-016-D03` — **Accessibility implementation** (DOC-03 §7/§10/§12, DOC-08
+`VOC-017-D03` — **Accessibility implementation** (DOC-03 §7/§10/§12, DOC-08
 Quality standards). The nav is a semantic `<nav>` with an accessible name (e.g.
 `aria-label="Primary"`). Each tab is a Next `<Link>` rendering a **visible text
 label** (not icon-only), so screen-reader and sighted users get the same label;
@@ -103,26 +103,26 @@ suppressed. The bottom nav is fixed to the bottom of the viewport for one-handed
 thumb reach (DOC-03 §12), and the `<main>` region reserves bottom spacing so
 content is never occluded by the fixed bar.
 
-`VOC-016-D04` — **Placeholder content.** Each tab route renders a single `<h1>`
+`VOC-017-D04` — **Placeholder content.** Each tab route renders a single `<h1>`
 naming the tab and one short line describing what will appear there (in the
 spirit of DOC-03 §9's "explain what will appear here" empty states, without
 implying any real/loaded state). No backend, no data, no interactivity beyond the
 nav links.
 
-`VOC-016-D05` — **Styling.** Plain Tailwind (v4, already wired via
+`VOC-017-D05` — **Styling.** Plain Tailwind (v4, already wired via
 `apps/web/src/app/globals.css`'s `@import "tailwindcss"`). shadcn/ui is DOC-08's
 eventual component system but is **not scaffolded yet**; this shell deliberately
 does not introduce it, to keep the change to `apps/web/src/**` only with no
 dependency change. Flagged so a human can decide whether to defer shadcn adoption
 to a separate foundation package (recommended).
 
-`VOC-016-D06` — **Root `/` untouched** (OPEN, optional). The existing
+`VOC-017-D06` — **Root `/` untouched** (OPEN, optional). The existing
 `apps/web/src/app/page.tsx` foundation page and root `layout.tsx` are left
 unchanged; no `/` → `/home` redirect is added. The shell is reachable directly at
 `/home`, `/journey`, `/progress`. A human may prefer a redirect; if desired it is
 a one-line follow-up and does not change this package's structure.
 
-`VOC-016-D07` — **Single task.** The route group, shell layout, three placeholder
+`VOC-017-D07` — **Single task.** The route group, shell layout, three placeholder
 pages, and `BottomNav` form one tightly-coupled, minimal shell — a nav with no
 routes, or routes with no shell layout, is a non-functional half-state. Per the
 VOC-010→VOC-015 precedent (each PR is reviewed against the whole package's
@@ -130,8 +130,8 @@ acceptance criteria), splitting this cohesive shell across multiple per-task PRs
 would fail whole-package review; it is delivered as one task in one PR of ~5
 small files.
 
-`VOC-016-D08` — **Verification without a web test runner** (OPEN,
-`VOC-016-DEP-05`). `apps/web` currently has no Vitest/RTL/Playwright setup (the
+`VOC-017-D08` — **Verification without a web test runner** (OPEN,
+`VOC-017-DEP-05`). `apps/web` currently has no Vitest/RTL/Playwright setup (the
 root `test` script runs only foundation and Go tests). Accessibility and
 structure are therefore verified by `build`/`typecheck`/`lint`/`format` plus the
 structured code-inspection checklist in `test-plan.md`. Automated a11y testing
@@ -151,8 +151,8 @@ fetches or displays progress/state.
   plain `git revert`.
 - **Analytics:** none. No events are emitted by a navigation shell with
   placeholder content.
-- **Accessibility:** in scope and central to this package — see `VOC-016-D03`,
-  `acceptance-criteria.md` (`VOC-016-AC-02`), and the accessibility checklist in
+- **Accessibility:** in scope and central to this package — see `VOC-017-D03`,
+  `acceptance-criteria.md` (`VOC-017-AC-02`), and the accessibility checklist in
   `test-plan.md`. Target is WCAG 2.2 AA per DOC-03 §10; the honest limitation is
   that AA is verified here by construction + inspection, with automated
-  axe/Playwright coverage flagged as the required follow-up (`VOC-016-D08`).
+  axe/Playwright coverage flagged as the required follow-up (`VOC-017-D08`).

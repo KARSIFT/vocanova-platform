@@ -1,12 +1,12 @@
 schema_version: 1
-id: VOC-016
+id: VOC-017
 slug: implement-the-three-tab-bottom-navigation-shell-de
 title: Three-Tab Bottom Navigation Shell (Home / Journey / Progress)
 type: feature
 status: draft
 risk: R1
 planned_implementation_risk_floor: R1
-canonical_path: specs/changes/VOC-016-implement-the-three-tab-bottom-navigation-shell-de
+canonical_path: specs/changes/VOC-017-implement-the-three-tab-bottom-navigation-shell-de
 authority_model: a003-active
 requirement_source: docs/design/03-ui-ux-design.md#2 ; docs/design/03-ui-ux-design.md#10
   ; docs/design/08-web-app-design.md
@@ -35,15 +35,15 @@ artifacts:
   test_plan: test-plan.md
   release_plan: release-plan.md
 dependencies:
-- id: VOC-016-DEP-01
+- id: VOC-017-DEP-01
   status: requires-founder-approved-implementation-ready-state-at-adoption
-- id: VOC-016-DEP-02
+- id: VOC-017-DEP-02
   status: resolve-base-sha-at-adoption
-- id: VOC-016-DEP-03
+- id: VOC-017-DEP-03
   status: requires-nextjs-web-foundation-on-develop
-- id: VOC-016-DEP-04
+- id: VOC-017-DEP-04
   status: open-decision-journey-route-name
-- id: VOC-016-DEP-05
+- id: VOC-017-DEP-05
   status: open-decision-web-test-infrastructure-follow-up
 affected_areas:
 - apps/web
@@ -74,6 +74,6 @@ autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-applicable
 blocking_reasons:
-- resolve VOC-016-DEP-04 (Journey route name) at adoption
-- resolve VOC-016-DEP-05 (web test infrastructure follow-up) at adoption
-- record founder-approved implementation-ready state (VOC-016-DEP-01)
+- resolve VOC-017-DEP-04 (Journey route name) at adoption
+- resolve VOC-017-DEP-05 (web test infrastructure follow-up) at adoption
+- record founder-approved implementation-ready state (VOC-017-DEP-01)

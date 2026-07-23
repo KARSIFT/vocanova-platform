@@ -1,15 +1,15 @@
-# VOC-016 — Acceptance Criteria
+# VOC-017 — Acceptance Criteria
 
 All criteria are observable and bidirectionally traceable to decisions
-`VOC-016-D00`..`D08`, task `VOC-016-T00`, tests `VOC-016-TEST-00`..`TEST-03`, and
-evidence `VOC-016-EV-00`..`EV-03`.
+`VOC-017-D00`..`D08`, task `VOC-017-T00`, tests `VOC-017-TEST-00`..`TEST-03`, and
+evidence `VOC-017-EV-00`..`EV-03`.
 
-## VOC-016-AC-00 — Three tab routes resolve with placeholder content
+## VOC-017-AC-00 — Three tab routes resolve with placeholder content
 
-- Requirement source: `VOC-016-D00`, `VOC-016-D01`, `VOC-016-D04`
-- Tasks: `VOC-016-T00`
-- Tests: `VOC-016-TEST-00`
-- Evidence: `VOC-016-EV-00`
+- Requirement source: `VOC-017-D00`, `VOC-017-D01`, `VOC-017-D04`
+- Tasks: `VOC-017-T00`
+- Tests: `VOC-017-TEST-00`
+- Evidence: `VOC-017-EV-00`
 - Result: pending
 
 Under a Next.js App Router route group `apps/web/src/app/(app)/`, the routes
@@ -19,16 +19,16 @@ descriptive placeholder text. No route depends on any backend call, and the
 project builds with all three routes present.
 
 > Route-name note: `/journey` is the planner's proposal for the Journey tab
-> (`VOC-016-D01`, `VOC-016-DEP-04`). If the adopter substitutes `/discover` (per
+> (`VOC-017-D01`, `VOC-017-DEP-04`). If the adopter substitutes `/discover` (per
 > DOC-08's routing table), that route folder and the corresponding `BottomNav`
 > href change accordingly; the rest of this criterion is unchanged.
 
-## VOC-016-AC-01 — Persistent bottom navigation on every tab route
+## VOC-017-AC-01 — Persistent bottom navigation on every tab route
 
-- Requirement source: `VOC-016-D00`, `VOC-016-D02`
-- Tasks: `VOC-016-T00`
-- Tests: `VOC-016-TEST-01`
-- Evidence: `VOC-016-EV-01`
+- Requirement source: `VOC-017-D00`, `VOC-017-D02`
+- Tasks: `VOC-017-T00`
+- Tests: `VOC-017-TEST-01`
+- Evidence: `VOC-017-EV-01`
 - Result: pending
 
 The `(app)` shell layout (`apps/web/src/app/(app)/layout.tsx`) renders the
@@ -39,12 +39,12 @@ three tab routes (Home→`/home`, Journey→`/journey`, Progress→`/progress`),
 that order. The bottom nav does not occlude page content (the content region
 reserves space for the fixed bar).
 
-## VOC-016-AC-02 — Accessibility: keyboard, focus, active state, touch targets
+## VOC-017-AC-02 — Accessibility: keyboard, focus, active state, touch targets
 
-- Requirement source: `VOC-016-D03`
-- Tasks: `VOC-016-T00`
-- Tests: `VOC-016-TEST-02`
-- Evidence: `VOC-016-EV-02`
+- Requirement source: `VOC-017-D03`
+- Tasks: `VOC-017-T00`
+- Tests: `VOC-017-TEST-02`
+- Evidence: `VOC-017-EV-02`
 - Result: pending
 
 The navigation meets, verifiable by inspection of the rendered markup and styles:
@@ -65,15 +65,15 @@ The navigation meets, verifiable by inspection of the rendered markup and styles
 
 These realize DOC-03 §7/§10/§12 and DOC-08 Quality standards (WCAG 2.2 AA
 intent). Automated axe/Playwright verification is a flagged follow-up
-(`VOC-016-D08`); this criterion is verified here by construction and structured
+(`VOC-017-D08`); this criterion is verified here by construction and structured
 inspection.
 
-## VOC-016-AC-03 — Mobile-first layout
+## VOC-017-AC-03 — Mobile-first layout
 
-- Requirement source: `VOC-016-D03`, `VOC-016-D04`
-- Tasks: `VOC-016-T00`
-- Tests: `VOC-016-TEST-02`
-- Evidence: `VOC-016-EV-02`
+- Requirement source: `VOC-017-D03`, `VOC-017-D04`
+- Tasks: `VOC-017-T00`
+- Tests: `VOC-017-TEST-02`
+- Evidence: `VOC-017-EV-02`
 - Result: pending
 
 The shell is designed mobile-first for the 360–430px viewport range (DOC-08):
@@ -83,12 +83,12 @@ the bottom nav is fixed to the bottom of the viewport (thumb-reachable per DOC-0
 content is hidden behind the bar. No horizontal scrolling is introduced at 360px
 width.
 
-## VOC-016-AC-04 — Deterministic checks pass
+## VOC-017-AC-04 — Deterministic checks pass
 
-- Requirement source: `VOC-016-D00`..`D07`
-- Tasks: `VOC-016-T00`
-- Tests: `VOC-016-TEST-03`
-- Evidence: `VOC-016-EV-03`
+- Requirement source: `VOC-017-D00`..`D07`
+- Tasks: `VOC-017-T00`
+- Tests: `VOC-017-TEST-03`
+- Evidence: `VOC-017-EV-03`
 - Result: pending
 
 `pnpm run lint:web`, `pnpm run typecheck:web`, and `pnpm run build:web` all exit

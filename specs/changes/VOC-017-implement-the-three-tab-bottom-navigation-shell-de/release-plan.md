@@ -1,4 +1,4 @@
-# VOC-016 — Release Plan
+# VOC-017 — Release Plan
 
 ## Release and deployment authorization
 
@@ -11,10 +11,10 @@ authority is claimed here; adoption and merge decisions belong to a human.
 
 Exact revision: the implementation PR's head commit, bound in the reviewer's
 verdict per `CLAUDE.md`. Preconditions: package adopted; Journey route name
-resolved (`VOC-016-DEP-04`); web-test-infra follow-up acknowledged
-(`VOC-016-DEP-05`); implementation authorized against a founder-approved
-implementation-ready state (`VOC-016-DEP-01`); `base_sha` re-pinned to the
-then-current `develop` head (`VOC-016-DEP-02`); CI green
+resolved (`VOC-017-DEP-04`); web-test-infra follow-up acknowledged
+(`VOC-017-DEP-05`); implementation authorized against a founder-approved
+implementation-ready state (`VOC-017-DEP-01`); `base_sha` re-pinned to the
+then-current `develop` head (`VOC-017-DEP-02`); CI green
 (`lint:web`/`typecheck:web`/`build:web`/`format:check`). No runtime monitoring
 applies — a placeholder navigation shell has no backend, telemetry, or dynamic
 state to monitor; the only "monitoring" is CI on the PR. Outcome owner: founder.
@@ -25,7 +25,7 @@ the merge-gate policy then in force, not by this document.
 ## Rollback
 
 Trigger: post-merge discovery of a broken route, a missing/incorrect nav link, an
-accessibility regression against `VOC-016-AC-02` (e.g. suppressed focus, sub-44px
+accessibility regression against `VOC-017-AC-02` (e.g. suppressed focus, sub-44px
 target, color-only active state), or a failing
 `typecheck:web`/`build:web`/`lint:web`/`format:check`. Mechanism: `git revert` of
 the merge commit — safe and complete, as the shell adds only front-end files and
@@ -35,20 +35,20 @@ this package's (adoption-time re-pinned) `base_sha`.
 ## Independent verification, human approvals, and closure
 
 Independent verification: exact-SHA reviewer verdict per `CLAUDE.md`, covering
-route resolution (`VOC-016-AC-00`), the persistent-nav contract
-(`VOC-016-AC-01`), the accessibility and mobile-first checklists
-(`VOC-016-AC-02`/`AC-03`, with the automated-a11y limitation explicitly noted per
-`VOC-016-D08`), and the deterministic checks (`VOC-016-AC-04`), plus confirmation
+route resolution (`VOC-017-AC-00`), the persistent-nav contract
+(`VOC-017-AC-01`), the accessibility and mobile-first checklists
+(`VOC-017-AC-02`/`AC-03`, with the automated-a11y limitation explicitly noted per
+`VOC-017-D08`), and the deterministic checks (`VOC-017-AC-04`), plus confirmation
 that the root `/` page and root layout are unchanged and that no
 dependency/lockfile change was introduced.
 
 Required human approvals: a founder-approved implementation-ready state at
-adoption (`VOC-016-DEP-01`, including the Journey route-name decision), plus the
+adoption (`VOC-017-DEP-01`, including the Journey route-name decision), plus the
 merge decision at implementation time. Proposed class is R1; under active A-003 no
 standing technical-steward approval is required merely for the class, and this is
 below R3 regardless — but a human still adopts the package, approves the
 requirement, and authorizes the merge, and the independent verifier must still
-review accessibility as a genuine semantic dimension (`VOC-016-R03`).
+review accessibility as a genuine semantic dimension (`VOC-017-R03`).
 
 Do not conflate repository merge, release, activation, and closure. Closure: no
 originating issue exists to auto-close; closure is the reviewer's exact-SHA PASS

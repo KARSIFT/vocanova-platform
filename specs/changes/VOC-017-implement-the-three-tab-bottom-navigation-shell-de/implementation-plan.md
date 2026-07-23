@@ -1,14 +1,14 @@
-# VOC-016 — Implementation Plan
+# VOC-017 — Implementation Plan
 
 ## Preconditions and protected areas
 
 Do not begin until this package is adopted and implementation is authorized: a
 human sets `status`, `approval_status`, and `implementation.authorized` in
 `change.yaml` (all at unadopted defaults in this draft), records a
-founder-approved implementation-ready state (`VOC-016-DEP-01`), resolves the
-Journey route name (`VOC-016-DEP-04`), and acknowledges the web-test-infra
-follow-up (`VOC-016-DEP-05`). Depends on the existing Next.js web foundation on
-`develop` (`VOC-016-DEP-03`, present at drafting). No protected areas are
+founder-approved implementation-ready state (`VOC-017-DEP-01`), resolves the
+Journey route name (`VOC-017-DEP-04`), and acknowledges the web-test-infra
+follow-up (`VOC-017-DEP-05`). Depends on the existing Next.js web foundation on
+`develop` (`VOC-017-DEP-03`, present at drafting). No protected areas are
 touched — every target is under `apps/web/src/**`.
 
 ## File reconciliation and implementation sequence
@@ -17,7 +17,7 @@ Existing state (do not disturb):
 - `apps/web/src/app/layout.tsx` — root layout (`<html>`/`<body>`, metadata). Left
   unchanged; the `(app)` shell layout nests inside it.
 - `apps/web/src/app/page.tsx` — root `/` foundation page. Left unchanged
-  (`VOC-016-D06`); no redirect added.
+  (`VOC-017-D06`); no redirect added.
 - `apps/web/src/app/globals.css` — Tailwind entry (`@import "tailwindcss"`).
   Reused as-is; no new global styles required beyond utility classes.
 
@@ -43,11 +43,11 @@ New files (all created fresh under `apps/web/src/app/(app)/`):
 3. `(app)/home/page.tsx` — placeholder: `<h1>Home</h1>` + one descriptive line.
 4. `(app)/journey/page.tsx` — placeholder: `<h1>Journey</h1>` + one descriptive
    line. (Rename the folder to `discover` if the adopter substitutes `/discover`
-   per `VOC-016-D01`; update the matching `BottomNav` href.)
+   per `VOC-017-D01`; update the matching `BottomNav` href.)
 5. `(app)/progress/page.tsx` — placeholder: `<h1>Progress</h1>` + one descriptive
    line.
 
-Ordered steps (single task, `VOC-016-T00`): create file 1 (the nav component),
+Ordered steps (single task, `VOC-017-T00`): create file 1 (the nav component),
 then file 2 (the shell layout that renders it), then files 3–5 (the placeholder
 pages the layout wraps). Keep everything within `apps/web/src/**`; introduce no
 dependency and no `package.json`/lockfile change.
@@ -70,10 +70,10 @@ prettier target set.)
 Independent verification (exact-SHA, per `CLAUDE.md`): the reviewer confirms the
 three routes resolve under `(app)`; the shell layout renders `BottomNav` + a
 `<main>` on every tab; `BottomNav` has exactly three correctly-targeted links in
-order; and each item of the `VOC-016-AC-02` accessibility checklist holds
+order; and each item of the `VOC-017-AC-02` accessibility checklist holds
 (semantic named `<nav>`, text labels, `aria-current` + non-color active cue,
-visible focus, ≥44px targets) and `VOC-016-AC-03` mobile-first layout holds. The
-verifier explicitly notes the automated-a11y limitation (`VOC-016-D08`), confirms
+visible focus, ≥44px targets) and `VOC-017-AC-03` mobile-first layout holds. The
+verifier explicitly notes the automated-a11y limitation (`VOC-017-D08`), confirms
 the root `/` page and root layout are unchanged, confirms no dependency/lockfile
 change, binds the verdict to the exact reviewed commit SHA, and confirms the
 implementer did not self-approve or self-merge.

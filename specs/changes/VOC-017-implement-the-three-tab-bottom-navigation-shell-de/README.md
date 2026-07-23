@@ -1,4 +1,4 @@
-# VOC-016 — Three-Tab Bottom Navigation Shell (Home / Journey / Progress)
+# VOC-017 — Three-Tab Bottom Navigation Shell (Home / Journey / Progress)
 
 **Draft package — not adopted, not approved, not implementation authority.**
 Prepared by the planner role from a free-text request grounded in the approved
@@ -9,9 +9,9 @@ implementation-ready state) before any implementation.
 
 ## Identity and lifecycle
 
-- Package ID: `VOC-016`
+- Package ID: `VOC-017`
 - Canonical path:
-  `specs/changes/VOC-016-implement-the-three-tab-bottom-navigation-shell-de/`
+  `specs/changes/VOC-017-implement-the-three-tab-bottom-navigation-shell-de/`
 - Lifecycle state: `draft` (unadopted; see `change.yaml` — every
   adoption/authorization gate is left at its unadopted default)
 - Proposed risk: R1 (draft proposal only — the authoritative floor is whatever
