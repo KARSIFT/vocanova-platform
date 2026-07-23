@@ -83,11 +83,15 @@ Current packages:
   synchronization before any VOC-006 correction may begin.
 
 - [`VOC-012 — PR #41 R3 Gate Remediation`](changes/VOC-012-pr41-r3-gate-remediation/README.md)
-  — `proposed` R3 remediation package sourced from issue #39 founder direction comment
-  `5052251828`. PR #41 merged VOC-011 without its independent exact-SHA report being
-  recorded on the PR before merge. VOC-012 forbids retroactive validation and requires
-  package synchronization, a governed PR #41 revert, fresh independently verified
-  VOC-011 adoption, and final synchronization before PR #40 remediation may resume.
+  — adopted `implementation-ready` R3 remediation package sourced from issue #39
+  founder direction comment `5052251828`. Exact package candidate
+  `2e6a838f49bd6f02c0e43d33b1aee51e5ba9fec3` received independent
+  `PASS WITH NON-BLOCKING FINDINGS` in comment `5063970647` before PR #42 merged as
+  canonical `develop` commit `0212350114e6e68dce9c334c73713d5749166a0d`.
+  After this lifecycle synchronization merges, authority is limited to preparing the
+  separately gated PR #41 revert. PR #41 remains permanently procedurally invalid;
+  fresh VOC-011 adoption and final synchronization remain required before PR #40
+  remediation may resume.
 
 This final synchronization records DOC-00 through DOC-12 as validly re-adopted and
 authoritative upon its canonical merge; it grants no application, deployment,

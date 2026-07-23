@@ -36,7 +36,12 @@ deployment, production, monitoring, release, or activation behavior changes.
 - **VOC-012-DEP-02:** Base `f1596ba9f0adb896e93368ec9cf9f111934c57c1` — resolved.
 - **VOC-012-DEP-03:** PR #41 Git/GitHub failure evidence — resolved.
 - **VOC-012-DEP-04:** Active A-003 governance — resolved and binding.
-- **VOC-012-DEP-05:** Valid VOC-012 adoption and sync — unresolved before revert.
+- **VOC-012-DEP-05:** Valid VOC-012 adoption and sync — package adoption resolved by
+  exact candidate `2e6a838f49bd6f02c0e43d33b1aee51e5ba9fec3`, independent report
+  comment `5063970647` posted at `2026-07-23T22:01:47Z`, and authorized human PR #42
+  merge `0212350114e6e68dce9c334c73713d5749166a0d` at
+  `2026-07-23T23:02:33Z`. Revert preparation remains blocked until this lifecycle
+  synchronization validly merges.
 
 ## Evidence register
 

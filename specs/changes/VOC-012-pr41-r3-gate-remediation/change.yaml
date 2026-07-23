@@ -4,7 +4,7 @@ id: VOC-012
 slug: pr41-r3-gate-remediation
 title: PR #41 R3 Gate Remediation
 type: governance-process-remediation
-status: proposed
+status: implementation-ready
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-012-pr41-r3-gate-remediation
@@ -16,7 +16,7 @@ requirement_approval_evidence: https://github.com/KARSIFT/vocanova-platform/issu
 base_branch: develop
 base_sha: f1596ba9f0adb896e93368ec9cf9f111934c57c1
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: 2e6a838f49bd6f02c0e43d33b1aee51e5ba9fec3
 
 owners:
   decision: founder
@@ -26,9 +26,12 @@ owners:
 
 approvals:
   package_independent_verification:
-    status: pending
-    candidate_sha: null
-    evidence: null
+    status: passed-exact-revision
+    verdict: PASS WITH NON-BLOCKING FINDINGS
+    candidate_sha: 2e6a838f49bd6f02c0e43d33b1aee51e5ba9fec3
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/42#issuecomment-5063970647
+    comment_id: 5063970647
+    posted_at: 2026-07-23T22:01:47Z
   package_founder:
     status: not-required-routine-r3
     evidence: active-a003
@@ -68,7 +71,7 @@ dependencies:
   - id: VOC-012-DEP-04
     status: resolved-by-active-a003-governance
   - id: VOC-012-DEP-05
-    status: package-adoption-and-sync-required-before-revert
+    status: resolved-by-pr-42-package-adoption-pending-this-sync
 
 package_adoption_affected_areas:
   - specs/README.md
@@ -80,7 +83,7 @@ planned_remediation_affected_areas:
   - specs/changes/VOC-012-pr41-r3-gate-remediation
 
 implementation:
-  authorized: false
+  authorized: true
   authority_issue: 39
   required: true
   target_branch: develop
@@ -98,9 +101,43 @@ release:
   migration_required: false
   rollback_required: true
 
-repository_adoption_status: pending
+package_adoption:
+  pull_request: 42
+  base_sha: f1596ba9f0adb896e93368ec9cf9f111934c57c1
+  candidate_sha: 2e6a838f49bd6f02c0e43d33b1aee51e5ba9fec3
+  candidate_tree_sha: e0164ca01aca59512d71afee3aae4889ec701897
+  independent_report:
+    verdict: PASS WITH NON-BLOCKING FINDINGS
+    comment_id: 5063970647
+    url: https://github.com/KARSIFT/vocanova-platform/pull/42#issuecomment-5063970647
+    posted_at: 2026-07-23T22:01:47Z
+  hosted_checks:
+    - name: governance-policy
+      conclusion: success
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/29963470014/job/89069666102
+    - name: governance-policy
+      conclusion: success
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/29963515118/job/89069808728
+    - name: validate
+      conclusion: success
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/29963469967/job/89069665966
+  merged_at: 2026-07-23T23:02:33Z
+  merged_by: m-e-h-r-d-a-a-d
+  canonical_merge_sha: 0212350114e6e68dce9c334c73713d5749166a0d
+  canonical_merge_tree_sha: e0164ca01aca59512d71afee3aae4889ec701897
+  candidate_and_merge_trees_identical: true
+  report_preceded_merge: true
+  material_revision_after_report: false
+
+repository_adoption_status: adopted
+adoption_pr: 42
+adopted_develop_sha: 0212350114e6e68dce9c334c73713d5749166a0d
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/42
 implementation_authority_before_adoption: false
-implementation_authority_status: blocked-pending-package-adoption-and-sync
+implementation_authority_status: active-revert-preparation-only-after-this-sync-merges
+next_stage: governed-pr41-revert-candidate
+next_stage_independent_verification: pending-exact-revision
+next_stage_authorized_human_merge: pending
 pr40_remediation_status: prohibited-pending-voc012-remediation
 voc_006_correction_status: prohibited-pending-nested-remediation
 issue_closure_status: blocked-pending-remediation-and-voc010-lifecycle
@@ -109,6 +146,7 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-applicable
-blocking_reasons:
-  - exact-revision-independent-verification-pending
-  - authorized-human-merge-pending
+pr41_procedural_status: permanently-invalid
+pr41_external_report_reuse: prohibited-and-not-reused
+package_sync_status: pending-this-candidate-merge
+blocking_reasons: null

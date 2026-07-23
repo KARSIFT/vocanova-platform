@@ -2,10 +2,24 @@
 
 ## Package adoption and synchronization
 
-The first PR adds only this proposed package and its index entry. It requires R3
-classification, deterministic/hosted checks, exact-SHA independent verification
-posted to the PR, and authorized human merge. A separate sync must record that
-adoption before remediation.
+PR #42 adopted exact package candidate
+`2e6a838f49bd6f02c0e43d33b1aee51e5ba9fec3` from base
+`f1596ba9f0adb896e93368ec9cf9f111934c57c1`. Deterministic and hosted checks passed,
+and exact-revision independent verification returned
+`PASS WITH NON-BLOCKING FINDINGS` in comment `5063970647`, posted at
+`2026-07-23T22:01:47Z`. The authorized human merge followed at
+`2026-07-23T23:02:33Z`, creating canonical `develop` commit
+`0212350114e6e68dce9c334c73713d5749166a0d`.
+
+The candidate and merge trees are byte-identical at
+`e0164ca01aca59512d71afee3aae4889ec701897`. Tree identity is content evidence only;
+the preceding canonical report satisfied the procedural gate. Codex did not approve
+or merge. PR #41's external report was not posted or reused, and PR #41 remains
+permanently procedurally invalid.
+
+After this separate synchronization validly merges, package authority extends only to
+preparing the governed PR #41 revert candidate. It does not authorize that candidate's
+merge or any later stage.
 
 ## Governed PR #41 revert
 

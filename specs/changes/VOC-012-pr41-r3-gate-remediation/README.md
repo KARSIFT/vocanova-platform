@@ -4,7 +4,7 @@
 
 - Change ID: `VOC-012`
 - Type: governance-process-remediation
-- Status: `proposed`
+- Status: `implementation-ready`
 - Risk: `R3`
 - Authority model: active A-003
 - Requirement source: issue #39 founder direction comment `5052251828`
@@ -39,10 +39,30 @@ chain. Only after that sequence may the previously planned PR #40 remediation re
 
 Tree identity is content evidence only. It does not cure the missing procedural gate.
 
+## Package adoption evidence
+
+PR #42 validly adopted the package from base
+`f1596ba9f0adb896e93368ec9cf9f111934c57c1` using exact candidate
+`2e6a838f49bd6f02c0e43d33b1aee51e5ba9fec3`. Both `governance-policy` runs and
+`validate` passed on that candidate. Claude Code independently verified the exact base
+and candidate with `PASS WITH NON-BLOCKING FINDINGS`; the complete report was posted
+as comment `5063970647` at `2026-07-23T22:01:47Z`.
+
+The authorized human merge followed at `2026-07-23T23:02:33Z` and created canonical
+`develop` commit `0212350114e6e68dce9c334c73713d5749166a0d`. The candidate and
+merge trees are byte-identical at `e0164ca01aca59512d71afee3aae4889ec701897`;
+that identity confirms merged content but is not a substitute for the preceding
+verification report. No material revision intervened. Codex did not approve or merge.
+
+The external chat report associated with PR #41 was not posted or reused. PR #41
+remains permanently procedurally invalid.
+
 ## Required sequence
 
-1. Independently verify and human-merge this package-only candidate.
-2. Separately synchronize VOC-012 package-adoption evidence and authority.
+1. Independently verify and human-merge this package-only candidate — complete through
+   PR #42.
+2. Separately synchronize VOC-012 package-adoption evidence and authority — this
+   candidate.
 3. Mechanically revert exactly PR #41's ten paths while preserving VOC-012 and all
    unrelated later history.
 4. Independently verify the exact revert candidate and stop for human merge.
@@ -51,8 +71,10 @@ Tree identity is content evidence only. It does not cure the missing procedural 
 7. Separately synchronize VOC-012 remediation and fresh VOC-011 adoption evidence.
 8. Only then resume the PR #40 remediation governed through VOC-011.
 
-This candidate performs package preparation only. It does not perform any later
-stage, validate PR #41 retroactively, authorize PR #40 remediation, or close issue #39.
+After this synchronization validly merges, package authority extends only to preparing
+the separately gated PR #41 revert candidate. It does not validate PR #41
+retroactively, authorize a revert merge, begin fresh VOC-011 adoption, authorize PR
+#40 remediation, or close issue #39.
 
 ## Scope boundary
 
