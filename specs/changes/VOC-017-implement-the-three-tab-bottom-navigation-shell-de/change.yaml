@@ -1,0 +1,76 @@
+schema_version: 1
+id: VOC-017
+slug: implement-the-three-tab-bottom-navigation-shell-de
+title: Three-Tab Bottom Navigation Shell (Home / Journey / Progress)
+type: feature
+status: implementation-ready
+risk: R1
+planned_implementation_risk_floor: R1
+canonical_path: specs/changes/VOC-017-implement-the-three-tab-bottom-navigation-shell-de
+authority_model: a003-active
+requirement_source: docs/design/03-ui-ux-design.md#2 ; docs/design/03-ui-ux-design.md#10
+  ; docs/design/08-web-app-design.md
+requirement_approval_status: founder-approved
+base_branch: develop
+base_sha: f5b920f8b6aa31565b66b03972b73ed6f0360c7b
+target_branch: develop
+approved_candidate_sha: TBD-set-at-package-adoption
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: false
+production_impact: none
+rollback_required: true
+owners:
+  decision: founder
+  package_preparation: claude-code-planner
+  implementation: claude-code
+  independent_verification: claude-code
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+- id: VOC-017-DEP-01
+  status: founder-approved
+- id: VOC-017-DEP-02
+  status: resolve-base-sha-at-adoption
+- id: VOC-017-DEP-03
+  status: requires-nextjs-web-foundation-on-develop
+- id: VOC-017-DEP-04
+  status: 'founder-resolved: route /discover (matches DOC-08''s canonical routing
+    table), nav label text stays Journey (matches DOC-03)'
+- id: VOC-017-DEP-05
+  status: open-decision-web-test-infrastructure-follow-up
+affected_areas:
+- apps/web
+implementation:
+  authorized: true
+  authority_status: validly-exercised
+  required: true
+  status: implementation-ready
+  target_branch: develop
+  pull_request: null
+  authority_issue: 28
+release:
+  required: false
+  mode: app-shell-addition-only
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: adopted
+adoption_pr: 22
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/22
+implementation_authority_before_adoption: false
+implementation_authority_status: exercised-pending-first-run
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-applicable
+blocking_reasons: null
