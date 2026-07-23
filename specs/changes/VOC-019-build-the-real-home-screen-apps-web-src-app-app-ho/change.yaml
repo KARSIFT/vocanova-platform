@@ -45,9 +45,9 @@ dependencies:
     64 custom properties) both present at commit a6da9bf3244048773cc08cdf20d536aba42b517b'
 - id: VOC-019-DEP-04
   status: 'founder-confirmed: narrower scope stands - sentence-practice quick-entry
-    and a review-start action are deferred to a follow-up package once a /review
-    route and real API wiring exist; this task covers Today''s Mission, streak,
-    due-review count (display-only), and Journey/Discover entry only'
+    and a review-start action are deferred to a follow-up package once a /review route
+    and real API wiring exist; this task covers Today''s Mission, streak, due-review
+    count (display-only), and Journey/Discover entry only'
 - id: VOC-019-DEP-05
   status: 'required-follow-up-not-in-scope: DOC-03 section 9 empty/loading/error states
     and wiring the feedback token scale (success/warning/error) are deferred to the
@@ -61,7 +61,7 @@ implementation:
   status: implementation-ready
   target_branch: develop
   pull_request: null
-  authority_issue: null
+  authority_issue: 41
 release:
   required: false
   mode: app-screen-addition-only
