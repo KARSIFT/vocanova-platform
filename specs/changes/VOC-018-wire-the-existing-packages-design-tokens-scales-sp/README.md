@@ -1,4 +1,4 @@
-# VOC-016 — Wire design-token scales into apps/web (Tailwind v4 @theme)
+# VOC-018 — Wire design-token scales into apps/web (Tailwind v4 @theme)
 
 **Draft package — not adopted, not approved, not implementation authority.**
 Prepared by the planner role from the free-text request and the approved web
@@ -8,9 +8,9 @@ any implementation.
 
 ## Identity and lifecycle
 
-- Package ID: `VOC-016`
+- Package ID: `VOC-018`
 - Canonical path:
-  `specs/changes/VOC-016-wire-the-existing-packages-design-tokens-scales-sp/`
+  `specs/changes/VOC-018-wire-the-existing-packages-design-tokens-scales-sp/`
 - Lifecycle state: `draft` (unadopted; see `change.yaml`)
 - Proposed risk: **R2** (draft proposal only — the authoritative floor is
   whatever `scripts/governance/classify-change-risk.sh` computes at
@@ -42,7 +42,7 @@ truth. It adds **no new UI screens, routes, or components** — only the wiring.
 
 Note: the request mentioned a `feedback` scale "if adopted"; no such scale exists
 in `packages/design-tokens`, so it is explicitly out of scope
-(`VOC-016-DEP-05`).
+(`VOC-018-DEP-05`).
 
 ## Scope, non-goals, risk, and protected areas
 

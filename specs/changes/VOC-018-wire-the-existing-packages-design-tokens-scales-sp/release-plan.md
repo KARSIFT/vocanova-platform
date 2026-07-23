@@ -1,4 +1,4 @@
-# VOC-016 — Release Plan
+# VOC-018 — Release Plan
 
 ## Release and deployment authorization
 
@@ -12,7 +12,7 @@ human.
 
 Exact revision: the implementation PR's head commit, bound in the reviewer's
 verdict per `CLAUDE.md`. Preconditions: package adopted; the open design decisions
-(`VOC-016-D00`/`D01`/`D02`, `VOC-016-DEP-04`) confirmed or amended; implementation
+(`VOC-018-D00`/`D01`/`D02`, `VOC-018-DEP-04`) confirmed or amended; implementation
 authorized against a founder-approved implementation-ready state; CI green
 (`format:check`, `lint`, `typecheck`, `test` incl. the drift check, `build`). No
 runtime monitoring applies — this is a build-time presentational layer with no
@@ -25,7 +25,7 @@ adoption) is made by a human/CI at implementation time, not by this document.
 
 Trigger: post-merge discovery of a wrong emitted value, an accidental change to a
 `packages/design-tokens/src/*` token value, a broken `build`/`typecheck`, or an
-unintended visual regression from the default-override semantics (`VOC-016-D02`).
+unintended visual regression from the default-override semantics (`VOC-018-D02`).
 Mechanism: `git revert` of the merge commit — safe and complete; no runtime
 consumer depends on the token layer yet and no data/migration is involved. Owner:
 founder. Last-known-good reference: `develop` at this package's (adoption-time)

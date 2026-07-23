@@ -1,14 +1,14 @@
-# VOC-016 — Test Plan
+# VOC-018 — Test Plan
 
 Tests are deterministic, use no secrets or production data, and trace to
-`VOC-016-AC-00`..`AC-04`. No migration or authorization test applies (no data,
+`VOC-018-AC-00`..`AC-04`. No migration or authorization test applies (no data,
 auth, or protected surface is touched); no accessibility test applies until a
 consuming surface renders (see `impact-analysis.md`).
 
-## VOC-016-TEST-00 — Package is importable and depended on
+## VOC-018-TEST-00 — Package is importable and depended on
 
-- Covers: `VOC-016-AC-00`
-- Preconditions: `VOC-016-T00` complete; `pnpm install` run.
+- Covers: `VOC-018-AC-00`
+- Preconditions: `VOC-018-T00` complete; `pnpm install` run.
 - Procedure:
   1. Inspect `packages/design-tokens/package.json`: confirm `main`, `types`, and
      an `exports` map resolving to `dist/index.js` / `dist/index.d.ts`, and that
@@ -21,13 +21,13 @@ consuming surface renders (see `impact-analysis.md`).
      and type-checks.
 - Expected result: all confirmations hold; zero typecheck errors; no token value
   changed.
-- Evidence: `VOC-016-EV-00`
+- Evidence: `VOC-018-EV-00`
 
-## VOC-016-TEST-01 — Every scale key is emitted with the exact token value
+## VOC-018-TEST-01 — Every scale key is emitted with the exact token value
 
-- Covers: `VOC-016-AC-01`
-- Preconditions: `VOC-016-T01` complete.
-- Procedure: with the token CSS present, verify against the `VOC-016-D01` table,
+- Covers: `VOC-018-AC-01`
+- Preconditions: `VOC-018-T01` complete.
+- Procedure: with the token CSS present, verify against the `VOC-018-D01` table,
   key by key:
   1. `spacing`→`--spacing-*` (7), `neutral`→`--color-neutral-*` (10),
      `brand.primary`→`--color-primary-*` (10),
@@ -40,12 +40,12 @@ consuming surface renders (see `impact-analysis.md`).
   3. No extra token-layer property and no missing key; no `--text-*--line-height`
      invented.
 - Expected result: all 64 present and exact; count matches; no stray keys.
-- Evidence: `VOC-016-EV-01`
+- Evidence: `VOC-018-EV-01`
 
-## VOC-016-TEST-02 — Tokens compile and are consumable
+## VOC-018-TEST-02 — Tokens compile and are consumable
 
-- Covers: `VOC-016-AC-01`, `VOC-016-AC-02`
-- Preconditions: `VOC-016-T01` complete.
+- Covers: `VOC-018-AC-01`, `VOC-018-AC-02`
+- Preconditions: `VOC-018-T01` complete.
 - Procedure:
   1. Run `pnpm --filter @vocanova/web build`; confirm it exits zero and the
      compiled CSS contains the token custom properties on `:root`.
@@ -53,15 +53,15 @@ consuming surface renders (see `impact-analysis.md`).
      with `bg-primary-500` yields `--color-primary-500`'s value; `p-md` yields
      `--spacing-md`), and that `var(--duration-base)` resolves — the
      `duration` scale is checked only as a custom property + `var()`, with **no**
-     `duration-<name>` utility asserted (`VOC-016-D01`/`D04`).
+     `duration-<name>` utility asserted (`VOC-018-D01`/`D04`).
 - Expected result: build passes; namespaced utilities resolve to token values;
   every custom property is consumable via `var(--…)`.
-- Evidence: `VOC-016-EV-01`
+- Evidence: `VOC-018-EV-01`
 
-## VOC-016-TEST-03 — Drift check fails on divergence, passes clean, and is CI-enforced
+## VOC-018-TEST-03 — Drift check fails on divergence, passes clean, and is CI-enforced
 
-- Covers: `VOC-016-AC-03`
-- Preconditions: `VOC-016-T02` complete; `dist` built (run `typecheck`/`build`
+- Covers: `VOC-018-AC-03`
+- Preconditions: `VOC-018-T02` complete; `dist` built (run `typecheck`/`build`
   first).
 - Procedure:
   1. Run `pnpm run test`; confirm `scripts/foundation/tokens-css.test.mjs`
@@ -72,11 +72,11 @@ consuming surface renders (see `impact-analysis.md`).
      key. Revert.
 - Expected result: passes clean; fails on the seeded mismatch; no
   `.github/workflows/*` file and no root `package.json` script was modified.
-- Evidence: `VOC-016-EV-03`
+- Evidence: `VOC-018-EV-03`
 
-## VOC-016-TEST-04 — Full deterministic suite passes; no UI surface added
+## VOC-018-TEST-04 — Full deterministic suite passes; no UI surface added
 
-- Covers: `VOC-016-AC-04`
+- Covers: `VOC-018-AC-04`
 - Preconditions: all tasks complete.
 - Procedure: run, from repo root:
   ```bash
@@ -91,4 +91,4 @@ consuming surface renders (see `impact-analysis.md`).
 - Expected result: all five commands exit zero with no new findings elsewhere;
   `page.tsx`/`layout.tsx` unchanged; the only new runtime artifact is the token
   CSS layer.
-- Evidence: `VOC-016-EV-04`
+- Evidence: `VOC-018-EV-04`

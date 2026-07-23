@@ -1,4 +1,4 @@
-# VOC-016 — Implementation Plan
+# VOC-018 — Implementation Plan
 
 ## Preconditions and protected areas
 
@@ -6,10 +6,10 @@ Do not begin until this package is adopted and implementation is authorized: a
 human sets `status`, `approval_status`, `implementation.authorized`, and records a
 founder-approved implementation-ready state in `change.yaml` (all at unadopted
 defaults in this draft), and confirms or amends the open design decisions
-`VOC-016-D00`/`D01`/`D02` (`VOC-016-DEP-04`). Depends on the VOC-010→VOC-015
+`VOC-018-D00`/`D01`/`D02` (`VOC-018-DEP-04`). Depends on the VOC-010→VOC-015
 scales already on `develop` (present at authoring). **Protected-area guard:** the
 recommended file set touches no R3/R4 path; the implementer must NOT edit any
-`.github/workflows/*` file (`VOC-016-D03`, `VOC-016-R03`) — doing so would raise
+`.github/workflows/*` file (`VOC-018-D03`, `VOC-018-R03`) — doing so would raise
 the risk floor and change the approval surface.
 
 ## File reconciliation and implementation sequence
@@ -33,17 +33,17 @@ New targets:
 
 Ordered steps:
 
-1. **`VOC-016-T00`** — add `main`/`types`/`exports` to
+1. **`VOC-018-T00`** — add `main`/`types`/`exports` to
    `packages/design-tokens/package.json`; add the `workspace:*` dependency to
    `apps/web`; `pnpm install`; verify `tsc -b` emits `dist` and the bare-specifier
    import type-checks.
-2. **`VOC-016-T01`** — implement the confirmed source-of-truth design
-   (`VOC-016-D00`). Generation: add the generator, run `generate:tokens`, commit
+2. **`VOC-018-T01`** — implement the confirmed source-of-truth design
+   (`VOC-018-D00`). Generation: add the generator, run `generate:tokens`, commit
    `tokens.generated.css`, import it from `globals.css`. Map every key per the
-   `VOC-016-D01` table; emit exactly the 64 custom properties in `VOC-016-AC-01`.
+   `VOC-018-D01` table; emit exactly the 64 custom properties in `VOC-018-AC-01`.
    Verify `pnpm --filter @vocanova/web build` compiles the token custom properties
    into the output and that a spot-check utility (e.g. `bg-primary-500`) resolves.
-3. **`VOC-016-T02`** — add `scripts/foundation/tokens-css.test.mjs`; confirm the
+3. **`VOC-018-T02`** — add `scripts/foundation/tokens-css.test.mjs`; confirm the
    root `test` glob runs it, it fails on a deliberate mismatch and passes clean,
    and no root script or workflow file was changed.
 
@@ -62,7 +62,7 @@ pnpm run format:check
 
 Independent verification (exact-SHA, per `CLAUDE.md`): the reviewer confirms each
 of the 64 emitted custom properties equals its TS token value byte-for-byte per
-the `VOC-016-D01` mapping; confirms **no** token value under
+the `VOC-018-D01` mapping; confirms **no** token value under
 `packages/design-tokens/src/*` changed; confirms the drift check actually fails on
 a divergence (not a no-op); confirms **no `.github/workflows/*` file was touched**
 and no protected path was entered; and confirms `page.tsx`/`layout.tsx` gained no

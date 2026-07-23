@@ -1,12 +1,12 @@
 schema_version: 1
-id: VOC-016
+id: VOC-018
 slug: wire-the-existing-packages-design-tokens-scales-sp
 title: Wire design-token scales into apps/web (Tailwind v4 @theme)
 type: feature
 status: draft
 risk: R2
 planned_implementation_risk_floor: R2
-canonical_path: specs/changes/VOC-016-wire-the-existing-packages-design-tokens-scales-sp
+canonical_path: specs/changes/VOC-018-wire-the-existing-packages-design-tokens-scales-sp
 authority_model: a003-active
 requirement_source: docs/design/08-web-app-design.md
 requirement_approval_status: not-approved
@@ -34,15 +34,15 @@ artifacts:
   test_plan: test-plan.md
   release_plan: release-plan.md
 dependencies:
-- id: VOC-016-DEP-01
+- id: VOC-018-DEP-01
   status: requires-founder-approved-implementation-ready-state-at-adoption
-- id: VOC-016-DEP-02
+- id: VOC-018-DEP-02
   status: resolve-base-sha-at-adoption
-- id: VOC-016-DEP-03
+- id: VOC-018-DEP-03
   status: requires-voc-010-through-voc-015-scales-on-develop
-- id: VOC-016-DEP-04
+- id: VOC-018-DEP-04
   status: founder-must-confirm-namespace-naming-and-source-of-truth-decisions
-- id: VOC-016-DEP-05
+- id: VOC-018-DEP-05
   status: no-feedback-scale-exists-so-it-is-out-of-scope
 affected_areas:
 - apps/web
