@@ -41,9 +41,12 @@ dependencies:
 - id: VOC-018-DEP-03
   status: requires-voc-010-through-voc-015-scales-on-develop
 - id: VOC-018-DEP-04
-  status: "founder-resolved: D00=generate (not hand-author); D01=drop brand- prefix (bg-primary-500/bg-secondary-500); D02=merge semantics (override only token-defined keys, not a full palette reset)"
+  status: 'founder-resolved: D00=generate (not hand-author); D01=drop brand- prefix
+    (bg-primary-500/bg-secondary-500); D02=merge semantics (override only token-defined
+    keys, not a full palette reset)'
 - id: VOC-018-DEP-05
-  status: "confirmed-out-of-scope: feedback scale (VOC-016) landed on develop after this draft, but wiring it is a follow-up package, not this one"
+  status: 'confirmed-out-of-scope: feedback scale (VOC-016) landed on develop after
+    this draft, but wiring it is a follow-up package, not this one'
 affected_areas:
 - apps/web
 - packages/design-tokens
@@ -56,6 +59,7 @@ implementation:
   status: implementation-ready
   target_branch: develop
   pull_request: null
+  authority_issue: null
 release:
   required: false
   mode: application-wiring-only
