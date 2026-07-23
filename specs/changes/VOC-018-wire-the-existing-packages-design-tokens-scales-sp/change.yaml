@@ -3,19 +3,19 @@ id: VOC-018
 slug: wire-the-existing-packages-design-tokens-scales-sp
 title: Wire design-token scales into apps/web (Tailwind v4 @theme)
 type: feature
-status: draft
+status: implementation-ready
 risk: R2
 planned_implementation_risk_floor: R2
 canonical_path: specs/changes/VOC-018-wire-the-existing-packages-design-tokens-scales-sp
 authority_model: a003-active
 requirement_source: docs/design/08-web-app-design.md
-requirement_approval_status: not-approved
+requirement_approval_status: founder-approved
 base_branch: develop
-base_sha: TBD-set-at-package-adoption
+base_sha: 85ab46c852a8c89fb0a34ee3050b84f7ca52dc69
 target_branch: develop
 approved_candidate_sha: TBD-set-at-package-adoption
-approval_status: not-approved
-implementation_authorized: false
+approval_status: approved
+implementation_authorized: true
 automatic_merge_allowed: false
 production_impact: none
 rollback_required: true
@@ -35,25 +35,25 @@ artifacts:
   release_plan: release-plan.md
 dependencies:
 - id: VOC-018-DEP-01
-  status: requires-founder-approved-implementation-ready-state-at-adoption
+  status: founder-approved
 - id: VOC-018-DEP-02
   status: resolve-base-sha-at-adoption
 - id: VOC-018-DEP-03
   status: requires-voc-010-through-voc-015-scales-on-develop
 - id: VOC-018-DEP-04
-  status: founder-must-confirm-namespace-naming-and-source-of-truth-decisions
+  status: "founder-resolved: D00=generate (not hand-author); D01=drop brand- prefix (bg-primary-500/bg-secondary-500); D02=merge semantics (override only token-defined keys, not a full palette reset)"
 - id: VOC-018-DEP-05
-  status: no-feedback-scale-exists-so-it-is-out-of-scope
+  status: "confirmed-out-of-scope: feedback scale (VOC-016) landed on develop after this draft, but wiring it is a follow-up package, not this one"
 affected_areas:
 - apps/web
 - packages/design-tokens
 - pnpm-lock.yaml
 - scripts/foundation
 implementation:
-  authorized: false
+  authorized: true
+  authority_status: validly-exercised
   required: true
-  status: draft
-  issue: null
+  status: implementation-ready
   target_branch: develop
   pull_request: null
 release:
@@ -64,11 +64,11 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 23
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/23
 implementation_authority_before_adoption: false
-implementation_authority_status: not-authorized
+implementation_authority_status: exercised-pending-first-run
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
