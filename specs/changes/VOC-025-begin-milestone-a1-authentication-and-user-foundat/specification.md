@@ -31,9 +31,9 @@ Proposed R3 is not a determination. Authentication, authorization, sensitive ide
 
 `VOC-025-D04` — **Mandatory order.** `T00 → T01 → T02 → T03 → T04 → T05`; each PR is independently reviewed and splitting cannot reduce combined R3 consequence.
 
-`VOC-025-D05` — **OPEN, founder scope decision.** “Replace every mock/placeholder source” conflicts with DOC-12’s A1→P1–P4 dependency and screens lacking approved learning endpoints. Adoption must either retain learning mocks until their milestone contracts exist, or expand scope with a complete endpoint/field/ownership/acceptance specification. No learning API is invented here.
+`VOC-025-D05` — **RESOLVED at adoption (founder decision, 2026-07-24).** Retain every existing VOC-010–VOC-024 learning-content mock/placeholder source as-is. A1 adds only the identity/session/auth layer underneath; it does not build, wire, or invent any learning-domain endpoint. Learning mocks remain mocks until their own P1–P4 milestone contracts exist, per DOC-12's own A1-before-P1 ordering. `VOC-025-T05` inventories and confirms this disposition; it must not expand scope.
 
-`VOC-025-D06` — **OPEN, founder user-journey decision.** Choose login route, return destination, public landing behavior, and provider/error/privacy copy. The documents require an authenticated shell but do not settle this user-facing policy.
+`VOC-025-D06` — **RESOLVED at adoption (founder decision, 2026-07-24).** Gate everything: every visit to the `(app)` route group (home, discover, situation, word-detail, progress) requires an active session and redirects to sign-in when absent, with no public/unauthenticated browsing path. No public landing/marketing page is in scope for A1.
 
 `VOC-025-D07` — **OPEN, adopted technical design.** Cookie name/domain/SameSite, token construction/rotation, rate-limit key/window/threshold, OAuth redirect allowlist, email sender, and staging isolation must meet D00–D03, be documented, environment-isolated, and secret-free in source. “Refresh” means validation/reissue within the fixed non-sliding policy unless a later approved decision changes DOC-06.
 

@@ -37,11 +37,12 @@ artifacts:
   release_plan: release-plan.md
 dependencies:
 - id: VOC-025-DEP-01
-  status: F3 staging gate must pass before A1 acceptance; current evidence is not
-    supplied
+  status: F3 staging gate must pass before A1 acceptance (VOC-025-T05's evidence
+    collection); current evidence is not supplied and F3 itself is not yet built -
+    T00-T04 may proceed, T05's acceptance evidence remains blocked until F3 exists
 - id: VOC-025-DEP-02
-  status: open-at-adoption; founder resolves D05 mock boundary and D06 unauthenticated
-    journey
+  status: 'resolved-at-adoption 2026-07-24: D05 = retain existing learning mocks,
+    auth layer only; D06 = gate every (app) route, no public browsing'
 - id: VOC-025-DEP-03
   status: open-before-provider-tasks; Google/email staging configuration, redirect
     URIs, secret provisioning, and isolation exist outside repository source control
@@ -87,6 +88,7 @@ ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
 blocking_reasons:
 - package is a draft and has not been human-adopted
-- D05 and D06 remain open
-- provider/credential and foundation readiness evidence is required before applicable
-  tasks
+- provider/credential readiness (Google OAuth, email sender) is required before VOC-025-T02
+  specifically, not before T00/T01
+- F3 staging evidence is required before VOC-025-T05's acceptance evidence, not before
+  T00-T04
