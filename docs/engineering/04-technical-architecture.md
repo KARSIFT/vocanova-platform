@@ -67,7 +67,7 @@ Future mobile: Next.js Web + Expo Mobile both call the same Go API / PostgreSQL.
 ## 5. Repository architecture
 
 Single monorepo, `vocanova-platform` (see
-[the migration notes](../product/README-migration-notes.md#5-repository-name-conflict) for why this
+[the migration notes](../archive/README-migration-notes.md#5-repository-name-conflict) for why this
 name, not `vocanova`):
 
 ```text
@@ -122,7 +122,7 @@ storage, IANA timezone strings for user-facing daily logic. Full schema in [05](
 
 Deterministic stage-based scheduling (not FSRS in MVP). Rating scale, exact step mechanics, and
 reset rule are canonical in [05](05-database-design.md) §9 — see
-[the migration notes](../product/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how the various
+[the migration notes](../archive/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how the various
 draft rating scales across documents were reconciled into one. Future algorithms can replace the
 scheduler behind a stable interface.
 
@@ -135,7 +135,7 @@ version). Settings changes apply from the next local day, not retroactively.
 
 AI purpose: help learners use vocabulary correctly. Canonical statuses are `correct` /
 `needs_improvement` / `incorrect` (see
-[the migration notes](../product/README-migration-notes.md#1-ai-feedback-label-conflict) — this document originally used different
+[the migration notes](../archive/README-migration-notes.md#1-ai-feedback-label-conflict) — this document originally used different
 example labels; the authoritative model lives in [09](09-ai-features.md), not here). Architecture:
 Business Service → Feedback Provider Interface → AI Provider. Rules: save the sentence before the AI
 call, validate structured output, retry safely (bounded), store feedback history, control cost.

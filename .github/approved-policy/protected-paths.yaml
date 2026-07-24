@@ -60,8 +60,14 @@ paths:
     minimum_risk: R3
 
 hosted_enforcement_status: not-activated
-automatic_merge_allowed: false
-autonomous_merge_allowed: false
+
+# Corrected 2026-07-24 (was stale `false`) - see docs/governance/a003-transition-state.yaml's
+# identical correction for the full explanation: this describes A-003 Section 10's
+# develop-merge authority, distinct from production-release authority below (which
+# remains correctly disabled). Live and evidenced since VOC-012.
+automatic_merge_allowed: true
+autonomous_merge_allowed: true
+
 production_deployment: disabled
 autonomous_production_release: disabled
 rl1_technical_activation: false

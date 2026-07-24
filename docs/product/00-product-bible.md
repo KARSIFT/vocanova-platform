@@ -69,7 +69,7 @@ MVP uses deterministic, step-based scheduling (steps 0–7), not a probabilistic
 that's an explicit future swap point behind a stable scheduling interface, not an MVP requirement.
 Learner-facing rating scale, exact schedule mechanics, and the reset rule are defined precisely in
 [05](../engineering/05-database-design.md) §9, and [08](../design/08-web-app-design.md). See
-[the migration notes](README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how the four
+[the migration notes](../archive/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how the four
 different rating-scale drafts across the source docs were reconciled — the two-word summary is:
 **"Again / Hard / Good / Easy" ratings, `review_step` 0–7, two consecutive incorrect answers reset to
 step 0.**
@@ -81,7 +81,7 @@ target word/phrase and return a status of `correct`, `needs_improvement`, or `in
 short explanation and (when needed) a corrected sentence. Full behavior, safety rules, prompt
 architecture, and evaluation thresholds are in [09](../engineering/09-ai-features.md) — that document is the single
 source of truth for AI behavior; don't restate feedback-label wording elsewhere (see
-[the migration notes](README-migration-notes.md#1-ai-feedback-label-conflict)).
+[the migration notes](../archive/README-migration-notes.md#1-ai-feedback-label-conflict)).
 
 Explicit MVP non-goals: open-ended AI chat, general AI tutor, essay correction, pronunciation
 scoring, speech recognition, roleplay, AI-generated vocabulary as the authoritative content source,

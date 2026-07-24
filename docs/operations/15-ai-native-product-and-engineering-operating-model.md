@@ -32,11 +32,23 @@ related_decisions:
 
 ## Document status
 
-This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, staging, release, and production publication for Vocanova.
+This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. It does **not** define production publication - no staging or production deployment stage exists in the live pipeline (corrected 2026-07-24; see §17.0).
 
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 
-Where any earlier planning document, conversation, draft, or summary conflicts with this document, this document takes precedence for the operating-model topics it governs.
+**Correction (2026-07-24):** §17 (Amendment A-001) and Decision Register entries DG5-08/DG10-05
+originally described an aspirational merge/staging model that was never the system actually
+built. §17 has been rewritten to match the live pipeline; those two decision entries carry an
+inline correction note pointing to §17.0 rather than being rewritten in place, to preserve the
+decision register as a historical record. **A-003 (`docs/governance/amendments/A-003-...md`) and
+the live `karsift-ai-infra` pipeline are the actual current authority for merge/review mechanics -
+where this document's remaining prose (outside §17) describes something narrower or different,
+treat it as historical design intent, not a live contradiction requiring further correction in
+this pass.** A full reconciliation of this document's other 28 sections against current practice
+was out of scope for this correction; it addressed the specific, concrete contradiction an
+external audit found (merge authority mechanics), not a line-by-line review of the whole document.
+
+Where any earlier planning document, conversation, draft, or summary conflicts with this document, this document takes precedence for the operating-model topics it governs - except where noted above.
 
 ---
 
@@ -1512,82 +1524,103 @@ Release 0.3.0
 
 # 17. Amendment A-001 — Development Merge Authority
 
-## 17.1 Canonical rule
+## 17.0 Rewritten 2026-07-24 to match the real, live pipeline
 
-This amendment supersedes every earlier statement requiring founder approval for merges into `develop`.
+This section previously described an aspirational operating model (Codex implements, Claude
+reviews, automatic merge, automatic staging deploy) that was never the system actually built.
+The real system is `KARSIFT/karsift-ai-infra`'s reusable GitHub Actions workflows, wired into
+this repository's own `.github/workflows/pipeline.yml`. It is architecturally simpler than what
+was originally specified here (no staging deploy, no Control Plane - see DOC-17/18's own
+superseded note in `docs/README.md`), has more real lifecycle stages than this section
+described (a distinct `plan`/`adopt` split before implementation even starts, and a bounded
+automatic remediation loop), and its actual authority/risk model is A-003 (Section 10 of that
+amendment - `docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md`),
+not the original A-001 text below. This section is kept as historical record of the original
+design intent but the rule that actually governs `develop` merges today is A-003 §10 plus
+`karsift-ai-infra`'s own `merge-gate.yml` - see that repo's README for the definitive mechanism.
+Where this section conflicts with A-003 or the live pipeline, **A-003 and the live pipeline win.**
 
-The canonical branch flow is:
+## 17.1 Canonical rule (as actually implemented)
+
+The real, live pipeline stage flow is:
 
 ```text
-Working branch
+Request (free text, a document, or a GitHub issue thread)
     ↓
-Deterministic CI and required specialist checks
+plan - drafts a DRAFT change package (spec, acceptance criteria, tasks); never authorizes anything
     ↓
-Claude review approval
+Human adoption - a founder reviews the draft, edits change.yaml to mark it approved/authorized,
+                 merges the draft PR
     ↓
-Automatic merge into develop
+adopt - opens the real, numbered per-task tracking issue(s) only now, not before
     ↓
-Automatic staging deployment
+implement (per task) - an implementer model writes the diff on a branch, opens a PR
     ↓
-Founder-approved release PR
+ci - deterministic checks (lint, typecheck, build, test, format)
     ↓
-Merge into main
+review - an independent verifier posts a structured, commit-bound PASS / PASS WITH
+         NON-BLOCKING FINDINGS / FAIL verdict
     ↓
-Founder-approved production publication
+remediate (only on a FAIL verdict or a plain CI failure) - re-dispatches the implementer once,
+           with the failure details attached, escalating to a stronger model on this last
+           attempt; if it fails again, stops and escalates to a human instead of trying a third time
+    ↓
+merge-gate - risk-aware, fails closed: auto-merges into `develop` only when the project's
+             switch is on AND checks are green AND the verdict passed AND this specific
+             package hasn't opted itself out (`automatic_merge_allowed: false` in its own
+             change.yaml) - otherwise requires the founder's literal "approved" comment,
+             which is always a valid decision at any risk class, including R4/unparseable risk
+    ↓
+release - once every task in a package's roster is closed, opens one "Release: <package>" issue;
+          exactly one founder "approved" reply promotes `develop` → `main` via a real PR
+          (never a direct push)
 ```
 
-## 17.2 Authority matrix
+There is no automatic staging deployment stage in the live system - `release.yml`'s scope ends at
+the `develop` → `main` promotion PR merging. Any hosted deployment is separate, not-yet-built work.
+
+## 17.2 Authority matrix (as actually implemented)
 
 | Action | Required authority |
 |---|---|
 | Approve product vision, scope, and material behavior | Founder |
-| Approve material specifications and decisions | Founder |
-| Implement approved specification | Codex |
-| Review implementation | Claude |
-| Merge implementation PR into `develop` | Required CI + specialist checks + Claude |
-| Deploy `develop` to staging | Automatic |
-| Merge `develop` into `main` | Founder |
-| Publish `main` to production | Founder |
+| Approve/adopt a draft change package | Founder (editing `change.yaml`, merging the draft PR) |
+| Draft a change package from a request | `planner` role (model resolved from `karsift-ai-infra`'s `config/roles.yml` - not fixed to any one vendor) |
+| Implement an approved task | `implementer` role (same convention) |
+| Independently verify an implementation | `reviewer` role (same convention - **must** stay a different vendor from `implementer` when possible; see `config/roles.yml`'s own notes for when that's been temporarily compromised and why) |
+| Merge implementation PR into `develop` | Deterministic checks green + reviewer PASS + package not opted out, **or** founder's literal `approved` comment (valid at any risk class) |
+| Merge `develop` into `main` | Founder's literal `approved` reply on the package's release issue - one approval per completed package, not per PR |
+| Publish `main` to production | Not built - out of scope for the live pipeline today |
 
 ## 17.3 Risk and `develop`
 
-Low-, medium-, and high-risk implementation pull requests may merge into `develop` without founder approval.
+R0 through R3 implementation PRs may auto-merge into `develop` without founder approval, but only
+when all of the following hold: the project has explicitly enabled the auto-merge switch, CI is
+green, the reviewer's verdict passed, and the specific package hasn't set its own
+`automatic_merge_allowed: false` opt-out. R4, or a PR with no parseable risk declaration at all,
+never auto-merges regardless of any switch - both always require the founder's literal `approved`
+comment. Risk is read from a `Risk classification: R#` line in the PR body; a calling project may
+supply its own deterministic, path-based risk floor (this project's is
+`docs/governance/change-risk-classification.md` /
+`.github/approved-policy/protected-paths.yaml`) that an AI-proposed risk value can raise but never
+lower.
 
-Risk level determines which tests and specialist checks must pass before Claude may approve.
+A reviewer's `PASS`/`PASS WITH NON-BLOCKING FINDINGS` verdict means the implementation appears
+technically acceptable and compliant with the approved specification. It does not authorize new
+product scope.
 
-For example, a high-risk authentication change may require:
+## 17.4 Automation level, as evidenced
 
-```text
-Formatting
-+ lint
-+ type checking
-+ unit tests
-+ integration tests
-+ build
-+ security checks
-+ migration checks
-+ specification-compliance review
-+ Claude approval
-```
+Automatic merge into `develop` is live and evidenced on this exact repository - it has fired
+correctly on numerous packages since VOC-012 (see
+`docs/governance/a003-transition-state.yaml`'s `automatic_merge_allowed` field for the activation
+record and evidence links). There was no formal ten-pull-request waiting period observed in
+practice before this activation; evidence accumulated organically across the packages that
+preceded and followed VOC-012.
 
-Claude approval means the implementation appears technically acceptable and compliant with the approved specification. It does not authorize new product scope.
-
-## 17.4 Initial automation level
-
-The previously proposed founder-controlled merge pilot and ten-pull-request delay before enabling `develop` auto-merge are removed.
-
-Claude-approved automatic merging into `develop` is part of the initial operating model.
-
-The first ten representative pull requests remain an evaluation period for:
-
-- Claude review quality.
-- Specification-drift detection.
-- CI reliability.
-- Security findings.
-- Staging failures.
-- Unexpected agent behavior.
-
-The founder may disable automatic development merges through the approved kill switch.
+The founder may disable automatic development merges at any time by setting
+`auto_merge_enabled: "false"` in this repository's `pipeline.yml` (a config change, not a
+separate kill-switch mechanism).
 
 ---
 
@@ -2943,9 +2976,19 @@ Promotions from `develop` to `main` use an identifiable release merge commit.
 
 Every implementation PR may merge into `develop` after required CI, specialist checks, and Claude approval. Founder approval is not required.
 
+*Correction 2026-07-24: superseded by A-003 §10 and the live pipeline - see §17.0. Verification is
+not vendor-locked to Claude (the `reviewer` role is config-driven, currently a temporary
+same-vendor compromise), the founder's `approved` comment is always a valid override at any risk
+class, and a per-package `automatic_merge_allowed: false` opt-out can require founder approval
+even when checks/review would otherwise pass. Preserved here as historical record, not current
+rule.*
+
 ### DG5-09 — Automatic staging
 
 Successful merges into `develop` automatically deploy to staging.
+
+*Correction 2026-07-24: never built. No staging deployment stage exists in the live pipeline - see
+§17.0/§17.1. Preserved as historical record, not current rule.*
 
 ### DG5-10 — Protected production
 
@@ -3257,9 +3300,15 @@ Migration uses complete verified document sources and does not reconstruct canon
 
 Codex implementation PRs targeting `develop` may merge automatically after required deterministic CI, specialist checks, and Claude approval.
 
+*Correction 2026-07-24: see DG5-08's identical correction note above and §17.0 - superseded by
+A-003 §10 and the live, vendor-agnostic pipeline. Preserved as historical record.*
+
 ### DG10-06 — Automatic staging
 
 Every approved merge into `develop` deploys automatically to staging and runs required verification.
+
+*Correction 2026-07-24: see DG5-09's identical correction note above - never built. Preserved as
+historical record.*
 
 ### DG10-07 — Founder-controlled main and production
 

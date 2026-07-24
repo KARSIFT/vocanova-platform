@@ -18,5 +18,7 @@ tooling and external configuration that do not yet exist. See
 for the required administrator settings and credentials.
 
 A-003 governance authority is active. These files do not technically activate RL1 or
-RL2, automatic/autonomous merge, production deployment, autonomous production
-release, DOC-17, or DOC-18.
+RL2, production deployment, autonomous production release, DOC-17, or DOC-18. (Automatic
+merge into `develop` specifically - a distinct, narrower gate, A-003 §10 - is separately
+implemented and live via karsift-ai-infra's merge-gate.yml; see
+`docs/governance/a003-transition-state.yaml`'s `automatic_merge_allowed` field.)

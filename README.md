@@ -3,11 +3,11 @@
 Vocanova is an AI-powered platform for practical English learning. It is maintained
 by KARSIFT as a private pnpm and Go monorepo.
 
-The repository is in the application-foundation phase. Its canonical roots are
-`apps/web`, `apps/api`, and the four approved shared packages under `packages/`.
-VOC-005 establishes buildable framework-neutral and Go skeletons only; product
-behavior remains subject to later approved changes. See the
-[local development guide](docs/development.md) for exact tools and commands.
+Its canonical roots are `apps/web`, `apps/api`, and the shared packages under `packages/`.
+Real, shipped product surfaces exist today - `apps/web` has working Home, Progress, and
+Journey/Discover (including situation drill-down) screens (VOC-018 through VOC-022), built
+against the wired design-token system - not skeletons awaiting later approved changes. See
+the [local development guide](docs/development.md) for exact tools and commands.
 
 ## Documentation
 
@@ -25,5 +25,7 @@ behavior remains subject to later approved changes. See the
 
 The repository uses three distinct knowledge systems: `docs/` for approved living
 documentation, `docs/decisions/` for material decision rationale, and `specs/` for
-bounded executable change packages. Documents 00–14 have not been migrated; any
-preservation-first migration requires a separately approved change.
+bounded executable change packages. Documents 00–13 were migrated and adopted as canonical
+(VOC-007/VOC-008); DOC-14 was deliberately reconciled but not adopted (see
+[docs/README.md](docs/README.md) for the full index and each document's actual status -
+that index, not this paragraph, is the source of truth for migration state going forward).

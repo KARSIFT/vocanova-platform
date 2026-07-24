@@ -58,7 +58,7 @@ There is **no dedicated Sentence History screen.** History is retained in the ba
 (`learner_sentences` / `ai_feedback_attempts` — see [05](../engineering/05-database-design.md) §11) for future use, but
 is not surfaced as its own MVP UI. (This reverses an earlier PRD draft that listed a "Sentence
 History Page" — see
-[the migration notes](../product/README-migration-notes.md#4-sentence-history-screen-conflict).
+[the migration notes](../archive/README-migration-notes.md#4-sentence-history-screen-conflict).
 Treat "sentence-history insights" as a named post-MVP opportunity,
 not a cut corner.)
 
@@ -115,7 +115,7 @@ rather than treating Word Detail as purely a content-browsing page.
 ## 7. Review UX detail
 
 Ratings surface as **Again / Hard / Good / Easy** (see
-[the migration notes](../product/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how this was reconciled
+[the migration notes](../archive/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how this was reconciled
 against three other rating-scale drafts found in earlier documents). The review screen must remain
 usable one-handed on a phone: large touch targets (44px minimum per [08](08-web-app-design.md)), no
 required typing unless the prompt type is explicitly typing/sentence-usage.

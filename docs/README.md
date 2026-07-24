@@ -35,7 +35,7 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
 | DOC-10 | [VocaNova Development Workflow](operations/10-development-workflow.md) | approved | founder | `docs/operations/10-development-workflow.md` | DOC-11, DOC-15, DOC-16, DOC-19 |
 | DOC-11 | [VocaNova DevOps and CI/CD Plan](operations/11-devops-and-ci-cd.md) | approved | founder | `docs/operations/11-devops-and-ci-cd.md` | DOC-10, DOC-16, DOC-19 |
 | DOC-12 | [VocaNova MVP Implementation Plan](product/12-mvp-implementation-plan.md) | approved | founder | `docs/product/12-mvp-implementation-plan.md` | DOC-00, DOC-01, DOC-03, DOC-04, DOC-10, DOC-11, DOC-13, DOC-18 |
-| DOC-13 | [VocaNova F1 Repository Foundation Execution Package](operations/13-f1-repository-foundation-execution-package.md) | proposed | founder | `docs/operations/13-f1-repository-foundation-execution-package.md` | DOC-10, DOC-12, DOC-15, DOC-16 |
+| DOC-13 | [VocaNova F1 Repository Foundation Execution Package](operations/13-f1-repository-foundation-execution-package.md) | historical (F1 complete) | founder | `docs/operations/13-f1-repository-foundation-execution-package.md` | DOC-10, DOC-12, DOC-15, DOC-16 |
 | DOC-14 | Historical KARSIFT AI Development Automation Architecture | not adopted | founder | Preserved as research; see DOC-19 | DOC-19 |
 | DOC-15 | [AI-Native Product and Engineering Operating Model](operations/15-ai-native-product-and-engineering-operating-model.md) | approved | founder | `docs/operations/15-ai-native-product-and-engineering-operating-model.md` | DOC-16, DOC-19 |
 | DOC-16 | [Autonomous Development Operating Model](governance/16-autonomous-development-operating-model.md) | approved | founder | `docs/governance/16-autonomous-development-operating-model.md` | DOC-15, DOC-17, DOC-19 |
@@ -45,12 +45,22 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
 
 ## Migration and relationships
 
-- [Migration manifest](migration-manifest.yaml) records source hashes, coverage, status, and disposition.
-- [Document graph](document-graph.yaml) is a derived impact aid and does not override authority.
-- [Migration notes](product/README-migration-notes.md) preserve the reconciliation evidence trail.
-- [Adoption notes](product/README-adoption-notes.md) record VOC-008 semantic corrections.
+- [Migration manifest](archive/migration-manifest.yaml) records source hashes, coverage, status, and disposition.
+- [Document graph](archive/document-graph.yaml) is a derived impact aid and does not override authority.
+- [Migration notes](archive/README-migration-notes.md) preserve the reconciliation evidence trail.
+- [Adoption notes](archive/README-adoption-notes.md) record VOC-008 semantic corrections.
 
-DOC-17 and DOC-18 are adopted together as the canonical autonomous-development
-architecture-and-roadmap baseline. Their adoption does not implement the Control Plane, activate
-RL1/RL2, permit automatic or autonomous merge, or enable production deployment or autonomous
-production release.
+**DOC-17 and DOC-18 describe a system that was never built and is not the project's actual
+direction** (corrected 2026-07-24; both remain `approved`/adopted as historical planning
+documents, not deleted, but should not be read as describing current or planned engineering
+work). They specify a standalone Control Plane service (a durable PostgreSQL work queue, an AI
+Budget Governor, an Execution Lease Manager, an MCP founder interface, etc.) and an 18-phase
+roadmap to build it. The system that actually shipped VOC-010 through VOC-022 is architecturally
+unrelated: a set of reusable GitHub Actions workflows (`KARSIFT/karsift-ai-infra`) wired into this
+repo's own `.github/workflows/pipeline.yml` - no Postgres queue, no Budget Governor, no MCP
+interface, no Change Contract Registry. This was a deliberate decision (see
+`karsift-ai-infra`'s own README and commit history), not an oversight. Their adoption does not
+implement the Control Plane, activate RL1/RL2, or enable production deployment or autonomous
+production release. It also does not, on its own, cover automatic merge into `develop` - that
+narrower capability (A-003 §10) is separately implemented and live; see
+`docs/governance/a003-transition-state.yaml`.
