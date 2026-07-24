@@ -47,9 +47,9 @@ dependencies:
   status: 'founder-confirmed: day-by-day current-week strip (7 entries), as tasks.md
     already specifies'
 - id: VOC-020-DEP-05
-  status: 'founder-confirmed: zero-history/first-mission empty state deferred to
-    the real API-wiring follow-up package, consistent with VOC-019 precedent -
-    tasks.md does not include a build step for it'
+  status: 'founder-confirmed: zero-history/first-mission empty state deferred to the
+    real API-wiring follow-up package, consistent with VOC-019 precedent - tasks.md
+    does not include a build step for it'
 - id: VOC-020-DEP-06
   status: 'required-follow-up-not-in-scope: DOC-03 section 9 loading/error states
     (once Progress fetches live data) and wiring the feedback token scale, VOC-020-D07'
@@ -62,7 +62,7 @@ implementation:
   status: implementation-ready
   target_branch: develop
   pull_request: null
-  authority_issue: null
+  authority_issue: 46
 release:
   required: false
   mode: app-screen-addition-only
