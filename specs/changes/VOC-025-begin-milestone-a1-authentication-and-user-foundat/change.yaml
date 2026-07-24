@@ -37,9 +37,9 @@ artifacts:
   release_plan: release-plan.md
 dependencies:
 - id: VOC-025-DEP-01
-  status: F3 staging gate must pass before A1 acceptance (VOC-025-T05's evidence
-    collection); current evidence is not supplied and F3 itself is not yet built -
-    T00-T04 may proceed, T05's acceptance evidence remains blocked until F3 exists
+  status: F3 staging gate must pass before A1 acceptance (VOC-025-T05's evidence collection);
+    current evidence is not supplied and F3 itself is not yet built - T00-T04 may
+    proceed, T05's acceptance evidence remains blocked until F3 exists
 - id: VOC-025-DEP-02
   status: 'resolved-at-adoption 2026-07-24: D05 = retain existing learning mocks,
     auth layer only; D06 = gate every (app) route, no public browsing'
