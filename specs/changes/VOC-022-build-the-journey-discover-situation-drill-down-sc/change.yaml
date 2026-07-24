@@ -65,7 +65,7 @@ implementation:
   status: implementation-ready
   target_branch: develop
   pull_request: null
-  authority_issue: null
+  authority_issue: 55
 release:
   required: false
   mode: app-screen-addition-only
