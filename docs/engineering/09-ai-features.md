@@ -91,7 +91,7 @@ failures never call the model and never complete the mission.
 
 ## 7. Feedback classifications
 
-See [the migration notes](../product/README-migration-notes.md#1-ai-feedback-label-conflict) for
+See [the migration notes](../archive/README-migration-notes.md#1-ai-feedback-label-conflict) for
 the source conflict this enum resolves.
 
 Exactly three learning statuses, separate from operational/validation/safety outcomes:
@@ -426,7 +426,7 @@ disabled.
 
 Edit-and-resubmit comparison, optional second example, repeated-error personalization, collocation
 coaching, feedback-language localization, guided hints, **sentence-history insights** (see
-[the migration notes](../product/README-migration-notes.md#4-sentence-history-screen-conflict) —
+[the migration notes](../archive/README-migration-notes.md#4-sentence-history-screen-conflict) —
 this is where the removed MVP "Sentence History Page" belongs instead), teacher dashboards,
 guided AI tutor, roleplay, speaking/pronunciation, listening/writing practice, grammar coaching,
 adaptive learning paths, learner-owned vocabulary import. Each requires separate approval.

@@ -70,7 +70,7 @@ Route groups: `(public)`, `(onboarding)`, `(app)`.
 ```
 
 Note: there is deliberately **no** sentence-history route (see [03](03-ui-ux-design.md) §2 and
-[the migration notes](../product/README-migration-notes.md#4-sentence-history-screen-conflict)) —
+[the migration notes](../archive/README-migration-notes.md#4-sentence-history-screen-conflict)) —
 sentence practice is a component, not a route.
 
 ## Core UX decisions

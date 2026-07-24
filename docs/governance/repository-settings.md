@@ -6,9 +6,12 @@ administrator must configure and record the following before autonomous merge or
 release is enabled.
 
 A-003 governance authority is active. That activation must not be represented as
-hosted or technical activation; automatic/autonomous merge, RL1/RL2 technical
-activation, production deployment, and autonomous production release remain disabled
-or unimplemented.
+hosted or technical activation. Automatic merge into `develop` (A-003 §10) is
+implemented, tested, and proven - live since VOC-012 (see
+`docs/governance/a003-transition-state.yaml`). RL1/RL2 technical activation,
+production deployment, and autonomous production release (A-003 §11/12, a distinct,
+narrower gate than develop-merge) remain disabled or unimplemented. *(Corrected
+2026-07-24 - previously conflated develop-merge with production-release authority.)*
 
 ## GitHub rulesets
 
@@ -117,31 +120,35 @@ Before deployment automation is added, record and validate:
   and
 - production environment approval rules matching R3/R4.
 
-## Current blockers
+## Current blockers (rewritten 2026-07-24 - the paragraph below was written during the
+original repository bootstrap, before any application code existed, and had never been
+updated since; it's preserved as history for the paragraph after it, which is still
+accurate)
 
-The repository currently has no application, package manifest, pnpm lockfile,
-workspace, test/build scripts, database tooling, Cloudflare configuration, deployment
-credentials, monitoring endpoints, distinct Codex/Claude GitHub identities, or
-verifier integration. Branch and non-self-referential ruleset enforcement is not
-recorded as active. DOC-15's broader
-knowledge-system bootstrap is also incomplete: verified sources for DOC-00 through
-DOC-14, `docs/migration-manifest.yaml`, and `docs/document-graph.yaml` are not yet
-available. They require a separate preservation-first migration change; this work
-does not invent their content. Therefore:
+*Historical, no longer true:* "The repository currently has no application, package
+manifest, pnpm lockfile, workspace, test/build scripts... only the dependency-free
+governance policy check can run today; application CI, previews, staging, production,
+and rollback cannot truthfully be automated yet."
 
-- only the dependency-free governance policy check can run today;
-- application CI, previews, staging, production, and rollback cannot truthfully be
-  automated yet; and
-- autonomous merge and autonomous production release must remain disabled until the
-  missing gates are implemented and validated through a non-production rehearsal.
+**Current reality:** `apps/web` and `apps/api` are real, working applications;
+`package.json`/`pnpm-lock.yaml`/the pnpm workspace exist; deterministic CI (format,
+lint, typecheck, test, build) runs on every PR and has passed across 22+ shipped
+packages (VOC-010 through VOC-022 at minimum) via `karsift-ai-infra`'s `ci.yml`.
+`docs/migration-manifest.yaml` and `docs/document-graph.yaml` were migrated
+(VOC-007/VOC-008) and later archived to `docs/archive/` as historical evidence
+trails (2026-07-24) - they are available, just not filed as live/current
+documentation. Verified sources for DOC-00 through DOC-13 are canonical and adopted;
+DOC-14 was deliberately reconciled but not adopted (see `docs/README.md`'s index).
+
+Previews, staging, production deployment, and rollback genuinely remain unbuilt -
+that part of the original blockers list still holds; only the "no application/CI"
+framing was stale.
 
 The initial governance bootstrap merged through PR #3 and its one-time exception has
 expired. The historical technical-steward appointment and completed dual-capacity
 VOC-002 approval remain permanent evidence, but the role is retired as routine R3
-authority and that migration approval cannot be reused. This current state does not
-remove any blocker above, activate hosted enforcement, authorize deployment, or
-enable autonomous release. Under active A-003, routine R3 uses strengthened technical
-gates and independent verification, while R4 founder authority remains unchanged.
-RL1/RL2 technical
-activation, automatic merge, and autonomous production release remain disabled until
+authority and that migration approval cannot be reused. Under active A-003, routine R3
+uses strengthened technical gates and independent verification, while R4 founder
+authority remains unchanged. Automatic merge into `develop` is live (see above); RL1/RL2
+technical activation and autonomous production release remain disabled until
 separately implemented, tested, and proven.

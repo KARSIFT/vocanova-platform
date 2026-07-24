@@ -60,8 +60,14 @@ paths:
     minimum_risk: R3
 
 hosted_enforcement_status: not-activated
+
+# Reverted 2026-07-24 - see docs/governance/a003-transition-state.yaml's identical
+# revert note: these two fields are a hard, unconditional invariant enforced by
+# tooling/governance/validate_repository_foundation.py, not stale prose. Changing
+# what they mean/require is a decision for the founder to make explicitly.
 automatic_merge_allowed: false
 autonomous_merge_allowed: false
+
 production_deployment: disabled
 autonomous_production_release: disabled
 rl1_technical_activation: false

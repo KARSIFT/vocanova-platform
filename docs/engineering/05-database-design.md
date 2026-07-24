@@ -160,7 +160,7 @@ default 0` **(check between 0 and 7)**, `next_review_at`, `last_reviewed_at`, `l
 `(user_id, meaning_id) where deleted_at is null`.
 
 **Review-step rule** (see
-[the migration notes](../product/README-migration-notes.md#2-review-rating-and-scheduling-conflict)
+[the migration notes](../archive/README-migration-notes.md#2-review-rating-and-scheduling-conflict)
 for why this table was selected over other drafts):
 `result` records objective correctness while `rating` records the scheduling choice. For objective
 prompts, an incorrect answer records `Again`; a correct answer permits Hard/Good/Easy. For
@@ -232,7 +232,7 @@ characters — see [07](07-api-contract-and-dto-design.md) and [09](09-ai-featur
 required when `status='failed'`).
 
 **Feedback status model** (see
-[the migration notes](../product/README-migration-notes.md#1-ai-feedback-label-conflict)): the
+[the migration notes](../archive/README-migration-notes.md#1-ai-feedback-label-conflict)): the
 attempt status is operational (`pending`/`succeeded`/`failed`/`cancelled`). The public processing
 status maps to `pending`/`completed`/`failed`/`skipped`; only a completed response carries the
 learning result `correct`/`needs_improvement`/`incorrect`. These layers are defined precisely in

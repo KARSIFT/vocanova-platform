@@ -37,7 +37,7 @@ tests; product and release authority follows the live R0–R4 and RL1–RL3 gove
 ## 2. Repository
 
 One monorepo, `vocanova-platform` (private during MVP — see
-[the migration notes](../product/README-migration-notes.md#5-repository-name-conflict)). Recommended
+[the migration notes](../archive/README-migration-notes.md#5-repository-name-conflict)). Recommended
 structure:
 
 ```text

@@ -43,7 +43,7 @@ Detail, and Review Completion. See [03](../design/03-ui-ux-design.md).
 
 There is **no dedicated sentence-history screen in MVP.** (Doc 01 originally listed one; doc 03 and
 doc 08 later dropped it in favor of storing history in the backend without a dedicated UI. See
-[the migration notes](README-migration-notes.md#4-sentence-history-screen-conflict).) Sentence-history
+[the migration notes](../archive/README-migration-notes.md#4-sentence-history-screen-conflict).) Sentence-history
 insights are a named post-MVP opportunity, not cut work.
 
 ## 3. MVP completion criteria

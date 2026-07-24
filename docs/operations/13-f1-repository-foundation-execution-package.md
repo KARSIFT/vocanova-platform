@@ -3,13 +3,20 @@ id: DOC-13
 title: VocaNova F1 Repository Foundation Execution Package
 version: 1.0
 document_type: execution-plan
-status: proposed
+status: historical
 owner: founder
 canonical_path: docs/operations/13-f1-repository-foundation-execution-package.md
 approved_at: null
-last_reviewed_at: 2026-07-19
+last_reviewed_at: 2026-07-24
 review_cycle: quarterly
 supersedes: null
+status_note: >
+  Corrected 2026-07-24 from stale `proposed` to `historical` - this document's own
+  body already states F1 is complete ("F1 in the literal 'empty repository' sense is
+  already substantially underway") and that it is "a planning artifact... not
+  authority to redo completed repository-foundation work," so `proposed` never
+  accurately described it. Preserved as the historical execution record, not a live
+  directive.
 related_documents:
   - DOC-10
   - DOC-12
