@@ -25,10 +25,6 @@ owners:
   package_preparation: planner
   implementation: codex
   independent_verification: codex
-  # (corrected at adoption: reviewer/planner currently run on openai/codex-action,
-  # a temporary same-vendor compromise - see karsift-ai-infra's config/roles.yml
-  # for the live model assignment and the reason. The draft's "claude-code"
-  # placeholder was already stale by the time this was adopted.)
 artifacts:
   readme: README.md
   specification: specification.md
@@ -40,9 +36,9 @@ artifacts:
   release_plan: release-plan.md
 dependencies:
 - id: VOC-024-DEP-01
-  status: 'founder-confirmed: static-screen deferral (VOC-024-D05) stands as-is - no
-    sentence-practice entry or live saved-word review state; scheduled only after a
-    real backend contract exists'
+  status: 'founder-confirmed: static-screen deferral (VOC-024-D05) stands as-is -
+    no sentence-practice entry or live saved-word review state; scheduled only after
+    a real backend contract exists'
 - id: VOC-024-DEP-02
   status: 'resolved-at-adoption: base_sha confirmed current develop tip'
 - id: VOC-024-DEP-03
