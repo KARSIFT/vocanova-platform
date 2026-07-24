@@ -3,7 +3,7 @@ id: VOC-025
 slug: begin-milestone-a1-authentication-and-user-foundat
 title: "Begin Milestone A1 \u2014 Authentication and User Foundation"
 type: feature
-status: draft
+status: implementation-ready
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-025-begin-milestone-a1-authentication-and-user-foundat
@@ -11,13 +11,13 @@ authority_model: a003-active
 requirement_source: docs/product/12-mvp-implementation-plan.md#5 ; docs/engineering/04-technical-architecture.md#6-10,#16-18
   ; docs/engineering/05-database-design.md#1,#6,#17-18 ; docs/engineering/06-backend-design.md#5-7,#15-17
   ; docs/engineering/07-api-contract-and-dto-design.md ; supplied free-text request
-requirement_approval_status: canonical-documents-approved; package-draft-awaits-human-adoption
+requirement_approval_status: founder-approved
 base_branch: develop
-base_sha: null
+base_sha: a49a028bd2fde1a46d15b74e2bc26e23a64e2188
 target_branch: develop
-approved_candidate_sha: null
-approval_status: not-approved
-implementation_authorized: false
+approved_candidate_sha: TBD-set-at-package-adoption
+approval_status: approved
+implementation_authorized: true
 automatic_merge_allowed: false
 production_impact: protected-authentication-and-identity-foundation; deployment-not-authorized
 rollback_required: true
@@ -63,12 +63,13 @@ affected_areas:
 - apps/web/src/middleware
 - apps/web/src/lib
 implementation:
-  authorized: false
-  authority_status: not-exercised
+  authorized: true
+  authority_status: validly-exercised
   required: true
-  status: blocked-pending-adoption
+  status: implementation-ready
   target_branch: develop
   pull_request: null
+  authority_issue: null
 release:
   required: true
   mode: controlled-staging-validation-before-a1-acceptance
@@ -86,9 +87,4 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons:
-- package is a draft and has not been human-adopted
-- provider/credential readiness (Google OAuth, email sender) is required before VOC-025-T02
-  specifically, not before T00/T01
-- F3 staging evidence is required before VOC-025-T05's acceptance evidence, not before
-  T00-T04
+blocking_reasons: null
