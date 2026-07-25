@@ -1,4 +1,4 @@
-import { globSync, readFileSync, statSync } from "node:fs";
+import { globSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -11,7 +11,12 @@ const repositoryRoot = path.resolve(
 const appRouteRoot = path.join(repositoryRoot, "apps/web/src/app/(app)");
 const webSrcRoot = path.join(repositoryRoot, "apps/web/src");
 const apiRouteRoot = path.join(repositoryRoot, "apps/api/app/api");
+const apiBusinessRoot = path.join(repositoryRoot, "apps/api/business");
+const apiSchemaRoot = path.join(repositoryRoot, "apps/api/ent/schema");
+const apiMigrationRoot = path.join(repositoryRoot, "apps/api/migrations");
 
+// Inventory of VOC-010–VOC-024 mocks retained as P4-pending placeholders.
+// See specs/changes/VOC-026-begin-milestone-p1-discover-and-save-words-per-doc/mock-inventory.md
 const expectedMocks = [
   {
     file: "apps/web/src/app/(app)/home/page.tsx",
@@ -23,26 +28,30 @@ const expectedMocks = [
     expectedConstant: "MOCK_PROGRESS_STATE",
     vocPackage: "VOC-020",
   },
+];
+
+// Inventory of VOC-010–VOC-024 mocks decommissioned to real P1 sources.
+const decommissionedMocks = [
   {
     file: "apps/web/src/app/(app)/discover/page.tsx",
     expectedConstant: "MOCK_DISCOVER_SITUATIONS",
     vocPackage: "VOC-021",
   },
   {
-    file: "apps/web/src/app/(app)/discover/[situation]/_lib/mock-word-data.ts",
+    file: "apps/web/src/app/(app)/discover/[situation]/page.tsx",
     expectedConstant: "MOCK_SITUATION_WORD_LISTS",
     vocPackage: "VOC-022",
   },
-];
-
-const expectedMockConsumers = [
-  {
-    file: "apps/web/src/app/(app)/discover/[situation]/page.tsx",
-    expectedImport: "MOCK_SITUATION_WORD_LISTS",
-  },
   {
     file: "apps/web/src/app/(app)/discover/[situation]/[word]/page.tsx",
-    expectedImport: "MOCK_SITUATION_WORD_LISTS",
+    expectedConstant: "MOCK_SITUATION_WORD_LISTS",
+    vocPackage: "VOC-022",
+  },
+  {
+    file: "apps/web/src/app/(app)/discover/[situation]/_lib/mock-word-data.ts",
+    expectedConstant: "MOCK_SITUATION_WORD_LISTS",
+    vocPackage: "VOC-022",
+    mustNotExist: true,
   },
 ];
 
@@ -57,7 +66,7 @@ const expectedRouteDirectories = [
 export function validateMockInventory() {
   const errors = [];
 
-  // Verify each mock file exists and still declares its expected constant.
+  // Verify each retained mock file exists and still declares its expected constant.
   for (const mock of expectedMocks) {
     const filePath = path.join(repositoryRoot, mock.file);
     if (!exists(filePath)) {
@@ -77,31 +86,122 @@ export function validateMockInventory() {
     }
   }
 
-  // Verify the two situation routes still import the shared mock data.
-  for (const consumer of expectedMockConsumers) {
-    const filePath = path.join(repositoryRoot, consumer.file);
-    if (!exists(filePath)) {
-      errors.push(`missing mock consumer file: ${consumer.file}`);
+  // Verify the decommissioned P1 mocks are gone from their original files and,
+  // where marked, that the source file itself has been removed.
+  for (const mock of decommissionedMocks) {
+    const filePath = path.join(repositoryRoot, mock.file);
+    const fileExists = exists(filePath);
+    if (mock.mustNotExist && fileExists) {
+      errors.push(
+        `${mock.file}: decommissioned mock source file must be removed`,
+      );
       continue;
     }
-    const content = readFileSync(filePath, "utf8");
-    if (!content.includes(consumer.expectedImport)) {
+    if (fileExists) {
+      const content = readFileSync(filePath, "utf8");
+      if (content.includes(mock.expectedConstant)) {
+        errors.push(
+          `${mock.file}: decommissioned constant ${mock.expectedConstant} still present`,
+        );
+      }
+    }
+  }
+
+  // Global scan: no decommissioned mock constant may appear anywhere in (app).
+  const appFiles = globSync("**/*.{ts,tsx}", { cwd: appRouteRoot });
+  const decommissionedConstants = new Set(
+    decommissionedMocks.map((m) => m.expectedConstant),
+  );
+  for (const file of appFiles) {
+    const content = readFileSync(path.join(appRouteRoot, file), "utf8");
+    for (const constant of decommissionedConstants) {
+      if (content.includes(constant)) {
+        errors.push(
+          `${file}: decommissioned constant ${constant} still present`,
+        );
+      }
+    }
+  }
+
+  // Verify no API routes beyond A1 auth and VOC-026 P1 content/learning were invented.
+  const allowedAPIPaths = [
+    /^\/api\/v1\/me$/,
+    /^\/api\/v1\/auth(?:\/|$)/,
+    /^\/api\/v1\/journey-situations(?:\/[^/]+)?$/,
+    /^\/api\/v1\/canonical-words\/[^/]+$/,
+    /^\/api\/v1\/user-words$/,
+    /^\/api\/v1\/user-words\/[^/]+$/,
+  ];
+  const apiRouteFiles = globSync("**/*.go", { cwd: apiRouteRoot });
+  for (const file of apiRouteFiles) {
+    const content = readFileSync(path.join(apiRouteRoot, file), "utf8");
+    const apiPaths = content.matchAll(/["'](\/api\/v1\/[^"'?\s]*)/g);
+    for (const match of apiPaths) {
+      const apiPath = match[1];
+      if (!allowedAPIPaths.some((allowed) => allowed.test(apiPath))) {
+        errors.push(
+          `${file}: contains API path ${apiPath} outside A1 and VOC-026 P1`,
+        );
+      }
+    }
+  }
+
+  // Verify no unexpected business modules (i.e. no invented P2–P4 behavior).
+  const allowedBusinessModules = new Set(["auth", "content", "learning"]);
+  for (const entry of readdirSync(apiBusinessRoot, {
+    withFileTypes: true,
+  })) {
+    if (entry.isDirectory() && !allowedBusinessModules.has(entry.name)) {
       errors.push(
-        `${consumer.file}: expected import ${consumer.expectedImport} not found`,
+        `apps/api/business/${entry.name}: unexpected business module outside A1 and VOC-026 P1`,
       );
     }
   }
 
-  // Verify no learning-domain API routes were invented.
-  const apiRouteFiles = globSync("**/*.go", { cwd: apiRouteRoot });
-  for (const file of apiRouteFiles) {
-    const content = readFileSync(path.join(apiRouteRoot, file), "utf8");
-    // Only A1 auth routes are permitted in app/api. A1 routes use the auth
-    // package and the /api/v1/me and /api/v1/auth prefixes.
-    const hasLearningPath = /["']\/api\/v1\/(?!me\b|auth\/)/.test(content);
-    if (hasLearningPath) {
+  // Verify no unexpected Ent schemas (i.e. no invented P2–P4 tables).
+  const allowedSchemaFiles = new Set([
+    "canonicalword.go",
+    "externalidentity.go",
+    "journeysituation.go",
+    "journeyword.go",
+    "magiclink.go",
+    "mixins.go",
+    "session.go",
+    "usagenote.go",
+    "user.go",
+    "userword.go",
+    "wordexample.go",
+    "wordmeaning.go",
+  ]);
+  for (const entry of readdirSync(apiSchemaRoot, { withFileTypes: true })) {
+    if (
+      entry.isFile() &&
+      entry.name.endsWith(".go") &&
+      !allowedSchemaFiles.has(entry.name)
+    ) {
       errors.push(
-        `${file}: contains a non-A1 API path; A1 must not invent learning-domain endpoints`,
+        `apps/api/ent/schema/${entry.name}: unexpected schema outside A1 and VOC-026 P1`,
+      );
+    }
+  }
+
+  // Verify no unexpected migrations (i.e. no invented P2–P4 tables).
+  const allowedMigrationFiles = new Set([
+    "20260724210000_identity_foundation.sql",
+    "20260724210001_oauth_state.sql",
+    "20260725100000_voc026_p1_content_tables.sql",
+    "20260725100001_voc026_p1_idempotency_keys.sql",
+  ]);
+  for (const entry of readdirSync(apiMigrationRoot, {
+    withFileTypes: true,
+  })) {
+    if (
+      entry.isFile() &&
+      entry.name.endsWith(".sql") &&
+      !allowedMigrationFiles.has(entry.name)
+    ) {
+      errors.push(
+        `apps/api/migrations/${entry.name}: unexpected migration outside A1 and VOC-026 P1`,
       );
     }
   }
@@ -138,12 +238,7 @@ export function validateMockInventory() {
   }
 
   // Verify no new MOCK_ or placeholder data sources were introduced in (app).
-  const appFiles = globSync("**/*.{ts,tsx}", { cwd: appRouteRoot });
-  const knownMocks = new Set(
-    expectedMocks
-      .map((m) => m.expectedConstant)
-      .concat("MOCK_SITUATION_WORD_LISTS"),
-  );
+  const knownMocks = new Set(expectedMocks.map((m) => m.expectedConstant));
   for (const file of appFiles) {
     const content = readFileSync(path.join(appRouteRoot, file), "utf8");
     const mockMatches = content.match(/\bMOCK_[A-Z_]+\b/g) ?? [];
@@ -176,6 +271,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     );
     process.exitCode = 1;
   } else {
-    process.stdout.write("A1 mock inventory validation passed.\n");
+    process.stdout.write("VOC-026 P1 mock inventory validation passed.\n");
   }
 }
