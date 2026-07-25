@@ -3,7 +3,7 @@ id: VOC-027
 slug: begin-milestone-p2-review-saved-words
 title: "Begin Milestone P2 \u2014 Review Saved Words"
 type: feature
-status: draft
+status: implementation-ready
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-027-begin-milestone-p2-review-saved-words
@@ -12,13 +12,13 @@ requirement_source: docs/product/12-mvp-implementation-plan.md#5 (P2 paragraph) 
   docs/engineering/05-database-design.md#9,#15 ; docs/engineering/06-backend-design.md#10
   ; docs/engineering/07-api-contract-and-dto-design.md (Review system; Idempotency)
   ; supplied free-text request
-requirement_approval_status: not-approved
+requirement_approval_status: founder-approved
 base_branch: develop
-base_sha: TBD-set-at-package-adoption
+base_sha: 7e724092c8ce30eef363d551c127ea34b36759a8
 target_branch: develop
 approved_candidate_sha: TBD-set-at-package-adoption
-approval_status: not-approved
-implementation_authorized: false
+approval_status: approved
+implementation_authorized: true
 automatic_merge_allowed: false
 production_impact: unknown
 rollback_required: true
@@ -67,9 +67,9 @@ affected_areas:
 - apps/web/src/app/(app)/home
 - scripts/foundation
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: not-started
+  status: implementation-ready
   target_branch: develop
   pull_request: null
   authority_issue: null
