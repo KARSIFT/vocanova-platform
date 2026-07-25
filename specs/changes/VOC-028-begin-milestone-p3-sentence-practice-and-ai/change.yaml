@@ -47,11 +47,11 @@ dependencies:
     tables and learner level from `user_onboarding_profiles` for A2/B1 prompt behavior.
 - id: VOC-028-DEP-02
   status: 'resolved-at-adoption 2026-07-25: production provider chosen (VOC-028-D02)
-    - the founder''s own OpenCode Go account, model opencode-go/deepseek-v4-pro,
-    integrated via opencode serve (a real headless HTTP server). Formal privacy/retention
-    verification (training-data use, retention, processing regions, subprocessors,
-    deletion) remains a pre-production legal-review gate, not resolved by this adoption
-    - see specification.md D02/D04.'
+    - the founder''s own OpenCode Go account, model opencode-go/deepseek-v4-pro, integrated
+    via opencode serve (a real headless HTTP server). Formal privacy/retention verification
+    (training-data use, retention, processing regions, subprocessors, deletion) remains
+    a pre-production legal-review gate, not resolved by this adoption - see specification.md
+    D02/D04.'
 - id: VOC-028-DEP-03
   status: "open-before-mission-completion; the daily-mission / streak / Confidence-Point\
     \ tables (`daily_mission_snapshots`, `daily_activity_summaries`, `streak_states`,\
@@ -98,9 +98,9 @@ release:
   automatic_merge: false
   migration_required: true
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 109
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/109
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
