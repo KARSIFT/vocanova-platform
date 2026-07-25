@@ -2,32 +2,32 @@ import Link from "next/link";
 
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
 
-// VOC-019 P4-pending mock fields: mission target, reviewed-today count, streak,
-// and due-review count have no P1 equivalent and stay mocked pending P4/P2.
+// VOC-019 P4-pending mock fields: mission target, reviewed-today count, and
+// streak have no P1/P2 equivalent and stay mocked pending P4.
+// VOC-027-D05: the due-review count is wired to the real P2 due-queue and is
+// no longer part of MOCK_HOME_STATE.
 const MOCK_HOME_STATE = {
   missionTargetWords: 10,
   reviewedWordsToday: 3,
   currentStreakDays: 5,
-  dueReviewWords: 8,
 } as const;
 
 export default async function HomePage() {
   const client = await createServerApiClient();
   let savedWordsResponse: Awaited<ReturnType<typeof client.listSavedWords>>;
+  let dueResponse: Awaited<ReturnType<typeof client.listDueWords>>;
   try {
     savedWordsResponse = await client.listSavedWords({ limit: 10 });
+    dueResponse = await client.listDueWords({ limit: 1 });
   } catch (error) {
     requireAuthRedirect(error, "/home");
   }
 
   const { items: savedWords } = savedWordsResponse.data;
+  const dueReviewWords = dueResponse.data.totalCount;
 
-  const {
-    missionTargetWords,
-    reviewedWordsToday,
-    currentStreakDays,
-    dueReviewWords,
-  } = MOCK_HOME_STATE;
+  const { missionTargetWords, reviewedWordsToday, currentStreakDays } =
+    MOCK_HOME_STATE;
 
   const missionProgressPercent = Math.min(
     100,
@@ -111,12 +111,21 @@ export default async function HomePage() {
         {dueReviewWords} words due today
       </p>
 
-      <Link
-        href="/discover"
-        className="mt-[var(--spacing-lg)] inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-primary-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
-      >
-        Go to Journey
-      </Link>
+      <div className="mt-[var(--spacing-lg)] flex flex-wrap gap-[var(--spacing-md)]">
+        <Link
+          href="/discover"
+          className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+        >
+          Go to Journey
+        </Link>
+
+        <Link
+          href="/reviews"
+          className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center rounded-md border border-neutral-300 bg-white px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+        >
+          Start review
+        </Link>
+      </div>
     </div>
   );
 }

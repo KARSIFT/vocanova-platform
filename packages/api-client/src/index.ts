@@ -111,6 +111,61 @@ export interface SaveUserWordBody {
   source: "journey" | "search" | "manual";
 }
 
+export interface DueWord {
+  userWordId: string;
+  meaningId: string;
+  wordId: string;
+  wordText: string;
+  wordSlug: string;
+  partOfSpeech: string;
+  shortDefinition: string;
+  status: string;
+  reviewStep: number;
+}
+
+export interface ListDueWordsResponse {
+  items: DueWord[];
+  nextCursor?: string;
+  totalCount: number;
+}
+
+export interface ReviewAttempt {
+  attemptId: string;
+  userWordId: string;
+  meaningId: string;
+  attemptType: string;
+  promptType: "multiple_choice" | "self_check";
+  result: "correct" | "incorrect" | "skipped";
+  rating?: "again" | "hard" | "good" | "easy";
+  reviewStepBefore: number;
+  reviewStepAfter: number;
+  answeredAt: string;
+  responseTimeMs: number;
+  selectedOptionMeaningId?: string;
+  typedAnswer?: string;
+  wasHintUsed: boolean;
+  source: string;
+  clientAttemptId: string;
+  nextReviewAt: string;
+}
+
+export interface SubmitReviewBody {
+  userWordId: string;
+  meaningId: string;
+  attemptType?: "review";
+  promptType: "multiple_choice" | "self_check";
+  result: "correct" | "incorrect" | "skipped";
+  rating?: "again" | "hard" | "good" | "easy";
+  answeredAt: string;
+  responseTimeMs?: number;
+  selectedOptionMeaningId?: string;
+  typedAnswer?: string;
+  wasHintUsed?: boolean;
+  source?: "review" | "review_session";
+  clientAttemptId: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface ApiError {
   type?: string;
   title?: string;
@@ -268,6 +323,24 @@ export class VocanovaClient {
     return { data, response };
   }
 
+  async listDueWords(
+    params?: { after?: string; limit?: number },
+    init?: RequestInit,
+  ): Promise<{ data: ListDueWordsResponse; response: Response }> {
+    const query = new URLSearchParams();
+    if (params?.after) {
+      query.set("after", params.after);
+    }
+    if (params?.limit !== undefined) {
+      query.set("limit", String(params.limit));
+    }
+    const path =
+      "/api/v1/reviews/due" + (query.toString() ? `?${query.toString()}` : "");
+    const response = await this.request("GET", path, undefined, init);
+    const data = (await response.json()) as ListDueWordsResponse;
+    return { data, response };
+  }
+
   async saveUserWord(
     body: SaveUserWordBody,
     idempotencyKey: string,
@@ -294,6 +367,26 @@ export class VocanovaClient {
       init,
     );
     return { response };
+  }
+
+  async submitReview(
+    body: SubmitReviewBody,
+    idempotencyKey: string,
+    init?: RequestInit,
+  ): Promise<{ data: ReviewAttempt; response: Response }> {
+    const headers = new Headers(init?.headers);
+    headers.set("Idempotency-Key", idempotencyKey);
+    const response = await this.request(
+      "POST",
+      "/api/v1/reviews/submissions",
+      body,
+      {
+        ...init,
+        headers,
+      },
+    );
+    const data = (await response.json()) as ReviewAttempt;
+    return { data, response };
   }
 
   private async request(

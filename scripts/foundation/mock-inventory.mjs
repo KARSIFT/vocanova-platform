@@ -15,8 +15,9 @@ const apiBusinessRoot = path.join(repositoryRoot, "apps/api/business");
 const apiSchemaRoot = path.join(repositoryRoot, "apps/api/ent/schema");
 const apiMigrationRoot = path.join(repositoryRoot, "apps/api/migrations");
 
-// Inventory of VOC-010–VOC-024 mocks retained as P4-pending placeholders.
-// See specs/changes/VOC-026-begin-milestone-p1-discover-and-save-words-per-doc/mock-inventory.md
+// Inventory of VOC-010–VOC-024 mocks retained as P4-pending placeholders,
+// reconciled at the VOC-027 P2 boundary. See
+// specs/changes/VOC-027-begin-milestone-p2-review-saved-words/mock-inventory.md
 const expectedMocks = [
   {
     file: "apps/web/src/app/(app)/home/page.tsx",
@@ -61,6 +62,7 @@ const expectedRouteDirectories = [
   path.join("discover", "[situation]"),
   path.join("discover", "[situation]", "[word]"),
   "progress",
+  "reviews",
 ];
 
 export function validateMockInventory() {
@@ -82,6 +84,33 @@ export function validateMockInventory() {
     if (!content.includes(mock.vocPackage)) {
       errors.push(
         `${mock.file}: expected VOC package reference ${mock.vocPackage} not found`,
+      );
+    }
+  }
+
+  // VOC-027-D05: Home's dueReviewWords was decommissioned to the real P2 due-queue
+  // count and must no longer be a hardcoded field in MOCK_HOME_STATE.
+  const homePath = path.join(
+    repositoryRoot,
+    "apps/web/src/app/(app)/home/page.tsx",
+  );
+  if (exists(homePath)) {
+    const homeContent = readFileSync(homePath, "utf8");
+    const homeMockMatch = homeContent.match(
+      /const\s+MOCK_HOME_STATE\s*=\s*\{[\s\S]*?\}\s*as\s+const/,
+    );
+    if (homeMockMatch && homeMockMatch[0].includes("dueReviewWords")) {
+      errors.push(
+        "apps/web/src/app/(app)/home/page.tsx: MOCK_HOME_STATE still contains the decommissioned dueReviewWords field",
+      );
+    }
+    if (
+      !/const\s+dueReviewWords\s*=\s*dueResponse\.data\.totalCount/.test(
+        homeContent,
+      )
+    ) {
+      errors.push(
+        "apps/web/src/app/(app)/home/page.tsx: dueReviewWords is not wired to the real due-queue totalCount",
       );
     }
   }
@@ -123,7 +152,8 @@ export function validateMockInventory() {
     }
   }
 
-  // Verify no API routes beyond A1 auth and VOC-026 P1 content/learning were invented.
+  // Verify no API routes beyond A1 auth, VOC-026 P1 content/learning, and the
+  // VOC-027 P2 review routes (due-queue read and submission) were invented.
   const allowedAPIPaths = [
     /^\/api\/v1\/me$/,
     /^\/api\/v1\/auth(?:\/|$)/,
@@ -131,6 +161,8 @@ export function validateMockInventory() {
     /^\/api\/v1\/canonical-words\/[^/]+$/,
     /^\/api\/v1\/user-words$/,
     /^\/api\/v1\/user-words\/[^/]+$/,
+    /^\/api\/v1\/reviews\/due$/,
+    /^\/api\/v1\/reviews\/submissions$/,
   ];
   const apiRouteFiles = globSync("**/*.go", { cwd: apiRouteRoot });
   for (const file of apiRouteFiles) {
@@ -146,8 +178,14 @@ export function validateMockInventory() {
     }
   }
 
-  // Verify no unexpected business modules (i.e. no invented P2–P4 behavior).
-  const allowedBusinessModules = new Set(["auth", "content", "learning"]);
+  // Verify no unexpected business modules. VOC-027-T00 adds the pure
+  // scheduling domain and T02 adds the review submission write path.
+  const allowedBusinessModules = new Set([
+    "auth",
+    "content",
+    "learning",
+    "reviews",
+  ]);
   for (const entry of readdirSync(apiBusinessRoot, {
     withFileTypes: true,
   })) {
@@ -166,6 +204,7 @@ export function validateMockInventory() {
     "journeyword.go",
     "magiclink.go",
     "mixins.go",
+    "reviewattempt.go",
     "session.go",
     "usagenote.go",
     "user.go",
@@ -191,6 +230,7 @@ export function validateMockInventory() {
     "20260724210001_oauth_state.sql",
     "20260725100000_voc026_p1_content_tables.sql",
     "20260725100001_voc026_p1_idempotency_keys.sql",
+    "20260725110000_voc027_p2_review_attempts.sql",
   ]);
   for (const entry of readdirSync(apiMigrationRoot, {
     withFileTypes: true,
@@ -219,6 +259,8 @@ export function validateMockInventory() {
       '"/discover"',
       '"/discover/:path*"',
       '"/progress"',
+      '"/reviews"',
+      '"/reviews/:path*"',
     ];
     for (const pattern of requiredPatterns) {
       if (!matcherText.includes(pattern)) {
@@ -245,7 +287,7 @@ export function validateMockInventory() {
     for (const mock of mockMatches) {
       if (!knownMocks.has(mock)) {
         errors.push(
-          `${file}: unexpected mock constant ${mock}; add it to the T05 inventory or replace with a real source`,
+          `${file}: unexpected mock constant ${mock}; add it to the VOC-027 inventory or replace with a real source`,
         );
       }
     }
@@ -271,6 +313,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     );
     process.exitCode = 1;
   } else {
-    process.stdout.write("VOC-026 P1 mock inventory validation passed.\n");
+    process.stdout.write("VOC-027 P2 mock inventory validation passed.\n");
   }
 }
