@@ -43,11 +43,11 @@ dependencies:
     \ (VOC-025-T05) but live staging A1 evidence remains blocked by the missing F3\
     \ staging environment (VOC-025-DEP-01)."
 - id: VOC-026-DEP-02
-  status: open-before-tasks-touch-saved-state-on-screens; founder must resolve the
-    open decisions in `specification.md` (D01 MVP seed-data scope, D03 discovery vs
-    mock contradiction, D04 save side-effects vs P2/P4 boundary, D05 how saved state
-    interacts with the retained Home/Progress P4 mocks during the transition). Implementation
-    of the affected tasks must not proceed past them by guessing.
+  status: 'resolved-at-adoption 2026-07-25: D01 = reuse VOC-022''s existing situation/word
+    set as the real seed; D03 = discovery shows all meanings with a saved overlay;
+    D04 = save writes only P1-owned user_words fields, no P2/P4 side effects; D05
+    = wire real saved-word content into Home/Progress, retain every other P4/P2 mock
+    field labelled mock-pending. See specification.md D01/D03/D04/D05/D06.'
 - id: VOC-026-DEP-03
   status: open-before-F3-staging-evidence; the F3 staging environment does not yet
     exist, so live P1 staging/rollback evidence in T05 cannot be executed and the
@@ -94,6 +94,9 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: founder must resolve open decisions D01,D03,D04,D05 before the affected
-  implementation tasks can proceed; F3 staging must exist before live P1 gate evidence
-  can be collected.
+blocking_reasons:
+- package is a draft and has not been human-adopted
+- F3 staging evidence is required before VOC-026-T05's live acceptance evidence, not
+  before T00-T04
+- provider-independent verification (Claude Code, exact-SHA) required per task, same
+  as VOC-025

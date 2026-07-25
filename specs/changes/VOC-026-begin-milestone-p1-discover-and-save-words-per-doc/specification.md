@@ -66,14 +66,18 @@ deny-by-default, requester-scoped, never-expose-Ent, explicit-DTO, UTC/RFC3339, 
 `X-CSRF-Token`-double-submit, `Idempotency-Key`-user-scoped rules apply. No auth/session
 mechanics are re-litigated here.
 
-`VOC-026-D01` — **OPEN, founder decision required.** MVP canonical vocabulary seed-data
-scope: how many journey situations, how many canonical words/meanings per situation, which
-A1–C1 difficulty mix, and whether the seed reuses the existing VOC-022 situation/word
-content (Airport, Restaurant, Hotel Check-in, Job Interview, Daily Conversation, Work
-Meeting, University Class) as the initial real seed or defines a different set. The request
-explicitly flags "exact canonical vocabulary seed-data scope for MVP" as founder-level. The
-implementer must not pick an unbounded scope to make the milestone "look complete"; the
-resolved scope bounds T00's seed and is the P1 content sufficiency reference.
+`VOC-026-D01` — **RESOLVED at adoption (founder decision, 2026-07-25).** The seed reuses
+the existing VOC-022 situation/word content verbatim as the initial real canonical set:
+the same seven situations (Airport, Restaurant, Hotel Check-in, Job Interview, Daily
+Conversation, Work Meeting, University Class) and the words/meanings already shown by each
+situation's mock word list, converted into real `canonical_words`/`word_meanings` rows
+(one meaning per existing mock entry to start; `word_examples`/`usage_notes` may be added
+per word where the mock already implies one, otherwise left for a later content pass — do
+not invent new example sentences beyond what a mock entry already implies). A1–C1
+difficulty mix is whatever the existing mock content already reflects; do not rebalance it
+for T00. This keeps the real seed visually/behaviorally identical to what VOC-022's mock
+already showed, minimizing new invented content while making it real. T00's seed is scoped
+exactly to this; expanding the canonical catalog beyond it is out of scope for P1.
 
 `VOC-026-D02` — **OPEN, implementer-facing naming/keying choice — founder or delegated
 reviewer to settle at adoption.** DOC-05 §7 makes a *meaning* the core learning unit and
@@ -87,47 +91,41 @@ exact path/identifier shapes (canonical-words URL vs word-meanings URL, slug vs 
 read endpoints) are for the human reviewer to settle at adoption; this is a naming choice,
 not a product-scope question, and is called out here rather than guessed.
 
-`VOC-026-D03` — **OPEN, contradiction flagged — founder decision required.** DOC-05 §8
-states the discovery query excludes meanings already in the learner's `user_words`, but
-the VOC-022 situation drill-down mock deliberately lists saved and unsaved words together
-and renders a "Saved" badge for saved ones. These conflict for P1. Either the discovery
-query shows all situation meanings with a saved overlay (matching the existing mock UI and
-the P1 gate's "see it saved consistently across the app"), or it excludes saved meanings
-and the saved badge never appears in the situation list. The request explicitly flags how
-saved state interacts with the existing static mock screens; resolving this contradiction
-is founder-controlled. `TEST` and `AC` are written to whichever resolution is adopted; the
-draft assumes the "show all with overlay" reading only for the proposed contract shape and
-marks the exclusion alternative as requiring updated criteria.
+`VOC-026-D03` — **RESOLVED at adoption (founder decision, 2026-07-25).** Show-all-with-overlay:
+the discovery/situation query returns every meaning in the situation regardless of saved
+state, with a per-meaning `saved: bool` overlay computed from the requester's `user_words`.
+This matches the existing VOC-022 mock UI's "Saved" badge behavior and is the only reading
+consistent with the P1 gate's "see it saved consistently across the app" — an exclusion
+query would make a save action remove a word from the very screen the learner just saved it
+from, which is not what "saved consistently" means. `TEST`/`AC` are written to this reading;
+the exclusion alternative is rejected, not merely deferred.
 
-`VOC-026-D04` — **OPEN, P2/P4 boundary — founder decision required.** DOC-06 §10 says word
-addition creates `user_words` at `review_step=0` with `next_review_at = now` and "awards a
-Confidence Point reward once"; DOC-06 §11 lists "Add word: +2". P1 must not invent P2
-scheduling or P4 gamification, but `user_words` is one shared row whose fields all three
-milestones touch. Resolve, for P1: (a) whether save sets `next_review_at` to `now` (making
-the word immediately "due" — a P2-coupled signal) or leaves it null until P2 implements the
-schedule; (b) whether save awards Confidence Points / appends a `confidence_point_ledger`
-entry / updates a daily-activity counter, all of which require P4 tables that this package
-does not create. The draft proposes: P1 save sets `status='new'`, `source` per the request
-origin (`journey`/`search`/`manual`), `review_step=0`, `added_at`, and leaves
-`next_review_at`, `consecutive_*_count`, `total_review_count`, and all counters at their
-schema defaults; it writes **no** point ledger or mission/activity rows and adds **no**
-tables it does not own. Resolving D04 differently is founder-controlled and adds tasks.
+`VOC-026-D04` — **RESOLVED at adoption (founder decision, 2026-07-25).** Adopted exactly as
+the draft proposed: P1 save sets `status='new'`, `source` per the request origin
+(`journey`/`search`/`manual`), `review_step=0`, `added_at`, and leaves `next_review_at`,
+`consecutive_*_count`, `total_review_count`, and all other counters at their schema
+defaults — `next_review_at` stays null, not `now`, so P1 never manufactures a P2-coupled
+"due" signal. Save writes **no** Confidence Point ledger entry and **no** mission/daily-
+activity row; DOC-06 §10/§11's point-award and scheduling behavior belongs to P2/P4 and is
+explicitly deferred, not implemented here. Keeps P1 strictly additive to the `user_words`
+row without inventing any P2/P4 table or semantics.
 
-`VOC-026-D05` — **OPEN, founder decision required.** How saved state interacts with the
-retained Home and Progress mock screens during the transition. The current Home mock shows
-P4 data (mission target, reviewed today, streak, due words) and the Progress mock shows
-Confidence Points, streaks, and a weekly completion history — all P4/P2 fields this package
-must not invent. The P1 gate requires "see it saved consistently across the app
-(home/discover/progress)." Resolve: (a) replace the P4 mock fields on Home/Progress with
-real P1-relevant saved-word content for the milestone (and record the P4 fields as deferred
-to P4, not invented now); (b) retain the P4 mocks untouched and add a real saved-words
-section alongside them (mixed real/mock, explicitly labelled); or (c) another founder
-choice. `VOC-025-D05` retained these mocks for A1; this package retires the ones in scope
-and must record the disposition of the out-of-scope P4 mock fields. T04 cannot proceed past
-this by guessing.
+`VOC-026-D05` — **RESOLVED at adoption (founder decision, 2026-07-25).** Option (a): on
+Home and Progress, replace only the mock fields that represent *saved-word content* (e.g.
+a "recently saved" or saved-words list/count) with the real P1 saved-words API, wired the
+same way T03 wires Discover/Situation/Word-Detail. Every P4-only or P2-only mock field that
+has no P1 equivalent — mission target, reviewed-today, streak, due-words count, Confidence
+Points, and the weekly completion history — stays exactly as it is today, explicitly
+labelled/commented as mock-pending-P4 (or -P2) in the code, not deleted and not silently
+left ambiguous. This satisfies the P1 gate's "saved consistently across the app" without
+inventing any P4 gamification or P2 scheduling data.
 
-`VOC-026-D06` — **RESOLVED at adoption, not by this draft.** To be set when the founder
-resolves D01, D03, D04, D05; no value is asserted here.
+`VOC-026-D06` — **RESOLVED at adoption (founder decision, 2026-07-25).** Composite record
+of D01/D03/D04/D05 above: VOC-022's existing situation/word set is the real P1 seed (D01);
+discovery shows all meanings with a saved overlay (D03); save writes only the P1-owned
+`user_words` fields with no P2/P4 side effects (D04); Home/Progress get real saved-word
+content wired in, with every other P4/P2 mock field explicitly retained and labelled
+mock-pending (D05). T00–T05 may proceed under these resolutions.
 
 ### Security and privacy
 
