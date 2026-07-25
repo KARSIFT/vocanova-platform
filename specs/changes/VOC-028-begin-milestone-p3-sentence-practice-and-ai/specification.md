@@ -173,7 +173,7 @@ concrete provider/model, and does not wire real credentials.
 
 ## Decisions, contradictions, security, and privacy
 
-`VOC-028-D00` — **OPEN, adopted technical baseline (carry-forward proposal).**
+`VOC-028-D00` — **RESOLVED at adoption (carry-forward confirmed, 2026-07-25).**
 P3 builds on the VOC-025 A1 auth/session/requester-context (`Requester`/
 `RequesterUserID`), `RequireAuth`, `CSRFMiddleware`, `AuthorizeOwner`, the
 user+operation-scoped `Idempotency-Key` handling, and the OpenAPI
@@ -191,67 +191,83 @@ through VOC-027 exists), and `learner_sentences`/`ai_feedback_attempts` do not
 exist yet (P3 creates them). The `idempotency_keys` table (VOC-026 migration)
 already exists and supports the `ai_feedback_request` scope (DOC-05 §13).
 
-`VOC-028-D01` — **OPEN/proposed (directed by request).** Because the
-daily-mission / streak / Confidence-Point tables genuinely do not exist (see
+`VOC-028-D01` — **RESOLVED at adoption (founder decision, 2026-07-25).** Because
+the daily-mission / streak / Confidence-Point tables genuinely do not exist (see
 `D00`/`DEP-03`), the orchestrator's mission-completion step is implemented as a
 **stub/interface point flagged for P4**: a `MissionUpdater` seam returns a
 backend-decided result after successful persistence (DOC-09 §8), but writes no
 `daily_mission_snapshots`/streak/point rows and surfaces `missionCompleted`
 honestly (not-yet-wired / false) rather than fabricating completion. No P4 tables
-are invented. The founder confirms this stub boundary at adoption; P4 owns the
-real wiring. (Recorded so the implementer does not "complete the loop" by
-guessing P4 tables.)
+are invented. P4 owns the real wiring.
 
-`VOC-028-D02` — **OPEN founder decision (R4 once decided; hard gate on T02).**
-The production feedback provider/model selection, secrets provisioning, and
-privacy verification. Per the request and DOC-09 §18/§21/§24 + DOC-12 §5, this
-draft does **not** select/hard-configure a concrete commercial provider/model
-or wire real credentials; the production adapter (T02) is drafted against the
-narrow T00 `FeedbackProvider` interface only. Before T02 can be accepted, the
-founder must evaluate provider candidates in the DOC-09 §18 order
-(target-word feedback quality, correction accuracy, meaning preservation,
-structured-output reliability, safety/privacy, latency/availability, cost
-predictability, operational simplicity), verify privacy settings (training-data
-use, retention, processing regions, subprocessors, deletion; prefer
-non-training/minimized-retention configs — DOC-09 §21), and record the choice +
-configuration (low randomness, short max output, structured output enabled, no
-web access/tools/memory). One primary provider/model operated at a time in MVP;
-no automatic multi-provider fallback (DOC-09 §17). Secrets remain backend-only
-and never enter source (DOC-09 §21; AGENTS safety).
+`VOC-028-D02` — **RESOLVED at adoption (founder decision, 2026-07-25).**
+Production feedback provider: the founder's own OpenCode Go account, model
+`opencode-go/deepseek-v4-pro` (the same account/model already used as this
+pipeline's `reviewer`, now reused as the application's production AI feedback
+provider). Integration shape: `opencode serve` (confirmed live via the
+installed CLI's own `--help` output - a genuine headless HTTP server mode,
+distinct from the `opencode run` CLI-subprocess-per-invocation pattern this
+repo's own CI pipeline uses for planning/implementation/review) is the intended
+integration point for the backend's `FeedbackProvider` adapter - a persistent
+HTTP client the Go backend calls per request, not a subprocess spawn.
+Credentials: `OPENCODE_API_KEY`/`OPENCODE_SECOND_API_KEY`-style backend-only
+secrets (never in source), matching this project's existing OpenCode
+credential pattern. Configuration per DOC-09 §18 (low randomness, short max
+output, structured output enabled, no web access/tools/memory) is T02's own
+implementation detail against this chosen provider. **Privacy verification
+caveat, carried forward, not waived**: DOC-09 §21's requirement to verify
+training-data use, retention, processing regions, subprocessors, and deletion
+procedures for the chosen provider before production launch still applies -
+this resolution picks the technical provider/model, it does not itself
+constitute the pre-production privacy/legal review (see `D04`). One primary
+provider/model operated at a time, no automatic multi-provider fallback
+(DOC-09 §17), unchanged.
 
-`VOC-028-D03` — **OPEN founder decision.** The emergency AI-disable switch,
-global/per-user cost ceilings, monthly hard stop, and the invariant that
-non-AI learning features remain available if AI generation is disabled (DOC-09
-§19, §25). The disable mechanism + cost-limit values + telemetry/alterting are
-a founder product/ops decision; the code seam is drafted in T05 observability
-but the activation values are not guessed here.
+`VOC-028-D03` — **RESOLVED at adoption (founder decision via DOC-09's own
+documented defaults, 2026-07-25).** DOC-09 §19 already specifies starting
+limits as approved-document defaults, not merely a suggestion: one active
+generation per learner, 5 requests/minute/learner, 30 feedback
+generations/day/learner, IP-level abuse protection, and global request/cost
+ceilings, plus a daily request ceiling, monthly cost warning, monthly hard
+stop, and an emergency AI-disable switch (values configurable, not hard-coded)
+per DOC-09 §19/§25. T05 implements the disable switch and cost-ceiling seam
+using these DOC-09-documented starting values; **non-AI learning features must
+remain available if AI generation is disabled**, unchanged from DOC-09 §19.
+Revising these starting values later is a normal, lower-stakes founder
+decision, not a blocker to building the seam now.
 
-`VOC-028-D04` — **OPEN founder decision (pre-production, legal review).**
-Retention defaults (DOC-09 §21 — learner sentence + structured feedback retained
+`VOC-028-D04` — **RESOLVED at adoption for MVP/staging development (founder
+decision, 2026-07-25); formal legal review remains a pre-production gate, not
+waived.** DOC-09 §21's retention defaults are already the approved document's
+own defaults, not guesses: learner sentence + structured feedback retained
 until account/learner deletion; request-level provider metadata 90 days;
 aggregated metrics without learner text long-term; standard logs 30 days max;
-raw provider request/response not stored by default; temporary malformed-output
-capture 7 days max, off by default; learner reports 180 days post-resolution;
-safety investigations up to 180 days). Defaults are configurable and require
-legal review before production. The code stores configurable retention knobs
-but the defaults/retention-job are not built or guessed in this milestone;
-flagged as pre-production founder/legal work.
+raw provider request/response not stored by default; temporary
+malformed-output capture 7 days max, off by default; learner reports 180 days
+post-resolution; safety investigations up to 180 days. T00's schema stores
+configurable retention knobs using these DOC-09 values as the implemented
+defaults. Per DOC-09 §21 itself, a **formal legal review remains required
+before production launch** - this resolution authorizes building against
+these defaults for MVP/staging development now, it does not substitute for
+that pre-production legal review.
 
-`VOC-028-D05` — **OPEN founder decision.** The exact entry-point placement and
-copy of the reusable feedback component across Home, Word-Detail, and
-Review-Completion (DOC-09 §5) — which surfaces launch with the practice input and
-which show entry affordances. The component is reusable (T04); the precise
-placement/permutation is a founder UX decision; this draft proposes wiring it
-primarily from Word-Detail (the natural target-word origin) with Home and
-Review-Completion entry points, to be confirmed at adoption.
+`VOC-028-D05` — **RESOLVED at adoption (founder decision, 2026-07-25).**
+Adopted exactly as the draft proposed: the reusable feedback component wires
+primarily from Word-Detail (the natural target-word origin), with Home and
+Review-Completion as additional entry points, per DOC-09 §5's own "Home, Word
+Detail, Review Completion" entry-point list.
 
-`VOC-028-D06` — **OPEN/proposed (composite, resolved at adoption).** Composite
-record of `D01`–`D05` above for the implementer: mission-completion is a P4
-stub (`D01`); no concrete provider/model or credentials are selected — `D02` is
-a hard gate on T02 acceptance; AI-disable/cost ceilings are founder-controlled
-(`D03`); retention defaults need legal review (`D04`); entry-point UX placement
-is a founder decision (`D05`). T00–T01 may proceed under `D00`/`D01` once
-adopted; T02 is blocked until `D02` is resolved; T04 placement waits for `D05`.
+`VOC-028-D06` — **RESOLVED at adoption (founder decision, 2026-07-25).**
+Composite record of `D01`-`D05` above for the implementer: mission-completion
+is a confirmed P4 stub (`D01`); production provider is the founder's OpenCode
+Go account / `opencode-go/deepseek-v4-pro` via `opencode serve`, privacy
+verification still required pre-production (`D02`); AI-disable/cost ceilings
+use DOC-09's own documented starting values (`D03`); retention uses DOC-09's
+own documented defaults for MVP/staging, formal legal review still required
+pre-production (`D04`); entry-point UX placement is Word-Detail-primary +
+Home + Review-Completion (`D05`). T00 through T05 may all proceed under these
+resolutions; T02 specifically proceeds against the concrete `D02` provider
+choice, not an unresolved gate.
 
 ### Security and privacy
 

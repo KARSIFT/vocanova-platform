@@ -4,14 +4,11 @@ Mandatory PR order (DOC-09 §24 / DOC-12 §5 P3 gate):
 `T00 → T01 → T02 → T03 → T04 → T05`. Each PR is independently reviewable,
 remains R3-proposed (path floor R3 for migrations/schemas), and requires Claude
 Code exact-SHA review. Safety/privacy/injection/cross-user/cost failures block
-release. The production-provider PR `T02` is a hard gate: it may be drafted
-against the narrow T00 interface but **cannot be accepted until provider
-candidates and privacy settings are evaluated and recorded** (`D02` — DOC-09
-§18/§21/§24; DOC-12 §5). No concrete commercial provider/model is selected or
-hard-configured, and no real credentials are wired, by any task in this draft.
-Tasks depending on open founder decisions (`D01`, `D02`, `D03`, `D04`, `D05`)
-may not proceed past them by guessing; record the adopted resolutions in `D06`
-first.
+release. **`D01`-`D05` were all resolved at adoption (recorded in `D06`,
+specification.md) - no task in this roster is blocked on an open founder
+decision.** `T02`'s production provider is the founder's OpenCode Go account,
+`opencode-go/deepseek-v4-pro`, via `opencode serve` (`D02`); no other
+commercial provider/model is selected or hard-configured by any task.
 
 ## VOC-028-T00 — AI domain and persistence: tables, narrow interfaces, mock provider
 
@@ -73,14 +70,13 @@ honestly as not-yet-wired; no `daily_mission_snapshots`/streak/point rows are
 created. Distinguish operational attempt states from the three learning statuses
 (DOC-09 §7). No real provider call, no API route, no frontend in this PR.
 
-## VOC-028-T02 — Prompt architecture and production provider (no concrete provider/credentials; `D02` gate)
+## VOC-028-T02 — Prompt architecture and production provider (`D02`: OpenCode Go / deepseek-v4-pro via `opencode serve`)
 
 - Requirement source: `VOC-028-D00`, `VOC-028-D02`, DOC-09 §§9,10,14,18,21, DOC-05 §15
 - Acceptance criteria: `VOC-028-AC-04`, `VOC-028-AC-05`
 - Tests: `VOC-028-TEST-10`..`VOC-028-TEST-12`, `VOC-028-TEST-14`
 - Evidence: `VOC-028-EV-10`..`VOC-028-EV-12`, `VOC-028-EV-14`
-- Status: pending — blocked until `D02` is resolved and recorded before
-  acceptance
+- Status: pending — unblocked; `D02` resolved at adoption
 
 Build the three backend-controlled prompt layers (DOC-09 §14): system (role,
 A2/B1 audience, target-word focus, concise/supportive/honest, injection
@@ -100,13 +96,14 @@ inconsistent combinations (e.g. `status=correct` with
 `corrected_sentence=null`), invalid enums, empty required fields, excessive
 lengths, off-target feedback, unexpected markup, contradicted explanations,
 unsafe output, leaked instructions/conversation. Implement **one** constrained
-repair attempt when budget allows. Draft the production adapter against the
-narrow T00 `FeedbackProvider` interface **only**: do **not** select or
-hard-configure a concrete commercial provider/model and do **not** wire real
-credentials; read the provider/model from configuration with a clearly flagged
-**open founder decision** (`D02`). `D02` (provider candidates evaluated per
-DOC-09 §18, privacy settings verified per §21, choice recorded) is a hard gate:
-this PR cannot be accepted until `D02` is resolved. Timeouts/retries: provider
+repair attempt when budget allows. Implement the production adapter against the
+narrow T00 `FeedbackProvider` interface, calling the founder's OpenCode Go
+account via `opencode serve` (a headless HTTP server, not a CLI subprocess
+per request) with model `opencode-go/deepseek-v4-pro`, per the adopted `D02`
+resolution - configuration (low randomness, short max output, structured
+output enabled, no web access/tools/memory) per DOC-09 §18. Credentials come
+from backend-only secrets (`OPENCODE_API_KEY`-style), never hard-coded or
+committed to source. Timeouts/retries: provider
 request 8s, total backend target 10s (DOC-09 §18); at most one transport retry for
 a clearly transient failure and one structured-output repair — never both
 indefinitely; no retry for invalid input, blocked content, auth failure, invalid
@@ -148,7 +145,7 @@ real moderation path follows `D02`. No frontend in this PR.
 - Acceptance criteria: `VOC-028-AC-07`
 - Tests: `VOC-028-TEST-17`..`VOC-028-TEST-21`
 - Evidence: `VOC-028-EV-17`..`VOC-028-EV-21`
-- Status: pending — blocked until `D05` (entry-point placement) is resolved
+- Status: pending — unblocked; `D05` resolved at adoption (Word-Detail primary, Home + Review-Completion entries)
 
 Add the `/api/v1` sentence-feedback write endpoint: submission sends sentence +
 attempt ID to `/api/v1`, `credentials: "include"`; the frontend never sends
@@ -177,7 +174,7 @@ stated states/classifications. No P4 behavior.
 - Acceptance criteria: `VOC-028-AC-08`, `VOC-028-AC-09`
 - Tests: `VOC-028-TEST-22`..`VOC-028-TEST-30`
 - Evidence: `VOC-028-EV-22`..`VOC-028-EV-30`
-- Status: pending — offline live-model evaluation blocked until `D02`
+- Status: pending — provider chosen (`D02`); offline live-model evaluation and full privacy verification still require F3 staging + formal legal review (see Blockers)
 
 Add the evaluation layer (DOC-09 §23): an initial dataset of ≥200
 synthetic/manually-written cases across correctness/grammar-error/regional-
@@ -216,9 +213,11 @@ rehearsal), and P3 gate readiness. Do not declare the DOC-12 P3 gate complete.
 
 ### Blockers
 
-- `VOC-028-DEP-02` (`D02`): the production provider/model + privacy decision is
-  open; offline live-model evaluation, the production adapter acceptance, and
-  the privacy/retention verification cannot be completed until it is resolved.
+- `VOC-028-DEP-02` (`D02`): the production provider/model is chosen (OpenCode Go
+  / `opencode-go/deepseek-v4-pro` via `opencode serve`), but formal
+  privacy/retention verification (training-data use, retention, processing
+  regions, subprocessors, deletion) remains a pre-production legal-review gate,
+  not resolved by this adoption.
 - `VOC-028-DEP-04`: F3 staging does not exist, so live staging exercises
   (`EV-28`, `EV-29`, `EV-30`) cannot be executed. This task provides procedures
   and in-repository evidence only; it does not declare the DOC-12 P3 gate
