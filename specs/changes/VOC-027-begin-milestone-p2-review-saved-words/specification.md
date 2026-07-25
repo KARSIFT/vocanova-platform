@@ -126,63 +126,57 @@ enter the schedule because they are saved with `next_review_at = null`, which is
 due state by definition. (Recorded as a resolution so the implementer does not
 "fix" P1 by guessing.)
 
-`VOC-027-D02` — **OPEN contradiction, naming/contract decision — founder or
-delegated reviewer to settle at adoption.** DOC-05 §9 enumerates
-`prompt_type` as `multiple_choice` / `self_check` / `typing` / `sentence_usage`
-(MVP implements `multiple_choice` and `self_check` first), but DOC-07 §"Review
-system" enumerates the initial MVP prompt types as `meaning_choice` /
-`word_choice` / `self_check`. The two approved documents disagree on the
-`multiple_choice`-vs-`meaning_choice`/`word_choice` names. The supplied request
-directs `multiple_choice` and `self_check` only per DOC-05 §9. This package
-proposes to adopt DOC-05 §9's `multiple_choice` + `self_check` as the
-`prompt_type` enum values (and as the `review_attempts.prompt_type` check
-constraint), and treat DOC-07's `meaning_choice`/`word_choice` as a draft-era
-scription error to be reconciled at adoption — but **this is a contract
-contradiction between two approved documents, not a naming taste choice**, so it
-is flagged here, not silently resolved. If the founder prefers
-`meaning_choice`/`word_choice`, the DTO/migration/tests in T00–T03 follow that
-choice instead; either way DOC-07 must be reconciled with the adopted enum under
-the DOC-12 §11 change-control rule (implementation convenience never overrides an
-approved product decision; COD-07 is updated by decision, not by guessing) and
-the superseded wording is retired via the canonical document process, not in this
-package. T00–T03 may not proceed until `D02` is resolved.
+`VOC-027-D02` — **RESOLVED at adoption (founder decision, 2026-07-25).** Adopt
+DOC-05 §9's `multiple_choice` + `self_check` as the `prompt_type` enum values
+(and the `review_attempts.prompt_type` check constraint), exactly as this
+package's own draft proposed — DOC-05 §9 is the more detailed, more recently
+cross-referenced source (it also defines the underlying `review_step`/rating
+mechanics DOC-07 depends on), and the supplied P2 request explicitly directed
+`multiple_choice`/`self_check`. DOC-07's `meaning_choice`/`word_choice` wording is
+confirmed as the draft-era scription error to reconcile, per the DOC-12 §11
+change-control rule — that document correction is tracked as follow-up work, not
+blocking T00–T03, which may now proceed under this resolution.
 
-`VOC-027-D03` — **OPEN founder product decision.** Which prompt types does P2
-build first, and in what mix? `multiple_choice` and `self_check` are both MVP-per
-DOC-05 §9, but the request explicitly leaves "which of multiple_choice/self_check
-to build first if not both" as a founder decision. Building both doubles the
-prompt-generation + grading surface for T02/T03; building one first is a smaller,
-safer first learning-state-mutating PR. The package proposes — **not decides** —
-to build `multiple_choice` first (it exercises the objective path: an incorrect
-answer records `Again`; a correct answer permits Hard/Good/Easy) with `self_check`
-either in the same T03 or a follow-up, and writes `D06` to record the founder's
-choice at adoption. The affected AC/TEST are written against the proposed reading
-and must be adjusted at adoption.
+`VOC-027-D03` — **RESOLVED at adoption (founder decision, 2026-07-25).** Build
+both `multiple_choice` and `self_check` within this package, in T03 — not
+deferred to a follow-up milestone. DOC-05 §9 names both as "MVP implements
+multiple_choice and self_check first" (a bundled MVP pair, not a sequential
+choice), and T02's submission API and T00's scheduling domain already handle both
+result/rating derivations uniformly (objective correctness for
+`multiple_choice`, rating-derives-result for `self_check`) with no meaningful
+extra transaction-layer surface — the added cost is confined to T03's prompt
+rendering and grading UI, which is a normal, bounded scope addition, not a
+second learning-state-mutating write path. Leaving `self_check` out would leave
+the P2 gate ("due words can be reviewed") only partially met for the MVP's own
+declared prompt-type pair.
 
-`VOC-027-D04` — **OPEN founder UX decision.** The exact review-session UI/flow —
-single-card review vs. a list-then-review flow, whether to batch by situation, how
-`response_time_ms` is measured client-side, whether to show step/interval to the
-learner (DOC-05 hides the raw step behind a friendly interval), and how the
-"accurate completion state" is presented (queue drained / words remaining today /
-"you're all caught up") — is a founder product decision. This package proposes the
-smallest flow that satisfies the P2 gate — a due-queue-driven single-card
-reviewer with `multiple_choice` prompts, an explicit "you're all caught up" empty
-state, and a per-session count of remaining due words — but does not decide it.
-`D06` records the founder's resolution at adoption; T03 waits for it past the
-proposal.
+`VOC-027-D04` — **RESOLVED at adoption (founder decision, 2026-07-25).** Adopted
+exactly as the package proposed: a due-queue-driven single-card reviewer (not a
+list-then-review flow, not batched by situation), covering both `multiple_choice`
+and `self_check` prompts per the adopted `D03`. `response_time_ms` is measured
+client-side from prompt-render to submit. The raw `review_step` is never shown to
+the learner (DOC-05's own friendly-interval-over-raw-step framing); the session
+shows an explicit "you're all caught up" empty state when the queue is drained
+and a per-session count of remaining due words while reviewing. This is the
+smallest flow that satisfies the P2 gate; T03 proceeds under it.
 
-`VOC-027-D05` — **OPEN founder scope decision.** VOC-026's Home
-`MOCK_HOME_STATE.dueReviewWords` was deliberately retained as
-mock-pending-P2 (`VOC-026-D05`/`mock-inventory.md`). P2 now owns the real
-due-count. Options: (a) wire `dueReviewWords` to `GET /api/v1/reviews/due` count
-this milestone (small, in-scope-adjacent, completes the loop); (b) leave the mock
-labelled mock-pending-P2 until a follow-up. T04's recommendation is (a) because
-"saved words enter the schedule" · "due words can be reviewed" reads more coherently
-when the Home due-count reflects the same due-queue. The other
-`MOCK_HOME_STATE`/`MOCK_PROGRESS_STATE` fields (mission target,
-reviewed-today count, streak, Confidence Points, weekly completion history) stay
-mock-pending-P4 — P4's job, explicitly **not** wired here. `D06` records the
-founder's resolution.
+`VOC-027-D05` — **RESOLVED at adoption (founder decision, 2026-07-25).** Option
+(a): wire Home's `dueReviewWords` to the real `GET /api/v1/reviews/due` count
+this milestone. "Saved words enter the schedule" and "due words can be
+reviewed" reads incoherently if Home still shows a stale mock due-count right
+next to a real, working review flow. Every other `MOCK_HOME_STATE`/
+`MOCK_PROGRESS_STATE` field (mission target, reviewed-today count, streak,
+Confidence Points, weekly completion history) stays mock-pending-P4, explicitly
+not wired here.
+
+`VOC-027-D06` — **RESOLVED at adoption (founder decision, 2026-07-25).**
+Composite record of D02/D03/D04/D05 above: `multiple_choice`/`self_check` is the
+adopted `prompt_type` enum, DOC-07's wording is the error to reconcile (D02);
+both prompt types ship within this package, in T03 (D03); the review session is
+a due-queue-driven single-card reviewer with an explicit "all caught up" empty
+state (D04); Home's due-count wires to the real due-queue while every other
+P4-only mock field stays untouched (D05). T00–T04 may proceed under these
+resolutions.
 
 ### Security and privacy
 
