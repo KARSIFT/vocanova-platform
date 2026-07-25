@@ -19,7 +19,7 @@ target_branch: develop
 approved_candidate_sha: TBD-set-at-package-adoption
 approval_status: approved
 implementation_authorized: true
-automatic_merge_allowed: false
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 owners:
