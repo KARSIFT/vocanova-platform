@@ -3,7 +3,7 @@ id: VOC-028
 slug: begin-milestone-p3-sentence-practice-and-ai
 title: "Begin Milestone P3 \u2014 Sentence Practice and AI Feedback"
 type: feature
-status: draft
+status: implementation-ready
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-028-begin-milestone-p3-sentence-practice-and-ai
@@ -11,14 +11,14 @@ authority_model: a003-active
 requirement_source: docs/product/12-mvp-implementation-plan.md#5 (P3 paragraph) ;
   docs/engineering/09-ai-features.md (full, authoritative AI-feature design) ; docs/engineering/05-database-design.md#11,#15
   ; supplied free-text request
-requirement_approval_status: not-approved
+requirement_approval_status: founder-approved
 base_branch: develop
 base_sha: eaad0086d476ef5eddb3b05fca604f400eacca2e
 target_branch: develop
 approved_candidate_sha: TBD-set-at-package-adoption
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 owners:
@@ -46,13 +46,12 @@ dependencies:
     target/meaning data from the P1 `canonical_words`/`word_meanings`/ `word_examples`/`usage_notes`
     tables and learner level from `user_onboarding_profiles` for A2/B1 prompt behavior.
 - id: VOC-028-DEP-02
-  status: "open-before-production-provider-task; the production feedback provider/model\
-    \ and its secrets + privacy configuration are an open founder decision (see `VOC-028-D02`).\
-    \ T02 (prompt + production provider) may be drafted against the narrow T00 provider\
-    \ interface but CANNOT be accepted until provider candidates are evaluated, privacy\
-    \ settings verified, and the choice recorded (DOC-09 \xA718, \xA721, \xA724; DOC-12\
-    \ \xA75 P3 gate). No real credentials or a concrete commercial provider/model\
-    \ are selected or wired by this draft."
+  status: 'resolved-at-adoption 2026-07-25: production provider chosen (VOC-028-D02)
+    - the founder''s own OpenCode Go account, model opencode-go/deepseek-v4-pro,
+    integrated via opencode serve (a real headless HTTP server). Formal privacy/retention
+    verification (training-data use, retention, processing regions, subprocessors,
+    deletion) remains a pre-production legal-review gate, not resolved by this adoption
+    - see specification.md D02/D04.'
 - id: VOC-028-DEP-03
   status: "open-before-mission-completion; the daily-mission / streak / Confidence-Point\
     \ tables (`daily_mission_snapshots`, `daily_activity_summaries`, `streak_states`,\
@@ -85,9 +84,9 @@ affected_areas:
 - apps/web/src/app/(app)/reviews
 - scripts/foundation
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: draft
+  status: implementation-ready
   target_branch: develop
   pull_request: null
   authority_issue: null
