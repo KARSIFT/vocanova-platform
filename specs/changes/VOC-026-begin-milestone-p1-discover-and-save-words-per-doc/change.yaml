@@ -1,0 +1,99 @@
+schema_version: 1
+id: VOC-026
+slug: begin-milestone-p1-discover-and-save-words-per-doc
+title: "Begin Milestone P1 \u2014 Discover and Save Words"
+type: feature
+status: draft
+risk: R3
+planned_implementation_risk_floor: R3
+canonical_path: specs/changes/VOC-026-begin-milestone-p1-discover-and-save-words-per-doc
+authority_model: a003-active
+requirement_source: docs/product/12-mvp-implementation-plan.md#5 (P1 paragraph) ;
+  docs/engineering/05-database-design.md#7-8,#9 ; docs/engineering/06-backend-design.md#5,#7,#10,#18
+  ; docs/engineering/07-api-contract-and-dto-design.md ; supplied free-text request
+requirement_approval_status: not-approved
+base_branch: develop
+base_sha: TBD-recorded-at-package-adoption
+target_branch: develop
+approved_candidate_sha: TBD-set-at-package-adoption
+approval_status: not-approved
+implementation_authorized: false
+automatic_merge_allowed: false
+production_impact: unknown
+rollback_required: true
+owners:
+  decision: founder
+  package_preparation: planner
+  implementation: unassigned
+  independent_verification: Claude Code
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+- id: VOC-026-DEP-01
+  status: "open-before-content-tasks; the now-real A1 auth from VOC-025 must be the\
+    \ requester context every P1 read/write depends on. A1 gate acceptance (DOC-12\
+    \ \xA75 A1) must pass before P1 can be accepted; A1 in-repository evidence exists\
+    \ (VOC-025-T05) but live staging A1 evidence remains blocked by the missing F3\
+    \ staging environment (VOC-025-DEP-01)."
+- id: VOC-026-DEP-02
+  status: open-before-tasks-touch-saved-state-on-screens; founder must resolve the
+    open decisions in `specification.md` (D01 MVP seed-data scope, D03 discovery vs
+    mock contradiction, D04 save side-effects vs P2/P4 boundary, D05 how saved state
+    interacts with the retained Home/Progress P4 mocks during the transition). Implementation
+    of the affected tasks must not proceed past them by guessing.
+- id: VOC-026-DEP-03
+  status: open-before-F3-staging-evidence; the F3 staging environment does not yet
+    exist, so live P1 staging/rollback evidence in T05 cannot be executed and the
+    DOC-12 P1 acceptance gate cannot itself be declared complete by this work alone.
+- id: VOC-026-DEP-04
+  status: open-before-staging-validated-tasks; the adopted base must provide/reconcile
+    the already-established Go/Huma/chi, PostgreSQL+Ent+Atlas, OpenAPI generation,
+    committed OpenAPI/client drift handling, and migration test commands before T00.
+affected_areas:
+- apps/api/business/content
+- apps/api/business/learning
+- apps/api/ent/schema
+- apps/api/migrations
+- apps/api/app/api
+- apps/api/openapi/vocanova.openapi.json
+- packages/api-client
+- apps/web/src/app/(app)/home
+- apps/web/src/app/(app)/discover
+- apps/web/src/app/(app)/discover/[situation]
+- apps/web/src/app/(app)/discover/[situation]/[word]
+- apps/web/src/app/(app)/progress
+implementation:
+  authorized: false
+  authority_status: not-exercised
+  required: true
+  status: draft
+  target_branch: develop
+  pull_request: null
+  authority_issue: null
+release:
+  required: true
+  mode: controlled-staging-validation-before-p1-acceptance
+  production_impact: not-authorized
+  deployment: prohibited-by-this-draft
+  automatic_merge: false
+  migration_required: true
+  rollback_required: true
+repository_adoption_status: not-adopted
+adoption_pr: null
+adoption_evidence: null
+implementation_authority_before_adoption: false
+implementation_authority_status: not-exercised
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
+blocking_reasons: founder must resolve open decisions D01,D03,D04,D05 before the affected
+  implementation tasks can proceed; F3 staging must exist before live P1 gate evidence
+  can be collected.
