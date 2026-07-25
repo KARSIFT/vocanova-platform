@@ -3,7 +3,7 @@ id: VOC-026
 slug: begin-milestone-p1-discover-and-save-words-per-doc
 title: "Begin Milestone P1 \u2014 Discover and Save Words"
 type: feature
-status: draft
+status: implementation-ready
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-026-begin-milestone-p1-discover-and-save-words-per-doc
@@ -11,13 +11,13 @@ authority_model: a003-active
 requirement_source: docs/product/12-mvp-implementation-plan.md#5 (P1 paragraph) ;
   docs/engineering/05-database-design.md#7-8,#9 ; docs/engineering/06-backend-design.md#5,#7,#10,#18
   ; docs/engineering/07-api-contract-and-dto-design.md ; supplied free-text request
-requirement_approval_status: not-approved
+requirement_approval_status: founder-approved
 base_branch: develop
-base_sha: TBD-recorded-at-package-adoption
+base_sha: ffc28cce384db26935b7c0824a13eff3c1b89984
 target_branch: develop
 approved_candidate_sha: TBD-set-at-package-adoption
-approval_status: not-approved
-implementation_authorized: false
+approval_status: approved
+implementation_authorized: true
 automatic_merge_allowed: false
 production_impact: unknown
 rollback_required: true
@@ -70,10 +70,10 @@ affected_areas:
 - apps/web/src/app/(app)/discover/[situation]/[word]
 - apps/web/src/app/(app)/progress
 implementation:
-  authorized: false
-  authority_status: not-exercised
+  authorized: true
+  authority_status: validly-exercised
   required: true
-  status: draft
+  status: implementation-ready
   target_branch: develop
   pull_request: null
   authority_issue: null
@@ -94,9 +94,4 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons:
-- package is a draft and has not been human-adopted
-- F3 staging evidence is required before VOC-026-T05's live acceptance evidence, not
-  before T00-T04
-- provider-independent verification (Claude Code, exact-SHA) required per task, same
-  as VOC-025
+blocking_reasons: null
