@@ -102,9 +102,9 @@ release:
   automatic_merge: true
   migration_required: true
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 126
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/126
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
@@ -113,6 +113,5 @@ ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
 blocking_reasons: "none; VOC-030-D01\u2013D05 resolved at adoption (2026-07-26, founder-gate\
   \ delegation) per specification.md's VOC-030-D06 composite record; VOC-030-DEP-01\
-  \ through DEP-05 remain open/tracked as documented (staging evidence and P1-P3\
-  \ live-staging chain still blocked by missing F3 environment, not blocking P4\
-  \ development)."
+  \ through DEP-05 remain open/tracked as documented (staging evidence and P1-P3 live-staging\
+  \ chain still blocked by missing F3 environment, not blocking P4 development)."
