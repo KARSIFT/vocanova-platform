@@ -3,7 +3,7 @@ id: VOC-030
 slug: begin-milestone-p4-daily-habit-and-progress-per
 title: "Begin Milestone P4 \u2014 Daily Habit and Progress"
 type: feature
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-030-begin-milestone-p4-daily-habit-and-progress-per
@@ -17,9 +17,9 @@ base_branch: develop
 base_sha: 17909e00f79a52da1e994dbb09aa82c4a3cbaeb0
 target_branch: develop
 approved_candidate_sha: not-set-until-adoption
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 owners:
@@ -88,18 +88,18 @@ affected_areas:
 - apps/web/src/app/(app)/progress
 - scripts/foundation
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: draft
+  status: adopted
   target_branch: develop
   pull_request: null
   authority_issue: null
 release:
   required: true
-  mode: not-authorized-by-this-draft
-  production_impact: not-authorized
-  deployment: prohibited-by-this-draft
-  automatic_merge: false
+  mode: standard-r3-auto-merge
+  production_impact: unknown-pending-p4-staging-evidence
+  deployment: not-authorized-by-this-package
+  automatic_merge: true
   migration_required: true
   rollback_required: true
 repository_adoption_status: not-adopted
@@ -111,5 +111,8 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: "not adopted; VOC-030-D01\u2013D05 are open founder decisions; VOC-030-DEP-01\
-  \ through DEP-05 are open dependencies; F3 staging does not exist"
+blocking_reasons: "none; VOC-030-D01\u2013D05 resolved at adoption (2026-07-26, founder-gate\
+  \ delegation) per specification.md's VOC-030-D06 composite record; VOC-030-DEP-01\
+  \ through DEP-05 remain open/tracked as documented (staging evidence and P1-P3\
+  \ live-staging chain still blocked by missing F3 environment, not blocking P4\
+  \ development)."

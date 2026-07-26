@@ -243,24 +243,21 @@ milestone roadmap (§3) has no dedicated Settings milestone. No A1/P1/P2/P3
 mechanic is re-litigated by this draft; the three write-transaction changes
 below are additive within each transaction's existing boundary.
 
-`VOC-030-D01` — **OPEN founder decision.** `user_settings` (DOC-05 §6) does
-not exist, and P4 cannot compute a timezone-aware, per-learner-configurable
-daily mission without a timezone and a review-target source. This draft
-proposes: create the full DOC-05 §6 `user_settings` table now (schema-complete
-with the approved design) but read/write only `timezone` and
-`daily_review_target`; build no public Settings API or UI (that remains a
-separate, future package's scope, since DOC-12 has no milestone that currently
-owns it); resolve timezone as `user_settings.timezone` → a request-time
-client-supplied IANA timezone → UTC fallback — a documented adaptation of the
-DOC-06 §13 priority chain, since the "onboarding answer" step has no data
-source until `user_onboarding_profiles` exists. **Not decided by this draft.**
-An alternative the founder may prefer: skip persistence entirely and resolve
-timezone purely per-request (client-supplied → UTC) with a hardcoded
-`daily_review_target` of 20 for every learner until a real Settings package
-exists — smaller surface, but forecloses any near-term per-learner
-customization and diverges further from the approved DOC-05 §6 design.
+`VOC-030-D01` — **DECIDED at adoption (2026-07-26).** Create the full DOC-05
+§6 `user_settings` table now (schema-complete with the approved design) but
+read/write only `timezone` and `daily_review_target`; build no public Settings
+API or UI (remains a separate, future package's scope). Resolve timezone as
+`user_settings.timezone` → a request-time client-supplied IANA timezone → UTC
+fallback — a documented adaptation of the DOC-06 §13 priority chain, since the
+"onboarding answer" step has no data source until `user_onboarding_profiles`
+exists. Chosen over the hardcoded-20/no-persistence alternative because it
+matches the already-approved DOC-05 §6 design exactly and avoids a future
+migration to retrofit persistence once a real Settings package exists —
+smaller near-term surface was judged not worth diverging from an approved
+schema.
 
-`VOC-030-D02` — **OPEN contradiction, not resolved by this draft.** DOC-05
+`VOC-030-D02` — **DECIDED at adoption (2026-07-26), per DOC-12 §11's
+change-control rule.** DOC-05
 §12's `confidence_point_ledger.reason` enum
 (`review_correct`/`daily_mission_completed`/`sentence_submitted`/
 `ai_feedback_received`/`streak_bonus`/`admin_adjustment`) and `source_type`
@@ -271,7 +268,7 @@ word: +2" reward, and label all four review-rating point tiers with the single
 +1" despite `Again` being the *incorrect*-rating case. Per DOC-12 §11's
 change-control rule, this is a genuine conflict between two approved
 documents and is recorded here, not silently resolved. Proposed minimal
-reconciliation for the founder to accept or redirect: add `word_added` to
+reconciliation, accepted as-is: add `word_added` to
 `reason` and `user_word` to `source_type` (closes the blocking gap — without
 it, word-add point awards have no valid `reason` value to write); keep
 `review_correct` as the shared reason across all four review-rating awards,
@@ -279,40 +276,49 @@ which is a non-blocking naming mismatch (data is still correctly attributable
 via `source_type='review_attempt'` and the ledger's own `amount`) that a future
 package may rename without a schema break.
 
-`VOC-030-D03` — **OPEN founder decision.** DOC-05 §10 defines the optional
+`VOC-030-D03` — **DECIDED at adoption (2026-07-26).** DOC-05 §10 defines the optional
 `new_word_target`/`new_words_completed` and
 `sentence_practice_target`/`sentence_practices_completed` mission counters as
 **bonus goals that do not block core mission or streak completion unless a
-later, versioned policy explicitly changes that rule.** This draft proposes
-leaving both optional goals **disabled** (null) for the initial P4 activation
+later, versioned policy explicitly changes that rule.** Both optional goals stay
+**disabled** (null) for the initial P4 activation
 — only the review target gates mission and streak completion — because
 enabling them adds cross-module coupling surface (P1 word-add and P3
 sentence-submission would each need to know their contribution toward the
 same daily snapshot) without being required by the DOC-12 §5 P4 gate wording.
-**Not decided by this draft**; if the founder wants either bonus goal active
-at launch, `policy_version` should advance from `p4-mission-policy-v1`
-accordingly.
+A later package can advance `policy_version` past `p4-mission-policy-v1` to
+activate either bonus goal once there's real usage signal to justify the
+added coupling.
 
-`VOC-030-D04` — **OPEN founder decision.** Grace-day consumption: this draft
-proposes **fully automatic** application when a grace day is available and a
+`VOC-030-D04` — **DECIDED at adoption (2026-07-26).** Grace-day consumption is
+**fully automatic** when a grace day is available and a
 day was missed (no learner action, no confirmation prompt) — matching DOC-00
 §3's "gentle reset" framing and the ledger's own earned/used semantics, which
-describe no UI trigger. An alternative is a learner-facing "use a grace day?"
-confirmation before the streak is protected. **Not decided by this draft.**
+describe no UI trigger. Chosen over a confirmation-prompt flow because the
+approved DOC-00 framing already implies invisibility, and no acceptance
+criteria in this milestone gate on a confirmation UX existing.
 
-`VOC-030-D05` — **OPEN founder decision.** Confidence Points, mission
+`VOC-030-D05` — **DECIDED at adoption (2026-07-26).** Confidence Points, mission
 snapshots, and streak state start **clean at this package's activation** — no
 retroactive backfill for P1/P2/P3 actions (saved words, reviews, sentences)
 that occurred before the migration lands, including any pre-existing staging
-or internal test-account activity. This draft proposes no backfill: the ledger
-is append-only and represents real-time events, and fabricating historical
+or internal test-account activity. The ledger
+is append-only and represents real-time events; fabricating historical
 entries for actions that predate reward wiring would misrepresent both the
 ledger and the streak/mission gate's own "accurately reflect completed
-behavior" requirement. **Not decided by this draft.**
+behavior" requirement.
 
-`VOC-030-D06` (reserved) — the composite record of `D01`–`D05` above is
-recorded only at adoption, once the founder has actually resolved them; this
-draft does not pre-fill it.
+`VOC-030-D06` — composite record: D01 (persist `user_settings.timezone`/
+`daily_review_target`, no Settings API/UI yet), D02 (add `word_added`/
+`user_word` enum values, keep shared `review_correct` reason), D03 (bonus
+mission goals disabled at launch), D04 (grace days consume automatically,
+no confirmation prompt), D05 (no retroactive backfill — ledger/streak/mission
+state starts clean at activation). All five resolved together at adoption
+(2026-07-26) under standing founder-gate delegation for routine R3 milestone
+starts (see karsift-ai-infra's founder-gate precedent from VOC-026/027/028's
+own D01–D06 resolutions) — each choice favors matching already-approved
+DOC-05/DOC-06 design over introducing new product surface, consistent with
+how P1–P3's equivalent open items were resolved.
 
 ### Security and privacy
 
