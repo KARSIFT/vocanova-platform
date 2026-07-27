@@ -71,10 +71,10 @@ dependencies:
     \ the already-established Go/Huma/chi, PostgreSQL+Ent+Atlas, OpenAPI generation,\
     \ and existing CI workflow structure confirmed present through VOC-025/026/027/028/030."
 - id: VOC-031-DEP-05
-  status: "resolved-at-adoption (2026-07-27, founder-gate delegation); VOC-031-D03\
-    \ decided option (b): grandfather pre-existing accounts. T00's migration backfills\
-    \ onboarding_status='completed' for every account existing at migration time;\
-    \ only accounts created afterward see the /onboarding gate. T00/T01 updated accordingly."
+  status: 'resolved-at-adoption (2026-07-27, founder-gate delegation); VOC-031-D03
+    decided option (b): grandfather pre-existing accounts. T00''s migration backfills
+    onboarding_status=''completed'' for every account existing at migration time;
+    only accounts created afterward see the /onboarding gate. T00/T01 updated accordingly.'
 affected_areas:
 - apps/api/business/users
 - apps/api/business/accounts
@@ -114,11 +114,10 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: "none; VOC-031-D01\u2013D09 resolved at adoption (2026-07-27,\
-  \ founder-gate delegation) per specification.md's decisions section (D03's\
-  \ retroactivity ambiguity resolved as grandfather-existing-accounts; D06\
-  \ settings/account scope resolved to include all fields plus email-change\
-  \ and account-deletion); VOC-031-DEP-01 through DEP-05 remain open/tracked\
-  \ as documented (staging evidence blocked by missing F3, production\
-  \ account-deletion enablement gated separately, new CI tooling\
+blocking_reasons: "none; VOC-031-D01\u2013D09 resolved at adoption (2026-07-27, founder-gate\
+  \ delegation) per specification.md's decisions section (D03's retroactivity ambiguity\
+  \ resolved as grandfather-existing-accounts; D06 settings/account scope resolved\
+  \ to include all fields plus email-change and account-deletion); VOC-031-DEP-01\
+  \ through DEP-05 remain open/tracked as documented (staging evidence blocked by\
+  \ missing F3, production account-deletion enablement gated separately, new CI tooling\
   \ reconciliation needed) - none block development."
