@@ -95,20 +95,6 @@ jobs:
   implement:
     if: github.event_name == 'workflow_dispatch' && inputs.action == 'implement'
     uses: KARSIFT/karsift-ai-infra/.github/workflows/implement.yml@main
-    # Caps what the reusable workflow can do to the intersection of this
-    # block and implement.yml's own - workflows: write here is required in
-    # addition to implement.yml's own grant, or a task that legitimately
-    # needs to add/modify a .github/workflows/* file (e.g. VOC-031-T07's
-    # accessibility.yml) fails to push with "refusing to allow a GitHub App
-    # to create or update workflow ... without workflows permission" even
-    # though implement.yml requests it. Keep in sync with this file's
-    # auto-advance job below, which hits the same call chain one level
-    # deeper (pipeline.yml -> auto-advance.yml -> implement.yml).
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      workflows: write
     with:
       change_id: ${{ inputs.change_id }}
       package_path: ${{ inputs.package_path }}
@@ -304,16 +290,6 @@ jobs:
   auto-advance:
     if: github.event_name == 'issues' && github.event.action == 'closed'
     uses: KARSIFT/karsift-ai-infra/.github/workflows/auto-advance.yml@main
-    # Ceiling propagates through the whole chain: this caps auto-advance.yml,
-    # which in turn caps its own nested implement.yml call - so workflows:
-    # write has to be granted at every level (see the implement job above's
-    # comment) or a task needing a new .github/workflows/* file fails to
-    # push once auto-dispatched, even though direct workflow_dispatch works.
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      workflows: write
     with:
       integration_branch: "develop"   # match the value used elsewhere in this file
     secrets: inherit
