@@ -1,0 +1,1860 @@
+{
+  "components": {
+    "schemas": {
+      "ConsumeMagicLinkInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ConsumeMagicLinkInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "email": {
+            "description": "The email address the link was sent to",
+            "format": "email",
+            "type": "string"
+          },
+          "token": {
+            "description": "The single-use token from the sign-in link",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "email"
+        ],
+        "type": "object"
+      },
+      "CurrentUser": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CurrentUser.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "avatarUrl": {
+            "format": "uri",
+            "type": "string"
+          },
+          "displayName": {
+            "maxLength": 120,
+            "type": "string"
+          },
+          "email": {
+            "description": "Verified email when available",
+            "format": "email",
+            "type": "string"
+          },
+          "emailVerifiedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "DueWordDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "meaningId": {
+            "description": "Meaning identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "partOfSpeech": {
+            "description": "Part of speech",
+            "type": "string"
+          },
+          "reviewStep": {
+            "description": "Backend review step",
+            "format": "int64",
+            "type": "integer"
+          },
+          "shortDefinition": {
+            "description": "Short definition",
+            "type": "string"
+          },
+          "status": {
+            "description": "Learning status",
+            "type": "string"
+          },
+          "userWordId": {
+            "description": "Saved record identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "wordId": {
+            "description": "Canonical word identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "wordSlug": {
+            "description": "Canonical word URL slug",
+            "type": "string"
+          },
+          "wordText": {
+            "description": "Canonical word text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userWordId",
+          "meaningId",
+          "wordId",
+          "wordText",
+          "wordSlug",
+          "partOfSpeech",
+          "shortDefinition",
+          "status",
+          "reviewStep"
+        ],
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "location": {
+            "description": "Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id'",
+            "type": "string"
+          },
+          "message": {
+            "description": "Error message text",
+            "type": "string"
+          },
+          "value": {
+            "description": "The value at the given location"
+          }
+        },
+        "type": "object"
+      },
+      "ErrorModel": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ErrorModel.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "detail": {
+            "description": "A human-readable explanation specific to this occurrence of the problem.",
+            "examples": [
+              "Property foo is required but is missing."
+            ],
+            "type": "string"
+          },
+          "errors": {
+            "description": "Optional list of individual error details",
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "instance": {
+            "description": "A URI reference that identifies the specific occurrence of the problem.",
+            "examples": [
+              "https://example.com/error-log/abc123"
+            ],
+            "format": "uri",
+            "type": "string"
+          },
+          "status": {
+            "description": "HTTP status code",
+            "examples": [
+              400
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "title": {
+            "description": "A short, human-readable summary of the problem type. This value should not change between occurrences of the error.",
+            "examples": [
+              "Bad Request"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "default": "about:blank",
+            "description": "A URI reference to human-readable documentation for the error.",
+            "examples": [
+              "https://example.com/errors/example"
+            ],
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GetSituationOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/GetSituationOutputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "meanings": {
+            "description": "Meanings in the situation",
+            "items": {
+              "$ref": "#/components/schemas/SituationMeaningDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "situation": {
+            "$ref": "#/components/schemas/SituationDTO",
+            "description": "Situation"
+          }
+        },
+        "required": [
+          "situation",
+          "meanings"
+        ],
+        "type": "object"
+      },
+      "GetWordOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/GetWordOutputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "word": {
+            "$ref": "#/components/schemas/WordDetailDTO",
+            "description": "Canonical word detail"
+          }
+        },
+        "required": [
+          "word"
+        ],
+        "type": "object"
+      },
+      "ListReviewsDueOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ListReviewsDueOutputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "items": {
+            "description": "Due words",
+            "items": {
+              "$ref": "#/components/schemas/DueWordDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "nextCursor": {
+            "description": "Opaque cursor for the next page",
+            "type": "string"
+          },
+          "totalCount": {
+            "description": "Total due words for the requester",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "totalCount"
+        ],
+        "type": "object"
+      },
+      "ListSavedWordsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ListSavedWordsOutputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "items": {
+            "description": "Saved meanings",
+            "items": {
+              "$ref": "#/components/schemas/SavedMeaningDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "nextCursor": {
+            "description": "Opaque cursor for the next page",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "ListSituationsOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ListSituationsOutputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "items": {
+            "description": "Situations",
+            "items": {
+              "$ref": "#/components/schemas/SituationDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "nextCursor": {
+            "description": "Opaque cursor for the next page",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "type": "object"
+      },
+      "OAuthStartInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/OAuthStartInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "redirectUri": {
+            "description": "The allowed OAuth redirect URI to return to",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "redirectUri"
+        ],
+        "type": "object"
+      },
+      "OAuthStartOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/OAuthStartOutputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "url": {
+            "description": "The Google OAuth authorization URL to redirect the user to",
+            "format": "uri",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "type": "object"
+      },
+      "ReportSentenceFeedbackInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ReportSentenceFeedbackInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "classification": {
+            "description": "Optional classification (e.g. incorrect, unsafe, unclear)",
+            "maxLength": 100,
+            "type": "string"
+          },
+          "reason": {
+            "description": "Short reason for the report",
+            "maxLength": 200,
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "type": "object"
+      },
+      "RequestMagicLinkInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/RequestMagicLinkInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "email": {
+            "description": "Email address to send the sign-in link to",
+            "format": "email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "type": "object"
+      },
+      "ReviewAttemptDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ReviewAttemptDTO.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "answeredAt": {
+            "description": "When the answer was submitted",
+            "format": "date-time",
+            "type": "string"
+          },
+          "attemptId": {
+            "description": "Immutable attempt identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "attemptType": {
+            "description": "Attempt category",
+            "type": "string"
+          },
+          "clientAttemptId": {
+            "description": "Client-provided idempotency identifier",
+            "type": "string"
+          },
+          "meaningId": {
+            "description": "Meaning identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "nextReviewAt": {
+            "description": "When the word will next be due",
+            "format": "date-time",
+            "type": "string"
+          },
+          "promptType": {
+            "description": "Prompt type",
+            "enum": [
+              "multiple_choice",
+              "self_check"
+            ],
+            "type": "string"
+          },
+          "rating": {
+            "description": "Learner rating",
+            "enum": [
+              "again",
+              "hard",
+              "good",
+              "easy"
+            ],
+            "type": "string"
+          },
+          "responseTimeMs": {
+            "description": "Client-measured response time in milliseconds",
+            "format": "int64",
+            "type": "integer"
+          },
+          "result": {
+            "description": "Objective result",
+            "enum": [
+              "correct",
+              "incorrect",
+              "skipped"
+            ],
+            "type": "string"
+          },
+          "reviewStepAfter": {
+            "description": "Review step after this attempt",
+            "format": "int64",
+            "type": "integer"
+          },
+          "reviewStepBefore": {
+            "description": "Review step before this attempt",
+            "format": "int64",
+            "type": "integer"
+          },
+          "selectedOptionMeaningId": {
+            "description": "Chosen option for multiple choice",
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "description": "Origin of the attempt",
+            "type": "string"
+          },
+          "typedAnswer": {
+            "description": "Typed answer if applicable",
+            "type": "string"
+          },
+          "userWordId": {
+            "description": "Saved word identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "wasHintUsed": {
+            "description": "Whether a hint was shown",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "attemptId",
+          "userWordId",
+          "meaningId",
+          "attemptType",
+          "promptType",
+          "result",
+          "rating",
+          "reviewStepBefore",
+          "reviewStepAfter",
+          "answeredAt",
+          "responseTimeMs",
+          "wasHintUsed",
+          "source",
+          "clientAttemptId",
+          "nextReviewAt"
+        ],
+        "type": "object"
+      },
+      "SaveUserWordInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SaveUserWordInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "meaningId": {
+            "description": "Meaning identifier to save",
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "description": "Origin of the save",
+            "enum": [
+              "journey",
+              "search",
+              "manual"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "meaningId",
+          "source"
+        ],
+        "type": "object"
+      },
+      "SavedMeaningDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SavedMeaningDTO.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "addedAt": {
+            "description": "When the meaning was added to the learner list",
+            "format": "date-time",
+            "type": "string"
+          },
+          "meaningId": {
+            "description": "Meaning identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "partOfSpeech": {
+            "description": "Part of speech",
+            "type": "string"
+          },
+          "saved": {
+            "description": "Whether the meaning is currently saved",
+            "type": "boolean"
+          },
+          "shortDefinition": {
+            "description": "Short definition",
+            "type": "string"
+          },
+          "source": {
+            "description": "Origin of the save",
+            "type": "string"
+          },
+          "status": {
+            "description": "Learning status",
+            "type": "string"
+          },
+          "userWordId": {
+            "description": "Saved record identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "wordId": {
+            "description": "Canonical word identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "wordSlug": {
+            "description": "Canonical word URL slug",
+            "type": "string"
+          },
+          "wordText": {
+            "description": "Canonical word text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "userWordId",
+          "meaningId",
+          "wordId",
+          "wordText",
+          "wordSlug",
+          "partOfSpeech",
+          "shortDefinition",
+          "status",
+          "source",
+          "saved",
+          "addedAt"
+        ],
+        "type": "object"
+      },
+      "SentenceFeedbackResultDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SentenceFeedbackResultDTO.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "attemptId": {
+            "description": "AI feedback attempt identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "canRetry": {
+            "description": "Whether the learner may safely retry",
+            "type": "boolean"
+          },
+          "correctedSentence": {
+            "description": "Corrected sentence when useful",
+            "type": "string"
+          },
+          "crisisResourceMessage": {
+            "description": "Non-clinical crisis resources for self-harm content",
+            "type": "string"
+          },
+          "errorCode": {
+            "description": "Stable public error code on failure",
+            "type": "string"
+          },
+          "errorMessage": {
+            "description": "Safe retryable message on failure",
+            "type": "string"
+          },
+          "explanation": {
+            "description": "Short explanation of the result",
+            "type": "string"
+          },
+          "improvementTip": {
+            "description": "One improvement tip when useful",
+            "type": "string"
+          },
+          "missionCompleted": {
+            "description": "Backend-confirmed mission state (P3 stub: always false)",
+            "type": "boolean"
+          },
+          "originalSentence": {
+            "description": "The sentence the learner submitted",
+            "type": "string"
+          },
+          "reported": {
+            "description": "Whether the learner has reported this feedback",
+            "type": "boolean"
+          },
+          "sentenceId": {
+            "description": "Learner sentence identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "status": {
+            "description": "Pedagogical outcome when feedback succeeded",
+            "enum": [
+              "correct",
+              "needs_improvement",
+              "incorrect"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "originalSentence",
+          "missionCompleted",
+          "canRetry",
+          "reported"
+        ],
+        "type": "object"
+      },
+      "SituationDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "category": {
+            "description": "Situation category",
+            "type": "string"
+          },
+          "displayOrder": {
+            "description": "Display order",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Situation identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "levelBand": {
+            "description": "Suggested level band",
+            "type": "string"
+          },
+          "shortDescription": {
+            "description": "Short description",
+            "type": "string"
+          },
+          "slug": {
+            "description": "URL slug",
+            "type": "string"
+          },
+          "title": {
+            "description": "Human-readable title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "title",
+          "shortDescription",
+          "category",
+          "displayOrder"
+        ],
+        "type": "object"
+      },
+      "SituationMeaningDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "meaningId": {
+            "description": "Meaning identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "partOfSpeech": {
+            "description": "Part of speech",
+            "type": "string"
+          },
+          "saved": {
+            "description": "Whether the authenticated requester has saved this meaning",
+            "type": "boolean"
+          },
+          "shortDefinition": {
+            "description": "Short definition",
+            "type": "string"
+          },
+          "wordId": {
+            "description": "Canonical word identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "wordSlug": {
+            "description": "Canonical word URL slug",
+            "type": "string"
+          },
+          "wordText": {
+            "description": "Canonical word text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "meaningId",
+          "wordId",
+          "wordSlug",
+          "wordText",
+          "partOfSpeech",
+          "shortDefinition",
+          "saved"
+        ],
+        "type": "object"
+      },
+      "SubmitReviewInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SubmitReviewInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "answeredAt": {
+            "description": "When the answer was submitted",
+            "format": "date-time",
+            "type": "string"
+          },
+          "attemptType": {
+            "default": "review",
+            "description": "Attempt category",
+            "enum": [
+              "review"
+            ],
+            "type": "string"
+          },
+          "clientAttemptId": {
+            "description": "Client-provided idempotency identifier",
+            "type": "string"
+          },
+          "meaningId": {
+            "description": "Meaning identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {},
+            "description": "Extra prompt context",
+            "type": "object"
+          },
+          "promptType": {
+            "description": "Prompt type",
+            "enum": [
+              "multiple_choice",
+              "self_check"
+            ],
+            "type": "string"
+          },
+          "rating": {
+            "description": "Learner rating",
+            "enum": [
+              "again",
+              "hard",
+              "good",
+              "easy"
+            ],
+            "type": "string"
+          },
+          "responseTimeMs": {
+            "default": 0,
+            "description": "Client-measured response time in milliseconds",
+            "format": "int64",
+            "type": "integer"
+          },
+          "result": {
+            "description": "Objective result",
+            "enum": [
+              "correct",
+              "incorrect",
+              "skipped"
+            ],
+            "type": "string"
+          },
+          "selectedOptionMeaningId": {
+            "description": "Chosen option for multiple choice",
+            "format": "uuid",
+            "type": "string"
+          },
+          "source": {
+            "default": "review",
+            "description": "Origin of the attempt",
+            "enum": [
+              "review",
+              "review_session"
+            ],
+            "type": "string"
+          },
+          "typedAnswer": {
+            "description": "Typed answer if applicable",
+            "type": "string"
+          },
+          "userWordId": {
+            "description": "Saved word identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "wasHintUsed": {
+            "default": false,
+            "description": "Whether a hint was shown",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "userWordId",
+          "meaningId",
+          "promptType",
+          "result",
+          "answeredAt",
+          "clientAttemptId"
+        ],
+        "type": "object"
+      },
+      "SubmitSentenceFeedbackInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SubmitSentenceFeedbackInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "attemptId": {
+            "description": "Learner-owned attempt identifier (user_word_id for word_detail, review_attempt_id for review)",
+            "format": "uuid",
+            "type": "string"
+          },
+          "sentenceText": {
+            "description": "Learner sentence to check",
+            "maxLength": 300,
+            "type": "string"
+          },
+          "source": {
+            "description": "Origin of the sentence",
+            "enum": [
+              "word_detail",
+              "review",
+              "daily_mission",
+              "free_practice"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "sentenceText",
+          "source",
+          "attemptId"
+        ],
+        "type": "object"
+      },
+      "WordDetailDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "difficultyLevel": {
+            "description": "Difficulty level",
+            "type": "string"
+          },
+          "id": {
+            "description": "Word identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "meanings": {
+            "description": "Meanings",
+            "items": {
+              "$ref": "#/components/schemas/WordMeaningDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "slug": {
+            "description": "URL slug",
+            "type": "string"
+          },
+          "text": {
+            "description": "Word text",
+            "type": "string"
+          },
+          "wordType": {
+            "description": "Word type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "slug",
+          "wordType",
+          "meanings"
+        ],
+        "type": "object"
+      },
+      "WordExampleDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "exampleText": {
+            "description": "Example sentence",
+            "type": "string"
+          },
+          "id": {
+            "description": "Example identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "situationLabel": {
+            "description": "Optional situation label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "exampleText"
+        ],
+        "type": "object"
+      },
+      "WordMeaningDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "examples": {
+            "description": "Example sentences",
+            "items": {
+              "$ref": "#/components/schemas/WordExampleDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Meaning identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "learnerDefinition": {
+            "description": "Learner-friendly definition",
+            "type": "string"
+          },
+          "partOfSpeech": {
+            "description": "Part of speech",
+            "type": "string"
+          },
+          "saved": {
+            "description": "Whether the authenticated requester has saved this meaning",
+            "type": "boolean"
+          },
+          "shortDefinition": {
+            "description": "Short definition",
+            "type": "string"
+          },
+          "usageNotes": {
+            "description": "Usage notes",
+            "items": {
+              "$ref": "#/components/schemas/WordUsageNoteDTO"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "userWordId": {
+            "description": "Saved record identifier when this meaning is saved",
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "partOfSpeech",
+          "shortDefinition",
+          "saved",
+          "examples",
+          "usageNotes"
+        ],
+        "type": "object"
+      },
+      "WordUsageNoteDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "Note identifier",
+            "format": "uuid",
+            "type": "string"
+          },
+          "noteText": {
+            "description": "Note text",
+            "type": "string"
+          },
+          "noteType": {
+            "description": "Note type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "noteType",
+          "noteText"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "Explicit Vocanova HTTP DTO contract. Internal persistence models are not exposed.",
+    "title": "Vocanova API",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/auth/logout": {
+      "post": {
+        "operationId": "Logout",
+        "parameters": [
+          {
+            "description": "Double-submit CSRF token",
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "schema": {
+              "description": "Double-submit CSRF token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          }
+        },
+        "summary": "Log out the current session",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/magic-links": {
+      "post": {
+        "operationId": "RequestMagicLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestMagicLinkInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Request a magic sign-in link",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/magic-links/consume": {
+      "post": {
+        "operationId": "ConsumeMagicLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsumeMagicLinkInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUser"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Consume a magic sign-in link",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/oauth/google/callback": {
+      "get": {
+        "operationId": "OAuthCallback",
+        "parameters": [
+          {
+            "description": "The authorization code from the OAuth provider",
+            "explode": false,
+            "in": "query",
+            "name": "code",
+            "schema": {
+              "description": "The authorization code from the OAuth provider",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The state parameter returned by the OAuth provider",
+            "explode": false,
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "description": "The state parameter returned by the OAuth provider",
+              "type": "string"
+            }
+          },
+          {
+            "description": "An error returned by the OAuth provider",
+            "explode": false,
+            "in": "query",
+            "name": "error",
+            "schema": {
+              "description": "An error returned by the OAuth provider",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "302": {
+            "description": "Redirect to the authenticated application"
+          }
+        },
+        "summary": "Handle the Google OAuth provider callback",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/auth/oauth/google/start": {
+      "post": {
+        "operationId": "OAuthStart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthStartInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthStartOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "default": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorModel"
+                }
+              }
+            },
+            "description": "Error"
+          }
+        },
+        "summary": "Start a Google OAuth sign-in flow",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/canonical-words/{wordSlug}": {
+      "get": {
+        "operationId": "GetCanonicalWord",
+        "parameters": [
+          {
+            "description": "Canonical word slug",
+            "in": "path",
+            "name": "wordSlug",
+            "required": true,
+            "schema": {
+              "description": "Canonical word slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWordOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "404": {
+            "description": "Word not found"
+          }
+        },
+        "summary": "Get a canonical word with meanings",
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/v1/journey-situations": {
+      "get": {
+        "operationId": "ListJourneySituations",
+        "parameters": [
+          {
+            "description": "Opaque pagination cursor",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque pagination cursor",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Maximum items to return (1-100)",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "description": "Maximum items to return (1-100)",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSituationsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Authentication is required"
+          }
+        },
+        "summary": "List active journey situations",
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/v1/journey-situations/{slug}": {
+      "get": {
+        "operationId": "GetJourneySituation",
+        "parameters": [
+          {
+            "description": "Situation slug",
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "description": "Situation slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSituationOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "404": {
+            "description": "Situation not found"
+          }
+        },
+        "summary": "Get a journey situation with meanings",
+        "tags": [
+          "Discovery"
+        ]
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "operationId": "GetCurrentUser",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUser"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Authentication is required"
+          }
+        },
+        "summary": "Get the authenticated user",
+        "tags": [
+          "Authentication"
+        ]
+      }
+    },
+    "/api/v1/reviews/due": {
+      "get": {
+        "operationId": "GetReviewsDue",
+        "parameters": [
+          {
+            "description": "Opaque pagination cursor",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque pagination cursor",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Maximum items to return (1-100)",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "description": "Maximum items to return (1-100)",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListReviewsDueOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Authentication is required"
+          }
+        },
+        "summary": "List the authenticated requester's due review words",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/reviews/submissions": {
+      "post": {
+        "operationId": "SubmitReview",
+        "parameters": [
+          {
+            "description": "User-scoped idempotency key",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "description": "User-scoped idempotency key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitReviewInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewAttemptDTO"
+                }
+              }
+            },
+            "description": "Review attempt recorded and schedule updated"
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          },
+          "404": {
+            "description": "Saved word not found"
+          },
+          "409": {
+            "description": "Idempotency conflict"
+          }
+        },
+        "summary": "Submit a review attempt and update the schedule",
+        "tags": [
+          "Reviews"
+        ]
+      }
+    },
+    "/api/v1/sentence-feedback": {
+      "post": {
+        "operationId": "SubmitSentenceFeedback",
+        "parameters": [
+          {
+            "description": "User-scoped idempotency key",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "description": "User-scoped idempotency key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitSentenceFeedbackInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SentenceFeedbackResultDTO"
+                }
+              }
+            },
+            "description": "Feedback result, which may include a business-level error code"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          },
+          "404": {
+            "description": "Owner or target resource not found"
+          },
+          "409": {
+            "description": "Idempotency key conflict"
+          }
+        },
+        "summary": "Submit a learner sentence for AI feedback",
+        "tags": [
+          "AI Feedback"
+        ]
+      }
+    },
+    "/api/v1/sentence-feedback/{attemptId}/reports": {
+      "post": {
+        "operationId": "ReportSentenceFeedback",
+        "parameters": [
+          {
+            "description": "AI feedback attempt identifier",
+            "in": "path",
+            "name": "attemptId",
+            "required": true,
+            "schema": {
+              "description": "AI feedback attempt identifier",
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportSentenceFeedbackInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Report recorded"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          },
+          "404": {
+            "description": "Feedback attempt not found"
+          }
+        },
+        "summary": "Report a quality concern for a feedback attempt",
+        "tags": [
+          "AI Feedback"
+        ]
+      }
+    },
+    "/api/v1/user-words": {
+      "get": {
+        "operationId": "ListSavedWords",
+        "parameters": [
+          {
+            "description": "Opaque pagination cursor",
+            "explode": false,
+            "in": "query",
+            "name": "after",
+            "schema": {
+              "description": "Opaque pagination cursor",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Maximum items to return (1-100)",
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "description": "Maximum items to return (1-100)",
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSavedWordsOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Authentication is required"
+          }
+        },
+        "summary": "List the authenticated requester's saved meanings",
+        "tags": [
+          "Learning"
+        ]
+      },
+      "post": {
+        "operationId": "SaveUserWord",
+        "parameters": [
+          {
+            "description": "User-scoped idempotency key",
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "description": "User-scoped idempotency key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveUserWordInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SavedMeaningDTO"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          },
+          "404": {
+            "description": "Meaning not found"
+          },
+          "409": {
+            "description": "Idempotency key conflict"
+          }
+        },
+        "summary": "Save a meaning for the authenticated requester",
+        "tags": [
+          "Learning"
+        ]
+      }
+    },
+    "/api/v1/user-words/{meaningId}": {
+      "delete": {
+        "operationId": "UnsaveUserWord",
+        "parameters": [
+          {
+            "description": "Meaning identifier to unsave",
+            "in": "path",
+            "name": "meaningId",
+            "required": true,
+            "schema": {
+              "description": "Meaning identifier to unsave",
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          },
+          "404": {
+            "description": "Saved meaning not found"
+          }
+        },
+        "summary": "Remove a saved meaning for the authenticated requester",
+        "tags": [
+          "Learning"
+        ]
+      }
+    }
+  }
+}

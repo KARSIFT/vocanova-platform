@@ -1,0 +1,27 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/api/go.mod
+
+      - run: corepack enable
+      - run: corepack prepare pnpm@11.14.0 --activate
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm run validate
+      - run: pnpm run audit

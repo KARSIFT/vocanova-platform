@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "./tokens.generated.css";
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
