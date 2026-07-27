@@ -22,8 +22,11 @@ Add the `user_onboarding_profiles` Ent schema + reviewed versioned Atlas SQL
 `VOC-031-D04` seed-eligibility rule as a pure, unit-tested domain function (no
 Ent/Huma dependency): no existing `user_settings` row → seed freely; existing
 row with `daily_review_target == 20` (schema default) → overwrite; existing
-row with any other value → never overwrite. No API route, no frontend, no
-gating logic in this PR.
+row with any other value → never overwrite. Per `VOC-031-D03`'s adoption-time
+resolution (grandfather existing accounts, see `T01`), the same migration
+must also backfill `onboarding_status='completed'` for every account that
+exists as of migration time, so no pre-existing account is ever gated. No API
+route, no frontend, no gating logic in this PR.
 
 ## VOC-031-T01 — Onboarding API, frontend flow, and gating
 
@@ -31,7 +34,8 @@ gating logic in this PR.
 - Acceptance criteria: `VOC-031-AC-01`
 - Tests: `VOC-031-TEST-04`..`VOC-031-TEST-07`
 - Evidence: `VOC-031-EV-04`..`VOC-031-EV-07`
-- Status: pending — blocked on `VOC-031-D03` resolution (`VOC-031-DEP-05`)
+- Status: pending — `VOC-031-D03` resolved at adoption (2026-07-27, founder-gate
+  delegation): grandfather pre-existing accounts.
 
 Add `GET`/`POST /api/v1/onboarding` (`GetOnboarding`/`CompleteOnboarding`) to
 the new `users` module: `POST` validates and persists the five answers,
@@ -44,9 +48,20 @@ client-side across screens and submitted once (`VOC-031-D02` — no
 resumability). Extend `apps/web/src/middleware.ts`'s matcher and redirect
 logic so an authenticated learner whose `onboardingStatus` is not
 `completed` is redirected to `/onboarding` from any other `(app)` route, and
-away from `/onboarding` to `/home` once `completed`. Implement the gate per
-the `VOC-031-D03` default (applies to every account, including pre-existing
-ones) unless the founder has overridden it at adoption.
+away from `/onboarding` to `/home` once `completed`.
+
+**`VOC-031-D03` resolution (grandfather existing accounts):** `T00`'s
+migration must backfill `onboarding_status='completed'` for every account
+that already exists as of the migration running (a one-time `UPDATE ...
+WHERE onboarding_status = 'not_started' AND created_at < <migration
+runtime>` or equivalent, run inside the same migration transaction that adds
+the `onboarding_status` gating column/values if not already present, so no
+window exists where a pre-existing account could see the gate). Only
+accounts created after the backfill runs default to
+`onboarding_status='not_started'` and see the `/onboarding` redirect. This
+keeps every prior milestone's (VOC-025 through VOC-030) documented staging
+procedure - which assumes direct navigation to `/home` after auth - working
+unchanged.
 
 ## VOC-031-T02 — Settings backend: read/write `user_settings` and `displayName`
 

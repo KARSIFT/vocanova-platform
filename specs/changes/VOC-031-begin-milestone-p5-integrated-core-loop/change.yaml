@@ -3,7 +3,7 @@ id: VOC-031
 slug: begin-milestone-p5-integrated-core-loop
 title: "Begin Milestone P5 \u2014 Integrated Core Loop"
 type: feature
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-031-begin-milestone-p5-integrated-core-loop
@@ -18,9 +18,9 @@ base_branch: develop
 base_sha: 96d008ec84e7f63ad630c28c246bf0f103d8047d
 target_branch: develop
 approved_candidate_sha: not-set-until-adoption
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 owners:
@@ -71,13 +71,10 @@ dependencies:
     \ the already-established Go/Huma/chi, PostgreSQL+Ent+Atlas, OpenAPI generation,\
     \ and existing CI workflow structure confirmed present through VOC-025/026/027/028/030."
 - id: VOC-031-DEP-05
-  status: "open-before-T01; VOC-031-D03 is a genuine new product ambiguity this draft\
-    \ surfaces but does not resolve \u2014 whether the onboarding gate applies retroactively\
-    \ to every pre-existing account (including non-production staging/test identities\
-    \ from VOC-025\u2013VOC-030, all of which are currently onboarding_status='not_started')\
-    \ or only to accounts created after this package's activation. T01's tasks/acceptance\
-    \ criteria are written against the literal (apply-to-everyone) default; the founder\
-    \ must confirm or override this before T01 is implemented."
+  status: "resolved-at-adoption (2026-07-27, founder-gate delegation); VOC-031-D03\
+    \ decided option (b): grandfather pre-existing accounts. T00's migration backfills\
+    \ onboarding_status='completed' for every account existing at migration time;\
+    \ only accounts created afterward see the /onboarding gate. T00/T01 updated accordingly."
 affected_areas:
 - apps/api/business/users
 - apps/api/business/accounts
@@ -94,32 +91,34 @@ affected_areas:
 - .github/workflows
 - package.json
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: draft
+  status: adopted
   target_branch: develop
   pull_request: null
   authority_issue: null
 release:
   required: true
-  mode: not-authorized-by-this-package
-  production_impact: unknown
+  mode: standard-r3-auto-merge
+  production_impact: unknown-pending-p5-staging-evidence
   deployment: not-authorized-by-this-package
-  automatic_merge: false
+  automatic_merge: true
   migration_required: true
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 146
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/146
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: "not adopted; VOC-031-D02\u2013D03, D05\u2013D07, and D09 require\
-  \ founder confirmation at adoption (D01, D04, D08 are supplied/derived, not open);\
-  \ VOC-031-DEP-01 through DEP-05 remain open/tracked as documented (staging evidence\
-  \ blocked by missing F3, production account-deletion enablement gated separately,\
-  \ new CI tooling reconciliation needed, onboarding-gate retroactivity ambiguity\
-  \ unresolved)."
+blocking_reasons: "none; VOC-031-D01\u2013D09 resolved at adoption (2026-07-27,\
+  \ founder-gate delegation) per specification.md's decisions section (D03's\
+  \ retroactivity ambiguity resolved as grandfather-existing-accounts; D06\
+  \ settings/account scope resolved to include all fields plus email-change\
+  \ and account-deletion); VOC-031-DEP-01 through DEP-05 remain open/tracked\
+  \ as documented (staging evidence blocked by missing F3, production\
+  \ account-deletion enablement gated separately, new CI tooling\
+  \ reconciliation needed) - none block development."

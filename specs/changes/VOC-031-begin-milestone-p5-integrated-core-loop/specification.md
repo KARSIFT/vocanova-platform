@@ -238,11 +238,17 @@ onboarding first once F3 exists); or **(b)** grandfather accounts that
 existed before this package's activation (e.g. accounts with `created_at`
 before the migration lands, or a one-time backfill marking pre-existing
 accounts `onboarding_status='completed'`) so only genuinely new sign-ups see
-the gate. `T01`'s tasks/acceptance-criteria are written against **(a)** as the
-literal reading of DOC-03 §3 and DOC-12's "no retroactive credit" precedent
-(`VOC-030-D05`) — new gates apply going forward, not retroactively rewritten
-history — but this is this draft's own default, not a founder decision, and
-must be confirmed or overridden at adoption.
+the gate.
+
+**Resolved at adoption (2026-07-27, founder-gate delegation): option (b),
+grandfather pre-existing accounts.** `T00`'s migration backfills
+`onboarding_status='completed'` for every account that exists at migration
+time; only accounts created after that point default to `not_started` and
+see the `/onboarding` redirect. This keeps every prior milestone's (VOC-025
+through VOC-030) documented staging procedure - which assumes direct
+navigation to `/home` after auth - working unchanged, and avoids forcing
+non-production test/staging identities through a flow that has no bearing on
+their evidentiary purpose.
 
 `VOC-031-D04` — **Seed-eligibility rule, restated precisely from `D01`'s
 founder decision.** On a successful `POST /api/v1/onboarding`: if no
