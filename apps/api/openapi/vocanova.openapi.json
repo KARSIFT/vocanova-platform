@@ -1,6 +1,74 @@
 {
   "components": {
     "schemas": {
+      "CompleteOnboardingInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/CompleteOnboardingInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "dailyReviewTarget": {
+            "description": "Self-reported daily review target",
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 5,
+            "type": "integer"
+          },
+          "englishLevel": {
+            "description": "Self-reported English level",
+            "enum": [
+              "a1",
+              "a2",
+              "b1",
+              "b2",
+              "unknown"
+            ],
+            "type": "string"
+          },
+          "learningGoal": {
+            "description": "Self-reported learning goal",
+            "enum": [
+              "general",
+              "work",
+              "travel",
+              "study",
+              "conversation",
+              "exam"
+            ],
+            "type": "string"
+          },
+          "mainUseCase": {
+            "description": "Self-reported main use case",
+            "enum": [
+              "daily_life",
+              "work",
+              "travel",
+              "study",
+              "social"
+            ],
+            "type": "string"
+          },
+          "nativeLanguage": {
+            "description": "Self-reported native language",
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "englishLevel",
+          "nativeLanguage",
+          "learningGoal",
+          "mainUseCase",
+          "dailyReviewTarget"
+        ],
+        "type": "object"
+      },
       "CompletionDayDTO": {
         "additionalProperties": false,
         "properties": {
@@ -17,6 +85,63 @@
         "required": [
           "localDate",
           "completed"
+        ],
+        "type": "object"
+      },
+      "ConsumeEmailChangeLinkDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ConsumeEmailChangeLinkDTO.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "changedAt": {
+            "description": "When the email change took effect",
+            "format": "date-time",
+            "type": "string"
+          },
+          "email": {
+            "description": "The new email address that is now in effect on users.email",
+            "format": "email",
+            "type": "string"
+          },
+          "previousEmail": {
+            "description": "The sign-in email address that was in effect before the change",
+            "format": "email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "previousEmail",
+          "changedAt"
+        ],
+        "type": "object"
+      },
+      "ConsumeEmailChangeLinkInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/ConsumeEmailChangeLinkInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "token": {
+            "description": "The single-use token from the email-change confirmation link",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
         ],
         "type": "object"
       },
@@ -76,8 +201,20 @@
           "emailVerifiedAt": {
             "format": "date-time",
             "type": "string"
+          },
+          "onboardingStatus": {
+            "description": "Onboarding status; not_started when the learner has not yet submitted onboarding",
+            "enum": [
+              "not_started",
+              "in_progress",
+              "completed"
+            ],
+            "type": "string"
           }
         },
+        "required": [
+          "onboardingStatus"
+        ],
         "type": "object"
       },
       "DailyMissionDTO": {
@@ -512,6 +649,54 @@
         ],
         "type": "object"
       },
+      "OnboardingProfileDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/OnboardingProfileDTO.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "completedAt": {
+            "description": "Onboarding completion timestamp",
+            "format": "date-time",
+            "type": "string"
+          },
+          "dailyReviewTarget": {
+            "description": "Self-reported daily review target (5-100)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "englishLevel": {
+            "description": "Self-reported English level (a1|a2|b1|b2|unknown)",
+            "type": "string"
+          },
+          "learningGoal": {
+            "description": "Self-reported learning goal",
+            "type": "string"
+          },
+          "mainUseCase": {
+            "description": "Self-reported main use case",
+            "type": "string"
+          },
+          "nativeLanguage": {
+            "description": "Self-reported native language",
+            "type": "string"
+          },
+          "status": {
+            "description": "Current onboarding status (not_started|in_progress|completed)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
       "ProgressDTO": {
         "additionalProperties": false,
         "properties": {
@@ -576,6 +761,29 @@
         },
         "required": [
           "reason"
+        ],
+        "type": "object"
+      },
+      "RequestEmailChangeLinkInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/RequestEmailChangeLinkInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "newEmail": {
+            "description": "The destination email the requester wants to switch to",
+            "format": "email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "newEmail"
         ],
         "type": "object"
       },
@@ -915,6 +1123,64 @@
         ],
         "type": "object"
       },
+      "SettingsDTO": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/SettingsDTO.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "appLanguage": {
+            "description": "Persisted app language preference; only 'en' is accepted at launch",
+            "enum": [
+              "en"
+            ],
+            "type": "string"
+          },
+          "dailyReviewTarget": {
+            "description": "Daily review target (5-100)",
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 5,
+            "type": "integer"
+          },
+          "displayName": {
+            "description": "Learner-controlled display name (0-80 chars)",
+            "type": "string"
+          },
+          "marketingEmailsEnabled": {
+            "description": "Whether the learner opts into marketing emails",
+            "type": "boolean"
+          },
+          "notificationsEnabled": {
+            "description": "Whether the learner opts into in-app notifications",
+            "type": "boolean"
+          },
+          "reviewIntervalPreset": {
+            "description": "Review interval preset",
+            "enum": [
+              "vocanova_default",
+              "wordup_like",
+              "custom"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "dailyReviewTarget",
+          "reviewIntervalPreset",
+          "appLanguage",
+          "notificationsEnabled",
+          "marketingEmailsEnabled",
+          "displayName"
+        ],
+        "type": "object"
+      },
       "SituationDTO": {
         "additionalProperties": false,
         "properties": {
@@ -1189,6 +1455,57 @@
           "source",
           "attemptId"
         ],
+        "type": "object"
+      },
+      "UpdateSettingsInputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "$schema": {
+            "description": "A URL to the JSON Schema for this object.",
+            "examples": [
+              "https://example.com/schemas/UpdateSettingsInputBody.json"
+            ],
+            "format": "uri",
+            "readOnly": true,
+            "type": "string"
+          },
+          "appLanguage": {
+            "description": "App language; only 'en' is accepted at launch",
+            "enum": [
+              "en"
+            ],
+            "type": "string"
+          },
+          "dailyReviewTarget": {
+            "description": "Daily review target (5-100)",
+            "format": "int64",
+            "maximum": 100,
+            "minimum": 5,
+            "type": "integer"
+          },
+          "displayName": {
+            "description": "Display name (0-80 chars)",
+            "maxLength": 80,
+            "type": "string"
+          },
+          "marketingEmailsEnabled": {
+            "description": "Marketing emails opt-in",
+            "type": "boolean"
+          },
+          "notificationsEnabled": {
+            "description": "Notifications opt-in",
+            "type": "boolean"
+          },
+          "reviewIntervalPreset": {
+            "description": "Review interval preset",
+            "enum": [
+              "vocanova_default",
+              "wordup_like",
+              "custom"
+            ],
+            "type": "string"
+          }
+        },
         "type": "object"
       },
       "WordDetailDTO": {
@@ -1736,6 +2053,71 @@
         ]
       }
     },
+    "/api/v1/onboarding": {
+      "get": {
+        "operationId": "GetOnboarding",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingProfileDTO"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Authentication is required"
+          }
+        },
+        "summary": "Get the requester's onboarding profile",
+        "tags": [
+          "Onboarding"
+        ]
+      },
+      "post": {
+        "operationId": "CompleteOnboarding",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteOnboardingInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingProfileDTO"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid onboarding submission"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          },
+          "409": {
+            "description": "Onboarding profile already exists with different answers"
+          }
+        },
+        "summary": "Complete onboarding for the requester",
+        "tags": [
+          "Onboarding"
+        ]
+      }
+    },
     "/api/v1/progress": {
       "get": {
         "operationId": "GetProgress",
@@ -1979,6 +2361,153 @@
         "summary": "Report a quality concern for a feedback attempt",
         "tags": [
           "AI Feedback"
+        ]
+      }
+    },
+    "/api/v1/settings": {
+      "get": {
+        "operationId": "GetSettings",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsDTO"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Get the requester's settings",
+        "tags": [
+          "Settings"
+        ]
+      },
+      "patch": {
+        "operationId": "UpdateSettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSettingsInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettingsDTO"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid settings update"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "summary": "Update the requester's settings",
+        "tags": [
+          "Settings"
+        ]
+      }
+    },
+    "/api/v1/settings/email-change-links": {
+      "post": {
+        "operationId": "RequestEmailChangeLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestEmailChangeLinkInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Invalid new email"
+          },
+          "401": {
+            "description": "Authentication is required"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Request a single-use email-change link",
+        "tags": [
+          "Settings"
+        ]
+      }
+    },
+    "/api/v1/settings/email-change-links/consume": {
+      "post": {
+        "operationId": "ConsumeEmailChangeLink",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsumeEmailChangeLinkInputBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsumeEmailChangeLinkDTO"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "description": "Invalid or expired email change link"
+          },
+          "403": {
+            "description": "Invalid CSRF token"
+          },
+          "409": {
+            "description": "New email is already registered to another account"
+          },
+          "429": {
+            "description": "Rate limited"
+          }
+        },
+        "summary": "Consume a single-use email-change link",
+        "tags": [
+          "Settings"
         ]
       }
     },

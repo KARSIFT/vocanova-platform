@@ -3,6 +3,37 @@ export interface CurrentUser {
   displayName?: string;
   avatarUrl?: string;
   emailVerifiedAt?: string;
+  /**
+   * VOC-031-T01 additive field. Always present in the response.
+   * The Next.js middleware uses it to gate the core-loop routes
+   * on whether the learner has completed onboarding (DOC-03 §3).
+   */
+  onboardingStatus: "not_started" | "in_progress" | "completed";
+}
+
+export type EnglishLevel = "a1" | "a2" | "b1" | "b2" | "unknown";
+
+export type LearningGoal =
+  "general" | "work" | "travel" | "study" | "conversation" | "exam";
+
+export type MainUseCase = "daily_life" | "work" | "travel" | "study" | "social";
+
+export interface OnboardingProfile {
+  status: "not_started" | "in_progress" | "completed";
+  englishLevel?: EnglishLevel;
+  nativeLanguage?: string;
+  learningGoal?: LearningGoal;
+  mainUseCase?: MainUseCase;
+  dailyReviewTarget?: number;
+  completedAt?: string;
+}
+
+export interface CompleteOnboardingBody {
+  englishLevel: EnglishLevel;
+  nativeLanguage: string;
+  learningGoal: LearningGoal;
+  mainUseCase: MainUseCase;
+  dailyReviewTarget: number;
 }
 
 export interface RequestMagicLinkBody {
@@ -228,6 +259,108 @@ export interface Progress {
   completionHistory: CompletionDay[];
 }
 
+export type ReviewIntervalPreset =
+  "vocanova_default" | "wordup_like" | "custom";
+
+/**
+ * VOC-031-T02 additive type. The persisted app language
+ * preference; only "en" is accepted at launch (VOC-031-D06),
+ * because no i18n infrastructure exists in this repository
+ * today.
+ */
+export type AppLanguage = "en";
+
+/**
+ * VOC-031-T02. The public Settings projection returned by
+ * GET /api/v1/settings. The /api/v1/settings/account frontend
+ * reads this for every editable Settings field.
+ */
+export interface Settings {
+  dailyReviewTarget: number;
+  reviewIntervalPreset: ReviewIntervalPreset;
+  appLanguage: AppLanguage;
+  notificationsEnabled: boolean;
+  marketingEmailsEnabled: boolean;
+  displayName: string;
+}
+
+/**
+ * VOC-031-T02. The partial-update payload for
+ * PATCH /api/v1/settings. Every field is optional; the API
+ * only writes the fields the caller supplies. The DOC-07 §3
+ * "no-op PATCH is a well-formed read" rule is honored, so
+ * an empty body returns the current state.
+ */
+export interface UpdateSettingsBody {
+  dailyReviewTarget?: number;
+  reviewIntervalPreset?: ReviewIntervalPreset;
+  appLanguage?: AppLanguage;
+  notificationsEnabled?: boolean;
+  marketingEmailsEnabled?: boolean;
+  displayName?: string;
+}
+
+/**
+ * VOC-031-T03. The request body for
+ * POST /api/v1/settings/email-change-links. The new email is
+ * the destination the requester wants to switch to; the
+ * current sign-in address is taken from the session and is
+ * never trusted from the body. The request is unconditionally
+ * generic on the server side, so the registration status of
+ * the new address is never observable through the request
+ * outcome (anti-enumeration posture, VOC-031-D05).
+ */
+export interface RequestEmailChangeLinkBody {
+  newEmail: string;
+}
+
+/**
+ * VOC-031-T03. The request body for
+ * POST /api/v1/settings/email-change-links/consume. The token
+ * is the only form the requester supplies; the API never sees
+ * the email itself at consume time (the server resolved it
+ * when the request was issued).
+ */
+export interface ConsumeEmailChangeLinkBody {
+  token: string;
+}
+
+/**
+ * VOC-031-T03. The post-confirm response from
+ * POST /api/v1/settings/email-change-links/consume. The
+ * server returns the new email and the previous email so the
+ * frontend can show the learner which address the security
+ * notification was dispatched to; the notification itself is
+ * owned by the backend, not the frontend.
+ */
+export interface ConsumeEmailChangeLinkResult {
+  email: string;
+  previousEmail: string;
+  changedAt: string;
+}
+
+/**
+ * VOC-031-T04. The post-deactivation response from
+ * POST /api/v1/account-deletion-requests. The user is already
+ * deactivated at this point: status is 'deactivated', every
+ * active session and every unconsumed auth/email-change
+ * token is revoked, and the purge_after clock is running. The
+ * frontend uses the dates to render a clear "your account
+ * has been scheduled for deletion" confirmation and to
+ * initiate logout. `replayed` is true when the call was a
+ * no-op because the (user, idempotency-key) pair already
+ * matched a prior request — the frontend uses it to
+ * suppress duplicate toasts on a retry.
+ */
+export interface CreateAccountDeletionRequestResult {
+  status: string;
+  userId: string;
+  requestedAt: string;
+  purgeAfter: string;
+  idempotencyKey: string;
+  replayed: boolean;
+}
+
 export interface ApiError {
   type?: string;
   title?: string;
@@ -266,6 +399,34 @@ export class VocanovaClient {
   }> {
     const response = await this.request("GET", "/api/v1/me", undefined, init);
     const data = (await response.json()) as CurrentUser;
+    return { data, response };
+  }
+
+  async getOnboarding(init?: RequestInit): Promise<{
+    data: OnboardingProfile;
+    response: Response;
+  }> {
+    const response = await this.request(
+      "GET",
+      "/api/v1/onboarding",
+      undefined,
+      init,
+    );
+    const data = (await response.json()) as OnboardingProfile;
+    return { data, response };
+  }
+
+  async completeOnboarding(
+    body: CompleteOnboardingBody,
+    init?: RequestInit,
+  ): Promise<{ data: OnboardingProfile; response: Response }> {
+    const response = await this.request(
+      "POST",
+      "/api/v1/onboarding",
+      body,
+      init,
+    );
+    const data = (await response.json()) as OnboardingProfile;
     return { data, response };
   }
 
@@ -513,6 +674,123 @@ export class VocanovaClient {
       "/api/v1/progress" + (query.toString() ? `?${query.toString()}` : "");
     const response = await this.request("GET", path, undefined, init);
     const data = (await response.json()) as Progress;
+    return { data, response };
+  }
+
+  /**
+   * VOC-031-T02. Get the requester's settings. The response is
+   * a stable Settings projection — every field is always
+   * present, with schema defaults for any unset value.
+   */
+  async getSettings(init?: RequestInit): Promise<{
+    data: Settings;
+    response: Response;
+  }> {
+    const response = await this.request(
+      "GET",
+      "/api/v1/settings",
+      undefined,
+      init,
+    );
+    const data = (await response.json()) as Settings;
+    return { data, response };
+  }
+
+  /**
+   * VOC-031-T02. Update the requester's settings via a partial
+   * PATCH. Only the fields supplied in `body` are written; every
+   * other field is preserved. An empty body is a well-formed
+   * no-op read and returns the current state. The `init.headers`
+   * are forwarded so the caller can attach a CSRF token.
+   */
+  async updateSettings(
+    body: UpdateSettingsBody,
+    init?: RequestInit,
+  ): Promise<{ data: Settings; response: Response }> {
+    const response = await this.request(
+      "PATCH",
+      "/api/v1/settings",
+      body,
+      init,
+    );
+    const data = (await response.json()) as Settings;
+    return { data, response };
+  }
+
+  /**
+   * VOC-031-T03. Request a single-use email-change link. The
+   * request is unconditionally generic on the server side
+   * (anti-enumeration posture, VOC-031-D05): whether the
+   * requested new email is already registered is never
+   * observable through this response. The `init.headers` are
+   * forwarded so the caller can attach a CSRF token.
+   */
+  async requestEmailChangeLink(
+    body: RequestEmailChangeLinkBody,
+    init?: RequestInit,
+  ): Promise<{ response: Response }> {
+    const response = await this.request(
+      "POST",
+      "/api/v1/settings/email-change-links",
+      body,
+      init,
+    );
+    return { response };
+  }
+
+  /**
+   * VOC-031-T03. Consume a single-use email-change link. The
+   * server validates the token's hash, expiry, single-use
+   * `consumed_at`, and environment, re-checks new-email
+   * uniqueness atomically at confirm time, and updates
+   * `users.email`. The `init.headers` are forwarded so the
+   * caller can attach a CSRF token.
+   */
+  async consumeEmailChangeLink(
+    body: ConsumeEmailChangeLinkBody,
+    init?: RequestInit,
+  ): Promise<{
+    data: ConsumeEmailChangeLinkResult;
+    response: Response;
+  }> {
+    const response = await this.request(
+      "POST",
+      "/api/v1/settings/email-change-links/consume",
+      body,
+      init,
+    );
+    const data = (await response.json()) as ConsumeEmailChangeLinkResult;
+    return { data, response };
+  }
+
+  /**
+   * VOC-031-T04. Deactivate the requester's account and
+   * schedule anonymization. Requires a CSRF token and a
+   * unique Idempotency-Key (DOC-07). A replay with the same
+   * key returns the existing row with `replayed: true`, so
+   * the frontend can suppress duplicate "your account was
+   * deleted" toasts on a retry. The user is already
+   * deactivated at this point: every active session is
+   * revoked, and the `purgeAfter` clock is running. The
+   * frontend should follow up with a logout request to clear
+   * the session cookie.
+   */
+  async createAccountDeletionRequest(
+    idempotencyKey: string,
+    init?: RequestInit,
+  ): Promise<{
+    data: CreateAccountDeletionRequestResult;
+    response: Response;
+  }> {
+    const headers = new Headers(init?.headers);
+    headers.set("Idempotency-Key", idempotencyKey);
+    const response = await this.request(
+      "POST",
+      "/api/v1/account-deletion-requests",
+      undefined,
+      { ...init, headers },
+    );
+    const data = (await response.json()) as CreateAccountDeletionRequestResult;
     return { data, response };
   }
 

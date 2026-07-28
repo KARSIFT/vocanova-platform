@@ -107,6 +107,20 @@ func (r *MemoryRepository) SetUserStatus(id uuid.UUID, status string) error {
 	return nil
 }
 
+// UpsertUser is a test helper that installs a user with a
+// specific ID. The default CreateUser allocates a random UUID
+// and several downstream tests need a deterministic one so the
+// auth-side identity and the in-memory fixture's user table
+// stay aligned. Not part of the production Repository contract.
+func (r *MemoryRepository) UpsertUser(u *User) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.users[u.ID] = u
+	if u.Email != "" {
+		r.usersByEmail[u.Email] = u
+	}
+}
+
 func (r *MemoryRepository) CreateSession(ctx context.Context, userID uuid.UUID, tokenHash []byte, createdAt, expiresAt time.Time) (*Session, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -141,6 +155,23 @@ func (r *MemoryRepository) RevokeSession(ctx context.Context, id uuid.UUID, revo
 	}
 	s.RevokedAt = &revokedAt
 	return nil
+}
+
+// RevokeAllSessionsForUser revokes every active session for a user in
+// the in-memory store. Mirrors PostgreSQLRepository.RevokeAllSessionsForUser
+// so service tests can exercise the same account-deletion path.
+func (r *MemoryRepository) RevokeAllSessionsForUser(ctx context.Context, userID uuid.UUID, revokedAt time.Time) (int64, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var n int64
+	for _, s := range r.sessions {
+		if s.UserID == userID && s.RevokedAt == nil {
+			t := revokedAt
+			s.RevokedAt = &t
+			n++
+		}
+	}
+	return n, nil
 }
 
 func (r *MemoryRepository) CreateMagicLink(ctx context.Context, email string, tokenHash []byte, environment string, createdAt, expiresAt time.Time) (*MagicLink, error) {
@@ -191,6 +222,23 @@ func (r *MemoryRepository) RevokeMagicLink(ctx context.Context, id uuid.UUID, re
 	return nil
 }
 
+// RevokeAllMagicLinksForUser revokes every unconsumed magic_links
+// row for userID. Mirrors PostgreSQLRepository.RevokeAllMagicLinksForUser
+// so service tests can exercise the same account-deletion path.
+func (r *MemoryRepository) RevokeAllMagicLinksForUser(ctx context.Context, userID uuid.UUID, revokedAt time.Time) (int64, error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	var n int64
+	t := revokedAt.UTC()
+	for _, m := range r.magicLinks {
+		if m.UserID != nil && *m.UserID == userID && m.ConsumedAt == nil && m.RevokedAt == nil {
+			m.RevokedAt = &t
+			n++
+		}
+	}
+	return n, nil
+}
+
 func (r *MemoryRepository) AttachMagicLinkUser(ctx context.Context, id uuid.UUID, userID uuid.UUID) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -200,6 +248,27 @@ func (r *MemoryRepository) AttachMagicLinkUser(ctx context.Context, id uuid.UUID
 	}
 	m.UserID = &userID
 	return nil
+}
+
+// SetMagicLinkUser is a test-only helper that installs a
+// magic_links row directly with both a token hash and a user id.
+// The production RequestMagicLink path goes through
+// CreateMagicLink + AttachMagicLinkUser; this helper shortens
+// the test setup for the account-deletion test, which needs
+// pre-existing user-bound magic-links to revoke.
+func (r *MemoryRepository) SetMagicLinkUser(tokenHash []byte, userID uuid.UUID, createdAt, expiresAt time.Time) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	m := &MagicLink{
+		ID:          uuid.New(),
+		UserID:      &userID,
+		Email:       "test@example.com",
+		Environment: "test",
+		CreatedAt:   createdAt.UTC(),
+		ExpiresAt:   expiresAt.UTC(),
+	}
+	r.magicLinks[m.ID] = m
+	r.magicLinksByHash[string(tokenHash)] = m
 }
 
 func (r *MemoryRepository) CreateOAuthState(ctx context.Context, tokenHash []byte, environment, provider, appReturnURL string, createdAt, expiresAt time.Time) (*OAuthState, error) {

@@ -87,12 +87,21 @@ type Repository interface {
 	CreateSession(ctx context.Context, userID uuid.UUID, tokenHash []byte, createdAt, expiresAt time.Time) (*Session, error)
 	GetSessionByTokenHash(ctx context.Context, tokenHash []byte) (*Session, error)
 	RevokeSession(ctx context.Context, id uuid.UUID, revokedAt time.Time) error
+	// RevokeAllSessionsForUser revokes every active session belonging
+	// to userID, setting revoked_at on each. Used by account-deletion
+	// (VOC-031-T04) and any other irreversible user-state change.
+	RevokeAllSessionsForUser(ctx context.Context, userID uuid.UUID, revokedAt time.Time) (int64, error)
 
 	// Magic links
 	CreateMagicLink(ctx context.Context, email string, tokenHash []byte, environment string, createdAt, expiresAt time.Time) (*MagicLink, error)
 	GetMagicLinkByTokenHash(ctx context.Context, tokenHash []byte) (*MagicLink, error)
 	ConsumeMagicLink(ctx context.Context, id uuid.UUID, consumedAt time.Time) error
 	RevokeMagicLink(ctx context.Context, id uuid.UUID, revokedAt time.Time) error
+	// RevokeAllMagicLinksForUser revokes every unconsumed magic_links
+	// row whose user_id matches userID, setting revoked_at on each.
+	// Used by account-deletion (VOC-031-T04) so no in-flight
+	// sign-in link can be consumed after the account is deactivated.
+	RevokeAllMagicLinksForUser(ctx context.Context, userID uuid.UUID, revokedAt time.Time) (int64, error)
 	AttachMagicLinkUser(ctx context.Context, id uuid.UUID, userID uuid.UUID) error
 
 	// OAuth states

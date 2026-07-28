@@ -127,6 +127,26 @@ func (r *PostgreSQLRepository) RevokeSession(ctx context.Context, id uuid.UUID, 
 	return nil
 }
 
+// RevokeAllSessionsForUser revokes every active session for a user in
+// one statement. Used by the account-deletion flow (T04) and any
+// other irreversible user-state change; revoking the requester's
+// current session at email-change confirm time is intentionally not
+// done (VOC-031-D05) — changing a login address is not equivalent to
+// revoking a session.
+func (r *PostgreSQLRepository) RevokeAllSessionsForUser(ctx context.Context, userID uuid.UUID, revokedAt time.Time) (int64, error) {
+	res, err := r.db.ExecContext(ctx,
+		`UPDATE sessions SET revoked_at = $1 WHERE user_id = $2 AND revoked_at IS NULL`,
+		revokedAt, userID)
+	if err != nil {
+		return 0, fmt.Errorf("revoke all sessions: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("revoke all sessions rows: %w", err)
+	}
+	return n, nil
+}
+
 func (r *PostgreSQLRepository) CreateMagicLink(ctx context.Context, email string, tokenHash []byte, environment string, createdAt, expiresAt time.Time) (*MagicLink, error) {
 	id := uuid.New()
 	_, err := r.db.ExecContext(ctx,
@@ -184,6 +204,25 @@ func (r *PostgreSQLRepository) RevokeMagicLink(ctx context.Context, id uuid.UUID
 		return fmt.Errorf("revoke magic link: %w", err)
 	}
 	return nil
+}
+
+// RevokeAllMagicLinksForUser revokes every unconsumed magic_links
+// row for userID in one statement. Used by the account-deletion
+// path (VOC-031-T04) so no in-flight sign-in link can be consumed
+// after the account is deactivated.
+func (r *PostgreSQLRepository) RevokeAllMagicLinksForUser(ctx context.Context, userID uuid.UUID, revokedAt time.Time) (int64, error) {
+	res, err := r.db.ExecContext(ctx,
+		`UPDATE magic_links SET revoked_at = $1
+		 WHERE user_id = $2 AND consumed_at IS NULL AND revoked_at IS NULL`,
+		revokedAt, userID)
+	if err != nil {
+		return 0, fmt.Errorf("revoke all magic links: %w", err)
+	}
+	n, err := res.RowsAffected()
+	if err != nil {
+		return 0, fmt.Errorf("revoke all magic links rows: %w", err)
+	}
+	return n, nil
 }
 
 func (r *PostgreSQLRepository) AttachMagicLinkUser(ctx context.Context, id uuid.UUID, userID uuid.UUID) error {
