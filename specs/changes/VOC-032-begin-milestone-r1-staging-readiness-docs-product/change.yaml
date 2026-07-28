@@ -1,0 +1,134 @@
+schema_version: 1
+id: VOC-032
+slug: begin-milestone-r1-staging-readiness-docs-product
+title: "Begin Milestone R1 \u2014 Staging Readiness"
+type: feature
+status: draft
+risk: R3
+planned_implementation_risk_floor: R3
+canonical_path: specs/changes/VOC-032-begin-milestone-r1-staging-readiness-docs-product
+authority_model: a003-active
+requirement_source: docs/product/12-mvp-implementation-plan.md#5 (R1 paragraph, F3
+  paragraph) ; docs/product/12-mvp-implementation-plan.md#6 (dependency rules) ; docs/operations/11-devops-and-ci-cd.md
+  ; docs/engineering/09-ai-features.md#23 ; apps/api/ent/README.md ; apps/api/migrations/README.md
+  ; docs/governance/change-risk-classification.md ; supplied free-text request (records
+  the founder's deploy-shape decision and confirms a real, already- provisioned staging
+  server and domain)
+requirement_approval_status: founder-approved
+base_branch: develop
+base_sha: 2f02b6cef7a42bd309b41f5637374405ec88c6f7
+target_branch: develop
+approved_candidate_sha: not-set-until-adoption
+approval_status: not-approved
+implementation_authorized: false
+automatic_merge_allowed: false
+production_impact: unknown
+rollback_required: true
+owners:
+  decision: founder
+  package_preparation: planner
+  implementation: unassigned
+  independent_verification: Claude Code
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+  mock_inventory: mock-inventory.md
+  staging_evidence: staging-evidence.md
+dependencies:
+- id: VOC-032-DEP-00
+  status: open-before-T07/T09; SSH deploy credentials for the founder-provisioned
+    staging server (host, deploy-user, private key, known_hosts fingerprint) do not
+    exist as GitHub Actions secrets and must be generated and added by the founder
+    (`STAGING_SSH_HOST`, `STAGING_SSH_USER`, `STAGING_SSH_PRIVATE_KEY`, `STAGING_SSH_KNOWN_HOSTS`).
+    The planner/implementer cannot provision or hand over server access credentials.
+- id: VOC-032-DEP-01
+  status: 'open-before-T05/T09; a Cloudflare origin TLS certificate/key (or an explicit
+    founder decision on a different Cloudflare TLS mode) and the staging-subdomain
+    DNS records (`VOC-032-D03`: staging.vocanova.site, api-staging.vocanova.site)
+    do not exist and must be created by the founder in the Cloudflare dashboard for
+    the real vocanova.site zone. The planner/implementer has no Cloudflare account
+    access.'
+- id: VOC-032-DEP-02
+  status: "open-before-DOC-11-conformance-claim; `VOC-032-D02` records an unresolved\
+    \ contradiction between this milestone's founder-directed deploy shape (self-hosted\
+    \ Docker Compose + nginx on vocanova.site) and DOC-11 \xA71's approved target\
+    \ infrastructure (Cloudflare Workers/ OpenNext + Render + Render PostgreSQL +\
+    \ vocanova.com). This does not block T00\u2013T12's build/staging work, which\
+    \ proceeds on the founder's explicit in-hand direction for this milestone, but\
+    \ DOC-11 itself needs a founder-approved amendment to reconcile before this shape\
+    \ can be called DOC-11-conformant."
+- id: VOC-032-DEP-03
+  status: open-before-T10; real staging AI-provider credentials (API key/ base URL
+    for the already-implemented `aifeedback. NewOpenCodeFeedbackProvider`) do not
+    exist in the staging environment and must be founder-provisioned before the one
+    live-provider evaluation pass required by `VOC-032-D09`(b) can run.
+- id: VOC-032-DEP-04
+  status: "open-before-adoption; `VOC-032-D04` records this draft's own choice to\
+    \ fold the never-built F3 \"Staging Foundation\" milestone's scope into this R1\
+    \ package rather than opening a separate F3 change package first, since DOC-12\
+    \ \xA73/\xA76 treat F3 and R1 as distinct milestones with F3 gating R1's own precondition\
+    \ chain. This framing needs explicit founder confirmation at adoption, not silent\
+    \ acceptance."
+- id: VOC-032-DEP-05
+  status: "open-before-P1-through-P5-staging-gate-declaration; the A1\u2192P1\u2192\
+    P2\u2192P3\u2192P4\u2192P5 acceptance chain (carried through VOC-025-DEP-01 /\
+    \ VOC-026-DEP-03 / VOC-027-DEP-02 / VOC-028-DEP-04 / VOC-030-DEP-02 / VOC-031-DEP-02)\
+    \ still has no live staging evidence as of this draft. This package's `T09`/`T12`\
+    \ evidence is the precondition that finally unblocks every one of those prior\
+    \ milestones' own staging-evidence documents, not only R1's; none of P1\u2013\
+    P5's gates can be declared passed until `T09` actually runs against the real staging\
+    \ target."
+- id: VOC-032-DEP-06
+  status: open-before-staging-acceptance; `VOC-032-D10` records that no real transactional-email
+    sender or real Google OAuth provider exists anywhere in this repository (only
+    `email.Fake{}` and `auth.NewFakeOAuthProvider`). This draft does not close that
+    gap. The founder must explicitly accept this limitation on what "staging acceptance"
+    can mean, or direct that closing it be folded into this package or a separate,
+    tightly-scoped follow-up, before R1's "founder completes staging acceptance" gate
+    item can be satisfied in a way that actually reflects real, production-like auth
+    conditions.
+affected_areas:
+- apps/api/cmd/api
+- apps/api/app/api
+- apps/api/business
+- apps/api/migrations
+- apps/web
+- infra
+- .github/workflows
+- docs/product/12-mvp-implementation-plan.md
+- docs/operations/11-devops-and-ci-cd.md
+implementation:
+  authorized: false
+  required: true
+  status: not-started
+  target_branch: develop
+  pull_request: null
+  authority_issue: null
+release:
+  required: true
+  mode: standard-r3-auto-merge
+  production_impact: unknown-pending-r1-staging-evidence
+  deployment: not-authorized-by-this-package
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: not-adopted
+adoption_pr: null
+adoption_evidence: null
+implementation_authority_before_adoption: false
+implementation_authority_status: not-exercised
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
+blocking_reasons: adoption blocked pending founder resolution of VOC-032-D02 (DOC-11
+  contradiction), VOC-032-D03 (staging subdomain/DNS), VOC-032-D04 (F3/R1 scope-folding
+  confirmation), and VOC-032-D10 (email/OAuth-gap disposition); VOC-032-DEP-00/DEP-01/DEP-03
+  (SSH credentials, Cloudflare certificate and DNS, AI-provider credentials) block
+  T07/T09/T10/T05 execution but not T00-T04/T06/T08/T11-T12's build/CI-wiring work.
