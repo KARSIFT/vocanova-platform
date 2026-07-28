@@ -1,11 +1,14 @@
 # VOC-031 — Tasks
 
-Ordered PR sequence: `T00 → T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09
-→ T10 → T11`. Each PR is independently reviewable, remains R3-proposed (path
-floor R3 for migrations/schemas/auth-adjacent modules), and requires Claude
-Code exact-SHA review. `T01` is additionally blocked on `VOC-031-D03`'s
-resolution (`VOC-031-DEP-05`) — it may not proceed on a guessed answer to
-whether the onboarding gate applies retroactively to pre-existing accounts.
+Ordered PR sequence: `T00 → T01 → T02 → T03 → T04 → T05 → T06 → T07a → T07b →
+T08 → T09 → T10 → T11`. Each PR is independently reviewable, remains
+R3-proposed (path floor R3 for migrations/schemas/auth-adjacent modules),
+and requires Claude Code exact-SHA review. `T01` is additionally blocked on
+`VOC-031-D03`'s resolution (`VOC-031-DEP-05`) — it may not proceed on a
+guessed answer to whether the onboarding gate applies retroactively to
+pre-existing accounts. `T07` was split into `T07a`/`T07b` on 2026-07-28
+(founder directive) after 4 implementer attempts across 3 models all
+silently timed out - see `T07a`'s own note for the full rationale.
 
 ## VOC-031-T00 — `user_onboarding_profiles` schema, migration, and onboarding domain logic
 
@@ -181,25 +184,47 @@ unchanged (`VOC-031-R06`, mirrors `VOC-030-R01`'s "byte-for-byte unchanged"
 requirement). Fix any gap found; record what was found and fixed, not merely
 asserted as fine.
 
-## VOC-031-T07 — Accessibility automation (axe-core + Playwright)
+## VOC-031-T07a — Accessibility automation: harness scaffolding + one screen
 
 - Requirement source: `VOC-031-D00`, `VOC-031-D01`, DOC-03 §10, DOC-08 quality standards
-- Acceptance criteria: `VOC-031-AC-07`
-- Tests: `VOC-031-TEST-32`..`VOC-031-TEST-35`
-- Evidence: `VOC-031-EV-32`..`VOC-031-EV-35`
+- Acceptance criteria: `VOC-031-AC-07` (partial — scaffolding half; see `T07b` for full coverage)
+- Tests: `VOC-031-TEST-32`, `VOC-031-TEST-33`
+- Evidence: `VOC-031-EV-32`, `VOC-031-EV-33`
 - Status: pending
 
-Install `@playwright/test` and an axe-core integration (net-new — confirmed
-absent repository-wide, `VOC-031-D00`). Add `apps/web/tests/e2e/` (the path
-`docs/design/08-web-app-design.md`'s architecture section already documents
-but that has never been created). Add an automated accessibility scan
-covering every core-loop screen at the three supported layouts (360px,
-430px, and one representative desktop width ≥1024px): zero critical/serious
-axe violations is the pass bar; non-color-only feedback and keyboard
-reachability are asserted explicitly, not only inferred from a clean axe
-run. Wire the suite into CI as a new job (DOC-10 §7 Level 2 — "selected
-Playwright"). Document CI runner/browser-dependency reconciliation
-(`VOC-031-DEP-04`).
+Split from the original single `T07` (2026-07-28, founder directive) after
+4 implementer attempts across 3 models (minimax-m3, kimi-k2.7-code,
+claude-sonnet-5) all silently hung for 35-55 minutes with no committed
+change - suspected cause is the combined size of first-time Playwright
+browser install + dev-server boot + a from-scratch multi-screen scan in one
+sitting, not model quality. This first half isolates just the
+scaffolding: install `@playwright/test` and an axe-core integration
+(net-new — confirmed absent repository-wide, `VOC-031-D00`). Add
+`apps/web/tests/e2e/` (the path `docs/design/08-web-app-design.md`'s
+architecture section already documents but that has never been created).
+Add ONE accessibility scan (Home screen only, one representative desktop
+width ≥1024px) proving the harness works end-to-end: axe-core wired,
+zero critical/serious violations asserted, wired into CI as a new job
+(DOC-10 §7 Level 2 — "selected Playwright"). Document CI
+runner/browser-dependency reconciliation (`VOC-031-DEP-04`). Do NOT expand
+to other screens or layouts here - that's `T07b`'s scope.
+
+## VOC-031-T07b — Accessibility automation: full screen/layout coverage
+
+- Requirement source: `VOC-031-D00`, `VOC-031-D01`, DOC-03 §10, DOC-08 quality standards
+- Acceptance criteria: `VOC-031-AC-07` (remaining half — see `T07a` for the scaffolding half)
+- Tests: `VOC-031-TEST-34`, `VOC-031-TEST-35`
+- Evidence: `VOC-031-EV-34`, `VOC-031-EV-35`
+- Status: pending
+
+Split from the original single `T07` (2026-07-28) — see `T07a`'s note for
+why. Builds on `T07a`'s already-working harness (Playwright + axe-core
+installed, CI job wired, one screen proven). Extend the accessibility scan
+to every remaining core-loop screen at all three supported layouts (360px,
+430px, and the desktop width ≥1024px `T07a` already covered for Home):
+zero critical/serious axe violations is the pass bar; non-color-only
+feedback and keyboard reachability are asserted explicitly, not only
+inferred from a clean axe run, for every screen.
 
 ## VOC-031-T08 — Full core-loop end-to-end Playwright suite
 
