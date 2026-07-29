@@ -54,7 +54,7 @@ reachable from preview/staging/CI.
 ## 2. Release artifacts and deployment ordering
 
 Every deployable candidate produces three immutable artifacts: frontend OpenNext bundle, Go API OCI
-image (`ghcr.io/vocanova/vocanova-api:sha-<sha>`), Atlas migration OCI image. Production deploys by
+image (`ghcr.io/karsift/vocanova-api:sha-<sha>`), Atlas migration OCI image. Production deploys by
 digest, never by rebuilding from source: **build once → test in staging → promote exactly to
 production.** Deployment order: resolve release manifest → validate artifacts → acquire environment
 lock → confirm backup readiness → migration preflight → run migration → verify → deploy API by
