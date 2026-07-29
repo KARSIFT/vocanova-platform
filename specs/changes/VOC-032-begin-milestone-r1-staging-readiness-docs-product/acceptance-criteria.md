@@ -177,6 +177,53 @@ layout this package built (file locations, how to reach staging) and
 explicitly notes the unresolved `VOC-032-D02` DOC-11 contradiction rather
 than presenting this milestone's shape as uncontested target infrastructure.
 
+## VOC-032-AC-13 — DOC-11 §1 amended to the real infrastructure shape
+
+- Requirement source: `VOC-032-D02` (resolved)
+- Tasks: `VOC-032-T13`
+- Tests: `VOC-032-TEST-25`
+- Evidence: `VOC-032-EV-26`
+- Result: pending — depends on `T00`–`T09`
+
+DOC-11 §1's target-infrastructure table describes self-hosted Docker
+Compose + nginx on the founder's server and the `vocanova.site` domain, not
+Cloudflare Workers/OpenNext + Render + Render PostgreSQL; the superseded
+baseline is annotated, not silently deleted; the amendment records VOC-032
+and the founder as approving owner.
+
+## VOC-032-AC-14 — Real transactional email sender
+
+- Requirement source: `VOC-032-D10` (resolved)
+- Tasks: `VOC-032-T14`
+- Tests: `VOC-032-TEST-26`..`VOC-032-TEST-27`
+- Evidence: `VOC-032-EV-27`..`VOC-032-EV-28`
+- Result: pending — blocked by `VOC-032-DEP-07` for the one live send
+
+A real `email.Sender` implementation exists alongside `Fake{}`; it reads its
+credential only from an environment variable, never a literal; it falls
+back to `Fake{}` when `EMAIL_MAGIC_LINK_ENABLED` is off or the credential is
+absent; a unit test against a fake HTTP transport confirms correct
+recipient/subject/text/HTML construction; one real magic-link email is
+delivered to a founder-controlled inbox in staging at least once, recorded
+in `staging-evidence.md`.
+
+## VOC-032-AC-15 — Real Google OAuth provider
+
+- Requirement source: `VOC-032-D10` (resolved)
+- Tasks: `VOC-032-T15`
+- Tests: `VOC-032-TEST-28`..`VOC-032-TEST-29`
+- Evidence: `VOC-032-EV-29`..`VOC-032-EV-30`
+- Result: pending — blocked by `VOC-032-DEP-07` for the one live exchange
+
+A real `auth.OAuthProvider` implementation exists alongside
+`NewFakeOAuthProvider`; it reads its client ID/secret/redirect URI only from
+environment variables, never a literal; it falls back to
+`NewFakeOAuthProvider` when `GOOGLE_OAUTH_ENABLED` is off or the credential
+is absent; a unit test against a fake HTTP transport confirms correct
+token/userinfo request-and-response handling; one real sign-in against
+Google's actual OAuth flow succeeds in staging at least once, recorded in
+`staging-evidence.md`.
+
 ## VOC-032-AC-12 — Evidence, mock-inventory, staging-evidence, and gate-readiness complete
 
 - Requirement source: all prior criteria
@@ -186,7 +233,10 @@ than presenting this milestone's shape as uncontested target infrastructure.
 - Result: pending
 
 Every `EV-*` referenced above is actually present at its claimed path;
-`mock-inventory.md` confirms no product mock was introduced;
-`staging-evidence.md` records `T09`/`T10`'s actual results; the gate-readiness
+`mock-inventory.md` confirms no product mock was introduced (`T14`/`T15`
+add real providers alongside their existing fakes, not a mock);
+`staging-evidence.md` records `T09`/`T10`'s actual results and `T14`/`T15`'s
+one-time live email-delivery and OAuth-exchange evidence; the gate-readiness
 summary correctly separates what this package's evidence satisfies from what
-remains founder-owned (staging acceptance itself; `D02`/`D03`/`D04`/`D10`).
+remains founder-owned (staging acceptance itself; `D03`/`D04` — `D02` and
+`D10` are resolved by `T13` and `T14`/`T15` respectively).

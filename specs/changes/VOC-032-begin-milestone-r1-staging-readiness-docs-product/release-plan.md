@@ -52,16 +52,18 @@ release decision, not guessed here.
 
 Claude Code must report the final SHA, evidence, limitations, findings, the
 active A-003 authority, and the remaining R3/R4/adoption/activation gates —
-including, explicitly, whether `VOC-032-D02`/`D03`/`D04`/`D10` were resolved
-as this draft proposed or overridden, whether any credential appears
-committed anywhere in the diff, and whether `T09`/`T10`'s claims are honestly
-scoped to what was actually live-executed. Routine R3 needs strengthened
-controls and independent verification; the open decisions need founder
-confirmation before their affected tasks proceed, and the founder-provisioned
-credentials (`VOC-032-DEP-00`/`DEP-01`/`DEP-03`) must exist before `T05`/`T07`/
-`T09`/`T10` can be verified live rather than only inspected. Closure requires
-all thirteen tasks' evidence, `staging-evidence.md`'s `T09`/`T10` results, the
-`infra/README.md` update, and the DOC-12 R1 gate evidence; neither a package
+including, explicitly, that `VOC-032-D02`/`D04`/`D10` were resolved at
+adoption exactly as `change.yaml`'s `dependencies` record (D02: amend DOC-11
+via T13; D04: fold F3 confirmed; D10: fold real email/OAuth via T14/T15,
+not overridden or silently re-interpreted), whether any credential appears
+committed anywhere in the diff, and whether `T09`/`T10`/`T14`/`T15`'s claims
+are honestly scoped to what was actually live-executed. Routine R3 needs
+strengthened controls and independent verification; the founder-provisioned
+credentials (`VOC-032-DEP-00`/`DEP-01`/`DEP-03`/`DEP-07`) must exist before
+`T05`/`T07`/`T09`/`T10`/`T14`/`T15` can be verified live rather than only
+inspected. Closure requires all sixteen tasks' evidence,
+`staging-evidence.md`'s `T09`/`T10`/`T14`/`T15` results, the `infra/README.md`
+update, and the DOC-12 R1 gate evidence; neither a package
 merge nor a staging deploy alone closes the milestone — R1's own gate
 additionally requires the founder to complete staging acceptance and scope to
 be frozen afterward, which this package's evidence supports but cannot itself

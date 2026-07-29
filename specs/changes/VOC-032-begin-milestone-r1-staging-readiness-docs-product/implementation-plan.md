@@ -2,15 +2,17 @@
 
 ## Preconditions and protected areas
 
-Do not begin until this draft is adopted and the founder has confirmed
-`VOC-032-D02` (DOC-11 contradiction disposition), `VOC-032-D03` (staging
-subdomain/DNS), `VOC-032-D04` (F3/R1 scope-folding), and `VOC-032-D10`
-(email/OAuth-gap disposition) — none of these may be silently assumed by the
-implementer. `T05`, `T07`, `T09`, and `T10` are additionally blocked on
-founder-provisioned credentials that do not exist yet (`VOC-032-DEP-00`
-SSH access, `VOC-032-DEP-01` Cloudflare certificate/DNS, `VOC-032-DEP-03`
-AI-provider staging credentials) — `T00`–`T04`, `T06`, `T08`, and `T11`–`T12`
-can proceed without them, but must not claim live verification they cannot
+This package was adopted 2026-07-28 (founder-gate delegation): `VOC-032-D02`
+(DOC-11 contradiction) resolved to amend DOC-11 now (`T13`), `VOC-032-D04`
+(F3/R1 scope-folding) confirmed as drafted, `VOC-032-D10` (email/OAuth gap)
+resolved to fold into scope (`T14`/`T15`) — see `change.yaml`'s
+`dependencies` for the exact text. `T05`, `T07`, `T09`, `T10`, `T14`, and
+`T15` are additionally blocked on founder-provisioned credentials that do
+not exist yet (`VOC-032-DEP-00` SSH access, `VOC-032-DEP-01` Cloudflare
+certificate/DNS, `VOC-032-DEP-03` AI-provider staging credentials,
+`VOC-032-DEP-07` email-provider/Google-OAuth-client credentials) —
+`T00`–`T04`, `T06`, `T08`, `T11`–`T15`'s unit-tested code, and `T12` can
+proceed without them, but must not claim live verification they cannot
 perform. Protected: `apps/api/migrations`, `apps/api/ent/schema` (read-only
 in this package — no schema change); `apps/api/business/auth`'s existing
 token/session/rate-limit primitives (constructed and called, never modified);
@@ -30,11 +32,12 @@ draft time for `auth`, `users`, `accounts`, `content`, `learning`, `reviews`,
 compose file, nginx config, Atlas config, or deploy workflow has been added
 by any other package merged since this draft (repeat the `VOC-032-D00`
 inspection at the adopted base SHA). Then execute
-`T00 → T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09 → T10 → T11 → T12`
-in order; `T05`'s live-TLS verification and `T07`'s live-SSH-deploy
-verification and `T09`/`T10`'s live rehearsal/evaluation wait for their
-respective founder-provisioned dependencies rather than guessing a
-substitute. Build the production API-wiring function in `T00` as a sibling
+`T00 → T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 → T09 → T10 → T11 →
+T13 → T14 → T15 → T12` in order (`T12` last, not numerically last — it is
+the final gate-readiness task); `T05`'s live-TLS verification, `T07`'s
+live-SSH-deploy verification, `T09`/`T10`'s live rehearsal/evaluation, and
+`T14`/`T15`'s live email-send/OAuth-exchange wait for their respective
+founder-provisioned dependencies rather than guessing a substitute. Build the production API-wiring function in `T00` as a sibling
 to `NewContractAPI()` in the same package, reusing its exact route-
 registration calls (`RegisterAuth`, `RegisterContent`, `RegisterLearning`,
 `RegisterReviews`, `RegisterAIFeedback`, `RegisterMissions`,

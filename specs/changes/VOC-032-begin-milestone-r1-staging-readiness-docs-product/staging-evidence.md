@@ -2,9 +2,10 @@
 
 ## Purpose
 
-This document records the evidence required by `VOC-032-AC-09`/`AC-10`/`AC-12`
-(via `VOC-032-TEST-21`/`TEST-22`/`TEST-24`). It is drafted before adoption/
-implementation; it is updated as `T00`–`T12` merge to record the
+This document records the evidence required by
+`VOC-032-AC-09`/`AC-10`/`AC-12`..`AC-15` (via
+`VOC-032-TEST-21`/`TEST-22`/`TEST-24`..`TEST-29`). It is drafted before
+adoption/implementation; it is updated as `T00`–`T12` merge to record the
 in-repository evidence actually produced, and — unlike every prior
 milestone's `staging-evidence.md`, which has been blocked outright by a
 non-existent F3 staging environment — this document is where that blockage
@@ -14,18 +15,20 @@ some future package.
 
 ## Current status
 
-As of this draft (2026-07-28), no task has been implemented. Once `T00`–`T08`,
-`T11`, and `T12` merge, their in-repository evidence can be recorded here
-without further external dependency. `T09` (migration/rollback rehearsal) and
-`T10` (live AI-evaluation pass) additionally require the founder-provisioned
-credentials named in `VOC-032-DEP-00` (SSH access), `VOC-032-DEP-01`
-(Cloudflare certificate/DNS), and `VOC-032-DEP-03` (AI-provider staging
-credentials) to exist before they can execute — this is a narrower,
-concrete, credential-shaped blocker, not the open-ended "F3 does not exist"
-blocker every prior milestone recorded. No R1-gate-complete declaration is
-made here, and none can be made until `T00`–`T12` are implemented, the
-founder-provisioned credentials exist, `T09`/`T10` actually run, and the
-founder completes staging acceptance per DOC-12 §5.
+As of adoption (2026-07-28), no task has been implemented. Once `T00`–`T08`,
+`T11`, `T13`, and `T12` merge, their in-repository evidence can be recorded
+here without further external dependency; `T14`/`T15`'s unit-tested code
+paths can too. `T09` (migration/rollback rehearsal) and `T10` (live
+AI-evaluation pass) require the founder-provisioned credentials named in
+`VOC-032-DEP-00` (SSH access), `VOC-032-DEP-01` (Cloudflare certificate/DNS),
+and `VOC-032-DEP-03` (AI-provider staging credentials); `T14`/`T15`'s one
+live send/exchange require `VOC-032-DEP-07` (email-provider/Google-OAuth-
+client credentials) — these are narrower, concrete, credential-shaped
+blockers, not the open-ended "F3 does not exist" blocker every prior
+milestone recorded. No R1-gate-complete declaration is made here, and none
+can be made until every task is implemented, the founder-provisioned
+credentials exist, `T09`/`T10`/`T14`/`T15` actually run, and the founder
+completes staging acceptance per DOC-12 §5.
 
 ## Planned in-repository evidence (produced by `T00`–`T12`, recorded as each task merges)
 
@@ -44,7 +47,12 @@ founder completes staging acceptance per DOC-12 §5.
 | `EV-22` | Live-provider AI evaluation pass | **Blocked by `VOC-032-DEP-03`** — staging AI-provider credentials do not yet exist. Procedure documented below; live execution recorded as blocked. |
 | `EV-23` | `infra/README.md` accuracy | **Produced by `T11`.** |
 | `EV-24`..`EV-25` | Installed-suite pass at final SHA; mock-inventory confirmation | **Produced by `T12` — see `T12 evidence` below.** |
-| `EV-26` | Exact-SHA independent verification (per PR) | **Performed by Claude Code (different model binding) at each PR's exact final SHA** — this is not the implementer's evidence to record; it is produced by the independent-verification role and reported per-PR. |
+| `EV-26` | DOC-11 §1 amendment accuracy | **Produced by `T13`** — `docs/operations/11-devops-and-ci-cd.md`. |
+| `EV-27` | Real email sender: request-construction unit test | **Produced by `T14`.** |
+| `EV-28` | Real email sender: one live staging delivery | **Blocked by `VOC-032-DEP-07`** — no email-provider account exists yet. |
+| `EV-29` | Real Google OAuth provider: token/userinfo unit test | **Produced by `T15`.** |
+| `EV-30` | Real Google OAuth provider: one live staging exchange | **Blocked by `VOC-032-DEP-07`** — no Google Cloud OAuth client exists yet. |
+| `EV-31` | Exact-SHA independent verification (per PR) | **Performed by Claude Code (different model binding) at each PR's exact final SHA** — this is not the implementer's evidence to record; it is produced by the independent-verification role and reported per-PR. |
 
 ## Staging exercise plan (blocked by founder-provisioned credentials, not by a missing environment)
 
@@ -82,6 +90,21 @@ and their results appended to this document.
 3. Record the resulting scores against every DOC-09 §23 threshold, plus
    total cost and latency, below once run. Any threshold miss is a
    release-blocking finding for R1, not a warning.
+
+### `EV-28` — Real email sender: one live staging delivery
+
+1. Confirm `VOC-032-DEP-07`'s email-provider account/API key exists in
+   staging.
+2. Trigger one real magic-link send to a founder-controlled test inbox.
+3. Confirm the email is actually received; record the send below once run.
+
+### `EV-30` — Real Google OAuth provider: one live staging exchange
+
+1. Confirm `VOC-032-DEP-07`'s Google Cloud OAuth client exists and its
+   redirect URI matches `api-staging.vocanova.site`.
+2. Perform one real sign-in against Google's actual OAuth flow in staging.
+3. Confirm the exchange succeeds and returns a real identity; record the
+   attempt below once run.
 
 ## Rollback triggers
 

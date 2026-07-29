@@ -3,7 +3,7 @@ id: VOC-032
 slug: begin-milestone-r1-staging-readiness-docs-product
 title: "Begin Milestone R1 \u2014 Staging Readiness"
 type: feature
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-032-begin-milestone-r1-staging-readiness-docs-product
@@ -19,9 +19,9 @@ base_branch: develop
 base_sha: 2f02b6cef7a42bd309b41f5637374405ec88c6f7
 target_branch: develop
 approved_candidate_sha: not-set-until-adoption
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 owners:
@@ -55,26 +55,24 @@ dependencies:
     the real vocanova.site zone. The planner/implementer has no Cloudflare account
     access.'
 - id: VOC-032-DEP-02
-  status: "open-before-DOC-11-conformance-claim; `VOC-032-D02` records an unresolved\
-    \ contradiction between this milestone's founder-directed deploy shape (self-hosted\
-    \ Docker Compose + nginx on vocanova.site) and DOC-11 \xA71's approved target\
-    \ infrastructure (Cloudflare Workers/ OpenNext + Render + Render PostgreSQL +\
-    \ vocanova.com). This does not block T00\u2013T12's build/staging work, which\
-    \ proceeds on the founder's explicit in-hand direction for this milestone, but\
-    \ DOC-11 itself needs a founder-approved amendment to reconcile before this shape\
-    \ can be called DOC-11-conformant."
+  status: "resolved-at-adoption (2026-07-28, founder-gate delegation); VOC-032-D02\
+    \ decided option (a): self-hosted Docker Compose + nginx on the founder's own\
+    \ server is the real production direction now that the hardware exists, not a\
+    \ staging-only interim shape. VOC-032-T13 amends DOC-11 \xA71's target-infrastructure\
+    \ table to this shape once T00\u2013T09 land, superseding the prior Render/\
+    \ Cloudflare-Workers baseline."
 - id: VOC-032-DEP-03
   status: open-before-T10; real staging AI-provider credentials (API key/ base URL
     for the already-implemented `aifeedback. NewOpenCodeFeedbackProvider`) do not
     exist in the staging environment and must be founder-provisioned before the one
     live-provider evaluation pass required by `VOC-032-D09`(b) can run.
 - id: VOC-032-DEP-04
-  status: "open-before-adoption; `VOC-032-D04` records this draft's own choice to\
-    \ fold the never-built F3 \"Staging Foundation\" milestone's scope into this R1\
-    \ package rather than opening a separate F3 change package first, since DOC-12\
-    \ \xA73/\xA76 treat F3 and R1 as distinct milestones with F3 gating R1's own precondition\
-    \ chain. This framing needs explicit founder confirmation at adoption, not silent\
-    \ acceptance."
+  status: "resolved-at-adoption (2026-07-28, founder-gate delegation); VOC-032-D04's\
+    \ framing confirmed: this package folds the never-built F3 \"Staging Foundation\"\
+    \ milestone's scope into R1 rather than opening a separate F3 package first,\
+    \ since T00\u2013T09's build/staging-infrastructure work is exactly F3's own\
+    \ scope and R1 cannot be validated without it existing regardless of which\
+    \ package ID builds it."
 - id: VOC-032-DEP-05
   status: "open-before-P1-through-P5-staging-gate-declaration; the A1\u2192P1\u2192\
     P2\u2192P3\u2192P4\u2192P5 acceptance chain (carried through VOC-025-DEP-01 /\
@@ -85,18 +83,28 @@ dependencies:
     P5's gates can be declared passed until `T09` actually runs against the real staging\
     \ target."
 - id: VOC-032-DEP-06
-  status: open-before-staging-acceptance; `VOC-032-D10` records that no real transactional-email
-    sender or real Google OAuth provider exists anywhere in this repository (only
-    `email.Fake{}` and `auth.NewFakeOAuthProvider`). This draft does not close that
-    gap. The founder must explicitly accept this limitation on what "staging acceptance"
-    can mean, or direct that closing it be folded into this package or a separate,
-    tightly-scoped follow-up, before R1's "founder completes staging acceptance" gate
-    item can be satisfied in a way that actually reflects real, production-like auth
-    conditions.
+  status: "resolved-at-adoption (2026-07-28, founder-gate delegation); VOC-032-D10\
+    \ decided: fold into this package's scope rather than accept as a staging-\
+    \ acceptance limitation. VOC-032-T14 (real email.Sender) and VOC-032-T15 (real\
+    \ auth.OAuthProvider) add real implementations alongside the existing fakes,\
+    \ each gated by T00's own kill switch. Live use of either is now tracked as\
+    \ VOC-032-DEP-07 (new), not this DEP."
+- id: VOC-032-DEP-07
+  status: "open-before-T14/T15's live evidence; a real transactional-email-provider\
+    \ account (API key or SMTP credentials) and a real Google Cloud OAuth 2.0 client\
+    \ (client ID, client secret, redirect URI for api-staging.vocanova.site) do not\
+    \ exist yet and must be created by the founder before the one live email send\
+    \ and one live Google sign-in T14/T15 each require can happen. Confirmed\
+    \ 2026-07-28: neither account exists yet; provisioning happens before T14/T15\
+    \ reach their live-evidence step, not before adoption \u2014 T14/T15's unit-\
+    \ tested code paths (fake-HTTP-transport tests) are not blocked by this DEP,\
+    \ only the one real send/exchange each task's evidence requires."
 affected_areas:
 - apps/api/cmd/api
 - apps/api/app/api
 - apps/api/business
+- apps/api/business/auth
+- apps/api/foundation/email
 - apps/api/migrations
 - apps/web
 - infra
@@ -104,9 +112,9 @@ affected_areas:
 - docs/product/12-mvp-implementation-plan.md
 - docs/operations/11-devops-and-ci-cd.md
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: not-started
+  status: adopted
   target_branch: develop
   pull_request: null
   authority_issue: null
@@ -115,7 +123,7 @@ release:
   mode: standard-r3-auto-merge
   production_impact: unknown-pending-r1-staging-evidence
   deployment: not-authorized-by-this-package
-  automatic_merge: false
+  automatic_merge: true
   migration_required: false
   rollback_required: true
 repository_adoption_status: not-adopted
@@ -127,8 +135,13 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: adoption blocked pending founder resolution of VOC-032-D02 (DOC-11
-  contradiction), VOC-032-D03 (staging subdomain/DNS), VOC-032-D04 (F3/R1 scope-folding
-  confirmation), and VOC-032-D10 (email/OAuth-gap disposition); VOC-032-DEP-00/DEP-01/DEP-03
-  (SSH credentials, Cloudflare certificate and DNS, AI-provider credentials) block
-  T07/T09/T10/T05 execution but not T00-T04/T06/T08/T11-T12's build/CI-wiring work.
+blocking_reasons: "none for adoption; VOC-032-D02/D04/D10 resolved at adoption\
+  \ (2026-07-28, founder-gate delegation) per specification.md's decisions\
+  \ section and DEP-02/DEP-04/DEP-06 above (D02: amend DOC-11 now via T13; D04:\
+  \ fold F3 scope into R1 confirmed; D10: fold real email/OAuth into scope via\
+  \ T14/T15); D03's proposed staging.vocanova.site/api-staging.vocanova.site\
+  \ subdomains accepted as-is. VOC-032-DEP-00/DEP-01/DEP-03/DEP-07 (SSH\
+  \ credentials, Cloudflare certificate and DNS, AI-provider credentials,\
+  \ email-provider/Google-OAuth-client credentials) remain open and block only\
+  \ T05/T07/T09/T10/T14/T15's live-evidence steps, not T00-T04/T06/T08/T11/T12-T15's\
+  \ build/CI-wiring/unit-tested code."

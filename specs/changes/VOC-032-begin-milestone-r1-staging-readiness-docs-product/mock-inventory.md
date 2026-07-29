@@ -50,3 +50,11 @@ command introduces any name that tool's existing checks would otherwise flag.
 | CI/CD | `.github/workflows/deploy-staging.yml` (or equivalent name) | T07 |
 | AI evaluation | Evaluation-gate command wired into CI | T08 |
 | Documentation | `infra/README.md` (rewritten) | T11 |
+| Documentation | DOC-11 §1 amended target-infrastructure table | T13 |
+| Email | Real `email.Sender` implementation, alongside `email.Fake{}` (kept) | T14 |
+| Auth | Real `auth.OAuthProvider` implementation, alongside `NewFakeOAuthProvider` (kept) | T15 |
+
+`T14`/`T15` add real, non-mock provider implementations behind existing
+`email.Sender`/`auth.OAuthProvider` interfaces — the fakes are kept (tests
+keep using them), not retired, so this does not change the "no product mock
+retired or introduced" disposition above.

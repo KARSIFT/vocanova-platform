@@ -59,25 +59,33 @@ documenting a rehearsal that never runs, the pattern every prior milestone's
 
 ## Scope, non-goals, risk, and protected areas
 
-Scope is the fixed ordered thirteen-task sequence `T00`–`T12` in `tasks.md`:
-a real DB-backed API server (`T00`); `.env.example` (`T01`); Dockerfiles for
-`apps/api` and `apps/web` (`T02`–`T03`); `docker-compose.yml` wiring
-`web`+`api`+`postgres`+`nginx` (`T04`); an nginx reverse-proxy config with
-Cloudflare-aware TLS (`T05`); Atlas migration tooling (`T06`); a CI/CD
-staging-deploy workflow triggered on push to `develop` (`T07`); an
-AI-evaluation-threshold CI gate (`T08`); a migration-and-rollback rehearsal
-actually run once against the real staging target (`T09`); one live-provider
-AI evaluation pass (`T10`); an `infra/README.md` update (`T11`); and
-evidence/mock-inventory/staging-evidence/gate-readiness (`T12`).
+Scope is the fixed sixteen-task sequence in `tasks.md` (`T00`–`T11`, `T13`–
+`T15`, then `T12` last): a real DB-backed API server (`T00`); `.env.example`
+(`T01`); Dockerfiles for `apps/api` and `apps/web` (`T02`–`T03`);
+`docker-compose.yml` wiring `web`+`api`+`postgres`+`nginx` (`T04`); an nginx
+reverse-proxy config with Cloudflare-aware TLS (`T05`); Atlas migration
+tooling (`T06`); a CI/CD staging-deploy workflow triggered on push to
+`develop` (`T07`); an AI-evaluation-threshold CI gate (`T08`); a
+migration-and-rollback rehearsal actually run once against the real staging
+target (`T09`); one live-provider AI evaluation pass (`T10`); an
+`infra/README.md` update (`T11`); amending DOC-11 §1's target-infrastructure
+baseline to this package's real shape (`T13`); a real transactional email
+sender (`T14`); a real Google OAuth provider (`T15`); and
+evidence/mock-inventory/staging-evidence/gate-readiness (`T12`, last).
+
+**Resolved at adoption (2026-07-28, founder-gate delegation)**, superseding
+this section's original draft-time framing: `VOC-032-D02` (DOC-11
+contradiction) decided in favor of amending DOC-11 now — self-hosted Docker
+Compose + nginx is the real production direction, not a staging-only
+interim shape (`T13`). `VOC-032-D04` (F3/R1 scope-folding) confirmed as
+drafted — no separate F3 package. `VOC-032-D10` (email/OAuth gap) decided in
+favor of folding into this package's scope rather than accepting the
+limitation (`T14`/`T15`). See `change.yaml`'s `dependencies` for the exact
+resolution text and the new `VOC-032-DEP-07` (provider-account credentials,
+not yet provisioned) this created.
 
 Excluded: any new learner-facing product feature; production deployment or
-RL1/RL2 activation; a real email sender or real Google OAuth provider (a
-discovered but unclosed gap — `VOC-032-D10`); amending DOC-11 itself (this
-package can only flag the contradiction it creates with DOC-11's approved
-target infrastructure, `VOC-032-D02`, not resolve an approved document);
-opening a separate F3 change package (`VOC-032-D04` records this draft's own
-choice to fold F3's undone scope into R1 instead — flagged for founder
-confirmation).
+RL1/RL2 activation.
 
 Protected: `apps/api/migrations`, `apps/api/ent/schema` (no schema change,
 but new tooling that executes them); `apps/api/business/auth`'s existing
@@ -100,8 +108,10 @@ format/vet/test/build, web lint/typecheck/build, the deterministic AI-
 evaluation gate this package adds) plus, once the founder-provisioned
 credentials and DNS exist (`VOC-032-DEP-00`/`DEP-01`/`DEP-03`), the live
 migration-and-rollback rehearsal and live AI-evaluation pass this package's
-own gate requires. This draft grants no approval, merge, activation,
-credentials, deployment, or closure authority, and the package is not
-adopted. Founder confirmation is required before adoption on: `VOC-032-D02`
-(DOC-11 contradiction), `VOC-032-D03` (staging subdomain/DNS), `VOC-032-D04`
-(F3/R1 scope-folding), and `VOC-032-D10` (email/OAuth-gap disposition).
+own gate requires, plus (once `VOC-032-DEP-07` is resolved) one live email
+delivery and one live Google OAuth exchange. Adopted 2026-07-28
+(founder-gate delegation): `implementation_authorized`/`automatic_merge_allowed`
+are `true` in `change.yaml`; `VOC-032-D02`/`D04`/`D10` are resolved per the
+section above. `VOC-032-DEP-00`/`DEP-01`/`DEP-03`/`DEP-07` remain open and
+block only the specific live-evidence steps they name, not routine
+development.

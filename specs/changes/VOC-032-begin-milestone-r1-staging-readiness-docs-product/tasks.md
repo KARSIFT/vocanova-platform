@@ -1,12 +1,16 @@
 # VOC-032 — Tasks
 
 Ordered PR sequence: `T00 → T01 → T02 → T03 → T04 → T05 → T06 → T07 → T08 →
-T09 → T10 → T11 → T12`. Each PR is independently reviewable, remains
-R3-proposed (path floor R3 for `.github/workflows`, `*/migrations/*`,
-`infra/*`), and requires Claude Code exact-SHA review. `T05` and `T09` are
-additionally blocked on `VOC-032-DEP-01` (Cloudflare certificate/DNS);
-`T07`/`T09` on `VOC-032-DEP-00` (SSH credentials); `T10` on `VOC-032-DEP-03`
-(AI-provider staging credentials) — each such task's own section states
+T09 → T10 → T11 → T13 → T14 → T15 → T12`. `T12` is deliberately last (not
+numerically last) — it is the final gate-readiness task and its own roster
+issue is only opened once every prior task, including `T13`–`T15`, has been
+added. Each PR is independently reviewable, remains R3-proposed (path floor
+R3 for `.github/workflows`, `*/migrations/*`, `infra/*`), and requires Claude
+Code exact-SHA review. `T05` and `T09` are additionally blocked on
+`VOC-032-DEP-01` (Cloudflare certificate/DNS); `T07`/`T09` on
+`VOC-032-DEP-00` (SSH credentials); `T10` on `VOC-032-DEP-03` (AI-provider
+staging credentials); `T14`/`T15` on `VOC-032-DEP-07` (email-provider
+account, Google Cloud OAuth client) — each such task's own section states
 exactly what can proceed without the credential and what cannot.
 
 ## VOC-032-T00 — Real, database-backed API server
@@ -284,21 +288,105 @@ still-approved target infrastructure (`VOC-032-D02`) pending a founder-
 approved DOC-11 amendment — do not silently describe this package's shape as
 "the" target infrastructure without that caveat.
 
+## VOC-032-T13 — Amend DOC-11 §1's target-infrastructure baseline
+
+- Requirement source: `VOC-032-D02` (resolved at adoption: option (a))
+- Acceptance criteria: `VOC-032-AC-13`
+- Tests: `VOC-032-TEST-25`
+- Evidence: `VOC-032-EV-26`
+- Status: pending — depends on `T00`–`T09` (must describe real, working
+  infrastructure, not an unbuilt plan)
+
+Amend `docs/operations/11-devops-and-ci-cd.md` §1's target-infrastructure
+table: replace the "Frontend: Next.js App Router on Cloudflare Workers via
+OpenNext" / "Backend: ... Render Web Service" / "Database: Render
+PostgreSQL, Frankfurt region" rows and the `vocanova.com` domain set with
+this package's real, built shape (self-hosted Docker Compose + nginx on the
+founder's own server, `vocanova.site`, Cloudflare for DNS/TLS/WAF/CDN only —
+not compute). Add an inline amendment note (matching this repository's
+existing convention for amending an approved document — see DOC-15 §17's own
+amendment-note style) recording that this supersedes the prior Render/
+Cloudflare-Workers baseline as of VOC-032, with the founder as approving
+owner. Do not delete or rewrite the superseded row silently — annotate it as
+superseded, consistent with how this repository treats its other approved-
+document amendments.
+
+## VOC-032-T14 — Real transactional email sender
+
+- Requirement source: `VOC-032-D10` (resolved at adoption: folded into
+  scope); `apps/api/foundation/email.Sender`
+- Acceptance criteria: `VOC-032-AC-14`
+- Tests: `VOC-032-TEST-26`..`VOC-032-TEST-27`
+- Evidence: `VOC-032-EV-27`..`VOC-032-EV-28`
+- Status: pending — depends on `T00`, `T01`; live staging delivery blocked
+  on `VOC-032-DEP-07` (email-provider account/API key)
+
+Add a real implementation of `apps/api/foundation/email.Sender` (an
+API-based transactional-email provider or authenticated SMTP client —
+implementer's choice, but it must read its credential only from an
+environment variable this task adds to `T01`'s `.env.example`, e.g.
+`EMAIL_PROVIDER_API_KEY`/`EMAIL_SMTP_URL`, never a literal in code) alongside
+the existing `email.Fake{}` (do not remove `Fake{}` — tests keep using it).
+Wire it behind `T00`'s `EMAIL_MAGIC_LINK_ENABLED` kill switch: when disabled
+or when the provider credential is absent, fall back to `Fake{}` so staging
+can still run with magic-link delivery off rather than crashing at startup.
+Add a unit test against the real sender's request-construction logic using a
+fake HTTP transport (never call the real provider from CI, matching this
+package's `T08` no-paid-provider-in-CI convention) confirming the correct
+recipient, subject, and both text/HTML bodies are sent for a real magic-link
+message. The one live send this task requires — one real magic-link email
+actually delivered to a founder-controlled test inbox in staging — happens
+once during `T09`'s rehearsal or later founder staging acceptance, not in
+CI, and is recorded in `staging-evidence.md`, not asserted by an automated
+test.
+
+## VOC-032-T15 — Real Google OAuth provider
+
+- Requirement source: `VOC-032-D10` (resolved at adoption: folded into
+  scope); `apps/api/business/auth.OAuthProvider`
+- Acceptance criteria: `VOC-032-AC-15`
+- Tests: `VOC-032-TEST-28`..`VOC-032-TEST-29`
+- Evidence: `VOC-032-EV-29`..`VOC-032-EV-30`
+- Status: pending — depends on `T00`; live staging exchange blocked on
+  `VOC-032-DEP-07` (Google Cloud OAuth client ID/secret)
+
+Add a real implementation of `apps/api/business/auth.OAuthProvider` that
+exchanges an authorization code with Google's real OAuth 2.0 token endpoint
+and fetches the identity from Google's userinfo endpoint, returning an
+`OAuthIdentity` in the same shape `NewFakeOAuthProvider` already returns
+(subject, email, email-verified, display name, avatar URL). Read the client
+ID, client secret, and redirect URI from environment variables this task
+adds to `T01`'s `.env.example` (e.g. `GOOGLE_OAUTH_CLIENT_ID`,
+`GOOGLE_OAUTH_CLIENT_SECRET`, `GOOGLE_OAUTH_REDIRECT_URI`), never a literal
+in code. Wire it behind `T00`'s `GOOGLE_OAUTH_ENABLED` kill switch: when
+disabled or the client credential is absent, fall back to
+`NewFakeOAuthProvider` so staging can still run with Google sign-in off
+rather than crashing at startup. Add a unit test against the token/userinfo
+request-and-response handling using a fake HTTP transport (never call
+Google's real endpoints from CI). The one live exchange this task requires —
+one real sign-in against Google's actual OAuth flow in staging — happens
+once during `T09`'s rehearsal or later founder staging acceptance, not in
+CI, and is recorded in `staging-evidence.md`, not asserted by an automated
+test.
+
 ## VOC-032-T12 — Evidence, mock-inventory, staging-evidence, and R1 gate-readiness
 
 - Requirement source: all prior tasks
 - Acceptance criteria: `VOC-032-AC-12`
 - Tests: `VOC-032-TEST-24`
 - Evidence: `VOC-032-EV-24`, `VOC-032-EV-25`
-- Status: pending — depends on `T00`–`T11`
+- Status: pending — depends on `T00`–`T11`, `T13`–`T15`
 
 Confirm every prior task's evidence is actually present at the paths this
 document and `staging-evidence.md` claim; re-run the full installed check
 suite at the final SHA; finalize `mock-inventory.md`'s "not applicable"
-confirmation (this package introduces no product mock); finalize
-`staging-evidence.md` with `T09`/`T10`'s actual recorded results; and write
+confirmation (this package introduces no product mock — `T14`/`T15` add real
+providers alongside their existing fakes, not a mock); finalize
+`staging-evidence.md` with `T09`/`T10`'s actual recorded results and `T14`/
+`T15`'s one-time live email-delivery and OAuth-exchange evidence; and write
 the R1 gate-readiness summary — explicitly listing which DOC-12 §5 R1 gate
 items are satisfied by this package's evidence (stability, tests, migration/
 rollback rehearsal, AI-evaluation thresholds) and which remain founder-owned
 and cannot be satisfied by any package (founder staging acceptance itself,
-and the `VOC-032-D02`/`D03`/`D04`/`D10` open decisions).
+and the `VOC-032-D03`/`D04` open decisions — `D02` and `D10` are resolved by
+`T13` and `T14`/`T15` respectively).

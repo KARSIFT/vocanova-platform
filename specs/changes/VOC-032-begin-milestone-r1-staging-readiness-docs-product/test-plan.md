@@ -183,12 +183,52 @@ own task descriptions state.
 - Expected result: no drift; the `VOC-032-D02` DOC-11-contradiction caveat is
   present. Evidence: `VOC-032-EV-23`.
 
+## VOC-032-TEST-25 — DOC-11 §1 amendment accuracy
+- Covers: `VOC-032-AC-13`; Preconditions: `T00`–`T09` merged.
+- Procedure: compare DOC-11 §1's amended target-infrastructure table against
+  the actual docker-compose/nginx shape `T00`–`T09` built.
+- Expected result: no drift; the superseded Render/Cloudflare-Workers row set
+  is annotated as superseded, not deleted; the amendment names VOC-032 and
+  the founder as approving owner. Evidence: `VOC-032-EV-26`.
+
+## VOC-032-TEST-26 — Real email sender: request construction
+- Covers: `VOC-032-AC-14`; Preconditions: `T14`.
+- Procedure: unit test the real `Sender` against a fake HTTP transport with a
+  representative magic-link message.
+- Expected result: correct recipient, subject, and both text/HTML bodies are
+  sent; no real network call occurs in this test. Evidence: `VOC-032-EV-27`.
+
+## VOC-032-TEST-27 — Real email sender: one live staging delivery
+- Covers: `VOC-032-AC-14`; Preconditions: `T14`, `VOC-032-DEP-07` resolved.
+- Procedure: trigger one real magic-link send to a founder-controlled test
+  inbox in staging.
+- Expected result: the email is actually received; the send is recorded in
+  `staging-evidence.md`. Recorded as blocked, not passing, until the
+  provider credential exists. Evidence: `VOC-032-EV-28`.
+
+## VOC-032-TEST-28 — Real Google OAuth provider: token/userinfo handling
+- Covers: `VOC-032-AC-15`; Preconditions: `T15`.
+- Procedure: unit test the real `OAuthProvider` against a fake HTTP transport
+  covering a successful exchange and a failure response from Google.
+- Expected result: correct request construction and response parsing in both
+  cases; no real call to Google occurs in this test. Evidence:
+  `VOC-032-EV-29`.
+
+## VOC-032-TEST-29 — Real Google OAuth provider: one live staging exchange
+- Covers: `VOC-032-AC-15`; Preconditions: `T15`, `VOC-032-DEP-07` resolved.
+- Procedure: perform one real sign-in against Google's actual OAuth flow in
+  staging.
+- Expected result: the exchange succeeds and returns a real identity; the
+  attempt is recorded in `staging-evidence.md`. Recorded as blocked, not
+  passing, until the Google Cloud OAuth client exists. Evidence:
+  `VOC-032-EV-30`.
+
 ## VOC-032-TEST-24 — Full installed suite passes at the final SHA
-- Covers: `VOC-032-AC-12`; Preconditions: `T00`–`T12`.
+- Covers: `VOC-032-AC-12`; Preconditions: `T00`–`T12`, `T13`–`T15`.
 - Procedure: run every installed command discovered at the adopted base
   (Go format/vet/test/build, web lint/typecheck/build, `T08`'s evaluation
   gate, `scripts/governance/*`) at the exact final SHA.
 - Expected result: all pass; any check that cannot run in this environment
-  (live SSH deploy, live TLS, live AI-provider pass) is listed as a recorded
-  limitation, never reported as passing. Evidence: `VOC-032-EV-24`,
-  `VOC-032-EV-25`.
+  (live SSH deploy, live TLS, live AI-provider pass, live email/OAuth
+  exchange) is listed as a recorded limitation, never reported as passing.
+  Evidence: `VOC-032-EV-24`, `VOC-032-EV-25`.

@@ -88,25 +88,26 @@ interaction.
 
 ## Risks, dependencies, and evidence
 
-- `VOC-032-R08`: `VOC-032-D02`'s unresolved DOC-11 contradiction means this
-  package's staging shape could later need significant rework if the founder
-  decides DOC-11's original Render/Cloudflare-Workers target should instead
-  govern staging too. Mitigate by not treating this package's shape as
-  permanent architecture — `T11`'s `infra/README.md` update records the
-  contradiction explicitly rather than presenting this as a settled decision.
+- `VOC-032-R08`: `VOC-032-D02`'s DOC-11 contradiction meant this package's
+  staging shape could later need significant rework if the founder instead
+  wanted DOC-11's original Render/Cloudflare-Workers target to govern
+  staging. **Resolved at adoption (2026-07-28): self-hosted Docker Compose +
+  nginx is the real production direction** — `T13` amends DOC-11 §1 itself
+  rather than merely flagging the contradiction (`VOC-032-DEP-02`).
 - `VOC-032-R09`: `VOC-032-D04`'s F3/R1 scope-folding is this draft's own
-  choice, not a verbatim founder instruction; if the founder disagrees at
-  adoption, some or all of `T00`–`T09` may need to be re-scoped as a
-  separate F3 package with R1 following it, rather than folded together.
-  Mitigate by surfacing this explicitly (done) rather than assuming
-  agreement.
+  choice, not a verbatim founder instruction. **Resolved at adoption
+  (2026-07-28): confirmed as drafted** — no separate F3 package (`VOC-032-DEP-04`).
 - `VOC-032-R10`: `VOC-032-D10`'s email/OAuth gap means R1's "founder completes
   staging acceptance" gate item may not be satisfiable in the way the founder
   actually intends (a genuinely production-like validation) until that gap
-  closes, regardless of how complete `T00`–`T12` are. Mitigate by naming this
-  explicitly in `T12`'s gate-readiness summary rather than letting a complete
-  task checklist imply a complete gate.
-- `VOC-032-DEP-00`..`DEP-06`: dependencies recorded in `change.yaml`.
-- `VOC-032-EV-00`..`EV-25`: server-wiring, container, compose, nginx,
-  migration-tooling, CI/CD, AI-evaluation, live-rehearsal, documentation, and
-  exact-SHA review evidence referenced by the acceptance criteria.
+  closes. **Resolved at adoption (2026-07-28): folded into this package's
+  scope** — `T14` (real email sender), `T15` (real Google OAuth provider),
+  tracked via new `VOC-032-DEP-07` for the provider-account credentials
+  neither has yet. `T12`'s gate-readiness summary still names any remaining
+  founder-owned item explicitly rather than letting a complete task checklist
+  imply a complete gate.
+- `VOC-032-DEP-00`..`DEP-07`: dependencies recorded in `change.yaml`.
+- `VOC-032-EV-00`..`EV-30`: server-wiring, container, compose, nginx,
+  migration-tooling, CI/CD, AI-evaluation, live-rehearsal, DOC-11 amendment,
+  real-provider, documentation, and exact-SHA review evidence referenced by
+  the acceptance criteria.

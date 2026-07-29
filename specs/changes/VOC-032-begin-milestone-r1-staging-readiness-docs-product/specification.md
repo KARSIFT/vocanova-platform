@@ -131,8 +131,17 @@ records that DOC-11 itself needs a founder-approved amendment to either (a)
 adopt this shape as the new target for the staging tier (and possibly
 production too, superseding Render/Cloudflare-Workers), or (b) explicitly
 scope this package's work as an interim/staging-only arrangement distinct from
-a still-future DOC-11-conformant production target. This draft does not
-decide (a) vs (b) — that is a founder decision (`VOC-032-DEP-02`).
+a still-future DOC-11-conformant production target.
+
+**Resolved at adoption (founder decision, `VOC-032-DEP-02`): option (a).**
+Self-hosted Docker Compose + nginx + Cloudflare DNS/TLS on the founder's own
+server is the real production direction now that the hardware exists, not a
+staging-only interim shape. `VOC-032-T13` amends DOC-11 §1's target-
+infrastructure baseline table to this shape (replacing the Cloudflare
+Workers/OpenNext + Render + Render PostgreSQL / `vocanova.com` row set) once
+this package's build (`T00`–`T09`) has actually landed and been proven, so
+the amendment describes real, working infrastructure rather than an
+unbuilt plan.
 
 `VOC-032-D03` — **Staging subdomain proposal (open until founder confirms
 DNS).** This draft proposes `staging.vocanova.site` (web) and
@@ -240,6 +249,18 @@ token validation logic itself). The founder must explicitly accept this
 limitation or direct that closing it be folded into this package or a
 tightly-scoped follow-up before staging acceptance is granted
 (`VOC-032-DEP-06`).
+
+**Resolved at adoption (founder decision, `VOC-032-DEP-06`): fold into this
+package's scope.** `VOC-032-T14` adds a real transactional-email `Sender`
+(`apps/api/foundation/email`) and `VOC-032-T15` adds a real Google OAuth
+`OAuthProvider` (`apps/api/business/auth`), both gated behind `T00`'s
+`EMAIL_MAGIC_LINK_ENABLED`/`GOOGLE_OAUTH_ENABLED` kill switches so either can
+still be disabled independently in staging if a provider account isn't
+ready. Both are blocked on new third-party accounts the founder must
+provision first — an email-provider account (API key or SMTP credentials)
+and a Google Cloud OAuth 2.0 client (client ID, client secret, and an
+authorized redirect URI matching `api-staging.vocanova.site`) — tracked as
+`VOC-032-DEP-07`, which did not exist before this decision.
 
 **Security and privacy.** No secret is committed by this package; every
 credential (`STAGING_SSH_PRIVATE_KEY`, the Cloudflare origin certificate/key,
