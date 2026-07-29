@@ -277,12 +277,11 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # ${GITHUB_SHA::7} is the documented 7-character
+      # short SHA convention this repo's other build
+      # pipelines already use.
       - name: Extract short commit SHA
         id: sha
-        env:
-          # ${GITHUB_SHA::7} is the documented
-          # 7-character short SHA convention this
-          # repo's other build pipelines already use;
         run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       # docker/build-push-action v5 (pinned to the v5.x
@@ -482,12 +481,15 @@ jobs:
       - name: Deploy to staging host
         if: ${{ inputs.skip_ssh_deploy != true }}
         uses: appleboy/ssh-action@v1
-        envs: GITHUB_TOKEN,GITHUB_ACTOR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
         with:
           host: ${{ secrets.STAGING_SSH_HOST }}
           username: ${{ secrets.STAGING_SSH_USER }}
           key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
           command_timeout: 15m
+          envs: GITHUB_TOKEN,GITHUB_ACTOR
           script: |
             set -euo pipefail
 
