@@ -178,7 +178,7 @@ services:
     build:
       context: ../apps/api
       dockerfile: Dockerfile
-    image: ghcr.io/vocanova/vocanova-api:dev
+    image: ghcr.io/karsift/vocanova-api:dev
     container_name: vocanova-api
     restart: unless-stopped
     depends_on:
@@ -259,7 +259,7 @@ services:
         # make `docker compose build` always use the staging
         # URL even in local dev.
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8080}
-    image: ghcr.io/vocanova/vocanova-web:dev
+    image: ghcr.io/karsift/vocanova-web:dev
     container_name: vocanova-web
     restart: unless-stopped
     depends_on:
