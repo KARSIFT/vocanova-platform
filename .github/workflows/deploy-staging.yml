@@ -83,7 +83,7 @@
 # with two tags — `sha-<short-sha>` (immutable, historical
 # record of "what was deployed when") and `dev` (mutable
 # latest, which is the tag T04's docker-compose.yml references
-# at `image: ghcr.io/vocanova/vocanova-api:dev` / `vocanova-
+# at `image: ghcr.io/karsift/vocanova-api:dev` / `vocanova-
 # web:dev`). `docker compose pull` on the staging host pulls
 # whichever image the `:dev` tag currently points at (i.e.
 # the just-pushed one), so the deploy always lands the
@@ -304,8 +304,8 @@ jobs:
           file: apps/api/Dockerfile
           push: true
           tags: |
-            ghcr.io/vocanova/vocanova-api:sha-${{ steps.sha.outputs.short_sha }}
-            ghcr.io/vocanova/vocanova-api:dev
+            ghcr.io/karsift/vocanova-api:sha-${{ steps.sha.outputs.short_sha }}
+            ghcr.io/karsift/vocanova-api:dev
           provenance: false
 
       # The web image's build context is the repo root
@@ -340,8 +340,8 @@ jobs:
           push: true
           build-args: NEXT_PUBLIC_API_BASE_URL=https://api-staging.vocanova.site
           tags: |
-            ghcr.io/vocanova/vocanova-web:sha-${{ steps.sha.outputs.short_sha }}
-            ghcr.io/vocanova/vocanova-web:dev
+            ghcr.io/karsift/vocanova-web:sha-${{ steps.sha.outputs.short_sha }}
+            ghcr.io/karsift/vocanova-web:dev
           provenance: false
 
       # Build a single tarball containing every file
