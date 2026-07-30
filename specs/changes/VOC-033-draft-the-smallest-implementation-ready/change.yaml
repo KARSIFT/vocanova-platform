@@ -61,7 +61,8 @@ dependencies:
     runs T02 locally (or on any runner with Docker) as evidence; the test is import-tag-gated
     so its absence from a bare runner never fails the ordinary `go test ./...` path.
 - id: VOC-033-DEP-02
-  status: resolved at adoption (2026-07-30) -- founder-gate inspection of authenticated
+  status: >-
+    resolved at adoption (2026-07-30) -- founder-gate inspection of authenticated
     run 30555539008 confirms the deploy reached Atlas on the real staging host and
     failed specifically on unknown txmode "transaction" in
     20260724210000_identity_foundation.sql. VOC-032-DEP-00 is resolved: the dedicated
