@@ -134,6 +134,6 @@ Document, in a comment at the top of the new file, exactly how to run it
 locally (`go test -tags=integration ./apps/api/migrations/...`) and that it is
 intentionally not part of the default `go test ./...` / `pnpm run test:api`
 path, cross-referencing `VOC-033-D02` and noting it does not replace or
-substitute for `VOC-032-T09`'s own live rehearsal against the real staging
+substitute for the parent package's own live rehearsal against the real staging
 target. Those infrastructure dependencies were verified resolved at VOC-033
 adoption, but T09 remains a separate live-evidence task.
