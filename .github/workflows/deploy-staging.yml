@@ -581,7 +581,7 @@ jobs:
             # 5. Apply any pending migrations BEFORE bringing the
             #    new api container up.
             #
-            #    The order pull → migrate → up -d (NOT pull → up
+            #    The order pull → postgres up → migrate → full up (NOT pull → up
             #    -d → migrate) is load-bearing. The new api
             #    image is built from the current `develop`
             #    source, which may include queries that assume
@@ -634,15 +634,49 @@ jobs:
             #    than the docker-compose up -d healthcheck
             #    route.
             # -------------------------------------------------------------
+            # On a first deploy, Postgres does not exist yet. Start only the
+            # private database service and wait for its declared healthcheck;
+            # api/web/nginx still remain stopped until migrations succeed.
+            docker compose up -d postgres
+            postgres_status=starting
+            for attempt in $(seq 1 30); do
+              postgres_status=$(docker inspect --format {{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}} vocanova-postgres 2>/dev/null || true)
+              if [ "$postgres_status" = "healthy" ]; then
+                break
+              fi
+              sleep 2
+            done
+            if [ "$postgres_status" != "healthy" ]; then
+              echo "ERROR: staging Postgres did not become healthy within 60 seconds" >&2
+              docker compose logs --no-color --tail=100 postgres >&2
+              exit 1
+            fi
+
             set -a
             . /opt/vocanova/infra/secrets/api.env
             set +a
-            sh /opt/vocanova/apps/api/scripts/migrate.sh
+
+            # DATABASE_URL uses the Compose-only hostname `postgres`, which
+            # host-side Atlas cannot resolve. Reach the same unpublished
+            # container through its private bridge IP; no database port is
+            # exposed on the host or internet.
+            postgres_ip=$(docker inspect --format {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} vocanova-postgres)
+            if [ -z "$postgres_ip" ]; then
+              echo "ERROR: could not resolve the private Postgres container IP" >&2
+              exit 1
+            fi
+            migration_database_url=$(printf "%s" "$DATABASE_URL" | sed "s/@postgres:5432/@${postgres_ip}:5432/")
+            if [ "$migration_database_url" = "$DATABASE_URL" ]; then
+              echo "ERROR: DATABASE_URL does not target the expected Compose postgres service" >&2
+              exit 1
+            fi
+            DATABASE_URL="$migration_database_url" sh /opt/vocanova/apps/api/scripts/migrate.sh
+            unset migration_database_url
 
             # -------------------------------------------------------------
             # 6. Bring the stack up.
             #
-            #    `docker compose up -d` is the only step in this
+            #    `docker compose up -d` is the full-stack replacement step in this
             #    workflow that touches a running container. Its
             #    documented behavior is: create new containers
             #    with the new images, wait for them to be
