@@ -135,4 +135,5 @@ locally (`go test -tags=integration ./apps/api/migrations/...`) and that it is
 intentionally not part of the default `go test ./...` / `pnpm run test:api`
 path, cross-referencing `VOC-033-D02` and noting it does not replace or
 substitute for `VOC-032-T09`'s own live rehearsal against the real staging
-target, which remains separately gated on `VOC-032-DEP-00`/`DEP-01`.
+target. Those infrastructure dependencies were verified resolved at VOC-033
+adoption, but T09 remains a separate live-evidence task.

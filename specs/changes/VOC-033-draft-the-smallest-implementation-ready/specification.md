@@ -1,6 +1,6 @@
 # VOC-033 — Atlas Migration txmode Directive and Duplicate-Index Fix: Specification
 
-**Draft package — not adopted, not approved, and not implementation authority.**
+**Adopted 2026-07-30 — implementation authorized for this exact scope.**
 
 ## Objective and requirement source
 
@@ -137,8 +137,9 @@ definition) and `staging-evidence.md`'s own follow-up note already identified it
 as the recommended direction; the inline constraint documents the invariant at
 the column definition, which is the more readable location.
 
-`VOC-033-D02` — **Open question for the human adopter, not resolved by this
-package.** `VOC-033-T02`'s proof that `atlas migrate apply` succeeds end to end
+`VOC-033-D02` — **Resolved at founder adoption (2026-07-30): accept the
+on-demand integration-test design.** `VOC-033-T02`'s proof that
+`atlas migrate apply` succeeds end to end
 is designed as a Go integration test gated by a build tag
 (proposed: `//go:build integration`), invoked with `go test -tags=integration ./apps/api/migrations/...`,
 that itself shells out to `docker run` for a disposable `postgres:16-alpine`
@@ -151,8 +152,8 @@ shared `ci.yml` is not even possible from this repository — it lives in
 `KARSIFT/karsift-ai-infra`, a different repository this planner has no access
 to. The practical consequence: this proof runs on-demand (developer machine, or
 manually during `VOC-032-T09`'s own rehearsal), not automatically on every
-future PR that touches `apps/api/migrations`. If the adopting human wants
-permanent CI enforcement instead, that requires a separate, distinctly-scoped
+future PR that touches `apps/api/migrations`. Permanent CI enforcement, if
+later required, needs a separate, distinctly-scoped
 follow-up package that touches `.github/workflows/pipeline.yml` and/or
 `karsift-ai-infra`'s `ci.yml` — recorded here as a flagged tradeoff, not
 silently decided either way.

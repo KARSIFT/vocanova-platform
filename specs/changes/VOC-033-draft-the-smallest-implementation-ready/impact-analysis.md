@@ -66,18 +66,17 @@ evidence-backed non-applicability, not omission.
   runner tier, and this package deliberately does not add a workflow-level
   guarantee (`VOC-033-D02`). Mitigated by the build-tag gate, which makes the
   test's absence-of-tooling case a clean skip, not a failure.
-- `VOC-033-R02`: **Informational only, not a package risk.** GitHub Actions run
+- `VOC-033-R02`: **Resolved informational dependency, not a package risk.** GitHub Actions run
   30555539008 (`deploy-staging`, push to `develop` @ this package's own
   `base_sha`) shows a real deploy attempt reaching the "Deploy to staging
   host" step (after build/push/SSH-configure/copy all succeeded) before
-  failing, with health-check polling skipped. This planning environment
-  cannot download that job's log text (requires repository-admin
-  authentication, unavailable here), so this package does not assert the
-  failure's exact cause. It is recorded because it suggests
-  `VOC-032-DEP-00` (SSH credentials) may already be functionally resolved,
-  which would materially change how close `VOC-032-T09`'s live rehearsal is
-  to actually running once this package merges — worth the adopting human's
-  direct attention, not something this package resolves.
+  failing, with health-check polling skipped. Authenticated founder-gate
+  inspection at adoption confirmed the exact failure: Atlas rejected
+  `-- atlas:txmode transaction` in the first migration. The same deployment
+  proved the Actions SSH credentials and private healthy PostgreSQL path;
+  Cloudflare DNS and the matching Origin Certificate were also independently
+  verified. The application and nginx remain stopped until this package
+  repairs the migration set.
 - `VOC-033-DEP-00`, `VOC-033-DEP-01`, `VOC-033-DEP-02`: see `change.yaml`.
 - `VOC-033-EV-00`: `git diff` of the 13 directive-line changes and the
   3-line deletion in `20260725130002_voc030_p4_gamification_tables.sql`.

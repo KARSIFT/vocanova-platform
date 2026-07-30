@@ -2,9 +2,8 @@
 
 ## Preconditions and protected areas
 
-Do not begin until this package is adopted (human review, `change.yaml`'s
-`approval_status`/`implementation_authorized`/`automatic_merge_allowed` set to
-their adopted values by that human action, not by this draft). All work touches
+This package was adopted by the founder gate on 2026-07-30; `change.yaml` records
+approval, implementation authority, and automatic merge authority. All work touches
 `apps/api/migrations`, an R3-protected path per
 `docs/governance/change-risk-classification.md` and confirmed directly against
 this package's exact file set in `specification.md`. Under active A-003,

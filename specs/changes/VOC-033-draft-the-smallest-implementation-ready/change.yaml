@@ -3,7 +3,7 @@ id: VOC-033
 slug: draft-the-smallest-implementation-ready
 title: Atlas Migration txmode Directive and Duplicate-Index Fix (VOC-032-T06 Follow-ups)
 type: infrastructure
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-033-draft-the-smallest-implementation-ready
@@ -28,9 +28,9 @@ owners:
   package_preparation: planner
   implementation: unassigned
   independent_verification: Claude Code
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: none
 rollback_required: true
 artifacts:
@@ -61,22 +61,21 @@ dependencies:
     runs T02 locally (or on any runner with Docker) as evidence; the test is import-tag-gated
     so its absence from a bare runner never fails the ordinary `go test ./...` path.
 - id: VOC-033-DEP-02
-  status: open, informational only, does not block this package -- run 30555539008
-    shows a real attempted deploy to the staging host (build/push, SSH host-key configuration,
-    and bundle copy all succeeded) reaching as far as the "Deploy to staging host"
-    step before failing, with both healthz-polling steps skipped. This suggests VOC-032-DEP-00
-    (SSH credentials) is functionally resolved in practice, ahead of what staging-evidence.md
-    currently records. This package cannot read the failed step's own log text (repository
-    log download requires admin-level authentication this environment does not have)
-    and does not assert the failure is this package's bug rather than something else;
-    the human adopting this package should reconcile staging-evidence.md's DEP-00/DEP-01
-    status against this run directly.
+  status: resolved at adoption (2026-07-30) -- founder-gate inspection of authenticated
+    run 30555539008 confirms the deploy reached Atlas on the real staging host and
+    failed specifically on unknown txmode "transaction" in
+    20260724210000_identity_foundation.sql. VOC-032-DEP-00 is resolved: the dedicated
+    Actions SSH credentials work and the private PostgreSQL container is healthy.
+    VOC-032-DEP-01 is also resolved: both staging DNS records are proxied through
+    Cloudflare and the matching Cloudflare Origin Certificate is installed. The
+    remaining 521 response is expected until this migration repair permits the
+    application and nginx services to start.
 affected_areas:
 - apps/api/migrations
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: implementation-ready
+  status: adopted
   target_branch: develop
   pull_request: null
   authority_issue: null
@@ -85,7 +84,7 @@ release:
   mode: no-deployment-this-package-is-tooling-and-tests-only
   production_impact: none
   deployment: not-authorized-by-this-package
-  automatic_merge: false
+  automatic_merge: true
   migration_required: false
   rollback_required: true
 repository_adoption_status: not-adopted
@@ -97,8 +96,6 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: not yet adopted; requires human review and adoption before implementation_authorized/automatic_merge_allowed
-  may be set true. No VOC-033-D question is open in a way that blocks drafting (see
-  specification.md), but VOC-033-DEP-02 above is worth the adopter's attention before
-  assuming VOC-032-T09's live rehearsal is still blocked the same way staging-evidence.md
-  currently describes it.
+blocking_reasons: none. Founder adoption resolves VOC-033-D02 in favor of the
+  build-tag-gated on-demand integration test; permanent CI wiring remains a separately
+  scoped follow-up. VOC-033-DEP-02 is reconciled with authenticated deployment evidence.

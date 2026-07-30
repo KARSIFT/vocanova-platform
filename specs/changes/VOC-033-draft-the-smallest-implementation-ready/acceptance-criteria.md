@@ -1,6 +1,6 @@
 # VOC-033 — Acceptance Criteria
 
-**Draft package — acceptance criteria are proposed, not adopted.**
+**Adopted 2026-07-30 — these acceptance criteria are binding for implementation.**
 
 ## VOC-033-AC-00 — Every forward migration file declares a valid Atlas txmode
 

@@ -1,19 +1,17 @@
 # VOC-033 — Atlas Migration txmode Directive and Duplicate-Index Fix
 
-**Draft package — not adopted, not approved, and not implementation authority.**
-Human adoption and separate implementation authorization are required before
-work begins. No authorization, approval, activation, deployment, or closure
-field is set by this draft.
+**Adopted 2026-07-30 — approved implementation authority for the scoped R3
+migration repair.**
 
 ## Identity and lifecycle
 
 - Package ID: `VOC-033`; canonical path:
   `specs/changes/VOC-033-draft-the-smallest-implementation-ready/`.
-- Lifecycle: `implementation-ready` (drafting complete); every authorization
-  field in `change.yaml` remains at its unadopted default
-  (`approval_status: not-approved`, `implementation_authorized: false`,
-  `automatic_merge_allowed: false`, `repository_adoption_status: not-adopted`).
-- Proposed risk: **R3** (proposal only — not a determination), matching the
+- Lifecycle: adopted and implementation-authorized
+  (`approval_status: approved`, `implementation_authorized: true`,
+  `automatic_merge_allowed: true`). The adoption workflow records repository
+  adoption evidence after this plan PR merges.
+- Risk: **R3**, matching the
   path-based floor `scripts/governance/classify-change-risk.sh` computes for
   this package's exact planned file set (all under `apps/api/migrations/`,
   which the classifier's `*/migrations/*` rule floors at R3). Nothing in
@@ -68,13 +66,14 @@ A-003 (routine R3, strengthened controls, independent verification — see
 `CLAUDE.md`). No EHR trigger; no R4 consequence in scope, so R4 founder
 authority is not implicated by this package's own scope.
 
-One flagged, unresolved design tradeoff for the adopting human:
-`VOC-033-D02` in `specification.md` — the proof that `atlas migrate apply`
+Founder adoption resolves `VOC-033-D02` in `specification.md`: the proof that
+`atlas migrate apply`
 succeeds is a build-tag-gated, on-demand Go integration test, not a permanent
 CI-wired check, because wiring it permanently would require editing
 `.github/workflows/*` (out of this package's declared scope) and/or the
 separately-owned `KARSIFT/karsift-ai-infra` `ci.yml` (not writable from this
-repository at all). This is presented as a tradeoff, not decided silently.
+repository at all). The real staging deployment after T00 supplies additional
+environment-level evidence; permanent CI wiring remains separately scoped.
 
 ## Verification, approvals, release, and closure
 
@@ -84,5 +83,4 @@ Run the deterministic commands in `implementation-plan.md` (Go
 vet/format/test/build, the repository's own governance/risk-classification
 scripts) per PR, plus `VOC-033-T02`'s own integration-test run (Docker + the
 pinned Atlas v1.2.0 binary) as evidence wherever it is exercised. This package
-authorizes no deployment; see `release-plan.md`. It has not been adopted as of
-this draft, and no field in `change.yaml` claims otherwise.
+authorizes no deployment; see `release-plan.md`.
