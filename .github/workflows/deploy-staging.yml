@@ -640,7 +640,7 @@ jobs:
             docker compose up -d postgres
             postgres_status=starting
             for attempt in $(seq 1 30); do
-              postgres_status=$(docker inspect --format {{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}} vocanova-postgres 2>/dev/null || true)
+              postgres_status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}}' vocanova-postgres 2>/dev/null || true)
               if [ "$postgres_status" = "healthy" ]; then
                 break
               fi
@@ -660,7 +660,7 @@ jobs:
             # host-side Atlas cannot resolve. Reach the same unpublished
             # container through its private bridge IP; no database port is
             # exposed on the host or internet.
-            postgres_ip=$(docker inspect --format {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} vocanova-postgres)
+            postgres_ip=$(docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' vocanova-postgres)
             if [ -z "$postgres_ip" ]; then
               echo "ERROR: could not resolve the private Postgres container IP" >&2
               exit 1
