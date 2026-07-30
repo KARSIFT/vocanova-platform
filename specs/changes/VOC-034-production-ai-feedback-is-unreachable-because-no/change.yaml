@@ -80,7 +80,7 @@ implementation:
   status: adopted
   target_branch: develop
   pull_request: null
-  authority_issue: https://github.com/KARSIFT/vocanova-platform-sandbox/issues/216
+  authority_issue: null
 release:
   required: false
   mode: no-deployment-authorized-by-this-package-itself
@@ -90,9 +90,9 @@ release:
   automatic_merge: true
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 217
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/217
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
