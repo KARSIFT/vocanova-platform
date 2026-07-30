@@ -431,7 +431,7 @@ jobs:
           # host's `migrations/` directory.
           cp apps/api/migrations/*.sql /tmp/deploy-bundle/apps/api/migrations/
           cp apps/api/migrations/atlas.sum /tmp/deploy-bundle/apps/api/migrations/
-          tar -czf /tmp/deploy-bundle.tgz -C /tmp/deploy-bundle .
+          tar -czf "$GITHUB_WORKSPACE/deploy-bundle.tgz" -C /tmp/deploy-bundle .
 
       # appleboy/scp-action v0.1.7 (pinned to the
       # major version; SHA-pin before any non-staging
@@ -450,7 +450,7 @@ jobs:
           host: ${{ secrets.STAGING_SSH_HOST }}
           username: ${{ secrets.STAGING_SSH_USER }}
           key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
-          source: /tmp/deploy-bundle.tgz
+          source: deploy-bundle.tgz
           target: /tmp/
 
       # appleboy/ssh-action v1 (pinned to the major
