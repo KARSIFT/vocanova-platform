@@ -61,16 +61,14 @@ dependencies:
     runs T02 locally (or on any runner with Docker) as evidence; the test is import-tag-gated
     so its absence from a bare runner never fails the ordinary `go test ./...` path.
 - id: VOC-033-DEP-02
-  status: >-
-    resolved at adoption (2026-07-30) -- founder-gate inspection of authenticated
+  status: 'resolved at adoption (2026-07-30) -- founder-gate inspection of authenticated
     run 30555539008 confirms the deploy reached Atlas on the real staging host and
-    failed specifically on unknown txmode "transaction" in
-    20260724210000_identity_foundation.sql. VOC-032-DEP-00 is resolved: the dedicated
-    Actions SSH credentials work and the private PostgreSQL container is healthy.
-    VOC-032-DEP-01 is also resolved: both staging DNS records are proxied through
-    Cloudflare and the matching Cloudflare Origin Certificate is installed. The
-    remaining 521 response is expected until this migration repair permits the
-    application and nginx services to start.
+    failed specifically on unknown txmode "transaction" in 20260724210000_identity_foundation.sql.
+    VOC-032-DEP-00 is resolved: the dedicated Actions SSH credentials work and the
+    private PostgreSQL container is healthy. VOC-032-DEP-01 is also resolved: both
+    staging DNS records are proxied through Cloudflare and the matching Cloudflare
+    Origin Certificate is installed. The remaining 521 response is expected until
+    this migration repair permits the application and nginx services to start.'
 affected_areas:
 - apps/api/migrations
 implementation:
@@ -88,15 +86,15 @@ release:
   automatic_merge: true
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 204
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/204
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: none. Founder adoption resolves VOC-033-D02 in favor of the
-  build-tag-gated on-demand integration test; permanent CI wiring remains a separately
-  scoped follow-up. VOC-033-DEP-02 is reconciled with authenticated deployment evidence.
+blocking_reasons: none. Founder adoption resolves VOC-033-D02 in favor of the build-tag-gated
+  on-demand integration test; permanent CI wiring remains a separately scoped follow-up.
+  VOC-033-DEP-02 is reconciled with authenticated deployment evidence.
