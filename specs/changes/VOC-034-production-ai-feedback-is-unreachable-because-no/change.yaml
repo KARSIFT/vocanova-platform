@@ -3,7 +3,7 @@ id: VOC-034
 slug: production-ai-feedback-is-unreachable-because-no
 title: Wire a Real Moderation Provider into Production AI Feedback (Fixes SAFETY_MODERATION_UNAVAILABLE)
 type: bugfix
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: R1-per-apps/api/business/aifeedback-and-apps/api/app/api-alone;
   R3-once-the-.env.example-comment-only-touch-in-T01-is-included (confirmed by running
@@ -22,9 +22,8 @@ requirement_source: GitHub issue https://github.com/KARSIFT/vocanova-platform-sa
   at this package's own `base_sha` (all read and cited with exact line references
   in specification.md). Blocks `KARSIFT/vocanova-platform-sandbox#185` (VOC-032-T09)
   per the issue's own "Relationship" section.
-requirement_approval_status: not-yet-founder-approved -- this package is drafted,
-  not adopted; nothing in it is implementation-authorized until a human founder/steward
-  adopts it per this repository's own AGENTS.md change workflow.
+requirement_approval_status: founder-approved at adoption on 2026-07-30 for the exact
+  R3 scope and decisions recorded in this package.
 base_branch: develop
 base_sha: fd4cc636815d6a87f7696b998b5c9304b4b34467
 target_branch: develop
@@ -34,9 +33,9 @@ owners:
   package_preparation: planner
   implementation: unassigned
   independent_verification: Claude Code
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: none-from-repository-merge-alone; once merged AND deployed to the
   staging/production host, restores real AI-feedback generation for ordinary sentences
   on the live `POST /api/v1/sentence-feedback` route, which is currently 100% fail-closed
@@ -76,9 +75,9 @@ affected_areas:
 - apps/api/app/api
 - apps/api/.env.example
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: draft
+  status: adopted
   target_branch: develop
   pull_request: null
   authority_issue: https://github.com/KARSIFT/vocanova-platform-sandbox/issues/216
@@ -88,7 +87,7 @@ release:
   production_impact: restores-real-ai-feedback-once-deployed; see top-level production_impact
     for the full statement
   deployment: not-authorized-by-this-package
-  automatic_merge: false
+  automatic_merge: true
   migration_required: false
   rollback_required: true
 repository_adoption_status: not-adopted
@@ -100,7 +99,8 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: not yet adopted -- awaiting founder/steward review of this draft
-  package, including the R3 risk proposal, the VOC-034-D01..D06 decisions recorded
-  in specification.md, and the open scope-tradeoff question in VOC-034-D06 about the
-  production-wiring regression test's chosen level of coverage.
+blocking_reasons: none for VOC-034-T00 through VOC-034-T02. Founder adoption confirms
+  R3 and resolves VOC-034-D06 in favor of the targeted buildAIProviders unit test,
+  route-level real-provider regression test, and mandatory live staging verification.
+  VOC-034-DEP-01 continues to block VOC-034-T03 only until T00 through T02 merge and
+  the merged staging image is deployed.

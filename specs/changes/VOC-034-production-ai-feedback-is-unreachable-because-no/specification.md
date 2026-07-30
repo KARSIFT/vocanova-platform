@@ -1,6 +1,6 @@
 # VOC-034 — Wire a Real Moderation Provider into Production AI Feedback: Specification
 
-**Draft — not adopted. Nothing in this document authorizes implementation.**
+**Adopted 2026-07-30 — implementation authorized for this exact R3 scope.**
 
 ## Objective and requirement source
 
@@ -269,8 +269,9 @@ worded as if only feedback generation reads them) to state they are now also rea
 content moderation. Text-only accuracy fix; no new variable, no new default, no
 behavior change from this edit alone.
 
-`VOC-034-D06` — **Flagged, not silently resolved either way; recorded here for the
-adopting human to weigh.** The production-wiring regression test required by the
+`VOC-034-D06` — **Resolved at founder adoption (2026-07-30): accept the targeted
+two-level regression-test design plus mandatory live staging proof.** The
+production-wiring regression test required by the
 issue's item 6 is implemented at two levels, not as a single full
 `NewProductionAPI`-plus-real-Postgres HTTP test:
 
@@ -291,10 +292,10 @@ issue's item 6 is implemented at two levels, not as a single full
    server were actually invoked and the response is not
    `SAFETY_MODERATION_UNAVAILABLE`.
 
-This proves the wiring defect is fixed without a full sqlmock-backed
+Together with `VOC-034-T03`'s mandatory live staging exercise, this proves the
+wiring defect is fixed without a full sqlmock-backed
 `NewProductionAPI` HTTP test, which would require stubbing every downstream Postgres
 query the full production route touches (accounts, learning, reviews, gamification,
 missions) for a single AI-feedback-focused regression — a disproportionate diff for
-this package's narrow scope. This trade-off is explicitly flagged, not asserted as
-obviously correct: an adopting human may instead require the heavier full-stack test,
-in which case this decision is reopened at adoption, not silently overridden here.
+this package's narrow scope. A heavier full-stack fake-database test is not required
+by this package; any future need for one must be separately scoped.

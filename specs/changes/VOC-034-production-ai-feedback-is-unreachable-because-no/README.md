@@ -1,21 +1,20 @@
 # VOC-034 — Wire a Real Moderation Provider into Production AI Feedback
 
-**Draft — not adopted. Nothing in this package is implementation-authorized.**
+**Adopted 2026-07-30 — implementation authorized for this exact R3 scope.**
 
 ## Identity and lifecycle
 
 - Package ID: `VOC-034`; canonical path:
   `specs/changes/VOC-034-production-ai-feedback-is-unreachable-because-no/`.
-- Lifecycle: **draft**, pending human founder/steward review
-  (`approval_status: not-approved`, `implementation_authorized: false`,
-  `automatic_merge_allowed: false` in `change.yaml`). Nothing here may be treated as
-  adopted, approved, or ready to implement until a human changes those fields.
-- Risk: proposed **R3** on semantic AI-provider/safety-consequence grounds
+- Lifecycle: adopted and implementation-authorized
+  (`approval_status: approved`, `implementation_authorized: true`,
+  `automatic_merge_allowed: true` in `change.yaml`). The adoption workflow records
+  repository adoption evidence after this plan PR merges.
+- Risk: **R3** on semantic AI-provider/safety-consequence grounds
   (`docs/governance/change-risk-classification.md`'s R3 row explicitly names
   "AI-provider controls"), independent of path matching — see `specification.md`
   "Risk and protected areas" for the full path-floor command output and the
-  reasoning for proposing R3 regardless of it. This is a proposal for a human to
-  review at adoption time, not a determination.
+  reasoning for the R3 determination confirmed at founder adoption.
 - Decision owner: founder; target branch: `develop`; base:
   `fd4cc636815d6a87f7696b998b5c9304b4b34467`.
 - Request source: GitHub issue
@@ -55,10 +54,10 @@ Full four-task breakdown in `tasks.md` (`T00 → T01 → T02 → T03`).
 
 Non-goals: any change to `service.go`'s orchestration or `safety.go`'s
 `CompositeSafetyClassifier` logic (both already correct); any new environment
-variable or independently-configurable moderation model/timeout (flagged as an open
-question, not decided); any public API contract change; any full sqlmock-backed
-`NewProductionAPI` HTTP test (a smaller two-level test strategy is proposed instead,
-`VOC-034-D06`, explicitly flagged for the adopting human to weigh); any change to
+variable or independently-configurable moderation model/timeout (deferred to a future
+package if evaluation shows it is needed); any public API contract change; any full
+sqlmock-backed `NewProductionAPI` HTTP test (the targeted two-level strategy in
+`VOC-034-D06` was accepted at adoption); any change to
 `.github/workflows/*`; any live deployment performed by this planning pass. Full
 list in `specification.md`.
 
@@ -70,12 +69,11 @@ test), `apps/api/.env.example` (comment-only). Active governance model: A-003
 EHR trigger; no R4 consequence in scope, so R4 founder authority is not implicated by
 this package's own scope.
 
-An open decision, `VOC-034-D06` in `specification.md`, is explicitly flagged rather
-than silently resolved: the production-wiring regression test is proposed at two
-smaller, targeted levels (a `buildAIProviders` unit test plus a route-level test
-using in-memory fakes and a fake HTTP server) rather than one full
-`NewProductionAPI`-plus-real-Postgres HTTP test, to keep the diff proportionate to
-this package's narrow scope. An adopting human may instead require the heavier test.
+Founder adoption resolves `VOC-034-D06` in favor of two targeted levels: a
+`buildAIProviders` unit test plus a route-level test using in-memory fakes and a fake
+HTTP server. The mandatory real staging exercise in `VOC-034-T03` supplies the
+environment-level proof after merge. A full sqlmock-backed `NewProductionAPI` test
+is not required for this narrow wiring fix.
 
 ## Verification, approvals, release, and closure
 

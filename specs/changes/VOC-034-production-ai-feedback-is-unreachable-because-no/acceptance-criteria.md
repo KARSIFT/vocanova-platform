@@ -1,6 +1,6 @@
 # VOC-034 — Acceptance Criteria
 
-**Draft — pending. These are proposed criteria for a human to adopt, not yet binding.**
+**Adopted 2026-07-30 — these acceptance criteria are binding for implementation.**
 
 ## VOC-034-AC-00 — Shared transport extraction is behavior-preserving
 

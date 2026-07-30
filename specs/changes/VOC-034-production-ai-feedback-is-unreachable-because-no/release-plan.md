@@ -80,7 +80,7 @@ Claude Code independent review, bound to the exact final SHA of each PR, is requ
 before merge per `CLAUDE.md`; whichever implementer model is bound cannot approve or
 merge its own implementation. No R4 founder approval is required by this package's
 own scope (no R4 path or consequence is touched) — this package's own semantic R3
-proposal is for the adopting human to confirm, not an R4 escalation. No EHR trigger
+  classification was confirmed at founder adoption, not an R4 escalation. No EHR trigger
 applies. Repository merge of `T00`–`T02`'s PRs is not release, activation, or closure
 of VOC-032-T09 or issue #216 by itself — closure of *this* package's own scope
 requires, in addition to the three PRs merging: `VOC-034-TEST-00`..`09` passing at

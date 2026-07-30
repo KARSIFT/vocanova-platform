@@ -2,10 +2,9 @@
 
 ## Preconditions and protected areas
 
-This package is a **draft**. Implementation must not begin until a human founder or
-steward adopts it — `change.yaml`'s `approval_status`, `implementation_authorized`,
-and `automatic_merge_allowed` fields record the current, unadopted state and must be
-flipped by the adopting human, not by this planning pass or by an implementer.
+This package was adopted by the founder gate on 2026-07-30. `change.yaml` records
+approval, implementation authority, and automatic merge authority for this exact
+R3 scope.
 
 All work touches `apps/api/business/aifeedback` and `apps/api/app/api`, which are not
 matched by this repository's automated R3 path glob on their own (confirmed by
