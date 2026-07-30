@@ -234,7 +234,7 @@ redeploys the fixed image (no workflow change needed — this package touches no
    `POST /api/v1/sentence-feedback`.
 4. Confirm the response is **not** `SAFETY_MODERATION_UNAVAILABLE`, and that a
    `learner_sentences` row and an `ai_feedback_attempts` row now exist for the
-   attempt (via the same operator-level DB inspection VOC-032-T09's own
+   attempt (via the same operator-level DB inspection the earlier VOC-032
    rehearsal already used).
 5. Delete the disposable identity, its sessions, the word fixture, the saved
    word, the review, the sentence/attempt rows, and any idempotency rows created
