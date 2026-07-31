@@ -43,46 +43,34 @@ export function validateWorkspace() {
     }
   }
 
-  const workspace = readFileSync(
-    path.join(repositoryRoot, "pnpm-workspace.yaml"),
-    "utf8",
+  const packageJsonContent = JSON.parse(
+    readFileSync(path.join(repositoryRoot, "package.json"), "utf8"),
   );
-  if (
-    !workspace.includes("- apps/web") ||
-    !workspace.includes("- packages/*")
-  ) {
+  const workspaces = packageJsonContent.workspaces || [];
+  if (!workspaces.includes("apps/web") || !workspaces.includes("packages/*")) {
     errors.push(
-      "pnpm workspace patterns do not include web and shared packages",
+      "workspace patterns do not include web and shared packages",
     );
   }
-  if (workspace.includes("apps/api")) {
-    errors.push("apps/api must not be a pnpm workspace project");
-  }
 
-  const projects = JSON.parse(
-    execFileSync("pnpm", ["--recursive", "list", "--depth", "-1", "--json"], {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-    }),
-  );
-  const actual = new Set(
-    projects.map((project) => path.relative(repositoryRoot, project.path)),
-  );
-  const expected = new Set([
+  const expected = [
     "apps/web",
     "packages/api-client",
     "packages/design-tokens",
     "packages/eslint-config",
     "packages/typescript-config",
-  ]);
+  ];
 
   for (const relative of expected) {
-    if (!actual.has(relative)) {
-      errors.push(`pnpm did not enumerate expected project: ${relative}`);
+    if (!existsSync(path.join(repositoryRoot, relative, "package.json"))) {
+      errors.push(`expected workspace project missing: ${relative}`);
     }
   }
-  if (actual.has("apps/api")) {
-    errors.push("pnpm incorrectly enumerated apps/api");
+
+  if (
+    existsSync(path.join(repositoryRoot, "apps/api/package.json"))
+  ) {
+    errors.push("apps/api must not be a workspace project");
   }
 
   return errors;
