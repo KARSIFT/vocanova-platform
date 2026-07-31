@@ -20,7 +20,8 @@ review per this repository's `CLAUDE.md`.
 - Tests: `VOC-035-TEST-00`, `VOC-035-TEST-01`, `VOC-035-TEST-02`,
   `VOC-035-TEST-03`, `VOC-035-TEST-04`, `VOC-035-TEST-08`
 - Evidence: `VOC-035-EV-00`
-- Status: pending (not authorized)
+- Status: merged (PR #239) — package adopted 2026-07-31, this task authorized
+  and complete.
 
 Add a new file `apps/api/business/aifeedback/gemini.go`:
 
@@ -107,7 +108,8 @@ real Gemini call):
 - Acceptance criteria: `VOC-035-AC-05`, `VOC-035-AC-06`, `VOC-035-AC-09`
 - Tests: `VOC-035-TEST-05`, `VOC-035-TEST-06`, `VOC-035-TEST-09`
 - Evidence: `VOC-035-EV-01`, `VOC-035-EV-03`
-- Status: pending (not authorized)
+- Status: merged (PR #240) — package adopted 2026-07-31, this task authorized
+  and complete.
 
 In `apps/api/app/api/production.go`:
 
@@ -170,7 +172,12 @@ In `apps/api/app/api/production_test.go`:
 - Acceptance criteria: `VOC-035-AC-07`, `VOC-035-AC-09`
 - Tests: `VOC-035-TEST-07`, `VOC-035-TEST-09`
 - Evidence: `VOC-035-EV-02`, `VOC-035-EV-03`
-- Status: pending (not authorized)
+- Status: pending — **authorized.** The package was adopted 2026-07-31
+  (`change.yaml`: `status: adopted`, `implementation_authorized: true`). This
+  "Status" line (like every task's in this file) was written by the planner
+  during drafting, before adoption, and was not updated when the package was
+  adopted — `change.yaml` is authoritative over this line; do not treat this
+  line's own wording as evidence the package is unauthorized.
 
 In `apps/api/cmd/eval-live/main.go`:
 
