@@ -10,13 +10,6 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           set +e
-          curl -sS -w "\n=== HTTP_STATUS: %{http_code} ===\n" \
-            "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200" \
+          curl -sS "https://generativelanguage.googleapis.com/v1beta/models?pageSize=200" \
             -H "x-goog-api-key: $GEMINI_API_KEY" > /tmp/models.json
-          cat /tmp/models.json | python3 -c "
-import json,sys
-d = json.load(sys.stdin)
-for m in d.get('models', []):
-    if 'generateContent' in m.get('supportedGenerationMethods', []):
-        print(m.get('name'), '|', m.get('displayName'))
-"
+          jq -r '.models[] | select(.supportedGenerationMethods[]? == "generateContent") | "\(.name) | \(.displayName)"' /tmp/models.json
