@@ -1,7 +1,5 @@
 [
 {"task_id": "VOC-035-T00", "issue": 233},
 {"task_id": "VOC-035-T01", "issue": 234},
-{"task_id": "VOC-034-T01", "issue": 235},
 {"task_id": "VOC-035-T02", "issue": 236},
-{"task_id": "VOC-035-T03", "issue": 237},
-{"task_id": "VOC-032-T10", "issue": 238}]
+{"task_id": "VOC-035-T03", "issue": 237}]
