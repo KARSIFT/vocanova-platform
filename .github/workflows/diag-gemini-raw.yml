@@ -1,0 +1,21 @@
+name: diag-gemini-raw
+on:
+  workflow_dispatch: {}
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Raw Gemini API call
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          set +e
+          curl -sS -w "\n=== HTTP_STATUS: %{http_code} ===\n" \
+            -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent" \
+            -H "Content-Type: application/json" \
+            -H "x-goog-api-key: $GEMINI_API_KEY" \
+            -d '{
+              "contents": [{"role": "user", "parts": [{"text": "Say the word PASS and nothing else."}]}],
+              "generationConfig": {"responseMimeType": "application/json", "responseSchema": {"type": "object", "properties": {"word": {"type": "string"}}, "required": ["word"]}}
+            }'
