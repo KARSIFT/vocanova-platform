@@ -21,7 +21,11 @@ require Claude Code exact-SHA review per this repository's `CLAUDE.md`.
 - Tests: `VOC-036-TEST-00`, `VOC-036-TEST-01`, `VOC-036-TEST-02`,
   `VOC-036-TEST-03`, `VOC-036-TEST-04`, `VOC-036-TEST-09`
 - Evidence: `VOC-036-EV-00`
-- Status: pending — not authorized (package not adopted)
+- Status: pending — **authorized.** The package was adopted 2026-08-01
+  (`change.yaml`: `status: adopted`, `implementation_authorized: true`). This
+  line was written by the planner during drafting, before adoption, and was
+  not updated when the package was adopted — `change.yaml` is authoritative
+  over this line.
 
 Add a new file `apps/api/business/aifeedback/cloudflare.go`:
 
@@ -117,7 +121,11 @@ a real Cloudflare call):
 - Acceptance criteria: `VOC-036-AC-05`, `VOC-036-AC-06`, `VOC-036-AC-10`
 - Tests: `VOC-036-TEST-05`, `VOC-036-TEST-06`, `VOC-036-TEST-10`
 - Evidence: `VOC-036-EV-01`, `VOC-036-EV-03`
-- Status: pending — not authorized (package not adopted)
+- Status: pending — **authorized.** The package was adopted 2026-08-01
+  (`change.yaml`: `status: adopted`, `implementation_authorized: true`). This
+  line was written by the planner during drafting, before adoption, and was
+  not updated when the package was adopted — `change.yaml` is authoritative
+  over this line.
 
 In `apps/api/app/api/production.go`:
 
@@ -196,7 +204,11 @@ In `apps/api/app/api/production_test.go`:
 - Acceptance criteria: `VOC-036-AC-07`, `VOC-036-AC-08`, `VOC-036-AC-10`
 - Tests: `VOC-036-TEST-07`, `VOC-036-TEST-08`, `VOC-036-TEST-10`
 - Evidence: `VOC-036-EV-02`, `VOC-036-EV-03`
-- Status: pending — not authorized (package not adopted)
+- Status: pending — **authorized.** The package was adopted 2026-08-01
+  (`change.yaml`: `status: adopted`, `implementation_authorized: true`). This
+  line was written by the planner during drafting, before adoption, and was
+  not updated when the package was adopted — `change.yaml` is authoritative
+  over this line.
 
 In `apps/api/cmd/eval-live/main.go`:
 
