@@ -5,7 +5,7 @@ title: Add a Cloudflare Workers AI AI-Feedback/Moderation Provider Alongside Ope
   and Gemini
 canonical_path: specs/changes/VOC-036-voc-032-t10-s-live-ai-evaluation-gate-ev-22-is
 type: feature
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: "R1-per-apps/api/business/aifeedback-and-apps/api/app/api-and-apps/api/cmd/eval-live-alone;\
   \ R3-once-the-.env.example-comment-and-new-variable-touch-is-included (confirmed\
@@ -36,9 +36,15 @@ requirement_source: "Free-text founder request recorded in this package's own dr
   \ in specification.md). No GitHub issue exists yet for this request; the calling\
   \ workflow is expected to open or link one at adoption. This package does not authorize\
   \ its own adoption \u2014 see \"approval_status\" below."
-requirement_approval_status: not-approved. This package is a draft; no human has reviewed
-  or accepted any decision recorded in specification.md yet, including VOC-036-D02
-  (the new account-ID env-var proposal) and the proposed default model.
+requirement_approval_status: 'approved at adoption (2026-08-01, founder-gate). VOC-036-D02
+  (new AI_PROVIDER_ACCOUNT_ID variable, not overloading AI_PROVIDER_API_KEY or
+  AI_PROVIDER_BASE_URL), VOC-036-D04 (MaxRetries 1/0 feedback/moderation,
+  flagged for T03 to validate given VOC-035''s rate-limit lesson), VOC-036-D05
+  (default stays opencode), VOC-036-D06 (--request-interval / EVAL_LIVE_REQUEST_INTERVAL
+  pacing decorator, confined to cmd/eval-live), and VOC-036-D07 (default model
+  @cf/meta/llama-3.3-70b-instruct-fp8-fast, flagged for T03 to validate given
+  VOC-035''s stale-default-model lesson) are all accepted as proposed in
+  specification.md. The R3 risk proposal is accepted as proposed.'
 base_branch: develop
 base_sha: c69b270a164bf2cb386f1b7637a7c3ab96af5bd0
 target_branch: develop
@@ -48,9 +54,9 @@ owners:
   package_preparation: planner
   implementation: unassigned
   independent_verification: Claude Code
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 artifacts:
@@ -84,9 +90,9 @@ affected_areas:
 - apps/api/cmd/eval-live
 - apps/api/.env.example
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: draft
+  status: adopted
   target_branch: develop
   pull_request: null
   authority_issue: null
@@ -95,7 +101,7 @@ release:
   mode: not-authorized-by-this-package
   production_impact: see top-level production_impact
   deployment: not-authorized-by-this-package
-  automatic_merge: false
+  automatic_merge: true
   migration_required: false
   rollback_required: true
 repository_adoption_status: not-adopted
@@ -107,8 +113,8 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: not adopted. change.yaml's approval_status is not-approved and implementation_authorized
-  is false; no task in tasks.md may be started until a human reviews this draft, confirms
-  or amends the proposed R3 risk classification, resolves VOC-036-D02's (new AI_PROVIDER_ACCOUNT_ID
-  variable) and VOC-036-D07's (default model) open questions, and records approval
-  here.
+blocking_reasons: none. Adopted 2026-08-01 (founder-gate). T00-T02 are
+  implementation-authorized and will auto-merge into develop on CI+independent-review
+  pass, per active A-003. T03 (the live Cloudflare evaluation) remains blocked
+  on VOC-036-DEP-00 (Cloudflare account/API token/account ID) until the founder
+  provisions it.
