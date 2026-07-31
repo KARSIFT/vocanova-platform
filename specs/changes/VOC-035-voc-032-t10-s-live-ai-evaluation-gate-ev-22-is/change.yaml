@@ -5,7 +5,7 @@ title: Add a Google Gemini (gemini-2.5-flash) AI-Feedback/Moderation Provider Al
   OpenCode
 canonical_path: specs/changes/VOC-035-voc-032-t10-s-live-ai-evaluation-gate-ev-22-is
 type: feature
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: "R1-per-apps/api/business/aifeedback-and-apps/api/app/api-and-apps/api/cmd/eval-live-alone;\
   \ R3-once-the-.env.example-comment-only-touch-is-included (confirmed by running\
@@ -26,11 +26,11 @@ requirement_source: "Free-text founder request recorded in this package's own dr
   \ in specification.md). No GitHub issue exists yet for this request; the calling\
   \ workflow is expected to open or link one at adoption. This package does not authorize\
   \ its own adoption \u2014 see \"approval_status\" below."
-requirement_approval_status: "not-approved. The founder's free-text request supplies\
-  \ the objective (\"add Gemini as a real, alternative provider\") but this draft\
-  \ package, its risk proposal, its task breakdown, and its acceptance criteria are\
-  \ not themselves approved by this drafting run \u2014 approval is a separate, subsequent\
-  \ human action per AGENTS.md/CLAUDE.md."
+requirement_approval_status: "approved at adoption (2026-07-31, founder-gate). VOC-035-D02\
+  \ (env-var naming: reuse existing AI_PROVIDER_* names, no new variable) and VOC-035-D05\
+  \ (AI_PROVIDER default stays opencode; gemini is opt-in until VOC-035-T03's live\
+  \ run validates it) are both accepted as proposed in specification.md. The R3 risk\
+  \ proposal is accepted as proposed."
 base_branch: develop
 base_sha: 56d47cf5fe1b425b3c87be43274506300468e304
 target_branch: develop
@@ -40,9 +40,9 @@ owners:
   package_preparation: planner
   implementation: unassigned
   independent_verification: Claude Code
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: unknown-until-adopted; if adopted and implemented as scoped, no
   production impact from repository merge alone (AGENTS.md's develop-merge vs. deploy-to-main/staging
   distinction). Once merged AND deployed AND an operator sets AI_PROVIDER=gemini with
@@ -65,11 +65,9 @@ artifacts:
   staging_evidence: staging-evidence.md
 dependencies:
 - id: VOC-035-DEP-00
-  status: "open, blocks VOC-035-T03 only (the live-evaluation task, not a code PR).\
-    \ The founder has not yet provisioned a free Gemini API key at aistudio.google.com.\
-    \ T00 through T02 (provider implementation, production wiring, cmd/eval-live wiring)\
-    \ do not depend on this credential \u2014 they are unit/integration tests against\
-    \ a fake HTTP transport only, per the founder's own request."
+  status: "resolved at adoption (2026-07-31). A free Gemini API key is provisioned\
+    \ as the GEMINI_API_KEY repo secret. VOC-035-T03 (the live-evaluation task) is\
+    \ unblocked once T00 through T02 merge and deploy."
 - id: VOC-035-DEP-01
   status: "open, informational. VOC-032-T10's own EV-22 evidence (OpenCode exhausted)\
     \ is the requirement-source evidence this package is grounded in; it is itself\
@@ -83,9 +81,9 @@ affected_areas:
 - apps/api/cmd/eval-live
 - apps/api/.env.example
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: draft
+  status: adopted
   target_branch: develop
   pull_request: null
   authority_issue: null
@@ -94,20 +92,20 @@ release:
   mode: no-deployment-authorized-by-this-package-itself
   production_impact: see top-level production_impact
   deployment: not-authorized-by-this-package
-  automatic_merge: false
+  automatic_merge: true
   migration_required: false
   rollback_required: true
 repository_adoption_status: draft
 adoption_pr: null
 adoption_evidence: null
 implementation_authority_before_adoption: false
-implementation_authority_status: not-exercised
+implementation_authority_status: exercised-at-adoption
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
-standing_technical_steward_approval: not-applicable-until-adopted
-blocking_reasons: not adopted. No task in this package is implementation-authorized
-  until a human reviews and adopts this draft, confirms or adjusts the proposed R3
-  risk classification, and resolves the open questions recorded in impact-analysis.md
-  and specification.md (notably VOC-035-D02's env-var-naming choice and VOC-035-D05's
-  "alongside, not replacing" default-selection question).
+standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
+blocking_reasons: none. Adopted 2026-07-31 (founder-gate). T00-T02 are
+  implementation-authorized and will auto-merge into develop on CI+independent-review
+  pass, per active A-003. T03 (the live Gemini evaluation) remains blocked only on
+  VOC-035-DEP-00 - already resolved, a Gemini API key is provisioned as
+  GEMINI_API_KEY - so T03 is unblocked once T00-T02 merge.
