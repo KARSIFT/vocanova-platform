@@ -57,7 +57,7 @@
 - Tasks: `VOC-037-T03`
 - Tests: `VOC-037-TEST-03`
 - Evidence: `VOC-037-EV-03`
-- Result: pending
+- Result: **NOT satisfied** (2026-08-01), recorded honestly as pending, not as a partial pass — see `VOC-037-EV-03` for exactly what was and wasn't verified. `AI_FEATURES_ENABLED` and `GOOGLE_OAUTH_ENABLED`/`EMAIL_MAGIC_LINK_ENABLED` were verified to change *some* observable signal (startup log / HTTP status respectively) when toggled, but `AI_FEATURES_ENABLED` was never verified at the documented HTTP surface and `NEW_USER_SIGNUP_ENABLED` was never toggled `true` or verified at all. The redeploy rehearsal exercised the recreate/health-check half of the mechanism but not `pull` (registry auth was session-specific, not re-demonstrated) and not a true two-different-versions rollback (only one production artifact exists so far). Closing AC-03 requires either completing these gaps once real credentials and a second production artifact exist, or an explicit founder-accepted waiver — this record does neither on its own.
 - Observable outcome: Each of the four named kill switches, toggled against the
   production target, observably changes application behavior as documented; a
   rollback-by-redeploy rehearsal against the production target completes without
