@@ -1,15 +1,21 @@
 ---
 decision_id: VOC-037-D01
 task_id: VOC-037-T01
-status: proposed
-decision_owner: founder
+status: accepted
+decision_owner: founder-gate-delegate
+approved_mechanism: 4A-corrected (same host as staging, separate directory tree/compose project/deploy user)
 risk: R3
 date: 2026-08-01
+accepted_date: 2026-08-01
 related_change: VOC-037
 depends_on:
   - VOC-037-D00
-depends_on_outcome: false
+depends_on_outcome: true
 inspection_bound_revision: 0e1f7813bce6f25654f46307a6331be260177e8f
+correction_note: 'Drafted before this file could see VOC-037-D00''s acceptance
+  despite branching from a commit that included it; corrected 2026-08-01 to
+  reflect D00''s actual accepted outcome (Option A-modified, same host) and
+  to fix section 4A''s now-invalid "must be a distinct host" conclusion.'
 ---
 
 # VOC-037-D01 — Production Secrets Management Decision Record
@@ -27,21 +33,39 @@ This task defines the mechanism, its alternatives, and its verification criteria
 
 ## Relationship to `VOC-037-D00` (production hosting decision)
 
-`VOC-037-D00` is `status: proposed` with every founder-approval field `Pending` (`t00-production-hosting-decision-record.md` lines 3–4, 103–110). No production hosting target has been selected, and this record does not assume one.
+**Correction (2026-08-01, founder-gate):** the text below was drafted from a
+revision where `VOC-037-D00` still showed `status: proposed`. `VOC-037-D00`
+is now **`status: accepted`**: the founder approved **Option A-modified**
+— production runs on the **same physical host as staging** (not a separate
+host), with full logical isolation required (separate compose project,
+separate env files/secrets, separate database instance, separate ports/
+domains, no shared volumes) and portability to a future dedicated host kept
+open. The founder explicitly acknowledged the shared-host resource/fault-
+domain risk this implies, and required this task (T01) and T04 to address it
+directly rather than assume it away. See
+`t00-production-hosting-decision-record.md`'s "Founder approval record"
+section for the full text.
 
-Accordingly this record is deliberately structured so that no part of it presupposes an unmade founder decision:
-
-- Section 2 states **target-independent invariants** that hold under either D00 option and are the substance of what founder approval on `VOC-037-D01` grants.
-- Section 4 states **two option-conditional mechanism specifications** — one for D00 Option A (separate self-hosted production host, same shape as staging) and one for D00 Option B (managed platform or multi-instance target). Exactly one becomes operative, determined by whichever option the founder accepts in D00.
-- Section 5 records inspection results that are already true of this repository regardless of D00's outcome, and names precisely which checks remain blocked on a provisioned production target.
-
-`VOC-037-D01` therefore cannot be *implemented* (host paths created, workflow environment configured, credentials provisioned) before D00 is accepted, and this record claims no such implementation. `change.yaml`'s sequencing statement — "T01/T03/T04 are sequenced after T00 per their stated dependency and will not be dispatched until the founder has actually decided T00's open question" — governs the follow-up implementation tasks in section 7, not the production of this decision-ready design document.
+This changes which mechanism below is operative, and invalidates one
+conclusion this record originally drew (see the correction inside section
+4A below: same-host colocation does **not** make INV-4 unsatisfiable, it
+just requires the isolation to be enforced by directory/project separation
+instead of by host separation). Sections 2 (target-independent invariants),
+3 (alternatives), and 5 (inspection results) are unaffected by this
+correction and stand as originally drafted.
 
 ## Recommendation
 
-Approve the target-independent invariants in section 2 now, and approve the option-conditional mechanism in section 4 that matches whichever option the founder accepts in `VOC-037-D00`.
-
-Under **Option A** the recommended mechanism is a hardened variant of the existing staging shape: a founder-approved GitHub Actions `production` environment as control plane, production-only credentials delivered to `0600` root-owned files on the production host, and containers reading only those files. Under **Option B** the recommended mechanism is the platform's own first-party secret store scoped to a production-only project/workspace, with the same invariants enforced through the platform's access controls rather than through host file permissions.
+**Operative mechanism: 4A, as corrected below for same-host colocation**
+(D00's actual accepted option). Approve the target-independent invariants in
+section 2, and the corrected 4A mechanism: a founder-approved GitHub
+Actions `production` environment as control plane, production-only
+credentials delivered to `0600` root-owned files under a **production-only
+directory tree, separate from staging's**, on the shared host, with
+containers reading only those files via a **separate Docker Compose
+project** from staging's. Section 4B (managed platform) is retained below
+for the record but is not operative, since D00 selected Option A-modified,
+not Option B.
 
 ## 1) Secret inventory and naming boundary
 
@@ -88,29 +112,65 @@ A2 and A3 are the "dedicated secrets manager" options that `specification.md`'s 
 
 Exactly one of the following becomes operative, determined by the option the founder accepts in `VOC-037-D00`.
 
-### 4A) If D00 selects Option A — separate self-hosted production host
+### 4A) D00's accepted option — same host as staging, logically isolated (corrected)
+
+**Correction to this section's original text:** the paragraph below
+originally concluded that colocating production and staging on one host
+"breaks INV-4" and that Option A "must therefore be implemented as a
+distinct host." That conclusion only followed from reusing staging's
+existing directory tree unchanged; it does not follow once production gets
+its **own, separate directory tree and its own Compose project**, which is
+what D00's accepted decision actually requires ("separate compose project,
+separate env files/secrets... no shared volumes"). The corrected mechanism
+below enforces INV-4 by directory/project separation on the shared host,
+rather than by host separation.
 
 **Control plane.** A GitHub Actions environment named `production` holds all production secrets at environment scope, never at repository-global scope. Required reviewers on that environment are founder-controlled. Only the production deploy workflow declares `environment: production`; preview and staging workflows must not.
 
-**Runtime plane.** The production deploy job writes runtime secret files on the production host only:
+**Runtime plane.** The production deploy job writes runtime secret files on
+the shared host, under a **production-only directory tree, distinct from
+staging's `/opt/vocanova/infra/secrets/` tree**:
 
-- `/opt/vocanova/infra/secrets/api.env`
-- `/opt/vocanova/infra/secrets/web.env` (if needed)
-- `/opt/vocanova/infra/secrets/postgres.env`
-- `/opt/vocanova/infra/secrets/nginx/*` (TLS keypair)
+- `/opt/vocanova/production/secrets/api.env`
+- `/opt/vocanova/production/secrets/web.env` (if needed)
+- `/opt/vocanova/production/secrets/postgres.env`
+- `/opt/vocanova/production/secrets/nginx/*` (TLS keypair)
 
-Permissions baseline: owner `root` or a dedicated least-privilege deploy user; mode `0600` for `*.env` and private keys; mode `0700` for directories holding private key material.
+Staging's existing tree (`/opt/vocanova/infra/secrets/...`) is left
+untouched and continues to serve staging only; no path, symlink, or bind
+mount ever crosses between the two trees. Production runs as its own
+Docker Compose project (distinct `-p`/`COMPOSE_PROJECT_NAME`, e.g.
+`vocanova-production`, separate from staging's implicit/default project
+name) reading only `/opt/vocanova/production/...`, with its own compose
+file (final path chosen in the T00 follow-up implementation, e.g.
+`infra/docker-compose.production.yml`) so a stray `docker compose` command
+run from the wrong directory cannot address the wrong tier's containers or
+secrets.
 
-These are the same in-repository-relative paths staging already uses (`infra/docker-compose.yml` lines 138, 196, 336–337 mount `./secrets/...`), which is safe only because Option A places production on a **separate host**. Colocating production and staging stacks on one host would put both tiers' secrets under one directory tree and break INV-4; Option A must therefore be implemented as a distinct host, not a second compose project on the staging host.
+Permissions baseline: owner `root` or a dedicated least-privilege
+production-only deploy user (**not** the same OS user staging's deploy
+path uses, so a compromised staging deploy credential cannot read
+production's files by shared file ownership); mode `0600` for `*.env` and
+private keys; mode `0700` for directories holding private key material;
+mode `0750` or stricter on `/opt/vocanova/production/` itself so staging's
+deploy user has no directory-listing access either.
+
+Because both stacks share the same physical CPU/RAM (D00's acknowledged
+shared-host risk), the production compose file must also set explicit
+per-service resource limits (`deploy.resources.limits` equivalents under
+plain `docker compose`, e.g. `mem_limit`/`cpus`) so a runaway staging
+container cannot starve production, and vice versa — this is a follow-up
+implementation item (section 7), not something this decision record itself
+configures.
 
 **Injection flow.**
 
 1. The production deploy workflow obtains production-scoped secrets from the `production` environment after required approval.
-2. It connects only to the production host and writes/updates the production secret files.
-3. It runs deploy/update commands that read those host files at runtime (`env_file`), never build args.
+2. It connects to the shared host and writes/updates only the files under `/opt/vocanova/production/secrets/`, never touching `/opt/vocanova/infra/secrets/`.
+3. It runs deploy/update commands scoped to the `vocanova-production` compose project only, reading those host files at runtime (`env_file`), never build args.
 4. It verifies health checks without printing secret values.
 
-**Disallowed.** Production secrets as Docker build args for `apps/api`/`apps/web`; production secrets written into `infra/docker-compose.yml`; reuse of the existing `STAGING_SSH_*` secrets or the staging host path for production.
+**Disallowed.** Production secrets as Docker build args for `apps/api`/`apps/web`; production secrets written into any compose file; reuse of the existing `STAGING_SSH_*` secrets, the staging host directory tree, the staging OS deploy user, or the staging Compose project for production.
 
 ### 4B) If D00 selects Option B — managed platform or multi-instance target
 
@@ -175,30 +235,53 @@ Emergency revocation policy:
 
 ## 7) Follow-up implementation scope after founder approval
 
-These are outside `VOC-037-T01` and each requires `VOC-037-D00` to be accepted first, because the operative mechanism (4A or 4B) is selected by that decision:
+`VOC-037-D00` is now accepted; the operative mechanism is 4A (corrected).
+These remain outside `VOC-037-T01` itself (this task is design/decision only)
+and are scoped for T03/T04/T05 or a dedicated provisioning follow-up:
 
-- Configure the production-scoped control plane (GitHub Actions `production` environment with founder-controlled reviewers under 4A; production-only platform project plus a deploy-credential-only CI environment under 4B).
-- Add or adjust the production deploy workflow to use it (`.github/workflows/deploy-production.yml`, a protected path requiring its own classification and review).
-- Document production secret-path conventions in `infra/`.
+- Configure the production-scoped control plane: a GitHub Actions
+  `production` environment with founder-controlled required reviewers.
+- Create `/opt/vocanova/production/` on the shared host (mode `0750` or
+  stricter), fully separate from `/opt/vocanova/infra/`, with its own
+  least-privilege deploy user distinct from staging's.
+- Add a production deploy workflow (`.github/workflows/deploy-production.yml`,
+  a protected path requiring its own classification and review) that writes
+  only under `/opt/vocanova/production/secrets/` and operates only on the
+  `vocanova-production` Compose project.
+- Add a production compose file (e.g. `infra/docker-compose.production.yml`)
+  with its own project name and explicit per-service resource limits
+  (shared-host contention mitigation, per D00's acknowledged risk).
+- Document the production secret-path and resource-limit conventions in
+  `infra/README.md`.
 - Add an operator runbook for rotation and emergency revocation.
-- Execute `INS-9`–`INS-11` and record `VOC-037-EV-01` with redacted evidence.
+- Execute `INS-9`–`INS-11` (adapted for same-host colocation: the negative-
+  access rehearsal must specifically prove staging's deploy user/path cannot
+  read `/opt/vocanova/production/secrets/`, not just that no shared host
+  exists) and record `VOC-037-EV-01` with redacted evidence.
 
 ## 8) Relationship to `VOC-032-DEP-07`
 
 Informational only, per `change.yaml`'s `VOC-037-DEP-02`. Whenever the still-open email-provider and Google-OAuth production credentials are eventually provisioned, they are provisioned through whichever mechanism this decision selects. This record neither re-opens nor resolves that R1 follow-up.
 
-## Founder approval record (required to move from proposed to accepted)
+## Founder approval record
 
-- Decision: Pending founder approval
-- Approved invariants (section 2): Pending
-- Approved option-conditional mechanism (4A or 4B, contingent on `VOC-037-D00`): Pending
-- Required conditions: Pending
-- Founder GitHub identity: Pending
-- Approval link and reviewed revision: Pending
-- Approval date: Pending
+- Decision: **Approved (2026-08-01, founder-gate delegate).** This is an R3
+  technical-mechanism decision (secrets storage/injection/rotation design),
+  distinct from `VOC-037-D00`'s R4 production-architecture decision, which
+  the founder decided directly. Per this project's founder-gate delegation,
+  R3 decisions of this kind are approved by the delegate; this record's
+  correction (section "Relationship to D00" and the corrected 4A above) is
+  itself part of what is being approved here.
+- Approved invariants (section 2): INV-1 through INV-7, as drafted.
+- Approved mechanism: **4A, corrected for same-host colocation** — separate
+  `/opt/vocanova/production/` directory tree, separate Compose project
+  (`vocanova-production`), separate least-privilege deploy user, explicit
+  per-service resource limits. 4B is not operative (D00 selected Option
+  A-modified, not Option B).
+- Required conditions: the section 7 follow-up implementation (T03-scoped or
+  a dedicated provisioning task) must include the resource-limit and
+  negative-access-rehearsal items added by this correction, not just the
+  original 4A scope.
+- Approval date: 2026-08-01
 
-When founder approval is recorded, set:
-
-- `status: accepted`
-- "Approved option-conditional mechanism" to 4A or 4B, matching the option accepted in `VOC-037-D00`
-- "Required conditions" to any gating constraints (reviewers, rotation cadence, runbook requirements)
+`status: accepted`.
