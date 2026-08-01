@@ -1,10 +1,12 @@
 ---
 decision_id: VOC-037-D00
 task_id: VOC-037-T00
-status: proposed
+status: accepted
 decision_owner: founder
+approved_option: A-modified (same host as staging, logically isolated, portable)
 risk: R4
 date: 2026-08-01
+accepted_date: 2026-08-01
 related_change: VOC-037
 ---
 
@@ -102,15 +104,37 @@ Expected repository areas for follow-up tasks:
 
 ## Founder approval record (required to move from proposed to accepted)
 
-- Decision: Pending founder approval
-- Approved option: Pending
-- Conditions/boundaries: Pending
-- Founder GitHub identity: Pending
-- Approval link and reviewed revision: Pending
-- Approval date: Pending
+- Decision: **Approved, with a modification to Option A** — production runs on
+  the **same physical host as staging** (not a separate server), rather than
+  either recommended Option A (separate host, same shape) or Option B
+  (managed/multi-instance platform).
+- Approved option: **Option A-modified ("co-located, logically isolated")**:
+  - Production runs as its own Docker Compose project on the existing
+    staging server, not a second machine.
+  - Full logical isolation from staging is still required: separate env
+    files/secrets, separate database (own Postgres instance/container, not a
+    shared instance or schema), separate ports, separate domains/hostnames,
+    no shared volumes.
+  - Portability is an explicit goal: the compose/env layout must not assume
+    single-host colocation is permanent, so a future move to a dedicated
+    production host is a clean cut (repoint DNS + redeploy), not a
+    rearchitecture.
+- Conditions/boundaries (founder-acknowledged risk, recorded rather than
+  silently accepted): the host is a 2-vCPU/4GB server already running
+  staging's full 4-service stack. Adding a second full stack (Postgres, API,
+  web, nginx) means staging and production **share CPU/RAM and fault
+  domain** on this host — resource contention or a bad staging deploy can
+  degrade production, and vice versa, until/unless production is moved to
+  its own host. T01 (secrets design) and T04 (monitoring) must account for
+  this shared-host risk explicitly (e.g. resource limits per compose
+  project, alerting that can distinguish which environment degraded).
+- Founder GitHub identity: `m-e-h-r-d-a-a-d`
+- Approval link and reviewed revision: recorded via founder-gate delegate
+  conversation, 2026-08-01 (this package's T00 PR, #266, at its merged SHA)
+- Approval date: 2026-08-01
 
-When founder approval is recorded, set:
-
-- `status: accepted`
-- "Approved option" to Option A or Option B
-- any required conditions (budget cap, uptime targets, migration deadline, etc.)
+`status: accepted`. Approved option: **Option A-modified (same host,
+logically isolated, portable)**. Conditions: shared-host resource/fault
+risk explicitly acknowledged and must be addressed by T01/T04, not treated
+as resolved by this decision alone; no fixed migration deadline set, but the
+compose/env layout must not create migration lock-in.
