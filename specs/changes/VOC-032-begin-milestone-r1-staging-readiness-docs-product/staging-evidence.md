@@ -28,9 +28,17 @@ below for the full record across all three providers tried and the
 founder's explicit decision to proceed to R1 with Cloudflare's 8B model
 despite it not meeting DOC-09 §23. `T14`/`T15`'s one live send/exchange
 still require `VOC-032-DEP-07` (email-provider/Google-OAuth-client
-credentials). No R1-gate-complete declaration is made here, and none can be
-made until `T14`/`T15`'s live evidence is recorded and the founder completes
-staging acceptance per DOC-12 §5.
+credentials) and remain open follow-ups (unit-tested only, no live send/
+exchange recorded). `T11`/`T13` also remain open, documentation-only
+follow-ups (see their own divergence notes below).
+
+**R1 is CLOSED (2026-08-01).** The founder has explicitly completed staging
+acceptance per DOC-12 §5 (recorded on issue #256), reviewing and knowingly
+accepting all four open gaps — the AI-evaluation threshold miss (`EV-22`),
+and the `T11`/`T13`/`T14`/`T15` follow-ups above — as a deliberate launch
+decision, not because they don't exist. None of DOC-09 §23, `AC-11`,
+`AC-13`, `AC-14`, or `AC-15` are amended by this decision; each remains an
+open, tracked follow-up for a future package.
 
 ## Planned in-repository evidence (produced by `T00`–`T12`, recorded as each task merges)
 
@@ -1075,7 +1083,7 @@ summary, exactly as `AC-12` requires.
 | **All required tests pass** | **Satisfied (in-repo).** `go test ./...` from `apps/api/`, `go vet ./...`, `gofmt -l .`, `go build ./...`, and `bash scripts/governance/validate-governance.sh` all pass at the final SHA. The `apps/web` and `infra` trees are exercised by the `karsift-ai-infra` `ci.yml` reusable workflow, not by `T12`'s in-process check, and their evidence is per-PR. | In-repo check is `T12`'s. The `karsift-ai-infra ci.yml` results are produced by CI, not by `T12`. |
 | **Migration + rollback rehearsed** | **Satisfied, with a disclosed limitation.** The live no-op apply, disposable-copy rollback of all 12 approved down artifacts, full 13-migration forward re-apply, and exact schema comparison all passed on 2026-07-30/31 — see `EV-21` above. The disposable copy was taken while the live database held zero application rows (the core-loop exercise that populates rows ran separately, a day later, directly against the live database, not against the disposable copy) — see `EV-21`'s "Disclosed limitation" note. `AC-09`'s literal criteria are met; a populated-table rollback was not exercised. | Exact commands, timestamps, and the disclosed ordering limitation are recorded under `EV-21`. A future package could re-run steps 3-6 in `T09`'s originally-specified order (core-loop writes before the snapshot) if stronger populated-table rollback assurance is ever required. |
 | **AI evaluation thresholds pass** | **FAILED — release-blocking per DOC-09 §23; founder-accepted exception recorded for R1.** `T08`'s mock-provider gate passes every threshold the current `EvaluationResult` shape can measure. The live-provider half genuinely failed against all three real providers tried (OpenCode, Gemini, Cloudflare) — see `EV-22`'s "Live execution status" section above for the full record. The founder has explicitly decided to proceed to R1 with the best available option (Cloudflare, `llama-3.1-8b-instruct-fp8-fast`: 100% reliable, 41% accurate) despite it not meeting DOC-09 §23, to be revisited with real usage data. DOC-09 §23 itself is unchanged. | Mock half: `T08`'s tests all pass. Live half: genuinely failed; not satisfiable by any package without either a stronger available provider, a paid tier, or the flagged prompt-fix lead in `EV-22` — see that section for the founder's own decision and reasoning. |
-| **Founder completes staging acceptance** | **Not started — founder-owned, out of scope of any package.** | This is a single human decision by the founder, recorded as a comment on the package's release issue (per the standard `karsift-ai-infra release.yml` flow). It cannot be satisfied by any code change. |
+| **Founder completes staging acceptance** | **SATISFIED (2026-08-01).** Recorded as a comment on issue #256, explicitly accepting the AI-evaluation exception plus the T11/T13/T14/T15 follow-ups as known, tracked gaps rather than blockers. | Founder's own decision; not satisfiable by any code change. See issue #256's comment history for the full text. |
 | **Scope is frozen** | **Satisfied (in this package).** No new product scope introduced; only the `T00`–`T15` and `T12` deliverables. | Inherently a property of the package's own change-control discipline; `T12`'s role is to confirm no PR in this package introduced unapproved scope. |
 
 ### Items this gate-readiness summary records explicitly, passing or not
