@@ -138,3 +138,38 @@ logically isolated, portable)**. Conditions: shared-host resource/fault
 risk explicitly acknowledged and must be addressed by T01/T04, not treated
 as resolved by this decision alone; no fixed migration deadline set, but the
 compose/env layout must not create migration lock-in.
+
+## Supersession (2026-08-01) — moved to a genuinely separate host
+
+The founder made a second production server available (`130.185.123.152`)
+and asked for a "better way" than manual same-host isolation work. The
+decision above is superseded, not deleted, to keep an honest record of why
+T06's implementation looks the way it does (it was originally built for
+same-host colocation, then verified to work unchanged on a real separate
+host — see T06's evidence).
+
+- **New approved option: plain Option A** — production runs on its own
+  dedicated host, fully separate from staging's. No shared CPU/RAM/fault
+  domain; the "same physical host" conditions/boundaries clause above no
+  longer applies.
+- The portability goal is satisfied by construction now, not as a future
+  intent — production already IS the dedicated host D00 originally
+  recommended before the founder's same-host modification.
+- T01's corrected 4A mechanism (separate directory tree, separate deploy
+  user, separate Compose project) remains valid and in effect even though
+  it's no longer strictly required for isolation on a genuinely separate
+  host — kept as defense in depth, not removed, since it cost nothing to
+  keep and a future consolidation (e.g. moving production back to a shared
+  host for cost reasons) would need it again.
+- Production host: `130.185.123.152` (Ubuntu 24.04, 2 vCPU/4GB, provisioned
+  2026-08-01). Deploy user: `vocanova-production` (dedicated OS user, `docker`
+  group membership, narrowly-scoped passwordless sudo for
+  `mkdir`/`tar`/`chown`/`touch`/`curl`/`chmod` only — not blanket `ALL`).
+- DNS: `production.vocanova.site` / `api-production.vocanova.site`, both
+  Cloudflare-proxied A records to the host above.
+- GitHub `production` environment created with `m-e-h-r-d-a-a-d` as required
+  reviewer.
+- Approval date: 2026-08-01 (founder-gate delegate, executing the founder's
+  direct instruction in conversation, not a new independent R4 judgment call
+  — the founder explicitly chose "second server" over continued same-host
+  troubleshooting).
