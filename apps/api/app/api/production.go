@@ -695,8 +695,13 @@ func RegisterHealthz(api huma.API, db Healthchecker) {
 	})
 }
 
+// RegisterMonitoringSentryTest registers the deliberate-Sentry-test-event
+// endpoint only in the production environment. It is gated on both a
+// non-empty token AND environment == "production" so that staging or any
+// other tier that happens to have MONITORING_TEST_TOKEN set does not also
+// expose the route.
 func RegisterMonitoringSentryTest(api huma.API, expectedToken, environment string) {
-	if strings.TrimSpace(expectedToken) == "" {
+	if strings.TrimSpace(expectedToken) == "" || environment != "production" {
 		return
 	}
 	huma.Register(api, huma.Operation{
@@ -716,11 +721,16 @@ func RegisterMonitoringSentryTest(api huma.API, expectedToken, environment strin
 		)
 		sentry.Flush(2 * time.Second)
 
+		// A 2xx with no event ID does not prove the event reached Sentry
+		// (e.g. DSN unset, network failure swallowed by the SDK) - treat
+		// that as a failure rather than a false "accepted".
+		if eventID == nil {
+			return nil, huma.Error502BadGateway("Sentry did not return an event ID - DSN may be unset or unreachable")
+		}
+
 		out := &MonitoringSentryTestOutput{}
 		out.Body.Status = "accepted"
-		if eventID != nil {
-			out.Body.EventID = string(*eventID)
-		}
+		out.Body.EventID = string(*eventID)
 		out.Body.Timestamp = time.Now().UTC().Format(time.RFC3339)
 		return out, nil
 	})
