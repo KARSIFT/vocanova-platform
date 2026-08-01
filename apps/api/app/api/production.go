@@ -24,10 +24,10 @@ import (
 	"github.com/KARSIFT/vocanova-platform/apps/api/foundation/email"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
-	"github.com/getsentry/sentry-go"
 )
 
 // ProductionConfig is the runtime configuration the cmd/api binary
@@ -71,9 +71,9 @@ type ProductionConfig struct {
 	GoogleOAuthScopes  string
 	GoogleOAuthTimeout time.Duration
 
-	SentryDSN          string
-	SentryEnvironment  string
-	SentryRelease      string
+	SentryDSN           string
+	SentryEnvironment   string
+	SentryRelease       string
 	MonitoringTestToken string
 }
 
@@ -164,13 +164,13 @@ func LoadProductionConfig() (ProductionConfig, error) {
 		EmailFrom:            os.Getenv("EMAIL_FROM"),
 		EmailProviderTimeout: getenvDuration("EMAIL_PROVIDER_TIMEOUT", 10*time.Second),
 
-		GoogleClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
-		GoogleClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-		GoogleOAuthScopes:  os.Getenv("GOOGLE_OAUTH_SCOPES"),
-		GoogleOAuthTimeout: getenvDuration("GOOGLE_OAUTH_TIMEOUT", 8*time.Second),
-		SentryDSN:          os.Getenv("SENTRY_DSN"),
-		SentryEnvironment:  getenv("SENTRY_ENVIRONMENT", getenv("ENVIRONMENT", "staging")),
-		SentryRelease:      os.Getenv("SENTRY_RELEASE"),
+		GoogleClientID:      os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
+		GoogleClientSecret:  os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+		GoogleOAuthScopes:   os.Getenv("GOOGLE_OAUTH_SCOPES"),
+		GoogleOAuthTimeout:  getenvDuration("GOOGLE_OAUTH_TIMEOUT", 8*time.Second),
+		SentryDSN:           os.Getenv("SENTRY_DSN"),
+		SentryEnvironment:   getenv("SENTRY_ENVIRONMENT", getenv("ENVIRONMENT", "staging")),
+		SentryRelease:       os.Getenv("SENTRY_RELEASE"),
 		MonitoringTestToken: os.Getenv("MONITORING_TEST_TOKEN"),
 	}
 
