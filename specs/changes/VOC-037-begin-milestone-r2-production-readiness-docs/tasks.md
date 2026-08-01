@@ -59,6 +59,34 @@ implementation-authorization are separate.
   and does not itself constitute the founder's required R4 legal/privacy sign-off
   — it produces the draft that sign-off is recorded against.
 
+## VOC-037-T06 — Production infrastructure provisioning
+
+- Requirement source: `VOC-037-D00` (accepted 2026-08-01, Option A-modified)
+  and `VOC-037-D01` (accepted 2026-08-01, corrected 4A mechanism) — see
+  `t00-production-hosting-decision-record.md` and
+  `t01-production-secrets-decision-record.md`
+- Acceptance criteria: `VOC-037-AC-06` (new; see acceptance-criteria.md)
+- Tests: `VOC-037-TEST-06`
+- Evidence: `VOC-037-EV-06`
+- Status: pending
+- Depends on: `VOC-037-T00`, `VOC-037-T01` (both accepted; this task executes
+  their already-decided design, it does not make new decisions)
+- Summary: Build the actual production target per T00/T01's accepted
+  decisions: a `/opt/vocanova/production/` directory tree fully separate
+  from staging's `/opt/vocanova/infra/`, its own `vocanova-production`
+  Docker Compose project with explicit per-service resource limits (shared-
+  host contention mitigation), a production-only least-privilege deploy
+  user, a `production` GitHub Actions environment with founder-controlled
+  required reviewers, and a new `.github/workflows/deploy-production.yml`
+  workflow that writes only under the production tree and never touches
+  staging's. Does not choose a production domain/DNS name itself — uses a
+  founder-confirmable placeholder and flags exact hostnames as a T05/founder
+  confirmation item, consistent with T00's "final names to be founder-
+  confirmed during implementation" note. Executes `VOC-037-T01`'s `INS-9`
+  through `INS-11` negative-access rehearsal (staging's deploy path/user
+  cannot read production's secrets) and records `VOC-037-EV-01` alongside
+  its own `EV-06`.
+
 ## VOC-037-T03 — Launch kill-switch and rollback verification (production target)
 
 - Requirement source: `VOC-037-D00` (inherits the hosting decision from `T00`)
@@ -66,7 +94,8 @@ implementation-authorization are separate.
 - Tests: `VOC-037-TEST-03`
 - Evidence: `VOC-037-EV-03`
 - Status: pending
-- Depends on: `VOC-037-T00` (needs a production host to verify against)
+- Depends on: `VOC-037-T06` (needs the actual production target `T06` builds,
+  not just T00's decision, to verify against)
 - Summary: Verify, against whatever production target `T00` decides, that the
   four existing kill switches (`AI_FEATURES_ENABLED`, `EMAIL_MAGIC_LINK_ENABLED`,
   `GOOGLE_OAUTH_ENABLED`, `NEW_USER_SIGNUP_ENABLED`) and the roll-forward/redeploy-
@@ -81,7 +110,7 @@ implementation-authorization are separate.
 - Tests: `VOC-037-TEST-04`
 - Evidence: `VOC-037-EV-04`
 - Status: pending
-- Depends on: `VOC-037-T00`
+- Depends on: `VOC-037-T06`
 - Summary: Configure and verify Sentry error monitoring and Better Stack/
   UptimeRobot uptime monitoring for the production target, with alerts reaching
   the founder, per DOC-11 §1's named tools and §5's "Production-ready" checklist
@@ -94,7 +123,7 @@ implementation-authorization are separate.
 - Tests: `VOC-037-TEST-05`
 - Evidence: `VOC-037-EV-05`
 - Status: pending
-- Depends on: `VOC-037-T00` through `VOC-037-T04`
+- Depends on: `VOC-037-T00` through `VOC-037-T04`, and `VOC-037-T06`
 - Summary: Open the R2 release PR, confirm every applicable check passes and
   required review returns `approve` or an explicitly accepted follow-up
   (mirroring the R1-closure pattern on issue #256), and record the founder's
