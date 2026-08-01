@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto/subtle"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -24,6 +25,7 @@ import (
 	"github.com/KARSIFT/vocanova-platform/apps/api/foundation/email"
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humachi"
+	"github.com/getsentry/sentry-go"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
@@ -69,6 +71,11 @@ type ProductionConfig struct {
 	GoogleClientSecret string
 	GoogleOAuthScopes  string
 	GoogleOAuthTimeout time.Duration
+
+	SentryDSN           string
+	SentryEnvironment   string
+	SentryRelease       string
+	MonitoringTestToken string
 }
 
 // AI-provider identifiers and per-provider connection defaults.
@@ -158,10 +165,14 @@ func LoadProductionConfig() (ProductionConfig, error) {
 		EmailFrom:            os.Getenv("EMAIL_FROM"),
 		EmailProviderTimeout: getenvDuration("EMAIL_PROVIDER_TIMEOUT", 10*time.Second),
 
-		GoogleClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
-		GoogleClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-		GoogleOAuthScopes:  os.Getenv("GOOGLE_OAUTH_SCOPES"),
-		GoogleOAuthTimeout: getenvDuration("GOOGLE_OAUTH_TIMEOUT", 8*time.Second),
+		GoogleClientID:      os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
+		GoogleClientSecret:  os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+		GoogleOAuthScopes:   os.Getenv("GOOGLE_OAUTH_SCOPES"),
+		GoogleOAuthTimeout:  getenvDuration("GOOGLE_OAUTH_TIMEOUT", 8*time.Second),
+		SentryDSN:           os.Getenv("SENTRY_DSN"),
+		SentryEnvironment:   getenv("SENTRY_ENVIRONMENT", getenv("ENVIRONMENT", "staging")),
+		SentryRelease:       os.Getenv("SENTRY_RELEASE"),
+		MonitoringTestToken: os.Getenv("MONITORING_TEST_TOKEN"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -469,6 +480,18 @@ type HealthzOutput struct {
 	}
 }
 
+type MonitoringSentryTestInput struct {
+	Authorization string `header:"Authorization" required:"true"`
+}
+
+type MonitoringSentryTestOutput struct {
+	Body struct {
+		Status    string `json:"status" example:"accepted"`
+		EventID   string `json:"event_id" example:"0123456789abcdef0123456789abcdef"`
+		Timestamp string `json:"timestamp" format:"date-time"`
+	}
+}
+
 // NewProductionAPI returns a huma.API wired against real,
 // Postgres-backed services built from cfg. It registers exactly
 // the same route set NewContractAPI registers, so the OpenAPI
@@ -531,8 +554,16 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 			CSRName:        "vocanova_csrf",
 			OAuthStateName: "vocanova_oauth_state",
 			Domain:         cfg.SessionDomain,
-			Secure:         cfg.SessionSecure,
-			SameSite:       http.SameSiteStrictMode,
+			// Intentionally NOT cfg.SessionDomain: the OAuth state cookie
+			// only round-trips between this API host's own start/callback
+			// endpoints, so it must be host-only (empty Domain), not
+			// scoped to the web app's hostname. A production/staging
+			// sibling-subdomain topology (api-X vs X) means a cookie
+			// scoped to SessionDomain is never sent back to this host by
+			// a real browser - found live via VOC-037-T03's rehearsal.
+			OAuthStateDomain: "",
+			Secure:           cfg.SessionSecure,
+			SameSite:         http.SameSiteStrictMode,
 		},
 	}
 	authSvc := auth.NewService(authRepo, mailer, oauthProvider, clk, limiter, authCfg)
@@ -630,6 +661,7 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 	})
 
 	RegisterHealthz(api, db)
+	RegisterMonitoringSentryTest(api, cfg.MonitoringTestToken, cfg.Environment)
 
 	return api, db, nil
 }
@@ -668,6 +700,47 @@ func RegisterHealthz(api huma.API, db Healthchecker) {
 				Detail: "database is unreachable",
 			}
 		}
+		return out, nil
+	})
+}
+
+// RegisterMonitoringSentryTest registers the deliberate-Sentry-test-event
+// endpoint only in the production environment. It is gated on both a
+// non-empty token AND environment == "production" so that staging or any
+// other tier that happens to have MONITORING_TEST_TOKEN set does not also
+// expose the route.
+func RegisterMonitoringSentryTest(api huma.API, expectedToken, environment string) {
+	if strings.TrimSpace(expectedToken) == "" || environment != "production" {
+		return
+	}
+	huma.Register(api, huma.Operation{
+		OperationID: "PostMonitoringSentryTest",
+		Method:      http.MethodPost,
+		Path:        "/ops/monitoring/sentry-test",
+		Summary:     "Emit a deliberate Sentry test event",
+		Tags:        []string{"Operations"},
+	}, func(ctx context.Context, input *MonitoringSentryTestInput) (*MonitoringSentryTestOutput, error) {
+		token := strings.TrimSpace(strings.TrimPrefix(input.Authorization, "Bearer "))
+		if token == "" || subtle.ConstantTimeCompare([]byte(token), []byte(expectedToken)) != 1 {
+			return nil, huma.Error401Unauthorized("monitoring test token missing or invalid")
+		}
+
+		eventID := sentry.CaptureMessage(
+			fmt.Sprintf("VOC-037-T04 monitoring test event (env=%s)", environment),
+		)
+		sentry.Flush(2 * time.Second)
+
+		// A 2xx with no event ID does not prove the event reached Sentry
+		// (e.g. DSN unset, network failure swallowed by the SDK) - treat
+		// that as a failure rather than a false "accepted".
+		if eventID == nil {
+			return nil, huma.Error502BadGateway("Sentry did not return an event ID - DSN may be unset or unreachable")
+		}
+
+		out := &MonitoringSentryTestOutput{}
+		out.Body.Status = "accepted"
+		out.Body.EventID = string(*eventID)
+		out.Body.Timestamp = time.Now().UTC().Format(time.RFC3339)
 		return out, nil
 	})
 }

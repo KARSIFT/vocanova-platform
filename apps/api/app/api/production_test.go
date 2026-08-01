@@ -178,6 +178,83 @@ func TestLoadProductionConfig_FallsBackToRedirectWhenAllowlistEmpty(t *testing.T
 	assert.Equal(t, []string{cfg.OAuthRedirect}, cfg.OAuthReturnURLs, "empty allowlist must fall back to OAUTH_REDIRECT_URI")
 }
 
+func TestLoadProductionConfig_MonitoringDefaultsAndOverrides(t *testing.T) {
+	t.Setenv("DATABASE_URL", "postgres://example/db")
+	t.Setenv("BASE_URL", "https://staging.vocanova.site")
+	t.Setenv("OAUTH_REDIRECT_URI", "https://api-staging.vocanova.site/auth/oauth/google/callback")
+	t.Setenv("SESSION_COOKIE_DOMAIN", "staging.vocanova.site")
+	t.Setenv("ENVIRONMENT", "production")
+	t.Setenv("SENTRY_DSN", "")
+	t.Setenv("SENTRY_ENVIRONMENT", "")
+	t.Setenv("SENTRY_RELEASE", "")
+	t.Setenv("MONITORING_TEST_TOKEN", "")
+
+	cfg, err := LoadProductionConfig()
+	require.NoError(t, err)
+	assert.Equal(t, "", cfg.SentryDSN)
+	assert.Equal(t, "production", cfg.SentryEnvironment, "SENTRY_ENVIRONMENT should default to ENVIRONMENT")
+	assert.Equal(t, "", cfg.SentryRelease)
+	assert.Equal(t, "", cfg.MonitoringTestToken)
+
+	t.Setenv("SENTRY_DSN", "https://example@sentry.invalid/1")
+	t.Setenv("SENTRY_ENVIRONMENT", "prod-api")
+	t.Setenv("SENTRY_RELEASE", "sha-deadbee")
+	t.Setenv("MONITORING_TEST_TOKEN", "test-token")
+	cfg, err = LoadProductionConfig()
+	require.NoError(t, err)
+	assert.Equal(t, "https://example@sentry.invalid/1", cfg.SentryDSN)
+	assert.Equal(t, "prod-api", cfg.SentryEnvironment)
+	assert.Equal(t, "sha-deadbee", cfg.SentryRelease)
+	assert.Equal(t, "test-token", cfg.MonitoringTestToken)
+}
+
+func TestRegisterMonitoringSentryTest_AuthBehavior(t *testing.T) {
+	cfg := huma.DefaultConfig("monitoring-test", "0.0.1")
+	router := chi.NewMux()
+	api := humachi.New(router, cfg)
+
+	RegisterMonitoringSentryTest(api, "expected-token", "production")
+
+	noAuthReq := httptest.NewRequest(http.MethodPost, "/ops/monitoring/sentry-test", nil)
+	noAuthResp := httptest.NewRecorder()
+	api.Adapter().ServeHTTP(noAuthResp, noAuthReq)
+	assert.Equal(t, http.StatusUnprocessableEntity, noAuthResp.Code)
+
+	badAuthReq := httptest.NewRequest(http.MethodPost, "/ops/monitoring/sentry-test", nil)
+	badAuthReq.Header.Set("Authorization", "Bearer wrong-token")
+	badAuthResp := httptest.NewRecorder()
+	api.Adapter().ServeHTTP(badAuthResp, badAuthReq)
+	assert.Equal(t, http.StatusUnauthorized, badAuthResp.Code)
+
+	// Sentry is not initialized in this test (no SENTRY_DSN), so
+	// CaptureMessage returns a nil event ID from the default no-op hub -
+	// the endpoint must report that as a failure (502), not a false
+	// "accepted" 200, per the fix for the reviewed "no event ID" finding.
+	okReq := httptest.NewRequest(http.MethodPost, "/ops/monitoring/sentry-test", nil)
+	okReq.Header.Set("Authorization", "Bearer expected-token")
+	okResp := httptest.NewRecorder()
+	api.Adapter().ServeHTTP(okResp, okReq)
+	assert.Equal(t, http.StatusBadGateway, okResp.Code)
+}
+
+// TestRegisterMonitoringSentryTest_NonProductionNotRegistered covers the
+// fix for the reviewed "production-only" overstatement: the route must not
+// be registered at all outside the production environment, even with a
+// valid token configured.
+func TestRegisterMonitoringSentryTest_NonProductionNotRegistered(t *testing.T) {
+	cfg := huma.DefaultConfig("monitoring-test", "0.0.1")
+	router := chi.NewMux()
+	api := humachi.New(router, cfg)
+
+	RegisterMonitoringSentryTest(api, "expected-token", "staging")
+
+	req := httptest.NewRequest(http.MethodPost, "/ops/monitoring/sentry-test", nil)
+	req.Header.Set("Authorization", "Bearer expected-token")
+	resp := httptest.NewRecorder()
+	api.Adapter().ServeHTTP(resp, req)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
+}
+
 // TestNewProductionAPI_RequiresDatabaseReachability covers the
 // startup-time safety property the task requires: when the
 // caller asks NewProductionAPI to open a connection against an

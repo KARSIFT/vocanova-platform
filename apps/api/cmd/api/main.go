@@ -18,6 +18,8 @@ import (
 	"time"
 
 	contract "github.com/KARSIFT/vocanova-platform/apps/api/app/api"
+	"github.com/getsentry/sentry-go"
+	sentryhttp "github.com/getsentry/sentry-go/http"
 )
 
 func main() {
@@ -37,6 +39,23 @@ func run() error {
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
 	}
+	if cfg.SentryDSN != "" {
+		release := cfg.SentryRelease
+		if release == "" {
+			release = "unversioned"
+		}
+		if err := sentry.Init(sentry.ClientOptions{
+			Dsn:         cfg.SentryDSN,
+			Environment: cfg.SentryEnvironment,
+			Release:     release,
+		}); err != nil {
+			return fmt.Errorf("init sentry: %w", err)
+		}
+		defer sentry.Flush(2 * time.Second)
+		fmt.Fprintf(os.Stderr, "api: sentry enabled (env=%s)\n", cfg.SentryEnvironment)
+	} else {
+		fmt.Fprintln(os.Stderr, "api: sentry disabled (SENTRY_DSN unset)")
+	}
 
 	api, db, err := contract.NewProductionAPI(cfg, nil)
 	if err != nil {
@@ -44,9 +63,19 @@ func run() error {
 	}
 	defer db.Close()
 
+	// Real unhandled errors/panics from any request, not just the
+	// deliberate VOC-037-T04 test endpoint, must reach Sentry - the
+	// deliberate test event alone proves the DSN/token wiring, not that
+	// "error monitoring active" (DOC-11 §5) is true for real traffic.
+	// sentryhttp.Handle is a no-op-safe wrap even when Sentry was never
+	// initialized (SENTRY_DSN unset): the default hub's client is nil and
+	// events are silently dropped, matching every other Sentry call site
+	// in this codebase.
+	handler := sentryhttp.New(sentryhttp.Options{Repanic: true}).Handle(api.Adapter())
+
 	srv := &http.Server{
 		Addr:              ":" + cfg.Port,
-		Handler:           api.Adapter(),
+		Handler:           handler,
 		ReadHeaderTimeout: 10 * time.Second,
 		ReadTimeout:       30 * time.Second,
 		WriteTimeout:      30 * time.Second,
