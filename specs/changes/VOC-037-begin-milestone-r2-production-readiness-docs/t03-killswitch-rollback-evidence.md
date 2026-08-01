@@ -11,12 +11,20 @@ real production target (`130.185.123.152`), the same pattern used for
 
 ## Standing of `VOC-037-AC-03`
 
-**Partially satisfied.** All four kill switches were verified live to
-produce a genuinely different, documented behavior when toggled. The
-redeploy mechanism was exercised successfully. One genuine, previously
-undiscovered bug was found and is recorded below rather than hidden -
-Google OAuth cannot currently complete an authenticated sign-in end-to-end
-in either staging or production, for reasons unrelated to any kill switch.
+**NOT satisfied**, recorded honestly rather than as a partial pass. Three of
+four switches (`EMAIL_MAGIC_LINK_ENABLED`, `GOOGLE_OAUTH_ENABLED`, and
+`AI_FEATURES_ENABLED`) were verified to change *some* observable signal
+when toggled, but `AI_FEATURES_ENABLED` only at a log level, not the
+documented HTTP surface, and `NEW_USER_SIGNUP_ENABLED` was never toggled
+`true` or verified at all. The redeploy mechanism's recreate/health-check
+half was exercised; its `pull`/registry-auth half was not (session-specific
+failure, not re-demonstrated), and no true two-different-versions rollback
+was possible (only one production artifact exists so far). One genuine,
+previously undiscovered bug was found and is recorded below rather than
+hidden - Google OAuth cannot currently complete an authenticated sign-in
+end-to-end in either staging or production, for reasons unrelated to any
+kill switch. Closing `VOC-037-AC-03` requires completing these gaps or an
+explicit founder-accepted waiver; this record does neither on its own.
 
 ## Kill switch verification (2026-08-01, live against production)
 
