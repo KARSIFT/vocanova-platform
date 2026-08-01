@@ -4,7 +4,7 @@ slug: begin-milestone-r2-production-readiness-docs
 title: 'Begin Milestone R2 (Production Readiness): Sequenced Task Set From R1''s Closed
   State to a Recorded Go/No-Go Decision'
 type: docs
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: 'Not yet computed by running scripts/governance/classify-change-risk.sh
 
@@ -55,7 +55,12 @@ requirement_source: 'Free-text founder request recorded in this package''s own d
   for the exact search and its result). No GitHub issue exists yet for this request;
   the calling workflow is expected to open or link one at adoption. This package does
   not authorize its own adoption -- see approval_status below.'
-requirement_approval_status: not-approved
+requirement_approval_status: 'approved at adoption (2026-08-01, founder-gate). T00 and
+  T02 remain scoped as decision-record/draft-only tasks per tasks.md - authorizing
+  their implementation authorizes drafting a recommendation/draft document for
+  founder review, not the underlying hosting or legal decision itself. T01/T03/T04
+  are sequenced after T00 per their stated dependency and will not be dispatched
+  until the founder has actually decided T00''s open question.'
 base_branch: develop
 base_sha: 3abf590428183395d899bf609d9a38e401357433
 target_branch: develop
@@ -65,9 +70,9 @@ owners:
   package_preparation: planner
   implementation: unassigned
   independent_verification: Claude Code
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 artifacts:
@@ -81,9 +86,10 @@ artifacts:
   release_plan: release-plan.md
 dependencies:
 - id: VOC-037-DEP-00
-  status: open. This package's T00 (production hosting/deploy-target decision) and
-    T02 (legal/privacy prerequisites) both require a founder decision that this drafting
-    pass cannot make; see specification.md's open questions.
+  status: open, not blocking adoption. T00 and T02 are authorized to produce their
+    decision-record/draft deliverables (see tasks.md); the actual founder decisions
+    on production hosting and legal/privacy content remain outstanding and will be
+    sought explicitly once T00/T02 merge and their output exists to review.
 - id: VOC-037-DEP-01
   status: open. T04 (live monitoring/alerting verification) and T03 (launch kill-switch
     verification) depend on the same production host existing, which depends on T00's
@@ -101,9 +107,9 @@ affected_areas:
 - docs/operations/11-devops-and-ci-cd.md
 - specs/changes/VOC-037-begin-milestone-r2-production-readiness-docs
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: draft
+  status: adopted
   target_branch: develop
   pull_request: null
   authority_issue: null
@@ -115,7 +121,7 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
+repository_adoption_status: adopted
 adoption_pr: null
 adoption_evidence: null
 implementation_authority_before_adoption: false
@@ -124,7 +130,11 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: Not yet adopted. Founder review and adoption decision required before
-  any task in this package may be implementation-authorized; the R3 risk proposal,
-  the R4-adjacent flag on T00/T02, and every open question in specification.md and
-  impact-analysis.md remain to be resolved by the founder at adoption.
+blocking_reasons: 'none for T00-T05 implementation dispatch. Adopted 2026-08-01
+  (founder-gate). T00''s production hosting/deploy-target decision and T02''s legal/
+  privacy prerequisites remain real, outstanding founder decisions that this
+  adoption does not and cannot make - T00/T02 are authorized only to produce their
+  decision-record/draft deliverables for founder review; T01/T03/T04 are gated on
+  T00''s actual decision per tasks.md''s stated dependency, and this package''s T05
+  (R2 release PR and founder go/no-go record) remains the required R4 founder
+  decision this whole package leads to.'
