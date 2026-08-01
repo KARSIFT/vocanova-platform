@@ -1,8 +1,9 @@
-# Staging infrastructure
+# Staging and production infrastructure
 
-This directory is the staging-tier infrastructure layout the
-**VOC-032** change package built and ships for the
-`vocanova.site` staging environment.
+This directory contains two environment layouts:
+
+- the staging-tier infrastructure from **VOC-032**
+- the production-tier provisioning artifacts from **VOC-037-T06**
 
 > **DOC-11 contradiction caveat (`VOC-032-D02`, resolved at
 > adoption 2026-07-28).** This layout is **not** the
@@ -26,6 +27,9 @@ This directory is the staging-tier infrastructure layout the
 infra/
 ├── README.md                  # this file (VOC-032-T11)
 ├── docker-compose.yml         # four-service stack: postgres + api + web + nginx
+├── docker-compose.production.yml   # VOC-037-T06 production stack (same-host isolated project)
+├── scripts/
+│   └── rehearse-production-secrets-boundary.sh  # VOC-037 INS-9..INS-11 rehearsal
 ├── nginx/
 │   ├── nginx.conf             # main config (events + http, includes conf.d/*.conf)
 │   ├── conf.d/
@@ -36,6 +40,15 @@ infra/
 │   │   ├── 10-staging-web.conf         # staging.vocanova.site -> web
 │   │   └── 20-api-staging.conf         # api-staging.vocanova.site -> api
 │   └── generate-dev-cert.sh   # self-signed cert for local compose validation
+├── nginx-production/
+│   ├── nginx.conf             # production nginx main config
+│   └── conf.d/
+│       ├── 00-cloudflare-real-ip.conf
+│       ├── 01-tls.conf
+│       ├── 02-docker-dns.conf
+│       ├── 05-default.conf
+│       ├── 10-production-web.conf  # __PRODUCTION_WEB_HOST__ placeholder
+│       └── 20-api-production.conf  # __PRODUCTION_API_HOST__ placeholder
 └── secrets/
     └── .gitignore             # untracked env files + TLS material; see below
 ```
@@ -56,7 +69,8 @@ apps/api/business/auth/google_oauth.go               # T15 (real OAuthProvider)
 apps/web/Dockerfile                                  # T03
 apps/web/next.config.ts                              # T03 (output: 'standalone')
 apps/web/.env.example                                # T01 (web env schema)
-.github/workflows/deploy-staging.yml                 # T07
+.github/workflows/deploy-staging.yml                 # VOC-032-T07
+.github/workflows/deploy-production.yml              # VOC-037-T06
 ```
 
 The actual docker-compose service definitions are in
@@ -192,6 +206,37 @@ workflow file, not a one-sided edit):
 └── usr/local/bin/atlas                 # installed by deploy-staging (idempotent)
 ```
 
+## Production host layout (same physical host, isolated tree)
+
+`VOC-037-D00` accepted "Option A-modified": production is co-located on the same
+physical host as staging, but fully isolated by directory tree, compose project,
+secrets, and deploy user.
+
+`deploy-production` (`.github/workflows/deploy-production.yml`) writes only under:
+
+```
+/opt/vocanova/production/
+├── docker-compose.production.yml
+├── nginx/
+│   ├── nginx.conf
+│   └── conf.d/
+├── secrets/                    # production-only, not shared with staging
+│   ├── api.env
+│   ├── postgres.env
+│   └── nginx/{cert.pem,key.pem}
+├── infra/scripts/rehearse-production-secrets-boundary.sh
+└── apps/api/{scripts,migrations}/...
+```
+
+Isolation rules enforced by T06:
+
+- production compose project name is `vocanova-production`
+- production paths never reference `/opt/vocanova/infra`
+- production workflow uses `PRODUCTION_*` secrets and environment `production`
+- shared-host contention is bounded by explicit `mem_limit`/`cpus` for each service
+- `rehearse-production-secrets-boundary.sh` executes `INS-9` through `INS-11`
+  to prove staging deploy identity cannot read production secrets
+
 The `apps/api/migrations/atlas.sum` integrity file is part
 of the deploy bundle; the `migrate.sh` wrapper refuses to
 proceed if it is missing.
@@ -319,14 +364,11 @@ changed in place (a protected-area edit, separate package
 or narrow T06 exception) or a disposable scratch database
 is used that does not exercise the duplicate-index file.
 
-## Production deployment (not authorized)
+## Production release authority
 
-This package authorizes **no production deployment**. RL1
-and RL2 technical activation and autonomous production
-release remain disabled per
-`docs/governance/a003-transition-state.yaml`; the deploy
-target this README documents is **staging only**, on the
-founder-provisioned host.
+`VOC-037-T06` provisions production infrastructure paths and deploy automation.
+It does not close R2, authorize launch, or activate autonomous production release.
+Founder go/no-go remains a separate `VOC-037-T05` gate.
 
 ## Cross-references
 

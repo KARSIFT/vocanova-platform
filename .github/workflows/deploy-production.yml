@@ -1,0 +1,269 @@
+name: deploy-production
+
+on:
+  workflow_dispatch:
+    inputs:
+      production_web_host:
+        description: "Production web hostname (founder-confirmed for this run)"
+        required: true
+        type: string
+        default: production.vocanova.site
+      production_api_host:
+        description: "Production API hostname (founder-confirmed for this run)"
+        required: true
+        type: string
+        default: api-production.vocanova.site
+      production_api_base_url:
+        description: "NEXT_PUBLIC_API_BASE_URL used at web image build time"
+        required: true
+        type: string
+        default: https://api-production.vocanova.site
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: deploy to production
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - name: Check out reviewed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract short commit SHA
+        id: sha
+        run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Build and push vocanova-api
+        uses: docker/build-push-action@v5
+        with:
+          context: apps/api
+          file: apps/api/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/karsift/vocanova-api:sha-${{ steps.sha.outputs.short_sha }}
+            ghcr.io/karsift/vocanova-api:prod
+          provenance: false
+
+      - name: Build and push vocanova-web
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          build-args: NEXT_PUBLIC_API_BASE_URL=${{ inputs.production_api_base_url }}
+          tags: |
+            ghcr.io/karsift/vocanova-web:sha-${{ steps.sha.outputs.short_sha }}
+            ghcr.io/karsift/vocanova-web:prod
+          provenance: false
+
+      - name: Configure SSH host key verification
+        env:
+          PRODUCTION_SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$PRODUCTION_SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Bundle production deploy artifacts
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/production-deploy-bundle
+          mkdir -p /tmp/production-deploy-bundle
+          mkdir -p /tmp/production-deploy-bundle/nginx/conf.d
+          mkdir -p /tmp/production-deploy-bundle/infra/scripts
+          mkdir -p /tmp/production-deploy-bundle/apps/api/scripts
+          mkdir -p /tmp/production-deploy-bundle/apps/api/migrations
+
+          cp infra/docker-compose.production.yml /tmp/production-deploy-bundle/
+          cp infra/nginx-production/nginx.conf /tmp/production-deploy-bundle/nginx/
+          cp infra/nginx-production/conf.d/*.conf /tmp/production-deploy-bundle/nginx/conf.d/
+          cp infra/scripts/rehearse-production-secrets-boundary.sh /tmp/production-deploy-bundle/infra/scripts/
+          chmod +x /tmp/production-deploy-bundle/infra/scripts/rehearse-production-secrets-boundary.sh
+          cp apps/api/scripts/migrate.sh /tmp/production-deploy-bundle/apps/api/scripts/
+          chmod +x /tmp/production-deploy-bundle/apps/api/scripts/migrate.sh
+          cp apps/api/migrations/*.sql /tmp/production-deploy-bundle/apps/api/migrations/
+          cp apps/api/migrations/atlas.sum /tmp/production-deploy-bundle/apps/api/migrations/
+          tar -czf "$GITHUB_WORKSPACE/production-deploy-bundle.tgz" -C /tmp/production-deploy-bundle .
+
+      - name: Copy deploy bundle to production host
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.PRODUCTION_SSH_HOST }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          source: production-deploy-bundle.tgz
+          target: /tmp/
+
+      - name: Sync production AI-provider configuration from GitHub secrets
+        uses: appleboy/ssh-action@v1
+        env:
+          PRODUCTION_CLOUDFLARE_API_TOKEN: ${{ secrets.PRODUCTION_CLOUDFLARE_API_TOKEN }}
+          PRODUCTION_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.PRODUCTION_CLOUDFLARE_ACCOUNT_ID }}
+        with:
+          host: ${{ secrets.PRODUCTION_SSH_HOST }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          command_timeout: 2m
+          envs: PRODUCTION_CLOUDFLARE_API_TOKEN,PRODUCTION_CLOUDFLARE_ACCOUNT_ID
+          script: |
+            set -euo pipefail
+            if [ -z "${PRODUCTION_CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${PRODUCTION_CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+              echo "PRODUCTION_CLOUDFLARE_API_TOKEN / PRODUCTION_CLOUDFLARE_ACCOUNT_ID missing or empty" >&2
+              exit 1
+            fi
+            sudo mkdir -p /opt/vocanova/production/secrets
+            sudo touch /opt/vocanova/production/secrets/api.env
+            sudo chown "$(id -un)":"$(id -gn)" /opt/vocanova/production/secrets/api.env
+            sed -i \
+              -e '/^AI_PROVIDER=/d' \
+              -e '/^AI_PROVIDER_API_KEY=/d' \
+              -e '/^AI_PROVIDER_ACCOUNT_ID=/d' \
+              -e '/^AI_PROVIDER_MODEL=/d' \
+              -e '/^AI_FEATURES_ENABLED=/d' \
+              /opt/vocanova/production/secrets/api.env
+            {
+              echo "AI_PROVIDER=cloudflare"
+              echo "AI_PROVIDER_API_KEY=${PRODUCTION_CLOUDFLARE_API_TOKEN}"
+              echo "AI_PROVIDER_ACCOUNT_ID=${PRODUCTION_CLOUDFLARE_ACCOUNT_ID}"
+              echo "AI_PROVIDER_MODEL=@cf/meta/llama-3.1-8b-instruct-fp8-fast"
+              echo "AI_FEATURES_ENABLED=true"
+            } >> /opt/vocanova/production/secrets/api.env
+            chmod 600 /opt/vocanova/production/secrets/api.env
+
+      - name: Deploy to production host
+        uses: appleboy/ssh-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          PRODUCTION_WEB_HOST: ${{ inputs.production_web_host }}
+          PRODUCTION_API_HOST: ${{ inputs.production_api_host }}
+          PRODUCTION_API_BASE_URL: ${{ inputs.production_api_base_url }}
+          STAGING_DEPLOY_USER: ${{ secrets.STAGING_SSH_USER }}
+          PRODUCTION_DEPLOY_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+        with:
+          host: ${{ secrets.PRODUCTION_SSH_HOST }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          command_timeout: 20m
+          envs: GITHUB_TOKEN,GITHUB_ACTOR,PRODUCTION_WEB_HOST,PRODUCTION_API_HOST,PRODUCTION_API_BASE_URL,STAGING_DEPLOY_USER,PRODUCTION_DEPLOY_USER
+          script: |
+            set -euo pipefail
+
+            sudo mkdir -p /opt/vocanova/production
+            sudo tar -xzf /tmp/production-deploy-bundle.tgz -C /opt/vocanova/production
+            sudo chown -R "$(id -un)":"$(id -gn)" /opt/vocanova/production
+            chmod 750 /opt/vocanova/production
+            mkdir -p /opt/vocanova/production/secrets/nginx
+            chmod 700 /opt/vocanova/production/secrets
+            chmod 700 /opt/vocanova/production/secrets/nginx
+
+            if ! command -v atlas >/dev/null 2>&1; then
+              sudo curl -fsSL "https://release.ariga.io/atlas/atlas-linux-amd64-v1.2.0" -o /usr/local/bin/atlas
+              sudo chmod +x /usr/local/bin/atlas
+            fi
+
+            cd /opt/vocanova/production
+            sed -i "s/__PRODUCTION_WEB_HOST__/${PRODUCTION_WEB_HOST}/g" nginx/conf.d/10-production-web.conf
+            sed -i "s/__PRODUCTION_API_HOST__/${PRODUCTION_API_HOST}/g" nginx/conf.d/20-api-production.conf
+
+            export VOCANOVA_PRODUCTION_ROOT="/opt/vocanova/production"
+            export PRODUCTION_NEXT_PUBLIC_API_BASE_URL="$PRODUCTION_API_BASE_URL"
+            compose_rendered="$(docker compose -f docker-compose.production.yml -p vocanova-production config)"
+            case "$compose_rendered" in
+              *"/opt/vocanova/infra"*)
+                echo "ERROR: production compose references staging path /opt/vocanova/infra" >&2
+                exit 1
+                ;;
+            esac
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+            docker compose -f docker-compose.production.yml -p vocanova-production pull
+
+            docker compose -f docker-compose.production.yml -p vocanova-production up -d postgres
+            postgres_status=starting
+            for attempt in $(seq 1 30); do
+              postgres_status=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}missing{{end}}' vocanova-production-postgres 2>/dev/null || true)
+              if [ "$postgres_status" = "healthy" ]; then
+                break
+              fi
+              sleep 2
+            done
+            if [ "$postgres_status" != "healthy" ]; then
+              echo "ERROR: production Postgres did not become healthy within 60 seconds" >&2
+              docker compose -f docker-compose.production.yml -p vocanova-production logs --no-color --tail=100 postgres >&2
+              exit 1
+            fi
+
+            set -a
+            . /opt/vocanova/production/secrets/api.env
+            set +a
+            postgres_ip=$(docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' vocanova-production-postgres)
+            if [ -z "$postgres_ip" ]; then
+              echo "ERROR: could not resolve production Postgres private IP" >&2
+              exit 1
+            fi
+            migration_database_url=$(printf "%s" "$DATABASE_URL" | sed "s/@postgres:5432/@${postgres_ip}:5432/")
+            if [ "$migration_database_url" = "$DATABASE_URL" ]; then
+              echo "ERROR: DATABASE_URL does not target the expected Compose postgres service" >&2
+              exit 1
+            fi
+            DATABASE_URL="$migration_database_url" sh /opt/vocanova/production/apps/api/scripts/migrate.sh
+            unset migration_database_url
+
+            docker compose -f docker-compose.production.yml -p vocanova-production up -d
+
+            sh /opt/vocanova/production/infra/scripts/rehearse-production-secrets-boundary.sh \
+              "$STAGING_DEPLOY_USER" \
+              "$PRODUCTION_DEPLOY_USER"
+
+      - name: Poll production API health endpoint
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            if curl -fsS --max-time 5 \
+                -H "Host: ${{ inputs.production_api_host }}" \
+                "https://${{ inputs.production_api_host }}/healthz" > /dev/null; then
+              echo "Production API health check passed on attempt $i/60"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "ERROR: production API did not become healthy within 5 minutes" >&2
+          exit 1
+
+      - name: Poll production web endpoint
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 60); do
+            status=$(curl -sS --max-time 5 -o /dev/null -w "%{http_code}" \
+                -H "Host: ${{ inputs.production_web_host }}" \
+                "https://${{ inputs.production_web_host }}/" || echo "000")
+            if [[ "$status" == 2* ]]; then
+              echo "Production web health check passed on attempt $i/60 (status $status)"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "ERROR: production web did not return 2xx within 5 minutes" >&2
+          exit 1
