@@ -1,0 +1,140 @@
+schema_version: 1
+id: VOC-037
+slug: begin-milestone-r2-production-readiness-docs
+title: 'Begin Milestone R2 (Production Readiness): Sequenced Task Set From R1''s Closed
+  State to a Recorded Go/No-Go Decision'
+type: docs
+status: adopted
+risk: R3
+planned_implementation_risk_floor: 'Not yet computed by running scripts/governance/classify-change-risk.sh
+
+  against a real file set, because this package''s own tasks (T00-T08 below)
+
+  do not yet have an approved, task-scoped file list to classify -- each
+
+  task''s own PR must run the classifier against its own actual diff at
+
+  implementation time. This package proposes R3 for the milestone as a
+
+  whole because its known likely areas (production secrets/credential
+
+  management, production infrastructure/hosting decisions, launch
+
+  kill-switches, and legal/privacy prerequisites) squarely match
+
+  docs/governance/change-risk-classification.md''s R3 row, and at least one
+
+  task (T00, the production hosting/deploy-target decision) plus the legal/
+
+  privacy prerequisite task (T02) plausibly reach R4 under that same
+
+  document''s classification-test question 1 (material product direction,
+
+  user-trust posture, and DOC-12''s own explicit founder-decision requirement
+
+  for go/no-go). This is a draft proposal for a human to review at adoption
+
+  time, not a determination, and does not bind any individual task''s own
+
+  later, path-based classifier run.'
+canonical_path: specs/changes/VOC-037-begin-milestone-r2-production-readiness-docs
+authority_model: a003-active
+requirement_source: 'Free-text founder request recorded in this package''s own drafting
+  run (2026-08-01), grounded against docs/product/12-mvp-implementation-plan.md (DOC-12)
+  section 5''s R2 objective and gate, and against specs/changes/VOC-032-begin-milestone-r1-staging-readiness-docs-product/staging-evidence.md''s
+  final R1-closure record (R1 closed 2026-08-01, founder-accepted per issue #256,
+  with four explicitly tracked follow-ups: the DOC-09 section 23 AI-evaluation-threshold
+  miss, the T14/T15 live email/Google-OAuth evidence blocked on VOC-032-DEP-07 credentials,
+  and the T11/T13 documentation rewrites). This package does not fold those four follow-ups
+  into R2 scope, per the request''s own explicit instruction, except where a new R2
+  task naturally depends on one of them (see specification.md''s dependency notes).
+  This package is also grounded against docs/operations/11-devops-and-ci-cd.md (DOC-11,
+  as amended by VOC-032-section-1-amendment) for the current staging-tier infrastructure
+  shape, and against a repository-wide search for existing privacy-policy, terms-of-service,
+  or data-handling-disclosure documents, which found none under docs/ (see specification.md
+  for the exact search and its result). No GitHub issue exists yet for this request;
+  the calling workflow is expected to open or link one at adoption. This package does
+  not authorize its own adoption -- see approval_status below.'
+requirement_approval_status: 'approved at adoption (2026-08-01, founder-gate). T00 and
+  T02 remain scoped as decision-record/draft-only tasks per tasks.md - authorizing
+  their implementation authorizes drafting a recommendation/draft document for
+  founder review, not the underlying hosting or legal decision itself. T01/T03/T04
+  are sequenced after T00 per their stated dependency and will not be dispatched
+  until the founder has actually decided T00''s open question.'
+base_branch: develop
+base_sha: 3abf590428183395d899bf609d9a38e401357433
+target_branch: develop
+approved_candidate_sha: not-set-until-adoption
+owners:
+  decision: founder
+  package_preparation: planner
+  implementation: unassigned
+  independent_verification: Claude Code
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
+production_impact: unknown
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+- id: VOC-037-DEP-00
+  status: open, not blocking adoption. T00 and T02 are authorized to produce their
+    decision-record/draft deliverables (see tasks.md); the actual founder decisions
+    on production hosting and legal/privacy content remain outstanding and will be
+    sought explicitly once T00/T02 merge and their output exists to review.
+- id: VOC-037-DEP-01
+  status: open. T04 (live monitoring/alerting verification) and T03 (launch kill-switch
+    verification) depend on the same production host existing, which depends on T00's
+    decision being made and implemented first -- this package sequences that dependency
+    explicitly in tasks.md.
+- id: VOC-037-DEP-02
+  status: informational, not blocking this drafting pass. VOC-032-DEP-07 (email-provider
+    and Google-OAuth production credentials, distinct from the staging credentials
+    already tracked as an open R1 follow-up) is referenced by T01 (production credential/secrets
+    management) only insofar as T01 must decide the production secret- storage mechanism
+    before those credentials are provisioned for production; T01 does not re-open
+    or duplicate the R1 follow-up itself.
+affected_areas:
+- docs/product/12-mvp-implementation-plan.md
+- docs/operations/11-devops-and-ci-cd.md
+- specs/changes/VOC-037-begin-milestone-r2-production-readiness-docs
+implementation:
+  authorized: true
+  required: true
+  status: adopted
+  target_branch: develop
+  pull_request: null
+  authority_issue: null
+release:
+  required: false
+  mode: not-authorized-by-this-package
+  production_impact: unknown
+  deployment: not-authorized-by-this-package
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: adopted
+adoption_pr: null
+adoption_evidence: null
+implementation_authority_before_adoption: false
+implementation_authority_status: not-exercised
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
+blocking_reasons: 'none for T00-T05 implementation dispatch. Adopted 2026-08-01
+  (founder-gate). T00''s production hosting/deploy-target decision and T02''s legal/
+  privacy prerequisites remain real, outstanding founder decisions that this
+  adoption does not and cannot make - T00/T02 are authorized only to produce their
+  decision-record/draft deliverables for founder review; T01/T03/T04 are gated on
+  T00''s actual decision per tasks.md''s stated dependency, and this package''s T05
+  (R2 release PR and founder go/no-go record) remains the required R4 founder
+  decision this whole package leads to.'
