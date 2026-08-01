@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"crypto/subtle"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -712,7 +713,7 @@ func RegisterMonitoringSentryTest(api huma.API, expectedToken, environment strin
 		Tags:        []string{"Operations"},
 	}, func(ctx context.Context, input *MonitoringSentryTestInput) (*MonitoringSentryTestOutput, error) {
 		token := strings.TrimSpace(strings.TrimPrefix(input.Authorization, "Bearer "))
-		if token == "" || token != expectedToken {
+		if token == "" || subtle.ConstantTimeCompare([]byte(token), []byte(expectedToken)) != 1 {
 			return nil, huma.Error401Unauthorized("monitoring test token missing or invalid")
 		}
 
