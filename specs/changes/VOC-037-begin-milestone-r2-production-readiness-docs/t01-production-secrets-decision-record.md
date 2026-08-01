@@ -285,3 +285,16 @@ Informational only, per `change.yaml`'s `VOC-037-DEP-02`. Whenever the still-ope
 - Approval date: 2026-08-01
 
 `status: accepted`.
+
+## Supersession note (2026-08-01)
+
+`VOC-037-D00` is now itself superseded (see that record's own "Supersession"
+section): production moved to a genuinely separate host
+(`130.185.123.152`), not same-host colocation. The 4A mechanism above
+(separate directory tree, separate Compose project, separate deploy user,
+resource limits) remains in effect and correct — none of it depended on
+being on a shared host, and it's strictly stronger isolation than a bare
+separate-host deployment would have required on its own. No changes needed
+to this record's approved mechanism; the shared-host-specific "Required
+conditions" note above is no longer load-bearing but is left as-is for
+historical accuracy.
