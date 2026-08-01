@@ -1,0 +1,245 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# VOC-037-T06 / VOC-037-TEST-01 (INS-9 through INS-11)
+#
+# Proves the logical isolation VOC-037-D01's corrected 4A mechanism
+# depends on, now that VOC-037-D00 co-locates both tiers on one host:
+#
+#   * /opt/vocanova/infra/secrets      (staging)
+#   * /opt/vocanova/production/secrets (production)
+#
+# Usage:
+#   rehearse-production-secrets-boundary.sh <staging_user> <production_user>
+#
+# Both tree roots can be overridden (VOCANOVA_STAGING_ROOT /
+# VOCANOVA_PRODUCTION_ROOT) so the same script can be run against a
+# disposable rehearsal host that mirrors the production shape without
+# touching the real one - which is exactly what VOC-037-TEST-01's
+# preconditions call for before a real production host exists.
+#
+# Every check either passes or exits non-zero. A check that cannot be
+# evaluated (missing file, `sudo -u` unavailable) is a FAILURE, never a
+# silent pass: an unevaluated negative-access check is indistinguishable
+# from an unenforced one.
+
+if [ "$#" -ne 2 ]; then
+  echo "usage: $0 <staging_user> <production_user>" >&2
+  exit 1
+fi
+
+staging_user="$1"
+production_user="$2"
+
+production_root="${VOCANOVA_PRODUCTION_ROOT:-/opt/vocanova/production}"
+staging_root="${VOCANOVA_STAGING_ROOT:-/opt/vocanova/infra}"
+production_tree="$production_root/secrets"
+staging_tree="$staging_root/secrets"
+
+failures=0
+
+fail() {
+  echo "  FAIL: $*" >&2
+  failures=$((failures + 1))
+}
+
+pass() {
+  echo "  ok: $*"
+}
+
+# Modes are compared as an integer bitmask rather than a string so that
+# "no wider than 0750" is checked, not "exactly 0750" - a stricter mode
+# than the baseline must not be reported as a violation.
+require_mode_no_wider_than() {
+  target="$1"
+  max_mode="$2"
+
+  if [ ! -e "$target" ]; then
+    fail "$target does not exist (cannot verify mode $max_mode)"
+    return
+  fi
+
+  actual_mode="$(stat -c "%a" "$target")"
+  if [ "$(( 0"$actual_mode" & ~0"$max_mode" ))" -ne 0 ]; then
+    fail "$target mode is $actual_mode, wider than the required $max_mode"
+    return
+  fi
+  pass "$target mode $actual_mode is within $max_mode"
+}
+
+require_owner_not() {
+  target="$1"
+  forbidden_owner="$2"
+
+  if [ ! -e "$target" ]; then
+    fail "$target does not exist (cannot verify ownership)"
+    return
+  fi
+
+  actual_owner="$(stat -c "%U" "$target")"
+  if [ "$actual_owner" = "$forbidden_owner" ]; then
+    fail "$target is owned by $forbidden_owner, which must not own production material"
+    return
+  fi
+  pass "$target is owned by $actual_owner (not $forbidden_owner)"
+}
+
+# A negative-access probe has three outcomes and only one of them is a
+# pass. Readable => the boundary is broken. Unreadable => the boundary
+# holds. Probe never ran (no sudo rights, missing account) => unknown,
+# which is reported as a failure, because an unevaluated check is
+# indistinguishable from an unenforced one.
+#
+# The probe's own exit status cannot be used to tell "unreadable" from
+# "sudo refused": both are exit 1. The inner shell therefore echoes a
+# marker carrying the real status, and a missing marker means the probe
+# did not run.
+probe_as_user() {
+  user="$1"
+  shift
+
+  set +e
+  probe_output="$(sudo -n -u "$user" sh -c '"$@" >/dev/null 2>&1; echo "PROBE:$?"' _ "$@" 2>/dev/null)"
+  set -e
+
+  case "$probe_output" in
+    *PROBE:*) printf '%s' "${probe_output##*PROBE:}" ;;
+    *) printf 'unknown' ;;
+  esac
+}
+
+require_unreadable_by() {
+  user="$1"
+  target="$2"
+
+  if [ ! -e "$target" ]; then
+    fail "$target does not exist; the negative-access probe for $user is meaningless"
+    return
+  fi
+
+  probe_status="$(probe_as_user "$user" test -r "$target")"
+  case "$probe_status" in
+    0) fail "$user CAN read $target" ;;
+    unknown) fail "could not run the read probe for $user against $target" ;;
+    *) pass "$user cannot read $target" ;;
+  esac
+}
+
+require_untraversable_by() {
+  user="$1"
+  target="$2"
+
+  probe_status="$(probe_as_user "$user" ls "$target")"
+  case "$probe_status" in
+    0) fail "$user can list $target" ;;
+    unknown) fail "could not run the traversal probe for $user against $target" ;;
+    *) pass "$user cannot list $target" ;;
+  esac
+}
+
+echo "[INS-9] production secret tree exists and matches the D01 permission baseline"
+require_mode_no_wider_than "$production_root" 750
+require_mode_no_wider_than "$production_tree" 700
+require_mode_no_wider_than "$production_tree/nginx" 700
+require_owner_not "$production_root" "$staging_user"
+require_owner_not "$production_tree" "$staging_user"
+
+env_files_found=0
+for env_file in "$production_tree"/*.env; do
+  [ -e "$env_file" ] || continue
+  env_files_found=$((env_files_found + 1))
+  require_mode_no_wider_than "$env_file" 600
+  require_owner_not "$env_file" "$staging_user"
+done
+if [ "$env_files_found" -eq 0 ]; then
+  fail "no *.env file found under $production_tree; production secrets are not provisioned"
+else
+  pass "$env_files_found production env file(s) checked"
+fi
+
+for key_file in "$production_tree"/nginx/key.pem "$production_tree"/nginx/cert.pem; do
+  require_mode_no_wider_than "$key_file" 600
+done
+
+# Any host path belonging to the other tier - staging's secrets tree,
+# its app tree, or a relative build context that resolved upward out of
+# the production root - is a cross-tier reference.
+report_stray_paths() {
+  source_label="$1"
+  text="$2"
+
+  stray_paths="$(printf '%s\n' "$text" \
+    | grep -oE "(/opt/vocanova|$staging_root|$(dirname "$production_root"))[^\"' :,]*" \
+    | grep -v "^$production_root" \
+    | sort -u || true)"
+
+  if [ -n "$stray_paths" ]; then
+    fail "$source_label references paths outside $production_root: $(printf '%s' "$stray_paths" | tr '\n' ' ')"
+    return
+  fi
+  pass "no $source_label path outside $production_root"
+}
+
+echo "[INS-10] production compose reads the production tree only"
+compose_file="$production_root/docker-compose.production.yml"
+if [ ! -f "$compose_file" ]; then
+  fail "$compose_file is missing"
+else
+  # Two passes are needed, because neither alone sees every host path.
+  # `docker compose config` resolves relative volume and build paths to
+  # absolute ones (the raw file cannot show those), but it folds
+  # `env_file` entries into `environment:` and drops the file paths
+  # themselves - so a compose file whose only cross-tier reference is an
+  # env_file pointing at staging renders completely clean. The raw file,
+  # with the root variable expanded the same way compose expands it,
+  # is what catches that case.
+  set +e
+  compose_rendered="$(VOCANOVA_PRODUCTION_ROOT="$production_root" \
+    docker compose -f "$compose_file" -p vocanova-production config 2>&1)"
+  compose_status=$?
+  set -e
+
+  if [ "$compose_status" -ne 0 ]; then
+    fail "docker compose config failed: $compose_rendered"
+  else
+    report_stray_paths "rendered compose" "$compose_rendered"
+
+    if printf '%s\n' "$compose_rendered" | grep -qE '^[[:space:]]+build:'; then
+      fail "production compose declares a build context; images must be pulled by tag"
+    else
+      pass "production compose declares no build context"
+    fi
+  fi
+
+  # Comments are stripped first: this file's own header discusses the
+  # staging paths it must never use, and a documentation mention is not
+  # a reference.
+  compose_source_expanded="$(sed \
+    -e 's/[[:space:]]*#.*$//' \
+    -e "s#\${VOCANOVA_PRODUCTION_ROOT:-/opt/vocanova/production}#$production_root#g" \
+    -e "s#\${VOCANOVA_PRODUCTION_ROOT}#$production_root#g" \
+    "$compose_file")"
+  report_stray_paths "compose source" "$compose_source_expanded"
+
+  if printf '%s\n' "$compose_source_expanded" | grep -qF "$production_tree"; then
+    pass "compose references the production secrets tree"
+  else
+    fail "compose does not reference $production_tree"
+  fi
+fi
+
+echo "[INS-11] neither tier's deploy identity can read the other's secrets"
+require_unreadable_by "$staging_user" "$production_tree/api.env"
+require_untraversable_by "$staging_user" "$production_root"
+if [ -e "$staging_tree/api.env" ]; then
+  require_unreadable_by "$production_user" "$staging_tree/api.env"
+else
+  pass "staging secrets tree absent on this host; production-to-staging probe not applicable"
+fi
+
+if [ "$failures" -ne 0 ]; then
+  echo "FAIL: $failures production/staging secret boundary check(s) failed" >&2
+  exit 1
+fi
+
+echo "PASS: production/staging secret boundary rehearsal checks succeeded"

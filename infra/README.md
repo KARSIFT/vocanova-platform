@@ -1,8 +1,9 @@
-# Staging infrastructure
+# Staging and production infrastructure
 
-This directory is the staging-tier infrastructure layout the
-**VOC-032** change package built and ships for the
-`vocanova.site` staging environment.
+This directory contains two environment layouts:
+
+- the staging-tier infrastructure from **VOC-032**
+- the production-tier provisioning artifacts from **VOC-037-T06**
 
 > **DOC-11 contradiction caveat (`VOC-032-D02`, resolved at
 > adoption 2026-07-28).** This layout is **not** the
@@ -26,6 +27,10 @@ This directory is the staging-tier infrastructure layout the
 infra/
 ├── README.md                  # this file (VOC-032-T11)
 ├── docker-compose.yml         # four-service stack: postgres + api + web + nginx
+├── docker-compose.production.yml   # VOC-037-T06 production stack (same-host isolated project)
+├── scripts/
+│   ├── rehearse-production-secrets-boundary.sh          # VOC-037 INS-9..INS-11 rehearsal
+│   └── rehearse-production-secrets-boundary.selftest.sh # disposable-mirror harness for the above
 ├── nginx/
 │   ├── nginx.conf             # main config (events + http, includes conf.d/*.conf)
 │   ├── conf.d/
@@ -36,6 +41,15 @@ infra/
 │   │   ├── 10-staging-web.conf         # staging.vocanova.site -> web
 │   │   └── 20-api-staging.conf         # api-staging.vocanova.site -> api
 │   └── generate-dev-cert.sh   # self-signed cert for local compose validation
+├── nginx-production/
+│   ├── nginx.conf             # production nginx main config
+│   └── conf.d/
+│       ├── 00-cloudflare-real-ip.conf
+│       ├── 01-tls.conf
+│       ├── 02-docker-dns.conf
+│       ├── 05-default.conf
+│       ├── 10-production-web.conf  # __PRODUCTION_WEB_HOST__ placeholder
+│       └── 20-api-production.conf  # __PRODUCTION_API_HOST__ placeholder
 └── secrets/
     └── .gitignore             # untracked env files + TLS material; see below
 ```
@@ -56,7 +70,8 @@ apps/api/business/auth/google_oauth.go               # T15 (real OAuthProvider)
 apps/web/Dockerfile                                  # T03
 apps/web/next.config.ts                              # T03 (output: 'standalone')
 apps/web/.env.example                                # T01 (web env schema)
-.github/workflows/deploy-staging.yml                 # T07
+.github/workflows/deploy-staging.yml                 # VOC-032-T07
+.github/workflows/deploy-production.yml              # VOC-037-T06
 ```
 
 The actual docker-compose service definitions are in
@@ -192,6 +207,89 @@ workflow file, not a one-sided edit):
 └── usr/local/bin/atlas                 # installed by deploy-staging (idempotent)
 ```
 
+## Production host layout (same physical host, isolated tree)
+
+`VOC-037-D00` accepted "Option A-modified": production is co-located on the same
+physical host as staging, but fully isolated by directory tree, compose project,
+secrets, and deploy user.
+
+`deploy-production` (`.github/workflows/deploy-production.yml`) writes only under:
+
+```
+/opt/vocanova/production/
+├── docker-compose.production.yml
+├── nginx/
+│   ├── nginx.conf
+│   └── conf.d/
+├── secrets/                    # production-only, not shared with staging
+│   ├── api.env
+│   ├── postgres.env
+│   └── nginx/{cert.pem,key.pem}
+├── infra/scripts/rehearse-production-secrets-boundary.sh
+└── apps/api/{scripts,migrations}/...
+```
+
+Isolation rules enforced by T06:
+
+- production compose project name is `vocanova-production`
+- production paths never reference `/opt/vocanova/infra`
+- production workflow uses `PRODUCTION_*` secrets and environment `production`
+- shared-host contention is bounded by explicit `mem_limit`/`cpus` for each service
+- `rehearse-production-secrets-boundary.sh` executes `INS-9` through `INS-11`
+  to prove staging deploy identity cannot read production secrets
+
+Two rules keep the two tiers from colliding on the shared root, and both are
+load-bearing:
+
+- **`deploy-staging` owns only `/opt/vocanova/infra` and `/opt/vocanova/apps`.**
+  It must never `chown`, extract into, or read `/opt/vocanova/production`. Its
+  deploy bundle is rejected before extraction if it contains any other path.
+  (It previously ran `chown -R … /opt/vocanova`, which took ownership of the
+  production tree; see `VOC-037-EV-01`.)
+- **`docker-compose.production.yml` declares no `build:` block.** It is
+  deployed to `/opt/vocanova/production/`, so any relative build context would
+  resolve upward into staging's tree. Production runs images built and pushed
+  by `deploy-production` and pulled by immutable `sha-<short-sha>` tag; that
+  tag is also what makes DOC-11 §3's redeploy-by-digest rollback possible.
+
+### Port mapping and Cloudflare origin routing
+
+Staging's nginx already publishes the host's `80`/`443`, so production's
+publishes `8081`/`8443` instead — two containers cannot bind the same host
+port. The production hostnames are still ordinary `https://` names on `443`
+at the edge, so **Cloudflare must be configured to reach the origin on port
+`8443`** for the production hostnames (an origin-port override on the
+proxied DNS records, or an origin rule targeting them). Without that step the
+production health checks in `deploy-production` fail even though the stack is
+healthy, because the edge is talking to staging's nginx on `443`.
+
+### Shared-host resource budget
+
+Both stacks share one 2 vCPU / 4 GB host, so their memory limits are budgeted
+together — production ~1.9 GB, staging ~1.4 GB, leaving headroom for the host.
+Raising a limit in one compose file without lowering the other oversubscribes
+the host. CPU values are per-service ceilings, so their sum may exceed 2 by
+design.
+
+| Service  | Production      | Staging         |
+| -------- | --------------- | --------------- |
+| postgres | 768m / 1.00 cpu | 512m / 0.75 cpu |
+| api      | 512m / 1.00 cpu | 384m / 0.75 cpu |
+| web      | 512m / 1.00 cpu | 384m / 0.75 cpu |
+| nginx    | 192m / 0.50 cpu | 128m / 0.50 cpu |
+
+### Verifying the boundary
+
+```bash
+# On the shared host, after provisioning (deploy-production runs this itself
+# as its final step and fails the deploy if any check fails):
+bash infra/scripts/rehearse-production-secrets-boundary.sh <staging_user> <production_user>
+
+# Against a disposable mirror of the production shape, with the negative
+# cases that prove the checker actually catches violations:
+sudo infra/scripts/rehearse-production-secrets-boundary.selftest.sh
+```
+
 The `apps/api/migrations/atlas.sum` integrity file is part
 of the deploy bundle; the `migrate.sh` wrapper refuses to
 proceed if it is missing.
@@ -319,14 +417,11 @@ changed in place (a protected-area edit, separate package
 or narrow T06 exception) or a disposable scratch database
 is used that does not exercise the duplicate-index file.
 
-## Production deployment (not authorized)
+## Production release authority
 
-This package authorizes **no production deployment**. RL1
-and RL2 technical activation and autonomous production
-release remain disabled per
-`docs/governance/a003-transition-state.yaml`; the deploy
-target this README documents is **staging only**, on the
-founder-provisioned host.
+`VOC-037-T06` provisions production infrastructure paths and deploy automation.
+It does not close R2, authorize launch, or activate autonomous production release.
+Founder go/no-go remains a separate `VOC-037-T05` gate.
 
 ## Cross-references
 
