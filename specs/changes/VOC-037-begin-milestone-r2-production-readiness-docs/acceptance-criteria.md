@@ -35,9 +35,25 @@
   accurately describe the data this application actually collects/processes, and
   carry an explicit founder review/approval record before either is published.
 
+## VOC-037-AC-06 — Production target is actually provisioned per T00/T01's accepted decisions
+
+- Requirement source: `VOC-037-D00`, `VOC-037-D01`
+- Tasks: `VOC-037-T06`
+- Tests: `VOC-037-TEST-06`
+- Evidence: `VOC-037-EV-06`
+- Result: pending
+- Observable outcome: `/opt/vocanova/production/` exists, fully separate
+  from `/opt/vocanova/infra/` (staging); a `vocanova-production` Compose
+  project runs with explicit per-service resource limits; a `production`
+  GitHub Actions environment with founder-controlled required reviewers
+  exists; `.github/workflows/deploy-production.yml` deploys to it without
+  ever touching staging's directory tree, deploy user, or Compose project;
+  and a negative-access rehearsal proves staging's deploy path cannot read
+  production's secrets (T01's `INS-9` through `INS-11`).
+
 ## VOC-037-AC-03 — Launch kill switches and rollback work against the production target
 
-- Requirement source: `VOC-037-D00`
+- Requirement source: `VOC-037-D00`, `VOC-037-T06`'s provisioned target
 - Tasks: `VOC-037-T03`
 - Tests: `VOC-037-TEST-03`
 - Evidence: `VOC-037-EV-03`
