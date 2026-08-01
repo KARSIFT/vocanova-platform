@@ -158,6 +158,13 @@ jobs:
             } >> /opt/vocanova/production/secrets/api.env
             chmod 600 /opt/vocanova/production/secrets/api.env
 
+      # Monitoring is optional-until-adopted, unlike the AI-provider sync
+      # above: skip cleanly (do not block deploys, including unrelated
+      # ones like T03's kill-switch verification) while these secrets
+      # don't exist yet, but still fail closed on a PARTIAL state (one set,
+      # one missing), which is the actual misconfiguration signal.
+      # Sentry/uptime API code no-ops when SENTRY_DSN is unset (see
+      # cmd/api/main.go), so an empty pair is safe, not silent-broken.
       - name: Sync production monitoring configuration from GitHub secrets
         uses: appleboy/ssh-action@v1
         env:
@@ -171,8 +178,12 @@ jobs:
           envs: PRODUCTION_SENTRY_DSN,PRODUCTION_MONITORING_TEST_TOKEN
           script: |
             set -euo pipefail
+            if [ -z "${PRODUCTION_SENTRY_DSN:-}" ] && [ -z "${PRODUCTION_MONITORING_TEST_TOKEN:-}" ]; then
+              echo "PRODUCTION_SENTRY_DSN / PRODUCTION_MONITORING_TEST_TOKEN both unset - skipping (monitoring not yet adopted)"
+              exit 0
+            fi
             if [ -z "${PRODUCTION_SENTRY_DSN:-}" ] || [ -z "${PRODUCTION_MONITORING_TEST_TOKEN:-}" ]; then
-              echo "PRODUCTION_SENTRY_DSN / PRODUCTION_MONITORING_TEST_TOKEN missing or empty" >&2
+              echo "PRODUCTION_SENTRY_DSN / PRODUCTION_MONITORING_TEST_TOKEN partially set - refusing a half-configured state" >&2
               exit 1
             fi
             sed -i \
