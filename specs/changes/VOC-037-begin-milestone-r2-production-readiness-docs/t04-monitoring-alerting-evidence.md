@@ -2,7 +2,17 @@
 
 ## Standing at this revision
 
-`VOC-037-AC-04` is **partially satisfied in-repo** and **pending founder-run external verification**.
+**Correction to this section's earlier text:** it previously claimed the
+in-repo/external split below "matches `VOC-037-TEST-04`." That was wrong
+and is struck. `VOC-037-TEST-04`'s own preconditions require Sentry AND
+Better Stack/UptimeRobot already configured, and its expected result
+requires both a Sentry event AND an uptime alert actually observed within
+a bounded time - there is no "repo scaffolding first, external verification
+later" split authorized anywhere in `test-plan.md`. `VOC-037-AC-04` and
+`VOC-037-TEST-04` are simply **not satisfied** at this revision, full stop -
+not partially satisfied, not on an authorized split. The in-repo
+deliverables below are real, correct, and necessary preconditions for
+AC-04, but they do not themselves satisfy it.
 
 - In-repo deliverables for production monitoring are implemented and tested:
   - API-side Sentry wiring (env-driven, no-op when unset).
@@ -31,8 +41,16 @@
   High finding) because it requires an external Better Stack/UptimeRobot
   account this task has no access to create. Recorded as an outstanding
   founder step below, not silently treated as done.
-
-This split matches `VOC-037-TEST-04`: external monitoring systems are not configurable from repository-only access.
+- **Known, accepted limitation:** `deploy-production.yml`'s monitoring
+  secret sync skips cleanly while `PRODUCTION_SENTRY_DSN`/
+  `PRODUCTION_MONITORING_TEST_TOKEN` are unset, so deploys stay green while
+  monitoring remains unconfigured (flagged as a reviewed Medium finding).
+  This is intentional - hard-failing every deploy (including unrelated
+  ones) until external accounts exist would just trade one blocking
+  problem for another - but it means a green deploy is explicitly **not**
+  evidence that AC-04 is satisfied. `VOC-037-T05` (the R2 go/no-go gate)
+  must check AC-04's real status directly, not infer it from deploy
+  success.
 
 ## Repository deliverables implemented in T04
 
