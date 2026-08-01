@@ -27,6 +27,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
+	"github.com/getsentry/sentry-go"
 )
 
 // ProductionConfig is the runtime configuration the cmd/api binary
@@ -69,6 +70,11 @@ type ProductionConfig struct {
 	GoogleClientSecret string
 	GoogleOAuthScopes  string
 	GoogleOAuthTimeout time.Duration
+
+	SentryDSN          string
+	SentryEnvironment  string
+	SentryRelease      string
+	MonitoringTestToken string
 }
 
 // AI-provider identifiers and per-provider connection defaults.
@@ -162,6 +168,10 @@ func LoadProductionConfig() (ProductionConfig, error) {
 		GoogleClientSecret: os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
 		GoogleOAuthScopes:  os.Getenv("GOOGLE_OAUTH_SCOPES"),
 		GoogleOAuthTimeout: getenvDuration("GOOGLE_OAUTH_TIMEOUT", 8*time.Second),
+		SentryDSN:          os.Getenv("SENTRY_DSN"),
+		SentryEnvironment:  getenv("SENTRY_ENVIRONMENT", getenv("ENVIRONMENT", "staging")),
+		SentryRelease:      os.Getenv("SENTRY_RELEASE"),
+		MonitoringTestToken: os.Getenv("MONITORING_TEST_TOKEN"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -469,6 +479,18 @@ type HealthzOutput struct {
 	}
 }
 
+type MonitoringSentryTestInput struct {
+	Authorization string `header:"Authorization" required:"true"`
+}
+
+type MonitoringSentryTestOutput struct {
+	Body struct {
+		Status    string `json:"status" example:"accepted"`
+		EventID   string `json:"event_id" example:"0123456789abcdef0123456789abcdef"`
+		Timestamp string `json:"timestamp" format:"date-time"`
+	}
+}
+
 // NewProductionAPI returns a huma.API wired against real,
 // Postgres-backed services built from cfg. It registers exactly
 // the same route set NewContractAPI registers, so the OpenAPI
@@ -630,6 +652,7 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 	})
 
 	RegisterHealthz(api, db)
+	RegisterMonitoringSentryTest(api, cfg.MonitoringTestToken, cfg.Environment)
 
 	return api, db, nil
 }
@@ -668,6 +691,37 @@ func RegisterHealthz(api huma.API, db Healthchecker) {
 				Detail: "database is unreachable",
 			}
 		}
+		return out, nil
+	})
+}
+
+func RegisterMonitoringSentryTest(api huma.API, expectedToken, environment string) {
+	if strings.TrimSpace(expectedToken) == "" {
+		return
+	}
+	huma.Register(api, huma.Operation{
+		OperationID: "PostMonitoringSentryTest",
+		Method:      http.MethodPost,
+		Path:        "/ops/monitoring/sentry-test",
+		Summary:     "Emit a deliberate Sentry test event",
+		Tags:        []string{"Operations"},
+	}, func(ctx context.Context, input *MonitoringSentryTestInput) (*MonitoringSentryTestOutput, error) {
+		token := strings.TrimSpace(strings.TrimPrefix(input.Authorization, "Bearer "))
+		if token == "" || token != expectedToken {
+			return nil, huma.Error401Unauthorized("monitoring test token missing or invalid")
+		}
+
+		eventID := sentry.CaptureMessage(
+			fmt.Sprintf("VOC-037-T04 monitoring test event (env=%s)", environment),
+		)
+		sentry.Flush(2 * time.Second)
+
+		out := &MonitoringSentryTestOutput{}
+		out.Body.Status = "accepted"
+		if eventID != nil {
+			out.Body.EventID = string(*eventID)
+		}
+		out.Body.Timestamp = time.Now().UTC().Format(time.RFC3339)
 		return out, nil
 	})
 }

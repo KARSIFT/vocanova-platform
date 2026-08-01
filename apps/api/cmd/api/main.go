@@ -18,6 +18,7 @@ import (
 	"time"
 
 	contract "github.com/KARSIFT/vocanova-platform/apps/api/app/api"
+	"github.com/getsentry/sentry-go"
 )
 
 func main() {
@@ -36,6 +37,23 @@ func run() error {
 	cfg, err := contract.LoadProductionConfig()
 	if err != nil {
 		return fmt.Errorf("load config: %w", err)
+	}
+	if cfg.SentryDSN != "" {
+		release := cfg.SentryRelease
+		if release == "" {
+			release = "unversioned"
+		}
+		if err := sentry.Init(sentry.ClientOptions{
+			Dsn:         cfg.SentryDSN,
+			Environment: cfg.SentryEnvironment,
+			Release:     release,
+		}); err != nil {
+			return fmt.Errorf("init sentry: %w", err)
+		}
+		defer sentry.Flush(2 * time.Second)
+		fmt.Fprintf(os.Stderr, "api: sentry enabled (env=%s)\n", cfg.SentryEnvironment)
+	} else {
+		fmt.Fprintln(os.Stderr, "api: sentry disabled (SENTRY_DSN unset)")
 	}
 
 	api, db, err := contract.NewProductionAPI(cfg, nil)
