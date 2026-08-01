@@ -29,7 +29,8 @@ infra/
 ├── docker-compose.yml         # four-service stack: postgres + api + web + nginx
 ├── docker-compose.production.yml   # VOC-037-T06 production stack (same-host isolated project)
 ├── scripts/
-│   └── rehearse-production-secrets-boundary.sh  # VOC-037 INS-9..INS-11 rehearsal
+│   ├── rehearse-production-secrets-boundary.sh          # VOC-037 INS-9..INS-11 rehearsal
+│   └── rehearse-production-secrets-boundary.selftest.sh # disposable-mirror harness for the above
 ├── nginx/
 │   ├── nginx.conf             # main config (events + http, includes conf.d/*.conf)
 │   ├── conf.d/
@@ -236,6 +237,58 @@ Isolation rules enforced by T06:
 - shared-host contention is bounded by explicit `mem_limit`/`cpus` for each service
 - `rehearse-production-secrets-boundary.sh` executes `INS-9` through `INS-11`
   to prove staging deploy identity cannot read production secrets
+
+Two rules keep the two tiers from colliding on the shared root, and both are
+load-bearing:
+
+- **`deploy-staging` owns only `/opt/vocanova/infra` and `/opt/vocanova/apps`.**
+  It must never `chown`, extract into, or read `/opt/vocanova/production`. Its
+  deploy bundle is rejected before extraction if it contains any other path.
+  (It previously ran `chown -R … /opt/vocanova`, which took ownership of the
+  production tree; see `VOC-037-EV-01`.)
+- **`docker-compose.production.yml` declares no `build:` block.** It is
+  deployed to `/opt/vocanova/production/`, so any relative build context would
+  resolve upward into staging's tree. Production runs images built and pushed
+  by `deploy-production` and pulled by immutable `sha-<short-sha>` tag; that
+  tag is also what makes DOC-11 §3's redeploy-by-digest rollback possible.
+
+### Port mapping and Cloudflare origin routing
+
+Staging's nginx already publishes the host's `80`/`443`, so production's
+publishes `8081`/`8443` instead — two containers cannot bind the same host
+port. The production hostnames are still ordinary `https://` names on `443`
+at the edge, so **Cloudflare must be configured to reach the origin on port
+`8443`** for the production hostnames (an origin-port override on the
+proxied DNS records, or an origin rule targeting them). Without that step the
+production health checks in `deploy-production` fail even though the stack is
+healthy, because the edge is talking to staging's nginx on `443`.
+
+### Shared-host resource budget
+
+Both stacks share one 2 vCPU / 4 GB host, so their memory limits are budgeted
+together — production ~1.9 GB, staging ~1.4 GB, leaving headroom for the host.
+Raising a limit in one compose file without lowering the other oversubscribes
+the host. CPU values are per-service ceilings, so their sum may exceed 2 by
+design.
+
+| Service | Production | Staging |
+| --- | --- | --- |
+| postgres | 768m / 1.00 cpu | 512m / 0.75 cpu |
+| api | 512m / 1.00 cpu | 384m / 0.75 cpu |
+| web | 512m / 1.00 cpu | 384m / 0.75 cpu |
+| nginx | 192m / 0.50 cpu | 128m / 0.50 cpu |
+
+### Verifying the boundary
+
+```bash
+# On the shared host, after provisioning (deploy-production runs this itself
+# as its final step and fails the deploy if any check fails):
+bash infra/scripts/rehearse-production-secrets-boundary.sh <staging_user> <production_user>
+
+# Against a disposable mirror of the production shape, with the negative
+# cases that prove the checker actually catches violations:
+sudo infra/scripts/rehearse-production-secrets-boundary.selftest.sh
+```
 
 The `apps/api/migrations/atlas.sum` integrity file is part
 of the deploy bundle; the `migrate.sh` wrapper refuses to

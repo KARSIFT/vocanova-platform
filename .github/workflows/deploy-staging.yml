@@ -84,6 +84,13 @@
 #   /usr/local/bin/atlas                     (installed by this workflow
 #                                              on first run; idempotent)
 #
+# Staging owns ONLY the two subtrees it extracts
+# (`/opt/vocanova/infra` and `/opt/vocanova/apps`). Since
+# VOC-037-D00 accepted same-host colocation, the sibling tree
+# `/opt/vocanova/production` belongs to the production tier and
+# holds production secrets; this workflow must never create,
+# read, chown, or otherwise reach into it (VOC-037-D01 INV-4).
+#
 # The convention `/opt/vocanova/...` is documented in T11
 # (infra/README.md). The first iteration of T11 will document
 # this exact path; subsequent edits to T11 that change the
@@ -572,10 +579,26 @@ jobs:
             #    The deploy user is expected to have passwordless
             #    `sudo` (a documented prerequisite in T11's
             #    infra/README.md).
+            #
+            #    Both the extraction and the ownership fix are
+            #    confined to the two staging subtrees. Since
+            #    VOC-037-D00 accepted same-host colocation, the
+            #    sibling `/opt/vocanova/production` tree holds
+            #    production secrets owned by a different deploy
+            #    user; a recursive `chown` of `/opt/vocanova`
+            #    would hand that tree to the staging deploy user
+            #    and break VOC-037-D01's INV-4. The bundle is
+            #    verified to contain only staging paths before
+            #    extraction so a malformed bundle cannot write
+            #    outside them either.
             # -------------------------------------------------------------
             sudo mkdir -p /opt/vocanova
+            if tar -tzf /tmp/deploy-bundle.tgz | grep -Ev '^\./?$|^\.?/?(infra|apps)(/|$)' | grep -q .; then
+              echo "ERROR: staging deploy bundle contains paths outside infra/ and apps/" >&2
+              exit 1
+            fi
             sudo tar -xzf /tmp/deploy-bundle.tgz -C /opt/vocanova
-            sudo chown -R "$(id -un)":"$(id -gn)" /opt/vocanova
+            sudo chown -R "$(id -un)":"$(id -gn)" /opt/vocanova/infra /opt/vocanova/apps
 
             # -------------------------------------------------------------
             # 2. Install Atlas on the staging host if it is not

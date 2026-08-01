@@ -51,8 +51,17 @@ only). No test in this plan uses a real secret or real production data.
   - Confirm `.github/workflows/deploy-production.yml` exists and declares
     `environment: production`.
   - Confirm `infra/docker-compose.production.yml` uses project
-    `vocanova-production`, references only production secret paths, and defines
-    explicit per-service resource limits.
+    `vocanova-production`, references only production secret paths, declares no
+    `build:` block (a relative context would resolve into staging's tree), and
+    defines explicit per-service resource limits budgeted against staging's on
+    the shared host.
+  - Confirm `.github/workflows/deploy-staging.yml` neither writes to nor takes
+    ownership of `/opt/vocanova/production`.
+  - Run `sudo infra/scripts/rehearse-production-secrets-boundary.selftest.sh`
+    against a disposable mirror of the production shape and verify both that the
+    correctly isolated shape passes and that every deliberately broken control
+    fails. This step is executable before the real host exists, per this plan's
+    `VOC-037-TEST-01` precondition allowing a disposable rehearsal.
   - Run one production workflow deploy to materialize
     `/opt/vocanova/production/` and verify it remains separate from
     `/opt/vocanova/infra/`.

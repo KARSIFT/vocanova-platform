@@ -134,8 +134,14 @@ jobs:
               exit 1
             fi
             sudo mkdir -p /opt/vocanova/production/secrets
-            sudo touch /opt/vocanova/production/secrets/api.env
-            sudo chown "$(id -un)":"$(id -gn)" /opt/vocanova/production/secrets/api.env
+            sudo chown "$(id -un)":"$(id -gn)" /opt/vocanova/production /opt/vocanova/production/secrets
+            # Tighten before the first secret byte is written, not after:
+            # the default 0755 from `mkdir` would leave a window in which
+            # staging's deploy user could read this file.
+            chmod 750 /opt/vocanova/production
+            chmod 700 /opt/vocanova/production/secrets
+            touch /opt/vocanova/production/secrets/api.env
+            chmod 600 /opt/vocanova/production/secrets/api.env
             sed -i \
               -e '/^AI_PROVIDER=/d' \
               -e '/^AI_PROVIDER_API_KEY=/d' \
@@ -159,7 +165,11 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
           PRODUCTION_WEB_HOST: ${{ inputs.production_web_host }}
           PRODUCTION_API_HOST: ${{ inputs.production_api_host }}
-          PRODUCTION_API_BASE_URL: ${{ inputs.production_api_base_url }}
+          # The immutable per-commit tag, not the mutable `prod` tag, is
+          # what production actually runs: DOC-11 §3's rollback model is
+          # "redeploy the previous artifact by digest", which requires
+          # the deployed tag to identify one specific build.
+          PRODUCTION_IMAGE_SHA_TAG: ${{ steps.sha.outputs.short_sha }}
           STAGING_DEPLOY_USER: ${{ secrets.STAGING_SSH_USER }}
           PRODUCTION_DEPLOY_USER: ${{ secrets.PRODUCTION_SSH_USER }}
         with:
@@ -167,7 +177,7 @@ jobs:
           username: ${{ secrets.PRODUCTION_SSH_USER }}
           key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
           command_timeout: 20m
-          envs: GITHUB_TOKEN,GITHUB_ACTOR,PRODUCTION_WEB_HOST,PRODUCTION_API_HOST,PRODUCTION_API_BASE_URL,STAGING_DEPLOY_USER,PRODUCTION_DEPLOY_USER
+          envs: GITHUB_TOKEN,GITHUB_ACTOR,PRODUCTION_WEB_HOST,PRODUCTION_API_HOST,PRODUCTION_IMAGE_SHA_TAG,STAGING_DEPLOY_USER,PRODUCTION_DEPLOY_USER
           script: |
             set -euo pipefail
 
@@ -178,6 +188,11 @@ jobs:
             mkdir -p /opt/vocanova/production/secrets/nginx
             chmod 700 /opt/vocanova/production/secrets
             chmod 700 /opt/vocanova/production/secrets/nginx
+            # Re-assert the file baseline on every deploy rather than
+            # trusting whatever mode the founder-populated files were
+            # created with; the rehearsal below fails the deploy if any
+            # of them is wider than 0600.
+            find /opt/vocanova/production/secrets -type f -exec chmod 600 {} +
 
             if ! command -v atlas >/dev/null 2>&1; then
               sudo curl -fsSL "https://release.ariga.io/atlas/atlas-linux-amd64-v1.2.0" -o /usr/local/bin/atlas
@@ -189,14 +204,28 @@ jobs:
             sed -i "s/__PRODUCTION_API_HOST__/${PRODUCTION_API_HOST}/g" nginx/conf.d/20-api-production.conf
 
             export VOCANOVA_PRODUCTION_ROOT="/opt/vocanova/production"
-            export PRODUCTION_NEXT_PUBLIC_API_BASE_URL="$PRODUCTION_API_BASE_URL"
-            compose_rendered="$(docker compose -f docker-compose.production.yml -p vocanova-production config)"
-            case "$compose_rendered" in
-              *"/opt/vocanova/infra"*)
-                echo "ERROR: production compose references staging path /opt/vocanova/infra" >&2
-                exit 1
-                ;;
-            esac
+            export PRODUCTION_IMAGE_TAG="sha-${PRODUCTION_IMAGE_SHA_TAG}"
+
+            # Pre-flight cross-tier guard. `docker compose config` folds
+            # env_file entries into `environment:` and drops their paths,
+            # so the raw compose source is scanned as well - an env_file
+            # pointing at staging renders completely clean otherwise.
+            # The post-deploy rehearsal script performs the same check
+            # plus the host-permission and negative-access ones; this
+            # guard exists to fail before anything is started.
+            compose_paths="$(
+              {
+                docker compose -f docker-compose.production.yml -p vocanova-production config
+                sed 's/[[:space:]]*#.*$//' docker-compose.production.yml
+              } | grep -oE "/opt/vocanova[^\"' :,}]*" | sort -u || true
+            )"
+            stray_paths="$(printf '%s\n' "$compose_paths" \
+              | grep -v '^/opt/vocanova/production' | grep -v '^$' || true)"
+            if [ -n "$stray_paths" ]; then
+              echo "ERROR: production compose references paths outside /opt/vocanova/production:" >&2
+              printf '%s\n' "$stray_paths" >&2
+              exit 1
+            fi
             echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
             docker compose -f docker-compose.production.yml -p vocanova-production pull
 
@@ -233,7 +262,7 @@ jobs:
 
             docker compose -f docker-compose.production.yml -p vocanova-production up -d
 
-            sh /opt/vocanova/production/infra/scripts/rehearse-production-secrets-boundary.sh \
+            bash /opt/vocanova/production/infra/scripts/rehearse-production-secrets-boundary.sh \
               "$STAGING_DEPLOY_USER" \
               "$PRODUCTION_DEPLOY_USER"
 

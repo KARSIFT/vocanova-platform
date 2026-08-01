@@ -1,3 +1,29 @@
+# infra/docker-compose.production.yml
+#
+# VOC-037-T06: production stack for the shared host, per
+# VOC-037-D00 (Option A-modified: same physical host as staging,
+# fully isolated by directory tree, compose project, secrets, and
+# deploy user) and VOC-037-D01's corrected 4A mechanism.
+#
+# Two properties of this file are load-bearing for that isolation
+# and must not be "simplified" away:
+#
+#   1. No service declares a `build:` block. The compose file is
+#      deployed to /opt/vocanova/production/, so a relative build
+#      context (`..`, `../apps/api`) would resolve into
+#      /opt/vocanova/ - i.e. straight into staging's tree. Images
+#      are built and pushed by .github/workflows/deploy-production.yml
+#      and consumed here by immutable tag only.
+#   2. Every path is anchored at ${VOCANOVA_PRODUCTION_ROOT}, which
+#      defaults to /opt/vocanova/production and never points at
+#      staging's /opt/vocanova/infra.
+#
+# Resource limits are the shared-host contention mitigation D00
+# required. The host is 2 vCPU / 4 GB and now runs both tiers, so
+# the two compose files' memory limits are budgeted together:
+# production caps at ~1.9 GB and staging at ~1.4 GB, leaving
+# headroom for the host itself. Raising a limit here without
+# lowering staging's oversubscribes the host.
 name: vocanova-production
 
 x-logging: &default-logging
@@ -25,17 +51,14 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
-    mem_limit: 1024m
+    mem_limit: 768m
     cpus: 1.00
     networks:
       - vocanova-production-net
     logging: *default-logging
 
   api:
-    build:
-      context: ../apps/api
-      dockerfile: Dockerfile
-    image: ghcr.io/karsift/vocanova-api:prod
+    image: ghcr.io/karsift/vocanova-api:${PRODUCTION_IMAGE_TAG:-prod}
     container_name: vocanova-production-api
     restart: unless-stopped
     depends_on:
@@ -50,19 +73,17 @@ services:
       timeout: 5s
       retries: 3
       start_period: 15s
-    mem_limit: 768m
-    cpus: 0.75
+    mem_limit: 512m
+    cpus: 1.00
     networks:
       - vocanova-production-net
     logging: *default-logging
 
   web:
-    build:
-      context: ..
-      dockerfile: apps/web/Dockerfile
-      args:
-        NEXT_PUBLIC_API_BASE_URL: ${PRODUCTION_NEXT_PUBLIC_API_BASE_URL:-https://api-production.vocanova.site}
-    image: ghcr.io/karsift/vocanova-web:prod
+    # NEXT_PUBLIC_API_BASE_URL is inlined into the client bundle at
+    # image-build time by deploy-production.yml, not here; there is
+    # no runtime equivalent to set.
+    image: ghcr.io/karsift/vocanova-web:${PRODUCTION_IMAGE_TAG:-prod}
     container_name: vocanova-production-web
     restart: unless-stopped
     depends_on:
@@ -76,8 +97,8 @@ services:
       timeout: 5s
       retries: 3
       start_period: 20s
-    mem_limit: 768m
-    cpus: 0.75
+    mem_limit: 512m
+    cpus: 1.00
     networks:
       - vocanova-production-net
     logging: *default-logging
@@ -105,7 +126,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-    mem_limit: 512m
+    mem_limit: 192m
     cpus: 0.50
     networks:
       - vocanova-production-net
