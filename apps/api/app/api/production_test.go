@@ -226,11 +226,33 @@ func TestRegisterMonitoringSentryTest_AuthBehavior(t *testing.T) {
 	api.Adapter().ServeHTTP(badAuthResp, badAuthReq)
 	assert.Equal(t, http.StatusUnauthorized, badAuthResp.Code)
 
+	// Sentry is not initialized in this test (no SENTRY_DSN), so
+	// CaptureMessage returns a nil event ID from the default no-op hub -
+	// the endpoint must report that as a failure (502), not a false
+	// "accepted" 200, per the fix for the reviewed "no event ID" finding.
 	okReq := httptest.NewRequest(http.MethodPost, "/ops/monitoring/sentry-test", nil)
 	okReq.Header.Set("Authorization", "Bearer expected-token")
 	okResp := httptest.NewRecorder()
 	api.Adapter().ServeHTTP(okResp, okReq)
-	assert.Equal(t, http.StatusOK, okResp.Code)
+	assert.Equal(t, http.StatusBadGateway, okResp.Code)
+}
+
+// TestRegisterMonitoringSentryTest_NonProductionNotRegistered covers the
+// fix for the reviewed "production-only" overstatement: the route must not
+// be registered at all outside the production environment, even with a
+// valid token configured.
+func TestRegisterMonitoringSentryTest_NonProductionNotRegistered(t *testing.T) {
+	cfg := huma.DefaultConfig("monitoring-test", "0.0.1")
+	router := chi.NewMux()
+	api := humachi.New(router, cfg)
+
+	RegisterMonitoringSentryTest(api, "expected-token", "staging")
+
+	req := httptest.NewRequest(http.MethodPost, "/ops/monitoring/sentry-test", nil)
+	req.Header.Set("Authorization", "Bearer expected-token")
+	resp := httptest.NewRecorder()
+	api.Adapter().ServeHTTP(resp, req)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
 }
 
 // TestNewProductionAPI_RequiresDatabaseReachability covers the
