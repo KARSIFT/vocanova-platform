@@ -57,7 +57,7 @@
 - Tasks: `VOC-037-T03`
 - Tests: `VOC-037-TEST-03`
 - Evidence: `VOC-037-EV-03`
-- Result: pending
+- Result: partially satisfied (2026-08-01) — all four switches verified to change behavior live; magic-link delivery and full OAuth/signup completion remain blocked on real credentials and a newly-found OAuth cookie-domain bug (see `VOC-037-EV-03`); rollback mechanism exercised but not a true prior-version rollback (first production deploy)
 - Observable outcome: Each of the four named kill switches, toggled against the
   production target, observably changes application behavior as documented; a
   rollback-by-redeploy rehearsal against the production target completes without
