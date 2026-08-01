@@ -1,0 +1,106 @@
+schema_version: 1
+id: VOC-034
+slug: production-ai-feedback-is-unreachable-because-no
+title: Wire a Real Moderation Provider into Production AI Feedback (Fixes SAFETY_MODERATION_UNAVAILABLE)
+type: bugfix
+status: adopted
+risk: R3
+planned_implementation_risk_floor: R1-per-apps/api/business/aifeedback-and-apps/api/app/api-alone;
+  R3-once-the-.env.example-comment-only-touch-in-T01-is-included (confirmed by running
+  `scripts/governance/classify-change-risk.sh --files-from` against this package's
+  exact planned file set at draft time, 2026-07-30 -- see specification.md "Risk and
+  protected areas" for the full command output and, independent of that path detail,
+  the semantic R3 argument this package proposes regardless of whether .env.example
+  ends up touched).
+canonical_path: specs/changes/VOC-034-production-ai-feedback-is-unreachable-because-no
+authority_model: a003-active
+requirement_source: GitHub issue https://github.com/KARSIFT/vocanova-platform-sandbox/issues/216
+  ("Production AI feedback is unreachable because no moderation provider is wired"),
+  opened after a founder/operator staging exercise following VOC-032-DEP-03's provisioning;
+  grounded directly against `apps/api/app/api/production.go`, `apps/api/business/aifeedback/safety.go`,
+  `apps/api/business/aifeedback/service.go`, and `apps/api/business/aifeedback/opencode.go`
+  at this package's own `base_sha` (all read and cited with exact line references
+  in specification.md). Blocks `KARSIFT/vocanova-platform-sandbox#185` (VOC-032-T09)
+  per the issue's own "Relationship" section.
+requirement_approval_status: founder-approved at adoption on 2026-07-30 for the exact
+  R3 scope and decisions recorded in this package.
+base_branch: develop
+base_sha: fd4cc636815d6a87f7696b998b5c9304b4b34467
+target_branch: develop
+approved_candidate_sha: not-set-until-adoption
+owners:
+  decision: founder
+  package_preparation: planner
+  implementation: unassigned
+  independent_verification: Claude Code
+approval_status: approved
+implementation_authorized: true
+automatic_merge_allowed: true
+production_impact: none-from-repository-merge-alone; once merged AND deployed to the
+  staging/production host, restores real AI-feedback generation for ordinary sentences
+  on the live `POST /api/v1/sentence-feedback` route, which is currently 100% fail-closed
+  with SAFETY_MODERATION_UNAVAILABLE for every sentence that doesn't match a local
+  weapon/self-harm pattern (see specification.md). Merging to `develop` performs no
+  deployment by itself (AGENTS.md's develop-merge vs. deploy-to-main/staging distinction).
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+  mock_inventory: mock-inventory.md
+  staging_evidence: staging-evidence.md
+dependencies:
+- id: VOC-034-DEP-00
+  status: resolved at draft time, per the issue itself (2026-07-30T20:26:55Z) -- staging
+    is already configured with AI_PROVIDER=opencode, a private Docker-gateway OpenCode
+    base URL, a non-empty application bearer, AI_PROVIDER_MODEL=opencode-go/hy3, and
+    AI_FEATURES_ENABLED=true (VOC-032-DEP-03's provisioning). A direct request through
+    the private staging OpenCode server already succeeded and returned structured
+    JSON with that exact model. This package's own live-verification task (VOC-034-T03)
+    does not depend on any new credential being provisioned -- only on this package's
+    own code merging and the staging host being redeployed with it.
+- id: VOC-034-DEP-01
+  status: open, blocks VOC-034-T03 only -- VOC-034-T00 through VOC-034-T02 merging
+    to `develop` and the staging host being redeployed with the merged image (the
+    same deploy-staging pipeline VOC-032-T07/T09 already exercise). Not required for
+    VOC-034-T00/T01/T02, which are unit/integration tests against fake HTTP servers
+    and in-memory fakes only, with no live dependency.
+affected_areas:
+- apps/api/business/aifeedback
+- apps/api/app/api
+- apps/api/.env.example
+implementation:
+  authorized: true
+  required: true
+  status: adopted
+  target_branch: develop
+  pull_request: null
+  authority_issue: null
+release:
+  required: false
+  mode: no-deployment-authorized-by-this-package-itself
+  production_impact: restores-real-ai-feedback-once-deployed; see top-level production_impact
+    for the full statement
+  deployment: not-authorized-by-this-package
+  automatic_merge: true
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: adopted
+adoption_pr: 217
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/217
+implementation_authority_before_adoption: false
+implementation_authority_status: not-exercised
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
+blocking_reasons: none for VOC-034-T00 through VOC-034-T02. Founder adoption confirms
+  R3 and resolves VOC-034-D06 in favor of the targeted buildAIProviders unit test,
+  route-level real-provider regression test, and mandatory live staging verification.
+  VOC-034-DEP-01 continues to block VOC-034-T03 only until T00 through T02 merge and
+  the merged staging image is deployed.
