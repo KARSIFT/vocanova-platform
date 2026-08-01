@@ -55,12 +55,12 @@ requirement_source: 'Free-text founder request recorded in this package''s own d
   for the exact search and its result). No GitHub issue exists yet for this request;
   the calling workflow is expected to open or link one at adoption. This package does
   not authorize its own adoption -- see approval_status below.'
-requirement_approval_status: 'approved at adoption (2026-08-01, founder-gate). T00 and
-  T02 remain scoped as decision-record/draft-only tasks per tasks.md - authorizing
-  their implementation authorizes drafting a recommendation/draft document for
-  founder review, not the underlying hosting or legal decision itself. T01/T03/T04
-  are sequenced after T00 per their stated dependency and will not be dispatched
-  until the founder has actually decided T00''s open question.'
+requirement_approval_status: approved at adoption (2026-08-01, founder-gate). T00
+  and T02 remain scoped as decision-record/draft-only tasks per tasks.md - authorizing
+  their implementation authorizes drafting a recommendation/draft document for founder
+  review, not the underlying hosting or legal decision itself. T01/T03/T04 are sequenced
+  after T00 per their stated dependency and will not be dispatched until the founder
+  has actually decided T00's open question.
 base_branch: develop
 base_sha: 3abf590428183395d899bf609d9a38e401357433
 target_branch: develop
@@ -122,19 +122,18 @@ release:
   migration_required: false
   rollback_required: true
 repository_adoption_status: adopted
-adoption_pr: null
-adoption_evidence: null
+adoption_pr: 259
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/259
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'none for T00-T05 implementation dispatch. Adopted 2026-08-01
-  (founder-gate). T00''s production hosting/deploy-target decision and T02''s legal/
-  privacy prerequisites remain real, outstanding founder decisions that this
-  adoption does not and cannot make - T00/T02 are authorized only to produce their
-  decision-record/draft deliverables for founder review; T01/T03/T04 are gated on
-  T00''s actual decision per tasks.md''s stated dependency, and this package''s T05
-  (R2 release PR and founder go/no-go record) remains the required R4 founder
-  decision this whole package leads to.'
+blocking_reasons: none for T00-T05 implementation dispatch. Adopted 2026-08-01 (founder-gate).
+  T00's production hosting/deploy-target decision and T02's legal/ privacy prerequisites
+  remain real, outstanding founder decisions that this adoption does not and cannot
+  make - T00/T02 are authorized only to produce their decision-record/draft deliverables
+  for founder review; T01/T03/T04 are gated on T00's actual decision per tasks.md's
+  stated dependency, and this package's T05 (R2 release PR and founder go/no-go record)
+  remains the required R4 founder decision this whole package leads to.
