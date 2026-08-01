@@ -271,12 +271,12 @@ Raising a limit in one compose file without lowering the other oversubscribes
 the host. CPU values are per-service ceilings, so their sum may exceed 2 by
 design.
 
-| Service | Production | Staging |
-| --- | --- | --- |
+| Service  | Production      | Staging         |
+| -------- | --------------- | --------------- |
 | postgres | 768m / 1.00 cpu | 512m / 0.75 cpu |
-| api | 512m / 1.00 cpu | 384m / 0.75 cpu |
-| web | 512m / 1.00 cpu | 384m / 0.75 cpu |
-| nginx | 192m / 0.50 cpu | 128m / 0.50 cpu |
+| api      | 512m / 1.00 cpu | 384m / 0.75 cpu |
+| web      | 512m / 1.00 cpu | 384m / 0.75 cpu |
+| nginx    | 192m / 0.50 cpu | 128m / 0.50 cpu |
 
 ### Verifying the boundary
 
