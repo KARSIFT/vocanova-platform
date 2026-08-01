@@ -42,6 +42,36 @@ only). No test in this plan uses a real secret or real production data.
 - Expected result: No false claim, no omission, founder review record present.
 - Evidence: `VOC-037-EV-02`
 
+## VOC-037-TEST-06 — Production target provisioning and isolation
+
+- Covers: `VOC-037-AC-06`
+- Preconditions: `VOC-037-D00` and `VOC-037-D01` accepted; production host access
+  available; production GitHub environment and secrets provisioned.
+- Procedure:
+  - Confirm `.github/workflows/deploy-production.yml` exists and declares
+    `environment: production`.
+  - Confirm `infra/docker-compose.production.yml` uses project
+    `vocanova-production`, references only production secret paths, declares no
+    `build:` block (a relative context would resolve into staging's tree), and
+    defines explicit per-service resource limits budgeted against staging's on
+    the shared host.
+  - Confirm `.github/workflows/deploy-staging.yml` neither writes to nor takes
+    ownership of `/opt/vocanova/production`.
+  - Run `sudo infra/scripts/rehearse-production-secrets-boundary.selftest.sh`
+    against a disposable mirror of the production shape and verify both that the
+    correctly isolated shape passes and that every deliberately broken control
+    fails. This step is executable before the real host exists, per this plan's
+    `VOC-037-TEST-01` precondition allowing a disposable rehearsal.
+  - Run one production workflow deploy to materialize
+    `/opt/vocanova/production/` and verify it remains separate from
+    `/opt/vocanova/infra/`.
+  - Execute `infra/scripts/rehearse-production-secrets-boundary.sh` on the host
+    and verify all checks pass (INS-9 through INS-11).
+- Expected result: production deploy automation and runtime tree are isolated from
+  staging, and negative-access rehearsal confirms staging cannot read production
+  secrets.
+- Evidence: `VOC-037-EV-06` plus `VOC-037-EV-01` rehearsal output
+
 ## VOC-037-TEST-03 — Kill switches and rollback against the production target
 
 - Covers: `VOC-037-AC-03`
