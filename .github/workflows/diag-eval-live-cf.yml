@@ -22,10 +22,10 @@ jobs:
             --provider cloudflare \
             --api-key "$CLOUDFLARE_API_TOKEN" \
             --account-id "$CLOUDFLARE_ACCOUNT_ID" \
-            --model "@cf/meta/llama-3.1-8b-instruct-fp8-fast" \
+            --model "@cf/meta/llama-4-scout-17b-16e-instruct" \
             --request-interval 1s \
             --cost-ceiling 0.25 \
-            --notes "VOC-036-T03 live evaluation, model overridden to the smaller 8B variant after the 70B default hit the 8s timeout on real-size prompts (fix already in PR #253; this is a model-selection follow-up, not a bug)" \
+            --notes "VOC-036-T03 live evaluation, third model attempt: llama-4-scout-17b-16e-instruct (MoE), after 70b (too slow) and 8b (not accurate enough) both failed for different reasons" \
             > /tmp/eval-live-report.txt 2>&1
           code=$?
           echo "=== report ==="
