@@ -6,7 +6,7 @@
 - Tasks: `VOC-037-T00`
 - Tests: `VOC-037-TEST-00`
 - Evidence: `VOC-037-EV-00`
-- Result: pending
+- Result: **SATISFIED** — `VOC-037-D00` is `status: accepted`; `t00-production-hosting-decision-record.md` names the approved option (Option A-modified, same-host co-location, logically isolated) and the files/workflows that change as a consequence, with explicit founder approval recorded (including two live-corrected supersession notes as real conditions were discovered). Bookkeeping note: this line was previously left `pending` after the decision was actually approved; corrected here, no new work.
 - Observable outcome: A decision record exists naming the chosen production
   hosting/deploy target (either "same shape as staging, second host" or a stated
   alternative), the specific files/workflows/infrastructure that must change as a
@@ -18,7 +18,7 @@
 - Tasks: `VOC-037-T01`
 - Tests: `VOC-037-TEST-01`
 - Evidence: `VOC-037-EV-01`
-- Result: pending
+- Result: **SATISFIED, with the same disclosed residual risk as AC-06** — `VOC-037-D01` is `status: accepted`; `t01-production-secrets-decision-record.md` states the 4A mechanism (separate directory tree/deploy user/Compose project/GitHub environment), distinct from staging's, and confirms by live inspection (not assertion) that production secrets are unreachable from preview and CI, and unreachable from staging's directory-permission path (`INS-9` passes). The one gap is the same one recorded under AC-06: staging's real deploy identity (`ubuntu`) has independent, pre-existing OS-level sudo that permission-based isolation cannot stop — founder-waived, not eliminated. Bookkeeping note: this line was previously left `pending` after the decision was actually approved; corrected here.
 - Observable outcome: A document states the production secret storage/injection/
   rotation mechanism, distinct from staging's, and confirms (by inspection of the
   chosen mechanism, not assertion alone) that no production secret is reachable
@@ -30,7 +30,7 @@
 - Tasks: `VOC-037-T02`
 - Tests: `VOC-037-TEST-02`
 - Evidence: `VOC-037-EV-02`
-- Result: pending
+- Result: **SATISFIED (2026-08-02)** — both documents carry an explicit founder review/approval record (data-collection accuracy confirmed, minimum age set to 13, contact email decided). One item — governing law/jurisdiction — is genuinely undecided pending VocaNova's incorporation status and is recorded as blocking *publication* specifically, not blocking this review criterion: the AC requires a review/approval record to exist before publication, and it now does, with the remaining gap disclosed rather than hidden. Publication itself should not proceed until governing law resolves.
 - Observable outcome: A privacy policy and terms-of-service document each exist,
   accurately describe the data this application actually collects/processes, and
   carry an explicit founder review/approval record before either is published.
@@ -69,7 +69,7 @@
 - Tasks: `VOC-037-T04`
 - Tests: `VOC-037-TEST-04`
 - Evidence: `VOC-037-EV-04`
-- Result: pending
+- Result: **SATISFIED (2026-08-02)** — both halves verified live against real production infrastructure: a real Sentry test event (event ID `60c282e455a843ff9151a235ebb71dda`) and a real, rehearsed uptime-down alert (founder-confirmed received via Telegram). Uptime monitoring uses self-hosted Uptime Kuma rather than the literally-named Better Stack/UptimeRobot — UptimeRobot's free tier defaults to `HEAD` probes, which the production API's `GET`-only `/healthz` rejects with `405`, and the founder chose the self-hosted alternative over a paid plan once informed live. See `VOC-037-EV-04`'s "Disclosed deviation" note.
 - Observable outcome: A deliberately triggered test error is observed in Sentry
   for the production environment; a deliberate uptime-check failure produces a
   founder-reaching alert from Better Stack/UptimeRobot.
