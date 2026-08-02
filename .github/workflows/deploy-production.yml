@@ -365,9 +365,53 @@ jobs:
 
             docker compose -f docker-compose.production.yml -p vocanova-production up -d
 
-            bash /opt/vocanova/production/infra/scripts/rehearse-production-secrets-boundary.sh \
+            # T06's rehearsal always runs and its output is always printed
+            # in full. It is only allowed to NOT fail the deploy for the
+            # one specific, disclosed, founder-waived finding recorded in
+            # t06-production-provisioning-evidence.md's "Confirmed
+            # residual risk" section (2026-08-02): staging's real deploy
+            # identity, `ubuntu`, has independent pre-existing blanket
+            # sudo via the standard %sudo group default, which INS-11
+            # correctly cannot pass against. Any other failure (INS-9,
+            # INS-10, or an INS-11 failure against any identity other
+            # than the exact waived one) still fails the deploy - this is
+            # not a blanket "ignore rehearsal failures" carve-out.
+            set +e
+            rehearsal_output="$(bash /opt/vocanova/production/infra/scripts/rehearse-production-secrets-boundary.sh \
               "$STAGING_DEPLOY_USER" \
-              "$PRODUCTION_DEPLOY_USER"
+              "$PRODUCTION_DEPLOY_USER" 2>&1)"
+            rehearsal_exit=$?
+            set -e
+            printf '%s\n' "$rehearsal_output"
+            if [ "$rehearsal_exit" -ne 0 ]; then
+              # The waiver is intentionally hardcoded to the literal
+              # account name "ubuntu", not the $STAGING_DEPLOY_USER
+              # variable. The variable is whatever STAGING_SSH_USER
+              # currently is - if that secret is ever repointed to a
+              # different account (including via the account-migration
+              # remediation t06-production-provisioning-evidence.md
+              # itself discusses), an identically-shaped blanket-sudo
+              # failure against the NEW account must NOT be silently
+              # auto-waived by this carve-out; it needs a fresh founder
+              # review. (Independent verification, PR #282, found this
+              # exact gap when the exclusion was built from the variable
+              # instead of the literal name - fixed here.)
+              if [ "$STAGING_DEPLOY_USER" = "ubuntu" ]; then
+                unwaived="$(printf '%s\n' "$rehearsal_output" | grep -E '^\s*(FAIL|ERROR):' \
+                  | grep -vF "FAIL: ubuntu is NOT read-blocked from /opt/vocanova/production/secrets/api.env: ubuntu already has independent broad sudo" \
+                  | grep -vF "FAIL: ubuntu is NOT traversal-blocked from /opt/vocanova/production: ubuntu already has independent broad sudo" \
+                  | grep -vE '^FAIL: [0-9]+ production/staging secret boundary check\(s\) failed$' \
+                  || true)"
+              else
+                unwaived="$rehearsal_output"
+              fi
+              if [ -n "$unwaived" ]; then
+                echo "ERROR: rehearsal failed with finding(s) beyond the disclosed, founder-waived ubuntu blanket-sudo risk:" >&2
+                printf '%s\n' "$unwaived" >&2
+                exit 1
+              fi
+              echo "::warning::Production secrets-boundary rehearsal FAILED INS-11 only on the disclosed, founder-waived finding (ubuntu's independent blanket sudo — see t06-production-provisioning-evidence.md). Deploy continues; this is a known accepted risk, not a new regression."
+            fi
 
       # Port :8443 (not the default 443) because production and staging
       # currently share one physical host (D00 supersession note, T06
