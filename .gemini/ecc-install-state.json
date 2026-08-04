@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "ecc.install.v1",
+  "installedAt": "2026-08-04T21:34:51.456Z",
+  "target": {
+    "id": "gemini-project",
+    "target": "gemini",
+    "kind": "project",
+    "root": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/vocanova-platform/.gemini",
+    "installStatePath": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/vocanova-platform/.gemini/ecc-install-state.json"
+  },
+  "request": {
+    "profile": "developer",
+    "modules": [],
+    "includeComponents": [],
+    "excludeComponents": [],
+    "legacyLanguages": [],
+    "legacyMode": false
+  },
+  "resolution": {
+    "selectedModules": [
+      "platform-configs"
+    ],
+    "skippedModules": [
+      "rules-core",
+      "agents-core",
+      "commands-core",
+      "hooks-runtime",
+      "framework-language",
+      "database",
+      "workflow-quality",
+      "orchestration"
+    ]
+  },
+  "source": {
+    "repoVersion": "2.1.0",
+    "repoCommit": "7a5757e6c0d7e8e1080d30169b4b044d76e0f7fc",
+    "manifestVersion": 1
+  },
+  "operations": [
+    {
+      "kind": "copy-file",
+      "moduleId": "platform-configs",
+      "sourcePath": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/ECC/.gemini/GEMINI.md",
+      "sourceRelativePath": ".gemini/GEMINI.md",
+      "destinationPath": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/vocanova-platform/.gemini/GEMINI.md",
+      "strategy": "sync-root-children",
+      "ownership": "managed",
+      "scaffoldOnly": false
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "platform-configs",
+      "sourcePath": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/ECC/mcp-configs/mcp-servers.json",
+      "sourceRelativePath": "mcp-configs/mcp-servers.json",
+      "destinationPath": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/vocanova-platform/.gemini/mcp-configs/mcp-servers.json",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "platform-configs",
+      "sourcePath": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/ECC/scripts/auto-update.js",
+      "sourceRelativePath": "scripts/auto-update.js",
+      "destinationPath": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/vocanova-platform/.gemini/scripts/auto-update.js",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false
+    },
+    {
+      "kind": "copy-file",
+      "moduleId": "platform-configs",
+      "sourcePath": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/ECC/scripts/setup-package-manager.js",
+      "sourceRelativePath": "scripts/setup-package-manager.js",
+      "destinationPath": "/tmp/claude-1000/-home-mehrdad-project-Kar-ift-vocanova-openswe/0172b7d4-9f7a-489d-9c10-789f0ee6120a/scratchpad/ecc-setup/vocanova-platform/.gemini/scripts/setup-package-manager.js",
+      "strategy": "preserve-relative-path",
+      "ownership": "managed",
+      "scaffoldOnly": false
+    }
+  ]
+}
