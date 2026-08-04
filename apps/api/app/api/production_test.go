@@ -178,6 +178,32 @@ func TestLoadProductionConfig_FallsBackToRedirectWhenAllowlistEmpty(t *testing.T
 	assert.Equal(t, []string{cfg.OAuthRedirect}, cfg.OAuthReturnURLs, "empty allowlist must fall back to OAUTH_REDIRECT_URI")
 }
 
+func TestLoadProductionConfig_ParseSignupAllowlist(t *testing.T) {
+	t.Setenv("DATABASE_URL", "postgres://example/db")
+	t.Setenv("BASE_URL", "https://staging.vocanova.site")
+	t.Setenv("OAUTH_REDIRECT_URI", "https://api-staging.vocanova.site/auth/oauth/google/callback")
+	t.Setenv("SESSION_COOKIE_DOMAIN", "staging.vocanova.site")
+	t.Setenv("NEW_USER_SIGNUP_ALLOWLIST", " Founder@Example.com , Tester@Example.com , ")
+
+	cfg, err := LoadProductionConfig()
+	require.NoError(t, err)
+	assert.Equal(t, map[string]struct{}{
+		"founder@example.com": {},
+		"tester@example.com":  {},
+	}, cfg.SignupAllowlist, "allowlist must be parsed, trimmed, and normalized to lowercase")
+}
+
+func TestLoadProductionConfig_SignupAllowlistNilWhenUnset(t *testing.T) {
+	t.Setenv("DATABASE_URL", "postgres://example/db")
+	t.Setenv("BASE_URL", "https://staging.vocanova.site")
+	t.Setenv("OAUTH_REDIRECT_URI", "https://api-staging.vocanova.site/auth/oauth/google/callback")
+	t.Setenv("SESSION_COOKIE_DOMAIN", "staging.vocanova.site")
+
+	cfg, err := LoadProductionConfig()
+	require.NoError(t, err)
+	assert.Nil(t, cfg.SignupAllowlist, "unset allowlist must allowlist no one, matching pre-VOC-038 behavior")
+}
+
 func TestLoadProductionConfig_MonitoringDefaultsAndOverrides(t *testing.T) {
 	t.Setenv("DATABASE_URL", "postgres://example/db")
 	t.Setenv("BASE_URL", "https://staging.vocanova.site")
@@ -335,6 +361,39 @@ func TestHealthzHandler_ReportsOkWhenPingSucceeds(t *testing.T) {
 	assert.NotEmpty(t, body.Timestamp)
 }
 
+// TestHealthzHandler_ReportsKillSwitchState covers VOC-038-T02: the
+// smoke-test suite asserts kill-switch state via /healthz rather
+// than a state-mutating probe, so /healthz must report exactly the
+// switches it was registered with.
+func TestHealthzHandler_ReportsKillSwitchState(t *testing.T) {
+	db := &fakeHealthchecker{err: nil}
+	cfg := huma.DefaultConfig("Vocanova API", "0.1.0")
+	mux := chi.NewMux()
+	api := humachi.New(mux, cfg)
+	RegisterHealthz(api, db, KillSwitchStatus{
+		MagicLinkEnabled:  false,
+		OAuthEnabled:      false,
+		NewSignupsEnabled: false,
+		AIEnabled:         true,
+	})
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	api.Adapter().ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var body struct {
+		KillSwitches KillSwitchStatus `json:"kill_switches"`
+	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&body))
+	assert.Equal(t, KillSwitchStatus{
+		MagicLinkEnabled:  false,
+		OAuthEnabled:      false,
+		NewSignupsEnabled: false,
+		AIEnabled:         true,
+	}, body.KillSwitches)
+}
+
 // newHealthzOnlyAPI builds a real huma.API that only has the
 // /healthz route registered against db, so the runtime
 // assertions above can probe the handler in isolation without
@@ -344,7 +403,7 @@ func newHealthzOnlyAPI(t *testing.T, db Healthchecker) huma.API {
 	cfg := huma.DefaultConfig("Vocanova API", "0.1.0")
 	mux := chi.NewMux()
 	api := humachi.New(mux, cfg)
-	RegisterHealthz(api, db)
+	RegisterHealthz(api, db, KillSwitchStatus{})
 	return api
 }
 

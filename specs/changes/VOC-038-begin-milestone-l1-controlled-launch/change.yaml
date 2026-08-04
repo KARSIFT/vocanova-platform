@@ -1,0 +1,114 @@
+schema_version: 1
+id: VOC-038
+slug: begin-milestone-l1-controlled-launch
+title: 'Begin Milestone L1 (Controlled Launch): Sequenced Task Set From R2 to a
+  Recorded Hold/Expand Decision'
+type: docs
+status: adopted
+risk: R4
+planned_implementation_risk_floor: 'Not yet computed by running scripts/governance/classify-change-risk.sh
+  against a real file set, for the same reason VOC-037 recorded: each task
+  (T00-T07 below) needs its own approved, task-scoped file list before the
+  classifier means anything. This package proposes R4 for the milestone as a
+  whole because DOC-12 section 5''s own L1 gate requires a founder-authored
+  hold/expand decision, and multiple tasks (T00 cohort/allowlist design, T04
+  AI-cohort enablement, T05 expansion thresholds) directly govern real user
+  exposure and AI cost/safety - the exact kind of material product-direction,
+  user-trust, and launch-control decision docs/governance/change-risk-classification.md
+  reserves to founder judgment, not automation. This is a draft proposal for
+  founder review at adoption time, not a determination.'
+canonical_path: specs/changes/VOC-038-begin-milestone-l1-controlled-launch
+authority_model: a003-active
+requirement_source: 'No explicit founder request exists yet for L1 specifically.
+  This package is drafted on my own initiative under the founder''s standing
+  2026-08-02 instruction ("go and implement next plans on develop ... you should
+  manage it by yourself") while R2 (VOC-037) evidence was already merged to
+  main (PR #285, founder-approved 2026-08-02) and no other open work item
+  existed in the repository (issue #265, the R2 go/no-go record, is the only
+  open issue and is explicitly founder-reserved - see VOC-037-AC-05). Grounded
+  against docs/product/12-mvp-implementation-plan.md (DOC-12) section 3''s
+  milestone roadmap, which names L1 as the milestone directly following R2,
+  and section 5''s L1 objective/gate text verbatim. This package deliberately
+  does NOT declare R2 closed or L1 dependency-satisfied - DOC-12 section 3 is
+  explicit that "a milestone can''t be accepted before its dependency passes,"
+  and R2''s own AC-05 (founder go/no-go) has not been recorded yet. This
+  package is scope-preparation only, consistent with DOC-12''s own allowance
+  that "work may be prepared early."'
+requirement_approval_status: 'Approved by the founder on 2026-08-05 (PR #286
+  adoption). Both prior blockers are cleared: VOC-037-AC-05 (R2 go/no-go) was
+  recorded and issue #265 closed with a GO decision; VOC-038-D00 (initial
+  allowlist: founder-only, expandable to named individuals later) and
+  VOC-038-D01 (expansion thresholds: error rate <1% and p95 latency <1.5s,
+  both sustained over a rolling 24h window with a minimum 50 core-loop
+  sessions/day sample size, plus AI cost <$15/day, all sustained for 7
+  consecutive days) were both decided by the founder directly and recorded
+  as comments on PR #286, bypassing the T00/T05 decision-record-only tasks.
+  This adoption does NOT implementation-authorize any individual task -
+  T00 through T07 each still require their own task-scoped dispatch, exactly
+  like VOC-037''s tasks were.'
+base_branch: develop
+base_sha: dcae7931c40d999ed449399173a8198dab103d58
+target_branch: develop
+approved_candidate_sha: not-set-until-adoption
+owners:
+  decision: founder
+  package_preparation: Claude Code (acting as founder-gate delegate per the
+    2026-08-02 standing delegation, drafting only - adoption remains founder-only)
+  implementation: unassigned
+  independent_verification: Claude Code
+approval_status: adopted
+implementation_authorized: false
+automatic_merge_allowed: false
+production_impact: none (docs-only proposal; no task dispatched)
+rollback_required: false
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+- id: VOC-038-DEP-00
+  status: resolved. VOC-037-AC-05 recorded on issue #265 (GO decision,
+    2026-08-05); issue closed.
+- id: VOC-038-DEP-01
+  status: resolved. VOC-038-D00 and VOC-038-D01 both decided directly by the
+    founder on PR #286 (2026-08-05), rather than produced via T00/T05.
+affected_areas:
+- docs/product/12-mvp-implementation-plan.md
+- specs/changes/VOC-038-begin-milestone-l1-controlled-launch
+implementation:
+  authorized: false
+  required: false
+  status: proposed
+  target_branch: develop
+  pull_request: null
+  authority_issue: null
+release:
+  required: false
+  mode: not-authorized-by-this-package
+  production_impact: none
+  deployment: not-authorized-by-this-package
+  automatic_merge: false
+  migration_required: false
+  rollback_required: false
+repository_adoption_status: adopted
+adoption_pr: 286
+adoption_evidence: 'Founder go/no-go on issue #265 (comment
+  https://github.com/KARSIFT/vocanova-platform-sandbox/issues/265#issuecomment-5184066794,
+  closed 2026-08-05); VOC-038-D00/D01 founder decisions on PR #286 (comment
+  https://github.com/KARSIFT/vocanova-platform-sandbox/pull/286#issuecomment-5184319172,
+  2026-08-05).'
+implementation_authority_before_adoption: false
+implementation_authority_status: not-exercised
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
+blocking_reasons: 'None remaining for adoption. Individual tasks T00-T07 each
+  still require their own task-scoped implementation authorization/dispatch
+  before any code is written, exactly as VOC-037''s tasks were dispatched one
+  at a time via implement.yml.'

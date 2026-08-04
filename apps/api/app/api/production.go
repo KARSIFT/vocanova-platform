@@ -44,6 +44,11 @@ type ProductionConfig struct {
 	MagicLinkPath   string
 	OAuthRedirect   string
 	OAuthReturnURLs []string
+	// SignupAllowlist holds normalized emails admitted to sign up
+	// even while NewSignupsOn is false (VOC-038-D00/D01). Built from
+	// NEW_USER_SIGNUP_ALLOWLIST, a comma-separated list, the same
+	// way OAuthReturnURLs is built from OAUTH_REDIRECT_ALLOWLIST.
+	SignupAllowlist map[string]struct{}
 	SessionDomain   string
 	SessionSecure   bool
 	SessionLifetime time.Duration
@@ -192,6 +197,14 @@ func LoadProductionConfig() (ProductionConfig, error) {
 		for _, p := range strings.Split(raw, ",") {
 			if u := strings.TrimSpace(p); u != "" {
 				cfg.OAuthReturnURLs = append(cfg.OAuthReturnURLs, u)
+			}
+		}
+	}
+	if raw := os.Getenv("NEW_USER_SIGNUP_ALLOWLIST"); raw != "" {
+		cfg.SignupAllowlist = make(map[string]struct{})
+		for _, e := range strings.Split(raw, ",") {
+			if e = auth.NormalizeEmail(e); e != "" {
+				cfg.SignupAllowlist[e] = struct{}{}
 			}
 		}
 	}
@@ -474,10 +487,25 @@ type HealthzInput struct{}
 // the probe should confirm reachability, not expose internals).
 type HealthzOutput struct {
 	Body struct {
-		Status    string `json:"status" example:"ok" doc:"Either 'ok' or 'unhealthy'"`
-		Database  string `json:"database" example:"ok" doc:"Either 'ok' or 'unhealthy'"`
-		Timestamp string `json:"timestamp" format:"date-time" doc:"Probe timestamp in RFC3339"`
+		Status       string           `json:"status" example:"ok" doc:"Either 'ok' or 'unhealthy'"`
+		Database     string           `json:"database" example:"ok" doc:"Either 'ok' or 'unhealthy'"`
+		Timestamp    string           `json:"timestamp" format:"date-time" doc:"Probe timestamp in RFC3339"`
+		KillSwitches KillSwitchStatus `json:"kill_switches" doc:"Current DOC-11 kill-switch state - not secret, and needed by VOC-038-T02's smoke-test suite to assert the deploy wrote the intended posture"`
 	}
+}
+
+// KillSwitchStatus reports the current state of the DOC-11 §3 kill
+// switches, exactly as LoadProductionConfig resolved them from the
+// environment. Reported on /healthz (unauthenticated) rather than
+// only internally: these flags are already effectively observable
+// from the outside by probing behavior (e.g. attempting a magic-link
+// request), so surfacing them directly lets VOC-038-T02's smoke-test
+// suite assert the intended posture without any state-mutating probe.
+type KillSwitchStatus struct {
+	MagicLinkEnabled  bool `json:"magic_link_enabled" example:"false"`
+	OAuthEnabled      bool `json:"oauth_enabled" example:"false"`
+	NewSignupsEnabled bool `json:"new_signups_enabled" example:"false"`
+	AIEnabled         bool `json:"ai_enabled" example:"true"`
 }
 
 type MonitoringSentryTestInput struct {
@@ -571,6 +599,7 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 		MagicLinkEnabled:  cfg.MagicLinkOn,
 		OAuthEnabled:      cfg.OAuthOn,
 		NewSignupsEnabled: cfg.NewSignupsOn,
+		SignupAllowlist:   cfg.SignupAllowlist,
 	})
 
 	usersRepo := users.NewPostgreSQLRepository(db)
@@ -663,7 +692,12 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 		return profile.Status, nil
 	})
 
-	RegisterHealthz(api, db)
+	RegisterHealthz(api, db, KillSwitchStatus{
+		MagicLinkEnabled:  cfg.MagicLinkOn,
+		OAuthEnabled:      cfg.OAuthOn,
+		NewSignupsEnabled: cfg.NewSignupsOn,
+		AIEnabled:         cfg.AIEnabled,
+	})
 	RegisterMonitoringSentryTest(api, cfg.MonitoringTestToken, cfg.Environment)
 
 	return api, db, nil
@@ -676,7 +710,7 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 // body. /healthz is the only production route NewContractAPI
 // does not register, because the contract generator has no
 // production database to probe - it is T00-specific.
-func RegisterHealthz(api huma.API, db Healthchecker) {
+func RegisterHealthz(api huma.API, db Healthchecker, switches KillSwitchStatus) {
 	huma.Register(api, huma.Operation{
 		OperationID: "GetHealthz",
 		Method:      http.MethodGet,
@@ -696,6 +730,7 @@ func RegisterHealthz(api huma.API, db Healthchecker) {
 		out.Body.Status = overall
 		out.Body.Database = dbStatus
 		out.Body.Timestamp = time.Now().UTC().Format(time.RFC3339)
+		out.Body.KillSwitches = switches
 		if overall != "ok" {
 			return out, &huma.ErrorModel{
 				Status: http.StatusServiceUnavailable,
