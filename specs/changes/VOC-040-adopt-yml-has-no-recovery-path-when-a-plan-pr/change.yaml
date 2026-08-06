@@ -23,10 +23,10 @@ requirement_source: 'GitHub issue #301 ("adopt.yml has no recovery path when a p
   open.'
 requirement_approval_status: 'Approved. Founder merged PR #302 (this draft package''s
   own plan PR) on 2026-08-06T08:42:06Z, adopting it. This follow-up commit records
-  that decision in change.yaml, since merging the plan PR only merges the draft
-  content and does not itself flip these fields - discovered live that this package
-  itself fell into exactly the gap issue #301 was filed to fix (recorded ~6h after
-  merge, during an unrelated status check).'
+  that decision in change.yaml, since merging the plan PR only merges the draft content
+  and does not itself flip these fields - discovered live that this package itself
+  fell into exactly the gap issue #301 was filed to fix (recorded ~6h after merge,
+  during an unrelated status check).'
 base_branch: develop
 base_sha: 0a6de36002f4619f63b192e621bbdc53fee12d04
 target_branch: develop
@@ -73,7 +73,7 @@ implementation:
   status: proposed
   target_branch: develop
   pull_request: null
-  authority_issue: 326
+  authority_issue: null
 release:
   required: true
   mode: not-authorized-by-this-package
@@ -91,11 +91,10 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R1-under-active-A003
-blocking_reasons: 'Repository-level adoption is resolved (PR 302). VOC-040-T00
-  still requires its own task-scoped implementation authorization/dispatch after
-  adoption, mirroring VOC-039/041/042''s convention. Separately and out of this
-  package''s own control - see specification.md''s scope section - two of the
-  issue''s three suggested improvements (a workflow_dispatch entry point on
-  adopt.yml; a merge-blocking checklist item in plan.yml''s draft PR body) require
-  a change to the KARSIFT/karsift-ai-infra repository, which this package cannot
-  touch and does not attempt to.'
+blocking_reasons: Repository-level adoption is resolved (PR 302). VOC-040-T00 still
+  requires its own task-scoped implementation authorization/dispatch after adoption,
+  mirroring VOC-039/041/042's convention. Separately and out of this package's own
+  control - see specification.md's scope section - two of the issue's three suggested
+  improvements (a workflow_dispatch entry point on adopt.yml; a merge-blocking checklist
+  item in plan.yml's draft PR body) require a change to the KARSIFT/karsift-ai-infra
+  repository, which this package cannot touch and does not attempt to.
