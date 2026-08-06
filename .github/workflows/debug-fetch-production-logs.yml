@@ -22,6 +22,6 @@ jobs:
             set -euo pipefail
             cd /opt/vocanova/production
             echo "===== web (last 15m) ====="
-            docker compose -f docker-compose.production.yml -p vocanova-production logs --no-color --since=15m web | tail -300
+            docker compose -f docker-compose.production.yml -p vocanova-production logs --no-color --since=3h web | tail -300
             echo "===== api (last 15m) ====="
-            docker compose -f docker-compose.production.yml -p vocanova-production logs --no-color --since=15m api | tail -300
+            docker compose -f docker-compose.production.yml -p vocanova-production logs --no-color --since=3h api | tail -300
