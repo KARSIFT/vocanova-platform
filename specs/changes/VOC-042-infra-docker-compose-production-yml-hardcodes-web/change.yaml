@@ -29,10 +29,10 @@ requirement_source: 'GitHub issue #319 ("infra/docker-compose.production.yml har
   API service''s own env values).'
 requirement_approval_status: 'Approved. Founder merged PR #320 (this draft package''s
   own plan PR) on 2026-08-06T14:19:35Z, adopting it. This follow-up commit records
-  that decision in change.yaml, since merging the plan PR only merges the draft
-  content and does not itself flip these fields - adopt.yml correctly refuses to
-  open task issues until this adoption record exists (see VOC-039/VOC-041''s prior
-  occurrences of the same gap, tracked in issue #301).'
+  that decision in change.yaml, since merging the plan PR only merges the draft content
+  and does not itself flip these fields - adopt.yml correctly refuses to open task
+  issues until this adoption record exists (see VOC-039/VOC-041''s prior occurrences
+  of the same gap, tracked in issue #301).'
 base_branch: develop
 base_sha: a8ff2e34246e7b0bea9e01adc12260e2b495fb23
 target_branch: develop
@@ -86,7 +86,7 @@ implementation:
   status: proposed
   target_branch: develop
   pull_request: null
-  authority_issue: 319
+  authority_issue: null
 release:
   required: true
   mode: not-authorized-by-this-package
@@ -104,9 +104,9 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'Repository-level adoption is resolved (PR 320). Individual tasks
+blocking_reasons: Repository-level adoption is resolved (PR 320). Individual tasks
   T00-T01 each still require their own task-scoped implementation authorization/dispatch
-  after adoption, mirroring VOC-039/VOC-041''s convention. specification.md''s open
-  questions 1-2 are resolved per VOC-042-DEP-01/DEP-02 above; open question 3
-  (infra/docker-compose.yml, the staging file, being unaudited for the same bug
-  class) stays open and out of scope - file a follow-up if needed.'
+  after adoption, mirroring VOC-039/VOC-041's convention. specification.md's open
+  questions 1-2 are resolved per VOC-042-DEP-01/DEP-02 above; open question 3 (infra/docker-compose.yml,
+  the staging file, being unaudited for the same bug class) stays open and out of
+  scope - file a follow-up if needed.
