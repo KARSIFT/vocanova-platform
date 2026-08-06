@@ -27,10 +27,10 @@ requirement_source: 'GitHub issue #312 ("deploy-production.yml writes BASE_URL/O
   the same workflow''s existing health-check step).'
 requirement_approval_status: 'Approved. Founder merged PR #313 (this draft package''s
   own plan PR) on 2026-08-06T13:19:01Z, adopting it. This follow-up commit records
-  that decision in change.yaml, since merging the plan PR only merges the draft
-  content and does not itself flip these fields - adopt.yml correctly refused to
-  open task issues until this adoption record exists (see its run on PR #313''s
-  merge: "this package was merged without being adopted").'
+  that decision in change.yaml, since merging the plan PR only merges the draft content
+  and does not itself flip these fields - adopt.yml correctly refused to open task
+  issues until this adoption record exists (see its run on PR #313''s merge: "this
+  package was merged without being adopted").'
 base_branch: develop
 base_sha: 6e6a44c162249739626f3e3e27d5242f3c89ae94
 target_branch: develop
@@ -79,7 +79,7 @@ implementation:
   status: proposed
   target_branch: develop
   pull_request: null
-  authority_issue: 312
+  authority_issue: null
 release:
   required: true
   mode: not-authorized-by-this-package
@@ -100,14 +100,13 @@ standing_technical_steward_approval: not-required-solely-for-routine-R3-under-ac
 blocking_reasons: 'Repository-level adoption is resolved (PR 313). Individual tasks
   T00-T01 each still require their own task-scoped implementation authorization/dispatch
   after adoption, mirroring VOC-039/VOC-040''s convention. specification.md''s open
-  question 1 (production_api_base_url''s workflow-input default) is resolved:
-  left out of this package''s scope, since the client-facing build-time value was
-  already corrected via an explicit workflow_dispatch override earlier today (not
-  a durable fix - the workflow''s own default is still wrong and this package does
-  not touch it; file a follow-up if it should also be fixed). Open question 2
-  (whether api.env on the live host needs a manual interim correction before this
-  package''s implementation lands) is NOT resolved - the live host''s api.env
-  still has the un-ported BASE_URL/OAUTH_REDIRECT_URI/OAUTH_REDIRECT_ALLOWLIST
+  question 1 (production_api_base_url''s workflow-input default) is resolved: left
+  out of this package''s scope, since the client-facing build-time value was already
+  corrected via an explicit workflow_dispatch override earlier today (not a durable
+  fix - the workflow''s own default is still wrong and this package does not touch
+  it; file a follow-up if it should also be fixed). Open question 2 (whether api.env
+  on the live host needs a manual interim correction before this package''s implementation
+  lands) is NOT resolved - the live host''s api.env still has the un-ported BASE_URL/OAUTH_REDIRECT_URI/OAUTH_REDIRECT_ALLOWLIST
   values as of adoption time; this package''s fix only changes what future deploys
   write, so a redeploy after implementation is required before real sign-in works
   again.'
