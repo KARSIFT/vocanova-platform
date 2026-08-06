@@ -1,5 +1,30 @@
 name: debug-fetch-production-logs
 
+# One-off, read-only diagnostic workflow for VOC-038-T03: real Google
+# sign-in still loops back to /signin after Google auth completes, despite
+# VOC-039's fixes (Node runtime middleware, structured auth-check-failure
+# logging in apps/web/src/middleware.ts) being live in production. No
+# product code path is touched by this workflow - SSH + `docker compose
+# logs` only, gated by the same `environment: production` approval as
+# deploy-production.yml since it reads the same PRODUCTION_SSH_* secrets.
+#
+# Version history (manually bumped - this file has no other versioning):
+#   v1 (2026-08-06T11:32Z) - web + api logs, --since=15m. Came back empty;
+#     the founder's sign-in attempt predated the window.
+#   v2 (2026-08-06T12:35Z) - widened to --since=3h. Still only showed
+#     container boot lines - apps/web and apps/api don't log routine
+#     per-request activity by default, only T02's structured failure
+#     lines (which never fired), so this couldn't tell us whether the
+#     OAuth callback request even reached the server.
+#   v3 (2026-08-06T12:39Z) - added nginx access logs (infra/docker-
+#     compose.yml's `nginx` service fronts every request over TLS at
+#     the network edge, so it logs regardless of what the app containers
+#     log) filtered to oauth/callback/signin/me paths, plus an
+#     unfiltered tail as a fallback.
+#
+# Delete this file once VOC-038-T03's real sign-in bug is root-caused -
+# it's diagnostic scaffolding, not a permanent part of the pipeline.
+
 on:
   workflow_dispatch: {}
 
