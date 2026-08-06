@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Fetch recent api + web logs
+      - name: Fetch recent nginx + api + web logs
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.PRODUCTION_SSH_HOST }}
@@ -21,7 +21,12 @@ jobs:
           script: |
             set -euo pipefail
             cd /opt/vocanova/production
-            echo "===== web (last 15m) ====="
+            echo "===== nginx (last 3h, oauth/callback/signin/me related) ====="
+            docker compose -f docker-compose.production.yml -p vocanova-production logs --no-color --since=3h nginx \
+              | grep -iE "oauth|callback|/api/v1/me|signin|/onboarding|/home" | tail -300 || echo "(no matching nginx lines)"
+            echo "===== nginx (last 3h, unfiltered tail) ====="
+            docker compose -f docker-compose.production.yml -p vocanova-production logs --no-color --since=3h nginx | tail -100
+            echo "===== web (last 3h) ====="
             docker compose -f docker-compose.production.yml -p vocanova-production logs --no-color --since=3h web | tail -300
-            echo "===== api (last 15m) ====="
+            echo "===== api (last 3h) ====="
             docker compose -f docker-compose.production.yml -p vocanova-production logs --no-color --since=3h api | tail -300
