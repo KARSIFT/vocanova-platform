@@ -29,10 +29,10 @@ requirement_source: 'GitHub issue #297 ("middleware.ts''s auth check silently fa
   some other non-ok status" in the auth-check failure paths).'
 requirement_approval_status: 'Approved. Founder merged PR #299 (this draft package''s
   own plan PR) on 2026-08-06T07:07:46Z, adopting it. This follow-up commit records
-  that decision in change.yaml, since merging the plan PR only merges the draft
-  content and does not itself flip these fields - adopt.yml correctly refused to
-  open task issues until this adoption record exists (see its 2026-08-06T07:08:03Z
-  failure on PR #299''s merge: "this package was merged without being adopted").'
+  that decision in change.yaml, since merging the plan PR only merges the draft content
+  and does not itself flip these fields - adopt.yml correctly refused to open task
+  issues until this adoption record exists (see its 2026-08-06T07:08:03Z failure on
+  PR #299''s merge: "this package was merged without being adopted").'
 base_branch: develop
 base_sha: d45f002b816509ff401448920d484743a9264819
 target_branch: develop
@@ -77,7 +77,7 @@ implementation:
   status: proposed
   target_branch: develop
   pull_request: null
-  authority_issue: 297
+  authority_issue: null
 release:
   required: true
   mode: not-authorized-by-this-package
@@ -95,6 +95,6 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'Repository-level adoption is resolved (PR 299). Individual tasks
+blocking_reasons: Repository-level adoption is resolved (PR 299). Individual tasks
   T00-T02 each still require their own task-scoped implementation authorization/dispatch
-  after adoption, mirroring VOC-037/VOC-038''s convention.'
+  after adoption, mirroring VOC-037/VOC-038's convention.
