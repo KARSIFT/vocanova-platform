@@ -1,7 +1,9 @@
 # Vocanova
 
 Vocanova is an AI-powered platform for practical English learning. It is maintained
-by KARSIFT as a private pnpm and Go monorepo.
+by KARSIFT as a pnpm and Go monorepo. The repository is public; see
+`docs/governance/repository-settings.md` for the security posture that implies
+(secret scanning/push protection enabled, no assumption of a private audience).
 
 Its canonical roots are `apps/web`, `apps/api`, and the shared packages under `packages/`.
 Real, shipped product surfaces exist today - `apps/web` has working Home, Progress, and
