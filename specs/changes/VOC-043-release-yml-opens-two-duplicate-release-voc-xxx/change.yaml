@@ -3,7 +3,7 @@ id: VOC-043
 slug: release-yml-opens-two-duplicate-release-voc-xxx
 title: 'release.yml Opens Two Duplicate "Release: VOC-XXX" Issues for the Same Package'
 type: fix
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: Not yet computed by running scripts/governance/classify-change-risk.sh
   against a real, task-scoped file list - consistent with how VOC-039 through VOC-042
@@ -15,9 +15,9 @@ planned_implementation_risk_floor: Not yet computed by running scripts/governanc
   and release-gating workflow changes as at least an R3-floor category. This is a
   draft proposal for the reviewing human at adoption time, not a determination.
 canonical_path: specs/changes/VOC-043-release-yml-opens-two-duplicate-release-voc-xxx
-approval_status: not-approved
+approval_status: adopted
 implementation_authorized: false
-automatic_merge_allowed: false
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 authority_model: a003-active
@@ -29,12 +29,15 @@ requirement_source: 'GitHub issue #328 ("release.yml opens two duplicate ''Relea
   bodies), a likely-cause analysis grounded in reading release.yml''s actual check-then-create
   logic, and a named suggested fix (make issue-opening idempotent per package, via
   an existing-issue re-check or a concurrency lock keyed on the package/change_id).'
-requirement_approval_status: not-approved. This draft package has not yet been reviewed
-  or adopted by a founder or technical steward. No task below is implementation-authorized.
+requirement_approval_status: 'Approved. Founder merged PR #332 (this draft package''s
+  own plan PR) on 2026-08-06T23:49:50Z, adopting it. This follow-up commit records
+  that decision in change.yaml. Repository-level adoption is recorded, but
+  VOC-043-T00 itself cannot be dispatched from this repository - see
+  blocking_reasons below.'
 base_branch: develop
 base_sha: a48f4d928bbd796c99f49825bb80eb1eab8ac7db
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: 1ec2e1f713800e2d5e8ae2f6360dc9c39f5fb389
 owners:
   decision: unassigned
   package_preparation: planner (drafting only; adoption remains a human decision)
@@ -81,18 +84,24 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 332
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/332
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'Not yet adopted. This package requires founder/technical-steward
-  review and an explicit adoption decision (status: adopted, implementation_authorized:
-  true) before VOC-043-T00 may be dispatched. specification.md''s open questions 1-3
-  (concrete concurrency mechanism, this repository''s actual consumption path for
-  the fixed reusable workflow, and manual cleanup of the two already-open duplicate
-  issues #310/#311) should be considered at adoption time.'
+blocking_reasons: 'Repository-level adoption is resolved (PR 332), but VOC-043-T00
+  targets karsift-ai-infra/.github/workflows/release.yml - a file in the separate
+  KARSIFT/karsift-ai-infra repository, which this repository''s implement.yml
+  dispatch has no access to (same cross-repo boundary VOC-040 explicitly avoided
+  for its own out-of-scope suggestions). implementation.authorized stays false;
+  VOC-043-T00 cannot be dispatched from here. A companion change package must be
+  filed directly against KARSIFT/karsift-ai-infra for the actual fix - this
+  package''s value is recording the root-cause analysis and confirmed fix design
+  for whoever files that. specification.md''s open question 3 (manual cleanup of
+  duplicate issues #310/#311) is separately resolved: both already have founder-
+  facing "approved" reply instructions pending; closing the extra one after either
+  promotion succeeds is a manual follow-up, not blocking.'
