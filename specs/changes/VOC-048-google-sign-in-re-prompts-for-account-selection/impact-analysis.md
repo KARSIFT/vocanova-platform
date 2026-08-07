@@ -1,4 +1,4 @@
-# VOC-045 — Impact Analysis
+# VOC-048 — Impact Analysis
 
 ## Security and privacy
 
@@ -10,7 +10,7 @@
 - CSRF protection: the existing `state`/`cookieState` comparison in
   `OAuthCallback` (`apps/api/business/auth/service.go` lines 256-259) is
   unrelated to the `prompt` parameter and must remain unchanged by any task
-  in this package - see `acceptance-criteria.md`'s `VOC-045-AC-03`.
+  in this package - see `acceptance-criteria.md`'s `VOC-048-AC-03`.
 - Consent semantics: dropping or conditioning `prompt=consent` means Google
   will, in some cases, silently re-authenticate and re-authorize a
   previously-consented user without displaying its own UI. This is the
@@ -35,7 +35,7 @@ schema, table, or stored-data change. `OAuthStart`'s existing
 
 - Analytics: None currently proposed. `specification.md`'s "Data,
   migrations, analytics, and accessibility" section notes that if
-  `VOC-045-T00`'s investigation surfaces a future need to distinguish
+  `VOC-048-T00`'s investigation surfaces a future need to distinguish
   re-prompt causes in production telemetry, that would be a separate
   proposal, not assumed here.
 - Accessibility: Not applicable, evidence-backed. This is a backend
@@ -45,30 +45,30 @@ schema, table, or stored-data change. `OAuthStart`'s existing
 
 ## Risks, dependencies, and evidence
 
-- `VOC-045-R00`: The app-level session may itself have an undiscovered
+- `VOC-048-R00`: The app-level session may itself have an undiscovered
   defect that this package's `T00` investigation has not yet run. If so,
   fixing only `AuthURL`'s `prompt` behavior would be an incomplete fix
   that still leaves users re-prompted. Mitigated by scoping `T00`
   (investigation) as a precondition to `T01` (fix), not bundling them.
-- `VOC-045-R01`: Removing or conditioning `prompt=consent` could regress the
+- `VOC-048-R01`: Removing or conditioning `prompt=consent` could regress the
   original T15 goal of surfacing a fresh `email_verified` status on every
   sign-in, if the replacement condition (open question 2) is chosen
-  carelessly. Mitigated by `acceptance-criteria.md`'s `VOC-045-AC-04`
+  carelessly. Mitigated by `acceptance-criteria.md`'s `VOC-048-AC-04`
   requiring the trade-off to be explicitly documented, not silently
   dropped.
-- `VOC-045-R02`: Because this reverses a previously deliberate, documented
+- `VOC-048-R02`: Because this reverses a previously deliberate, documented
   design decision rather than fixing an accidental bug, there is a risk the
   original reasoning for that decision is no longer fully understood by
-  whoever implements the fix. Mitigated by requiring `VOC-045-T01`'s
+  whoever implements the fix. Mitigated by requiring `VOC-048-T01`'s
   implementer to read and explicitly address the existing code comment
   (`google_oauth.go` lines 192-203) rather than deleting it without
   comment.
-- `VOC-045-DEP-00`: See `change.yaml` - the root-cause finding could be
+- `VOC-048-DEP-00`: See `change.yaml` - the root-cause finding could be
   incomplete if a future issue-#343 comment reports additional symptoms.
-- `VOC-045-DEP-01`: See `change.yaml` - whether this needs explicit
+- `VOC-048-DEP-01`: See `change.yaml` - whether this needs explicit
   founder/product sign-off beyond routine R3 review is unresolved at
   drafting time.
-- `VOC-045-EV-00`: `VOC-045-T00`'s investigation findings (documented in its
+- `VOC-048-EV-00`: `VOC-048-T00`'s investigation findings (documented in its
   own pull request), confirming or ruling out an app-level session defect.
-- `VOC-045-EV-01`: `VOC-045-T01`'s implementing pull request, including its
+- `VOC-048-EV-01`: `VOC-048-T01`'s implementing pull request, including its
   test results and its explicit resolution of open question 2.

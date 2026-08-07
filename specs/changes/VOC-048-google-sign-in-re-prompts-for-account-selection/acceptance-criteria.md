@@ -1,11 +1,11 @@
-# VOC-045 — Acceptance Criteria
+# VOC-048 — Acceptance Criteria
 
-## VOC-045-AC-00 — App-level session behavior is confirmed, not assumed
+## VOC-048-AC-00 — App-level session behavior is confirmed, not assumed
 
 - Requirement source: `specification.md`'s "What remains unconfirmed" section
-- Tasks: `VOC-045-T00`
-- Tests: `VOC-045-TEST-00`
-- Evidence: `VOC-045-EV-00`
+- Tasks: `VOC-048-T00`
+- Tests: `VOC-048-TEST-00`
+- Evidence: `VOC-048-EV-00`
 - Result: pending
 
 The investigation records, with reproducible evidence, whether the app's own
@@ -14,13 +14,13 @@ page loads and browser restarts as intended, independent of Google's own
 OAuth prompt behavior. This criterion is satisfied by a documented finding
 either way, not only by finding "no bug."
 
-## VOC-045-AC-01 — Google's account picker/consent screen does not reappear for an already-authorized, already-signed-in user
+## VOC-048-AC-01 — Google's account picker/consent screen does not reappear for an already-authorized, already-signed-in user
 
 - Requirement source: `specification.md`'s objective (issue #343's acceptance
   shape)
-- Tasks: `VOC-045-T01`
-- Tests: `VOC-045-TEST-01`
-- Evidence: `VOC-045-EV-01`
+- Tasks: `VOC-048-T01`
+- Tests: `VOC-048-TEST-01`
+- Evidence: `VOC-048-EV-01`
 - Result: pending
 
 After a user has completed a real Google sign-in once, a second sign-in
@@ -30,14 +30,14 @@ identity) does not force Google's account-selection or consent UI to
 display. The user reaches the app's authenticated state without seeing that
 screen again.
 
-## VOC-045-AC-02 — Explicit sign-out still requires a fresh Google sign-in
+## VOC-048-AC-02 — Explicit sign-out still requires a fresh Google sign-in
 
 - Requirement source: `specification.md`'s objective (issue #343's acceptance
   shape: "...until either the app's own session expires or the user
   explicitly signs out")
-- Tasks: `VOC-045-T01`
-- Tests: `VOC-045-TEST-02`
-- Evidence: `VOC-045-EV-01`
+- Tasks: `VOC-048-T01`
+- Tests: `VOC-048-TEST-02`
+- Evidence: `VOC-048-EV-01`
 - Result: pending
 
 After a user explicitly signs out of the app, a subsequent sign-in attempt
@@ -46,25 +46,25 @@ require Google's own UI to reappear if Google itself still recognizes the
 user's browser session - it requires that the app does not skip
 authentication with Google altogether after sign-out).
 
-## VOC-045-AC-03 — CSRF state-token protection is unchanged
+## VOC-048-AC-03 — CSRF state-token protection is unchanged
 
 - Requirement source: `specification.md`'s "Decisions, contradictions,
   security, and privacy" section
-- Tasks: `VOC-045-T01`
-- Tests: `VOC-045-TEST-03`
-- Evidence: `VOC-045-EV-01`
+- Tasks: `VOC-048-T01`
+- Tests: `VOC-048-TEST-03`
+- Evidence: `VOC-048-EV-01`
 - Result: pending
 
 The existing `state`/`cookieState` comparison in `OAuthCallback` continues to
 reject a callback whose state does not match the value the app itself
 generated and stored, unchanged by any task in this package.
 
-## VOC-045-AC-04 — `email_verified` freshness trade-off is explicitly resolved, not silently dropped
+## VOC-048-AC-04 — `email_verified` freshness trade-off is explicitly resolved, not silently dropped
 
 - Requirement source: `specification.md`'s open question 2
-- Tasks: `VOC-045-T01`
-- Tests: `VOC-045-TEST-04`
-- Evidence: `VOC-045-EV-01`
+- Tasks: `VOC-048-T01`
+- Tests: `VOC-048-TEST-04`
+- Evidence: `VOC-048-EV-01`
 - Result: pending
 
 The fix's chosen replacement condition for when `prompt` is (or is not) set

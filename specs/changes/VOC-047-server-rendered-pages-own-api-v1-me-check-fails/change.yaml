@@ -1,5 +1,13 @@
 schema_version: 1
-id: VOC-043
+# RENAMED 2026-08-08: drafted as VOC-043, colliding with an
+# already-adopted, unrelated VOC-043 package (two packages independently
+# computed the same "next available ID" while drafted concurrently - the same
+# collision class VOC-044's own header comment documents). This draft's own topic (server-rendered pages' /api/v1/me check) was separately
+# picked up and actually adopted/implemented as VOC-044 - this draft itself was
+# never adopted and stays inert, kept only as historical record of the collision.
+# Renamed to VOC-047 purely to make the ID unique again; nothing about this
+# package's content, status, or (non-)adoption changed.
+id: VOC-047
 slug: server-rendered-pages-own-api-v1-me-check-fails
 title: Server-Rendered Pages' Own /api/v1/me Check Fails with 401 Immediately After
   middleware.ts's Identical Check Succeeds, Blocking Real Onboarding After Google
@@ -7,7 +15,7 @@ title: Server-Rendered Pages' Own /api/v1/me Check Fails with 401 Immediately Af
 type: fix
 status: draft
 risk: R3
-canonical_path: specs/changes/VOC-043-server-rendered-pages-own-api-v1-me-check-fails
+canonical_path: specs/changes/VOC-047-server-rendered-pages-own-api-v1-me-check-fails
 planned_implementation_risk_floor: Not yet computed by running scripts/governance/classify-change-risk.sh
   against a real, task-scoped file list - consistent with how VOC-039/VOC-040/VOC-041/VOC-042
   handled this field. This package proposes R3 for the change as a whole because the
@@ -55,21 +63,21 @@ artifacts:
   test_plan: test-plan.md
   release_plan: release-plan.md
 dependencies:
-- id: VOC-043-DEP-00
+- id: VOC-047-DEP-00
   status: 'unresolved. Depends on issue #333''s reported reproduction remaining accurate
     at implementation time - if a later comment on the issue narrows or changes the
-    diagnosis, VOC-043-T00 must be re-scoped before implementation, per this planner''s
+    diagnosis, VOC-047-T00 must be re-scoped before implementation, per this planner''s
     instructions to ground the package in the request as given rather than a stale
     snapshot of it.'
-- id: VOC-043-DEP-01
+- id: VOC-047-DEP-01
   status: unresolved. The issue explicitly asks the implementer to instrument both
     cookie paths on a single real request before fixing anything, since the exact
     divergence (encoding/escaping round-trip, a dropped cookie attribute, or something
     else) is not yet confirmed empirically - only the two candidate call sites are
-    named. VOC-043-T00's actual code change depends on this instrumentation step's
+    named. VOC-047-T00's actual code change depends on this instrumentation step's
     real-request finding, not on this package's own unconfirmed hypothesis (see specification.md's
     open questions).
-- id: VOC-043-DEP-02
+- id: VOC-047-DEP-02
   status: unresolved. Depends on the reviewing human deciding whether the temporary
     instrumentation/logging added to diagnose this (redacted per the issue's own instruction
     not to log raw cookie values) must be removed before merge, or may remain as permanent
@@ -78,7 +86,7 @@ dependencies:
 affected_areas:
 - apps/web/src/lib/api-server.ts
 - apps/web/src/middleware.ts
-- specs/changes/VOC-043-server-rendered-pages-own-api-v1-me-check-fails
+- specs/changes/VOC-047-server-rendered-pages-own-api-v1-me-check-fails
 implementation:
   authorized: false
   required: true
