@@ -3,7 +3,7 @@ id: VOC-020
 slug: build-the-real-progress-screen-apps-web-src-app-ap
 title: Build the Real Progress Screen (Confidence Points, Streak, Completion History)
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-020-build-the-real-progress-screen-apps-web-src-app-ap

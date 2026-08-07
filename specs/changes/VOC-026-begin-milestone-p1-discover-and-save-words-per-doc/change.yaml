@@ -3,7 +3,7 @@ id: VOC-026
 slug: begin-milestone-p1-discover-and-save-words-per-doc
 title: "Begin Milestone P1 \u2014 Discover and Save Words"
 type: feature
-status: implementation-ready
+status: completed
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-026-begin-milestone-p1-discover-and-save-words-per-doc

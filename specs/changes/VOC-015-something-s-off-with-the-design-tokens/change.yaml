@@ -3,7 +3,7 @@ id: VOC-015
 slug: something-s-off-with-the-design-tokens
 title: "Design Tokens — Brand Color Scale (primary / secondary)"
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-015-something-s-off-with-the-design-tokens

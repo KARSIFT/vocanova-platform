@@ -3,7 +3,7 @@ id: VOC-025
 slug: begin-milestone-a1-authentication-and-user-foundat
 title: "Begin Milestone A1 \u2014 Authentication and User Foundation"
 type: feature
-status: implementation-ready
+status: completed
 risk: R3
 planned_implementation_risk_floor: R3
 canonical_path: specs/changes/VOC-025-begin-milestone-a1-authentication-and-user-foundat
