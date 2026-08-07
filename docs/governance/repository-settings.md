@@ -140,9 +140,15 @@ trails (2026-07-24) - they are available, just not filed as live/current
 documentation. Verified sources for DOC-00 through DOC-13 are canonical and adopted;
 DOC-14 was deliberately reconciled but not adopted (see `docs/README.md`'s index).
 
-Previews, staging, production deployment, and rollback genuinely remain unbuilt -
-that part of the original blockers list still holds; only the "no application/CI"
-framing was stale.
+**Updated again (2026-08-08):** staging and production deployment are no longer
+unbuilt - `deploy-staging.yml` and `deploy-production.yml` exist, have both run
+successfully many times against real infrastructure (a real server plus
+vocanova.site/Cloudflare DNS), and production deploys are now restricted to `main`
+only via the `production` environment's branch policy. Rollback is a manual,
+proven procedure (redeploy the previous immutable image digest - DOC-11 §3), not
+one-click automation. Per-PR Cloudflare previews genuinely remain unbuilt - that
+part of the original blockers list still holds for previews specifically, not for
+staging/production deployment anymore.
 
 The initial governance bootstrap merged through PR #3 and its one-time exception has
 expired. The historical technical-steward appointment and completed dual-capacity

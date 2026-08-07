@@ -32,6 +32,11 @@ may refine them but may not weaken governance or security.
   revision and cannot substitute for required human approval.
 - Governance replacements are evaluated under the authority effective before them;
   they cannot authorize their own adoption.
+- Any change to workflow behavior, governance fields, or repository settings must
+  update every doc that describes that behavior in the same pull request - or, for
+  a settings change made outside a PR (e.g. via the GitHub API), in an immediate
+  doc-only follow-up PR. A doc that claims something no longer true is worse than
+  no doc at all; this is what caused the 2026-08-08 governance-doc reconciliation.
 
 ## Reporting a bug found outside the normal loop
 
@@ -43,9 +48,20 @@ may refine them but may not weaken governance or security.
   automatically triggers `plan-from-issue` (see `pipeline.yml`), which drafts a
   real change package for founder review and adoption, keeping every fix inside
   the same governed loop as planned work instead of bypassing it.
-- The exception is narrow, low-risk process/prep work explicitly requested in the
-  moment (e.g. wiring already-approved credentials into a deploy workflow) - not a
-  general license to hand-fix whatever looks broken.
+- The only exception (as of 2026-08-08) is GitHub repository/environment *settings*
+  changes made via the GitHub API or web UI - branch protection, environment
+  deployment-branch policies, security toggles (secret scanning, Dependabot), and
+  similar. Those aren't code, carry no review dimension the pipeline covers, and
+  may be made directly when explicitly requested. Every actual code or content
+  change that lands in `develop`/`main` - workflow files, application code, docs,
+  change packages, anything committed to git - goes through the issue ->
+  `plan-from-issue` -> adoption -> `implement.yml` route above, even when small,
+  even when explicitly requested in the moment, and even when an agent (not just a
+  human) is the one who wants the change made. This closes an earlier, broader
+  "narrow, low-risk process/prep work" exception that had been used to justify
+  direct-to-`main` commits (see the 2026-08-06 production-log debug workflow
+  incident, removed 2026-08-08) - that class of change is exactly what this rule
+  now requires to go through the governed loop instead.
 - Include enough in the issue for the planner to act without re-deriving your
   diagnosis: exact reproduction steps or commands, the failing behavior, and (if
   you found it) the root cause - not just a symptom description.
