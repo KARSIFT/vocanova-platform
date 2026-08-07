@@ -4,7 +4,7 @@ slug: user-settings-upsert-omits-created-at-updated-at
 title: user_settings Upsert Omits created_at/updated_at from the INSERT Branch, Violating
   NOT NULL and Blocking Every New User's Onboarding
 type: fix
-status: draft
+status: adopted
 risk: R3
 canonical_path: specs/changes/VOC-045-user-settings-upsert-omits-created-at-updated-at
 planned_implementation_risk_floor: Not yet computed by running scripts/governance/classify-change-risk.sh
@@ -31,21 +31,21 @@ requirement_source: 'GitHub issue #341 ("user_settings upsert omits created_at/u
   why onboarding is the first code path to exercise a genuine INSERT rather than the
   ON CONFLICT UPDATE branch, and proposes a fix (add created_at/updated_at to both
   INSERT column lists and VALUES) plus a suggested regression-test approach.'
-requirement_approval_status: 'Not approved. This package is an unreviewed draft prepared
-  by the planner role in response to issue #341; no founder or technical-steward adoption
-  decision has been recorded. See owners and approval_status below.'
+requirement_approval_status: 'Approved. Founder merged PR #342 (this draft package''s
+  own plan PR) on 2026-08-07T10:04:03Z, adopting it. This follow-up commit records
+  that decision in change.yaml, mirroring VOC-039/040/041/042/043/044''s convention.'
 base_branch: develop
 base_sha: fb1e1a33ad6b0cc58ea42c2c573e120d35fd8539
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: c06b9f5c3579d70f39686714dd98f59d6eca7cde
 owners:
   decision: unassigned
   package_preparation: planner (drafting only; adoption remains a human decision)
   implementation: unassigned
   independent_verification: unassigned
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: adopted
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 artifacts:
@@ -83,9 +83,9 @@ affected_areas:
 - apps/api/migrations/migration_test.go
 - specs/changes/VOC-045-user-settings-upsert-omits-created-at-updated-at
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: not-authorized
+  status: proposed
   target_branch: develop
   pull_request: null
   authority_issue: null
@@ -97,17 +97,21 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 342
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/342
 implementation_authority_before_adoption: false
-implementation_authority_status: not-exercised
+implementation_authority_status: exercised
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: Repository-level adoption has not occurred. No task in tasks.md
-  is implementation-authorized. specification.md's open questions 1-2 (how each call
-  site should consistently source its INSERT-branch timestamp, and whether a schema-level
-  DEFAULT now() fix is also in scope) must be resolved or explicitly accepted by the
-  reviewing human at adoption time.
+blocking_reasons: 'Repository-level adoption is resolved (PR 342). Individual tasks
+  T00-T02 each still require their own task-scoped implementation authorization/dispatch
+  after adoption, mirroring VOC-039 through VOC-044''s convention. specification.md''s
+  open questions resolved at adoption time: open question 1 (how gamification''s
+  UpsertUserSettings should source its INSERT-branch timestamp) is left to T01''s
+  implementer discretion, as already stated in tasks.md; open question 2 (a
+  schema-level DEFAULT now() fix) is explicitly deferred - this package''s scope
+  stays the two known-broken call sites plus regression coverage, to keep the P0
+  fix fast. File a follow-up package for the schema-level hardening if desired.'
