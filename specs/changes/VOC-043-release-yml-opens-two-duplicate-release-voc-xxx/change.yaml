@@ -31,9 +31,8 @@ requirement_source: 'GitHub issue #328 ("release.yml opens two duplicate ''Relea
   an existing-issue re-check or a concurrency lock keyed on the package/change_id).'
 requirement_approval_status: 'Approved. Founder merged PR #332 (this draft package''s
   own plan PR) on 2026-08-06T23:49:50Z, adopting it. This follow-up commit records
-  that decision in change.yaml. Repository-level adoption is recorded, but
-  VOC-043-T00 itself cannot be dispatched from this repository - see
-  blocking_reasons below.'
+  that decision in change.yaml. Repository-level adoption is recorded, but VOC-043-T00
+  itself cannot be dispatched from this repository - see blocking_reasons below.'
 base_branch: develop
 base_sha: a48f4d928bbd796c99f49825bb80eb1eab8ac7db
 target_branch: develop
@@ -75,7 +74,7 @@ implementation:
   status: proposed
   target_branch: develop
   pull_request: null
-  authority_issue: null
+  authority_issue: 336
 release:
   required: true
   mode: not-authorized-by-this-package
@@ -94,17 +93,15 @@ autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
 blocking_reasons: 'Repository-level adoption is resolved (PR 332). implementation.authorized
-  is set true only so adopt.yml''s own binary check (which has no separate state
-  for "adopted but not dispatchable in this repo") does not fail closed - VOC-043-T00
-  targets karsift-ai-infra/.github/workflows/release.yml, a file in the separate
-  KARSIFT/karsift-ai-infra repository, which this repository''s implement.yml
-  dispatch has no access to (same cross-repo boundary VOC-040 explicitly avoided
-  for its own out-of-scope suggestions). DO NOT dispatch implement.yml against
-  VOC-043-T00''s resulting task issue in this repo - it will not work. A companion
-  change package must be filed directly against KARSIFT/karsift-ai-infra for the
-  actual fix; this package''s value is recording the root-cause analysis and
-  confirmed fix design for whoever files that. specification.md''s open question 3
-  (manual cleanup of duplicate issues #310/#311) is separately resolved: both
-  already have founder-facing "approved" reply instructions pending; closing the
-  extra one after either
-  promotion succeeds is a manual follow-up, not blocking.'
+  is set true only so adopt.yml''s own binary check (which has no separate state for
+  "adopted but not dispatchable in this repo") does not fail closed - VOC-043-T00
+  targets karsift-ai-infra/.github/workflows/release.yml, a file in the separate KARSIFT/karsift-ai-infra
+  repository, which this repository''s implement.yml dispatch has no access to (same
+  cross-repo boundary VOC-040 explicitly avoided for its own out-of-scope suggestions).
+  DO NOT dispatch implement.yml against VOC-043-T00''s resulting task issue in this
+  repo - it will not work. A companion change package must be filed directly against
+  KARSIFT/karsift-ai-infra for the actual fix; this package''s value is recording
+  the root-cause analysis and confirmed fix design for whoever files that. specification.md''s
+  open question 3 (manual cleanup of duplicate issues #310/#311) is separately resolved:
+  both already have founder-facing "approved" reply instructions pending; closing
+  the extra one after either promotion succeeds is a manual follow-up, not blocking.'
