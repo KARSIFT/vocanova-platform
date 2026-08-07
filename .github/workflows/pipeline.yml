@@ -275,6 +275,11 @@ jobs:
       founder_username: "m-e-h-r-d-a-a-d"   # same identity as merge-gate's founder_username, above
       integration_branch: "develop"   # match the value used elsewhere in this file
       production_branch: "main"
+      auto_release_enabled: "true"    # founder's explicit, twice-confirmed request (2026-08-08) -
+        # see AGENTS.md's "Release and deployment authority" section for the record. Release
+        # promotion (and, via deploy-production.yml's own push-to-main trigger, the resulting
+        # production deploy) now requires no founder "approved" comment - CI + independent
+        # review passing on every task PR that went into the package is the gate.
     secrets: inherit
 
   # Fills the gap between adoption (one human decision, the whole roster at

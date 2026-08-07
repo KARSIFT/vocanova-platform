@@ -273,28 +273,48 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         self.assert_failure("rl1_technical_activation must remain false")
 
     def test_a003_automatic_merge_enablement_fails(self) -> None:
+        # 2026-08-08: the repository is now authorized (see the
+        # AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08 marker in
+        # a003-transition-state.yaml) and this field's required value is
+        # "true", not "false" - the tripwire this test exercises is that
+        # DEVIATING from the currently-required value (in either direction)
+        # still fails closed, not that the field is frozen at one constant
+        # forever regardless of authorization.
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "automatic_merge_allowed: false",
             "automatic_merge_allowed: true",
+            "automatic_merge_allowed: false",
         )
-        self.assert_failure("automatic_merge_allowed must remain false")
+        self.assert_failure("automatic_merge_allowed must equal 'true' once authorized")
+
+    def test_a003_automatic_merge_enablement_without_marker_fails(self) -> None:
+        # The other half of the same tripwire: the marker and the four
+        # merge/release/deployment fields must move together. Flipping a
+        # field to the authorized value while REMOVING the marker (as if
+        # someone tried to sneak the capability in without the recorded
+        # authorization) must fail just as hard as the reverse.
+        self.replace(
+            "docs/governance/a003-transition-state.yaml",
+            "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08",
+            "MARKER-REMOVED-FOR-TEST",
+        )
+        self.assert_failure("automatic_merge_allowed must remain 'false' without an authorization marker")
 
     def test_a003_autonomous_merge_enablement_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "autonomous_merge_allowed: false",
             "autonomous_merge_allowed: true",
+            "autonomous_merge_allowed: false",
         )
-        self.assert_failure("autonomous_merge_allowed must remain false")
+        self.assert_failure("autonomous_merge_allowed must equal 'true' once authorized")
 
     def test_a003_autonomous_production_enablement_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "autonomous_production_release: disabled",
             "autonomous_production_release: enabled",
+            "autonomous_production_release: disabled",
         )
-        self.assert_failure("autonomous production release must remain disabled")
+        self.assert_failure("autonomous_production_release must equal 'enabled' once authorized")
 
     def test_a003_doc_17_adoption_fails(self) -> None:
         self.replace(
@@ -371,10 +391,10 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
     def test_production_deployment_enablement_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "production_deployment: disabled",
             "production_deployment: enabled",
+            "production_deployment: disabled",
         )
-        self.assert_failure("production deployment must remain disabled")
+        self.assert_failure("production_deployment must equal 'enabled' once authorized")
 
     def test_protected_policy_partial_adoption_fails(self) -> None:
         self.replace(
@@ -474,7 +494,12 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         self.assert_failure("not pinned")
 
     def test_false_autonomous_activation_claim_fails(self) -> None:
-        path = self.root / ".github/approved-policy/protected-paths.yaml"
+        # Targets post-merge-activation-checklist.md, not
+        # protected-paths.yaml: as of 2026-08-08 the latter is a legitimately
+        # authorized exception to this pattern (see validate_false_activation's
+        # own comment) - this test still needs to prove the tripwire is real
+        # everywhere ELSE a false activation claim could appear.
+        path = self.root / "docs/governance/post-merge-activation-checklist.md"
         path.write_text(path.read_text(encoding="utf-8") + "automatic_merge: true\n", encoding="utf-8")
         self.assert_failure("false claim")
 
