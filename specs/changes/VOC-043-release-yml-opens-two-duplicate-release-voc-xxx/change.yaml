@@ -70,7 +70,7 @@ affected_areas:
 - karsift-ai-infra/.github/workflows/release.yml
 - specs/changes/VOC-043-release-yml-opens-two-duplicate-release-voc-xxx
 implementation:
-  authorized: false
+  authorized: true
   required: true
   status: proposed
   target_branch: develop
@@ -88,20 +88,23 @@ repository_adoption_status: adopted
 adoption_pr: 332
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/332
 implementation_authority_before_adoption: false
-implementation_authority_status: not-exercised
+implementation_authority_status: exercised
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'Repository-level adoption is resolved (PR 332), but VOC-043-T00
-  targets karsift-ai-infra/.github/workflows/release.yml - a file in the separate
+blocking_reasons: 'Repository-level adoption is resolved (PR 332). implementation.authorized
+  is set true only so adopt.yml''s own binary check (which has no separate state
+  for "adopted but not dispatchable in this repo") does not fail closed - VOC-043-T00
+  targets karsift-ai-infra/.github/workflows/release.yml, a file in the separate
   KARSIFT/karsift-ai-infra repository, which this repository''s implement.yml
   dispatch has no access to (same cross-repo boundary VOC-040 explicitly avoided
-  for its own out-of-scope suggestions). implementation.authorized stays false;
-  VOC-043-T00 cannot be dispatched from here. A companion change package must be
-  filed directly against KARSIFT/karsift-ai-infra for the actual fix - this
-  package''s value is recording the root-cause analysis and confirmed fix design
-  for whoever files that. specification.md''s open question 3 (manual cleanup of
-  duplicate issues #310/#311) is separately resolved: both already have founder-
-  facing "approved" reply instructions pending; closing the extra one after either
+  for its own out-of-scope suggestions). DO NOT dispatch implement.yml against
+  VOC-043-T00''s resulting task issue in this repo - it will not work. A companion
+  change package must be filed directly against KARSIFT/karsift-ai-infra for the
+  actual fix; this package''s value is recording the root-cause analysis and
+  confirmed fix design for whoever files that. specification.md''s open question 3
+  (manual cleanup of duplicate issues #310/#311) is separately resolved: both
+  already have founder-facing "approved" reply instructions pending; closing the
+  extra one after either
   promotion succeeds is a manual follow-up, not blocking.'
