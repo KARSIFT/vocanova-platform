@@ -5,7 +5,7 @@ slug: design-tokens-motion-scale
 title: Design Tokens — Motion Scale (Duration + Easing)
 
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-013-design-tokens-motion-scale

@@ -3,7 +3,7 @@ id: VOC-018
 slug: wire-the-existing-packages-design-tokens-scales-sp
 title: Wire design-token scales into apps/web (Tailwind v4 @theme)
 type: feature
-status: implementation-ready
+status: completed
 risk: R2
 planned_implementation_risk_floor: R2
 canonical_path: specs/changes/VOC-018-wire-the-existing-packages-design-tokens-scales-sp

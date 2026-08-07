@@ -3,7 +3,7 @@ id: VOC-024
 slug: build-the-word-detail-screen-a-new-nested-dynamic
 title: Build the Word Detail Screen
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-024-build-the-word-detail-screen-a-new-nested-dynamic-

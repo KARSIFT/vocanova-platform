@@ -3,7 +3,7 @@ id: VOC-019
 slug: build-the-real-home-screen-apps-web-src-app-app-ho
 title: Build the Real Home Screen (Today's Mission, Streak, Due Reviews, Journey Entry)
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-019-build-the-real-home-screen-apps-web-src-app-app-ho

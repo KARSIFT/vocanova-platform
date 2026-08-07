@@ -3,7 +3,7 @@ id: VOC-017
 slug: implement-the-three-tab-bottom-navigation-shell-de
 title: Three-Tab Bottom Navigation Shell (Home / Journey / Progress)
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-017-implement-the-three-tab-bottom-navigation-shell-de
