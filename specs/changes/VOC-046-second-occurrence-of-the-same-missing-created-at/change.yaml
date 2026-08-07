@@ -5,7 +5,7 @@ title: 'Second Occurrence of the Missing created_at/updated_at Bug Class: daily_
   INSERT Crashes GET /api/v1/daily-mission for Every New User, Plus a Repository-Wide
   Audit'
 type: fix
-status: draft
+status: adopted
 risk: R3
 canonical_path: specs/changes/VOC-046-second-occurrence-of-the-same-missing-created-at
 planned_implementation_risk_floor: Not yet computed by running scripts/governance/classify-change-risk.sh
@@ -41,23 +41,27 @@ requirement_source: 'GitHub issue #352 ("Second occurrence of the same missing c
   should be audited for the same omission. It proposes an immediate fix for the confirmed
   crash plus a systemic audit, regression coverage per call site, and a schema-scanning
   check to prevent a third undetected occurrence.'
-requirement_approval_status: Not approved. This package is a draft proposal only;
-  no founder or technical-steward adoption decision has been recorded. change.yaml's
-  own approval_status, implementation_authorized, and automatic_merge_allowed fields
-  are left at their unadopted defaults, as required by the planner role's own scope
-  rules.
+requirement_approval_status: 'Approved. Founder merged PR #353 (this draft package''s
+  own plan PR) on 2026-08-07T12:34:39Z, adopting it. This follow-up commit records
+  that decision in change.yaml, mirroring VOC-039 through VOC-045''s convention.
+  Open question 1 (audit scope) is resolved by tasks.md''s own boundary already
+  (thirteen named files, record-not-silently-skip); open question 2 (schema-scanning
+  check) is resolved IN SCOPE - T03 stays in this package, worth preventing a
+  third occurrence; open question 3 (generic 500 masking real errors) is resolved
+  OUT of scope - real but tangential, file a follow-up if desired. T00 is P0 and
+  should be dispatched first, ahead of T01-T03.'
 base_branch: develop
 base_sha: b6ecae02b944b7eb7462971616ae988a29ee9358
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: 6309ca41aa8023ed6dc777ab61431de6eb6c168b
 owners:
   decision: unassigned
   package_preparation: planner (drafting only; adoption remains a human decision)
   implementation: unassigned
   independent_verification: unassigned
-approval_status: not-approved
-implementation_authorized: false
-automatic_merge_allowed: false
+approval_status: adopted
+implementation_authorized: true
+automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true
 artifacts:
@@ -109,7 +113,7 @@ affected_areas:
 - apps/api/migrations
 - specs/changes/VOC-046-second-occurrence-of-the-same-missing-created-at
 implementation:
-  authorized: false
+  authorized: true
   required: true
   status: proposed
   target_branch: develop
@@ -123,20 +127,17 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 353
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/353
 implementation_authority_before_adoption: false
-implementation_authority_status: not-exercised
+implementation_authority_status: exercised
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'Repository-level adoption has not occurred. No task in tasks.md
-  may be dispatched until a human founder/steward adopts this package (sets status:
-  adopted and implementation_authorized: true in a follow-up commit, per VOC-039 through
-  VOC-045''s convention), and each task still requires its own task-scoped implementation
-  authorization/dispatch after adoption. specification.md''s open questions 1-3 (the
-  full audit scope''s exact boundaries, whether the schema-scanning check is in scope,
-  and whether the generic-500-masking behavior is in scope) are flagged for the reviewing
-  human to resolve at or before adoption.'
+blocking_reasons: 'Repository-level adoption is resolved (PR 353). Individual tasks
+  T00-T03 each still require their own task-scoped implementation authorization/dispatch
+  after adoption, mirroring VOC-039 through VOC-045''s convention. T00 is P0 (live
+  production outage) and should be dispatched first, ahead of T01-T03. specification.md''s
+  open questions resolved at adoption time per requirement_approval_status above.'
