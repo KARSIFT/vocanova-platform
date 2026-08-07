@@ -43,13 +43,13 @@ requirement_source: 'GitHub issue #352 ("Second occurrence of the same missing c
   check to prevent a third undetected occurrence.'
 requirement_approval_status: 'Approved. Founder merged PR #353 (this draft package''s
   own plan PR) on 2026-08-07T12:34:39Z, adopting it. This follow-up commit records
-  that decision in change.yaml, mirroring VOC-039 through VOC-045''s convention.
-  Open question 1 (audit scope) is resolved by tasks.md''s own boundary already
-  (thirteen named files, record-not-silently-skip); open question 2 (schema-scanning
-  check) is resolved IN SCOPE - T03 stays in this package, worth preventing a
-  third occurrence; open question 3 (generic 500 masking real errors) is resolved
-  OUT of scope - real but tangential, file a follow-up if desired. T00 is P0 and
-  should be dispatched first, ahead of T01-T03.'
+  that decision in change.yaml, mirroring VOC-039 through VOC-045''s convention. Open
+  question 1 (audit scope) is resolved by tasks.md''s own boundary already (thirteen
+  named files, record-not-silently-skip); open question 2 (schema-scanning check)
+  is resolved IN SCOPE - T03 stays in this package, worth preventing a third occurrence;
+  open question 3 (generic 500 masking real errors) is resolved OUT of scope - real
+  but tangential, file a follow-up if desired. T00 is P0 and should be dispatched
+  first, ahead of T01-T03.'
 base_branch: develop
 base_sha: b6ecae02b944b7eb7462971616ae988a29ee9358
 target_branch: develop
@@ -118,7 +118,7 @@ implementation:
   status: proposed
   target_branch: develop
   pull_request: null
-  authority_issue: 352
+  authority_issue: null
 release:
   required: true
   mode: not-authorized-by-this-package
@@ -136,8 +136,8 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'Repository-level adoption is resolved (PR 353). Individual tasks
+blocking_reasons: Repository-level adoption is resolved (PR 353). Individual tasks
   T00-T03 each still require their own task-scoped implementation authorization/dispatch
-  after adoption, mirroring VOC-039 through VOC-045''s convention. T00 is P0 (live
-  production outage) and should be dispatched first, ahead of T01-T03. specification.md''s
-  open questions resolved at adoption time per requirement_approval_status above.'
+  after adoption, mirroring VOC-039 through VOC-045's convention. T00 is P0 (live
+  production outage) and should be dispatched first, ahead of T01-T03. specification.md's
+  open questions resolved at adoption time per requirement_approval_status above.
