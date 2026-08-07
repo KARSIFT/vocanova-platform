@@ -109,9 +109,9 @@ standing_technical_steward_approval: not-required-solely-for-routine-R3-under-ac
 blocking_reasons: 'Repository-level adoption is resolved (PR 342). Individual tasks
   T00-T02 each still require their own task-scoped implementation authorization/dispatch
   after adoption, mirroring VOC-039 through VOC-044''s convention. specification.md''s
-  open questions resolved at adoption time: open question 1 (how gamification''s
-  UpsertUserSettings should source its INSERT-branch timestamp) is left to T01''s
-  implementer discretion, as already stated in tasks.md; open question 2 (a
-  schema-level DEFAULT now() fix) is explicitly deferred - this package''s scope
-  stays the two known-broken call sites plus regression coverage, to keep the P0
-  fix fast. File a follow-up package for the schema-level hardening if desired.'
+  open questions resolved at adoption time: open question 1 (how gamification''s UpsertUserSettings
+  should source its INSERT-branch timestamp) is left to T01''s implementer discretion,
+  as already stated in tasks.md; open question 2 (a schema-level DEFAULT now() fix)
+  is explicitly deferred - this package''s scope stays the two known-broken call sites
+  plus regression coverage, to keep the P0 fix fast. File a follow-up package for
+  the schema-level hardening if desired.'
