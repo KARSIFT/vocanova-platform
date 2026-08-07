@@ -14,10 +14,15 @@ on:
         type: string
         default: api-production.vocanova.site
       production_api_base_url:
-        description: "NEXT_PUBLIC_API_BASE_URL used at web image build time - include :8443 while production and staging share one host (see D00 supersession note)"
+        description: "NEXT_PUBLIC_API_BASE_URL baked into the web bundle at build time and called from the browser - no port, now that Cloudflare forwards the plain :443 hostname to the origin's 8443 (VOC-038-T03 prep; verify this Cloudflare rule is still in place before dispatching)"
         required: true
         type: string
-        default: https://api-production.vocanova.site:8443
+        default: https://api-production.vocanova.site
+      new_user_signup_allowlist:
+        description: "VOC-038-D00/D01: comma-separated emails admitted to sign up while NEW_USER_SIGNUP_ENABLED stays false (the L1 controlled-launch cohort). Leave empty to allowlist no one. Expanding the cohort is editing this input at the next dispatch - no code change."
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -196,29 +201,72 @@ jobs:
             } >> /opt/vocanova/production/secrets/api.env
             chmod 600 /opt/vocanova/production/secrets/api.env
 
+      # Google OAuth is optional-until-adopted, same reasoning as the
+      # monitoring sync above: skip cleanly while these secrets don't
+      # exist, fail closed on a PARTIAL state. GOOGLE_OAUTH_ENABLED
+      # itself is written by the config step below, gated on whether
+      # this step actually wrote a client ID/secret pair.
+      - name: Sync production Google OAuth configuration from GitHub secrets
+        id: google_oauth
+        uses: appleboy/ssh-action@v1
+        env:
+          PRODUCTION_GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          PRODUCTION_GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+        with:
+          host: ${{ secrets.PRODUCTION_SSH_HOST }}
+          username: ${{ secrets.PRODUCTION_SSH_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+          command_timeout: 2m
+          envs: PRODUCTION_GOOGLE_OAUTH_CLIENT_ID,PRODUCTION_GOOGLE_OAUTH_CLIENT_SECRET
+          script: |
+            set -euo pipefail
+            if [ -z "${PRODUCTION_GOOGLE_OAUTH_CLIENT_ID:-}" ] && [ -z "${PRODUCTION_GOOGLE_OAUTH_CLIENT_SECRET:-}" ]; then
+              echo "GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET both unset - skipping (OAuth not yet adopted)"
+              exit 0
+            fi
+            if [ -z "${PRODUCTION_GOOGLE_OAUTH_CLIENT_ID:-}" ] || [ -z "${PRODUCTION_GOOGLE_OAUTH_CLIENT_SECRET:-}" ]; then
+              echo "GOOGLE_OAUTH_CLIENT_ID / GOOGLE_OAUTH_CLIENT_SECRET partially set - refusing a half-configured state" >&2
+              exit 1
+            fi
+            sed -i \
+              -e '/^GOOGLE_OAUTH_CLIENT_ID=/d' \
+              -e '/^GOOGLE_OAUTH_CLIENT_SECRET=/d' \
+              /opt/vocanova/production/secrets/api.env
+            {
+              echo "GOOGLE_OAUTH_CLIENT_ID=${PRODUCTION_GOOGLE_OAUTH_CLIENT_ID}"
+              echo "GOOGLE_OAUTH_CLIENT_SECRET=${PRODUCTION_GOOGLE_OAUTH_CLIENT_SECRET}"
+            } >> /opt/vocanova/production/secrets/api.env
+            chmod 600 /opt/vocanova/production/secrets/api.env
+
       # BASE_URL/OAUTH_REDIRECT_URI/etc. are not secrets - they're
       # non-sensitive config derived entirely from this workflow's own
       # production_web_host/production_api_host inputs - so they're
       # written here from workflow inputs rather than requiring a
       # separate founder pre-population step the way DATABASE_URL and
-      # provider API keys do. Kill switches default OFF for
-      # email/OAuth/signups until real production credentials for those
-      # exist (VOC-032-DEP-07's production-tier equivalent); AI stays on
-      # per the sync step above. Found live during VOC-037-T06's first
-      # real deploy rehearsal (api container looped on "BASE_URL is
-      # required" until this was added).
+      # provider API keys do. Email magic-link and signups stay OFF
+      # (VOC-032-DEP-07's production-tier equivalent) until real
+      # credentials for those exist too; GOOGLE_OAUTH_ENABLED instead
+      # tracks whether the Google OAuth sync step above actually found
+      # a client ID/secret pair, so OAuth turns on automatically once
+      # VOC-038-T03's credentials are adopted, with no separate flag
+      # to remember to flip. AI stays on per its own sync step. Found
+      # live during VOC-037-T06's first real deploy rehearsal (api
+      # container looped on "BASE_URL is required" until this was
+      # added).
       - name: Write production application configuration
         uses: appleboy/ssh-action@v1
         env:
           PRODUCTION_WEB_HOST: ${{ inputs.production_web_host }}
           PRODUCTION_API_HOST: ${{ inputs.production_api_host }}
           PRODUCTION_SENTRY_RELEASE: sha-${{ steps.sha.outputs.short_sha }}
+          PRODUCTION_NEW_USER_SIGNUP_ALLOWLIST: ${{ inputs.new_user_signup_allowlist }}
+          PRODUCTION_GOOGLE_OAUTH_ENABLED: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID != '' && secrets.GOOGLE_OAUTH_CLIENT_SECRET != '' }}
         with:
           host: ${{ secrets.PRODUCTION_SSH_HOST }}
           username: ${{ secrets.PRODUCTION_SSH_USER }}
           key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
           command_timeout: 2m
-          envs: PRODUCTION_WEB_HOST,PRODUCTION_API_HOST,PRODUCTION_SENTRY_RELEASE
+          envs: PRODUCTION_WEB_HOST,PRODUCTION_API_HOST,PRODUCTION_SENTRY_RELEASE,PRODUCTION_NEW_USER_SIGNUP_ALLOWLIST,PRODUCTION_GOOGLE_OAUTH_ENABLED
           script: |
             set -euo pipefail
             sed -i \
@@ -234,11 +282,17 @@ jobs:
               -e '/^EMAIL_MAGIC_LINK_ENABLED=/d' \
               -e '/^GOOGLE_OAUTH_ENABLED=/d' \
               -e '/^NEW_USER_SIGNUP_ENABLED=/d' \
+              -e '/^NEW_USER_SIGNUP_ALLOWLIST=/d' \
               /opt/vocanova/production/secrets/api.env
             {
               echo "ENVIRONMENT=production"
+              # Port :8443 is required for these browser-facing values too:
+              # live reproduction showed the unqualified host hits nginx's
+              # 444 catch-all instead of production's real listener. This
+              # matches the same Cloudflare/host-sharing finding already
+              # documented in the health-check comment below.
               echo "BASE_URL=https://${PRODUCTION_API_HOST}:8443"
-              echo "OAUTH_REDIRECT_URI=https://${PRODUCTION_API_HOST}:8443/auth/oauth/google/callback"
+              echo "OAUTH_REDIRECT_URI=https://${PRODUCTION_API_HOST}:8443/api/v1/auth/oauth/google/callback"
               echo "OAUTH_REDIRECT_ALLOWLIST=https://${PRODUCTION_WEB_HOST}:8443/onboarding,https://${PRODUCTION_WEB_HOST}:8443/home"
               # Shared parent domain (e.g. ".vocanova.site"), NOT the bare
               # web hostname: the session/CSRF cookies are set by the API
@@ -256,8 +310,9 @@ jobs:
               echo "SENTRY_ENVIRONMENT=production"
               echo "SENTRY_RELEASE=${PRODUCTION_SENTRY_RELEASE}"
               echo "EMAIL_MAGIC_LINK_ENABLED=false"
-              echo "GOOGLE_OAUTH_ENABLED=false"
+              echo "GOOGLE_OAUTH_ENABLED=${PRODUCTION_GOOGLE_OAUTH_ENABLED}"
               echo "NEW_USER_SIGNUP_ENABLED=false"
+              echo "NEW_USER_SIGNUP_ALLOWLIST=${PRODUCTION_NEW_USER_SIGNUP_ALLOWLIST}"
             } >> /opt/vocanova/production/secrets/api.env
             chmod 600 /opt/vocanova/production/secrets/api.env
 
@@ -456,14 +511,20 @@ jobs:
       # VOC-038-T02: replaces the manual curl/SSH checks used ad hoc
       # during R2 with a scripted, repeatable suite. Expected
       # kill-switch state mirrors the "Write production application
-      # configuration" step above (email/OAuth/signups off, AI on).
+      # configuration" step above (email/signups off, AI on).
+      # EXPECT_OAUTH_ENABLED mirrors the same secrets-present condition
+      # as GOOGLE_OAUTH_ENABLED there, instead of a hardcoded "false" -
+      # found live on VOC-038-T03's first real dispatch after adopting
+      # OAuth credentials: the real kill switch correctly flipped to
+      # true, but this hardcoded expectation still said false, failing
+      # the suite over a stale assumption rather than a real defect.
       # SMOKE_TEST_SESSION_COOKIE is intentionally unset here - no
       # founder-provisioned smoke-test account exists yet, so the
       # core-loop check runs as a non-fatal SKIP until one is.
       - name: Run production smoke-test suite
         env:
           EXPECT_MAGIC_LINK_ENABLED: "false"
-          EXPECT_OAUTH_ENABLED: "false"
+          EXPECT_OAUTH_ENABLED: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID != '' && secrets.GOOGLE_OAUTH_CLIENT_SECRET != '' }}
           EXPECT_NEW_SIGNUPS_ENABLED: "false"
           EXPECT_AI_ENABLED: "true"
         run: |

@@ -164,8 +164,10 @@ func (r *Repository) UpsertUserSettings(ctx context.Context, tx *sql.Tx, userID 
 		return nil, fmt.Errorf("daily review target %d out of range [%d,%d]", dailyReviewTarget, MinDailyReviewTarget, MaxDailyReviewTarget)
 	}
 	row := tx.QueryRowContext(ctx,
-		`INSERT INTO user_settings (id, user_id, timezone, daily_review_target)
-		 VALUES ($1, $2, $3, $4)
+		`INSERT INTO user_settings (
+			id, user_id, timezone, daily_review_target, created_at, updated_at
+		)
+		 VALUES ($1, $2, $3, $4, NOW(), NOW())
 		 ON CONFLICT (user_id) DO UPDATE
 		   SET timezone = COALESCE(NULLIF(user_settings.timezone, 'UTC'), EXCLUDED.timezone),
 		       daily_review_target = CASE WHEN user_settings.daily_review_target <> 20
@@ -218,10 +220,10 @@ func (r *Repository) InsertPointLedger(
 	err := tx.QueryRowContext(ctx,
 		`INSERT INTO confidence_point_ledger (
 			id, user_id, amount, balance_after, reason, source_type,
-			source_id, idempotency_key, metadata, occurred_at
+			source_id, idempotency_key, metadata, occurred_at, created_at, updated_at
 		) VALUES (
 			$1, $2, $3, $4, $5, $6,
-			$7, $8, $9, $10
+			$7, $8, $9, $10, NOW(), NOW()
 		)
 		ON CONFLICT (user_id, idempotency_key) WHERE idempotency_key IS NOT NULL
 		DO UPDATE SET amount = confidence_point_ledger.amount
@@ -264,10 +266,10 @@ func (r *Repository) InsertGraceLedger(
 	err := tx.QueryRowContext(ctx,
 		`INSERT INTO grace_day_ledger (
 			id, user_id, amount, balance_after, reason, source_type,
-			source_id, applied_to_local_date, timezone, idempotency_key
+			source_id, applied_to_local_date, timezone, idempotency_key, created_at, updated_at
 		) VALUES (
 			$1, $2, $3, $4, $5, $6,
-			$7, $8, $9, $10
+			$7, $8, $9, $10, NOW(), NOW()
 		)
 		ON CONFLICT (user_id, idempotency_key) WHERE idempotency_key IS NOT NULL
 		DO UPDATE SET amount = grace_day_ledger.amount
@@ -305,11 +307,11 @@ func (r *Repository) UpsertStreakState(
 		`INSERT INTO streak_states (
 			id, user_id, current_streak_count, longest_streak_count,
 			last_completed_local_date, last_activity_local_date,
-			timezone, status
+			timezone, status, created_at, updated_at
 		) VALUES (
 			$1, $2, $3, $4,
 			$5, $6,
-			$7, $8
+			$7, $8, NOW(), NOW()
 		)
 		ON CONFLICT (user_id) DO UPDATE
 		  SET current_streak_count = EXCLUDED.current_streak_count,

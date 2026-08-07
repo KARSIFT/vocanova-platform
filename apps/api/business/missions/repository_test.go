@@ -10,6 +10,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// dailyMissionSnapshotInsertColumnsPattern matches the
+// daily_mission_snapshots INSERT column list only: the regression this
+// guards is the omission of created_at/updated_at, not the placeholder
+// numbering or timestamp source the fix chooses for them. sqlmock collapses
+// each whitespace run in the actual statement to a single space, so the
+// pattern tolerates optional spaces around the parentheses rather than
+// assuming how the SQL literal is wrapped.
+const dailyMissionSnapshotInsertColumnsPattern = `INSERT INTO daily_mission_snapshots \(\s*id,\s*user_id,\s*local_date,\s*timezone,\s*review_target,\s*reviews_completed,\s*policy_version,\s*status,\s*grace_applied,\s*created_at,\s*updated_at\s*\)`
+
 func newUUIDs(t *testing.T) (uuid.UUID, uuid.UUID) {
 	t.Helper()
 	return uuid.MustParse("00000000-0000-0000-0000-000000000001"),
@@ -26,7 +35,7 @@ func TestPostgreSQLRepositoryCreateDailyMissionSnapshot(t *testing.T) {
 	day := time.Date(2026, 7, 26, 0, 0, 0, 0, time.UTC)
 
 	mock.ExpectBegin()
-	mock.ExpectQuery("INSERT INTO daily_mission_snapshots").
+	mock.ExpectQuery(dailyMissionSnapshotInsertColumnsPattern).
 		WithArgs(
 			sqlmock.AnyArg(), userID, day, "UTC", 20, "p4-mission-policy-v1",
 		).
