@@ -1,5 +1,13 @@
 schema_version: 1
-id: VOC-045
+# RENAMED 2026-08-08: drafted as VOC-045, colliding with an
+# already-adopted, unrelated VOC-045 package (two packages independently
+# computed the same "next available ID" while drafted concurrently - the same
+# collision class VOC-044's own header comment documents). The founder closed the originating issue (#343) without adoption on 2026-08-07,
+# confirming the underlying bug was already resolved / no longer needed - this
+# draft stays permanently inert by design, kept only as historical record.
+# Renamed to VOC-048 purely to make the ID unique again; nothing about this
+# package's content, status, or (non-)adoption changed.
+id: VOC-048
 slug: google-sign-in-re-prompts-for-account-selection
 title: Google Sign-In Unconditionally Requests prompt=consent, Re-Prompting Account
   Selection/Consent on Every Sign-In Instead of Only When Actually Needed
@@ -13,7 +21,7 @@ planned_implementation_risk_floor: Not yet computed by running scripts/governanc
   inside the authentication/authorization area docs/governance/change-risk-classification.md
   names as an R3-floor category. This is a draft proposal for the reviewing human
   at adoption time, not a determination.
-canonical_path: specs/changes/VOC-045-google-sign-in-re-prompts-for-account-selection
+canonical_path: specs/changes/VOC-048-google-sign-in-re-prompts-for-account-selection
 authority_model: a003-active
 requirement_source: 'GitHub issue #343 ("Google sign-in re-prompts for account selection/consent
   on every sign-in instead of remembering an active session"), reporting founder feedback
@@ -56,13 +64,13 @@ artifacts:
   test_plan: test-plan.md
   release_plan: release-plan.md
 dependencies:
-- id: VOC-045-DEP-00
+- id: VOC-048-DEP-00
   status: 'unresolved at drafting time. This package''s root-cause finding (see specification.md)
     was made by directly reading apps/api/business/auth/google_oauth.go''s AuthURL
     method during drafting, not merely inferred from the issue text. If a future comment
     on issue #343 reports different or additional symptoms, such as the app-level
-    session itself also not persisting, VOC-045-T01 must be re-scoped before implementation.'
-- id: VOC-045-DEP-01
+    session itself also not persisting, VOC-048-T01 must be re-scoped before implementation.'
+- id: VOC-048-DEP-01
   status: unresolved at drafting time. Depends on the reviewing human deciding whether
     changing the unconditional prompt=consent behavior, which has been in place since
     an existing code comment attributes it to task T15, requires product or founder
@@ -73,7 +81,7 @@ affected_areas:
 - apps/api/business/auth/google_oauth_test.go
 - apps/api/business/auth/service.go
 - apps/api/business/auth/service_test.go
-- specs/changes/VOC-045-google-sign-in-re-prompts-for-account-selection
+- specs/changes/VOC-048-google-sign-in-re-prompts-for-account-selection
 implementation:
   authorized: false
   required: true

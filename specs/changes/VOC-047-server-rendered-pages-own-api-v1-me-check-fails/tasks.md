@@ -1,4 +1,4 @@
-# VOC-043 — Tasks
+# VOC-047 — Tasks
 
 None of the tasks below is implementation-authorized by this package. Adoption
 and each task's own implementation-authorization are separate, mirroring
@@ -8,10 +8,10 @@ precisely, per `specification.md`'s open question 1 — the exact diff for `T01`
 below is therefore described in terms of its required outcome, not a
 predetermined line-level change.
 
-## VOC-043-T00 — Instrument both cookie-forwarding paths and capture a real-request comparison
+## VOC-047-T00 — Instrument both cookie-forwarding paths and capture a real-request comparison
 
 - Requirement source: issue #333's own suggested diagnostic approach
-- Acceptance criteria: `VOC-043-AC-00`
+- Acceptance criteria: `VOC-047-AC-00`
 - Status: pending
 - Summary: add temporary, redacted diagnostic logging to
   `apps/web/src/middleware.ts`'s existing `cookieHeader` construction and to
@@ -26,13 +26,13 @@ predetermined line-level change.
   logging is removed or kept as permanent low-cardinality diagnostics is decided
   at review time, not by this task.
 
-## VOC-043-T01 — Fix the identified cookie-forwarding divergence
+## VOC-047-T01 — Fix the identified cookie-forwarding divergence
 
-- Requirement source: issue #333's core reported defect, scoped by `VOC-043-T00`'s
+- Requirement source: issue #333's core reported defect, scoped by `VOC-047-T00`'s
   finding
-- Acceptance criteria: `VOC-043-AC-01`
+- Acceptance criteria: `VOC-047-AC-01`
 - Status: pending
-- Depends on: `VOC-043-T00`'s real-request finding
+- Depends on: `VOC-047-T00`'s real-request finding
 - Summary: make `apps/web/src/lib/api-server.ts`'s `createServerApiClient()`
   forward cookies to `/api/v1/me` (and any other API call it makes) using the
   same effective cookie-header value `apps/web/src/middleware.ts` already
@@ -40,18 +40,18 @@ predetermined line-level change.
   fix direction, either by changing `api-server.ts` to match `middleware.ts`'s
   raw-header forward, changing `middleware.ts` to match a corrected
   `cookies()`-based approach, or extracting one shared cookie-forwarding helper
-  used by both — whichever `VOC-043-T00`'s finding indicates actually resolves
+  used by both — whichever `VOC-047-T00`'s finding indicates actually resolves
   the divergence. Verify by confirming a request with a valid session cookie
   now receives `200` (not `401`) from both `middleware.ts`'s check and
   `createServerApiClient().getCurrentUser()` in the same request lifecycle.
 
-## VOC-043-T02 — Deterministic regression test for this cookie-forwarding divergence
+## VOC-047-T02 — Deterministic regression test for this cookie-forwarding divergence
 
 - Requirement source: issue #333's implicit ask (this defect took three live
   reproductions to isolate; a regression should not require a fourth)
-- Acceptance criteria: `VOC-043-AC-02`
+- Acceptance criteria: `VOC-047-AC-02`
 - Status: pending
-- Depends on: `VOC-043-T01` (or may be written failing-first against the
+- Depends on: `VOC-047-T01` (or may be written failing-first against the
   pre-fix behavior, at the implementer's discretion)
 - Summary: add a deterministic test in `apps/web`'s existing test stack that
   constructs a request carrying a representative session cookie, exercises
@@ -61,16 +61,16 @@ predetermined line-level change.
   call receives the expected cookie value). Runs via `pnpm validate` or a
   narrower documented script.
 
-## VOC-043-T03 — Confirm the full set of createServerApiClient() call sites is covered
+## VOC-047-T03 — Confirm the full set of createServerApiClient() call sites is covered
 
 - Requirement source: `specification.md`'s open question 3
-- Acceptance criteria: `VOC-043-AC-03`
+- Acceptance criteria: `VOC-047-AC-03`
 - Status: pending
 - Depends on: none (can run independently of T00-T02, though should be recorded
   alongside them for this package's closure)
 - Summary: search the repository for every call site of `createServerApiClient`
   (e.g. `apps/web/src/app/onboarding/page.tsx` and any other server component),
   record the full list as this task's evidence, and confirm each one is covered
-  by `VOC-043-T01`'s fix to the shared implementation (no per-call-site
+  by `VOC-047-T01`'s fix to the shared implementation (no per-call-site
   workaround should be needed, since the fix corrects
   `createServerApiClient()` itself).

@@ -1,4 +1,4 @@
-# VOC-043 — Release Plan
+# VOC-047 — Release Plan
 
 ## Release and deployment authorization
 
@@ -10,10 +10,10 @@ none of that authorization boundary.
 
 ## Preconditions, monitoring, and outcome
 
-Preconditions: `VOC-043-T00` through `VOC-043-T03` implemented, independently
-verified against the exact revision to be released, and `VOC-043-AC-00`
+Preconditions: `VOC-047-T00` through `VOC-047-T03` implemented, independently
+verified against the exact revision to be released, and `VOC-047-AC-00`
 through `AC-03` each satisfied with real evidence (not asserted) per
-`acceptance-criteria.md`. Because `VOC-043-T01`'s exact diff depends on
+`acceptance-criteria.md`. Because `VOC-047-T01`'s exact diff depends on
 `T00`'s real-request finding (per `specification.md`'s open question 1), the
 reviewing human should confirm at release time that the merged fix actually
 matches a finding recorded in `T00`'s evidence, not an unconfirmed guess.
@@ -34,7 +34,7 @@ protected page (not merely pass `middleware.ts`). Post-deploy, monitor:
 - Whatever this repo's existing production monitoring (Sentry/Kuma, per
   `VOC-037-T04`'s monitoring/alerting evidence) already tracks for the
   affected auth/onboarding endpoints.
-- If temporary diagnostic logging from `VOC-043-T00` is retained per
+- If temporary diagnostic logging from `VOC-047-T00` is retained per
   `specification.md`'s open question 2, confirm it does not silently persist
   raw cookie/session-token values in production logs.
 
@@ -56,7 +56,7 @@ Accountable owner: named explicitly in the implementation PR, not left
 implicit.
 
 Validation: confirm, after rollback, that `apps/web/src/lib/api-server.ts` and
-`apps/web/src/middleware.ts` both return to their pre-`VOC-043` state (i.e.
+`apps/web/src/middleware.ts` both return to their pre-`VOC-047` state (i.e.
 the same broken state issue #333 reports today), not some new intermediate
 state.
 

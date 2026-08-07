@@ -1,4 +1,4 @@
-# VOC-045 — Release Plan
+# VOC-048 — Release Plan
 
 ## Release and deployment authorization
 
@@ -11,7 +11,7 @@ release decision, made under the repository's active authority model
 ## Preconditions, monitoring, and outcome
 
 - Exact revision: to be recorded as the merged commit SHA for each of
-  `VOC-045-T00` and `VOC-045-T01` once implemented.
+  `VOC-048-T00` and `VOC-048-T01` once implemented.
 - Checks: `pnpm validate` (or its narrower `apps/api`-scoped equivalents)
   and `go test ./apps/api/business/auth/...`, per
   `implementation-plan.md`'s validation section.
@@ -34,8 +34,8 @@ release decision, made under the repository's active authority model
 ## Rollback
 
 - Trigger: any user signed in without a genuine, verified Google OAuth
-  round-trip (regression of `VOC-045-AC-02`), any weakening of the CSRF
-  state-token check (regression of `VOC-045-AC-03`), or a spike in
+  round-trip (regression of `VOC-048-AC-02`), any weakening of the CSRF
+  state-token check (regression of `VOC-048-AC-03`), or a spike in
   authentication failures following release.
 - Mechanism: revert the merged commit/PR for the affected task. No data
   migration is introduced by either task, so no data-compatibility rollback

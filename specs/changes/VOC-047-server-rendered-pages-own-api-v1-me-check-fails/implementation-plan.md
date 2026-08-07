@@ -1,4 +1,4 @@
-# VOC-043 — Implementation Plan
+# VOC-047 — Implementation Plan
 
 ## Preconditions and protected areas
 
@@ -13,19 +13,19 @@ conflicting work at drafting time.
 
 Existing targets (both read in full at drafting time):
 - `apps/web/src/middleware.ts` (128 lines) — the working reference
-  implementation; not expected to change unless `VOC-043-T00`'s finding points
+  implementation; not expected to change unless `VOC-047-T00`'s finding points
   the fix in the other direction (see `specification.md`'s open question 1).
 - `apps/web/src/lib/api-server.ts` (32 lines) — the most likely target of the
   actual fix.
 - `apps/web/src/app/onboarding/page.tsx` (51 lines) — the only confirmed caller
-  of `createServerApiClient()` at drafting time; `VOC-043-T03`'s grep confirms
+  of `createServerApiClient()` at drafting time; `VOC-047-T03`'s grep confirms
   whether others exist.
 
-No other file is expected to require changes, pending `VOC-043-T00`'s finding.
+No other file is expected to require changes, pending `VOC-047-T00`'s finding.
 
 Ordered steps:
 
-1. `VOC-043-T00`: add temporary, redacted diagnostic logging to both
+1. `VOC-047-T00`: add temporary, redacted diagnostic logging to both
    `middleware.ts`'s `cookieHeader` construction (line 61,
    `request.headers.get("cookie") ?? ""`) and `api-server.ts`'s `cookieHeader`
    construction (line 10, `cookieStore.toString()`). Log at minimum each
@@ -35,7 +35,7 @@ Ordered steps:
    non-secret config — never log the raw token value). Exercise both paths for
    one real (or realistically constructed) request and record the exact
    comparison as this task's evidence.
-2. `VOC-043-T01`: apply the fix `VOC-043-T00`'s finding indicates. If the
+2. `VOC-047-T01`: apply the fix `VOC-047-T00`'s finding indicates. If the
    finding confirms `specification.md`'s named hypothesis (the two
    implementations diverge in how they reconstruct the `Cookie` header),
    change `api-server.ts` to forward the raw incoming cookie header exactly as
@@ -44,13 +44,13 @@ Ordered steps:
    confirming `createServerApiClient().getCurrentUser()` succeeds with `200`
    for a session `middleware.ts` already validated as `200` in the same
    request.
-3. `VOC-043-T02`: add a deterministic regression test in `apps/web`'s existing
+3. `VOC-047-T02`: add a deterministic regression test in `apps/web`'s existing
    test stack (implementer to identify the best-fit location, e.g. alongside
    any existing `api-server.ts` or `middleware.ts` unit tests) asserting the
    fixed cookie-forwarding behavior for a representative session-cookie input.
    Must fail against the pre-fix behavior (or be written failing-first) and
    pass against the post-fix behavior.
-4. `VOC-043-T03`: run a repository-wide search for `createServerApiClient` call
+4. `VOC-047-T03`: run a repository-wide search for `createServerApiClient` call
    sites and record the full list as evidence, confirming each is covered by
    `T01`'s fix.
 
@@ -65,11 +65,11 @@ git diff --check
 pnpm validate   # or the narrower relevant apps/web script
 ```
 
-Plus this package's own `VOC-043-TEST-00`/`01`/`02`/`03` procedures.
+Plus this package's own `VOC-047-TEST-00`/`01`/`02`/`03` procedures.
 
 Independent verification: per `CLAUDE.md`, an independent reviewer (not the
 implementer) must re-review the exact final revision against this
-specification, confirm `VOC-043-AC-00` through `AC-03` are each satisfied with
+specification, confirm `VOC-047-AC-00` through `AC-03` are each satisfied with
 real evidence (not asserted), confirm no raw cookie/session-token value was
 logged or committed anywhere (including in the implementation PR's own
 description or diagnostic output), and confirm no self-approval occurred.
