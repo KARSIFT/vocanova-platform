@@ -61,15 +61,16 @@ paths:
 
 hosted_enforcement_status: not-activated
 
-# Reverted 2026-07-24 - see docs/governance/a003-transition-state.yaml's identical
-# revert note: these two fields are a hard, unconditional invariant enforced by
-# tooling/governance/validate_repository_foundation.py, not stale prose. Changing
-# what they mean/require is a decision for the founder to make explicitly.
-automatic_merge_allowed: false
-autonomous_merge_allowed: false
+# AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08 - see
+# docs/governance/a003-transition-state.yaml's identical marker/note for the
+# full record (founder's explicit, twice-confirmed request). This file mirrors
+# that one's merge/release/deployment fields and must move in lockstep with
+# it - tooling/governance/validate_repository_foundation.py checks both.
+automatic_merge_allowed: true
+autonomous_merge_allowed: true
 
-production_deployment: disabled
-autonomous_production_release: disabled
+production_deployment: enabled
+autonomous_production_release: enabled
 rl1_technical_activation: false
 rl2_technical_activation: false
 doc_17_repository_adoption: true

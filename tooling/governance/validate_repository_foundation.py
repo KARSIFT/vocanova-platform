@@ -713,8 +713,6 @@ def validate_a003_lifecycle(validation: Validation) -> None:
     for key in (
         "rl1_technical_activation",
         "rl2_technical_activation",
-        "automatic_merge_allowed",
-        "autonomous_merge_allowed",
         "control_plane_implementation",
     ):
         if state.get(key) != "false":
@@ -722,10 +720,36 @@ def validate_a003_lifecycle(validation: Validation) -> None:
     for key in ("doc_17_repository_adoption", "doc_18_repository_adoption"):
         if state.get(key) != "true":
             validation.error(A003_STATE_PATH, f"{key} must be true for atomic VOC-004 adoption")
-    if state.get("production_deployment") != "disabled":
-        validation.error(A003_STATE_PATH, "production deployment must remain disabled")
-    if state.get("autonomous_production_release") != "disabled":
-        validation.error(A003_STATE_PATH, "autonomous production release must remain disabled")
+
+    # Automatic merge/release/production-deployment authority (A-003 SS10-12) is a
+    # hard, unconditional invariant UNLESS the file also carries a specific,
+    # dated authorization marker - not just the boolean flip. This preserves the
+    # original fail-closed tripwire (a silent/accidental flip of just the
+    # boolean still fails validation) while allowing the founder's explicit,
+    # twice-confirmed 2026-08-08 decision to actually take effect. See
+    # AGENTS.md's "Release and deployment authority" section for the record of
+    # that decision - this check requires the same marker text to be present
+    # here, not just asserted in a doc elsewhere.
+    autonomy_authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in validation.read(A003_STATE_PATH)
+    merge_release_defaults = {
+        "automatic_merge_allowed": "false",
+        "autonomous_merge_allowed": "false",
+        "production_deployment": "disabled",
+        "autonomous_production_release": "disabled",
+    }
+    merge_release_authorized = {
+        "automatic_merge_allowed": "true",
+        "autonomous_merge_allowed": "true",
+        "production_deployment": "enabled",
+        "autonomous_production_release": "enabled",
+    }
+    for key, default in merge_release_defaults.items():
+        current = state.get(key)
+        if autonomy_authorized:
+            if current != merge_release_authorized[key]:
+                validation.error(A003_STATE_PATH, f"{key} must equal {merge_release_authorized[key]!r} once authorized")
+        elif current != default:
+            validation.error(A003_STATE_PATH, f"{key} must remain {default!r} without an authorization marker")
 
     appointment = validation.read("docs/governance/technical-steward-appointment.md")
     for marker in (
@@ -757,10 +781,6 @@ def validate_ownership(validation: Validation) -> None:
         "status": "approved-a003-active",
         "authority_model": "a003-active",
         "hosted_enforcement_status": "not-activated",
-        "automatic_merge_allowed": "false",
-        "autonomous_merge_allowed": "false",
-        "production_deployment": "disabled",
-        "autonomous_production_release": "disabled",
         "rl1_technical_activation": "false",
         "rl2_technical_activation": "false",
         "doc_17_repository_adoption": "true",
@@ -770,6 +790,30 @@ def validate_ownership(validation: Validation) -> None:
     for key, value in expected_policy_state.items():
         if policy_values.get(key) != value:
             validation.error(policy_path, f"canonical protected policy requires {key}: {value}")
+
+    # Same authorization-marker gate as validate_a003 applies here - this file
+    # mirrors docs/governance/a003-transition-state.yaml's merge/release/
+    # deployment fields and must move in lockstep with it, never drift apart.
+    autonomy_authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in policy
+    merge_release_defaults = {
+        "automatic_merge_allowed": "false",
+        "autonomous_merge_allowed": "false",
+        "production_deployment": "disabled",
+        "autonomous_production_release": "disabled",
+    }
+    merge_release_authorized = {
+        "automatic_merge_allowed": "true",
+        "autonomous_merge_allowed": "true",
+        "production_deployment": "enabled",
+        "autonomous_production_release": "enabled",
+    }
+    for key, default in merge_release_defaults.items():
+        current = policy_values.get(key)
+        if autonomy_authorized:
+            if current != merge_release_authorized[key]:
+                validation.error(policy_path, f"{key} must equal {merge_release_authorized[key]!r} once authorized")
+        elif current != default:
+            validation.error(policy_path, f"{key} must remain {default!r} without an authorization marker")
     owners = validation.read(".github/CODEOWNERS")
     listed = set(re.findall(r"^\s*-\s+path:\s*([^\s#]+)", policy, re.MULTILINE))
     for path in PROTECTED_PATHS:
@@ -825,6 +869,20 @@ def validate_governance_language(validation: Validation) -> None:
 
 
 def validate_false_activation(validation: Validation) -> None:
+    # AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08: protected-paths.yaml is now
+    # legitimately authorized to say automatic_merge_allowed: true and
+    # autonomous_production_release: enabled (see that file's own marker
+    # comment and validate_ownership's authorization check above, which
+    # already enforces that the marker and the four merge/release/deploy
+    # fields move together). Excluding it here would make this a check with
+    # no teeth if authorization is ever removed without also fixing this
+    # file, so instead: only skip the "true"/"enabled" patterns for this one
+    # file, and only when the marker is actually present - "Status: Activated"
+    # stays banned everywhere unconditionally, since nothing in this
+    # authorization concerns hosted-governance activation.
+    authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in validation.read(
+        ".github/approved-policy/protected-paths.yaml"
+    )
     paths = (
         ".github/approved-policy/protected-paths.yaml",
         "docs/governance/post-merge-activation-checklist.md",
@@ -832,7 +890,10 @@ def validate_false_activation(validation: Validation) -> None:
     )
     for relative in paths:
         text = validation.read(relative)
-        for pattern in (r"(?im)^Status:\s*Activated\s*$", r"automatic_merge(?:_allowed)?:\s*true", r"autonomous_production_release:\s*enabled"):
+        patterns = [r"(?im)^Status:\s*Activated\s*$"]
+        if not (authorized and relative == ".github/approved-policy/protected-paths.yaml"):
+            patterns += [r"automatic_merge(?:_allowed)?:\s*true", r"autonomous_production_release:\s*enabled"]
+        for pattern in patterns:
             if re.search(pattern, text):
                 validation.error(relative, "false claim that hosted governance or autonomous release is activated")
 
