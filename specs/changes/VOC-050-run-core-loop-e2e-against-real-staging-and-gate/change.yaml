@@ -39,8 +39,8 @@ requirement_source: 'GitHub issue #391 ("Run core-loop E2E against real staging 
   requirement - it only adds a required, mostly-automated staging gate ahead of the
   already-authorized R0-R2 auto-promotion path.'
 requirement_approval_status: 'Approved. Founder-delegate (acting under the standing
-  founder-gate delegation for vocanova-platform-sandbox, confirmed explicitly this same
-  session) adopted this draft package via PR #394/#396 on 2026-08-08, mirroring
+  founder-gate delegation for vocanova-platform-sandbox, confirmed explicitly this
+  same session) adopted this draft package via PR #394/#396 on 2026-08-08, mirroring
   VOC-039/040/041/042/043/044/045/046/049''s convention. (PR #394 originally merged
   this draft in unauthorized-draft state by mistake and was reverted via PR #395;
   this replacement PR carries the same content with adoption fields correctly flipped
@@ -122,7 +122,7 @@ implementation:
   status: proposed
   target_branch: develop
   pull_request: null
-  authority_issue: 391
+  authority_issue: null
 release:
   required: true
   mode: not-authorized-by-this-package
@@ -131,9 +131,9 @@ release:
   automatic_merge: false
   migration_required: true
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 396
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/396
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
