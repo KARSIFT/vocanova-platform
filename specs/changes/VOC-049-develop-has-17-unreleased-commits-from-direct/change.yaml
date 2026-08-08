@@ -123,7 +123,7 @@ implementation:
   status: proposed
   target_branch: main
   pull_request: null
-  authority_issue: 375
+  authority_issue: null
 release:
   required: true
   mode: not-authorized-by-this-package
