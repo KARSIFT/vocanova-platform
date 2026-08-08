@@ -51,6 +51,15 @@ does not require standing steward or founder approval solely because it is R3; R
 decisions continue to require founder approval, and autonomous production release
 remains disabled. The exception expired when PR #3 merged and cannot be reused.
 
+**Updated 2026-08-08**: "autonomous production release remains disabled" above
+describes the state as of this amendment - it does not remain true afterward. The
+founder later separately, explicitly authorized automatic production release for
+vocanova-platform-sandbox (see `AGENTS.md`'s "Release and deployment authority"),
+through a distinct decision unrelated to and not derived from this amendment's own
+exception (which, as stated above, expired and cannot be reused for exactly this
+kind of authorization). R4 decisions in general still require founder approval;
+this is one specific R4 decision the founder already made, not a standing bypass.
+
 ## Decision
 
 The previous rule requiring founder approval for every production merge and

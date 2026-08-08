@@ -7,6 +7,14 @@ governance authority. A-003 became effectively active at `2026-07-17T16:44:34Z`;
 automatic/autonomous merge, RL1/RL2 technical activation, production deployment, and
 autonomous production release remain disabled or unimplemented.
 
+**Updated 2026-08-08**: for vocanova-platform-sandbox specifically, automatic/autonomous
+merge, production deployment, and autonomous production release are no longer
+disabled - the founder explicitly, twice-confirmed-live authorized all three (see
+`AGENTS.md`'s "Release and deployment authority" section). RL1/RL2 technical
+activation remain disabled; that authorization was not part of this request. The
+sentence above is preserved as historically accurate for the period before this
+date.
+
 ## A-003 adoption and effective-activation boundary
 
 A-003 adoption and activation are completed historical facts:
@@ -83,3 +91,13 @@ Record an evidence link, accountable human, and completion date for every item.
 
 Until all applicable activation items are evidenced, R3 production changes remain
 blocked and autonomous production release remains disabled.
+
+**Updated 2026-08-08**: for vocanova-platform-sandbox, the founder explicitly
+authorized automatic production release (see `AGENTS.md`'s "Release and deployment
+authority") notwithstanding this checklist not being fully evidenced - the
+"Activation rehearsal" items above (forced-failure/rollback rehearsal, independent
+ruleset/identity/secret-isolation verification) genuinely have not all been done.
+This was a deliberate founder decision to accept that gap, not a claim that the
+checklist passed. Production rollback/migration safety remains a real, separately
+tracked risk - see the founder's own conversation record and any linked follow-up
+work for current status, not this checklist's own unchecked boxes.
