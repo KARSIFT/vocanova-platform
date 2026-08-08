@@ -81,6 +81,13 @@ type ProductionConfig struct {
 	SentryEnvironment   string
 	SentryRelease       string
 	MonitoringTestToken string
+	SmokeTestMintToken  string
+
+	// SyntheticSmokeTestEmail is the reserved identity of the
+	// deploy-seeded synthetic smoke-test account (VOC-050-T00). It is
+	// normalized at load time because every comparison against it
+	// happens on already-normalized addresses.
+	SyntheticSmokeTestEmail string
 }
 
 // AI-provider identifiers and per-provider connection defaults.
@@ -105,6 +112,14 @@ const (
 	// model default so telemetry still records a concrete value when
 	// AI_PROVIDER_MODEL is unset.
 	defaultCloudflareModel = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+
+	// defaultSyntheticSmokeTestEmail matches the default
+	// apps/api/scripts/seed-synthetic-smoke-user.sh seeds, so the
+	// address the deploy creates and the address the API refuses on
+	// every real sign-in path stay the same when neither side is
+	// configured explicitly. The `.invalid` TLD is reserved by
+	// RFC 2606 and can never receive mail.
+	defaultSyntheticSmokeTestEmail = "smoke-test-bot@synthetic.vocanova.invalid"
 )
 
 // aiProviderBaseURL resolves AI_PROVIDER_BASE_URL for the selected
@@ -178,6 +193,10 @@ func LoadProductionConfig() (ProductionConfig, error) {
 		SentryEnvironment:   getenv("SENTRY_ENVIRONMENT", getenv("ENVIRONMENT", "staging")),
 		SentryRelease:       os.Getenv("SENTRY_RELEASE"),
 		MonitoringTestToken: os.Getenv("MONITORING_TEST_TOKEN"),
+		SmokeTestMintToken:  os.Getenv("SMOKE_TEST_SESSION_MINT_TOKEN"),
+		SyntheticSmokeTestEmail: auth.NormalizeEmail(
+			getenv("VOCANOVA_SYNTHETIC_SMOKE_TEST_EMAIL", defaultSyntheticSmokeTestEmail),
+		),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -520,6 +539,19 @@ type MonitoringSentryTestOutput struct {
 	}
 }
 
+type SyntheticSmokeTestSessionMintInput struct {
+	Authorization string `header:"Authorization" required:"true"`
+}
+
+type SyntheticSmokeTestSessionMintOutput struct {
+	Body struct {
+		Status        string `json:"status" example:"issued"`
+		SessionCookie string `json:"session_cookie" doc:"Opaque vocanova_session value for the synthetic smoke-test account"`
+		CSRFToken     string `json:"csrf_token" doc:"Double-submit CSRF token paired with the vocanova_csrf cookie"`
+		ExpiresAt     string `json:"expires_at" format:"date-time"`
+	}
+}
+
 // NewProductionAPI returns a huma.API wired against real,
 // Postgres-backed services built from cfg. It registers exactly
 // the same route set NewContractAPI registers, so the OpenAPI
@@ -611,10 +643,11 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 	}
 	authSvc := auth.NewService(authRepo, mailer, oauthProvider, clk, limiter, authCfg)
 	authSvc.SetKillSwitches(&auth.KillSwitches{
-		MagicLinkEnabled:  cfg.MagicLinkOn,
-		OAuthEnabled:      cfg.OAuthOn,
-		NewSignupsEnabled: cfg.NewSignupsOn,
-		SignupAllowlist:   cfg.SignupAllowlist,
+		MagicLinkEnabled:       cfg.MagicLinkOn,
+		OAuthEnabled:           cfg.OAuthOn,
+		NewSignupsEnabled:      cfg.NewSignupsOn,
+		SignupAllowlist:        cfg.SignupAllowlist,
+		ReservedSyntheticEmail: cfg.SyntheticSmokeTestEmail,
 	})
 
 	usersRepo := users.NewPostgreSQLRepository(db)
@@ -644,6 +677,7 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 		EmailChangePath:           "/auth/email-change",
 		EmailChangeLinkLifetime:   15 * time.Minute,
 		AccountDeletionPurgeDelay: accounts.DefaultAccountDeletionPurgeDelay,
+		ReservedSyntheticEmail:    cfg.SyntheticSmokeTestEmail,
 	})
 
 	aiProvider, safetyClassifier := buildAIProviders(cfg)
@@ -714,6 +748,7 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 		AIEnabled:         cfg.AIEnabled,
 	})
 	RegisterMonitoringSentryTest(api, cfg.MonitoringTestToken, cfg.Environment)
+	RegisterSyntheticSmokeTestSessionMint(api, authSvc, cfg.SmokeTestMintToken)
 
 	return api, db, nil
 }
@@ -794,6 +829,56 @@ func RegisterMonitoringSentryTest(api huma.API, expectedToken, environment strin
 		out.Body.Status = "accepted"
 		out.Body.EventID = string(*eventID)
 		out.Body.Timestamp = time.Now().UTC().Format(time.RFC3339)
+		return out, nil
+	})
+}
+
+// RegisterSyntheticSmokeTestSessionMint registers a token-gated endpoint that
+// mints a real session for only the reserved synthetic smoke-test user.
+// The route is fail-closed: when expectedToken is empty, no route is registered.
+func RegisterSyntheticSmokeTestSessionMint(api huma.API, authSvc *auth.Service, expectedToken string) {
+	if strings.TrimSpace(expectedToken) == "" {
+		return
+	}
+	huma.Register(api, huma.Operation{
+		OperationID: "PostSyntheticSmokeTestSessionMint",
+		Method:      http.MethodPost,
+		Path:        "/ops/synthetic-smoke-test/session",
+		Summary:     "Mint a synthetic smoke-test session cookie",
+		Tags:        []string{"Operations"},
+	}, func(ctx context.Context, input *SyntheticSmokeTestSessionMintInput) (*SyntheticSmokeTestSessionMintOutput, error) {
+		token := strings.TrimSpace(strings.TrimPrefix(input.Authorization, "Bearer "))
+		if token == "" || subtle.ConstantTimeCompare([]byte(token), []byte(expectedToken)) != 1 {
+			return nil, huma.Error401Unauthorized("smoke-test mint token missing or invalid")
+		}
+
+		session, sessionToken, err := authSvc.MintSyntheticSmokeTestSession(ctx)
+		if err != nil {
+			switch err {
+			case auth.ErrSyntheticSessionMintDisabled:
+				return nil, huma.Error503ServiceUnavailable("synthetic smoke-test session minting is disabled")
+			case auth.ErrSyntheticUserNotSeeded:
+				return nil, huma.Error503ServiceUnavailable("synthetic smoke-test user is not seeded")
+			case auth.ErrUserDisabled:
+				return nil, huma.Error503ServiceUnavailable("synthetic smoke-test user is disabled")
+			default:
+				return nil, huma.Error500InternalServerError("failed to mint synthetic smoke-test session")
+			}
+		}
+
+		c := authHumaContext(ctx)
+		c.AppendHeader("Set-Cookie", authSvc.SessionCookie(sessionToken, session.ExpiresAt).String())
+		csrfToken, csrfCookie := authSvc.IssueCSRFCookie()
+		if csrfCookie == nil || csrfToken == "" {
+			return nil, huma.Error500InternalServerError("failed to issue csrf cookie")
+		}
+		c.AppendHeader("Set-Cookie", csrfCookie.String())
+
+		out := &SyntheticSmokeTestSessionMintOutput{}
+		out.Body.Status = "issued"
+		out.Body.SessionCookie = sessionToken
+		out.Body.CSRFToken = csrfToken
+		out.Body.ExpiresAt = session.ExpiresAt.UTC().Format(time.RFC3339)
 		return out, nil
 	})
 }

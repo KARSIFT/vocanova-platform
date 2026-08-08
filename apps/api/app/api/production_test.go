@@ -20,6 +20,7 @@ import (
 
 	"github.com/KARSIFT/vocanova-platform/apps/api/business/aifeedback"
 	"github.com/KARSIFT/vocanova-platform/apps/api/business/auth"
+	"github.com/KARSIFT/vocanova-platform/apps/api/foundation/clock"
 	"github.com/KARSIFT/vocanova-platform/apps/api/foundation/email"
 )
 
@@ -120,6 +121,7 @@ func TestLoadProductionConfig_DefaultsAreSensible(t *testing.T) {
 	t.Setenv("NEW_USER_SIGNUP_ENABLED", "")
 	t.Setenv("AI_PROVIDER", "")
 	t.Setenv("AI_PROVIDER_BASE_URL", "")
+	t.Setenv("VOCANOVA_SYNTHETIC_SMOKE_TEST_EMAIL", "")
 
 	cfg, err := LoadProductionConfig()
 	require.NoError(t, err)
@@ -131,6 +133,20 @@ func TestLoadProductionConfig_DefaultsAreSensible(t *testing.T) {
 	assert.True(t, cfg.NewSignupsOn, "NEW_USER_SIGNUP_ENABLED must default to true when unset")
 	assert.Equal(t, "opencode", cfg.APIProvider, "AI_PROVIDER must default to opencode when unset")
 	assert.Equal(t, "http://127.0.0.1:4096", cfg.APIBaseURL, "AI_PROVIDER_BASE_URL must default to local opencode serve when unset")
+	assert.Equal(t, "smoke-test-bot@synthetic.vocanova.invalid", cfg.SyntheticSmokeTestEmail, "VOCANOVA_SYNTHETIC_SMOKE_TEST_EMAIL must default to the reserved .invalid identity the deploy seed uses")
+}
+
+func TestLoadProductionConfig_NormalizesSyntheticSmokeTestEmail(t *testing.T) {
+	t.Setenv("DATABASE_URL", "postgres://example/db")
+	t.Setenv("BASE_URL", "https://staging.vocanova.site")
+	t.Setenv("OAUTH_REDIRECT_URI", "https://api-staging.vocanova.site/auth/oauth/google/callback")
+	t.Setenv("SESSION_COOKIE_DOMAIN", "staging.vocanova.site")
+	t.Setenv("VOCANOVA_SYNTHETIC_SMOKE_TEST_EMAIL", " Smoke-Test-Bot@Synthetic.Vocanova.Invalid ")
+
+	cfg, err := LoadProductionConfig()
+	require.NoError(t, err)
+	assert.Equal(t, "smoke-test-bot@synthetic.vocanova.invalid", cfg.SyntheticSmokeTestEmail,
+		"the reserved identity must be normalized so it matches the already-normalized addresses the auth paths compare against")
 }
 
 func TestLoadProductionConfig_HonorsExplicitDisables(t *testing.T) {
@@ -214,6 +230,7 @@ func TestLoadProductionConfig_MonitoringDefaultsAndOverrides(t *testing.T) {
 	t.Setenv("SENTRY_ENVIRONMENT", "")
 	t.Setenv("SENTRY_RELEASE", "")
 	t.Setenv("MONITORING_TEST_TOKEN", "")
+	t.Setenv("SMOKE_TEST_SESSION_MINT_TOKEN", "")
 
 	cfg, err := LoadProductionConfig()
 	require.NoError(t, err)
@@ -221,17 +238,20 @@ func TestLoadProductionConfig_MonitoringDefaultsAndOverrides(t *testing.T) {
 	assert.Equal(t, "production", cfg.SentryEnvironment, "SENTRY_ENVIRONMENT should default to ENVIRONMENT")
 	assert.Equal(t, "", cfg.SentryRelease)
 	assert.Equal(t, "", cfg.MonitoringTestToken)
+	assert.Equal(t, "", cfg.SmokeTestMintToken)
 
 	t.Setenv("SENTRY_DSN", "https://example@sentry.invalid/1")
 	t.Setenv("SENTRY_ENVIRONMENT", "prod-api")
 	t.Setenv("SENTRY_RELEASE", "sha-deadbee")
 	t.Setenv("MONITORING_TEST_TOKEN", "test-token")
+	t.Setenv("SMOKE_TEST_SESSION_MINT_TOKEN", "mint-token")
 	cfg, err = LoadProductionConfig()
 	require.NoError(t, err)
 	assert.Equal(t, "https://example@sentry.invalid/1", cfg.SentryDSN)
 	assert.Equal(t, "prod-api", cfg.SentryEnvironment)
 	assert.Equal(t, "sha-deadbee", cfg.SentryRelease)
 	assert.Equal(t, "test-token", cfg.MonitoringTestToken)
+	assert.Equal(t, "mint-token", cfg.SmokeTestMintToken)
 }
 
 func TestRegisterMonitoringSentryTest_AuthBehavior(t *testing.T) {
@@ -279,6 +299,66 @@ func TestRegisterMonitoringSentryTest_NonProductionNotRegistered(t *testing.T) {
 	resp := httptest.NewRecorder()
 	api.Adapter().ServeHTTP(resp, req)
 	assert.Equal(t, http.StatusNotFound, resp.Code)
+}
+
+func TestRegisterSyntheticSmokeTestSessionMint_NotRegisteredWhenTokenUnset(t *testing.T) {
+	cfg := huma.DefaultConfig("mint-test", "0.0.1")
+	router := chi.NewMux()
+	api := humachi.New(router, cfg)
+	svc, _, _, _ := authTestService(t)
+	RegisterSyntheticSmokeTestSessionMint(api, svc, "")
+
+	req := httptest.NewRequest(http.MethodPost, "/ops/synthetic-smoke-test/session", nil)
+	resp := httptest.NewRecorder()
+	api.Adapter().ServeHTTP(resp, req)
+	assert.Equal(t, http.StatusNotFound, resp.Code)
+}
+
+func TestRegisterSyntheticSmokeTestSessionMint_AuthAndMintBehavior(t *testing.T) {
+	cfg := huma.DefaultConfig("mint-test", "0.0.1")
+	router := chi.NewMux()
+	api := humachi.New(router, cfg)
+	api.UseMiddleware(withHumaContext)
+
+	svc, repo, _, _ := authTestService(t)
+	svc.SetKillSwitches(&auth.KillSwitches{
+		MagicLinkEnabled:       true,
+		OAuthEnabled:           true,
+		NewSignupsEnabled:      true,
+		ReservedSyntheticEmail: "smoke-test-bot@synthetic.vocanova.invalid",
+	})
+	_, err := repo.CreateUser(context.Background(), "smoke-test-bot@synthetic.vocanova.invalid", nil)
+	require.NoError(t, err)
+
+	RegisterSyntheticSmokeTestSessionMint(api, svc, "expected-token")
+
+	noAuthReq := httptest.NewRequest(http.MethodPost, "/ops/synthetic-smoke-test/session", nil)
+	noAuthResp := httptest.NewRecorder()
+	api.Adapter().ServeHTTP(noAuthResp, noAuthReq)
+	assert.Equal(t, http.StatusUnprocessableEntity, noAuthResp.Code)
+
+	badAuthReq := httptest.NewRequest(http.MethodPost, "/ops/synthetic-smoke-test/session", nil)
+	badAuthReq.Header.Set("Authorization", "Bearer wrong-token")
+	badAuthResp := httptest.NewRecorder()
+	api.Adapter().ServeHTTP(badAuthResp, badAuthReq)
+	assert.Equal(t, http.StatusUnauthorized, badAuthResp.Code)
+
+	okReq := httptest.NewRequest(http.MethodPost, "/ops/synthetic-smoke-test/session", nil)
+	okReq.Header.Set("Authorization", "Bearer expected-token")
+	okResp := httptest.NewRecorder()
+	api.Adapter().ServeHTTP(okResp, okReq)
+	assert.Equal(t, http.StatusOK, okResp.Code)
+
+	var out struct {
+		SessionCookie string `json:"session_cookie"`
+		CSRFToken     string `json:"csrf_token"`
+	}
+	require.NoError(t, json.NewDecoder(okResp.Body).Decode(&out))
+	assert.NotEmpty(t, out.SessionCookie)
+	assert.NotEmpty(t, out.CSRFToken)
+
+	_, err = svc.ValidateSession(context.Background(), out.SessionCookie)
+	require.NoError(t, err)
 }
 
 // TestNewProductionAPI_RequiresDatabaseReachability covers the
@@ -412,6 +492,36 @@ func newHealthzOnlyAPI(t *testing.T, db Healthchecker) huma.API {
 // (which uses os.Setenv under the hood) and t.Setenv cleans up
 // after itself.
 var _ = os.Getenv
+
+func authTestService(t *testing.T) (*auth.Service, *auth.MemoryRepository, *email.Fake, *clock.Fixed) {
+	t.Helper()
+	now := time.Date(2026, 8, 8, 23, 0, 0, 0, time.UTC)
+	c := &clock.Fixed{T: now}
+	repo := auth.NewMemoryRepository()
+	fake := &email.Fake{}
+	limiter := auth.NewFixedWindowRateLimiter(c, time.Hour, 100)
+	svc := auth.NewService(repo, fake, nil, c, limiter, auth.Config{
+		Environment:      "test",
+		BaseURL:          "https://test.example.com",
+		MagicLinkPath:    "/auth/magic",
+		OAuthRedirectURI: "https://test.example.com/auth/oauth/google/callback",
+		OAuthRedirectAllowlist: []string{
+			"https://test.example.com/app",
+		},
+		SessionLifetime:    30 * 24 * time.Hour,
+		MagicLinkLifetime:  15 * time.Minute,
+		OAuthStateLifetime: 10 * time.Minute,
+		Cookie: auth.CookieConfig{
+			Name:           "vocanova_session",
+			CSRName:        "vocanova_csrf",
+			OAuthStateName: "vocanova_oauth_state",
+			Domain:         "test.example.com",
+			Secure:         true,
+			SameSite:       http.SameSiteLaxMode,
+		},
+	})
+	return svc, repo, fake, c
+}
 
 // TestBuildEmailSender_FallsBackToFakeWhenKillSwitchOff covers
 // the first T14 fallback rule: when EMAIL_MAGIC_LINK_ENABLED is

@@ -27,9 +27,13 @@ may refine them but may not weaken governance or security.
 - Use the highest builder, path-classifier, verifier, steward, or founder risk class.
 - Never self-approve or weaken a check, ownership rule, test, or risk class to make a
   change pass.
-- Codex may implement an approved package and prepare its pull request, but it cannot
-  approve or merge its own work. Claude Code independently verifies the exact final
-  revision and cannot substitute for required human approval.
+- The implementer role may implement an approved package and prepare its pull
+  request, but it cannot approve or merge its own work. The independent reviewer
+  role independently verifies the exact final revision and cannot substitute for
+  required human approval. (Which model/vendor occupies each role is configurable
+  and has changed more than once - see karsift-ai-infra's `config/roles.yml` for
+  the current occupant; this document describes the role, not a permanent vendor
+  commitment.)
 - Governance replacements are evaluated under the authority effective before them;
   they cannot authorize their own adoption.
 - Any change to workflow behavior, governance fields, or repository settings must

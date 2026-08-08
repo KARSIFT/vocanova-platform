@@ -98,6 +98,12 @@ func (s *Service) RequestMagicLink(ctx context.Context, clientIP, emailAddr stri
 		// Return the same generic result to avoid enumeration.
 		return nil
 	}
+	if s.killSwitches.IsReservedSyntheticEmail(emailAddr) {
+		// Never issue a real sign-in link for the synthetic
+		// smoke-test identity; the same generic result keeps the
+		// reserved address indistinguishable from any other.
+		return nil
+	}
 
 	now := s.clock.Now()
 	expiresAt := now.Add(s.cfg.MagicLinkLifetime)
@@ -150,6 +156,9 @@ func (s *Service) ConsumeMagicLink(ctx context.Context, clientIP, token, emailAd
 	emailAddr = normalizeEmail(emailAddr)
 	token = strings.TrimSpace(token)
 	if token == "" || emailAddr == "" {
+		return nil, nil, "", ErrInvalidMagicLink
+	}
+	if s.killSwitches.IsReservedSyntheticEmail(emailAddr) {
 		return nil, nil, "", ErrInvalidMagicLink
 	}
 
@@ -285,6 +294,9 @@ func (s *Service) OAuthCallback(ctx context.Context, clientIP, code, state, cook
 
 	emailAddr := normalizeEmail(identity.Email)
 	if emailAddr == "" {
+		return nil, nil, "", "", ErrOAuthProviderFailed
+	}
+	if s.killSwitches.IsReservedSyntheticEmail(emailAddr) {
 		return nil, nil, "", "", ErrOAuthProviderFailed
 	}
 
@@ -473,6 +485,26 @@ func (s *Service) ClearOAuthStateCookie() *http.Cookie {
 // ValidateCSRF validates the double-submit CSRF token.
 func (s *Service) ValidateCSRF(cookieValue, headerValue string) bool {
 	return ValidateCSRF(cookieValue, headerValue)
+}
+
+// MintSyntheticSmokeTestSession creates a real session for the reserved
+// deploy-seeded synthetic smoke-test account only.
+func (s *Service) MintSyntheticSmokeTestSession(ctx context.Context) (*Session, string, error) {
+	if s.killSwitches == nil || s.killSwitches.ReservedSyntheticEmail == "" {
+		return nil, "", ErrSyntheticSessionMintDisabled
+	}
+	user, err := s.repo.GetUserByEmail(ctx, s.killSwitches.ReservedSyntheticEmail)
+	if err != nil {
+		return nil, "", ErrSyntheticUserNotSeeded
+	}
+	if !user.Active() {
+		return nil, "", ErrUserDisabled
+	}
+	_, session, token, err := s.issueSession(ctx, user)
+	if err != nil {
+		return nil, "", err
+	}
+	return session, token, nil
 }
 
 // tokenAndHash decodes a base64 token and returns its SHA-256 hash.

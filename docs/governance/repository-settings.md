@@ -93,7 +93,9 @@ bot identity as human authority.
 
 ## Required identities and credentials
 
-- Distinct Codex implementation and Claude Code verification identities.
+- Distinct implementer-role and independent-reviewer-role identities (currently both
+  Cursor-backed, per karsift-ai-infra's `config/roles.yml` - configurable, not a
+  permanent Codex/Claude assignment).
 - The recorded human founder identity and preserved historical technical-steward
   identity; no replacement standing steward team is required.
 - GitHub App or OIDC-based credentials with least privilege and short expiry.
