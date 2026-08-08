@@ -89,9 +89,14 @@ is currently deployed against — not a plan:
 This table is an implementation target, not authority to procure vendors, incur spend, create
 infrastructure, deploy, or release. Each such action requires its own approved change package and
 the authority applicable at execution time. The v1.1 rows above describe the staging tier that
-already exists as a result of VOC-032 `T00`–`T09`; production-tier deployment, RL1/RL2
-technical activation, and autonomous production release remain disabled per
-`docs/governance/a003-transition-state.yaml` and are not authorized by this amendment.
+already exists as a result of VOC-032 `T00`–`T09`; RL1/RL2 technical activation remains
+disabled per `docs/governance/a003-transition-state.yaml` and is not authorized by this
+amendment. **Updated 2026-08-08**: production-tier deployment and autonomous production
+release, previously also listed here as disabled, are no longer disabled -
+`docs/governance/a003-transition-state.yaml` itself now records both as enabled,
+following the founder's explicit authorization (see `AGENTS.md`'s "Release and
+deployment authority"). This amendment still does not itself authorize them; that
+authorization came from a separate, later decision.
 
 **Domains (v1.1, post-`VOC-032-§1-amendment`):** `vocanova.site` apex (reserved, not currently
 used by the staging tier), `staging.vocanova.site` (web app, browser-facing — the staging tier's

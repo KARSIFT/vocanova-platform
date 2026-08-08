@@ -68,9 +68,17 @@ artifact categories or authority hierarchy.
 |---|---|---|
 | Founder | Consequential strategic, financial, legal, product-direction, public-launch, user-trust, and difficult-to-reverse decisions | Routine implementation approval is not required |
 | ChatGPT | Product analysis, specifications, architecture proposals, governance drafting, and decision routing | Cannot approve founder-controlled decisions or implementation |
-| Codex | Implementation of approved, implementation-ready changes and applicable tests and documentation | Cannot approve its own work, expand scope, or deploy directly to production |
-| Claude Code | Independent specification, code, architecture, security, and CI/CD verification | Is not a human technical steward and cannot assume legal or organizational accountability |
+| Implementer role | Implementation of approved, implementation-ready changes and applicable tests and documentation | Cannot approve its own work, expand scope, or deploy directly to production |
+| Independent reviewer role | Independent specification, code, architecture, security, and CI/CD verification | Is not a human technical steward and cannot assume legal or organizational accountability |
 | Technical steward (historical) | Preserved evidence of the pre-A-003 routine R3 and one-time migration authority | Retired as routine approval authority; cannot substitute for founder authority or become a standing EHR layer |
+
+**Updated 2026-08-08**: "Implementer role" and "Independent reviewer role" above were
+previously named "Codex" and "Claude Code" respectively - both were accurate at the
+time this table was written, but which model/vendor occupies each role is
+configurable and has changed more than once since (both roles currently run
+through Cursor, per karsift-ai-infra's `config/roles.yml`, which is the sole
+current source of truth for the actual occupant). Renamed to the role names to
+avoid this table going stale again on the next vendor change.
 | GitHub Actions | Deterministic checks, traceability, gates, and deployment orchestration | Cannot make product or business decisions |
 | Cloudflare | Isolated preview, staging, production deployment, monitoring, and rollback infrastructure | Must not decide whether a release is authorized |
 
@@ -113,6 +121,17 @@ GitHub enforcement is configured:
 - strengthened active-A-003 controls and independent verification remain required;
 - AI agents must not impersonate founder or qualified-human authority; and
 - autonomous production release remains disabled.
+
+**Updated 2026-08-08**: the "until remaining GitHub enforcement is configured"
+condition above has since been resolved for vocanova-platform-sandbox. The founder
+explicitly, twice-confirmed-live authorized automatic release-to-main promotion and
+automatic production deployment (see `AGENTS.md`'s "Release and deployment
+authority" section and `docs/governance/a003-transition-state.yaml`'s
+`AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08` marker for the record). Autonomous
+production release is live, not disabled, as of that date - the bullet above is
+preserved as the historically-accurate description of the state before that
+authorization, not the current state. R3-change production blocking and AI agents
+never impersonating founder/steward authority remain unchanged.
 
 R4 decisions continue to require founder approval. The bootstrap exception expired
 when PR #3 merged and cannot be reused for later governance, workflow, application,
