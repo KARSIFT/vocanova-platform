@@ -91,6 +91,26 @@ on:
         type: string
         default: "VOC"
 
+# Explicit floor for every job below, all of which call karsift-ai-infra's
+# reusable workflows via `uses:` with `secrets: inherit` and no
+# job-level `permissions:` of their own - without this, they silently
+# inherit whatever the repo's own default_workflow_permissions setting
+# grants, and a reusable workflow call can never get MORE access than its
+# caller has regardless of what the called workflow's own job declares.
+# This union covers every permission any called workflow
+# (implement/adopt/release/merge-gate/review/remediate/plan/auto-advance)
+# actually needs - added 2026-08-08 specifically so this repo's
+# default_workflow_permissions could be safely tightened from "write" to
+# "read" without breaking the pipeline; do not narrow this without
+# re-checking every called reusable workflow's own job-level permissions
+# first.
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  checks: read
+
 jobs:
   implement:
     if: github.event_name == 'workflow_dispatch' && inputs.action == 'implement'
