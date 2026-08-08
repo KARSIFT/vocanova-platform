@@ -29,12 +29,12 @@ requirement_source: 'GitHub issue #392 ("Add hourly Sentry-based log/error monit
   tool; this package proposes the concrete mechanism (a scheduled workflow polling
   the Sentry API) as new scope DOC-11 does not itself specify.'
 requirement_approval_status: 'Approved. Founder-delegate (acting under the standing
-  founder-gate delegation for vocanova-platform-sandbox, confirmed explicitly this same
-  session) adopted this draft package via PR #393/#397 on 2026-08-08, mirroring
+  founder-gate delegation for vocanova-platform-sandbox, confirmed explicitly this
+  same session) adopted this draft package via PR #393/#397 on 2026-08-08, mirroring
   VOC-039/040/041/042/043/044/045/046/049''s convention. (PR #393 originally merged
   this draft in unauthorized-draft state by mistake, also under the wrong ID VOC-050
-  which collided with PR #394 - see karsift-ai-infra issue #20 - and was reverted via
-  PR #395; this replacement PR carries the same content, correctly numbered VOC-051,
+  which collided with PR #394 - see karsift-ai-infra issue #20 - and was reverted
+  via PR #395; this replacement PR carries the same content, correctly numbered VOC-051,
   with adoption fields flipped before merge this time.)'
 base_branch: develop
 base_sha: 50b5ba917edd40f9ce6f61c1849969dcc4d8fef4
@@ -102,7 +102,7 @@ implementation:
   status: proposed
   target_branch: develop
   pull_request: null
-  authority_issue: 392
+  authority_issue: null
 release:
   required: true
   mode: not-authorized-by-this-package
@@ -111,9 +111,9 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 397
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/397
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
