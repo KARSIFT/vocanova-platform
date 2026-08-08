@@ -67,14 +67,23 @@ artifacts:
   release_plan: release-plan.md
 dependencies:
 - id: VOC-051-DEP-00
-  status: unresolved at drafting time. This package assumes a Sentry organization
-    and project(s) already exist for apps/api (confirmed live - apps/api/go.mod already
-    depends on github.com/getsentry/sentry-go v0.48.0 and apps/api/app/api/production.go
-    already reads SENTRY_DSN) and that the same Sentry organization can host an apps/web
-    project and issue an org-scoped read-only API auth token. Whether the founder's
-    existing Sentry plan/tier supports an additional project and a read-only org auth
-    token (some Sentry plans gate API-token scopes or project counts) is not verified
-    by this drafting pass and must be confirmed before T01/T02 begin.
+  status: 'RESOLVED 2026-08-08. The founder confirmed signed-in access to the
+    real Sentry organization (slug vocanova, Developer/free plan, 5,000
+    errors/month pooled account-wide, 1 user seat), chose Layout B (four
+    projects: prod-api, prod-web, stage-api, stage-web - not the apps/api-precedent
+    Layout A), created an internal-integration token (vocanova-monitoring-agent)
+    scoped to Issue & Event: Read + Project: Read only, and provided all four DSN
+    values directly to the founder-gate overseer session. Five GitHub Actions
+    secrets are now set on the repository: PRODUCTION_SENTRY_DSN (updated in
+    place - see t00-evidence.md''s gate-status note: the founder had deleted the
+    pre-existing project it originally pointed to while cleaning up, which
+    silently disabled apps/api production error reporting until this fix; the
+    correction takes effect on apps/api''s next production deploy, not
+    retroactively), STAGING_SENTRY_DSN, PRODUCTION_WEB_SENTRY_DSN,
+    STAGING_WEB_SENTRY_DSN (all new), and SENTRY_API_TOKEN (new; note this is
+    the actual secret name - T03''s originally proposed SENTRY_API_AUTH_TOKEN
+    name is superseded). Full layout table in t00-evidence.md section 3.
+    T01/T02/T03 are unblocked.'
 - id: VOC-051-DEP-01
   status: unresolved at drafting time. Depends on the reviewing human deciding the
     exact GitHub API identity the new scheduled workflow uses to open issues (GITHUB_TOKEN
