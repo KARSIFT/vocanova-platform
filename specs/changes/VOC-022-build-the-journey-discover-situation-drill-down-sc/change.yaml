@@ -4,7 +4,7 @@ slug: build-the-journey-discover-situation-drill-down-sc
 title: Build the Journey/Discover Situation Drill-Down Screen (Within-Situation Word
   List)
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-022-build-the-journey-discover-situation-drill-down-sc

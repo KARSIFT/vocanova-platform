@@ -1,4 +1,4 @@
-# VOC-043 — Server-Rendered Pages' Own /api/v1/me Check Fails with 401 Immediately After middleware.ts's Identical Check Succeeds, Blocking Real Onboarding After Google Sign-In: Specification
+# VOC-047 — Server-Rendered Pages' Own /api/v1/me Check Fails with 401 Immediately After middleware.ts's Identical Check Succeeds, Blocking Real Onboarding After Google Sign-In: Specification
 
 ## Objective and requirement source
 
@@ -83,7 +83,7 @@ each task's own implementation PR.
 
 ## Decisions, contradictions, security, and privacy
 
-No `VOC-043-D00`-style founder/product decision is defined by this draft. Which
+No `VOC-047-D00`-style founder/product decision is defined by this draft. Which
 direction the fix takes (unifying on `middleware.ts`'s raw-header forward,
 unifying on `api-server.ts`'s `cookies()`-based approach, or a third shared
 helper) is deliberately left open pending the in-scope instrumentation finding —
@@ -117,8 +117,8 @@ accessibility surface is affected.
    (`middleware.ts`'s raw header forward vs. `api-server.ts`'s `cookies()`-based
    reconstruction) and a suggested diagnostic approach, but explicitly frames the
    suggested fix direction as "for the implementer to confirm empirically, not
-   asserted here." This package's `VOC-043-T00` therefore starts with
-   instrumentation, not a code change, and the actual fix (`VOC-043-T01`) is
+   asserted here." This package's `VOC-047-T00` therefore starts with
+   instrumentation, not a code change, and the actual fix (`VOC-047-T01`) is
    scoped to whatever that instrumentation finds — flagged for the reviewing
    human that the task list below cannot fully specify the fix's exact diff in
    advance of that finding.

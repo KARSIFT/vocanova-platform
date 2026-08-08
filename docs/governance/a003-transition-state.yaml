@@ -34,25 +34,25 @@ exceptional_human_review_mode: exceptional-only
 rl1_technical_activation: false
 rl2_technical_activation: false
 
-# Reverted 2026-07-24: an earlier pass on this date briefly set these two
-# fields to `true`, reasoning that Section 10 ("Merge Authority - Merge into
-# `develop`") is live and distinct from Section 11/12's production-release
-# authority below. That reasoning about A-003's own text is still correct,
-# but these two specific fields are also a hard, unconditional invariant
-# enforced by tooling/governance/validate_repository_foundation.py (which
-# requires both to remain the literal string "false" regardless of A-003
-# activation status) - a deliberate governance tripwire, not stale prose.
-# Changing what these two fields mean/require is a real decision the
-# founder should make explicitly, not a side effect of a docs cleanup, so
-# the values are restored here pending that decision. The underlying fact
-# (karsift-ai-infra's merge-gate.yml auto-merges into develop and has fired
-# on VOC-012, VOC-014, VOC-016 through VOC-022 at minimum) remains true and
-# is recorded in docs/governance/repository-settings.md.
-automatic_merge_allowed: false
-autonomous_merge_allowed: false
+# AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08: the founder explicitly requested
+# fully automatic release-to-main promotion and production deployment, with no
+# approval comment and no manual dispatch step, on a project with real users
+# mid-L1-controlled-launch. Asked directly what that meant, with the concrete
+# consequences laid out in full, and confirmed a second time after that. This
+# marker string is checked by tooling/governance/validate_repository_foundation.py
+# (validate_a003) - removing it without also reverting these four fields to
+# their prior false/disabled values fails validation, and vice versa; the two
+# must move together. See AGENTS.md's "Release and deployment authority"
+# section for the full record. karsift-ai-infra's release.yml now runs with
+# `auto_release_enabled: "true"` (pipeline.yml's release job) and
+# deploy-production.yml triggers on every push to `main`. RL1/RL2 technical
+# activation were NOT part of this request and remain a separate, distinct,
+# still-disabled gate below - do not treat this marker as covering them too.
+automatic_merge_allowed: true
+autonomous_merge_allowed: true
 
-production_deployment: disabled
-autonomous_production_release: disabled
+production_deployment: enabled
+autonomous_production_release: enabled
 doc_17_repository_adoption: true
 doc_18_repository_adoption: true
 control_plane_implementation: false

@@ -1,4 +1,4 @@
-# VOC-043 — Server-Rendered Pages' Own /api/v1/me Check Fails with 401 Immediately After middleware.ts's Identical Check Succeeds, Blocking Real Onboarding After Google Sign-In
+# VOC-047 — Server-Rendered Pages' Own /api/v1/me Check Fails with 401 Immediately After middleware.ts's Identical Check Succeeds, Blocking Real Onboarding After Google Sign-In
 
 **Status: proposed, not adopted.** Nothing in this package is
 implementation-authorized. It is a draft response to
@@ -33,13 +33,13 @@ not as an asserted root cause.
 ## What this package deliberately does NOT do
 
 - It does not assert a confirmed root cause or commit to a specific code diff
-  in advance of `VOC-043-T00`'s real-request instrumentation finding — the
+  in advance of `VOC-047-T00`'s real-request instrumentation finding — the
   issue itself explicitly declines to assert this, and this package follows
   that same discipline rather than guessing past it.
 - It does not touch `apps/api/business/auth/service.go`'s `ValidateSession` or
   any other API-side session-validation logic, since the issue's evidence
   points at the two Next.js-side cookie-forwarding implementations, not the
-  API's own validation — unless `VOC-043-T00`'s finding indicates otherwise,
+  API's own validation — unless `VOC-047-T00`'s finding indicates otherwise,
   in which case `specification.md`'s stated non-goal must be revisited before
   implementation, not silently overridden.
 - It does not adopt itself. `change.yaml` leaves every adoption/authorization
@@ -49,8 +49,8 @@ not as an asserted root cause.
 ## Open questions flagged for the reviewing human
 
 `specification.md`'s "Open questions" section flags: (1) the root cause is
-not yet empirically confirmed, so `VOC-043-T01`'s exact diff is scoped by
-`VOC-043-T00`'s finding rather than predetermined here; (2) whether diagnostic
+not yet empirically confirmed, so `VOC-047-T01`'s exact diff is scoped by
+`VOC-047-T00`'s finding rather than predetermined here; (2) whether diagnostic
 logging added during instrumentation should be temporary or may persist as a
 regression signal; and (3) whether any server component beyond
 `apps/web/src/app/onboarding/page.tsx` also calls `createServerApiClient()`
@@ -69,10 +69,10 @@ Mirrors recent packages' convention (e.g. VOC-042, VOC-041, VOC-039, VOC-040):
    server-rendered page depends on to actually render for a real user, not
    merely to pass `middleware.ts`).
 2. Read `specification.md`'s open questions and confirm the sequencing
-   (`VOC-043-T00`'s instrumentation before `VOC-043-T01`'s fix) is acceptable,
+   (`VOC-047-T00`'s instrumentation before `VOC-047-T01`'s fix) is acceptable,
    rather than requesting the implementer commit to a specific diff upfront.
 3. Decide whether temporary diagnostic logging added during instrumentation
    should be removed before merge or may persist (open question 2).
-4. Adopt (or request changes to) this package, then dispatch `VOC-043-T00`
-   through `VOC-043-T03` individually, as prior packages' tasks were
+4. Adopt (or request changes to) this package, then dispatch `VOC-047-T00`
+   through `VOC-047-T03` individually, as prior packages' tasks were
    dispatched one at a time.

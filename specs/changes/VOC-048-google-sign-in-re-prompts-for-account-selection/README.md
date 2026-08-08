@@ -1,4 +1,4 @@
-# VOC-045 — Google Sign-In Re-Prompts for Account Selection/Consent on Every Sign-In
+# VOC-048 — Google Sign-In Re-Prompts for Account Selection/Consent on Every Sign-In
 
 **Status: proposed, not adopted.** Nothing in this package is
 implementation-authorized. It is a draft response to
@@ -70,7 +70,7 @@ other named hypothesis - whether the app's own session
 correctly across page loads/browser restarts, separate from Google's
 prompt behavior. That requires runtime/browser-level observation this
 drafting pass did not perform; `specification.md`'s open questions and
-`tasks.md`'s `VOC-045-T00` scope that confirmation as the first task, before
+`tasks.md`'s `VOC-048-T00` scope that confirmation as the first task, before
 any fix task changes `AuthURL`'s behavior.
 
 ## What this package deliberately does NOT do
@@ -103,7 +103,7 @@ fixing an unintentional bug; (2) what the correct replacement condition
 should be (e.g. omit `prompt` entirely and rely on Google's own default
 behavior, versus only set it on a user's first-ever OAuth authorization,
 versus some other signal); and (3) whether the app-level session itself
-needs any change at all, pending `VOC-045-T00`'s investigation.
+needs any change at all, pending `VOC-048-T00`'s investigation.
 
 ## Structure
 
@@ -121,7 +121,7 @@ Mirrors recent packages' convention (e.g. VOC-044, VOC-043, VOC-042):
    routine R3 review.
 3. Decide the replacement condition for when `prompt` should (and should
    not) be requested, or whether that decision should be left to
-   `VOC-045-T01`'s implementer to propose for review.
-4. Adopt (or request changes to) this package, then dispatch `VOC-045-T00`
-   (investigation) before `VOC-045-T01` (fix), consistent with this
+   `VOC-048-T01`'s implementer to propose for review.
+4. Adopt (or request changes to) this package, then dispatch `VOC-048-T00`
+   (investigation) before `VOC-048-T01` (fix), consistent with this
    package's own scoping.

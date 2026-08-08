@@ -5,7 +5,7 @@ slug: design-tokens-foundation
 title: Design Tokens Foundation — Initial Spacing and Color Scale
 
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-010-design-tokens-foundation

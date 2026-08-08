@@ -1,4 +1,4 @@
-# VOC-045 — Google Sign-In Re-Prompts for Account Selection/Consent on Every Sign-In: Specification
+# VOC-048 — Google Sign-In Re-Prompts for Account Selection/Consent on Every Sign-In: Specification
 
 ## Objective and requirement source
 
@@ -48,7 +48,7 @@ persists correctly across page loads and browser restarts. It is plausible
 that the app-level session is entirely correct and only Google's own prompt
 is the visible symptom (in which case the fix is scoped entirely to
 `AuthURL`), but this specification does not assert that without the
-investigation task (`VOC-045-T00`) confirming it first.
+investigation task (`VOC-048-T00`) confirming it first.
 
 ## Scope and non-goals
 
@@ -62,7 +62,7 @@ In scope:
 - Preserving some workable way to obtain a reasonably fresh
   `email_verified` status without forcing the screen on literally every
   sign-in (see open question 2 for the exact mechanism, left open for the
-  reviewing human and/or `VOC-045-T01`'s implementer to settle).
+  reviewing human and/or `VOC-048-T01`'s implementer to settle).
 
 Out of scope (see `README.md`'s "What this package deliberately does NOT
 do" for the complete list):
@@ -88,7 +88,7 @@ specification does not attempt to make that call itself (see open question
 
 ## Decisions, contradictions, security, and privacy
 
-No `VOC-045-D0x` decisions are defined here; none may be defined before
+No `VOC-048-D0x` decisions are defined here; none may be defined before
 adoption. Recording the constraints a fix must satisfy, for the reviewing
 human and/or implementer to turn into an actual decision at or after
 adoption:
@@ -118,7 +118,7 @@ adoption:
   stored-data change. Confirmed by inspecting the affected files - neither
   `google_oauth.go` nor `service.go`'s `OAuthStart` reads or writes any
   database table beyond `CreateOAuthState`'s existing, unaffected call.
-- Analytics: None currently proposed. If `VOC-045-T00`'s investigation finds
+- Analytics: None currently proposed. If `VOC-048-T00`'s investigation finds
   a need to distinguish "re-prompted due to no prior consent" from
   "re-prompted due to a bug" in production going forward, that would be a
   new, separate proposal, not something this specification assumes.
@@ -147,10 +147,10 @@ adoption:
      fresh sign-in, not a same-session repeat), and omit it otherwise.
    This specification records the trade-off (freshness of `email_verified`
    versus re-prompt frequency) without picking a resolution; that decision
-   belongs to `VOC-045-T01`'s implementer, subject to review, or to the
+   belongs to `VOC-048-T01`'s implementer, subject to review, or to the
    adopting human up front.
 3. Is the app-level session itself confirmed working as intended, separate
-   from Google's prompt behavior? `VOC-045-T00` must answer this before
-   `VOC-045-T01` proceeds; if the app-level session turns out to also be
-   broken, `VOC-045-T01`'s scope must be revised to address that too, not
+   from Google's prompt behavior? `VOC-048-T00` must answer this before
+   `VOC-048-T01` proceeds; if the app-level session turns out to also be
+   broken, `VOC-048-T01`'s scope must be revised to address that too, not
    just `AuthURL`.

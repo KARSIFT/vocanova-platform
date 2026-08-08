@@ -1,6 +1,18 @@
 name: deploy-production
 
+# Auto-deploys on every push to main (2026-08-08, founder's explicit, twice-
+# confirmed request - see AGENTS.md's "Release and deployment authority"
+# section): release.yml's own auto_release_enabled path is what actually
+# produces that push (a checked, merged promotion PR), so by the time this
+# fires the code has already passed CI + independent review on every task
+# PR that went into it. workflow_dispatch stays available as a manual
+# override/retry path with the same input defaults a push run resolves to
+# automatically (see each `inputs.X || 'default'` below) - nothing about
+# manual dispatch changed.
+
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       production_web_host:
@@ -75,7 +87,7 @@ jobs:
           context: .
           file: apps/web/Dockerfile
           push: true
-          build-args: NEXT_PUBLIC_API_BASE_URL=${{ inputs.production_api_base_url }}
+          build-args: NEXT_PUBLIC_API_BASE_URL=${{ inputs.production_api_base_url || 'https://api-production.vocanova.site' }}
           tags: |
             ghcr.io/karsift/vocanova-web:sha-${{ steps.sha.outputs.short_sha }}
             ghcr.io/karsift/vocanova-web:prod
@@ -256,8 +268,8 @@ jobs:
       - name: Write production application configuration
         uses: appleboy/ssh-action@v1
         env:
-          PRODUCTION_WEB_HOST: ${{ inputs.production_web_host }}
-          PRODUCTION_API_HOST: ${{ inputs.production_api_host }}
+          PRODUCTION_WEB_HOST: ${{ inputs.production_web_host || 'production.vocanova.site' }}
+          PRODUCTION_API_HOST: ${{ inputs.production_api_host || 'api-production.vocanova.site' }}
           PRODUCTION_SENTRY_RELEASE: sha-${{ steps.sha.outputs.short_sha }}
           PRODUCTION_NEW_USER_SIGNUP_ALLOWLIST: ${{ inputs.new_user_signup_allowlist }}
           PRODUCTION_GOOGLE_OAUTH_ENABLED: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID != '' && secrets.GOOGLE_OAUTH_CLIENT_SECRET != '' }}
@@ -321,8 +333,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
-          PRODUCTION_WEB_HOST: ${{ inputs.production_web_host }}
-          PRODUCTION_API_HOST: ${{ inputs.production_api_host }}
+          PRODUCTION_WEB_HOST: ${{ inputs.production_web_host || 'production.vocanova.site' }}
+          PRODUCTION_API_HOST: ${{ inputs.production_api_host || 'api-production.vocanova.site' }}
           # The immutable per-commit tag, not the mutable `prod` tag, is
           # what production actually runs: DOC-11 §3's rollback model is
           # "redeploy the previous artifact by digest", which requires
@@ -484,7 +496,7 @@ jobs:
           set -euo pipefail
           for i in $(seq 1 60); do
             if curl -fsS --max-time 5 \
-                "https://${{ inputs.production_api_host }}:8443/healthz" > /dev/null; then
+                "https://${{ inputs.production_api_host || 'api-production.vocanova.site' }}:8443/healthz" > /dev/null; then
               echo "Production API health check passed on attempt $i/60"
               exit 0
             fi
@@ -498,7 +510,7 @@ jobs:
           set -euo pipefail
           for i in $(seq 1 60); do
             status=$(curl -sS --max-time 5 -o /dev/null -w "%{http_code}" \
-                "https://${{ inputs.production_web_host }}:8443/" || echo "000")
+                "https://${{ inputs.production_web_host || 'production.vocanova.site' }}:8443/" || echo "000")
             if [[ "$status" == 2* ]]; then
               echo "Production web health check passed on attempt $i/60 (status $status)"
               exit 0
@@ -529,5 +541,5 @@ jobs:
           EXPECT_AI_ENABLED: "true"
         run: |
           bash infra/scripts/smoke-test-production.sh \
-            "https://${{ inputs.production_api_host }}:8443" \
-            "https://${{ inputs.production_web_host }}:8443"
+            "https://${{ inputs.production_api_host || 'api-production.vocanova.site' }}:8443" \
+            "https://${{ inputs.production_web_host || 'production.vocanova.site' }}:8443"

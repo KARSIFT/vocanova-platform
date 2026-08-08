@@ -1,0 +1,147 @@
+schema_version: 1
+id: VOC-049
+slug: develop-has-17-unreleased-commits-from-direct
+title: Promote develop to main for the Batch of Direct Governance/Infra-Cleanup Commits
+  That Bypassed the Normal Per-Package Release Flow
+type: release
+status: adopted
+risk: R2
+planned_implementation_risk_floor: Not yet computed by running scripts/governance/classify-change-risk.sh
+  against a real task-scoped file list. This package proposes R2 because the promotion
+  task itself introduces no new code or behavior change - every commit in the batch
+  is already merged into develop and (per the issue) already reviewed - but the batch
+  includes the auto_release_enabled wiring commit itself, which docs/governance/change-risk-
+  classification.md would treat as a governance/workflow-authority change (typically
+  R3-or-higher on its own). This package does not re-review that commit's substance
+  (that already happened in whichever PR merged it into develop); it only proposes
+  the risk for the promotion action. This is a draft proposal for the reviewing human
+  at adoption time, not a determination, and the human may reasonably set this higher
+  given the governance-authority content riding along in the batch.
+canonical_path: specs/changes/VOC-049-develop-has-17-unreleased-commits-from-direct
+authority_model: a003-active
+requirement_source: 'GitHub issue #375 ("develop has 17 unreleased commits from direct
+  governance/infra-cleanup PRs - needs promotion to main"). The issue states develop
+  was, at filing time, 17 commits ahead of main (https://github.com/KARSIFT/vocanova-platform-sandbox/compare/main...develop),
+  none of which reached main through release.yml''s normal check-and-open/auto- promote
+  flow, because none originated from an adopted change package with a .karsift/tasks.json
+  task roster - they were direct governance/infra-cleanup PRs (docs reconciliation,
+  duplicate-ID/invalid-YAML fixes, stale package- status syncs, the auto_release_enabled
+  wiring itself, and a branch-ruleset verification commit). Since release.yml only
+  fires on a tracked task issue closing, this content had no natural trigger to reach
+  main on its own. The issue requests this batch be promoted from develop to main
+  through the normal governed loop, and separately notes that once this promotion
+  completes, auto_release_enabled should be live for future packages going forward.'
+requirement_approval_status: 'Approved. Founder-delegate (acting under the standing
+  founder-gate delegation for vocanova-platform-sandbox, confirmed explicitly this same
+  session) merged this draft package''s own plan PR (#376) on 2026-08-08, adopting it.
+  This follow-up commit records that decision, mirroring VOC-044/045/046''s convention -
+  merging the plan PR only merges the draft content and does not itself flip these
+  fields.
+
+  Resolves VOC-049-DEP-00 (the stale "1 commit" drafting-time finding): re-checked
+  origin/main...origin/develop at adoption time and confirmed the gap is genuinely 17
+  commits, matching issue #375''s original count, not the planner''s drafting-time
+  finding. The drafting-time finding was itself stale/transient (likely a GitHub API
+  compare-endpoint consistency lag), not evidence anything had already promoted.
+  VOC-049-T00 still re-verifies independently at implementation time per its own design
+  regardless of this note.
+
+  Resolves VOC-049-DEP-01 (whether the auto_release_enabled wiring commit riding along
+  in this batch needs separate elevated review before promotion): no separate review is
+  required. That commit was already explicitly authorized by the founder directly
+  (asked what "no need to approval for deployment" meant, given the full consequences,
+  and confirmed twice) before it merged into develop - see AGENTS.md''s "Release and
+  deployment authority" section for the record. This package''s promotion action makes
+  that already-authorized content reachable on main; it does not re-authorize it.
+
+  Mechanism selected from specification.md''s open question 1: option (a) - this
+  package''s own task issue closing gives release.yml''s normal check-and-open/
+  auto-promote jobs a real trigger, the same governed path any other package''s release
+  uses. No manual promotion PR.'
+drafting_time_note: 'At drafting time (2026-08-08), origin/main and origin/develop
+  were compared directly: develop was found to be only 1 commit ahead of main (0914ea7,
+  "Merge pull request #374 from KARSIFT/test/ruleset-verification"), not 17. This
+  means most of the batch the issue describes has already reached main by some path
+  between the issue being filed and this package being drafted - plausibly the release.yml
+  auto-promote path the batch itself enabled, or a separate manual promotion. This
+  package does not assume the issue''s "17 commits" figure is still accurate; tasks.md''s
+  T00 requires the implementer to re-run the same compare at implementation time and
+  treat whatever the actual remaining gap is (which may be small, or even zero) as
+  authoritative over the issue''s original count. If T00 finds the gap is already
+  zero, this package''s remaining tasks close as not-needed with that finding recorded
+  as evidence, rather than promoting nothing to manufacture busywork.'
+base_branch: develop
+base_sha: 0914ea7d9d41d6ef6cd4fa4c3530ecb858c877b0
+target_branch: main
+approved_candidate_sha: 0914ea7d9d41d6ef6cd4fa4c3530ecb858c877b0
+owners:
+  decision: unassigned
+  package_preparation: planner (drafting only; adoption remains a human decision)
+  implementation: unassigned
+  independent_verification: unassigned
+approval_status: adopted
+implementation_authorized: true
+automatic_merge_allowed: true
+production_impact: unknown until adopted and implemented. The batch itself is already
+  merged into develop; production_impact here refers only to whatever effect promoting
+  it to main and the resulting automatic production deploy (deploy-production.yml,
+  per AGENTS.md's "Release and deployment authority") has, which depends on T00's
+  re-verified diff content at implementation time.
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+- id: VOC-049-DEP-00
+  status: unresolved at drafting time. This package's entire premise (a 17- commit
+    gap) is stated by the issue, not independently re-confirmed at drafting time beyond
+    the direct origin/main vs origin/develop compare recorded in drafting_time_note
+    above, which already found a much smaller (1-commit) gap than the issue describes.
+    VOC-049-T00 must re-run the compare at implementation time and treat that result,
+    not the issue's original count, as authoritative.
+- id: VOC-049-DEP-01
+  status: unresolved at drafting time. Depends on the reviewing human deciding whether
+    the auto_release_enabled/auto_release wiring commit riding along in this batch
+    needs its own separate, elevated review before this package's promotion task is
+    dispatched, given AGENTS.md documents that change as a named, dated, explicit
+    founder delegation rather than routine content, and this package does not re-review
+    that commit's substance.
+affected_areas:
+- (promotion only - no application, workflow, or governance-document source changes
+  are made by this package's own tasks; the affected content is whatever is already
+  merged into develop, unchanged by this package)
+- specs/changes/VOC-049-develop-has-17-unreleased-commits-from-direct
+implementation:
+  authorized: true
+  required: true
+  status: proposed
+  target_branch: main
+  pull_request: null
+  authority_issue: null
+release:
+  required: true
+  mode: not-authorized-by-this-package
+  production_impact: unknown-until-implemented
+  deployment: not-authorized-by-this-package
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: adopted
+adoption_pr: 376
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/376
+implementation_authority_before_adoption: false
+implementation_authority_status: exercised
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
+blocking_reasons: 'Repository-level adoption is resolved (PR #376). VOC-049-T00 still
+  must run and re-verify the actual commit gap before VOC-049-T01 (the real promotion)
+  is dispatched, per tasks.md''s own design - adoption authorizes the task roster, it
+  does not skip T00''s re-verification step.'

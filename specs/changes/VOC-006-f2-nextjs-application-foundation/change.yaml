@@ -4,7 +4,7 @@ id: VOC-006
 slug: f2-nextjs-application-foundation
 title: F2 Next.js Application Foundation
 type: infrastructure
-status: implementation-ready
+status: completed
 risk: R3
 planned_implementation_risk_floor: R2
 canonical_path: specs/changes/VOC-006-f2-nextjs-application-foundation

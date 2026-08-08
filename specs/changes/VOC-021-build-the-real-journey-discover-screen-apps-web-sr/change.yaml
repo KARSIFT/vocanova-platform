@@ -3,7 +3,7 @@ id: VOC-021
 slug: build-the-real-journey-discover-screen-apps-web-sr
 title: Build the Real Journey/Discover Screen (Situation List)
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-021-build-the-real-journey-discover-screen-apps-web-sr

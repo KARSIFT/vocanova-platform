@@ -3,7 +3,7 @@ id: VOC-014
 slug: add-an-elevation-shadow-token-scale-to-packages-de
 title: "Design Tokens \u2014 Elevation / Shadow Scale"
 type: feature
-status: implementation-ready
+status: completed
 risk: R1
 planned_implementation_risk_floor: R1
 canonical_path: specs/changes/VOC-014-add-an-elevation-shadow-token-scale-to-packages-de
