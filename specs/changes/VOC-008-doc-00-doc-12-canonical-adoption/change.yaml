@@ -4,7 +4,7 @@ id: VOC-008
 slug: doc-00-doc-12-canonical-adoption
 title: DOC-00 through DOC-12 Canonical Adoption
 type: documentation-adoption
-status: implementation-ready
+status: completed
 risk: R4
 planned_implementation_risk_floor: R4
 canonical_path: specs/changes/VOC-008-doc-00-doc-12-canonical-adoption

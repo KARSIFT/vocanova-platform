@@ -4,7 +4,7 @@ id: VOC-009
 slug: pr32-r4-gate-remediation
 title: PR #32 R4 Gate Remediation
 type: governance-process-remediation
-status: implementation-ready
+status: completed
 risk: R4
 planned_implementation_risk_floor: R4
 canonical_path: specs/changes/VOC-009-pr32-r4-gate-remediation
