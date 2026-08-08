@@ -4,7 +4,7 @@ id: VOC-007
 slug: canonical-product-technical-documentation-migration
 title: Canonical Product and Technical Documentation Migration
 type: documentation-adoption
-status: implementation-ready
+status: completed
 risk: R4
 planned_implementation_risk_floor: R4
 canonical_path: specs/changes/VOC-007-canonical-product-technical-documentation-migration
