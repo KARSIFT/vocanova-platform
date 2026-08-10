@@ -94,10 +94,10 @@ dependencies:
 
     '
 - id: VOC-063-DEP-01
-  status: 'resolved at adoption time (2026-08-10, PR #474). The founder-delegate
-    explicitly accepted superseding VOC-053''s adopted non-goal that forbade retrying
-    or polling step 7 (see VOC-053 specification.md scope/non-goals and VOC-053-AC-01),
-    per requirement_approval_status above.
+  status: 'resolved at adoption time (2026-08-10, PR #474). The founder-delegate explicitly
+    accepted superseding VOC-053''s adopted non-goal that forbade retrying or polling
+    step 7 (see VOC-053 specification.md scope/non-goals and VOC-053-AC-01), per requirement_approval_status
+    above.
 
     '
 - id: VOC-063-DEP-02
@@ -119,7 +119,7 @@ implementation:
   status: proposed
   target_branch: develop
   pull_request: null
-  authority_issue: 473
+  authority_issue: null
 release:
   required: true
   mode: not-authorized-by-this-package
@@ -137,11 +137,11 @@ production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'None - adopted 2026-08-10 (PR #474). Resolved at adoption: R2
-  classification accepted as-proposed by the founder-delegate; VOC-063-DEP-01 (superseding
-  VOC-053''s "no retry/poll on step 7" non-goal) explicitly accepted, see requirement_approval_status.
-  Still pending, for the implementer/independent verifier, not blocking adoption
-  itself: confirming scripts/governance/classify-change-risk.sh''s actual detected
-  floor for each task''s real file list is not higher than R2.
+blocking_reasons: 'None - adopted 2026-08-10 (PR #474). Resolved at adoption: R2 classification
+  accepted as-proposed by the founder-delegate; VOC-063-DEP-01 (superseding VOC-053''s
+  "no retry/poll on step 7" non-goal) explicitly accepted, see requirement_approval_status.
+  Still pending, for the implementer/independent verifier, not blocking adoption itself:
+  confirming scripts/governance/classify-change-risk.sh''s actual detected floor for
+  each task''s real file list is not higher than R2.
 
   '
