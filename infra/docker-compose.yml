@@ -351,15 +351,12 @@ services:
       - ./secrets/nginx/cert.pem:/etc/nginx/certs/cert.pem:ro
       - ./secrets/nginx/key.pem:/etc/nginx/certs/key.pem:ro
     healthcheck:
-      # wget the local nginx port; any 2xx/3xx response
-      # is acceptable for "nginx is up" - the real
-      # routing checks are in VOC-032-TEST-12. The
-      # official nginx image's entrypoint already runs
-      # `nginx -t` before starting, so a config-syntax
-      # error fails the container start outright; this
-      # healthcheck just verifies the server is
-      # accepting connections.
-      test: ["CMD-SHELL", "wget --quiet --tries=1 -O /dev/null http://127.0.0.1/ || exit 1"]
+      # Probe the default-server /healthz location (VOC-066).
+      # A bare GET to http://127.0.0.1/ hits the catch-all and
+      # returns 444 by design (VOC-032-D03); /healthz is the
+      # deliberate exception that confirms nginx is accepting
+      # connections without weakening scanner hardening.
+      test: ["CMD-SHELL", "wget --quiet --tries=1 -O /dev/null http://127.0.0.1/healthz || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
