@@ -20,8 +20,7 @@ const repositoryRoot = path.resolve(
   "../..",
 );
 
-const BARE_ROOT_PROBE =
-  /http:\/\/127\.0\.0\.1\/(?=["'\s|]|$)/;
+const BARE_ROOT_PROBE = /http:\/\/127\.0\.0\.1\/(?=["'\s|]|$)/;
 const HEALTHZ_PROBE = /http:\/\/127\.0\.0\.1\/healthz/;
 
 /**
@@ -118,7 +117,9 @@ function assertNginxEdgeProbeUsesHealthz(probeCommand, composeLabel) {
 
 function listInfraComposeFiles() {
   return readdirSync(path.join(repositoryRoot, "infra"))
-    .filter((name) => name.startsWith("docker-compose") && name.endsWith(".yml"))
+    .filter(
+      (name) => name.startsWith("docker-compose") && name.endsWith(".yml"),
+    )
     .sort()
     .map((name) => path.join("infra", name));
 }
