@@ -26,28 +26,36 @@ This directory contains two environment layouts:
 ```
 infra/
 ├── README.md                  # this file (VOC-032-T11)
-├── docker-compose.yml         # four-service stack: postgres + api + web + nginx
-├── docker-compose.production.yml   # VOC-037-T06 production stack (same-host isolated project)
+├── docker-compose.yml         # three-service app stack: postgres + api + web
+├── docker-compose.production.yml   # VOC-037-T06 production app stack (isolated project)
+├── docker-compose.shared-edge.yml  # VOC-067-T02 shared nginx on host 80/443
 ├── scripts/
 │   ├── rehearse-production-secrets-boundary.sh          # VOC-037 INS-9..INS-11 rehearsal
 │   └── rehearse-production-secrets-boundary.selftest.sh # disposable-mirror harness for the above
 ├── nginx/
-│   ├── nginx.conf             # main config (events + http, includes conf.d/*.conf)
+│   ├── nginx.conf             # legacy per-tier main config (not loaded by shared edge)
 │   ├── conf.d/
-│   │   ├── 00-cloudflare-real-ip.conf  # real-IP restoration scoped to CF ranges
-│   │   ├── 01-tls.conf                 # shared TLS / ssl_protocols / ssl_ciphers
-│   │   ├── 02-docker-dns.conf          # resolver + Docker-embedded DNS variables
-│   │   ├── 05-default.conf             # catch-all server, 444 closes
-│   │   ├── 10-staging-web.conf         # staging.vocanova.site -> web
-│   │   └── 20-api-staging.conf         # api-staging.vocanova.site -> api
+│   │   ├── 00-cloudflare-real-ip.conf  # loaded via nginx-shared/ on shared edge
+│   │   ├── 01-tls.conf
+│   │   ├── 02-docker-dns.conf
+│   │   ├── 05-default.conf             # legacy; shared edge uses nginx-shared/conf.d/
+│   │   ├── 10-staging-web.conf         # staging.vocanova.site -> vocanova-web
+│   │   └── 20-api-staging.conf         # api-staging.vocanova.site -> vocanova-api
 │   └── generate-dev-cert.sh   # self-signed cert for local compose validation
+├── nginx-shared/              # VOC-067-T02 shared-edge main + http{} directives
+│   ├── nginx.conf
+│   └── conf.d/
+│       ├── 00-cloudflare-real-ip.conf
+│       ├── 01-tls.conf
+│       ├── 02-docker-dns.conf
+│       └── 05-default.conf             # single catch-all + /healthz for both tiers
 ├── nginx-production/
 │   ├── nginx.conf             # production nginx main config
 │   └── conf.d/
 │       ├── 00-cloudflare-real-ip.conf
 │       ├── 01-tls.conf
 │       ├── 02-docker-dns.conf
-│       ├── 05-default.conf
+│       ├── 05-default.conf             # empty — catch-all lives in nginx-shared/
 │       ├── 10-production-web.conf  # __PRODUCTION_WEB_HOST__ placeholder
 │       └── 20-api-production.conf  # __PRODUCTION_API_HOST__ placeholder
 └── secrets/
@@ -80,28 +88,39 @@ mean, not their full syntax.
 
 ## Service architecture
 
-`docker compose -f infra/docker-compose.yml` brings up four
-services on a single internal Docker network (`vocanova-net`):
+`docker compose -f infra/docker-compose.yml` brings up three application
+services on a single internal Docker network (`vocanova-net`). Public HTTPS
+for staging hostnames is served by `vocanova-shared-edge-nginx`
+(`docker compose -f infra/docker-compose.shared-edge.yml`), which also routes
+production hostnames from the same process (VOC-067-T02).
 
 | Service    | Image                       | Port (host) | Reachable from        |
 | ---------- | --------------------------- | ----------- | --------------------- |
 | `postgres` | `postgres:16-alpine`        | none        | internal network only |
 | `api`      | `apps/api/Dockerfile` (T02) | none        | internal network only |
 | `web`      | `apps/web/Dockerfile` (T03) | none        | internal network only |
-| `nginx`    | `nginx:1.27-alpine`         | 80, 443     | the internet (via CF) |
 
-**Only `nginx` publishes host ports.** The database and the
-two app services are reachable only on the internal network
+**Shared edge** (`docker compose -f infra/docker-compose.shared-edge.yml`):
+
+| Service | Image               | Port (host) | Networks                                   |
+| ------- | ------------------- | ----------- | ------------------------------------------ |
+| `nginx` | `nginx:1.27-alpine` | 80, 443     | `vocanova-net` + `vocanova-production-net` |
+
+**Only the shared-edge nginx publishes host ports.** The database and the
+two app services are reachable only on their tier's internal network
 — this is the explicit `VOC-032-R03` mitigation (a misconfigured
 `ports:` block exposing `postgres`'s `5432` to the host would
 expose the database to the internet, which this package's
-impact analysis explicitly forbids). Cross-service addressing
-uses Docker's embedded DNS: `postgres:5432`, `api:8080`,
-`web:3000`. Every service has a `HEALTHCHECK`; the api's
-`/healthz` pings the live database connection; nginx
-intentionally exposes a shallow 200 probe only (the real
-routing checks are `infra/nginx/conf.d/10-staging-web.conf`
-and `20-api-staging.conf`).
+impact analysis explicitly forbids). Cross-service addressing uses Docker's embedded DNS on each tier's network.
+Staging upstreams in nginx vhost fragments use explicit `container_name`
+values (`vocanova-web`, `vocanova-api`, `vocanova-production-web`,
+`vocanova-production-api`) because the shared edge attaches to both
+`vocanova-net` and `vocanova-production-net` and service names like `web`
+would be ambiguous. Every app service has a `HEALTHCHECK`; the api's
+`/healthz` pings the live database connection; the shared edge's
+`/healthz` on the default server is a shallow 200 probe only (the real
+routing checks are `10-staging-web.conf` / `20-api-staging.conf` and their
+production twins).
 
 The `web` image is built with the monorepo root as its build
 context (so pnpm can resolve workspace dependencies). The
@@ -200,7 +219,9 @@ workflow file, not a one-sided edit):
 /opt/vocanova/
 ├── infra/                              # this directory on the host
 │   ├── docker-compose.yml              # SCPed by deploy-staging
-│   ├── nginx/...                       # SCPed by deploy-staging
+│   ├── docker-compose.shared-edge.yml  # VOC-067-T02; rare recreate
+│   ├── nginx-shared/...                # shared-edge main + http{} conf
+│   ├── nginx/...                       # SCPed by deploy-staging (10-/20- vhosts)
 │   └── secrets/                        # founder-populated, NOT SCPed
 ├── apps/api/scripts/migrate.sh         # SCPed by deploy-staging
 ├── apps/api/scripts/seed-synthetic-smoke-user.{sh,sql}
@@ -258,29 +279,49 @@ load-bearing:
 
 ### Port mapping and Cloudflare origin routing
 
-Staging's nginx already publishes the host's `80`/`443`, so production's
-publishes `8081`/`8443` instead — two containers cannot bind the same host
-port. The production hostnames are still ordinary `https://` names on `443`
-at the edge, so **Cloudflare must be configured to reach the origin on port
-`8443`** for the production hostnames (an origin-port override on the
-proxied DNS records, or an origin rule targeting them). Without that step the
-production health checks in `deploy-production` fail even though the stack is
-healthy, because the edge is talking to staging's nginx on `443`.
+**VOC-067-T02 (shared edge):** one nginx process (`vocanova-shared-edge-nginx`)
+binds host `80`/`443` and routes by `server_name` / SNI to each tier's
+upstream containers on `vocanova-net` and `vocanova-production-net`.
+
+**Cutover dual-publish (required until T05):** Cloudflare still remaps
+production hostnames to origin `:8443` until VOC-067-T05. T00's ordered
+cutover keeps that remap active while origin `:443` is proven. Therefore
+`vocanova-production-nginx` continues to publish host `8081`/`8443` as a
+temporary bridge so production traffic via the remap does not black-hole
+when the shared edge lands. Staging no longer has a per-tier nginx; its
+public path is shared-edge only. Steady state after T05 is ordinary
+`edge :443 → origin :443` for both tiers with the production bridge
+retired. Until T04/T05 complete, some deploy-emitted production URLs may
+still mention `:8443`; that is cutover port-qualification, not the target
+steady-state design.
+
+Bring up order on the shared host:
+
+1. `docker compose -f docker-compose.yml up -d` (staging apps)
+2. `docker compose -f docker-compose.production.yml up -d` (production apps
+   plus temporary `:8443` bridge nginx)
+3. `docker compose -f docker-compose.shared-edge.yml up -d` (shared edge on
+   `80`/`443` — `deploy-staging.yml` performs this controlled bring-up)
+
+Recreating the shared-edge container is rare and documented — ordinary
+deploys only `nginx -t` + reload (VOC-067-T03).
 
 ### Shared-host resource budget
 
 Both stacks share one 2 vCPU / 4 GB host, so their memory limits are budgeted
-together — production ~1.9 GB, staging ~1.4 GB, leaving headroom for the host.
-Raising a limit in one compose file without lowering the other oversubscribes
+together — production ~1.9 GB (including the temporary cutover nginx),
+staging ~1.3 GB apps + shared edge ~320 MB, leaving headroom for the host.
+Raising a limit in one compose file without lowering another oversubscribes
 the host. CPU values are per-service ceilings, so their sum may exceed 2 by
 design.
 
-| Service  | Production      | Staging         |
-| -------- | --------------- | --------------- |
-| postgres | 768m / 1.00 cpu | 512m / 0.75 cpu |
-| api      | 512m / 1.00 cpu | 384m / 0.75 cpu |
-| web      | 512m / 1.00 cpu | 384m / 0.75 cpu |
-| nginx    | 192m / 0.50 cpu | 128m / 0.50 cpu |
+| Service               | Production      | Staging         | Shared edge     |
+| --------------------- | --------------- | --------------- | --------------- |
+| postgres              | 768m / 1.00 cpu | 512m / 0.75 cpu | —               |
+| api                   | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
+| web                   | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
+| nginx (cutover :8443) | 192m / 0.50 cpu | —               | —               |
+| nginx (shared edge)   | —               | —               | 320m / 0.50 cpu |
 
 ### Verifying the boundary
 
@@ -310,13 +351,15 @@ docker compose -f infra/docker-compose.yml config
 # 2. Build the api and web images locally.
 docker compose -f infra/docker-compose.yml build
 
-# 3. Bring the four-service stack up locally. This requires
-#    a populated infra/secrets/ directory (postgres.env +
-#    api.env + a self-signed cert/key generated by
-#    infra/nginx/generate-dev-cert.sh into
-#    infra/secrets/nginx/) and a database the api can reach
-#    (the compose `postgres` service is the obvious target).
+# 3. Bring the staging app stack up locally. Requires a populated
+#    infra/secrets/ directory (postgres.env + api.env + a self-signed
+#    cert/key from infra/nginx/generate-dev-cert.sh).
 docker compose -f infra/docker-compose.yml up -d
+
+# 3b. Shared edge (after staging + production app stacks exist and
+#     their Docker networks are created). From infra/ on the host, or
+#     from repo root with production-path overrides as below.
+docker compose -f infra/docker-compose.shared-edge.yml up -d
 
 # 4. Verify the api's /healthz reports 200 and the database
 #    ping passes.
@@ -327,15 +370,43 @@ docker compose -f infra/docker-compose.yml exec api wget -q -O- http://127.0.0.1
 docker compose -f infra/docker-compose.yml down
 ```
 
-The `nginx -t` syntax-check used in `T05`'s
-`VOC-032-TEST-12` is:
+The shared-edge `nginx -t` syntax check (VOC-067-TEST-02) is:
+
+```bash
+sh infra/nginx/generate-dev-cert.sh   # if infra/secrets/nginx/ is empty
+
+# Substitute production placeholders for a local disposable check:
+mkdir -p /tmp/vocanova-nginx-prod-conf.d
+cp infra/nginx-production/conf.d/05-default.conf /tmp/vocanova-nginx-prod-conf.d/
+sed 's/__PRODUCTION_WEB_HOST__/production.vocanova.site/g;
+     s/__PRODUCTION_API_HOST__/api-production.vocanova.site/g' \
+  infra/nginx-production/conf.d/10-production-web.conf \
+  > /tmp/vocanova-nginx-prod-conf.d/10-production-web.conf
+sed 's/__PRODUCTION_WEB_HOST__/production.vocanova.site/g;
+     s/__PRODUCTION_API_HOST__/api-production.vocanova.site/g' \
+  infra/nginx-production/conf.d/20-api-production.conf \
+  > /tmp/vocanova-nginx-prod-conf.d/20-api-production.conf
+
+docker run --rm \
+  -v $(pwd)/infra/nginx-shared/nginx.conf:/etc/nginx/nginx.conf:ro \
+  -v $(pwd)/infra/nginx-shared/conf.d:/etc/nginx/conf.d/shared:ro \
+  -v $(pwd)/infra/nginx/conf.d:/etc/nginx/conf.d/staging:ro \
+  -v /tmp/vocanova-nginx-prod-conf.d:/etc/nginx/conf.d/production:ro \
+  -v $(pwd)/infra/secrets/nginx/cert.pem:/etc/nginx/certs/staging/cert.pem:ro \
+  -v $(pwd)/infra/secrets/nginx/key.pem:/etc/nginx/certs/staging/key.pem:ro \
+  -v $(pwd)/infra/secrets/nginx/cert.pem:/etc/nginx/certs/production/cert.pem:ro \
+  -v $(pwd)/infra/secrets/nginx/key.pem:/etc/nginx/certs/production/key.pem:ro \
+  nginx:1.27-alpine nginx -t
+```
+
+Legacy per-tier staging-only `nginx -t` (superseded by shared edge):
 
 ```bash
 docker run --rm \
   -v $(pwd)/infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
   -v $(pwd)/infra/nginx/conf.d:/etc/nginx/conf.d:ro \
-  -v $(pwd)/infra/secrets/nginx/cert.pem:/etc/nginx/certs/cert.pem:ro \
-  -v $(pwd)/infra/secrets/nginx/key.pem:/etc/nginx/certs/key.pem:ro \
+  -v $(pwd)/infra/secrets/nginx/cert.pem:/etc/nginx/certs/staging/cert.pem:ro \
+  -v $(pwd)/infra/secrets/nginx/key.pem:/etc/nginx/certs/staging/key.pem:ro \
   nginx:1.27-alpine nginx -t
 ```
 
