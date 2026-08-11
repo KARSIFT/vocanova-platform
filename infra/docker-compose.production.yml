@@ -135,7 +135,8 @@ services:
       - ${VOCANOVA_PRODUCTION_ROOT:-/opt/vocanova/production}/secrets/nginx/cert.pem:/etc/nginx/certs/cert.pem:ro
       - ${VOCANOVA_PRODUCTION_ROOT:-/opt/vocanova/production}/secrets/nginx/key.pem:/etc/nginx/certs/key.pem:ro
     healthcheck:
-      test: ["CMD-SHELL", "wget --quiet --tries=1 -O /dev/null http://127.0.0.1/ || exit 1"]
+      # Default-server /healthz probe (VOC-066); bare / returns 444.
+      test: ["CMD-SHELL", "wget --quiet --tries=1 -O /dev/null http://127.0.0.1/healthz || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
