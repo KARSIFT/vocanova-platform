@@ -20,6 +20,8 @@ import (
 
 	"github.com/KARSIFT/vocanova-platform/apps/api/business/aifeedback"
 	"github.com/KARSIFT/vocanova-platform/apps/api/business/auth"
+	"github.com/KARSIFT/vocanova-platform/apps/api/business/gamification"
+	"github.com/KARSIFT/vocanova-platform/apps/api/business/missions"
 	"github.com/KARSIFT/vocanova-platform/apps/api/foundation/clock"
 	"github.com/KARSIFT/vocanova-platform/apps/api/foundation/email"
 )
@@ -1244,4 +1246,46 @@ func TestNewProductionAPI_BuildsWithRealOpenCodeSafetyClassifier(t *testing.T) {
 	require.True(t, ok, "NewProductionAPI's helper must produce a real *aifeedback.CompositeSafetyClassifier when fully configured")
 	_, ok = csc.Provider().(*aifeedback.OpenCodeModerationProvider)
 	require.True(t, ok, "NewProductionAPI's helper must wrap a real *aifeedback.OpenCodeModerationProvider, not MockProvider or nil, when fully configured")
+}
+
+// ---------------------------------------------------------------------------
+// VOC-065-T01 regression: the live composition root must wire gamification
+// and missions into the reviews PostgreSQL repository so SubmitReview
+// increments daily_mission_snapshots.reviews_completed. See
+// specs/changes/VOC-065-real-backend-write-path-bug-reviews-completed/t00-evidence.md.
+// ---------------------------------------------------------------------------
+
+// TestProductionReviewsRepositoryWiresP4Dependencies asserts the extracted
+// production construction helper wires both P4 dependencies. A nil
+// gamification or missions service skips applyP4ReviewWiring entirely while
+// P2 review_attempts / user_words writes still succeed — the exact defect
+// from issue #482 / run 31429774964.
+func TestProductionReviewsRepositoryWiresP4Dependencies(t *testing.T) {
+	db, _, err := sqlmock.New()
+	require.NoError(t, err)
+	defer db.Close()
+
+	clk := clock.Real{}
+	gamSvc := gamification.NewService(gamification.NewRepository(db))
+	missionsSvc := missions.NewService(missions.NewRepository(db), gamSvc)
+
+	repo := newProductionReviewsRepository(db, clk, gamSvc, missionsSvc)
+	require.True(t, repo.HasP4Wiring(),
+		"production reviews repository must wire gamification and missions for P4 review writes")
+}
+
+// TestProductionGo_NewProductionAPIConstructsP4WiredReviewsRepository is the
+// composition-root guard: NewProductionAPI must call
+// newProductionReviewsRepository (not bare reviews.NewPostgreSQLRepository
+// without P4 options). This catches a regression where a future edit
+// reconstructs the reviews repository before gamSvc/missionsSvc exist or
+// omits the With* options again.
+func TestProductionGo_NewProductionAPIConstructsP4WiredReviewsRepository(t *testing.T) {
+	source, err := os.ReadFile("production.go")
+	require.NoError(t, err)
+	src := string(source)
+	assert.Contains(t, src, "newProductionReviewsRepository(db, clk, gamSvc, missionsSvc)",
+		"NewProductionAPI must build the reviews repository via newProductionReviewsRepository")
+	assert.NotContains(t, src, "reviews.NewPostgreSQLRepository(db, clk)\n",
+		"production.go must not construct the reviews repository without P4 wiring options")
 }
