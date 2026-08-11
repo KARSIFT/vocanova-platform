@@ -111,10 +111,13 @@ Update `.github/workflows/deploy-staging.yml` and
 - Acceptance criteria: `VOC-067-AC-05`
 - Tests: `VOC-067-TEST-05`
 - Evidence: `VOC-067-EV-04`
-- Status: pending — depends on T02/T03; should not land before origin `:443`
-  actually serves production (cutover order in
-  [`t00-edge-architecture-decision-record.md`](t00-edge-architecture-decision-record.md);
-  coordinate with T05)
+- Status: pending — depends on T02/T03/T05, in that order (corrected
+  2026-08-11 after a premature attempt at this task was dispatched and
+  correctly FAILed independent review for landing ahead of T05 — see PR #525,
+  closed unmerged). Must not land before T05's `VOC-067-EV-05` confirms the
+  shared edge is live on origin `:443` and the Cloudflare remap is removed
+  (cutover order in
+  [`t00-edge-architecture-decision-record.md`](t00-edge-architecture-decision-record.md)).
 
 Remove `:8443` from production client-facing and deploy-emitted URLs that
 exist only because of the dual-nginx port split, including at least:
@@ -135,7 +138,9 @@ otherwise follow stale runbooks.
 - Acceptance criteria: `VOC-067-AC-06`
 - Tests: `VOC-067-TEST-06`
 - Evidence: `VOC-067-EV-05`
-- Status: pending — depends on T02–T04; cutover order and Cloudflare API
+- Status: pending — depends on T02/T03 (corrected 2026-08-11: T05 does NOT
+  depend on T04 — T04 depends on T05, not the reverse; see T04's status
+  line above). Cutover order and Cloudflare API
   operator recorded in
   [`t00-edge-architecture-decision-record.md`](t00-edge-architecture-decision-record.md)
 
