@@ -4,7 +4,7 @@ slug: both-nginx-containers-staging-and-production
 title: Both nginx Containers (Staging and Production) Report Unhealthy Permanently
   Because Docker HEALTHCHECK Targets the Wrong Vhost
 type: fix
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: "Not yet computed by running scripts/governance/classify-change-risk.sh\
   \ against a real task-scoped file list. This package proposes R3 for the change\
@@ -15,7 +15,7 @@ planned_implementation_risk_floor: "Not yet computed by running scripts/governan
   \ names \"production infrastructure\" explicitly as an R3-floor category regardless\
   \ of diff size. The semantic consequence is restoring a truthful Docker health signal\
   \ for both staging and production nginx without weakening the intentional 444 catch-all\
-  \ hardening for unrecognized Host headers \u2014 still an R3-protected infrastructure\
+  \ hardening for unrecognized Host headers — still an R3-protected infrastructure\
   \ change, not a higher class (no schema, secrets, auth logic, or governance authority\
   \ change). This is a draft proposal for the reviewing human at adoption time, not\
   \ a determination.\n"
@@ -32,13 +32,20 @@ requirement_source: "GitHub issue #484 (\"Both nginx containers (staging and pro
   \ the identical HEALTHCHECK in infra/docker-compose.yml and infra/docker-compose.production.yml\
   \ (wget to http://127.0.0.1/ with no Host header), and the root cause that 05-default.conf\
   \ (and its production counterpart) deliberately return 444 for unrecognized Host\
-  \ \u2014 so the probe can never pass by construction. The issue requires the fix\
+  \ — so the probe can never pass by construction. The issue requires the fix\
   \ land in both compose files in the same change and offers two non-prescriptive\
   \ directions (Host-qualified wget, or a dedicated /healthz on the catch-all). A\
   \ companion issue about unifying the two nginx containers is referenced but is independent\
   \ and out of this package's scope.\n"
-requirement_approval_status: Not approved. This package is a draft for founder/steward
-  review at adoption time. An issue alone is not implementation authority (AGENTS.md).
+requirement_approval_status: Approved. Founder-delegate (acting under the standing
+  founder-gate delegation for vocanova-platform-sandbox) adopted this draft package
+  on 2026-08-11. R3 classification accepted as proposed. VOC-066-DEP-01 resolved:
+  the recommended default approach is authorized (a dedicated /healthz-style location
+  on the default catch-all vhost, preserving the intentional 444 for every other
+  unrecognized Host). VOC-066-DEP-02 resolved: no interim manual recreate is required;
+  the next normal deploy-staging.yml/deploy-production.yml recreate picking up the
+  fixed HEALTHCHECK is acceptable. VOC-066-DEP-03 confirmed out of scope (nginx
+  consolidation is tracked separately as VOC-067).
 base_branch: develop
 base_sha: null
 target_branch: develop
@@ -48,8 +55,8 @@ owners:
   package_preparation: planner (drafting only; adoption remains a human decision)
   implementation: unassigned
   independent_verification: unassigned
-approval_status: not-approved
-implementation_authorized: false
+approval_status: adopted
+implementation_authorized: true
 automatic_merge_allowed: false
 production_impact: unknown until adopted and implemented. The intended production
   effect is limited to making vocanova-production-nginx's Docker health status truthful
@@ -71,17 +78,17 @@ artifacts:
 dependencies:
 - id: VOC-066-DEP-00
   status: "unresolved at drafting time. Depends on issue #484's reported reproduction\
-    \ remaining accurate at implementation time \u2014 both nginx containers still\
+    \ remaining accurate at implementation time — both nginx containers still\
     \ unhealthy for the same 444-on-bare-Host reason, with the same HEALTHCHECK strings\
     \ in both compose files. If a later comment reports a different or additional\
     \ cause, VOC-066-T00 must be re-scoped before implementation.\n"
 - id: VOC-066-DEP-01
-  status: "unresolved at drafting time. Approach choice for the healthcheck fix \u2014\
+  status: "unresolved at drafting time. Approach choice for the healthcheck fix —\
     \ recommended default is a dedicated /healthz (or equivalent) location on the\
     \ default catch-all vhost that returns 200 while preserving 444 for all other\
     \ unrecognized-Host traffic; alternative is a Host-qualified wget against a real\
     \ vhost. Adoption must record which approach is authorized. See specification.md\
-    \ open question 1; Host-header approach carries a documented port-80 \u2192 301\
+    \ open question 1; Host-header approach carries a documented port-80 → 301\
     \ HTTPS redirect hazard.\n"
 - id: VOC-066-DEP-02
   status: 'unresolved at drafting time. Whether the currently-running staging and/or
@@ -106,7 +113,7 @@ affected_areas:
 - infra/nginx-production/conf.d/05-default.conf
 - specs/changes/VOC-066-both-nginx-containers-staging-and-production
 implementation:
-  authorized: false
+  authorized: true
   required: true
   status: proposed
   target_branch: develop
@@ -120,18 +127,18 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 491
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/491
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'Draft only. Blocking for adoption: (1) human adoption/authorization
-  of this package; (2) VOC-066-DEP-01 approach choice; (3) VOC-066-DEP-02 recreate-timing
-  decision. Path-classifier floor for each task''s real file list must still be confirmed
-  at implementation time and must not be declared below the detected floor.
+blocking_reasons: 'None - adopted 2026-08-11 (PR #491). R3 classification, DEP-01
+  approach choice, and DEP-02 recreate-timing accepted as proposed. Path-classifier
+  floor for each task''s real file list must still be confirmed at implementation
+  time and must not be declared below the detected floor.
 
   '
