@@ -660,13 +660,13 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 	learningRepo := learning.NewPostgreSQLRepository(db)
 	learningSvc := learning.NewService(learningRepo, learningIdem, clk)
 
-	reviewsRepo := reviews.NewPostgreSQLRepository(db, clk)
-	reviewsSvc := reviews.NewService(reviewsRepo, learningIdem, clk)
-
 	gamRepo := gamification.NewRepository(db)
 	gamSvc := gamification.NewService(gamRepo)
 	missionsRepo := missions.NewRepository(db)
 	missionsSvc := missions.NewService(missionsRepo, gamSvc)
+
+	reviewsRepo := newProductionReviewsRepository(db, clk, gamSvc, missionsSvc)
+	reviewsSvc := reviews.NewService(reviewsRepo, learningIdem, clk)
 
 	accountsRepo := accounts.NewPostgreSQLRepository(db)
 	accountsIdem := accountsIdempotencyAdapter{store: learningIdem}
@@ -751,6 +751,17 @@ func NewProductionAPI(cfg ProductionConfig, db *sql.DB) (huma.API, *sql.DB, erro
 	RegisterSyntheticSmokeTestSessionMint(api, authSvc, cfg.SmokeTestMintToken)
 
 	return api, db, nil
+}
+
+// newProductionReviewsRepository is the sole construction path for the live
+// reviews PostgreSQL repository. It wires P4 gamification and missions
+// dependencies so SubmitReview increments daily_mission_snapshots.reviews_completed.
+// NewProductionAPI is the only caller; production_test.go asserts this wiring.
+func newProductionReviewsRepository(db *sql.DB, clk clock.Clock, gamSvc *gamification.Service, missionsSvc *missions.Service) *reviews.PostgreSQLRepository {
+	return reviews.NewPostgreSQLRepository(db, clk,
+		reviews.WithGamificationService(gamSvc),
+		reviews.WithMissionsService(missionsSvc),
+	)
 }
 
 // RegisterHealthz installs the unauthenticated GET /healthz probe.
