@@ -1,17 +1,17 @@
 schema_version: 1
 id: VOC-067
 slug: production-outage-root-cause-consider-unifying
-title: "Production Outage Root Cause \u2014 Unify Staging/Production nginx Into One\
+title: "Production Outage Root Cause — Unify Staging/Production nginx Into One\
   \ Shared-but-Isolated Edge on :80/:443"
 type: infrastructure
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: "Not yet computed by running scripts/governance/classify-change-risk.sh\
   \ against a real task-scoped file list. Path floor for expected areas is R3: infra/*\
   \ and .github/workflows/* are R3 in scripts/governance/classify-change-risk.sh and\
   \ docs/governance/protected-areas.md (production infrastructure; deployment and\
-  \ rollback). This package proposes R4 for the change as a whole \u2014 a draft proposal\
-  \ for the reviewing human at adoption time, not a determination \u2014 because the\
+  \ rollback). This package proposes R4 for the change as a whole — a draft proposal\
+  \ for the reviewing human at adoption time, not a determination — because the\
   \ primary scope revises the accepted VOC-037-D00 production-hosting isolation shape\
   \ (separate nginx process and separate host ports for production) into a shared\
   \ edge process with Host-based routing, which is a consequential production-architecture\
@@ -29,7 +29,7 @@ requirement_source: "GitHub issue #485 (\"Production outage root cause: consider
   \ Host: header returned 200 from both on-box and external networks. Root cause:\
   \ production nginx publishes 8081:80 / 8443:443 because staging nginx already owns\
   \ host 80/443 on the shared 2 vCPU / 4 GB host (VOC-037-D00 Option A-modified);\
-  \ production public hostnames depend on a Cloudflare-side :443 \u2192 origin :8443\
+  \ production public hostnames depend on a Cloudflare-side :443 → origin :8443\
   \ remap, and that remap is what broke. Issue proposes replacing two independent\
   \ nginx containers + Cloudflare port-remap with one shared nginx on standard 80/443\
   \ doing Host-based (SNI/server_name) routing to each tier's upstreams while preserving\
@@ -37,9 +37,24 @@ requirement_source: "GitHub issue #485 (\"Production outage root cause: consider
   \ compose project, and directory trees. Issue also notes both nginx containers'\
   \ Docker HEALTHCHECK are permanently broken (unrelated root cause, found in the\
   \ same investigation) and worth fixing regardless of which edge design is adopted. "
-requirement_approval_status: not-approved. Draft package only. Adoption, implementation
-  authorization, and any founder acceptance of a VOC-037-D00 supersession remain human
-  decisions.
+requirement_approval_status: "Approved by the founder (m-e-h-r-d-a-a-d), 2026-08-11.\
+  \ R4 classification accepted as proposed — this is a founder decision, not\
+  \ a delegate one, matching active-A-003. Each open dependency resolved directly\
+  \ by the founder: VOC-067-DEP-00 — shared nginx is the chosen direction (removes\
+  \ the Cloudflare port-remap failure class that caused the 2026-08-11 outage); T02–\
+  \ T05 proceed as scoped, dual-nginx-hardening is not pursued. VOC-067-DEP-01 —\
+  \ this package's proposed lifecycle defaults (dedicated shared-edge compose; deploys\
+  \ limited to nginx -t + reload; recreate rare/gated) are accepted as proposed.\
+  \ VOC-067-DEP-02 — the founder explicitly accepts this package superseding\
+  \ VOC-037-D00/D01's \"separate nginx process per tier\" isolation clause, on the\
+  \ condition (unchanged from the original decision and from this package's own scope)\
+  \ that config, TLS certs, secrets, and deploy-user write access remain fully isolated\
+  \ per tier even though the nginx process itself is shared. VOC-067-DEP-03 —\
+  \ the founder chose repository-driven Cloudflare API execution (not a manual dashboard\
+  \ change) for the origin-port-remap removal, in the proposed order: shared edge\
+  \ live and health-checked on origin :443 first, then remove the remap via the Cloudflare\
+  \ API, then the T04 port-normalization deploy, with an explicit rollback that restores\
+  \ the remap if edge checks fail."
 base_branch: develop
 base_sha: null
 target_branch: develop
@@ -49,12 +64,12 @@ owners:
   package_preparation: planner (drafting only; adoption remains a human decision)
   implementation: unassigned
   independent_verification: unassigned
-approval_status: not-approved
-implementation_authorized: false
+approval_status: adopted
+implementation_authorized: true
 automatic_merge_allowed: false
 production_impact: "expected. Shared-edge cutover changes how production and staging\
   \ reach the public internet; a failed cutover or bad reload can take both tiers\
-  \ offline on this shared host. Removing the Cloudflare :443\u2192:8443 remap and\
+  \ offline on this shared host. Removing the Cloudflare :443→:8443 remap and\
   \ the repository's :8443 port-qualification workarounds (VOC-041, VOC-042 and related)\
   \ is part of the intended end state if shared nginx is adopted. Exact blast radius\
   \ depends on VOC-067-DEP-00 / DEP-01 resolution at adoption. "
@@ -74,7 +89,7 @@ dependencies:
     \ all, versus keeping dual nginx and hardening the Cloudflare origin-port override\
     \ instead. Issue #485 proposes shared nginx as the preferred direction but explicitly\
     \ marks it as a design decision for planning, not an implementation mandate. Adoption\
-    \ must record which path is authorized; T02\u2013T05 assume shared nginx and are\
+    \ must record which path is authorized; T02–T05 assume shared nginx and are\
     \ cancelled/superseded if dual-nginx-hardening is chosen instead (T01 HEALTHCHECK\
     \ fix remains valuable either way).\n"
 - id: VOC-067-DEP-01
@@ -84,7 +99,7 @@ dependencies:
     \ tier down. Issue #485 names this as the real tradeoff that needs an explicit\
     \ answer. This package proposes concrete defaults in specification.md (dedicated\
     \ shared-edge compose; deploys only nginx -t + reload; recreate is rare/gated)\
-    \ for the reviewing human to accept, amend, or reject \u2014 not as a silent implementer\
+    \ for the reviewing human to accept, amend, or reject — not as a silent implementer\
     \ choice.\n"
 - id: VOC-067-DEP-02
   status: 'unresolved at drafting time. Explicit founder acceptance that sharing the
@@ -99,12 +114,12 @@ dependencies:
     \ production.vocanova.site / api-production.vocanova.site is an out-of-repo edge\
     \ configuration change. Exact operator steps, who executes them, and the ordered\
     \ cutover relative to repository deploys must be recorded in T00's decision evidence\
-    \ and executed/verified in T05 \u2014 this package cannot itself edit Cloudflare.\n"
+    \ and executed/verified in T05 — this package cannot itself edit Cloudflare.\n"
 - id: VOC-067-DEP-04
   status: "resolved at drafting time by reading the live files. Both infra/docker-compose.yml\
     \ and infra/docker-compose.production.yml nginx HEALTHCHECKs probe `wget ... http://127.0.0.1/`\
     \ with no Host header; infra/nginx/conf.d/05-default.conf (and the production\
-    \ twin) listen as default_server and `return 444` for unmatched Host \u2014 so\
+    \ twin) listen as default_server and `return 444` for unmatched Host — so\
     \ the probe never sees a 2xx/3xx and the HEALTHCHECK is permanently unhealthy.\
     \ Confirmed independently during drafting, not merely assumed from issue #485.\n"
 affected_areas:
@@ -116,12 +131,12 @@ affected_areas:
 - .github/workflows/deploy-staging.yml
 - .github/workflows/deploy-production.yml
 - "docs/operations/ (only where they currently document :8443 / dual-nginx / Cloudflare\
-  \ origin-port remap \u2014 exact files chosen at implementation)"
+  \ origin-port remap — exact files chosen at implementation)"
 - specs/changes/VOC-067-production-outage-root-cause-consider-unifying
 - Cloudflare production hostname origin settings (ops evidence in T05; not a repository
   path)
 implementation:
-  authorized: false
+  authorized: true
   required: true
   status: proposed
   target_branch: develop
@@ -135,21 +150,19 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 493
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/493
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
 autonomous_production_release: disabled
 ehr: not-triggered
 standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
-blocking_reasons: 'Not adopted. Requires founder/steward review of the proposed R4
-  classification and of VOC-067-DEP-00 (shared nginx vs dual-nginx harden), VOC-067-DEP-01
-  (lifecycle ownership defaults), VOC-067-DEP-02 (VOC-037-D00/D01 supersession acceptance),
-  and VOC-067-DEP-03 (Cloudflare cutover ownership). Confirmation that scripts/governance/classify-change-risk.sh''s
-  actual detected floor for each task''s real file list is not higher than proposed
-  (and that R4 founder authority is recorded if the shared-nginx path is chosen) remains
-  pending at adoption.
+blocking_reasons: 'None - adopted 2026-08-11 (PR #493) by direct founder decision
+  (R4). VOC-067-DEP-00 through DEP-03 resolved as recorded in requirement_approval_status
+  above. Confirmation that scripts/governance/classify-change-risk.sh''s actual detected
+  floor for each task''s real file list is not higher than proposed remains pending
+  for the implementer/independent verifier, not blocking adoption itself.
 
   '
