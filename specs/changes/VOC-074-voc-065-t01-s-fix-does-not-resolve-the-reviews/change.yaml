@@ -1,0 +1,134 @@
+schema_version: 1
+id: VOC-074
+slug: voc-065-t01-s-fix-does-not-resolve-the-reviews
+title: VOC-065-T01's Fix Does Not Resolve the reviews_completed Increment Bug
+type: bugfix
+status: draft
+risk: R3
+planned_implementation_risk_floor: "Measured during drafting by running scripts/governance/classify-change-risk.sh\
+  \ --files-from against the expected task-scoped file list (apps/api/app/api/production.go,\
+  \ apps/api/business/reviews/postgres.go, apps/api/business/missions/repository.go,\
+  \ apps/web/tests/staging-e2e/core-loop.staging.spec.ts): the detected path floor\
+  \ is R1. This package proposes R3 for the change as a whole (not R1) because the\
+  \ symptom is a core-loop product correctness failure \u2014 daily_mission_snapshots.reviews_completed\
+  \ still does not advance after real review submissions on staging despite VOC-065-T01's\
+  \ wiring fix landing \u2014 plus the staging gate currently allows a vacuous E2E\
+  \ pass that masks the defect. If T00 confirms a cause that forces a migration under\
+  \ apps/api/migrations/, the path floor itself rises to R3 and must be re-declared.\
+  \ This is a draft proposal for the reviewing human at adoption time, not a determination.\n"
+canonical_path: specs/changes/VOC-074-voc-065-t01-s-fix-does-not-resolve-the-reviews
+authority_model: a003-active
+requirement_source: "GitHub issue #539 (\"VOC-065-T01's fix does not resolve the reviews_completed\
+  \ increment bug - counter still stuck at 0 despite passing E2E suite\"), opened\
+  \ 2026-08-12. VOC-065-T01 (merged via PR #523) wired WithGamificationService/WithMissionsService\
+  \ into newProductionReviewsRepository in apps/api/app/api/production.go, intended\
+  \ to fix issue #482. Post-merge staging runs 31575459316 (~07:47 UTC) and 31583230574\
+  \ (~09:31 UTC) both report core-loop Playwright 1 passed, but the VOC-050-T02 diagnostic\
+  \ dump in deploy-staging.yml shows today's daily_mission_snapshots.reviews_completed\
+  \ stuck at 0 with updated_at=2026-08-12 07:50:56 unchanged across ~1h43m \u2014\
+  \ authoritative evidence the counter is not incrementing. Step 7 passes vacuously\
+  \ when reviewedCards=0 (reviewedAfter >= reviewedBefore + 0). VOC-065-T02 independent\
+  \ review (PR #529) correctly returned VERDICT: FAIL. Issue #539 lists investigation\
+  \ starting points: re-trace SubmitReview \u2192 applyP4ReviewWiring \u2192 IncrementReviewsCompleted\
+  \ at runtime; check IncrementReviewsCompleted SQL touching updated_at without incrementing;\
+  \ confirm whether the synthetic queue was non-empty during the runs.\n"
+requirement_approval_status: not-approved
+base_branch: develop
+base_sha: null
+target_branch: develop
+approved_candidate_sha: null
+owners:
+  decision: unassigned
+  package_preparation: planner (drafting only; adoption remains a human decision)
+  implementation: unassigned
+  independent_verification: unassigned
+approval_status: not-approved
+implementation_authorized: false
+automatic_merge_allowed: true
+production_impact: 'likely yes. If T00 confirms a real increment-path defect (not
+  only queue exhaustion), fixing it changes production user-visible daily-mission
+  progress for all users going forward. E2E hardening (T02) affects staging CI signal
+  only until the fix lands. No schema migration anticipated by default; historical
+  under-counts remain an open adoption question (VOC-074-DEP-01).
+
+  '
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+- id: VOC-074-DEP-00
+  status: "unresolved at drafting time. Which exact cause prevents IncrementReviewsCompleted\
+    \ from committing after VOC-065-T01's wiring fix is not settled \u2014 T00 must\
+    \ confirm with direct evidence. Drafting-time candidates (see specification.md):\
+    \ (1) runtime P4 guard still false or applyP4ReviewWiring error-swallowed path;\
+    \ (2) IncrementReviewsCompleted SQL or EnsureTodaySnapshot touching updated_at\
+    \ without incrementing reviews_completed; (3) (user_id, local_date) write-key\
+    \ mismatch between write and read/diagnostic dump; (4) synthetic-account queue\
+    \ exhaustion making reviewedCards=0 (test limitation, not the original bug). The\
+    \ diagnostic dump alone cannot distinguish (1)\u2013(3) from (4) without also\
+    \ capturing reviewedCards from a run with a guaranteed-non-empty queue.\n"
+- id: VOC-074-DEP-01
+  status: "unresolved at drafting time. Whether historical daily_mission_snapshots\
+    \ rows should be backfilled after the forward fix lands is an adopting-human decision.\
+    \ Default proposed scope is forward-fix only \u2014 no corrective migration \u2014\
+    \ unless adoption explicitly expands it. See specification.md open question 2.\n"
+- id: VOC-074-DEP-02
+  status: 'unresolved at drafting time. VOC-065-T02 (PR #529) must not be merged or
+    recorded as satisfying VOC-065-AC-03 until this package''s T03 evidence closes
+    the residual gap. Adoption should note whether VOC-065-T02 is superseded by VOC-074-T03
+    or remains open pending this package.
+
+    '
+- id: VOC-074-DEP-03
+  status: 'unresolved at drafting time. If T00 confirms queue exhaustion as the primary
+    reason reviewedCards=0 on repeat same-day runs, should this package add synthetic-account
+    queue reset/seeding before step 5 (e.g. in deploy-staging.yml or the E2E helper),
+    or track that as a separate follow-up? See specification.md open question 3.
+
+    '
+affected_areas:
+- "apps/api/business/reviews/postgres.go (SubmitReview \u2192 applyP4ReviewWiring;\
+  \ read-only unless T00 finds a defect)"
+- apps/api/business/missions/ (IncrementReviewsCompleted, EnsureTodaySnapshot; conditional
+  edit if T00 finds a defect there)
+- apps/api/app/api/production.go (read-only unless T00 finds wiring still incomplete
+  at runtime)
+- apps/web/tests/staging-e2e/core-loop.staging.spec.ts (T02 E2E hardening; T03 verification
+  target)
+- ".github/workflows/deploy-staging.yml (conditional \u2014 only if T00/T02 require\
+  \ queue reset or diagnostic enrichment; read-only by default)"
+- apps/api/migrations/ (out of default scope; only if VOC-074-DEP-01 expands to a
+  corrective backfill)
+- specs/changes/VOC-074-voc-065-t01-s-fix-does-not-resolve-the-reviews
+implementation:
+  authorized: false
+  required: true
+  status: not-started
+  target_branch: develop
+  pull_request: null
+  authority_issue: null
+release:
+  required: true
+  mode: not-authorized-by-this-package
+  production_impact: likely-if-real-increment-defect-confirmed
+  deployment: not-authorized-by-this-package
+  automatic_merge: false
+  migration_required: false-by-default-see-VOC-074-DEP-01
+  rollback_required: true
+repository_adoption_status: not-adopted
+adoption_pr: null
+adoption_evidence: null
+implementation_authority_before_adoption: false
+implementation_authority_status: not-exercised
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
+blocking_reasons: Package is draft; not adopted; implementation not authorized.
