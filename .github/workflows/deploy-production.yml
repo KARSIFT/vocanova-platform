@@ -7,7 +7,11 @@ name: deploy-production
 # does not recreate the shared-edge container; staging owns rare bring-up
 # (deploy-staging.yml). Reload is docker-exec only — no cross-tier filesystem
 # writes. The temporary vocanova-production-nginx cutover bridge (:8443 until
-# T05) receives the same nginx -t + reload treatment after compose up.
+# Cloudflare --verify-only confirms remap absence — VOC-067-T05 / AC-06)
+# receives the same nginx -t + reload treatment after compose up. Do not
+# retire that service, and do not switch the :8443 readiness polls below,
+# until t05-live-cutover-evidence.md records cloudflare_remap_api_status:
+# absent. T04 then removes remaining :8443 URL qualifications.
 #
 # Auto-deploys on every push to main (2026-08-08, founder's explicit, twice-
 # confirmed request - see AGENTS.md's "Release and deployment authority"
@@ -44,6 +48,16 @@ on:
         required: false
         type: string
         default: ""
+      voc067_cloudflare_origin_cutover:
+        description: "VOC-067-T05 Cloudflare origin-port remap (repository-driven API). skip = normal deploy. verify-only and restore run only the Cloudflare script (no image build/deploy). apply deploys first, then removes the remap after smoke. Keep skip on ordinary deploys. Do not apply until shared-edge origin :443 is proven. Do not retire the :8443 bridge until verify-only reports remap absent."
+        required: false
+        type: choice
+        options:
+          - skip
+          - verify-only
+          - apply
+          - restore
+        default: skip
 
 permissions:
   contents: read
@@ -54,8 +68,28 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  voc067-cloudflare-cutover:
+    name: VOC-067-T05 Cloudflare origin-port remap
+    if: github.event_name == 'workflow_dispatch' && (inputs.voc067_cloudflare_origin_cutover == 'verify-only' || inputs.voc067_cloudflare_origin_cutover == 'restore')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - name: Check out reviewed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      - name: Run Cloudflare origin-port remap action
+        env:
+          PRODUCTION_CLOUDFLARE_API_TOKEN: ${{ secrets.PRODUCTION_CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          mode="${{ inputs.voc067_cloudflare_origin_cutover }}"
+          infra/scripts/cloudflare-remove-production-origin-port-remap.sh "--${mode}"
+
   deploy:
     name: deploy to production
+    if: github.event_name != 'workflow_dispatch' || inputs.voc067_cloudflare_origin_cutover == 'skip' || inputs.voc067_cloudflare_origin_cutover == 'apply' || inputs.voc067_cloudflare_origin_cutover == ''
     runs-on: ubuntu-latest
     timeout-minutes: 30
     environment: production
@@ -528,6 +562,9 @@ jobs:
 
             # VOC-067-T03: reload production cutover bridge nginx (volume-mounted
             # conf from this tree only). Fail closed on nginx -t; no recreate.
+            # Keep this block until Cloudflare --verify-only confirms remap
+            # absence (VOC-067-AC-06); retiring the container first recreates
+            # issue #485 if the remap still targets origin :8443.
             if docker inspect vocanova-production-nginx >/dev/null 2>&1; then
               if ! docker exec vocanova-production-nginx nginx -t; then
                 echo "ERROR: production bridge nginx -t failed after conf update; deploy aborted without reload" >&2
@@ -584,12 +621,14 @@ jobs:
               echo "::warning::Production secrets-boundary rehearsal FAILED INS-11 only on the disclosed, founder-waived finding (ubuntu's independent blanket sudo — see t06-production-provisioning-evidence.md). Deploy continues; this is a known accepted risk, not a new regression."
             fi
 
-      # Port :8443 (not the default 443) during VOC-067 cutover: shared-edge
-      # owns host 80/443 (VOC-067-T02), while production keeps a temporary
-      # nginx bridge on 8081/8443 until T05 removes the Cloudflare
-      # :443 → origin :8443 remap (T00 ordered cutover). These polls still
-      # target :8443 so they exercise the remap path Cloudflare still uses.
-      # After T05, switch these checks to ordinary :443 (T04/T05).
+      # HARD GATE until VOC-067-T04, and only after T05 records
+      # cloudflare_remap_api_status: absent: these polls must stay on :8443
+      # while vocanova-production-nginx still publishes 8443. Shared-edge
+      # owns host 80/443 (VOC-067-T02); the bridge exists so a still-active
+      # Cloudflare :443 → origin :8443 remap (T00 ordered cutover) keeps
+      # working. Switching these to :443 here is T04 scope and would fail
+      # readiness if remap is gone but this job still probes the bridge, or
+      # the reverse. Do not change the port in this task.
       #
       # Cloudflare proxies 8443 to any proxied hostname without extra
       # configuration (it's one of Cloudflare's built-in alternate HTTPS
@@ -702,3 +741,15 @@ jobs:
           bash infra/scripts/smoke-test-production.sh \
             "https://${{ inputs.production_api_host || 'api-production.vocanova.site' }}:8443" \
             "https://${{ inputs.production_web_host || 'production.vocanova.site' }}:8443"
+
+      # T00 step 4: remove remap only after this revision's origin path is
+      # healthy (smoke above still uses :8443 / the bridge). Then prove
+      # ordinary :443. Does not retire vocanova-production-nginx.
+      - name: VOC-067-T05 Cloudflare origin-port remap (apply after healthy deploy)
+        if: github.event_name == 'workflow_dispatch' && inputs.voc067_cloudflare_origin_cutover == 'apply'
+        env:
+          PRODUCTION_CLOUDFLARE_API_TOKEN: ${{ secrets.PRODUCTION_CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          infra/scripts/cloudflare-remove-production-origin-port-remap.sh --apply
+          infra/scripts/verify-voc067-cutover.sh
