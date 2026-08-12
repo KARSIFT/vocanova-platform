@@ -148,12 +148,8 @@ test("VOC-066-TEST-03: nginx edge compose files probe /healthz, not bare /", () 
 
   const checkedPaths = [...new Set(checked.map((entry) => entry.relativePath))];
   assert.ok(
-    checkedPaths.includes("infra/docker-compose.production.yml"),
-    "production nginx HEALTHCHECK must remain guarded",
-  );
-  assert.ok(
     checkedPaths.includes("infra/docker-compose.shared-edge.yml"),
-    "shared-edge nginx HEALTHCHECK must remain guarded (staging public edge post-VOC-067)",
+    "shared-edge nginx HEALTHCHECK must remain guarded (sole public edge post-VOC-067-T05)",
   );
 });
 

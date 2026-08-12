@@ -346,12 +346,12 @@ together — production ~1.7 GB apps, staging ~1.3 GB apps + shared edge
 without lowering another oversubscribes the host. CPU values are per-service
 ceilings, so their sum may exceed 2 by design.
 
-| Service         | Production      | Staging         | Shared edge     |
-| --------------- | --------------- | --------------- | --------------- |
-| postgres        | 768m / 1.00 cpu | 512m / 0.75 cpu | —               |
-| api             | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
-| web             | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
-| nginx (shared)  | —               | —               | 320m / 0.50 cpu |
+| Service        | Production      | Staging         | Shared edge     |
+| -------------- | --------------- | --------------- | --------------- |
+| postgres       | 768m / 1.00 cpu | 512m / 0.75 cpu | —               |
+| api            | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
+| web            | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
+| nginx (shared) | —               | —               | 320m / 0.50 cpu |
 
 ### Verifying the boundary
 
