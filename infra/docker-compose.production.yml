@@ -26,11 +26,13 @@
 # lowering staging's oversubscribes the host.
 #
 # Public HTTPS end state (after VOC-067-T05): vocanova-shared-edge-nginx on
-# host 80/443 (infra/docker-compose.shared-edge.yml). Until T05 removes the
-# Cloudflare :443 → origin :8443 remap, this compose keeps a temporary
-# production nginx cutover bridge on host 8081/8443 so the still-active
-# remap continues to hit a healthy origin listener (VOC-067-T02 dual-publish;
-# T00 ordered cutover). T05 removes the remap and retires this bridge.
+# host 80/443 (infra/docker-compose.shared-edge.yml). Until Cloudflare
+# --verify-only confirms the :443 → origin :8443 remap is absent
+# (VOC-067-AC-06 / TEST-06; missing token is not a pass), this compose
+# keeps a temporary production nginx cutover bridge on host 8081/8443 so
+# a still-active remap continues to hit a healthy origin listener
+# (VOC-067-T02 dual-publish; T00 ordered cutover). Retiring this service
+# before that API confirm recreates issue #485.
 name: vocanova-production
 
 x-logging: &default-logging
@@ -125,9 +127,10 @@ services:
     logging: *default-logging
 
   # VOC-067-T02 temporary cutover bridge: publish 8081/8443 only while
-  # Cloudflare still remaps production hostnames to origin :8443 (T05).
-  # Primary public path is shared-edge on 80/443; do not treat this service
-  # as the steady-state edge. Cert paths match shared-edge production mounts
+  # Cloudflare still remaps production hostnames to origin :8443, or until
+  # T05 records cloudflare_remap_api_status: absent. Primary public path is
+  # shared-edge on 80/443; do not treat this service as the steady-state
+  # edge. Cert paths match shared-edge production mounts
   # (/etc/nginx/certs/production/) so the same conf.d tree loads in both.
   nginx:
     image: nginx:1.27-alpine

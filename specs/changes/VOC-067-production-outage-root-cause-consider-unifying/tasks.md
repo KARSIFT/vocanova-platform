@@ -137,12 +137,13 @@ otherwise follow stale runbooks.
 - Requirement source: issue #485; `VOC-067-DEP-03`; `VOC-067-AC-06`
 - Acceptance criteria: `VOC-067-AC-06`
 - Tests: `VOC-067-TEST-06`
-- Evidence: `VOC-067-EV-05`
-- Status: pending — depends on T02/T03 (corrected 2026-08-11: T05 does NOT
-  depend on T04 — T04 depends on T05, not the reverse; see T04's status
-  line above). Cutover order and Cloudflare API
-  operator recorded in
-  [`t00-edge-architecture-decision-record.md`](t00-edge-architecture-decision-record.md)
+- Evidence: `VOC-067-EV-05` —
+  [`t05-live-cutover-evidence.md`](t05-live-cutover-evidence.md)
+- Status: **remediation (attempt 2)** — Cloudflare API cutover scripts +
+  fail-closed `--verify-only`; external `:443` checks pass; production
+  `:8443` bridge **kept** until `cloudflare_remap_api_status: absent`.
+  Live Cloudflare `--verify-only` with a production token is still required
+  for AC-06 (TEST-06: missing credentials is not a pass).
 
 No large new feature code expected. Produce evidence that:
 

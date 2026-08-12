@@ -30,6 +30,10 @@ infra/
 ├── docker-compose.production.yml   # VOC-037-T06 production app stack (isolated project)
 ├── docker-compose.shared-edge.yml  # VOC-067-T02 shared nginx on host 80/443
 ├── scripts/
+│   ├── cloudflare-remove-production-origin-port-remap.sh   # VOC-067-T05 Cloudflare API cutover
+│   ├── cloudflare-remove-production-origin-port-remap.selftest.sh
+│   ├── cloudflare_origin_port_remap.py                   # shared mutation (script + selftest)
+│   ├── verify-voc067-cutover.sh                          # VOC-067-T05 external :443 checks
 │   ├── rehearse-production-secrets-boundary.sh          # VOC-037 INS-9..INS-11 rehearsal
 │   └── rehearse-production-secrets-boundary.selftest.sh # disposable-mirror harness for the above
 ├── nginx/
@@ -279,27 +283,56 @@ load-bearing:
 
 ### Port mapping and Cloudflare origin routing
 
-**VOC-067-T02 (shared edge):** one nginx process (`vocanova-shared-edge-nginx`)
+**VOC-067-T02 / T05 (shared edge):** one nginx process (`vocanova-shared-edge-nginx`)
 binds host `80`/`443` and routes by `server_name` / SNI to each tier's
 upstream containers on `vocanova-net` and `vocanova-production-net`.
 
-**Cutover dual-publish (required until T05):** Cloudflare still remaps
-production hostnames to origin `:8443` until VOC-067-T05. T00's ordered
-cutover keeps that remap active while origin `:443` is proven. Therefore
-`vocanova-production-nginx` continues to publish host `8081`/`8443` as a
-temporary bridge so production traffic via the remap does not black-hole
-when the shared edge lands. Staging no longer has a per-tier nginx; its
-public path is shared-edge only. Steady state after T05 is ordinary
-`edge :443 → origin :443` for both tiers with the production bridge
-retired. Until T04/T05 complete, some deploy-emitted production URLs may
-still mention `:8443`; that is cutover port-qualification, not the target
-steady-state design.
+**Cutover (T05 in progress):** ordinary `edge :443 → origin :443` is the
+target for both tiers. Shared-edge already binds `80`/`443`. Production
+still publishes a temporary `vocanova-production-nginx` bridge on
+`8081`/`8443` until Cloudflare `--verify-only` confirms the origin-port
+remap to `:8443` is absent (`cloudflare_remap_api_status: absent` in
+`VOC-067-EV-05`). Missing API credentials is not a pass (TEST-06).
+Retiring the bridge before that confirm recreates issue #485.
+
+Until T04 lands, deploy-emitted production URLs still mention `:8443`;
+that is a **hard gate** (readiness polls and OAuth values stay on `:8443`
+while the bridge exists), not the target steady-state design.
+
+Cutover tooling (repository-driven, VOC-067-DEP-03):
+
+```bash
+# 1. Confirm external :443 health (no API token required; does not prove
+#    remap absence while the :8443 bridge may still be running)
+infra/scripts/verify-voc067-cutover.sh
+
+# 2. Verify Cloudflare origin rules (token required; TEST-06 fail-closed)
+PRODUCTION_CLOUDFLARE_API_TOKEN=… \
+  infra/scripts/cloudflare-remove-production-origin-port-remap.sh --verify-only
+
+# 3. Remove remap only after origin :443 is proven (founder/ops dispatch
+#    deploy-production.yml with voc067_cloudflare_origin_cutover=apply)
+PRODUCTION_CLOUDFLARE_API_TOKEN=… \
+  infra/scripts/cloudflare-remove-production-origin-port-remap.sh --apply
+
+# Rollback: restore remap to :8443 if edge checks fail after removal
+PRODUCTION_CLOUDFLARE_API_TOKEN=… \
+  infra/scripts/cloudflare-remove-production-origin-port-remap.sh --restore
+```
+
+Do **not** `docker stop/rm vocanova-production-nginx` until step 2 prints
+`OK: no origin rules remap production hosts to port 8443`.
+
+The same actions are available on `deploy-production.yml` via
+`workflow_dispatch` input `voc067_cloudflare_origin_cutover`
+(`verify-only` / `restore` do not build or deploy; `apply` deploys, then
+removes the remap after smoke). Ordinary `push` to `main` leaves this
+`skip`.
 
 Bring up order on the shared host:
 
 1. `docker compose -f docker-compose.yml up -d` (staging apps)
-2. `docker compose -f docker-compose.production.yml up -d` (production apps
-   plus temporary `:8443` bridge nginx)
+2. `docker compose -f docker-compose.production.yml up -d` (production apps)
 3. `docker compose -f docker-compose.shared-edge.yml up -d` (shared edge on
    `80`/`443` — `deploy-staging.yml` performs this controlled bring-up)
 
@@ -313,36 +346,32 @@ nginx or secrets tree. Each pipeline updates only its own conf/certs path,
 then signals the shared edge with `docker exec` against
 `vocanova-shared-edge-nginx`:
 
-| Pipeline            | Writes                                        | Shared-edge signal                                                                                             |
-| ------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `deploy-staging`    | `/opt/vocanova/infra/nginx/`, `nginx-shared/` | Routine: `nginx -t` + `nginx -s reload` when the container exists. Rare: T02 first-start bring-up when absent. |
-| `deploy-production` | `/opt/vocanova/production/nginx/`             | `nginx -t` + `nginx -s reload` when the container exists (skip if staging has not brought it up yet).          |
+| Pipeline            | Writes                                        | Shared-edge signal                                                                                                                                                                                                                                     |
+| ------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `deploy-staging`    | `/opt/vocanova/infra/nginx/`, `nginx-shared/` | Routine: `nginx -t` + `nginx -s reload` when the container exists. Rare: T02 first-start bring-up when absent.                                                                                                                                         |
+| `deploy-production` | `/opt/vocanova/production/nginx/`             | Shared-edge: `nginx -t` + `nginx -s reload` when the container exists (skip if staging has not brought it up yet). Cutover bridge: same `nginx -t` + reload against `vocanova-production-nginx` after compose up, until remap is API-confirmed absent. |
 
 Failed `nginx -t` **fails the deploy closed** without reload — the
 in-memory config (both tiers) stays on the previous generation. Neither
 pipeline may `compose down` or recreate the shared-edge container on a
 routine deploy.
 
-Production's temporary `vocanova-production-nginx` cutover bridge
-(`:8443` until T05) is reloaded the same way after
-`deploy-production` writes production conf; it is not the shared edge.
-
 ### Shared-host resource budget
 
 Both stacks share one 2 vCPU / 4 GB host, so their memory limits are budgeted
-together — production ~1.9 GB (including the temporary cutover nginx),
-staging ~1.3 GB apps + shared edge ~320 MB, leaving headroom for the host.
-Raising a limit in one compose file without lowering another oversubscribes
-the host. CPU values are per-service ceilings, so their sum may exceed 2 by
-design.
+together — production ~1.9 GB apps (including the temporary `:8443` nginx
+bridge at 192m), staging ~1.3 GB apps + shared edge
+~320 MB, leaving headroom for the host. Raising a limit in one compose file
+without lowering another oversubscribes the host. CPU values are per-service
+ceilings, so their sum may exceed 2 by design.
 
-| Service               | Production      | Staging         | Shared edge     |
-| --------------------- | --------------- | --------------- | --------------- |
-| postgres              | 768m / 1.00 cpu | 512m / 0.75 cpu | —               |
-| api                   | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
-| web                   | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
-| nginx (cutover :8443) | 192m / 0.50 cpu | —               | —               |
-| nginx (shared edge)   | —               | —               | 320m / 0.50 cpu |
+| Service        | Production      | Staging         | Shared edge     |
+| -------------- | --------------- | --------------- | --------------- |
+| postgres       | 768m / 1.00 cpu | 512m / 0.75 cpu | —               |
+| api            | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
+| web            | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
+| nginx (bridge) | 192m / 0.50 cpu | —               | —               |
+| nginx (shared) | —               | —               | 320m / 0.50 cpu |
 
 ### Verifying the boundary
 
