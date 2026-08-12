@@ -5,34 +5,37 @@ title: Cloudflare Zone-Scoped API Token for VOC-067-T05 Origin-Port Cutover
 type: infrastructure
 status: adopted
 risk: R3
-planned_implementation_risk_floor: 'Not yet computed by running scripts/governance/classify-change-risk.sh
-  against a real task-scoped file list. Expected in-scope paths include .github/workflows/deploy-production.yml
-  (R3 path floor), infra/scripts/* and infra/README.md (R3 via infra/*), and GitHub production-environment
-  secret configuration (production infrastructure — human ops, not a git path). This package proposes
-  R3 for the change as a whole because it wires production Cloudflare zone/Origin-Rules API access for
-  an already-adopted cutover path (VOC-067-DEP-03 / VOC-067-T05) without revisiting the shared-edge architecture
-  decision (R4, already founder-approved in VOC-067). It does not broaden application auth, schema, or
-  governance authority. This is a draft proposal for the reviewing human at adoption time, not a determination.
-
-  '
+planned_implementation_risk_floor: "Not yet computed by running scripts/governance/classify-change-risk.sh\
+  \ against a real task-scoped file list. Expected in-scope paths include .github/workflows/deploy-production.yml\
+  \ (R3 path floor), infra/scripts/* and infra/README.md (R3 via infra/*), and GitHub\
+  \ production-environment secret configuration (production infrastructure \u2014\
+  \ human ops, not a git path). This package proposes R3 for the change as a whole\
+  \ because it wires production Cloudflare zone/Origin-Rules API access for an already-adopted\
+  \ cutover path (VOC-067-DEP-03 / VOC-067-T05) without revisiting the shared-edge\
+  \ architecture decision (R4, already founder-approved in VOC-067). It does not broaden\
+  \ application auth, schema, or governance authority. This is a draft proposal for\
+  \ the reviewing human at adoption time, not a determination.\n"
 canonical_path: specs/changes/VOC-072-same-request-as-github-issue-535-voc-067-t05
 authority_model: a003-active
-requirement_source: 'GitHub issue #535 ("VOC-067-T05 Cloudflare cutover blocked because PRODUCTION_CLOUDFLARE_API_TOKEN
-  cannot read the vocanova.site zone"), opened after a failing deploy-production.yml voc067-cloudflare-cutover
-  job run. The existing PRODUCTION_CLOUDFLARE_API_TOKEN is scoped for Cloudflare Workers AI secret sync
-  (deploy-production.yml AI-provider injection using PRODUCTION_CLOUDFLARE_API_TOKEN and PRODUCTION_CLOUDFLARE_ACCOUNT_ID),
-  not Zone or Origin Rules management. Live cutover tooling (infra/scripts/cloudflare-remove-production-origin-port-remap.sh,
-  resolve_zone_id via GET /zones?name=vocanova.site) fails because the token returns an empty zone list
-  — interpreted as "zone not found" — blocking VOC-067-TEST-06 and leaving VOC-067-EV-05 cloudflare_remap_api_status
-  at unconfirmed. A human with Cloudflare dashboard access must create an API token with Zone:Read and
-  Origin Rules:Edit for the vocanova.site zone, store it as a GitHub production-environment secret (either
-  by safely broadening PRODUCTION_CLOUDFLARE_API_TOKEN or adding a dedicated secret), and wire deploy-production.yml''s
-  voc067-cloudflare-cutover job (and the apply-after-smoke step) to use the zone-capable credential.
-
-  '
-requirement_approval_status: Approved. Founder-delegate (acting under the standing founder-gate delegation
-  for vocanova-platform-sandbox, and the founder's explicit 2026-08-12 trip authorization for infra fix
-  work) adopted this draft package on 2026-08-12. R3 classification accepted as proposed.
+requirement_source: "GitHub issue #535 (\"VOC-067-T05 Cloudflare cutover blocked because\
+  \ PRODUCTION_CLOUDFLARE_API_TOKEN cannot read the vocanova.site zone\"), opened\
+  \ after a failing deploy-production.yml voc067-cloudflare-cutover job run. The existing\
+  \ PRODUCTION_CLOUDFLARE_API_TOKEN is scoped for Cloudflare Workers AI secret sync\
+  \ (deploy-production.yml AI-provider injection using PRODUCTION_CLOUDFLARE_API_TOKEN\
+  \ and PRODUCTION_CLOUDFLARE_ACCOUNT_ID), not Zone or Origin Rules management. Live\
+  \ cutover tooling (infra/scripts/cloudflare-remove-production-origin-port-remap.sh,\
+  \ resolve_zone_id via GET /zones?name=vocanova.site) fails because the token returns\
+  \ an empty zone list \u2014 interpreted as \"zone not found\" \u2014 blocking VOC-067-TEST-06\
+  \ and leaving VOC-067-EV-05 cloudflare_remap_api_status at unconfirmed. A human\
+  \ with Cloudflare dashboard access must create an API token with Zone:Read and Origin\
+  \ Rules:Edit for the vocanova.site zone, store it as a GitHub production-environment\
+  \ secret (either by safely broadening PRODUCTION_CLOUDFLARE_API_TOKEN or adding\
+  \ a dedicated secret), and wire deploy-production.yml's voc067-cloudflare-cutover\
+  \ job (and the apply-after-smoke step) to use the zone-capable credential.\n"
+requirement_approval_status: Approved. Founder-delegate (acting under the standing
+  founder-gate delegation for vocanova-platform-sandbox, and the founder's explicit
+  2026-08-12 trip authorization for infra fix work) adopted this draft package on
+  2026-08-12. R3 classification accepted as proposed.
 base_branch: develop
 base_sha: null
 target_branch: develop
@@ -45,10 +48,12 @@ owners:
 approval_status: adopted
 implementation_authorized: true
 automatic_merge_allowed: false
-production_impact: expected once verify-only/--apply run with the new token. This package does not itself
-  remove the Cloudflare :443→:8443 remap; it unblocks the repository-driven API path VOC-067 already authorized.
-  Mis-scoped or over-broad tokens increase blast radius; dedicated zone-scoped secret is the recommended
-  default (VOC-072-DEP-00). Until verify-only succeeds, VOC-067's :8443 bridge must remain (voc067-cutover-bridge-gate.test.mjs).
+production_impact: "expected once verify-only/--apply run with the new token. This\
+  \ package does not itself remove the Cloudflare :443\u2192:8443 remap; it unblocks\
+  \ the repository-driven API path VOC-067 already authorized. Mis-scoped or over-broad\
+  \ tokens increase blast radius; dedicated zone-scoped secret is the recommended\
+  \ default (VOC-072-DEP-00). Until verify-only succeeds, VOC-067's :8443 bridge must\
+  \ remain (voc067-cutover-bridge-gate.test.mjs)."
 rollback_required: true
 artifacts:
   readme: README.md
@@ -61,27 +66,31 @@ artifacts:
   release_plan: release-plan.md
 dependencies:
 - id: VOC-072-DEP-00
-  status: 'unresolved at drafting time. Whether to broaden PRODUCTION_CLOUDFLARE_API_TOKEN in place vs
-    add a dedicated production secret for zone/Origin-Rules cutover only (recommended: dedicated secret
-    so Workers AI sync keeps least privilege). See specification.md open question 1.
+  status: 'unresolved at drafting time. Whether to broaden PRODUCTION_CLOUDFLARE_API_TOKEN
+    in place vs add a dedicated production secret for zone/Origin-Rules cutover only
+    (recommended: dedicated secret so Workers AI sync keeps least privilege). See
+    specification.md open question 1.
 
     '
 - id: VOC-072-DEP-01
-  status: 'unresolved at drafting time. Exact dedicated secret name if DEP-00 chooses separation (draft
-    default: PRODUCTION_CLOUDFLARE_ZONE_ORIGIN_RULES_TOKEN). See specification.md open question 2.
+  status: 'unresolved at drafting time. Exact dedicated secret name if DEP-00 chooses
+    separation (draft default: PRODUCTION_CLOUDFLARE_ZONE_ORIGIN_RULES_TOKEN). See
+    specification.md open question 2.
 
     '
 - id: VOC-067
-  status: 'VOC-067-T05 repository tooling and deploy-production.yml cutover input already landed; AC-06
-    remap clause remains blocked pending zone-capable credentials (issue #535). This package does not
-    reopen VOC-067-DEP-00 shared-edge architecture.
+  status: 'VOC-067-T05 repository tooling and deploy-production.yml cutover input
+    already landed; AC-06 remap clause remains blocked pending zone-capable credentials
+    (issue #535). This package does not reopen VOC-067-DEP-00 shared-edge architecture.
 
     '
 affected_areas:
-- GitHub production environment secrets (human ops — Cloudflare dashboard + repository settings)
-- .github/workflows/deploy-production.yml (voc067-cloudflare-cutover job; apply-after-smoke step)
-- infra/scripts/cloudflare-remove-production-origin-port-remap.sh (env var documentation; optional clearer
-  zone-resolution errors)
+- "GitHub production environment secrets (human ops \u2014 Cloudflare dashboard +\
+  \ repository settings)"
+- .github/workflows/deploy-production.yml (voc067-cloudflare-cutover job; apply-after-smoke
+  step)
+- infra/scripts/cloudflare-remove-production-origin-port-remap.sh (env var documentation;
+  optional clearer zone-resolution errors)
 - infra/README.md (operator sequence for cutover credentials)
 implementation:
   authorized: true
@@ -99,8 +108,8 @@ release:
   migration_required: false
   rollback_required: true
 repository_adoption_status: adopted
-adoption_pr: 541
-adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/541
+adoption_pr: 537
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/537
 implementation_authority_before_adoption: false
 implementation_authority_status: not-exercised
 production_deployment: disabled
