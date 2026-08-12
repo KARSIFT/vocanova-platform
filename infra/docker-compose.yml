@@ -67,8 +67,9 @@
 #      its own `.gitignore` keeps out of git.
 #   2. Staging app services (postgres, api, web) publish no host ports —
 #      only the shared-edge nginx (infra/docker-compose.shared-edge.yml,
-#      VOC-067-T02) binds host 80/443 for this tier. (Production's temporary
-#      cutover bridge retired in VOC-067-T05.) Internal
+#      VOC-067-T02) binds host 80/443 for this tier. Production keeps a
+#      temporary :8443 cutover bridge until T05 records Cloudflare remap
+#      absence (do not retire it earlier — issue #485). Internal
 #      services stay on `vocanova-net` only (VOC-032-R03 mitigation): do not
 #      add a `ports:` block to postgres/api/web.
 #   3. The web image's NEXT_PUBLIC_API_BASE_URL is a build-time

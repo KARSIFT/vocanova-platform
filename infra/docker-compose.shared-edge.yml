@@ -22,8 +22,9 @@
 #
 # Cutover (T00 / T05):
 #   * This process binds host 80/443 (primary path for both tiers).
-#   * VOC-067-T05 removed the Cloudflare production origin-port remap and
-#     retired vocanova-production-nginx (the temporary :8443 bridge).
+#   * Production keeps vocanova-production-nginx on 8081/8443 until T05
+#     records cloudflare_remap_api_status: absent. Do not retire that
+#     bridge while remap may still target origin :8443 (issue #485).
 #
 # Host layout (shared host):
 #   /opt/vocanova/infra/docker-compose.shared-edge.yml  (SCPed with staging bundle)

@@ -21,14 +21,18 @@
 # Resource limits are the shared-host contention mitigation D00
 # required. The host is 2 vCPU / 4 GB and now runs both tiers, so
 # the two compose files' memory limits are budgeted together:
-# production caps at ~1.7 GB and staging at ~1.4 GB, leaving
+# production caps at ~1.9 GB and staging at ~1.4 GB, leaving
 # headroom for the host itself. Raising a limit here without
 # lowering staging's oversubscribes the host.
 #
-# Public HTTPS end state (VOC-067-T05): vocanova-shared-edge-nginx on host
-# 80/443 (infra/docker-compose.shared-edge.yml). The temporary production
-# nginx cutover bridge on 8081/8443 is retired in T05 once Cloudflare no
-# longer remaps production hostnames to origin :8443.
+# Public HTTPS end state (after VOC-067-T05): vocanova-shared-edge-nginx on
+# host 80/443 (infra/docker-compose.shared-edge.yml). Until Cloudflare
+# --verify-only confirms the :443 → origin :8443 remap is absent
+# (VOC-067-AC-06 / TEST-06; missing token is not a pass), this compose
+# keeps a temporary production nginx cutover bridge on host 8081/8443 so
+# a still-active remap continues to hit a healthy origin listener
+# (VOC-067-T02 dual-publish; T00 ordered cutover). Retiring this service
+# before that API confirm recreates issue #485.
 name: vocanova-production
 
 x-logging: &default-logging
@@ -118,6 +122,42 @@ services:
       start_period: 20s
     mem_limit: 512m
     cpus: 1.00
+    networks:
+      - vocanova-production-net
+    logging: *default-logging
+
+  # VOC-067-T02 temporary cutover bridge: publish 8081/8443 only while
+  # Cloudflare still remaps production hostnames to origin :8443, or until
+  # T05 records cloudflare_remap_api_status: absent. Primary public path is
+  # shared-edge on 80/443; do not treat this service as the steady-state
+  # edge. Cert paths match shared-edge production mounts
+  # (/etc/nginx/certs/production/) so the same conf.d tree loads in both.
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: vocanova-production-nginx
+    restart: unless-stopped
+    depends_on:
+      web:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+      - "8443:443"
+    volumes:
+      - ${VOCANOVA_PRODUCTION_ROOT:-/opt/vocanova/production}/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${VOCANOVA_PRODUCTION_ROOT:-/opt/vocanova/production}/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ${VOCANOVA_PRODUCTION_ROOT:-/opt/vocanova/production}/secrets/nginx/cert.pem:/etc/nginx/certs/production/cert.pem:ro
+      - ${VOCANOVA_PRODUCTION_ROOT:-/opt/vocanova/production}/secrets/nginx/key.pem:/etc/nginx/certs/production/key.pem:ro
+    healthcheck:
+      # Default-server /healthz probe (VOC-066); bare / returns 444.
+      test: ["CMD-SHELL", "wget --quiet --tries=1 -O /dev/null http://127.0.0.1/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    mem_limit: 192m
+    cpus: 0.50
     networks:
       - vocanova-production-net
     logging: *default-logging

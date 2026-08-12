@@ -7,12 +7,19 @@ set -euo pipefail
 # 8443, restoring ordinary edge :443 → origin :443. Supports verify-only
 # and rollback (restore port 8443) per T00.
 #
+# Live API (all modes, including --verify-only) requires a token. Missing
+# credentials is a TEST-06 failure, not a pass. Offline selftest uses
+# VOC067_OFFLINE_RULESET_FILE and does not call Cloudflare.
+#
 # Environment (accepts production-prefixed names from deploy-production.yml):
-#   CLOUDFLARE_API_TOKEN or PRODUCTION_CLOUDFLARE_API_TOKEN (required for --apply/--restore)
+#   CLOUDFLARE_API_TOKEN or PRODUCTION_CLOUDFLARE_API_TOKEN
+#     required for live --verify-only / --apply / --restore
 #   CLOUDFLARE_ZONE_NAME (default: vocanova.site)
 #   VOC067_PRODUCTION_WEB_HOST (default: production.vocanova.site)
 #   VOC067_PRODUCTION_API_HOST (default: api-production.vocanova.site)
 #   VOC067_ORIGIN_PORT (default: 8443 — the cutover bridge port to remove)
+#   VOC067_OFFLINE_RULESET_FILE — fixture JSON (Cloudflare GET shape); skips API
+#   VOC067_OFFLINE_OUTPUT — where --apply/--restore writes the updated ruleset
 #
 # Usage:
 #   cloudflare-remove-production-origin-port-remap.sh --verify-only
@@ -21,14 +28,17 @@ set -euo pipefail
 #
 # After --apply or when --verify-only reports no remap, run:
 #   infra/scripts/verify-voc067-cutover.sh
+# Do not retire vocanova-production-nginx until --verify-only exits 0.
 
 API_BASE="https://api.cloudflare.com/client/v4"
 ZONE_NAME="${CLOUDFLARE_ZONE_NAME:-vocanova.site}"
 WEB_HOST="${VOC067_PRODUCTION_WEB_HOST:-production.vocanova.site}"
 API_HOST="${VOC067_PRODUCTION_API_HOST:-api-production.vocanova.site}"
 ORIGIN_PORT="${VOC067_ORIGIN_PORT:-8443}"
+MUTATE_PY="$(cd "$(dirname "$0")" && pwd)/cloudflare_origin_port_remap.py"
 
 TOKEN="${CLOUDFLARE_API_TOKEN:-${PRODUCTION_CLOUDFLARE_API_TOKEN:-}}"
+OFFLINE_FILE="${VOC067_OFFLINE_RULESET_FILE:-}"
 
 mode=""
 case "${1:-}" in
@@ -41,8 +51,14 @@ case "${1:-}" in
     ;;
 esac
 
-if [ "$mode" != verify ] && [ -z "$TOKEN" ]; then
-  echo "ERROR: CLOUDFLARE_API_TOKEN (or PRODUCTION_CLOUDFLARE_API_TOKEN) is required for --apply/--restore" >&2
+if [ -z "$OFFLINE_FILE" ] && [ -z "$TOKEN" ]; then
+  echo "ERROR: CLOUDFLARE_API_TOKEN (or PRODUCTION_CLOUDFLARE_API_TOKEN) is required for --verify-only/--apply/--restore" >&2
+  echo "Missing Cloudflare credentials is a VOC-067-TEST-06 failure, not a pass." >&2
+  exit 1
+fi
+
+if [ -n "$OFFLINE_FILE" ] && [ ! -f "$OFFLINE_FILE" ]; then
+  echo "ERROR: VOC067_OFFLINE_RULESET_FILE not found: $OFFLINE_FILE" >&2
   exit 1
 fi
 
@@ -86,103 +102,79 @@ print(zones[0]["id"])
 
 mutate_ruleset_json() {
   local action="$1"
-  python3 - "$action" "$WEB_HOST" "$API_HOST" "$ORIGIN_PORT" <<'PY'
-import json
-import sys
-
-action, web_host, api_host, origin_port = sys.argv[1:5]
-origin_port = int(origin_port)
-ruleset = json.load(sys.stdin)
-rules = ruleset.get("result", {}).get("rules") or []
-
-def host_in_expression(expr: str, host: str) -> bool:
-    if not expr:
-        return False
-    return host in expr
-
-def rule_targets_production(rule) -> bool:
-    expr = rule.get("expression", "")
-    return host_in_expression(expr, web_host) or host_in_expression(expr, api_host)
-
-def rule_has_port(rule, port: int) -> bool:
-    origin = (rule.get("action_parameters") or {}).get("origin") or {}
-    return origin.get("port") == port
-
-if action == "verify":
-    port_rules = [r for r in rules if rule_targets_production(r) and rule_has_port(r, origin_port)]
-    if not port_rules:
-        print(f"OK: no origin rules remap production hosts to port {origin_port}")
-        sys.exit(0)
-    print(f"FOUND: {len(port_rules)} origin rule(s) still remap to port {origin_port}:", file=sys.stderr)
-    for r in port_rules:
-        print(
-            f"  - id={r.get('id')} ref={r.get('ref')} expr={r.get('expression')!r}",
-            file=sys.stderr,
-        )
-    sys.exit(2)
-
-updated = []
-changed = False
-for rule in rules:
-    if not rule_targets_production(rule):
-        updated.append(rule)
-        continue
-    params = dict(rule.get("action_parameters") or {})
-    origin = dict(params.get("origin") or {})
-    if action == "remove":
-        if origin.get("port") == origin_port:
-            origin.pop("port", None)
-            changed = True
-    elif action == "restore":
-        if origin.get("port") != origin_port:
-            origin["port"] = origin_port
-            changed = True
-    if origin:
-        params["origin"] = origin
-    else:
-        params.pop("origin", None)
-    new_rule = dict(rule)
-    if params:
-        new_rule["action_parameters"] = params
-    elif "action_parameters" in new_rule:
-        new_rule.pop("action_parameters")
-    updated.append(new_rule)
-
-if not changed:
-    print("NOOP")
-    sys.exit(0)
-
-print(json.dumps({"rules": updated}))
-PY
+  shift
+  python3 "$MUTATE_PY" "$action" "$WEB_HOST" "$API_HOST" "$ORIGIN_PORT" "$@"
 }
 
-ZONE_ID="$(resolve_zone_id)"
-ruleset_json="$(cf_api GET "/zones/${ZONE_ID}/rulesets/phases/http_request_origin/entrypoint")"
-RULESET_ID="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["id"])' <<<"$ruleset_json")"
+load_ruleset_json() {
+  if [ -n "$OFFLINE_FILE" ]; then
+    cat "$OFFLINE_FILE"
+    return
+  fi
+  ZONE_ID="$(resolve_zone_id)"
+  cf_api GET "/zones/${ZONE_ID}/rulesets/phases/http_request_origin/entrypoint"
+}
+
+write_offline_output() {
+  local body="$1"
+  if [ -n "${VOC067_OFFLINE_OUTPUT:-}" ]; then
+    printf '%s' "$body" > "$VOC067_OFFLINE_OUTPUT"
+  fi
+}
+
+ruleset_json="$(load_ruleset_json)"
+if [ -z "$OFFLINE_FILE" ]; then
+  RULESET_ID="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["result"]["id"])' <<<"$ruleset_json")"
+else
+  RULESET_ID="offline"
+fi
 
 case "$mode" in
   verify)
     printf '%s' "$ruleset_json" | mutate_ruleset_json verify
     ;;
   apply)
-    update_payload="$(printf '%s' "$ruleset_json" | mutate_ruleset_json remove || true)"
-    if [ -z "${update_payload:-}" ] || [ "$update_payload" = "NOOP" ]; then
-      echo "Remap already absent; nothing to apply."
+    if [ -n "$OFFLINE_FILE" ]; then
+      update_payload="$(printf '%s' "$ruleset_json" | mutate_ruleset_json remove --full-ruleset || true)"
+      if [ -z "${update_payload:-}" ] || [ "$update_payload" = "NOOP" ]; then
+        echo "Remap already absent; nothing to apply."
+        printf '%s' "$ruleset_json" | mutate_ruleset_json verify
+      else
+        echo "Applying origin-port remap removal to ruleset ${RULESET_ID} (offline)..."
+        write_offline_output "$update_payload"
+        printf '%s' "$update_payload" | mutate_ruleset_json verify
+      fi
     else
-      echo "Applying origin-port remap removal to ruleset ${RULESET_ID}..."
-      cf_api PUT "/zones/${ZONE_ID}/rulesets/${RULESET_ID}" "$update_payload" >/dev/null
-      echo "Cloudflare API update succeeded."
+      update_payload="$(printf '%s' "$ruleset_json" | mutate_ruleset_json remove || true)"
+      if [ -z "${update_payload:-}" ] || [ "$update_payload" = "NOOP" ]; then
+        echo "Remap already absent; nothing to apply."
+      else
+        echo "Applying origin-port remap removal to ruleset ${RULESET_ID}..."
+        cf_api PUT "/zones/${ZONE_ID}/rulesets/${RULESET_ID}" "$update_payload" >/dev/null
+        echo "Cloudflare API update succeeded."
+      fi
+      printf '%s' "$(cf_api GET "/zones/${ZONE_ID}/rulesets/phases/http_request_origin/entrypoint")" | mutate_ruleset_json verify
     fi
-    printf '%s' "$(cf_api GET "/zones/${ZONE_ID}/rulesets/phases/http_request_origin/entrypoint")" | mutate_ruleset_json verify
     ;;
   restore)
-    update_payload="$(printf '%s' "$ruleset_json" | mutate_ruleset_json restore || true)"
-    if [ -z "${update_payload:-}" ] || [ "$update_payload" = "NOOP" ]; then
-      echo "Remap already present; nothing to restore."
+    if [ -n "$OFFLINE_FILE" ]; then
+      update_payload="$(printf '%s' "$ruleset_json" | mutate_ruleset_json restore --full-ruleset || true)"
+      if [ -z "${update_payload:-}" ] || [ "$update_payload" = "NOOP" ]; then
+        echo "Remap already present; nothing to restore."
+      else
+        echo "Restoring origin-port remap to ${ORIGIN_PORT} on ruleset ${RULESET_ID} (offline)..."
+        write_offline_output "$update_payload"
+        echo "Rollback mutation succeeded (offline)."
+      fi
     else
-      echo "Restoring origin-port remap to ${ORIGIN_PORT} on ruleset ${RULESET_ID}..."
-      cf_api PUT "/zones/${ZONE_ID}/rulesets/${RULESET_ID}" "$update_payload" >/dev/null
-      echo "Rollback API update succeeded. Re-verify :8443 path before closing incident."
+      update_payload="$(printf '%s' "$ruleset_json" | mutate_ruleset_json restore || true)"
+      if [ -z "${update_payload:-}" ] || [ "$update_payload" = "NOOP" ]; then
+        echo "Remap already present; nothing to restore."
+      else
+        echo "Restoring origin-port remap to ${ORIGIN_PORT} on ruleset ${RULESET_ID}..."
+        cf_api PUT "/zones/${ZONE_ID}/rulesets/${RULESET_ID}" "$update_payload" >/dev/null
+        echo "Rollback API update succeeded. Re-verify :8443 path before closing incident."
+      fi
     fi
     ;;
 esac

@@ -139,10 +139,11 @@ otherwise follow stale runbooks.
 - Tests: `VOC-067-TEST-06`
 - Evidence: `VOC-067-EV-05` —
   [`t05-live-cutover-evidence.md`](t05-live-cutover-evidence.md)
-- Status: **complete** (2026-08-12) — Cloudflare API cutover scripts added;
-  external `:443` checks pass for all four hostnames; production cutover bridge
-  retired in repository; live Cloudflare `--verify-only` awaits production token
-  in independent verification
+- Status: **remediation (attempt 2)** — Cloudflare API cutover scripts +
+  fail-closed `--verify-only`; external `:443` checks pass; production
+  `:8443` bridge **kept** until `cloudflare_remap_api_status: absent`.
+  Live Cloudflare `--verify-only` with a production token is still required
+  for AC-06 (TEST-06: missing credentials is not a pass).
 
 No large new feature code expected. Produce evidence that:
 

@@ -9,7 +9,12 @@ set -euo pipefail
 #
 # Usage:
 #   verify-voc067-cutover.sh
-#   verify-voc067-cutover.sh --include-8443-bridge   # also probe legacy bridge
+#   verify-voc067-cutover.sh --include-8443-bridge   # also probe the cutover bridge
+#
+# External :443 success does not prove Cloudflare remap absence while the
+# :8443 bridge may still be running (pre-cutover remap → :8443 also yields
+# edge 200). Use cloudflare-remove-production-origin-port-remap.sh
+# --verify-only for AC-06.
 #
 # Requires: curl
 
@@ -49,7 +54,7 @@ run_check "production api healthz" "https://api-production.vocanova.site/healthz
 
 if [ "$include_bridge" = true ]; then
   echo ""
-  echo "Legacy :8443 bridge probes (optional; expected absent after bridge retirement)"
+  echo "Cutover-bridge :8443 probes (optional; expected while remap is unconfirmed)"
   run_check "production web :8443" "https://production.vocanova.site:8443/" || true
   run_check "production api :8443 healthz" "https://api-production.vocanova.site:8443/healthz" || true
 fi
