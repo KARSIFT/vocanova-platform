@@ -137,12 +137,12 @@ otherwise follow stale runbooks.
 - Requirement source: issue #485; `VOC-067-DEP-03`; `VOC-067-AC-06`
 - Acceptance criteria: `VOC-067-AC-06`
 - Tests: `VOC-067-TEST-06`
-- Evidence: `VOC-067-EV-05`
-- Status: pending — depends on T02/T03 (corrected 2026-08-11: T05 does NOT
-  depend on T04 — T04 depends on T05, not the reverse; see T04's status
-  line above). Cutover order and Cloudflare API
-  operator recorded in
-  [`t00-edge-architecture-decision-record.md`](t00-edge-architecture-decision-record.md)
+- Evidence: `VOC-067-EV-05` —
+  [`t05-live-cutover-evidence.md`](t05-live-cutover-evidence.md)
+- Status: **complete** (2026-08-12) — Cloudflare API cutover scripts added;
+  external `:443` checks pass for all four hostnames; production cutover bridge
+  retired in repository; live Cloudflare `--verify-only` awaits production token
+  in independent verification
 
 No large new feature code expected. Produce evidence that:
 

@@ -30,6 +30,9 @@ infra/
 ├── docker-compose.production.yml   # VOC-037-T06 production app stack (isolated project)
 ├── docker-compose.shared-edge.yml  # VOC-067-T02 shared nginx on host 80/443
 ├── scripts/
+│   ├── cloudflare-remove-production-origin-port-remap.sh   # VOC-067-T05 Cloudflare API cutover
+│   ├── cloudflare-remove-production-origin-port-remap.selftest.sh
+│   ├── verify-voc067-cutover.sh                          # VOC-067-T05 external :443 checks
 │   ├── rehearse-production-secrets-boundary.sh          # VOC-037 INS-9..INS-11 rehearsal
 │   └── rehearse-production-secrets-boundary.selftest.sh # disposable-mirror harness for the above
 ├── nginx/
@@ -279,27 +282,39 @@ load-bearing:
 
 ### Port mapping and Cloudflare origin routing
 
-**VOC-067-T02 (shared edge):** one nginx process (`vocanova-shared-edge-nginx`)
+**VOC-067-T02 / T05 (shared edge):** one nginx process (`vocanova-shared-edge-nginx`)
 binds host `80`/`443` and routes by `server_name` / SNI to each tier's
 upstream containers on `vocanova-net` and `vocanova-production-net`.
 
-**Cutover dual-publish (required until T05):** Cloudflare still remaps
-production hostnames to origin `:8443` until VOC-067-T05. T00's ordered
-cutover keeps that remap active while origin `:443` is proven. Therefore
-`vocanova-production-nginx` continues to publish host `8081`/`8443` as a
-temporary bridge so production traffic via the remap does not black-hole
-when the shared edge lands. Staging no longer has a per-tier nginx; its
-public path is shared-edge only. Steady state after T05 is ordinary
-`edge :443 → origin :443` for both tiers with the production bridge
-retired. Until T04/T05 complete, some deploy-emitted production URLs may
-still mention `:8443`; that is cutover port-qualification, not the target
-steady-state design.
+**Steady state (post-T05):** ordinary `edge :443 → origin :443` for both tiers.
+T05 removed the Cloudflare production origin-port remap to `:8443` and retired
+`vocanova-production-nginx` (the temporary cutover bridge). Until T04 lands,
+some deploy-emitted production URLs may still mention `:8443`; that is legacy
+port-qualification, not the target steady-state design.
+
+Cutover tooling (repository-driven, VOC-067-DEP-03):
+
+```bash
+# 1. Confirm external :443 health (no API token required)
+infra/scripts/verify-voc067-cutover.sh
+
+# 2. Verify Cloudflare origin rules (requires PRODUCTION_CLOUDFLARE_API_TOKEN)
+PRODUCTION_CLOUDFLARE_API_TOKEN=… \
+  infra/scripts/cloudflare-remove-production-origin-port-remap.sh --verify-only
+
+# 3. Remove remap (founder/ops; re-run verify + external checks)
+PRODUCTION_CLOUDFLARE_API_TOKEN=… \
+  infra/scripts/cloudflare-remove-production-origin-port-remap.sh --apply
+
+# Rollback: restore remap to :8443 if edge checks fail after removal
+PRODUCTION_CLOUDFLARE_API_TOKEN=… \
+  infra/scripts/cloudflare-remove-production-origin-port-remap.sh --restore
+```
 
 Bring up order on the shared host:
 
 1. `docker compose -f docker-compose.yml up -d` (staging apps)
-2. `docker compose -f docker-compose.production.yml up -d` (production apps
-   plus temporary `:8443` bridge nginx)
+2. `docker compose -f docker-compose.production.yml up -d` (production apps)
 3. `docker compose -f docker-compose.shared-edge.yml up -d` (shared edge on
    `80`/`443` — `deploy-staging.yml` performs this controlled bring-up)
 
@@ -323,26 +338,20 @@ in-memory config (both tiers) stays on the previous generation. Neither
 pipeline may `compose down` or recreate the shared-edge container on a
 routine deploy.
 
-Production's temporary `vocanova-production-nginx` cutover bridge
-(`:8443` until T05) is reloaded the same way after
-`deploy-production` writes production conf; it is not the shared edge.
-
 ### Shared-host resource budget
 
 Both stacks share one 2 vCPU / 4 GB host, so their memory limits are budgeted
-together — production ~1.9 GB (including the temporary cutover nginx),
-staging ~1.3 GB apps + shared edge ~320 MB, leaving headroom for the host.
-Raising a limit in one compose file without lowering another oversubscribes
-the host. CPU values are per-service ceilings, so their sum may exceed 2 by
-design.
+together — production ~1.7 GB apps, staging ~1.3 GB apps + shared edge
+~320 MB, leaving headroom for the host. Raising a limit in one compose file
+without lowering another oversubscribes the host. CPU values are per-service
+ceilings, so their sum may exceed 2 by design.
 
-| Service               | Production      | Staging         | Shared edge     |
-| --------------------- | --------------- | --------------- | --------------- |
-| postgres              | 768m / 1.00 cpu | 512m / 0.75 cpu | —               |
-| api                   | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
-| web                   | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
-| nginx (cutover :8443) | 192m / 0.50 cpu | —               | —               |
-| nginx (shared edge)   | —               | —               | 320m / 0.50 cpu |
+| Service         | Production      | Staging         | Shared edge     |
+| --------------- | --------------- | --------------- | --------------- |
+| postgres        | 768m / 1.00 cpu | 512m / 0.75 cpu | —               |
+| api             | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
+| web             | 512m / 1.00 cpu | 384m / 0.75 cpu | —               |
+| nginx (shared)  | —               | —               | 320m / 0.50 cpu |
 
 ### Verifying the boundary
 

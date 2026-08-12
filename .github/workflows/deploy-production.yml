@@ -6,8 +6,9 @@ name: deploy-production
 # nginx -t fails the deploy closed without reload (VOC-067-AC-04). Production
 # does not recreate the shared-edge container; staging owns rare bring-up
 # (deploy-staging.yml). Reload is docker-exec only — no cross-tier filesystem
-# writes. The temporary vocanova-production-nginx cutover bridge (:8443 until
-# T05) receives the same nginx -t + reload treatment after compose up.
+# writes. VOC-067-T05 retired the temporary vocanova-production-nginx :8443
+# cutover bridge; public HTTPS is shared-edge :443 only (T04 removes remaining
+# :8443 URL qualifications from deploy-emitted values).
 #
 # Auto-deploys on every push to main (2026-08-08, founder's explicit, twice-
 # confirmed request - see AGENTS.md's "Release and deployment authority"
@@ -525,16 +526,6 @@ jobs:
               sh /opt/vocanova/production/apps/api/scripts/seed-synthetic-smoke-user.sh
 
             docker compose -f docker-compose.production.yml -p vocanova-production up -d
-
-            # VOC-067-T03: reload production cutover bridge nginx (volume-mounted
-            # conf from this tree only). Fail closed on nginx -t; no recreate.
-            if docker inspect vocanova-production-nginx >/dev/null 2>&1; then
-              if ! docker exec vocanova-production-nginx nginx -t; then
-                echo "ERROR: production bridge nginx -t failed after conf update; deploy aborted without reload" >&2
-                exit 1
-              fi
-              docker exec vocanova-production-nginx nginx -s reload
-            fi
 
             # T06's rehearsal always runs and its output is always printed
             # in full. It is only allowed to NOT fail the deploy for the
