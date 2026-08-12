@@ -35,10 +35,11 @@ const productionComposePath = path.join(
 );
 
 function readFrontmatterStatus(markdown) {
-  const match = markdown.match(
-    /^---\r?\n([\s\S]*?)\r?\n---/,
+  const match = markdown.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  assert.ok(
+    match,
+    "t05-live-cutover-evidence.md must start with YAML frontmatter",
   );
-  assert.ok(match, "t05-live-cutover-evidence.md must start with YAML frontmatter");
   const statusMatch = match[1].match(
     /^cloudflare_remap_api_status:\s*(\S+)\s*$/m,
   );

@@ -346,9 +346,9 @@ nginx or secrets tree. Each pipeline updates only its own conf/certs path,
 then signals the shared edge with `docker exec` against
 `vocanova-shared-edge-nginx`:
 
-| Pipeline            | Writes                                        | Shared-edge signal                                                                                             |
-| ------------------- | --------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `deploy-staging`    | `/opt/vocanova/infra/nginx/`, `nginx-shared/` | Routine: `nginx -t` + `nginx -s reload` when the container exists. Rare: T02 first-start bring-up when absent. |
+| Pipeline            | Writes                                        | Shared-edge signal                                                                                                                                                                                                                                     |
+| ------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `deploy-staging`    | `/opt/vocanova/infra/nginx/`, `nginx-shared/` | Routine: `nginx -t` + `nginx -s reload` when the container exists. Rare: T02 first-start bring-up when absent.                                                                                                                                         |
 | `deploy-production` | `/opt/vocanova/production/nginx/`             | Shared-edge: `nginx -t` + `nginx -s reload` when the container exists (skip if staging has not brought it up yet). Cutover bridge: same `nginx -t` + reload against `vocanova-production-nginx` after compose up, until remap is API-confirmed absent. |
 
 Failed `nginx -t` **fails the deploy closed** without reload — the
