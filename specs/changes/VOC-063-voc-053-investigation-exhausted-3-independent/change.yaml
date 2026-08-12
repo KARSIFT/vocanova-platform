@@ -1,0 +1,147 @@
+schema_version: 1
+id: VOC-063
+slug: voc-053-investigation-exhausted-3-independent
+title: Supersede VOC-053 With Staging Core-Loop E2E Step-7 Retry Hardening After Three
+  Independent Investigation Passes Exhaust All Candidates
+type: process
+status: adopted
+risk: R2
+planned_implementation_risk_floor: 'Measured during drafting by running scripts/governance/classify-change-risk.sh
+  against the expected task-scoped file list (apps/web/tests/staging-e2e/core-loop.staging.spec.ts
+  for T01; specs/changes/VOC-053-staging-core-loop-e2e-words-reviewed-today/tasks.md
+  and related VOC-053 package docs for T00): the detected path floor is R1, established
+  by the staging E2E spec file. T00''s VOC-053 package documentation edits are R0
+  (*.md under specs/changes/). This package proposes R2 for the change as a whole
+  (not R1/R0) because the combined consequence is an operational change to deploy-staging.yml''s
+  post-deploy gate behavior: step 7 will tolerate a bounded number of transient read
+  mismatches before failing, which is a deliberate reversal of VOC-053''s own adopted
+  non-goal ("no weakening, retrying, polling-until-pass, or removal of the step 7
+  assertion") and therefore warrants explicit human review at adoption time even though
+  no production application code or workflow YAML is touched. The independent verifier
+  must still confirm the actual implemented retry bounds do not amount to an unbounded
+  poll-until-pass. This is a draft proposal for the reviewing human at adoption time,
+  not a determination.
+
+  '
+canonical_path: specs/changes/VOC-063-voc-053-investigation-exhausted-3-independent
+authority_model: a003-active
+requirement_source: "GitHub issue #473 (\"VOC-053 investigation exhausted (3 independent\
+  \ passes, all candidates ruled out): close/supersede with a test-hardening scope\"\
+  ), opened 2026-08-10 as a plan-from-issue request to move forward after VOC-053's\
+  \ three independent root-cause investigation passes \u2014 two prior implementer\
+  \ attempts (VOC-053-T00 attempts 1 and 2) plus a third pass with live staging/production\
+  \ access \u2014 individually ruled out all three of issue #450's original candidates:\
+  \ (a) Next.js/CDN caching (live cf-cache-status consistently DYNAMIC across multiple\
+  \ edge colos; no Cache-Control/proxy_cache in nginx or Go API), (b) backend timezone/local-date\
+  \ computation bug (two independent full handler \u2192 service \u2192 repository\
+  \ traces found no code path that can decrement reviews_completed or flip local_date\
+  \ between requests seconds apart), and (c) cross-run deploy-staging.yml concurrency\
+  \ (the overlapping-run evidence from T00 attempt 2 was a false positive \u2014 job-level\
+  \ inspection shows deploy-staging.yml's concurrency: {group: staging-deploy} lock\
+  \ serializes runs cleanly). A real staging deploy + full core-loop E2E run on 2026-08-10\
+  \ (workflow run 31371614353) passed cleanly, including the exact step-7 assertion\
+  \ that failed originally. VOC-053-T01 is explicitly gated on T00 naming a specific\
+  \ evidence-backed cause and explicitly forbids touching step 7; with all named candidates\
+  \ exhausted and no fourth cause identified, T01 cannot proceed as scoped. The issue\
+  \ requests VOC-053 be closed/superseded and a successor package scoped to harden\
+  \ tests/staging-e2e/core-loop.staging.spec.ts step 7 (retry-and-reverify for possible\
+  \ transient reads) and remove the temporary VOC-053-DEP-00 diagnostic (recordHomeResponseDiagnostic).\
+  \ Issue #450 remains open for the original symptom; this package does not re-litigate\
+  \ it.\n"
+requirement_approval_status: Approved. Founder-delegate (acting under the standing
+  founder-gate delegation for vocanova-platform-sandbox, confirmed explicitly this
+  same session) adopted this draft package on 2026-08-10, mirroring the established
+  convention of flipping adoption fields before merge so adopt.yml succeeds. This
+  explicitly includes accepting VOC-063-DEP-01 (superseding VOC-053's adopted "no
+  retry/poll on step 7" non-goal) - the founder-delegate reviewed the package's own
+  stated rationale (three independent investigation passes exhausted all named root
+  causes; VOC-053-T01 cannot proceed as scoped) and accepts the scope change.
+base_branch: develop
+base_sha: 9ca3204d5c713db78c8240801af6160e0398db78
+target_branch: develop
+approved_candidate_sha: null
+owners:
+  decision: unassigned
+  package_preparation: planner (drafting only; adoption remains a human decision)
+  implementation: unassigned
+  independent_verification: unassigned
+approval_status: adopted
+implementation_authorized: true
+automatic_merge_allowed: false
+production_impact: none expected. Every task in this package touches only staging
+  E2E test code and/or VOC-053 package documentation. No production application code,
+  database schema, workflow YAML, or deployment configuration changes are in scope.
+  The staging deploy gate's strictness changes (more tolerant step 7), which is an
+  operational/CI consequence, not a production user-facing behavior change.
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+- id: VOC-063-DEP-00
+  status: 'resolved at drafting time by issue #473''s thread and the linked third-pass
+    evidence (https://github.com/KARSIFT/vocanova-platform-sandbox/issues/450#issuecomment-5238054774).
+    All three of issue #450''s original candidates are ruled out by direct live evidence,
+    not merely by static reading. VOC-053-T00''s investigation objective is therefore
+    complete; VOC-053-T01/T02 cannot proceed under their adopted scope. This package
+    supersedes that fix path.
+
+    '
+- id: VOC-063-DEP-01
+  status: 'resolved at adoption time (2026-08-10, PR #474). The founder-delegate explicitly
+    accepted superseding VOC-053''s adopted non-goal that forbade retrying or polling
+    step 7 (see VOC-053 specification.md scope/non-goals and VOC-053-AC-01), per requirement_approval_status
+    above.
+
+    '
+- id: VOC-063-DEP-02
+  status: 'unresolved at drafting time. Exact retry parameters (max attempts, interval,
+    total timeout) for step 7''s re-read loop are not specified in the issue thread.
+    This package sets guardrails in specification.md and leaves the concrete values
+    to VOC-063-T01''s implementer, who must record them in that task''s evidence and
+    PR description.
+
+    '
+affected_areas:
+- apps/web/tests/staging-e2e/core-loop.staging.spec.ts
+- specs/changes/VOC-053-staging-core-loop-e2e-words-reviewed-today (T00 documentation
+  closure only; no change to VOC-053's adopted change.yaml status fields)
+- specs/changes/VOC-063-voc-053-investigation-exhausted-3-independent
+implementation:
+  authorized: true
+  required: true
+  status: proposed
+  target_branch: develop
+  pull_request: null
+  authority_issue: null
+release:
+  required: true
+  mode: not-authorized-by-this-package
+  production_impact: none-expected
+  deployment: not-authorized-by-this-package
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: adopted
+adoption_pr: 474
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform-sandbox/pull/474
+implementation_authority_before_adoption: false
+implementation_authority_status: not-exercised
+production_deployment: disabled
+autonomous_production_release: disabled
+ehr: not-triggered
+standing_technical_steward_approval: not-required-solely-for-routine-R3-under-active-A003
+blocking_reasons: 'None - adopted 2026-08-10 (PR #474). Resolved at adoption: R2 classification
+  accepted as-proposed by the founder-delegate; VOC-063-DEP-01 (superseding VOC-053''s
+  "no retry/poll on step 7" non-goal) explicitly accepted, see requirement_approval_status.
+  Still pending, for the implementer/independent verifier, not blocking adoption itself:
+  confirming scripts/governance/classify-change-risk.sh''s actual detected floor for
+  each task''s real file list is not higher than R2.
+
+  '

@@ -24,3 +24,11 @@ than assuming ownership routing proves approval.
 
 Link deterministic evidence, exact-SHA independent verification, required human
 approvals, deployment/rollback controls, hosted activation, and closure evidence.
+
+## `automatic_merge_allowed` drafting
+
+Set `automatic_merge_allowed` in `change.yaml` per the risk-class rule in
+`AGENTS.md` (subsection "Drafting `automatic_merge_allowed` in `change.yaml`")
+before the plan PR is reviewed. The template literal (`true`) matches routine
+R0–R2; R4 packages and deliberate opt-outs must set `false` with a stated
+reason in `change.yaml`.

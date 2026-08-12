@@ -60,6 +60,12 @@ func NewPostgreSQLRepository(db *sql.DB, c clock.Clock, opts ...ReviewRepository
 	return repo
 }
 
+// HasP4Wiring reports whether both P4 dependencies are wired so SubmitReview
+// will run applyP4ReviewWiring. The production composition root must wire both.
+func (r *PostgreSQLRepository) HasP4Wiring() bool {
+	return r.gamification != nil && r.missions != nil
+}
+
 func (r *PostgreSQLRepository) ListDueWords(ctx context.Context, req ListDueWordsRequest) (*ListDueWordsResponse, error) {
 	limit := req.Limit
 	if limit <= 0 {
