@@ -14,7 +14,13 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 
 const CFG = {
-  baseBranch: process.env.BASE_BRANCH || "main",
+  // vocanova-platform splits develop/main (see pipeline.yml's own
+  // integration_branch/production_branch comments) - tasks merge into
+  // develop, which auto-deploys to staging on push. Set BASE_BRANCH=main
+  // instead only for a GitHub-flow-only project with a single long-lived
+  // branch and no separate staging tier.
+  baseBranch: process.env.BASE_BRANCH || "develop",
+  productionBranch: process.env.PRODUCTION_BRANCH || "main",
   maxAttempts: Number(process.env.MAX_ATTEMPTS || 3),
   pollSeconds: Number(process.env.POLL_INTERVAL_SECONDS || 60),
   readyLabel: process.env.READY_LABEL || "agent:ready",
@@ -131,25 +137,38 @@ function runChecks() {
 }
 
 // --- deploy ---
+//
+// Both deploy-staging.yml (on push to develop) and deploy-production.yml
+// (on push to main) fire on their own push trigger - a merge is enough to
+// start them, nothing here needs to `gh workflow run` them directly (that
+// would dispatch against the wrong ref/content and, for deploy-production
+// specifically, a different set of inputs than its push trigger uses).
+// This just watches for the run that push already started.
 
-function triggerWorkflow(file) {
-  return sh("gh", ["workflow", "run", file, "--ref", CFG.baseBranch]);
-}
-
-function waitForWorkflow(file, timeoutMs = 15 * 60 * 1000) {
+function waitForWorkflowRunAfter(file, afterSha, timeoutMs = 15 * 60 * 1000) {
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     const r = sh("gh", [
-      "run", "list", "--workflow", file, "--limit", "1",
-      "--json", "status,conclusion,databaseId",
+      "run", "list", "--workflow", file, "--limit", "5",
+      "--json", "status,conclusion,headSha,createdAt",
     ]);
     if (r.ok) {
-      const [run] = JSON.parse(r.stdout || "[]");
-      if (run && run.status === "completed") return run.conclusion; // "success" | "failure" | ...
+      const runs = JSON.parse(r.stdout || "[]");
+      const match = runs.find((run) => run.headSha === afterSha);
+      if (match) {
+        if (match.status === "completed") return match.conclusion; // "success" | "failure" | ...
+      } else if (runs.length === 0) {
+        // nothing queued yet - the push webhook can lag a few seconds
+      }
     }
     execFileSync("sleep", ["15"]);
   }
   return "timed_out";
+}
+
+function currentSha(branch) {
+  sh("git", ["fetch", "origin", branch]);
+  return sh("git", ["rev-parse", `origin/${branch}`]).stdout;
 }
 
 // --- the loop ---
@@ -246,24 +265,43 @@ function mergeAndDeploy(number, branch, issue, reviewText) {
     return { ok: false };
   }
 
-  log(number, "deploying to staging");
-  triggerWorkflow("deploy-staging.yml");
-  const stagingResult = waitForWorkflow("deploy-staging.yml");
+  log(number, `waiting for the deploy-staging.yml run that push triggered`);
+  const developSha = currentSha(CFG.baseBranch);
+  const stagingResult = waitForWorkflowRunAfter("deploy-staging.yml", developSha);
   log(number, `staging deploy: ${stagingResult}`);
 
   if (stagingResult !== "success") {
-    commentOnIssue(number, `**Orchestrator:** merged, but staging deploy came back \`${stagingResult}\` - not promoting to production. Check the deploy-staging.yml run.`);
+    commentOnIssue(number, `**Orchestrator:** merged to \`${CFG.baseBranch}\`, but staging deploy came back \`${stagingResult}\` - not promoting to production. Check the deploy-staging.yml run.`);
     return { ok: true, staging: stagingResult, production: "skipped" };
   }
 
   if (!CFG.autoDeployProduction) {
-    commentOnIssue(number, `**Orchestrator:** merged and staging is healthy. Production auto-deploy is off (AUTO_DEPLOY_PRODUCTION=false) - promote manually when ready.`);
+    commentOnIssue(number, `**Orchestrator:** merged to \`${CFG.baseBranch}\` and staging is healthy. Production promotion is off (AUTO_DEPLOY_PRODUCTION=false) - this repo normally promotes ${CFG.baseBranch} -> ${CFG.productionBranch} at the package level (karsift-ai-infra's release.yml), not per task. Promote manually when ready.`);
     return { ok: true, staging: "success", production: "manual" };
   }
 
-  log(number, "deploying to production");
-  triggerWorkflow("deploy-production.yml");
-  const prodResult = waitForWorkflow("deploy-production.yml");
+  // NOTE: this promotes on every single task merge, which bypasses this
+  // repo's existing package-level release gate (release.yml normally waits
+  // for a whole change package's task roster to close first). Only turn
+  // AUTO_DEPLOY_PRODUCTION on if you've deliberately decided this loop
+  // should replace that gate, not by default.
+  log(number, `promoting ${CFG.baseBranch} -> ${CFG.productionBranch}`);
+  const promo = sh("gh", [
+    "pr", "create",
+    "--base", CFG.productionBranch,
+    "--head", CFG.baseBranch,
+    "--title", `Promote ${CFG.baseBranch} -> ${CFG.productionBranch}: #${number}`,
+    "--body", `Automated promotion after #${number} merged and staging passed.`,
+  ]);
+  if (!promo.ok) {
+    log(number, "promotion PR failed (likely nothing to promote, or a conflict):", promo.stderr);
+    commentOnIssue(number, `**Orchestrator:** staging healthy, but opening the ${CFG.baseBranch}->${CFG.productionBranch} promotion PR failed:\n\`\`\`\n${promo.stderr.slice(0, 1000)}\n\`\`\``);
+    return { ok: true, staging: "success", production: "promotion_failed" };
+  }
+  sh("gh", ["pr", "merge", CFG.baseBranch, "--merge"]);
+
+  const mainSha = currentSha(CFG.productionBranch);
+  const prodResult = waitForWorkflowRunAfter("deploy-production.yml", mainSha);
   log(number, `production deploy: ${prodResult}`);
   commentOnIssue(number, `**Orchestrator:** shipped. Staging: success. Production: \`${prodResult}\`.`);
   return { ok: true, staging: "success", production: prodResult };

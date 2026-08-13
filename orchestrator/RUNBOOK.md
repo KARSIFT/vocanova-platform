@@ -30,12 +30,15 @@ Environment variables (all optional, sane defaults shown):
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `BASE_BRANCH` | `main` | branch tasks are built from and merged into |
+| `BASE_BRANCH` | `develop` | branch tasks are built from and merged into. This repo splits `develop`/`main` (see `pipeline.yml`'s own `integration_branch`/`production_branch` comments) — `develop` is correct here. Only set this to `main` for a GitHub-flow-only project with a single long-lived branch. |
+| `PRODUCTION_BRANCH` | `main` | where `BASE_BRANCH` gets promoted to when `AUTO_DEPLOY_PRODUCTION=true` |
 | `MAX_ATTEMPTS` | `3` | implement/review retries before escalating to a human |
 | `READY_LABEL` | `agent:ready` | issue label the `--watch` poller looks for |
 | `POLL_INTERVAL_SECONDS` | `60` | how often `--watch` checks for new labeled issues |
-| `AUTO_DEPLOY_PRODUCTION` | `false` | if `true`, promotes to production automatically once staging is healthy. **Leave this `false` until you've watched it run a few times** — this is a live app with real users; start by reviewing the staging result yourself and promoting by hand (`gh workflow run deploy-production.yml`) until you trust it. |
+| `AUTO_DEPLOY_PRODUCTION` | `false` | if `true`, opens and merges a `develop`→`main` promotion PR (which itself triggers `deploy-production.yml`'s push trigger) once staging is healthy — **on every single task**, not per completed package. **Leave this `false`.** This repo already has a package-level release gate (`karsift-ai-infra`'s `release.yml`, which waits for a whole change package's task roster to close before promoting) — turning this on bypasses that gate and promotes after every individual task instead. Only enable it if you've deliberately decided this loop should replace that gate, and this is a live app with real users, so don't flip it lightly. Until then, review each staging result yourself and promote through your existing process. |
 | `IMPLEMENTER_MODEL` / `REVIEWER_MODEL` | CLI default | pin specific models if you want; leave unset to use whatever `claude` defaults to |
+
+Neither `deploy-staging.yml` nor `deploy-production.yml` is triggered directly by this script — both already fire on their own `push` trigger (to `develop` and `main` respectively). The orchestrator merges, then watches for the run that push already started; it never dispatches these workflows itself, which matters for `deploy-production.yml` specifically since its `workflow_dispatch` inputs (production hostnames, Cloudflare cutover mode) are meant for a deliberate manual re-run, not an automated one.
 
 ## 3. Run it once, against a real issue (do this first)
 
@@ -85,6 +88,6 @@ This does not touch `.github/workflows/pipeline.yml` or `karsift-ai-infra`
 yet. Both can run side by side. Once you've watched the orchestrator handle
 real issues correctly, the natural next step is retiring `pipeline.yml`'s
 `implement`/`review`/`adopt`/`merge-gate` jobs (keep `ci.yml`'s deterministic
-checks and the deploy workflows — this script calls those same
-`deploy-staging.yml`/`deploy-production.yml` files, it doesn't replace them)
-— that's a deliberate follow-up, not done here.
+checks and the deploy workflows exactly as they are — this script relies on
+their existing push triggers, it doesn't replace or call them directly) —
+that's a deliberate follow-up, not done here.
