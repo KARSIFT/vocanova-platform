@@ -15,6 +15,7 @@ A-002. All non-conflicting controls remain effective.
 | [Amendment A-002](amendments/A-002-governed-autonomous-releases.md) | Approved canonical release-authority amendment |
 | [Amendment A-003](amendments/A-003-governed-autonomous-engineering-authority.md) | Approved and effectively active governance amendment; substantive body remains frozen |
 | [A-003 transition state](a003-transition-state.yaml) | Machine-readable approval, adoption, activation, and operational truth |
+| [Amendment A-004](amendments/A-004-orchestrator-independent-verification-merge-authority.md) | Approved and adopted; orchestrator-originated PR merge authority in place of karsift-ai-infra's pipeline.yml ceremony, scoped narrowly per ADR-0001 |
 | [Technical-steward appointment](technical-steward-appointment.md) | Permanent historical evidence; retired as routine R3 approval authority |
 | [Change risk classification](change-risk-classification.md) | R0-R4 classification and verification requirements |
 | [Protected areas](protected-areas.md) | Sensitive paths and change types |

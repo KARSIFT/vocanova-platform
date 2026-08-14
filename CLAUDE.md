@@ -1,4 +1,13 @@
+@AGENTS.md
+
 # Claude Code Independent Review Instructions
+
+The section above is imported from this repo's `AGENTS.md` (authority model, change
+workflow, safety rules) - every Claude Code session in this repo loads it, not just
+the reviewer role below. This file's own content is specific to the independent
+*reviewer* role only; an implementer or orchestrator session should follow `AGENTS.md`
+above but does not inherit reviewer-only obligations (like "cannot grant approval")
+from the section below unless it is itself acting as reviewer.
 
 Claude Code is the independent verifier for specification compliance, correctness,
 architecture, security, privacy, data migrations, accessibility, CI/CD, deployment,
