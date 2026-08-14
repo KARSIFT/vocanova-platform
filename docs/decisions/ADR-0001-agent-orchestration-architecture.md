@@ -52,8 +52,11 @@ churn instead of one process holding context.
 6. **Oversight does not stop at merge.** A REACT step watches for failures anywhere downstream —
    post-merge CI, a staging deploy, a production deploy — not just inside the implement/review
    loop.
-7. **Escalation is triaged, not automatic.** Exhausting retries (or a REACT-caught failure) does
-   not itself mean paging the founder. The orchestrator classifies the cause and autonomously
+7. **Retrying is a judgment call, not a fixed count, and escalation is triaged, not automatic.**
+   There is no hardcoded retry limit on the Implementer/Reviewer loop — the orchestrator decides
+   after every single failed review whether trying again is worth it, the same live judgment it
+   applies to a REACT-caught failure downstream. Deciding to stop trying does not itself mean
+   paging the founder: the orchestrator classifies the cause and autonomously
    retries with a stronger/different model, re-scopes an under-specified task, retries a flaky
    step cleanly, or deprioritizes low-value work — all without a human. Only two categories
    escalate: genuine product ambiguity where guessing wrong is expensive (with options and a
