@@ -37,6 +37,14 @@ Create working branches from the appropriate protected branch using these prefix
 - `security/` for security changes
 - `hotfix/` for an approved emergency path
 
+The automated orchestrator (see
+[ADR-0001](docs/decisions/ADR-0001-agent-orchestration-architecture.md)) creates its
+own working branches from `develop` using an `orchestrator/issue-<number>-<slug>`
+prefix. This prefix is deliberately distinct from the human-contributor prefixes
+above to avoid colliding with `karsift-ai-infra`'s legacy `pipeline.yml` trigger,
+which still matches `startsWith(github.head_ref, 'agent/')` and would otherwise run
+its own incompatible checks against the PR.
+
 Use a stable `VOC-###` identifier in the branch name when one exists. Work in an
 isolated branch or worktree and target `develop`; release pull requests promote
 `develop` to `main`. Working branches are normally squash-merged. Release promotions
