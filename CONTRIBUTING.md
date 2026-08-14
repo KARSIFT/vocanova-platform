@@ -1,5 +1,27 @@
 # Contributing
 
+## Automated orchestrator PRs
+
+Some pull requests in this repository are opened, and sometimes merged, automatically
+by an orchestrator session rather than by a human contributor. These are triggered
+from a GitHub issue labeled `agent:ready`; the orchestrator dispatches its own
+`implementer` (`.claude/agents/implementer.md`) and `reviewer`
+(`.claude/agents/reviewer.md`) subagents to implement and independently verify the
+change before it can merge. The reviewer subagent has no write access to the change
+it reviews.
+
+If you see a PR like this and aren't expecting it, that's normal, not a mistake. For
+the full architecture, see
+[ADR-0001](docs/decisions/ADR-0001-agent-orchestration-architecture.md) (currently
+`status: proposed`, not yet accepted). The merge-authority rules that let a
+qualifying orchestrator-originated PR merge without the standard
+`karsift-ai-infra` pipeline ceremony are defined in
+[A-004](docs/governance/amendments/A-004-orchestrator-independent-verification-merge-authority.md)
+(`status: approved`, founder-approved and adopted). A-004 only applies when its
+conditions are met on every occurrence - it does not change founder authority over
+R4 changes, protected-area review, or any other governance requirement described
+elsewhere in this document.
+
 Vocanova uses two permanent branches:
 
 - `main` contains production-ready history.
