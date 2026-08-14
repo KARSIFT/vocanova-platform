@@ -2,11 +2,12 @@
 id: A-004
 title: Orchestrator Independent-Verification Merge Authority
 version: 1.0
-status: proposed
+status: approved
 owner: founder
 canonical_path: docs/governance/amendments/A-004-orchestrator-independent-verification-merge-authority.md
-approved_at: null
-approval_evidence: null
+approved_at: 2026-08-14T15:19:41Z
+approval_evidence: PR-54-founder-approval-comment-5295002955-reviewed-commit-94f4d2196156c55b3264f955c4d03746ab2cd37a
+repository_adoption: adopted (merged to develop via PR #54, commit 70b73382a7af2e607a0a29d32b91af7aae9b802e)
 last_reviewed_at: 2026-08-14
 review_cycle: quarterly
 supersedes:
@@ -24,11 +25,13 @@ related_decisions:
 
 # Amendment A-004 — Orchestrator Independent-Verification Merge Authority
 
-> **Status: proposed, not adopted.** Per `docs/governance/README.md`, an author or
-> implementation agent cannot be the sole approver of a governance change. This
-> document was drafted by Claude Code and requires founder approval evidence bound to
-> the exact reviewed revision, the same as A-002 and A-003 before it, before any part
-> of it takes effect.
+> **Status: approved and adopted.** Founder approval recorded on PR #54, issue comment
+> [5295002955](https://github.com/KARSIFT/vocanova-platform/pull/54#issuecomment-5295002955),
+> bound to reviewed commit `94f4d2196156c55b3264f955c4d03746ab2cd37a`. PR #54 merged
+> into `develop` as commit `70b73382a7af2e607a0a29d32b91af7aae9b802e`. This document
+> was drafted by Claude Code, which per `docs/governance/README.md` could not be its
+> sole approver — the founder's own comment above is the approval evidence, the same
+> pattern A-002 and A-003 used.
 
 ## 1. Purpose
 
