@@ -95,7 +95,8 @@ governed by pre-A-003 R4 founder and R3 technical-steward approval bound to its 
 revision. That approval is exhausted and cannot be reused - VOC-002 itself grants no
 standing automatic-merge or autonomous-production-release authority. This does not mean
 those capabilities are disabled system-wide: automatic merge into `develop` is a
-separately implemented and proven gate (A-003 §10, live via karsift-ai-infra's
-merge-gate.yml) with its own authority, not derived from VOC-002. See AGENTS.md's
+separately implemented and proven gate (DOC-16's "Branch and merge behavior"
+section, live via karsift-ai-infra's merge-gate.yml) with its own authority, not
+derived from VOC-002. See AGENTS.md's
 "Change workflow" section for the current, accurate state of that gate and of
 autonomous production release.
