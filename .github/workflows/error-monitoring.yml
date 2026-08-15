@@ -1,6 +1,6 @@
 name: error-monitoring
 
-# Hourly Sentry -> GitHub-issue monitoring agent (VOC-051-T02).
+# Daily Sentry -> GitHub-issue monitoring agent (VOC-051-T02).
 #
 # Queries the Sentry API for unresolved issues that were first seen recently
 # across all four Layout B projects (see the VOC-051 package's
@@ -38,7 +38,10 @@ name: error-monitoring
 
 on:
   schedule:
-    - cron: "0 * * * *"
+    # Once a day at 00:00 UTC. Was hourly; changed 2026-08-15 (founder
+    # request) - see the WINDOW_MINUTES comment below for the matching
+    # look-back window change this requires.
+    - cron: "0 0 * * *"
   workflow_dispatch:
 
 # Only `issues: write` - deliberately no `contents:`, `deployments:`,
@@ -47,7 +50,7 @@ on:
 permissions:
   issues: write
 
-# Serialized, never cancelled: two overlapping runs (an hourly schedule and a
+# Serialized, never cancelled: two overlapping runs (the daily schedule and a
 # manual `workflow_dispatch`, say) would each build their own
 # already-reported-marker index and could both decide the same Sentry issue is
 # new, creating duplicate issues and duplicate `plan-from-issue` runs
@@ -106,15 +109,19 @@ jobs:
           SENTRY_ORG: vocanova
           SENTRY_API_TOKEN: ${{ secrets.SENTRY_API_TOKEN }}
           # Window decision (specification.md open question 4): a fixed
-          # look-back window, deliberately wider than the hourly cadence, with
-          # no persisted "last checked" state anywhere. The 30 minutes of
-          # overlap absorb a late/skipped cron tick (GitHub's scheduled
-          # triggers are best-effort and can be delayed or dropped under load)
-          # without needing an artifact, cache entry, or committed marker file
-          # that could itself go stale, be evicted, or need write permission
-          # this workflow deliberately does not have. The duplicate-check index
-          # below is what makes the overlap harmless.
-          WINDOW_MINUTES: "90"
+          # look-back window, deliberately wider than the schedule's cadence,
+          # with no persisted "last checked" state anywhere. The overlap
+          # absorbs a late/skipped cron tick (GitHub's scheduled triggers are
+          # best-effort and can be delayed or dropped under load) without
+          # needing an artifact, cache entry, or committed marker file that
+          # could itself go stale, be evicted, or need write permission this
+          # workflow deliberately does not have. The duplicate-check index
+          # below is what makes the overlap harmless. Was 90 (60min hourly
+          # cadence + 30min overlap) when the schedule was hourly; now 1500
+          # (24h daily cadence + 60min overlap) to match the cron change
+          # above - keep this in lockstep with the cron expression if either
+          # changes again.
+          WINDOW_MINUTES: "1500"
           # Layout B per t00-evidence.md §3: one Sentry project per app per
           # tier, so the project slug - not an `environment=` query filter - is
           # what identifies the tier. Filtering by environment tag as well
@@ -324,7 +331,7 @@ jobs:
               return [
                 `<!-- ${marker} -->`,
                 "",
-                "Automated hourly Sentry monitoring (`.github/workflows/error-monitoring.yml`) detected a new",
+                "Automated Sentry monitoring (`.github/workflows/error-monitoring.yml`) detected a new",
                 "unresolved production/staging problem. Filed as a plain unlabeled issue so `plan-from-issue`",
                 "drafts a change package from it, per AGENTS.md's \"Reporting a bug found outside the normal loop\".",
                 "",
