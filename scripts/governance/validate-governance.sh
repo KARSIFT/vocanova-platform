@@ -17,8 +17,8 @@ required_files=(
   docs/governance/post-merge-activation-checklist.md
   docs/governance/repository-settings.md
   docs/governance/technical-steward-appointment.md
-  docs/architecture/17-autonomous-development-architecture.md
-  docs/planning/18-autonomous-development-implementation-roadmap.md
+  docs/archive/17-autonomous-development-architecture.md
+  docs/archive/18-autonomous-development-implementation-roadmap.md
   docs/templates/change-specification.md
   docs/templates/acceptance-criteria.md
   docs/templates/founder-decision-card.md
@@ -177,8 +177,8 @@ r4_ruleset_paths=(
   /docs/governance/post-merge-activation-checklist.md
   /docs/governance/a003-transition-state.yaml
   /docs/governance/16-autonomous-development-operating-model.md
-  /docs/architecture/17-autonomous-development-architecture.md
-  /docs/planning/18-autonomous-development-implementation-roadmap.md
+  /docs/archive/17-autonomous-development-architecture.md
+  /docs/archive/18-autonomous-development-implementation-roadmap.md
   /specs/changes/VOC-002-a003-governance-transition/
   /specs/changes/VOC-003-a003-lifecycle-sync/
   /specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/

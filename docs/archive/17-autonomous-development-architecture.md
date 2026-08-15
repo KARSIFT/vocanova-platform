@@ -3,9 +3,11 @@ id: DOC-17
 title: VocaNova Autonomous Development Architecture
 version: 1.0
 document_type: technical-architecture
-status: approved
+status: superseded
+superseded_at: 2026-08-14
+superseded_note: Retired to docs/archive/ - describes a Control Plane system that was adopted but never built; the live orchestrator system (docs/decisions/ADR-0001-agent-orchestration-architecture.md, DOC-16, .claude/agents/) is what actually runs. Frozen body checksums below are unchanged - only this frontmatter and its file location moved.
 owner: founder
-canonical_path: docs/architecture/17-autonomous-development-architecture.md
+canonical_path: docs/archive/17-autonomous-development-architecture.md
 
 founder_direction_status: approved
 formal_repository_approval_status: approved-exact-revision

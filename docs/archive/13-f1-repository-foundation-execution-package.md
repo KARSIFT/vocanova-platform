@@ -5,7 +5,7 @@ version: 1.0
 document_type: execution-plan
 status: historical
 owner: founder
-canonical_path: docs/operations/13-f1-repository-foundation-execution-package.md
+canonical_path: docs/archive/13-f1-repository-foundation-execution-package.md
 approved_at: null
 last_reviewed_at: 2026-07-24
 review_cycle: quarterly

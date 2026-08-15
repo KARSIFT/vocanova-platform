@@ -3,9 +3,11 @@ id: DOC-18
 title: VocaNova Autonomous Development Implementation Roadmap
 version: 1.0
 document_type: implementation-roadmap
-status: approved
+status: superseded
+superseded_at: 2026-08-14
+superseded_note: Retired to docs/archive/ - the 18-phase roadmap to build DOC-17's Control Plane was never executed; the live orchestrator system (docs/decisions/ADR-0001-agent-orchestration-architecture.md, DOC-16, .claude/agents/) is what actually runs. Frozen body checksums below are unchanged - only this frontmatter and its file location moved.
 owner: founder
-canonical_path: docs/planning/18-autonomous-development-implementation-roadmap.md
+canonical_path: docs/archive/18-autonomous-development-implementation-roadmap.md
 
 founder_direction_status: approved
 formal_repository_approval_status: approved-exact-revision

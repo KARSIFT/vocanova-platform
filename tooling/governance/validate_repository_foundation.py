@@ -32,8 +32,18 @@ A003_FROZEN_SHA256 = "f2b454653a33e6cb76a0eab37c01d48b0174227450c9ea255474f6aac5
 # evidence markers checked in validate_a003_lifecycle below (URLs, SHAs,
 # timestamps) now play the equivalent role - unaltered evidence rather than an
 # unaltered byte string.
-DOC17_PATH = "docs/architecture/17-autonomous-development-architecture.md"
-DOC18_PATH = "docs/planning/18-autonomous-development-implementation-roadmap.md"
+# Retired to docs/archive/ 2026-08-14 (status: superseded) - the frozen source/body
+# checksums below are unchanged, since only frontmatter fields (canonical_path,
+# status) and file location moved, never the checksummed body text itself.
+DOC17_PATH = "docs/archive/17-autonomous-development-architecture.md"
+DOC18_PATH = "docs/archive/18-autonomous-development-implementation-roadmap.md"
+# VOC-004's own package files are a permanent historical record written at
+# adoption time (2026-07-24), when DOC-17/DOC-18 lived at these original paths -
+# that evidence must never be rewritten to describe the later 2026-08-14 archive
+# move, so validate_voc_004_package checks these constants, not DOC17_PATH/
+# DOC18_PATH above.
+DOC17_PATH_AT_VOC004_ADOPTION = "docs/architecture/17-autonomous-development-architecture.md"
+DOC18_PATH_AT_VOC004_ADOPTION = "docs/planning/18-autonomous-development-implementation-roadmap.md"
 DOC17_SOURCE_SHA256 = "8c9fd7b714e84d39f4b5e9d5c8a4cf8f00a3231b269e2d6dadf6e0ff7707693a"
 DOC18_SOURCE_SHA256 = "717c33649f49cedca64cc4744d8121f4b6f5a371c9760076bfa8134c050a8664"
 DOC17_BODY_SHA256 = "b3a157557210f0afecbb5ed4ff53cd2738f50c451c39ef0d012363a6d8df7a40"
@@ -504,8 +514,8 @@ def validate_voc_004_package(validation: Validation) -> None:
         "/home/mehrdad/project/vocanova-source/DOC-18-vocanova-autonomous-development-implementation-roadmap.md",
         DOC17_SOURCE_SHA256,
         DOC18_SOURCE_SHA256,
-        DOC17_PATH,
-        DOC18_PATH,
+        DOC17_PATH_AT_VOC004_ADOPTION,
+        DOC18_PATH_AT_VOC004_ADOPTION,
         "R4",
         "exact-SHA Claude Code",
         "exact-SHA founder R4 approval",
@@ -538,7 +548,7 @@ def validate_doc_17_doc_18_adoption(validation: Validation) -> None:
     expected_documents = {
         DOC17_PATH: {
             "id": "DOC-17",
-            "status": "approved",
+            "status": "superseded",
             "canonical_path": DOC17_PATH,
             "founder_direction_status": "approved",
             "formal_repository_approval_status": "approved-exact-revision",
@@ -558,7 +568,7 @@ def validate_doc_17_doc_18_adoption(validation: Validation) -> None:
         },
         DOC18_PATH: {
             "id": "DOC-18",
-            "status": "approved",
+            "status": "superseded",
             "canonical_path": DOC18_PATH,
             "founder_direction_status": "approved",
             "formal_repository_approval_status": "approved-exact-revision",
@@ -595,7 +605,7 @@ def validate_doc_17_doc_18_adoption(validation: Validation) -> None:
     for relative, text, marker in (
         ("docs/architecture/README.md", architecture_index, "17-autonomous-development-architecture.md"),
         ("docs/planning/README.md", planning_index, "18-autonomous-development-implementation-roadmap.md"),
-        ("docs/README.md", root_index, "DOC-17 and DOC-18 are adopted together"),
+        ("docs/README.md", root_index, "DOC-17 and DOC-18 were adopted together"),
         ("specs/README.md", specs_index, "VOC-004 — Canonical Adoption of DOC-17 and DOC-18"),
     ):
         if marker not in text:

@@ -163,7 +163,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_voc_004_classifier_rejects_r3(self) -> None:
         result = self.run_classifier_for_path(
-            "docs/architecture/17-autonomous-development-architecture.md", "R3"
+            "docs/archive/17-autonomous-development-architecture.md", "R3"
         )
         self.assertEqual(1, result.returncode, result.stdout + result.stderr)
         self.assertIn("below the detected floor R4", result.stderr)
@@ -341,7 +341,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_17_frozen_body_change_fails(self) -> None:
         self.replace(
-            "docs/architecture/17-autonomous-development-architecture.md",
+            "docs/archive/17-autonomous-development-architecture.md",
             "AI workers are replaceable.",
             "AI workers are permanent.",
         )
@@ -349,7 +349,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_18_frozen_body_change_fails(self) -> None:
         self.replace(
-            "docs/planning/18-autonomous-development-implementation-roadmap.md",
+            "docs/archive/18-autonomous-development-implementation-roadmap.md",
             "Production autonomy is not activated early.",
             "Production autonomy is activated early.",
         )
@@ -357,7 +357,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_17_false_technical_activation_fails(self) -> None:
         self.replace(
-            "docs/architecture/17-autonomous-development-architecture.md",
+            "docs/archive/17-autonomous-development-architecture.md",
             "technical_activation_status: inactive",
             "technical_activation_status: active",
         )
@@ -365,7 +365,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_17_pre_merge_lifecycle_fails(self) -> None:
         self.replace(
-            "docs/architecture/17-autonomous-development-architecture.md",
+            "docs/archive/17-autonomous-development-architecture.md",
             "repository_adoption_status: adopted",
             "repository_adoption_status: candidate-pending-merge",
         )
@@ -373,7 +373,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_18_missing_adopted_develop_sha_fails(self) -> None:
         self.replace(
-            "docs/planning/18-autonomous-development-implementation-roadmap.md",
+            "docs/archive/18-autonomous-development-implementation-roadmap.md",
             "adopted_develop_sha: 2b5ecb19b532a9b23250e1255ff1e7fb9a78ef77",
             "adopted_develop_sha: null",
         )

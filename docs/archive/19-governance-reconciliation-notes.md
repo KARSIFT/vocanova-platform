@@ -3,13 +3,20 @@ id: DOC-19
 title: VocaNova Governance Reconciliation Notes
 version: 1.0
 document_type: governance-orientation
-status: proposed
+status: historical
 owner: founder
-canonical_path: docs/operations/19-governance-reconciliation-notes.md
+canonical_path: docs/archive/19-governance-reconciliation-notes.md
 approved_at: null
-last_reviewed_at: 2026-07-19
+last_reviewed_at: 2026-08-14
 review_cycle: quarterly
 supersedes: null
+status_note: >
+  Retired to docs/archive/ 2026-08-14. This document's job - a plain-language
+  orientation to how the scattered governance amendments related to each other -
+  is now done directly by DOC-16 v2.0, which folds A-002/A-003/A-004 into one
+  self-contained document instead of needing a separate reader's guide. Preserved
+  as the historical record of the pre-consolidation reconciliation effort, not a
+  live directive; never formally left `proposed` status while live.
 related_documents:
   - DOC-10
   - DOC-11
@@ -28,7 +35,14 @@ source_files:
 
 # 19 — VocaNova Governance Reconciliation Notes
 
-> **Authority boundary:** This proposed note is an orientation aid. It does not amend or replace
+> **Retired 2026-08-14:** This document is historical. DOC-16 v2.0 now serves the
+> plain-language orientation role this document used to play, directly and as
+> canonical text - read [DOC-16](../governance/16-autonomous-development-operating-model.md)
+> instead. The content below is preserved as evidence of the pre-consolidation
+> reconciliation effort and describes governance as it stood before 2026-08-14; it
+> was never authoritative on its own even before retirement.
+
+> **Authority boundary:** This note was an orientation aid. It did not amend or replace
 > canonical governance. For an authority question, read the linked governance sources directly.
 
 ## 1. Current authority in plain terms
