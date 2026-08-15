@@ -32,7 +32,7 @@ related_decisions:
 
 ## Document status
 
-This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. It does **not** define production publication - no staging or production deployment stage exists in the live pipeline (corrected 2026-07-24; see §17.0).
+This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. It does not itself define production-publication mechanics in detail - those live in `deploy-staging.yml`/`deploy-production.yml` and [DOC-16](../governance/16-autonomous-development-operating-model.md). (Corrected 2026-07-24, then corrected again 2026-08-14: this line previously said "no staging or production deployment stage exists in the live pipeline," which was accurate in 2026-07 but is stale now - both stages exist and have run against real infrastructure since 2026-08-08. See §17.0 for the earlier correction and DOC-16 for current release authority.)
 
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 
@@ -40,8 +40,9 @@ It consolidates all approved decisions from Decision Groups 1–10 and incorpora
 originally described an aspirational merge/staging model that was never the system actually
 built. §17 has been rewritten to match the live pipeline; those two decision entries carry an
 inline correction note pointing to §17.0 rather than being rewritten in place, to preserve the
-decision register as a historical record. **A-003 (`docs/governance/amendments/A-003-...md`) and
-the live `karsift-ai-infra` pipeline are the actual current authority for merge/review mechanics -
+decision register as a historical record. **DOC-16 (`docs/governance/16-autonomous-development-operating-model.md`,
+which folds in the former A-003 amendment as of its v2.0 revision) and the live `karsift-ai-infra`
+pipeline are the actual current authority for merge/review mechanics -
 where this document's remaining prose (outside §17) describes something narrower or different,
 treat it as historical design intent, not a live contradiction requiring further correction in
 this pass.** A full reconciliation of this document's other 28 sections against current practice
@@ -1533,12 +1534,13 @@ this repository's own `.github/workflows/pipeline.yml`. It is architecturally si
 was originally specified here (no staging deploy, no Control Plane - see DOC-17/18's own
 superseded note in `docs/README.md`), has more real lifecycle stages than this section
 described (a distinct `plan`/`adopt` split before implementation even starts, and a bounded
-automatic remediation loop), and its actual authority/risk model is A-003 (Section 10 of that
-amendment - `docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md`),
-not the original A-001 text below. This section is kept as historical record of the original
-design intent but the rule that actually governs `develop` merges today is A-003 §10 plus
-`karsift-ai-infra`'s own `merge-gate.yml` - see that repo's README for the definitive mechanism.
-Where this section conflicts with A-003 or the live pipeline, **A-003 and the live pipeline win.**
+automatic remediation loop), and its actual authority/risk model is DOC-16's "Branch and merge
+behavior" section (which folds in the former A-003 amendment as of DOC-16 v2.0, 2026-08-14 -
+`docs/governance/16-autonomous-development-operating-model.md`), not the original A-001 text
+below. This section is kept as historical record of the original design intent but the rule
+that actually governs `develop` merges today is DOC-16 plus `karsift-ai-infra`'s own
+`merge-gate.yml` - see that repo's README for the definitive mechanism. Where this section
+conflicts with DOC-16 or the live pipeline, **DOC-16 and the live pipeline win.**
 
 ## 17.1 Canonical rule (as actually implemented)
 
@@ -2976,7 +2978,8 @@ Promotions from `develop` to `main` use an identifiable release merge commit.
 
 Every implementation PR may merge into `develop` after required CI, specialist checks, and Claude approval. Founder approval is not required.
 
-*Correction 2026-07-24: superseded by A-003 §10 and the live pipeline - see §17.0. Verification is
+*Correction 2026-07-24: superseded by DOC-16's "Branch and merge behavior" section (formerly
+A-003 §10, folded into DOC-16 v2.0 as of 2026-08-14) and the live pipeline - see §17.0. Verification is
 not vendor-locked to Claude (the `reviewer` role is config-driven, currently a temporary
 same-vendor compromise), the founder's `approved` comment is always a valid override at any risk
 class, and a per-package `automatic_merge_allowed: false` opt-out can require founder approval
@@ -3301,7 +3304,8 @@ Migration uses complete verified document sources and does not reconstruct canon
 Codex implementation PRs targeting `develop` may merge automatically after required deterministic CI, specialist checks, and Claude approval.
 
 *Correction 2026-07-24: see DG5-08's identical correction note above and §17.0 - superseded by
-A-003 §10 and the live, vendor-agnostic pipeline. Preserved as historical record.*
+DOC-16's "Branch and merge behavior" section (formerly A-003 §10) and the live, vendor-agnostic
+pipeline. Preserved as historical record.*
 
 ### DG10-06 — Automatic staging
 

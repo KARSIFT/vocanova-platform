@@ -35,7 +35,13 @@ jobs:
         run: |
           bash -n scripts/governance/validate-governance.sh
           bash -n scripts/governance/classify-change-risk.sh
-      - name: Validate existing governance
-        run: bash scripts/governance/validate-governance.sh
-      - name: Classify change risk
-        run: bash scripts/governance/classify-change-risk.sh
+      # Real enforcement of both scripts against the actual PR diff and body
+      # already runs in governance-policy.yml (validate-governance.sh bare, plus
+      # classify-change-risk.sh with --base/--head/--pr-body-file/--require-
+      # declaration). Re-running validate-governance.sh here added nothing beyond
+      # what that job already covers, and a bare classify-change-risk.sh call in
+      # this job's clean-checkout context has no working-tree diff to classify -
+      # it always reports "No changed files to classify," not a real check.
+      # Removed 2026-08-14 to stop double-running the same governance check on
+      # every PR; this job's own value (Python unit tests, the foundation
+      # validator, and the shell-syntax check above) is unchanged.

@@ -7,7 +7,7 @@ adoption:
   issue: https://github.com/KARSIFT/vocanova-platform/issues/29
   adopted_documents: [DOC-00, DOC-01, DOC-02, DOC-03, DOC-04, DOC-05, DOC-06, DOC-07, DOC-08, DOC-09, DOC-10, DOC-11, DOC-12]
   approved_at: 2026-07-21
-  reconciliation_record: docs/product/README-adoption-notes.md
+  reconciliation_record: docs/archive/README-adoption-notes.md
   external_effect: none
 source_snapshot:
   - path: 00-README-and-changelog.md
@@ -171,7 +171,7 @@ section_coverage:
   - source: 00-README-and-changelog.md
     disposition: preserved-in-full-with-governance-erratum
     destinations:
-      - docs/product/README-migration-notes.md
+      - docs/archive/README-migration-notes.md
   - source: 01-product-bible-and-prd.md
     disposition: split-without-omission
     sections:
@@ -223,13 +223,13 @@ section_coverage:
   - source: 12-governance-and-automation.md
     disposition: research-preserved-conclusions-not-adopted
     destinations:
-      - docs/product/README-migration-notes.md
+      - docs/archive/README-migration-notes.md
       - DOC-19
     note: Historical comparison is retained; its recommendation is rejected against DOC-16, A-002, A-003, and live activation state.
 evidence:
   issue: https://github.com/KARSIFT/vocanova-platform/issues/25
   package: specs/changes/VOC-007-canonical-product-technical-documentation-migration
-  reconciliation_notes: docs/product/README-migration-notes.md
+  reconciliation_notes: docs/archive/README-migration-notes.md
   adoption_issue: https://github.com/KARSIFT/vocanova-platform/issues/29
   adoption_package: specs/changes/VOC-008-doc-00-doc-12-canonical-adoption
-  adoption_reconciliation_notes: docs/product/README-adoption-notes.md
+  adoption_reconciliation_notes: docs/archive/README-adoption-notes.md

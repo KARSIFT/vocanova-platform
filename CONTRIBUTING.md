@@ -3,12 +3,18 @@
 ## Automated orchestrator PRs
 
 Some pull requests in this repository are opened, and sometimes merged, automatically
-by an orchestrator session rather than by a human contributor. These are triggered
-from a GitHub issue labeled `agent:ready`; the orchestrator dispatches its own
-`implementer` (`.claude/agents/implementer.md`) and `reviewer`
-(`.claude/agents/reviewer.md`) subagents to implement and independently verify the
-change before it can merge. The reviewer subagent has no write access to the change
-it reviews.
+by an orchestrator rather than by a human contributor. These are triggered from a
+GitHub issue labeled `agent:ready`; the orchestrator implements and independently
+reviews the change following the roles defined in `.claude/agents/implementer.md`
+and `.claude/agents/reviewer.md`. Depending on which orchestrator path is running -
+the interim `orchestrator/run.mjs` script, which currently sends its own inline
+prompts to the `claude` CLI rather than loading those files as native Claude Code
+subagents, or an interactive Claude Code orchestrator session, which sometimes can
+dispatch them as real subagents and sometimes (recorded live on PR #60) follows
+their instructions directly as a prompt when that mechanism isn't available in the
+current context - the exact dispatch mechanism varies, but the role split and its
+guarantee do not: whichever way it runs, the reviewer role never has write access
+to the change it reviews.
 
 If you see a PR like this and aren't expecting it, that's normal, not a mistake. For
 the full architecture, see
@@ -16,9 +22,11 @@ the full architecture, see
 `status: proposed`, not yet accepted). The merge-authority rules that let a
 qualifying orchestrator-originated PR merge without the standard
 `karsift-ai-infra` pipeline ceremony are defined in
-[A-004](docs/governance/amendments/A-004-orchestrator-independent-verification-merge-authority.md)
-(`status: approved`, founder-approved and adopted). A-004 only applies when its
-conditions are met on every occurrence - it does not change founder authority over
+[DOC-16](docs/governance/16-autonomous-development-operating-model.md)'s "Branch
+and merge behavior" section (folded in from the former "A-004" amendment; see
+DOC-16's "Amendment history" for the original approval evidence). This authority
+only applies when its conditions are met on every occurrence - it does not change
+founder authority over
 R4 changes, protected-area review, or any other governance requirement described
 elsewhere in this document.
 
@@ -63,23 +71,18 @@ pnpm validate
 pnpm audit
 ```
 
-Governance validation remains independently required where applicable:
-
-```bash
-bash scripts/governance/validate-governance.sh
-bash scripts/governance/classify-change-risk.sh
-git diff --check
-```
+Governance validation remains independently required where applicable - see
+AGENTS.md's ["Current validation"](AGENTS.md#current-validation) section for the
+exact current commands, kept in one place rather than duplicated here so the two
+files can't drift apart.
 
 Use the exact checked-in tool versions and scripts with a frozen lockfile. Do not claim
 an unavailable tool or external deployment passed.
 
-Under active A-003, routine R3 requires strengthened applicable controls and
-independent verification, not standing technical-steward or founder approval merely
-because it is R3. R4 founder authority remains unchanged and EHR remains exceptional,
-not a routine approval layer. Claude Code is an independent verifier, never human
-authority. Repository protections apply to contributors and automation actors alike;
-never bypass failed checks, required review, branch protection, or production gates.
+Repository protections apply to contributors and automation actors alike; never
+bypass failed checks, required review, branch protection, or production gates. See
+AGENTS.md's "Safety" section and DOC-16 for the current R3/R4/EHR authority model -
+kept there as the single source rather than restated here.
 
 The one-time initial DOC-16/A-002 bootstrap may merge with founder approval,
 independent Claude Code verification, and passing repository validation. It does not
@@ -92,7 +95,8 @@ governed by pre-A-003 R4 founder and R3 technical-steward approval bound to its 
 revision. That approval is exhausted and cannot be reused - VOC-002 itself grants no
 standing automatic-merge or autonomous-production-release authority. This does not mean
 those capabilities are disabled system-wide: automatic merge into `develop` is a
-separately implemented and proven gate (A-003 §10, live via karsift-ai-infra's
-merge-gate.yml) with its own authority, not derived from VOC-002. See AGENTS.md's
+separately implemented and proven gate (DOC-16's "Branch and merge behavior"
+section, live via karsift-ai-infra's merge-gate.yml) with its own authority, not
+derived from VOC-002. See AGENTS.md's
 "Change workflow" section for the current, accurate state of that gate and of
 autonomous production release.

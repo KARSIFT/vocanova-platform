@@ -163,18 +163,25 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_voc_004_classifier_rejects_r3(self) -> None:
         result = self.run_classifier_for_path(
-            "docs/architecture/17-autonomous-development-architecture.md", "R3"
+            "docs/archive/17-autonomous-development-architecture.md", "R3"
         )
         self.assertEqual(1, result.returncode, result.stdout + result.stderr)
         self.assertIn("below the detected floor R4", result.stderr)
 
-    def test_a003_frozen_body_change_fails(self) -> None:
+    def test_doc16_folded_amendment_evidence_removal_fails(self) -> None:
+        # DOC-16 v2.0 folds the former standalone A-002/A-003/A-004 amendment
+        # documents into itself and preserves their approval evidence in its own
+        # "Amendment history" section instead of a separate frozen-checksum file
+        # per amendment (see validate_a003_lifecycle). Losing one of those exact
+        # evidence strings - here, A-003's effective-activation comment URL -
+        # must still fail validation, the same protection the old whole-body
+        # checksum provided before consolidation.
         self.replace(
-            "docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md",
-            "AI performs the work",
-            "AI sometimes performs the work",
+            "docs/governance/16-autonomous-development-operating-model.md",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-0000000000",
         )
-        self.assert_failure("frozen A-003 substantive body checksum mismatch")
+        self.assert_failure("missing folded amendment evidence marker")
 
     def test_a003_authority_rollback_without_governed_record_fails(self) -> None:
         self.replace(
@@ -334,7 +341,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_17_frozen_body_change_fails(self) -> None:
         self.replace(
-            "docs/architecture/17-autonomous-development-architecture.md",
+            "docs/archive/17-autonomous-development-architecture.md",
             "AI workers are replaceable.",
             "AI workers are permanent.",
         )
@@ -342,7 +349,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_18_frozen_body_change_fails(self) -> None:
         self.replace(
-            "docs/planning/18-autonomous-development-implementation-roadmap.md",
+            "docs/archive/18-autonomous-development-implementation-roadmap.md",
             "Production autonomy is not activated early.",
             "Production autonomy is activated early.",
         )
@@ -350,7 +357,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_17_false_technical_activation_fails(self) -> None:
         self.replace(
-            "docs/architecture/17-autonomous-development-architecture.md",
+            "docs/archive/17-autonomous-development-architecture.md",
             "technical_activation_status: inactive",
             "technical_activation_status: active",
         )
@@ -358,7 +365,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_17_pre_merge_lifecycle_fails(self) -> None:
         self.replace(
-            "docs/architecture/17-autonomous-development-architecture.md",
+            "docs/archive/17-autonomous-development-architecture.md",
             "repository_adoption_status: adopted",
             "repository_adoption_status: candidate-pending-merge",
         )
@@ -366,7 +373,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_18_missing_adopted_develop_sha_fails(self) -> None:
         self.replace(
-            "docs/planning/18-autonomous-development-implementation-roadmap.md",
+            "docs/archive/18-autonomous-development-implementation-roadmap.md",
             "adopted_develop_sha: 2b5ecb19b532a9b23250e1255ff1e7fb9a78ef77",
             "adopted_develop_sha: null",
         )
