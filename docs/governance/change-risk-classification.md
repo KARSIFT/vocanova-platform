@@ -22,7 +22,7 @@ approval layer or risk class.
 The completed A-003 transition was fixed at R4 with an R3 protected
 governance/authority effect and was approved under pre-A-003 governance. Its one-time
 migration approval is exhausted and cannot authorize another change. Canonical A-003
-lifecycle state and amendment paths retain an R4 floor.
+lifecycle state (`docs/governance/a003-transition-state.yaml`) retains an R4 floor.
 
 ## Classification tests
 

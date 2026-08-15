@@ -32,7 +32,7 @@ related_decisions:
 
 ## Document status
 
-This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. It does **not** define production publication - no staging or production deployment stage exists in the live pipeline (corrected 2026-07-24; see §17.0).
+This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. It does not itself define production-publication mechanics in detail - those live in `deploy-staging.yml`/`deploy-production.yml` and [DOC-16](../governance/16-autonomous-development-operating-model.md). (Corrected 2026-07-24, then corrected again 2026-08-14: this line previously said "no staging or production deployment stage exists in the live pipeline," which was accurate in 2026-07 but is stale now - both stages exist and have run against real infrastructure since 2026-08-08. See §17.0 for the earlier correction and DOC-16 for current release authority.)
 
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 

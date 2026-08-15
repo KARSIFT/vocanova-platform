@@ -168,13 +168,20 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         self.assertEqual(1, result.returncode, result.stdout + result.stderr)
         self.assertIn("below the detected floor R4", result.stderr)
 
-    def test_a003_frozen_body_change_fails(self) -> None:
+    def test_doc16_folded_amendment_evidence_removal_fails(self) -> None:
+        # DOC-16 v2.0 folds the former standalone A-002/A-003/A-004 amendment
+        # documents into itself and preserves their approval evidence in its own
+        # "Amendment history" section instead of a separate frozen-checksum file
+        # per amendment (see validate_a003_lifecycle). Losing one of those exact
+        # evidence strings - here, A-003's effective-activation comment URL -
+        # must still fail validation, the same protection the old whole-body
+        # checksum provided before consolidation.
         self.replace(
-            "docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md",
-            "AI performs the work",
-            "AI sometimes performs the work",
+            "docs/governance/16-autonomous-development-operating-model.md",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-0000000000",
         )
-        self.assert_failure("frozen A-003 substantive body checksum mismatch")
+        self.assert_failure("missing folded amendment evidence marker")
 
     def test_a003_authority_rollback_without_governed_record_fails(self) -> None:
         self.replace(

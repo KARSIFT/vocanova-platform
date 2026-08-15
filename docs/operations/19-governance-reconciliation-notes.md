@@ -41,10 +41,10 @@ consequential business, legal, pricing, major product-direction, privacy/user-tr
 difficult-to-reverse decisions and requires founder approval. EHR is an exceptional stop-and-seek-
 expertise condition, not a standing approval layer or a risk class.
 
-Canonical sources: [DOC-16](../governance/16-autonomous-development-operating-model.md),
-[A-002](../governance/amendments/A-002-governed-autonomous-releases.md),
-[A-003](../governance/amendments/A-003-governed-autonomous-engineering-authority.md),
-[risk classification](../governance/change-risk-classification.md), and the
+Canonical source: [DOC-16](../governance/16-autonomous-development-operating-model.md)
+(as of its v2.0 revision, a single self-contained document - the former A-002 and
+A-003 amendments are folded directly into it), plus
+[risk classification](../governance/change-risk-classification.md) and the
 [approval matrix](../governance/approval-matrix.md).
 
 ## 2. Permission is not technical activation
@@ -61,13 +61,17 @@ develop-merge row - see that file's own correction note for why):
 | A-003 authority model | active |
 | RL1 technical activation | `false` |
 | RL2 technical activation | `false` |
-| Automatic merge allowed (into `develop` - A-003 §10) | `true` - live since VOC-012 |
-| Production deployment (to `main` - A-003 §11/12) | `disabled` |
-| Autonomous production release | `disabled` |
+| Automatic merge allowed (into `develop`) | `true` - live since VOC-012 |
+| Production deployment (to `main`) | `enabled` - live since 2026-08-08, founder-authorized (see AGENTS.md's "Release and deployment authority") |
+| Autonomous production release | `enabled` - same 2026-08-08 authorization |
 | Control Plane implementation | `false` |
 
-These are implementation-time facts, not permanent promises. The transition YAML and
-[activation checklist](../governance/post-merge-activation-checklist.md) remain the sources of truth.
+These are implementation-time facts, not permanent promises, and this table was
+stale on the production-deployment/autonomous-release rows before this correction
+(2026-08-14). The transition YAML and
+[activation checklist](../governance/post-merge-activation-checklist.md) remain the
+live sources of truth - if this table and either of those ever disagree again, they
+win, not this copy.
 
 ## 3. What the stale source got right
 

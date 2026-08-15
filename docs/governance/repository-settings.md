@@ -36,7 +36,6 @@ Configure a non-self-referential R4 control for these exact paths:
 /docs/governance/change-risk-classification.md
 /docs/governance/protected-areas.md
 /docs/governance/post-merge-activation-checklist.md
-/docs/governance/amendments/
 /docs/governance/a003-transition-state.yaml
 /docs/governance/16-autonomous-development-operating-model.md
 /docs/architecture/17-autonomous-development-architecture.md

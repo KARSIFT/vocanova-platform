@@ -24,7 +24,7 @@ paths:
     minimum_risk: R4
   - path: docs/governance/
     minimum_risk: R3
-  - path: docs/governance/amendments/
+  - path: docs/governance/16-autonomous-development-operating-model.md
     minimum_risk: R4
   - path: docs/governance/a003-transition-state.yaml
     minimum_risk: R4

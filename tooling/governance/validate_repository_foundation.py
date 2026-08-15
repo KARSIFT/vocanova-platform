@@ -22,10 +22,16 @@ PACKAGE_FILES = (
     "test-plan.md",
 )
 
-A003_PATH = "docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md"
+DOC16_PATH = "docs/governance/16-autonomous-development-operating-model.md"
 A003_STATE_PATH = "docs/governance/a003-transition-state.yaml"
 A003_FROZEN_SHA256 = "f2b454653a33e6cb76a0eab37c01d48b0174227450c9ea255474f6aac59b4f83"
-A003_FROZEN_BODY_SHA256 = "ad05cc8c92047002288245574bc3b76e1cce6f54d43805039ad53393534af4e7"
+# A003_FROZEN_BODY_SHA256 protected the standalone amendment file's exact text
+# before DOC-16 v2.0 (2026-08-14) folded it directly into DOC-16 and retired
+# that file. A whole-body checksum can no longer apply to text that was
+# deliberately reformatted into a single consolidated document; the exact
+# evidence markers checked in validate_a003_lifecycle below (URLs, SHAs,
+# timestamps) now play the equivalent role - unaltered evidence rather than an
+# unaltered byte string.
 DOC17_PATH = "docs/architecture/17-autonomous-development-architecture.md"
 DOC18_PATH = "docs/planning/18-autonomous-development-implementation-roadmap.md"
 DOC17_SOURCE_SHA256 = "8c9fd7b714e84d39f4b5e9d5c8a4cf8f00a3231b269e2d6dadf6e0ff7707693a"
@@ -48,7 +54,7 @@ REQUIRED_FILES = (
     "docs/README.md",
     DOC17_PATH,
     DOC18_PATH,
-    A003_PATH,
+    DOC16_PATH,
     A003_STATE_PATH,
     "docs/decisions/README.md",
     "scripts/governance/classify-change-risk.sh",
@@ -597,54 +603,24 @@ def validate_doc_17_doc_18_adoption(validation: Validation) -> None:
 
 
 def validate_a003_lifecycle(validation: Validation) -> None:
-    amendment = validation.read(A003_PATH)
     state = validate_restricted_yaml(validation, A003_STATE_PATH)
-    metadata = frontmatter_values(amendment)
-    full_sha = hashlib.sha256(amendment.encode("utf-8")).hexdigest()
-    body = amendment.split("---", 2)[2] if amendment.count("---") >= 2 else ""
-    body_sha = hashlib.sha256(body.encode("utf-8")).hexdigest()
+    operating_model = validation.read(DOC16_PATH)
 
-    if body_sha != A003_FROZEN_BODY_SHA256:
-        validation.error(A003_PATH, "frozen A-003 substantive body checksum mismatch")
     if state.get("frozen_source_sha256") != A003_FROZEN_SHA256:
         validation.error(A003_STATE_PATH, "frozen A-003 source checksum identifier is missing or changed")
 
-    active = state.get("effective_activation_status") == "active" or metadata.get("effective_activation_status") == "active"
+    active = state.get("effective_activation_status") == "active"
     if not active:
-        if full_sha != A003_FROZEN_SHA256:
-            validation.error(A003_PATH, "inactive adoption candidate must match the exact frozen A-003 source")
-        expected_inactive = {
-            "authority_model": "pre-a003",
-            "transition_stage": "pre-merge-transition",
-            "formal_founder_approval_status": "pending-exact-revision-github-evidence",
-            "technical_steward_migration_approval_status": "pending-exact-revision-github-evidence",
-            "independent_verification_status": "pending-exact-revision-claude-evidence",
-            "repository_adoption_status": "pending",
-            "effective_activation_status": "inactive",
-            "approved_pr_head_sha": "null",
-            "adopted_develop_sha": "null",
-            "post_merge_validation_status": "not-run",
-            "activation_evidence": "null",
-            "migration_approval_status": "pending-one-time-use",
-            "migration_approval_exhausted": "false",
-            "technical_steward_routine_authority_status": "current-until-valid-activation",
-            "exceptional_human_review_mode": "exceptional-only-after-valid-activation",
-        }
-        for key, value in expected_inactive.items():
-            if state.get(key) != value:
-                validation.error(A003_STATE_PATH, f"inactive transition requires {key}: {value}")
-        for key, value in {
-            "status": "proposed",
-            "formal_founder_approval_status": "pending-exact-revision-github-evidence",
-            "repository_adoption_status": "pending",
-            "effective_activation_status": "inactive",
-            "approved_at": "null",
-            "adopted_at": "null",
-            "effective_at": "null",
-            "approval_evidence": "null",
-        }.items():
-            if metadata.get(key) != value:
-                validation.error(A003_PATH, f"pre-merge A-003 metadata requires {key}: {value}")
+        # A-003 effective activation (2026-07-17T16:44:34Z) is a completed,
+        # permanent historical fact for this repository - there is no valid path
+        # back to a pre-activation state, so unlike earlier validator revisions
+        # this is a hard failure rather than a second branch that re-validates an
+        # alternate pre-merge document shape.
+        validation.error(
+            A003_STATE_PATH,
+            "effective_activation_status must remain active - this repository has no "
+            "supported pre-activation state after 2026-07-17T16:44:34Z",
+        )
     else:
         required_active = {
             "authority_model": "a003-active",
@@ -686,29 +662,35 @@ def validate_a003_lifecycle(validation: Validation) -> None:
         for key, value in exact_active_state.items():
             if state.get(key) != value:
                 validation.error(A003_STATE_PATH, f"active A-003 requires exact {key}: {value}")
-        active_metadata = {
-            "status": "approved",
-            "formal_founder_approval_status": "approved-exact-revision-github-evidence",
-            "repository_adoption_status": "adopted",
-            "effective_activation_status": "active",
-        }
-        for key, value in active_metadata.items():
-            if metadata.get(key) != value:
-                validation.error(A003_PATH, f"active transition requires synchronized {key}: {value}")
-        exact_metadata = {
-            "approved_at": "2026-07-17T16:37:38Z",
-            "adopted_at": "2026-07-17T16:41:32Z",
-            "effective_at": "2026-07-17T16:44:34Z",
-            "approved_pr_head_sha": "c858ebff3d97da88fea830bc32a74f69f59a9ad2",
-            "adopted_develop_sha": "9d5b4bc1d4a72e313b013047601265ee837c34f2",
-            "approval_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067",
-            "independent_verification_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005293621",
-            "repository_adoption_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005429197",
-            "activation_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622",
-        }
-        for key, value in exact_metadata.items():
-            if metadata.get(key) != value:
-                validation.error(A003_PATH, f"active transition requires exact {key}: {value}")
+        doc16_metadata = frontmatter_values(operating_model)
+        if doc16_metadata.get("status") != "approved":
+            validation.error(DOC16_PATH, "DOC-16 requires synchronized status: approved")
+
+        # DOC-16 v2.0 folds the former standalone A-002/A-003/A-004 amendment
+        # documents directly into this operating model and preserves their
+        # approval evidence in its own "Amendment history" section instead of a
+        # separate frozen-checksum file per amendment. A whole-body checksum
+        # cannot survive a legitimate, authorized consolidation of three
+        # documents into one - so this checks the same underlying fact a
+        # checksum protected (evidence cannot be silently dropped or altered)
+        # by requiring every exact evidence string to still appear verbatim.
+        required_evidence_markers = (
+            "Amendment history",
+            "09f97341ff093fd20a70683d88b772e154979330",
+            "https://github.com/KARSIFT/vocanova-platform/pull/3#issuecomment-4961029533",
+            "2026-07-17T16:44:34Z",
+            "c858ebff3d97da88fea830bc32a74f69f59a9ad2",
+            "9d5b4bc1d4a72e313b013047601265ee837c34f2",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005293621",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005429197",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622",
+            "94f4d2196156c55b3264f955c4d03746ab2cd37a",
+            "https://github.com/KARSIFT/vocanova-platform/pull/54#issuecomment-5295002955",
+        )
+        for marker in required_evidence_markers:
+            if marker not in operating_model:
+                validation.error(DOC16_PATH, f"missing folded amendment evidence marker: {marker}")
 
     for key in (
         "rl1_technical_activation",

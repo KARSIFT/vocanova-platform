@@ -16,9 +16,11 @@ the full architecture, see
 `status: proposed`, not yet accepted). The merge-authority rules that let a
 qualifying orchestrator-originated PR merge without the standard
 `karsift-ai-infra` pipeline ceremony are defined in
-[A-004](docs/governance/amendments/A-004-orchestrator-independent-verification-merge-authority.md)
-(`status: approved`, founder-approved and adopted). A-004 only applies when its
-conditions are met on every occurrence - it does not change founder authority over
+[DOC-16](docs/governance/16-autonomous-development-operating-model.md)'s "Branch
+and merge behavior" section (folded in from the former "A-004" amendment; see
+DOC-16's "Amendment history" for the original approval evidence). This authority
+only applies when its conditions are met on every occurrence - it does not change
+founder authority over
 R4 changes, protected-area review, or any other governance requirement described
 elsewhere in this document.
 

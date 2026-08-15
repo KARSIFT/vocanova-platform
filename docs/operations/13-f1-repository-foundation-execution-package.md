@@ -30,7 +30,11 @@ source_files:
 ---
 # 13 — VocaNova F1 Repository Foundation Execution Package
 
-> **Lifecycle notice:** This document is proposed and is not an authoritative implementation input until separately adopted. Words such as “approved” within the imported body describe the source snapshot, not this repository lifecycle.
+> **Lifecycle notice:** This document is historical (F1 is complete - see the
+> `status_note` in this document's own frontmatter) and is not an authoritative
+> implementation input. Words such as "approved" within the imported body describe
+> the source snapshot at the time this package was written, not current repository
+> lifecycle state.
 
 ## 1. Purpose
 
