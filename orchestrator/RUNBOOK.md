@@ -18,11 +18,13 @@ built yet; this is the loop everything else attaches to next.
   `gh` for every GitHub write (issue comments, PRs, merges, triggering
   deploy workflows) — nothing here uses a bare API token directly.
 - **`claude`** (Claude Code CLI), authenticated (`claude auth login`, or
-  `ANTHROPIC_API_KEY` set in the environment). **Run `claude --help` and
-  sanity-check the flags this script uses** (`-p`, `--permission-mode`,
-  `--disallowedTools`, `--output-format`, `--model`) against your installed
-  version before trusting it unattended — this was written without a live
-  install to verify against, and CLI flags do change across versions.
+  `ANTHROPIC_API_KEY` set in the environment). The flags this script uses
+  (`-p`, `--permission-mode acceptEdits`, `--disallowedTools`,
+  `--output-format json`, `--model`) were verified against a live install
+  (Claude Code CLI 2.1.233) via `claude --help` on 2026-08-15 — all five are
+  current and valid at that version. CLI flags can still change across
+  versions, so re-verify with `claude --help` if the installed version has
+  moved on since, but this is no longer an open, never-checked assumption.
 
 ## 2. Configure
 

@@ -5,10 +5,12 @@
 // PR/issue comment at every cold-started step. See orchestrator/RUNBOOK.md.
 //
 // Requires on PATH: git, gh (authenticated, repo write access), claude
-// (Claude Code CLI, authenticated), pnpm. Verify `claude --help` against your
-// installed version before trusting the flags below unattended - CLI flags
-// for non-interactive/headless runs have changed across versions and this
-// was written without a live install to test against.
+// (Claude Code CLI, authenticated), pnpm. The flags used below (-p,
+// --permission-mode, --disallowedTools, --output-format, --model) were
+// verified against a live install (Claude Code CLI 2.1.233) via
+// `claude --help` on 2026-08-15 - all current and valid at that version.
+// CLI flags can still change across versions, so re-verify with
+// `claude --help` if the installed version has moved on since.
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
