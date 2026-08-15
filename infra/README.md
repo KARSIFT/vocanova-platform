@@ -29,7 +29,10 @@ infra/
 │   ├── cloudflare_origin_port_remap.py                   # shared mutation (script + selftest)
 │   ├── verify-voc067-cutover.sh                          # VOC-067-T05 external :443 checks
 │   ├── rehearse-production-secrets-boundary.sh          # VOC-037 INS-9..INS-11 rehearsal
-│   └── rehearse-production-secrets-boundary.selftest.sh # disposable-mirror harness for the above
+│   ├── rehearse-production-secrets-boundary.selftest.sh # disposable-mirror harness for the above
+│   ├── smoke-test-production.sh                          # scripted post-deploy health/kill-switch/core-loop suite
+│   ├── smoke-test-production.selftest.sh                 # harness for the above against a local fake server
+│   └── validate-nginx-healthcheck-probes.sh              # wraps scripts/foundation/nginx-healthcheck-probe.test.mjs
 ├── nginx/
 │   ├── nginx.conf             # legacy per-tier main config (not loaded by shared edge)
 │   ├── conf.d/

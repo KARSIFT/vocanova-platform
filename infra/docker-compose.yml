@@ -10,8 +10,13 @@
 # Authority: VOC-032 change package (adopted 2026-07-28;
 #            specs/changes/VOC-032-begin-milestone-r1-staging-readiness-docs-product/).
 # Depends on: T02 (apps/api/Dockerfile), T03 (apps/web/Dockerfile +
-#             next.config.ts); the nginx service's actual config
-#             lands in T05.
+#             next.config.ts). Nginx never became a service in this file -
+#             VOC-067-T02 shipped it as the separate shared-edge compose
+#             project instead (infra/docker-compose.shared-edge.yml),
+#             fronting both staging and production on host 80/443.
+#             (Corrected 2026-08-15 - this comment previously said "the
+#             nginx service's actual config lands in T05," describing a
+#             plan superseded before it was ever implemented here.)
 #
 # This file wires three application services for the staging host per the
 # founder's deploy-shape decision (VOC-032-D01): self-hosted Docker
@@ -29,10 +34,12 @@
 #     without every [REQUIRED] variable.
 #   * apps/web/.env.example (T01) - schema for any founder-
 #     populated web env overrides.
-#   * infra/nginx/ (T05) - nginx service mounts its config and TLS
-#     material from here; this file's T05 PR is what populates
-#     them. The mount paths below MUST exist on the staging host
-#     before `docker compose up`.
+#   * infra/docker-compose.shared-edge.yml (VOC-067-T02) - the actual
+#     internet-facing nginx service, in a separate compose project, not
+#     this file. It mounts infra/nginx-shared/ as its main config and
+#     infra/nginx/conf.d/ for the staging vhosts specifically. See
+#     infra/README.md's "Service architecture" section for the full
+#     shared-edge picture.
 #   * infra/secrets/ (this PR) - env_files and TLS certs the
 #     founder must populate on the staging host; the .gitignore
 #     in that directory keeps them out of git.
