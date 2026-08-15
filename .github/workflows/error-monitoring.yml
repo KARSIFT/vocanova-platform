@@ -86,17 +86,22 @@ jobs:
       # working (issue still filed, planner triggered by hand) if the App
       # credentials are absent, and the script warns explicitly when it lands
       # on that path instead of pretending the loop closed.
+      # actions/create-github-app-token v3.2.0, pinned to the immutable
+      # commit documented at
+      # https://github.com/actions/create-github-app-token/releases/tag/v3.2.0.
       - name: Mint a GitHub App installation token
         id: app-token
         if: steps.app-credentials.outputs.available == 'true'
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1
         with:
           app-id: ${{ secrets.KARSIFT_BOT_APP_ID }}
           private-key: ${{ secrets.KARSIFT_BOT_PRIVATE_KEY }}
           permission-issues: write
 
+      # actions/github-script v8.0.0, pinned to the immutable commit
+      # documented at https://github.com/actions/github-script/releases/tag/v8.0.0.
       - name: Query Sentry and open deduplicated bug issues
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         env:
           SENTRY_ORG: vocanova
           SENTRY_API_TOKEN: ${{ secrets.SENTRY_API_TOKEN }}
