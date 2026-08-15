@@ -40,8 +40,9 @@ It consolidates all approved decisions from Decision Groups 1–10 and incorpora
 originally described an aspirational merge/staging model that was never the system actually
 built. §17 has been rewritten to match the live pipeline; those two decision entries carry an
 inline correction note pointing to §17.0 rather than being rewritten in place, to preserve the
-decision register as a historical record. **A-003 (`docs/governance/amendments/A-003-...md`) and
-the live `karsift-ai-infra` pipeline are the actual current authority for merge/review mechanics -
+decision register as a historical record. **DOC-16 (`docs/governance/16-autonomous-development-operating-model.md`,
+which folds in the former A-003 amendment as of its v2.0 revision) and the live `karsift-ai-infra`
+pipeline are the actual current authority for merge/review mechanics -
 where this document's remaining prose (outside §17) describes something narrower or different,
 treat it as historical design intent, not a live contradiction requiring further correction in
 this pass.** A full reconciliation of this document's other 28 sections against current practice
