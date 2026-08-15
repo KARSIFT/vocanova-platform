@@ -89,7 +89,7 @@ is currently deployed against — not a plan:
 | DNS/TLS/WAF/CDN (edge) | Cloudflare (narrowed role) — DNS, TLS, WAF, and CDN only; **no Cloudflare compute** (no Workers, no OpenNext, no Cloudflare D1/KV/Durable Objects/Queues/R2 at the edge) |
 | Atlas migration tooling | `apps/api/atlas.hcl` + `apps/api/scripts/migrate.sh` apply the existing `apps/api/migrations/*.sql` set; `.down.sql.example` files remain non-executable by Atlas per the existing `apps/api/migrations/README.md` rule |
 | Deploy automation | `.github/workflows/deploy-staging.yml` — build + tag by commit SHA + push to `ghcr.io` on every merge to `develop`, then SSH to the staging host, pull, apply migrations via the `T06` wrapper, `docker compose up -d`, poll `/healthz`; fails closed without tearing down currently-running containers if the health check does not pass within a bounded timeout |
-| Error monitoring | Sentry — **extended 2026-08-08 by `VOC-051-§1-amendment`** to cover `apps/web` browser-side/server-side error reporting and an hourly Sentry-to-GitHub-issue monitoring workflow (see the amendment note below); the tool choice itself is unchanged |
+| Error monitoring | Sentry — **extended 2026-08-08 by `VOC-051-§1-amendment`** to cover `apps/web` browser-side/server-side error reporting and a Sentry-to-GitHub-issue monitoring workflow (see the amendment note below), which runs daily as of 2026-08-15 (founder request, was hourly at adoption); the tool choice itself is unchanged |
 | Uptime monitoring | Better Stack / UptimeRobot (unchanged) |
 | Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP (unchanged) |
 
@@ -134,8 +134,9 @@ production secrets ever reachable from preview/staging/CI (unchanged from v1.0).
 >   is in `specs/changes/VOC-051-add-hourly-sentry-based-log-error-monitoring/t00-evidence.md` §3.
 >   This also closed a gap: `apps/api` staging had no Sentry wiring at all before VOC-051.
 > - **Sentry data now feeds the governed change loop automatically.**
->   `.github/workflows/error-monitoring.yml` runs hourly, queries all four projects for unresolved
->   issues first seen in the preceding 90 minutes using a read-only (`project:read` + `event:read`)
+>   `.github/workflows/error-monitoring.yml` runs daily (changed from hourly 2026-08-15, founder
+>   request), queries all four projects for unresolved issues first seen in the preceding 1500
+>   minutes (25 hours) using a read-only (`project:read` + `event:read`)
 >   Sentry token held as the `SENTRY_API_TOKEN` Actions secret, and opens one plain unlabeled GitHub
 >   issue per genuinely new problem — deduplicated on a stable Sentry issue-ID marker embedded in the
 >   issue body — so `change-package.yml`'s `plan-from-issue` job drafts a change package from it. This is
