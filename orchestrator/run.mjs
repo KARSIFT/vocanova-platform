@@ -14,8 +14,9 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 
 const CFG = {
-  // vocanova-platform splits develop/main (see pipeline.yml's own
-  // integration_branch/production_branch comments) - tasks merge into
+  // vocanova-platform splits develop/main (see the integration_branch fields
+  // in pipeline.yml/change-package.yml and the integration_branch/
+  // production_branch fields in package-release.yml) - tasks merge into
   // develop, which auto-deploys to staging on push. Set BASE_BRANCH=main
   // instead only for a GitHub-flow-only project with a single long-lived
   // branch and no separate staging tier.

@@ -1530,7 +1530,9 @@ Release 0.3.0
 This section previously described an aspirational operating model (Codex implements, Claude
 reviews, automatic merge, automatic staging deploy) that was never the system actually built.
 The real system is `KARSIFT/karsift-ai-infra`'s reusable GitHub Actions workflows, wired into
-this repository's own `.github/workflows/pipeline.yml`. It is architecturally simpler than what
+this repository's own `.github/workflows/pipeline.yml`/`change-package.yml`/`package-release.yml`
+(split across those three files by real `needs:` dependency, not one monolithic file - see
+`pipeline.yml`'s own header comment). It is architecturally simpler than what
 was originally specified here (no staging deploy, no Control Plane - see DOC-17/18's own
 superseded note in `docs/README.md`), has more real lifecycle stages than this section
 described (a distinct `plan`/`adopt` split before implementation even starts, and a bounded

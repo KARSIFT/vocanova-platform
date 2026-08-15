@@ -101,7 +101,7 @@ See `plan-review.yml`'s header comment in karsift-ai-infra for the full mechanis
   manual verification, monitoring, code review - do not hand-write and push a fix
   PR directly. Open a plain, unlabeled GitHub issue describing the bug, its root
   cause if known, evidence, and a suggested fix. An unlabeled issue on this repo
-  automatically triggers `plan-from-issue` (see `pipeline.yml`), which drafts a
+  automatically triggers `plan-from-issue` (see `change-package.yml`), which drafts a
   real change package for founder review and adoption, keeping every fix inside
   the same governed loop as planned work instead of bypassing it.
 - The only exception (as of 2026-08-08) is GitHub repository/environment *settings*
@@ -225,7 +225,7 @@ project with real users mid-L1-controlled-launch - and confirmed a second time
 after that):
 
 - `karsift-ai-infra`'s `release.yml` runs with `auto_release_enabled: "true"`
-  (see `pipeline.yml`'s `release` job). Once a change package's full task roster
+  (see `package-release.yml`'s `release` job). Once a change package's full task roster
   closes, promotion from `develop` to `main` happens automatically - CI and
   independent review having already passed on every task PR that went into it is
   the gate, not a founder `approved` comment. The release-approval issue still
