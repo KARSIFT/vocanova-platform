@@ -1,33 +1,35 @@
 name: pipeline
 
-# Thin file. All real logic lives in KARSIFT/karsift-ai-infra's reusable
-# workflows - this just wires triggers to them. Runs alongside (not instead
-# of) this repo's own governance/risk-classification workflows, if any.
+# Wires triggers to KARSIFT/karsift-ai-infra's reusable workflows for the
+# generic, shared parts of the loop - drafting a change package, adopting its
+# task roster, per-task implementation, independent review, retry, merge, and
+# release/production-promotion. Runs alongside (not instead of) this repo's
+# own governance/risk-classification workflows, if any.
 #
-# `plan` turns a request (free text, an existing document, or a GitHub issue's
-# whole thread) into a DRAFT change package (planner role, see plan.yml) - it
-# never adopts, authorizes, or implements anything, a human still does that by
-# hand, by reviewing and merging the draft PR. `adopt` then opens the real
-# per-task tracking issues, but only once that merge has happened - not at
-# draft time. `plan-from-issue` is what makes "anyone (a human, or another
-# agent - e.g. one that reads application logs and notices a bug) just opens
-# an issue" a valid way in: it auto-drafts a package from that issue, asking a
-# clarifying question back on the issue itself if there isn't enough to go on
-# yet, but a bare issue never becomes implementation authority on its own -
-# adoption is still the one required human decision point. Once a package is
-# adopted, `implement` (dispatched per task, same as before) carries on from
-# there.
+# `ci` is the one job that is NOT a call into karsift-ai-infra: this repo has
+# its own single validation entry point (`pnpm validate`, see
+# docs/development.md), so the `ci` job below runs it directly instead of a
+# generic multi-project detection script.
 #
-# Copy this file into a project repo and fill in:
-#   - founder_username below (whose "approved" comment is a valid merge decision)
-#   - auto_merge_enabled, only once you have real evidence for this project's loop
-#   - integration_branch below - "develop" if this project splits develop/main,
-#     "main" if it's GitHub-flow-only (a single long-lived branch). Get this
-#     wrong and the very first checkout step fails outright.
-#   - id_prefix - appears TWICE (the workflow_dispatch default, and
-#     plan-from-issue's hardcoded value) - keep both in sync, e.g. "VOC"
-#   - your project's own PR-body convention for "Risk classification: R#" and
-#     "Package path: `...`" if it differs from the defaults this template assumes
+# The orchestrator (`orchestrator/RUNBOOK.md`, `.claude/agents/`, see also
+# CONTRIBUTING.md's "Automated orchestrator PRs" section and
+# docs/decisions/ADR-0001-agent-orchestration-architecture.md) is now an
+# ADDITIONAL path alongside this file, not a replacement of it: a live
+# orchestrator session can implement and independently review a task directly
+# without cold-starting `implement`/`review` here. This file's `implement` job
+# stays in place regardless, because `remediate` (below) automatically
+# re-dispatches it on a FAIL verdict for an `agent/`-branch PR - removing it
+# would silently break that retry path for any PR still going through the
+# non-orchestrator route. `merge-gate` reads any comment starting "**
+# Independent verification" with a `VERDICT:` line, so it merges the same way
+# whether that comment came from karsift-ai-infra's own reviewer or from the
+# orchestrator's reviewer subagent; an orchestrator-originated PR that
+# qualifies under DOC-16's "Branch and merge behavior" section may also merge
+# directly without waiting on this file at all, falling back to the path here
+# otherwise. `release` / `auto-advance` remain the only mechanism that
+# promotes `develop` to `main` and triggers production deployment, gated on a
+# package's whole task roster closing - see AGENTS.md's "Release and
+# deployment authority" section.
 #
 # PRIVATE REPO + GitHub Free org plan: org-level secrets (ANTHROPIC_API_KEY,
 # OPENAI_API_KEY, etc.) silently do NOT reach private repos on a Free org plan,
@@ -91,19 +93,19 @@ on:
         type: string
         default: "VOC"
 
-# Explicit floor for every job below, all of which call karsift-ai-infra's
-# reusable workflows via `uses:` with `secrets: inherit` and no
-# job-level `permissions:` of their own - without this, they silently
-# inherit whatever the repo's own default_workflow_permissions setting
-# grants, and a reusable workflow call can never get MORE access than its
-# caller has regardless of what the called workflow's own job declares.
-# This union covers every permission any called workflow
-# (implement/adopt/release/merge-gate/review/remediate/plan/auto-advance)
-# actually needs - added 2026-08-08 specifically so this repo's
-# default_workflow_permissions could be safely tightened from "write" to
-# "read" without breaking the pipeline; do not narrow this without
+# Explicit floor for every reusable-workflow job below, all of which call
+# karsift-ai-infra via `uses:` with `secrets: inherit` and no job-level
+# `permissions:` of their own - without this, they silently inherit whatever
+# the repo's own default_workflow_permissions setting grants, and a reusable
+# workflow call can never get MORE access than its caller has regardless of
+# what the called workflow's own job declares. This union covers every
+# permission any called workflow (implement/adopt/release/merge-gate/review/
+# remediate/plan/auto-advance) actually needs - added 2026-08-08 specifically
+# so this repo's default_workflow_permissions could be safely tightened from
+# "write" to "read" without breaking the pipeline; do not narrow this without
 # re-checking every called reusable workflow's own job-level permissions
-# first.
+# first. The in-house `ci` job below narrows this back down to `contents:
+# read` for itself, since it only checks out and runs local commands.
 permissions:
   contents: write
   issues: write
@@ -131,7 +133,7 @@ jobs:
       request: ${{ inputs.request }}
       source_document_path: ${{ inputs.source_document_path }}
       id_prefix: ${{ inputs.id_prefix }}
-      integration_branch: "develop"   # match the value used for implement, above
+      integration_branch: "develop"   # "main" for a GitHub-flow-only project
     secrets: inherit
 
   # Lets ANYONE (or any other agent, authenticated however it authenticates)
@@ -174,9 +176,50 @@ jobs:
       pr_number: ${{ github.event.pull_request.number }}
     secrets: inherit
 
+  # In-house deterministic checks. `pnpm validate` is this repo's single
+  # canonical validation entry point (workspace, format, lint/vet, type,
+  # test, build - see docs/development.md's "Root commands" table), so this
+  # job runs it directly instead of a generic multi-project detection
+  # script. Mirrors the actions/checkout + actions/setup-node +
+  # actions/setup-go + corepack pattern already used by
+  # accessibility.yml/lighthouse.yml/deploy-staging.yml in this repo.
   ci:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
-    uses: KARSIFT/karsift-ai-infra/.github/workflows/ci.yml@main
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      # actions/checkout v4.2.2, pinned to the immutable commit documented at
+      # https://github.com/actions/checkout/releases/tag/v4.2.2
+      - name: Check out reviewed revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # actions/setup-node v7.0.0, pinned to the immutable commit documented
+      # at https://github.com/actions/setup-node/releases/tag/v7.0.0
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version-file: ".nvmrc"
+
+      # actions/setup-go v7.0.0, pinned to the immutable commit documented at
+      # https://github.com/actions/setup-go/releases/tag/v7.0.0. Needed here
+      # (unlike lighthouse.yml/accessibility.yml, which never touch the Go
+      # API) because pnpm validate's lint:api/test:api/build:api steps shell
+      # out to go vet/go test/go build.
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version-file: "apps/api/go.mod"
+
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@11.14.0 --activate
+
+      - name: Install workspace dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate
+        run: pnpm validate
 
   # Planning PRs (head branch prefixed "plan/" by plan.yml) create a package
   # rather than implementing one, so they never carry the "Package path:"

@@ -84,10 +84,18 @@ meant to run without you.
 
 ## 6. Relationship to the existing `pipeline.yml`
 
-This does not touch `.github/workflows/pipeline.yml` or `karsift-ai-infra`
-yet. Both can run side by side. Once you've watched the orchestrator handle
-real issues correctly, the natural next step is retiring `pipeline.yml`'s
-`implement`/`review`/`adopt`/`merge-gate` jobs (keep `ci.yml`'s deterministic
-checks and the deploy workflows exactly as they are — this script relies on
-their existing push triggers, it doesn't replace or call them directly) —
-that's a deliberate follow-up, not done here.
+This runs alongside `.github/workflows/pipeline.yml`, not instead of it.
+`pipeline.yml` still owns the change-package/task-roster model end to end:
+`plan`/`plan-from-issue` draft a package, `adopt` opens its task roster,
+`implement`/`review`/`remediate` are the cold-started fallback for any task
+not picked up by a live orchestrator session, `merge-gate` merges once checks
+and an independent-verification `VERDICT:` comment both pass (from either
+source - it doesn't care who posted the verdict), and `release`/`auto-advance`
+remain the only mechanism that promotes `develop` to `main` and triggers
+production deployment, gated on a package's whole roster closing. None of
+that is scheduled for retirement: it stays load-bearing regardless of how
+much of the day-to-day implementation work the orchestrator ends up handling
+directly. `pipeline.yml`'s `ci` job is no longer a call into
+`karsift-ai-infra`'s `ci.yml` - it now runs `pnpm validate` directly - but
+that's an implementation detail of the check, not a relationship change with
+this script.

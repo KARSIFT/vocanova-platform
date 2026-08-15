@@ -127,11 +127,10 @@ harness this repository has ever had (`VOC-031-D00` confirmed
 the absence of Playwright, axe-core, and Lighthouse CI in the
 adopted base). The CI integration is a new workflow file
 (`.github/workflows/accessibility.yml`) that runs separately
-from `pipeline.yml`'s `ci` job - the `ci` job uses
-`KARSIFT/karsift-ai-infra/.github/workflows/ci.yml@main` which
-runs `pnpm run format:check lint typecheck test build`, none of
-which install or invoke Playwright. Wiring the e2e suite into
-that generic job would couple the entire pnpm validation
+from `pipeline.yml`'s `ci` job - the `ci` job runs `pnpm
+validate` directly (workspace, format, lint/vet, type, test,
+build), none of which install or invoke Playwright. Wiring the
+e2e suite into that job would couple the entire pnpm validation
 chain to a multi-minute Playwright browser install and
 production build, regressing PR feedback time for changes
 that have nothing to do with e2e coverage. The dedicated
