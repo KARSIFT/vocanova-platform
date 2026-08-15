@@ -138,7 +138,7 @@ production secrets ever reachable from preview/staging/CI (unchanged from v1.0).
 >   issues first seen in the preceding 90 minutes using a read-only (`project:read` + `event:read`)
 >   Sentry token held as the `SENTRY_API_TOKEN` Actions secret, and opens one plain unlabeled GitHub
 >   issue per genuinely new problem — deduplicated on a stable Sentry issue-ID marker embedded in the
->   issue body — so `pipeline.yml`'s `plan-from-issue` job drafts a change package from it. This is
+>   issue body — so `change-package.yml`'s `plan-from-issue` job drafts a change package from it. This is
 >   the same route AGENTS.md's "Reporting a bug found outside the normal loop" requires of a human
 >   who spots a bug; it is observability feeding that existing loop, and it changes no release,
 >   deployment, or approval gate. The workflow holds `issues: write` and nothing else, and

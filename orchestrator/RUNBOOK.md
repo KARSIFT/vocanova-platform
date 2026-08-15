@@ -30,7 +30,7 @@ Environment variables (all optional, sane defaults shown):
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `BASE_BRANCH` | `develop` | branch tasks are built from and merged into. This repo splits `develop`/`main` (see `pipeline.yml`'s own `integration_branch`/`production_branch` comments) — `develop` is correct here. Only set this to `main` for a GitHub-flow-only project with a single long-lived branch. |
+| `BASE_BRANCH` | `develop` | branch tasks are built from and merged into. This repo splits `develop`/`main` (see the `integration_branch` fields in `pipeline.yml`/`change-package.yml` and the `integration_branch`/`production_branch` fields in `package-release.yml`) — `develop` is correct here. Only set this to `main` for a GitHub-flow-only project with a single long-lived branch. |
 | `PRODUCTION_BRANCH` | `main` | where `BASE_BRANCH` gets promoted to when `AUTO_DEPLOY_PRODUCTION=true` |
 | `MAX_ATTEMPTS` | `3` | implement/review retries before escalating to a human |
 | `READY_LABEL` | `agent:ready` | issue label the `--watch` poller looks for |
@@ -82,20 +82,23 @@ issues, they'll just burn 3 attempts and escalate anyway), real product
 ambiguity, and a production deploy repeating a rollback. Everything else is
 meant to run without you.
 
-## 6. Relationship to the existing `pipeline.yml`
+## 6. Relationship to the existing pipeline files
 
-This runs alongside `.github/workflows/pipeline.yml`, not instead of it.
-`pipeline.yml` still owns the change-package/task-roster model end to end:
-`plan`/`plan-from-issue` draft a package, `adopt` opens its task roster,
-`implement`/`review`/`remediate` are the cold-started fallback for any task
-not picked up by a live orchestrator session, `merge-gate` merges once checks
-and an independent-verification `VERDICT:` comment both pass (from either
-source - it doesn't care who posted the verdict), and `release`/`auto-advance`
-remain the only mechanism that promotes `develop` to `main` and triggers
-production deployment, gated on a package's whole roster closing. None of
-that is scheduled for retirement: it stays load-bearing regardless of how
-much of the day-to-day implementation work the orchestrator ends up handling
-directly. `pipeline.yml`'s `ci` job is no longer a call into
-`karsift-ai-infra`'s `ci.yml` - it now runs `pnpm validate` directly - but
-that's an implementation detail of the check, not a relationship change with
-this script.
+This runs alongside `.github/workflows/pipeline.yml` / `change-package.yml` /
+`package-release.yml`, not instead of them (that three-file split, plus
+`ci` moving in-house, is a behavior-preserving reorg - same jobs, same
+triggers, same logic, just grouped by real `needs:` dependency instead of one
+12-job file). Together they still own the change-package/task-roster model
+end to end: `plan`/`plan-from-issue` draft a package, `adopt` opens its task
+roster (`change-package.yml`); `review`/`remediate` are the cold-started
+fallback for any task not picked up by a live orchestrator session, `merge-gate`
+merges once checks and an independent-verification `VERDICT:` comment both
+pass, from either source - it doesn't care who posted the verdict
+(`pipeline.yml`); and `release`/`auto-advance` remain the only mechanism that
+promotes `develop` to `main` and triggers production deployment, gated on a
+package's whole roster closing (`package-release.yml`). None of that is
+scheduled for retirement: it stays load-bearing regardless of how much of the
+day-to-day implementation work the orchestrator ends up handling directly.
+`pipeline.yml`'s `ci` job is not a call into `karsift-ai-infra` - it runs
+`pnpm validate` directly - but that's an implementation detail of the check,
+not a relationship change with this script.

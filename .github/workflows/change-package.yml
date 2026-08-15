@@ -1,0 +1,157 @@
+name: change-package
+
+# Drafting and adopting a VOC-### change package: request -> draft PR ->
+# adoption -> per-task implementation. None of these four jobs have a
+# `needs:` tie to pipeline.yml's ci/review/merge-gate cluster (they're each
+# independently triggered), so they live in their own file - this keeps
+# pipeline.yml's job graph to just the PR-validation-and-merge jobs that
+# genuinely depend on each other, instead of one 12-job file showing every
+# job on every trigger regardless of relevance.
+#
+# `plan` turns a request (free text, an existing document, or a GitHub
+# issue's whole thread) into a DRAFT change package - it never adopts,
+# authorizes, or implements anything; a human still does that by hand, by
+# reviewing and merging the draft PR (see pipeline.yml's `plan-review` job
+# for that PR's independent review). `plan-from-issue` is what makes "anyone
+# (a human, or another agent) just opens an issue" a valid way in: it
+# auto-drafts a package from that issue, asking a clarifying question back on
+# the issue itself if there isn't enough to go on yet - a bare issue never
+# becomes implementation authority on its own; adoption is still the one
+# required human decision point. `adopt` opens the real per-task tracking
+# issues once a "plan/"-branch PR actually merges - not at draft time. Once a
+# package is adopted, `implement` (dispatched per task, either manually or by
+# package-release.yml's `auto-advance` job) carries on from there. The
+# orchestrator (`.claude/agents/`, `orchestrator/RUNBOOK.md`) is an
+# additional path for implementation alongside `implement` here, not a
+# replacement of it.
+#
+# All four jobs are karsift-ai-infra reusable workflows, pinned to an exact
+# commit (not `@main`) so this file can't silently break when that repo's
+# default branch moves - bump deliberately, verify the next real run is
+# green, don't float.
+#
+# PRIVATE REPO + GitHub Free org plan: org-level secrets (ANTHROPIC_API_KEY,
+# OPENAI_API_KEY, etc.) silently do NOT reach private repos on a Free org
+# plan, even when the secret's visibility is "All repositories" - jobs see an
+# empty value with no error at workflow-definition time, only a runtime
+# "Secret X is required, but not provided" failure. If secrets aren't
+# reaching this repo, set them again at the repo level too
+# (`gh secret set ANTHROPIC_API_KEY --repo OWNER/REPO`).
+
+on:
+  issues:
+    types: [opened]
+  issue_comment:
+    types: [created]
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Which reusable workflow to run"
+        required: true
+        type: choice
+        options: [implement, plan]
+        default: implement
+      change_id:
+        description: 'implement only: adopted package to implement from, e.g. "VOC-007"'
+        required: false
+        type: string
+      package_path:
+        description: 'implement only: path to the package directory, e.g. "specs/changes/VOC-007-some-slug"'
+        required: false
+        type: string
+      task_id:
+        description: "implement only: task ID from the package's task list"
+        required: false
+        type: string
+      issue_number:
+        description: "implement only: GitHub issue carrying implementation authority"
+        required: false
+        type: string
+      attempt:
+        description: "implement only: 1 or 2"
+        required: false
+        type: string
+        default: "1"
+      request:
+        description: "plan only: free-text description of the change package to draft"
+        required: false
+        type: string
+      source_document_path:
+        description: "plan only: path to an existing document in the repo to draft from, instead of/alongside request"
+        required: false
+        type: string
+      id_prefix:
+        description: 'plan only: package ID prefix, e.g. "VOC"'
+        required: false
+        type: string
+        default: "VOC"
+
+# Floor for every job below, all called via `uses:` with `secrets: inherit`
+# and no job-level `permissions:` of their own - a reusable workflow call can
+# never get MORE access than its caller has.
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  checks: read
+
+jobs:
+  implement:
+    if: github.event_name == 'workflow_dispatch' && inputs.action == 'implement'
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/implement.yml@9dd5185954175f12601cce10be3f84ac158f44c4
+    with:
+      change_id: ${{ inputs.change_id }}
+      package_path: ${{ inputs.package_path }}
+      task_id: ${{ inputs.task_id }}
+      issue_number: ${{ inputs.issue_number }}
+      attempt: ${{ inputs.attempt }}
+      integration_branch: "develop"
+    secrets: inherit
+
+  plan:
+    if: github.event_name == 'workflow_dispatch' && inputs.action == 'plan'
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/plan.yml@9dd5185954175f12601cce10be3f84ac158f44c4
+    with:
+      request: ${{ inputs.request }}
+      source_document_path: ${{ inputs.source_document_path }}
+      id_prefix: ${{ inputs.id_prefix }}
+      integration_branch: "develop"
+    secrets: inherit
+
+  # Lets ANYONE (or any other agent) kick off planning just by opening an
+  # issue - no manual workflow_dispatch needed. Gated on the issue carrying
+  # NO karsift:* label at open time, since this system's own issue-creation
+  # (adopt's task issues, package-release.yml's release-approval issues)
+  # always labels what it opens - an unlabeled issue is, by construction,
+  # something this system didn't create itself.
+  #
+  # Also fires on a later comment, but only if the issue is currently labeled
+  # `karsift:needs-info` (the planner asked a clarifying question and is
+  # waiting) AND the comment isn't from a bot account, so the planner's own
+  # posted question doesn't re-trigger itself in a loop. Deliberately NOT
+  # restricted to human commenters - a human or another agent replying both
+  # work the same way, through the same issue thread.
+  plan-from-issue:
+    if: |
+      (github.event_name == 'issues' && github.event.action == 'opened' && toJSON(github.event.issue.labels) == '[]') ||
+      (github.event_name == 'issue_comment' && contains(github.event.issue.labels.*.name, 'karsift:needs-info') && github.event.comment.user.type != 'Bot')
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/plan.yml@9dd5185954175f12601cce10be3f84ac158f44c4
+    with:
+      source_issue_number: ${{ github.event.issue.number }}
+      id_prefix: "VOC"   # match the value used for the workflow_dispatch plan job, above
+      integration_branch: "develop"
+    secrets: inherit
+
+  # The other half of plan.yml's split: opens the real per-task tracking
+  # issues (and, if this package traces back to an originating issue, closes
+  # the loop on it) only once a "plan/"-branch PR actually merges - i.e. only
+  # once a human has adopted the draft.
+  adopt:
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'plan/')
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/adopt.yml@9dd5185954175f12601cce10be3f84ac158f44c4
+    with:
+      pr_number: ${{ github.event.pull_request.number }}
+    secrets: inherit

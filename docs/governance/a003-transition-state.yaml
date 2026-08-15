@@ -44,7 +44,7 @@ rl2_technical_activation: false
 # their prior false/disabled values fails validation, and vice versa; the two
 # must move together. See AGENTS.md's "Release and deployment authority"
 # section for the full record. karsift-ai-infra's release.yml now runs with
-# `auto_release_enabled: "true"` (pipeline.yml's release job) and
+# `auto_release_enabled: "true"` (package-release.yml's release job) and
 # deploy-production.yml triggers on every push to `main`. RL1/RL2 technical
 # activation were NOT part of this request and remain a separate, distinct,
 # still-disabled gate below - do not treat this marker as covering them too.

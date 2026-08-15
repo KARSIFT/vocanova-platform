@@ -1,0 +1,77 @@
+name: package-release
+
+# Promotes a completed change package to production. Neither job here has a
+# `needs:` tie to pipeline.yml's ci/review/merge-gate cluster or to
+# change-package.yml's drafting/adoption jobs - they live in their own file
+# so an issue-closing event doesn't also surface 10 unrelated jobs in the
+# Actions graph.
+#
+# `release` is the gate above the per-task loop: exactly one human decision
+# per completed change package (its full task roster closed), not per task -
+# gates promotion from `develop` to `main`. Routes both `issues: closed`
+# (package-completion detection) and `issue_comment` (the founder's
+# "approved" reply on a "Release: ..." issue) to release.yml, which
+# internally filters by event/action/issue title. Deploy itself is out of
+# scope here - see release.yml's own header comment and
+# .github/workflows/deploy-production.yml, which triggers on the resulting
+# push to `main`.
+#
+# `auto-advance` fills the gap between adoption (one human decision, the
+# whole roster at once) and release (one human decision, the whole completed
+# package at once): dispatches the NEXT task in an adopted package's roster
+# automatically (via change-package.yml's `implement` job, workflow_dispatch)
+# once the current task's tracking issue closes, so routine task-to-task
+# progression needs no further per-task human trigger. A no-op on the
+# package's last task (release's own check-completion handles that
+# transition instead) or if the next task is already dispatched/done. Runs
+# on the same `issues: closed` event as `release` above - both are safe to
+# fire together, since each package/task can only ever be in the "next task
+# exists" or "roster complete" state, never both, so exactly one of the two
+# actually does something per event.
+#
+# Both jobs are karsift-ai-infra reusable workflows, pinned to an exact
+# commit (not `@main`) so this file can't silently break when that repo's
+# default branch moves - bump deliberately, verify the next real run is
+# green, don't float. This is the mechanism AGENTS.md's "Release and
+# deployment authority" section describes as founder-authorized, live
+# production automation - be deliberate about any change here.
+#
+# PRIVATE REPO + GitHub Free org plan: org-level secrets silently do NOT
+# reach private repos on a Free org plan even when visibility is "All
+# repositories" - see pipeline.yml's header comment for the full note.
+
+on:
+  issues:
+    types: [closed]
+  issue_comment:
+    types: [created]
+
+# Floor for both jobs below, called via `uses:` with `secrets: inherit` and
+# no job-level `permissions:` of their own.
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: read
+  checks: read
+
+jobs:
+  release:
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/release.yml@9dd5185954175f12601cce10be3f84ac158f44c4
+    with:
+      founder_username: "m-e-h-r-d-a-a-d"   # same identity as pipeline.yml's merge-gate founder_username
+      integration_branch: "develop"
+      production_branch: "main"
+      auto_release_enabled: "true"    # founder's explicit, twice-confirmed request (2026-08-08) -
+        # see AGENTS.md's "Release and deployment authority" section for the record. Release
+        # promotion (and, via deploy-production.yml's own push-to-main trigger, the resulting
+        # production deploy) now requires no founder "approved" comment - CI + independent
+        # review passing on every task PR that went into the package is the gate.
+    secrets: inherit
+
+  auto-advance:
+    if: github.event_name == 'issues' && github.event.action == 'closed'
+    uses: KARSIFT/karsift-ai-infra/.github/workflows/auto-advance.yml@9dd5185954175f12601cce10be3f84ac158f44c4
+    with:
+      integration_branch: "develop"
+    secrets: inherit

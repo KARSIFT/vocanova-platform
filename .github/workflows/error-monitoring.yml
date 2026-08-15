@@ -5,7 +5,7 @@ name: error-monitoring
 # Queries the Sentry API for unresolved issues that were first seen recently
 # across all four Layout B projects (see the VOC-051 package's
 # `t00-evidence.md` §3) and opens one plain, UNLABELED GitHub issue per
-# genuinely new problem, so `pipeline.yml`'s `plan-from-issue` job drafts a
+# genuinely new problem, so `change-package.yml`'s `plan-from-issue` job drafts a
 # governed change package from it - the same route AGENTS.md's "Reporting a bug
 # found outside the normal loop" requires of a human. This workflow only ever
 # opens issues; it never adopts, approves, merges, or deploys anything.
@@ -81,7 +81,7 @@ jobs:
       # NOT the default `GITHUB_TOKEN`. This is load-bearing rather than
       # stylistic: GitHub does not start new workflow runs from events created
       # with the default `GITHUB_TOKEN`, so an issue opened that way would
-      # never trigger `pipeline.yml`'s `plan-from-issue` job - the entire point
+      # never trigger `change-package.yml`'s `plan-from-issue` job - the entire point
       # of filing it. The `|| github.token` fallback below keeps the run
       # working (issue still filed, planner triggered by hand) if the App
       # credentials are absent, and the script warns explicitly when it lands
@@ -139,7 +139,7 @@ jobs:
             if (process.env.USING_APP_TOKEN !== "true") {
               core.warning(
                 "KARSIFT_BOT_APP_ID/KARSIFT_BOT_PRIVATE_KEY are not set, so this run falls back to the default GITHUB_TOKEN. " +
-                  "Any issue it opens will NOT trigger pipeline.yml's plan-from-issue job (GitHub does not start workflow runs " +
+                  "Any issue it opens will NOT trigger change-package.yml's plan-from-issue job (GitHub does not start workflow runs " +
                   "from GITHUB_TOKEN-created events); planning must be started by hand for those issues."
               );
             }

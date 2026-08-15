@@ -78,9 +78,10 @@ churn instead of one process holding context.
   quota, not quality, and was the direct cause of most pipeline failures this repo has seen — a
   stable default with one deliberate cross-vendor hop (Reviewer → Cursor) captures the actual
   benefit without the instability.
-- `pipeline.yml`'s `implement`/`review`/`adopt`/`merge-gate` jobs are not retired by this ADR —
-  they keep running in parallel. Retiring them is a deliberate future decision, made only after
-  the design above is proven, not a side effect of accepting this record.
+- The karsift-ai-infra-backed `implement`/`adopt` (in `change-package.yml`) and `review`/
+  `merge-gate` (in `pipeline.yml`) jobs are not retired by this ADR — they keep running in
+  parallel. Retiring them is a deliberate future decision, made only after the design above is
+  proven, not a side effect of accepting this record.
 
 ## Alternatives considered
 
@@ -105,15 +106,17 @@ unsafe territory as trust in the system grows.
 
 ## Migration and rollback
 
-Additive only. `pipeline.yml` and `karsift-ai-infra` are unmodified and keep running exactly as
-they do today; nothing here requires touching them. Rollback is simply not building the
+Additive only. `pipeline.yml`/`change-package.yml`/`package-release.yml` and `karsift-ai-infra`
+keep running exactly as they do today (behavior-preserving split across those three files, VOC
+CI-cleanup); nothing here requires touching them further. Rollback is simply not building the
 Routine/subagent flow described in §3–§7 — there is nothing to revert on the existing pipeline
 since it was never changed.
 
 ## Affected documents and system areas
 
-- `.github/workflows/pipeline.yml` — eventual retirement of `implement`/`review`/`adopt`/
-  `merge-gate` jobs is a deliberate future decision, out of scope for this ADR.
+- `.github/workflows/pipeline.yml` (`review`/`merge-gate`) and `change-package.yml`
+  (`implement`/`adopt`) — eventual retirement of these jobs is a deliberate future decision, out
+  of scope for this ADR.
 - `orchestrator/run.mjs`, `orchestrator/RUNBOOK.md` — interim implementation (PR #50, PR #51),
   stays in place per §8.
 - `CLAUDE.md` — needs the `@AGENTS.md` import (§5), not yet made.
