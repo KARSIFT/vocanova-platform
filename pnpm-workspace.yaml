@@ -2,6 +2,19 @@ packages:
   - apps/web
   - packages/*
 
+# Forces patched versions of two transitive high-severity advisories `pnpm
+# audit` reports (both several levels deep in build-time-only dependency
+# chains, not the runtime request path): brace-expansion (DoS via unbounded
+# expansion, GHSA-mh99-v99m-4gvg / GHSA-rgw5-rvv9-x895, pulled in by
+# @sentry/nextjs's bundler/webpack plugins via glob>minimatch) and nanoid
+# (infinite loop on a zero-size custom generator, GHSA-2v37-7h3g-55p8,
+# pulled in by @tailwindcss/postcss via postcss). Neither is a direct
+# dependency of this repo. docs/development.md's `pnpm audit` policy fails
+# on high/critical; these were the three high-severity entries.
+overrides:
+  brace-expansion: ">=5.0.9"
+  nanoid: ">=3.3.18"
+
 allowBuilds:
   "@sentry/cli": true
   sharp: false
