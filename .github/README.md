@@ -21,7 +21,10 @@ lives in `.github/` itself. See
 for the required administrator settings and credentials.
 
 A-003 governance authority is active. These files do not technically activate RL1 or
-RL2, production deployment, autonomous production release, DOC-17, or DOC-18. (Automatic
-merge into `develop` specifically - a distinct, narrower gate, A-003 §10 - is separately
-implemented and live via karsift-ai-infra's merge-gate.yml; see
-`docs/governance/a003-transition-state.yaml`'s `automatic_merge_allowed` field.)
+RL2, production deployment, or autonomous production release. (Automatic merge into
+`develop` specifically - a distinct, narrower gate, DOC-16's "Branch and merge
+behavior" section - is separately implemented and live via karsift-ai-infra's
+merge-gate.yml; see `docs/governance/a003-transition-state.yaml`'s
+`automatic_merge_allowed` field.) DOC-17 and DOC-18's Control Plane architecture is
+superseded and archived (`docs/archive/`) - not something these files, or anything
+else, still needs to "activate."
