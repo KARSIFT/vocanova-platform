@@ -16,12 +16,11 @@ name: lighthouse
 # Mirrors the .github/workflows/accessibility.yml workflow
 # pattern from T07a: separate job, NOT folded into
 # pipeline.yml's `ci` job, because the `ci` job's contract
-# is `pnpm run format:check lint typecheck test build` and
-# adding a multi-minute production build + headless Chrome
-# audit run would regress PR feedback time for every PR
-# regardless of whether performance coverage applies. The
-# dedicated workflow keeps the cost local to PRs that touch
-# `apps/web/**` or its tests.
+# is `pnpm validate` and adding a multi-minute production
+# build + headless Chrome audit run would regress PR feedback
+# time for every PR regardless of whether performance coverage
+# applies. The dedicated workflow keeps the cost local to PRs
+# that touch `apps/web/**` or its tests.
 #
 # The first-time browser install is the same trade-off
 # T07a's `accessibility.yml` already accepts (see that

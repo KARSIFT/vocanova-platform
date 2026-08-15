@@ -25,18 +25,28 @@
 // and is therefore NOT part of the default `go test ./...` /
 // `pnpm run test:api` path, and is NOT wired into any GitHub
 // Actions workflow. This is a deliberate, founder-adopted
-// tradeoff, not an oversight: editing the shared `ci.yml` to add
-// a Postgres service container and an Atlas install step is not
-// even possible from this repository (it lives in
-// KARSIFT/karsift-ai-infra, a separate repository this planner
-// has no access to), and the package's declared scope excludes
-// any change to `.github/workflows/*` in this repo. The practical
-// consequence is that this proof runs on demand (a developer's
-// machine, or manually during VOC-032-T09's own live staging
-// rehearsal) rather than on every future PR. Permanent CI
-// enforcement, if later required, needs a separate, distinctly-
-// scoped follow-up package that touches the appropriate
-// workflow file in this repo and/or `ci.yml` in karsift-ai-infra.
+// tradeoff, not an oversight: at the time of VOC-033-D02, editing
+// the shared `ci.yml` to add a Postgres service container and an
+// Atlas install step was not even possible from this repository
+// (it lived in KARSIFT/karsift-ai-infra, a separate repository
+// this planner had no access to), and the package's declared
+// scope excluded any change to `.github/workflows/*` in this repo.
+// The practical consequence was that this proof ran on demand (a
+// developer's machine, or manually during VOC-032-T09's own live
+// staging rehearsal) rather than on every future PR.
+//
+// Update: `pipeline.yml`'s `ci` job now runs in-house (`pnpm
+// validate`, no longer a call into karsift-ai-infra's `ci.yml`),
+// so the specific "not even possible from this repository"
+// constraint above no longer applies - adding a Postgres service
+// container and Atlas step to this repo's own `.github/workflows/
+// pipeline.yml` is now technically straightforward. This test
+// remains gated behind the `integration` build tag and unwired
+// from CI regardless, since permanent CI enforcement is still a
+// separate, distinctly-scoped decision (declared package scope,
+// runtime cost, and Atlas's pre-existing known-bad-migration
+// issues per VOC-032's staging-evidence.md) that this comment does
+// not by itself authorize.
 //
 // This test does NOT replace or substitute for VOC-032-T09's
 // live rehearsal against the real staging database. It is a

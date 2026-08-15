@@ -67,11 +67,10 @@
 # a new job in pipeline.yml, because pipeline.yml's own header
 # (see the comment block at the top of pipeline.yml) states
 # "Deploy is out of scope" and its `ci`/`release` jobs have
-# contracts (`pnpm run format:check lint typecheck test build`
-# for ci, package-completion detection for release) that a
-# multi-minute production-image build + SSH deploy would
-# regress for every PR regardless of whether staging-deploy
-# coverage applies.
+# contracts (`pnpm validate` for ci, package-completion
+# detection for release) that a multi-minute production-image
+# build + SSH deploy would regress for every PR regardless of
+# whether staging-deploy coverage applies.
 #
 # Staging host layout this workflow assumes (founder-set-up
 # per T11's infra/README.md; this is the load-bearing

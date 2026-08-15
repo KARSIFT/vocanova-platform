@@ -6,18 +6,17 @@ name: accessibility
 # against a production build of @vocanova/web, on every PR that
 # touches the web app or its tests. See apps/web/tests/e2e/README.md
 # "CI runner / browser-dependency reconciliation (VOC-031-DEP-04)"
-# for the rationale for separating this from the generic pipeline.yml
-# `ci` job (which runs pnpm validate against the karsift-ai-infra
-# reusable workflow and intentionally does not install Playwright).
+# for the rationale for separating this from pipeline.yml's `ci`
+# job (which runs `pnpm validate` directly and intentionally does
+# not install Playwright).
 #
 # The workflow is wired as a required job (per DOC-10 §7 Level 2
 # "selected Playwright" + the T07a acceptance criterion's
 # "wired into CI as a new job"). It is intentionally NOT folded
 # into pipeline.yml's `ci` job because that job's contract is
-# `pnpm run format:check lint typecheck test build` and adding a
-# multi-minute browser install + production build would regress
-# PR feedback time for every PR regardless of whether e2e
-# coverage applies.
+# `pnpm validate` and adding a multi-minute browser install +
+# production build would regress PR feedback time for every PR
+# regardless of whether e2e coverage applies.
 
 on:
   pull_request:

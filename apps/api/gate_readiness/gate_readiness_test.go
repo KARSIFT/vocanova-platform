@@ -285,8 +285,8 @@ func TestT13Doc11AmendmentApplied(t *testing.T) {
 // The test is restricted to the apps/api subtree because
 // that is the part of the repository that the standard
 // Go tooling covers; apps/web and infra are exercised by
-// the existing karsift-ai-infra ci.yml workflow and are
-// out of scope for this specific gate.
+// pipeline.yml's own in-house `ci` job (`pnpm validate`) and
+// are out of scope for this specific gate.
 func TestFullInstalledSuiteRuns(t *testing.T) {
 	appsAPIRoot := resolveAppsAPIRoot(t)
 	if _, err := os.Stat(filepath.Join(appsAPIRoot, "go.mod")); err != nil {
