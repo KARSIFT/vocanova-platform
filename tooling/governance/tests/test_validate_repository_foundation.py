@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import shutil
 import subprocess
 import sys
@@ -20,7 +21,15 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         shutil.copytree(
             REPOSITORY_ROOT,
             self.root,
-            ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"),
+            ignore=shutil.ignore_patterns(
+                ".git",
+                ".next",
+                "node_modules",
+                "dist",
+                "coverage",
+                "__pycache__",
+                "*.pyc",
+            ),
         )
 
     def tearDown(self) -> None:
@@ -99,6 +108,100 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         result = self.run_validator()
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
 
+    def test_automatic_merge_drafting_matrix_covers_r0_through_r4(self) -> None:
+        spec = importlib.util.spec_from_file_location("foundation_validator_matrix", VALIDATOR)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        for level in range(5):
+            risk = f"R{level}"
+            with self.subTest(risk=risk, case="default"):
+                self.assertIsNone(
+                    module.automatic_merge_drafting_error(
+                        {"id": "VOC-080", "risk": risk, "automatic_merge_allowed": True}
+                    )
+                )
+            with self.subTest(risk=risk, case="reasoned hold"):
+                self.assertIsNone(
+                    module.automatic_merge_drafting_error(
+                        {
+                            "id": "VOC-080",
+                            "risk": risk,
+                            "automatic_merge_allowed": False,
+                            "automatic_merge_hold_reason": "Named package-local merge window.",
+                        }
+                    )
+                )
+            with self.subTest(risk=risk, case="unreasoned hold"):
+                self.assertIn(
+                    "requires automatic_merge_hold_reason",
+                    module.automatic_merge_drafting_error(
+                        {"id": "VOC-080", "risk": risk, "automatic_merge_allowed": False}
+                    ),
+                )
+
+    def test_future_package_unreasoned_automatic_merge_hold_fails(self) -> None:
+        package = self.root / "specs/changes/VOC-080-policy-fixture"
+        package.mkdir()
+        (package / "change.yaml").write_text(
+            "id: VOC-080\nrisk: R4\nautomatic_merge_allowed: false\n",
+            encoding="utf-8",
+        )
+        self.assert_failure("automatic_merge_allowed false requires automatic_merge_hold_reason")
+
+    def test_future_package_reasoned_automatic_merge_hold_passes(self) -> None:
+        package = self.root / "specs/changes/VOC-080-policy-fixture"
+        package.mkdir()
+        (package / "change.yaml").write_text(
+            "id: VOC-080\nrisk: R4\nautomatic_merge_allowed: false\n"
+            "automatic_merge_hold_reason: Named package-local merge window.\n",
+            encoding="utf-8",
+        )
+        result = self.run_validator()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_future_package_placeholder_automatic_merge_hold_fails(self) -> None:
+        package = self.root / "specs/changes/VOC-080-policy-fixture"
+        package.mkdir()
+        (package / "change.yaml").write_text(
+            "id: VOC-080\nrisk: R2\nautomatic_merge_allowed: false\n"
+            "automatic_merge_hold_reason: TBD\n",
+            encoding="utf-8",
+        )
+        self.assert_failure("must be a non-placeholder package-local rationale")
+
+    def test_automatic_merge_example_matrix_requires_r0_through_r4(self) -> None:
+        path = self.root / "specs/templates/change-package/examples/automatic-merge-drafting.json"
+        matrix = json.loads(path.read_text(encoding="utf-8"))
+        matrix["cases"] = [case for case in matrix["cases"] if case["name"] != "r4-default"]
+        path.write_text(json.dumps(matrix), encoding="utf-8")
+        self.assert_failure("default examples must cover R0-R4")
+
+    def test_voc079_automatic_merge_transition_marker_is_required(self) -> None:
+        self.replace(
+            "specs/changes/VOC-079-r4-approval-neutral/change.yaml",
+            "must not be reused as precedent after adoption",
+            "marker removed for test",
+        )
+        self.assert_failure("missing VOC-079 transition-exception marker")
+
+    def test_voc079_automatic_merge_transition_exception_stays_r4(self) -> None:
+        self.replace(
+            "specs/changes/VOC-079-r4-approval-neutral/change.yaml",
+            "risk: R4",
+            "risk: R3",
+        )
+        self.assert_failure("must preserve its pre-transition R4 false exception")
+
+    def test_automatic_merge_cross_document_rule_is_required(self) -> None:
+        self.replace(
+            "AGENTS.md",
+            "R0, R1, R2, R3, and R4 all default to",
+            "Only lower risk classes default to",
+        )
+        self.assert_failure("missing automatic-merge drafting rule marker")
+
     def test_classifier_accepts_r4_for_protected_policy(self) -> None:
         result = self.run_classifier("R4")
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
@@ -163,18 +266,25 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_voc_004_classifier_rejects_r3(self) -> None:
         result = self.run_classifier_for_path(
-            "docs/architecture/17-autonomous-development-architecture.md", "R3"
+            "docs/archive/17-autonomous-development-architecture.md", "R3"
         )
         self.assertEqual(1, result.returncode, result.stdout + result.stderr)
         self.assertIn("below the detected floor R4", result.stderr)
 
-    def test_a003_frozen_body_change_fails(self) -> None:
+    def test_doc16_folded_amendment_evidence_removal_fails(self) -> None:
+        # DOC-16 v2.0 folds the former standalone A-002/A-003/A-004 amendment
+        # documents into itself and preserves their approval evidence in its own
+        # "Amendment history" section instead of a separate frozen-checksum file
+        # per amendment (see validate_a003_lifecycle). Losing one of those exact
+        # evidence strings - here, A-003's effective-activation comment URL -
+        # must still fail validation, the same protection the old whole-body
+        # checksum provided before consolidation.
         self.replace(
-            "docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md",
-            "AI performs the work",
-            "AI sometimes performs the work",
+            "docs/governance/16-autonomous-development-operating-model.md",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622",
+            "https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-0000000000",
         )
-        self.assert_failure("frozen A-003 substantive body checksum mismatch")
+        self.assert_failure("missing folded amendment evidence marker")
 
     def test_a003_authority_rollback_without_governed_record_fails(self) -> None:
         self.replace(
@@ -248,13 +358,37 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assert_failure("historical evidence marker")
 
-    def test_a003_routine_r3_human_approval_marker_removal_fails(self) -> None:
+    def test_voc079_risk_class_personal_approval_marker_removal_fails(self) -> None:
         self.replace(
             "docs/governance/approval-matrix.md",
-            "No standing technical-steward approval; no founder approval merely because work is R3",
-            "Standing technical-steward and founder approval required for every R3",
+            "no class requires founder",
+            "R4 requires founder approval",
         )
-        self.assert_failure("missing A-003 authority marker")
+        self.assert_failure("missing current authority marker")
+
+    def test_voc079_r4_approval_neutral_doc16_marker_removal_fails(self) -> None:
+        self.replace(
+            "docs/governance/16-autonomous-development-operating-model.md",
+            "R4 does not require founder approval merely because it is R4",
+            "R4 always requires founder approval",
+        )
+        self.assert_failure("missing VOC-079 approval-neutral marker")
+
+    def test_voc079_action_specific_authority_marker_removal_fails(self) -> None:
+        self.replace(
+            ".github/pull_request_template.md",
+            "Action-specific authority and evidence",
+            "Generic approval",
+        )
+        self.assert_failure("missing VOC-079 approval-neutral marker")
+
+    def test_voc079_reviewer_role_neutrality_marker_removal_fails(self) -> None:
+        self.replace(
+            "CLAUDE.md",
+            "may occupy the independent-reviewer role",
+            "is the permanent independent reviewer",
+        )
+        self.assert_failure("missing VOC-079 approval-neutral marker")
 
     def test_a003_rl2_false_activation_fails(self) -> None:
         self.replace(
@@ -272,49 +406,37 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assert_failure("rl1_technical_activation must remain false")
 
-    def test_a003_automatic_merge_enablement_fails(self) -> None:
-        # 2026-08-08: the repository is now authorized (see the
-        # AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08 marker in
-        # a003-transition-state.yaml) and this field's required value is
-        # "true", not "false" - the tripwire this test exercises is that
-        # DEVIATING from the currently-required value (in either direction)
-        # still fails closed, not that the field is frozen at one constant
-        # forever regardless of authorization.
+    def test_a003_automatic_merge_retirement_fails_closed(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "automatic_merge_allowed: true",
             "automatic_merge_allowed: false",
+            "automatic_merge_allowed: true",
         )
-        self.assert_failure("automatic_merge_allowed must equal 'true' once authorized")
+        self.assert_failure("automatic_merge_allowed must equal 'false' after VOC-078 control-plane retirement")
 
-    def test_a003_automatic_merge_enablement_without_marker_fails(self) -> None:
-        # The other half of the same tripwire: the marker and the four
-        # merge/release/deployment fields must move together. Flipping a
-        # field to the authorized value while REMOVING the marker (as if
-        # someone tried to sneak the capability in without the recorded
-        # authorization) must fail just as hard as the reverse.
+    def test_a003_retirement_without_marker_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08",
+            "VOC-078-CONTROL-PLANE-RETIRED-2026-08-19",
             "MARKER-REMOVED-FOR-TEST",
         )
-        self.assert_failure("automatic_merge_allowed must remain 'false' without an authorization marker")
+        self.assert_failure("automatic_merge_allowed must equal 'true' once authorized")
 
     def test_a003_autonomous_merge_enablement_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "autonomous_merge_allowed: true",
             "autonomous_merge_allowed: false",
+            "autonomous_merge_allowed: true",
         )
-        self.assert_failure("autonomous_merge_allowed must equal 'true' once authorized")
+        self.assert_failure("autonomous_merge_allowed must equal 'false' after VOC-078 control-plane retirement")
 
     def test_a003_autonomous_production_enablement_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "autonomous_production_release: enabled",
             "autonomous_production_release: disabled",
+            "autonomous_production_release: enabled",
         )
-        self.assert_failure("autonomous_production_release must equal 'enabled' once authorized")
+        self.assert_failure("autonomous_production_release must equal 'disabled' after VOC-078 control-plane retirement")
 
     def test_a003_doc_17_adoption_fails(self) -> None:
         self.replace(
@@ -334,7 +456,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_17_frozen_body_change_fails(self) -> None:
         self.replace(
-            "docs/architecture/17-autonomous-development-architecture.md",
+            "docs/archive/17-autonomous-development-architecture.md",
             "AI workers are replaceable.",
             "AI workers are permanent.",
         )
@@ -342,7 +464,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_18_frozen_body_change_fails(self) -> None:
         self.replace(
-            "docs/planning/18-autonomous-development-implementation-roadmap.md",
+            "docs/archive/18-autonomous-development-implementation-roadmap.md",
             "Production autonomy is not activated early.",
             "Production autonomy is activated early.",
         )
@@ -350,7 +472,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_17_false_technical_activation_fails(self) -> None:
         self.replace(
-            "docs/architecture/17-autonomous-development-architecture.md",
+            "docs/archive/17-autonomous-development-architecture.md",
             "technical_activation_status: inactive",
             "technical_activation_status: active",
         )
@@ -358,7 +480,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_17_pre_merge_lifecycle_fails(self) -> None:
         self.replace(
-            "docs/architecture/17-autonomous-development-architecture.md",
+            "docs/archive/17-autonomous-development-architecture.md",
             "repository_adoption_status: adopted",
             "repository_adoption_status: candidate-pending-merge",
         )
@@ -366,7 +488,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_doc_18_missing_adopted_develop_sha_fails(self) -> None:
         self.replace(
-            "docs/planning/18-autonomous-development-implementation-roadmap.md",
+            "docs/archive/18-autonomous-development-implementation-roadmap.md",
             "adopted_develop_sha: 2b5ecb19b532a9b23250e1255ff1e7fb9a78ef77",
             "adopted_develop_sha: null",
         )
@@ -388,13 +510,13 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assert_failure("control_plane_implementation must remain false")
 
-    def test_production_deployment_enablement_fails(self) -> None:
+    def test_production_deployment_retirement_fails_closed(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "production_deployment: enabled",
             "production_deployment: disabled",
+            "production_deployment: enabled",
         )
-        self.assert_failure("production_deployment must equal 'enabled' once authorized")
+        self.assert_failure("production_deployment must equal 'disabled' after VOC-078 control-plane retirement")
 
     def test_protected_policy_partial_adoption_fails(self) -> None:
         self.replace(
@@ -470,16 +592,45 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         self.assert_failure("AI or bot identity")
 
     def test_workflow_write_permission_fails(self) -> None:
-        self.replace(".github/workflows/repository-governance.yml", "contents: read", "contents: write")
+        self.replace(".github/workflows/governance.yml", "contents: read", "contents: write")
         self.assert_failure("contents: read")
 
+    def test_merge_eligibility_permission_expansion_fails(self) -> None:
+        self.replace(".github/workflows/governance.yml", "checks: read", "checks: write")
+        self.assert_failure("checks: read")
+
+    def test_missing_merge_eligibility_adapter_fails(self) -> None:
+        (self.root / "tooling/governance/merge-eligibility/github_adapter.py").unlink()
+        self.assert_failure("github_adapter.py")
+
+    def test_merge_eligibility_adapter_write_method_fails(self) -> None:
+        self.replace(
+            "tooling/governance/merge-eligibility/github_adapter.py",
+            'method="GET"',
+            'method="POST"',
+        )
+        self.assert_failure("prohibited write/process path")
+
+    def test_merge_eligibility_schema_version_change_fails(self) -> None:
+        self.replace(
+            "tooling/governance/merge-eligibility/schema-v1.json",
+            '"schema_version": { "const": 1 }',
+            '"schema_version": { "const": 2 }',
+        )
+        self.assert_failure("schema_version must be pinned to 1")
+
+    def test_merge_eligibility_evaluator_network_boundary_fails(self) -> None:
+        path = self.root / "tooling/governance/merge-eligibility/evaluator.py"
+        path.write_text(path.read_text(encoding="utf-8") + "\nimport urllib\n", encoding="utf-8")
+        self.assert_failure("pure evaluator contains prohibited boundary")
+
     def test_pull_request_target_fails(self) -> None:
-        self.replace(".github/workflows/repository-governance.yml", "pull_request:", "pull_request_target:")
+        self.replace(".github/workflows/governance.yml", "pull_request:", "pull_request_target:")
         self.assert_failure("pull_request_target")
 
     def test_path_filtered_workflow_fails(self) -> None:
         self.replace(
-            ".github/workflows/repository-governance.yml",
+            ".github/workflows/governance.yml",
             "  pull_request:\n    branches:",
             "  pull_request:\n    paths:\n      - docs/**\n    branches:",
         )
@@ -487,7 +638,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_unpinned_external_action_fails(self) -> None:
         self.replace(
-            ".github/workflows/repository-governance.yml",
+            ".github/workflows/governance.yml",
             "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
             "actions/checkout@v4",
         )

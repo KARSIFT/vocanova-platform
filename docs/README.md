@@ -17,6 +17,7 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
 - [Governance](governance/README.md)
 - [Decisions](decisions/README.md)
 - [Templates](templates/README.md)
+- [Archive](archive/README.md)
 
 ## Canonical document index
 
@@ -35,13 +36,13 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
 | DOC-10 | [VocaNova Development Workflow](operations/10-development-workflow.md) | approved | founder | `docs/operations/10-development-workflow.md` | DOC-11, DOC-15, DOC-16, DOC-19 |
 | DOC-11 | [VocaNova DevOps and CI/CD Plan](operations/11-devops-and-ci-cd.md) | approved | founder | `docs/operations/11-devops-and-ci-cd.md` | DOC-10, DOC-16, DOC-19 |
 | DOC-12 | [VocaNova MVP Implementation Plan](product/12-mvp-implementation-plan.md) | approved | founder | `docs/product/12-mvp-implementation-plan.md` | DOC-00, DOC-01, DOC-03, DOC-04, DOC-10, DOC-11, DOC-13, DOC-18 |
-| DOC-13 | [VocaNova F1 Repository Foundation Execution Package](operations/13-f1-repository-foundation-execution-package.md) | historical (F1 complete) | founder | `docs/operations/13-f1-repository-foundation-execution-package.md` | DOC-10, DOC-12, DOC-15, DOC-16 |
+| DOC-13 | [VocaNova F1 Repository Foundation Execution Package](archive/13-f1-repository-foundation-execution-package.md) | historical (F1 complete) | founder | `docs/archive/13-f1-repository-foundation-execution-package.md` | DOC-10, DOC-12, DOC-15, DOC-16 |
 | DOC-14 | Historical KARSIFT AI Development Automation Architecture | not adopted | founder | Preserved as research; see DOC-19 | DOC-19 |
 | DOC-15 | [AI-Native Product and Engineering Operating Model](operations/15-ai-native-product-and-engineering-operating-model.md) | approved | founder | `docs/operations/15-ai-native-product-and-engineering-operating-model.md` | DOC-16, DOC-19 |
 | DOC-16 | [Autonomous Development Operating Model](governance/16-autonomous-development-operating-model.md) | approved | founder | `docs/governance/16-autonomous-development-operating-model.md` | DOC-15, DOC-17, DOC-19 |
-| DOC-17 | [Autonomous Development Architecture](architecture/17-autonomous-development-architecture.md) | approved | founder | `docs/architecture/17-autonomous-development-architecture.md` | DOC-16, DOC-18, DOC-19 |
-| DOC-18 | [Autonomous Development Implementation Roadmap](planning/18-autonomous-development-implementation-roadmap.md) | approved | founder | `docs/planning/18-autonomous-development-implementation-roadmap.md` | DOC-17, DOC-19 |
-| DOC-19 | [Governance Reconciliation Notes](operations/19-governance-reconciliation-notes.md) | proposed | founder | `docs/operations/19-governance-reconciliation-notes.md` | DOC-10, DOC-11, DOC-15, DOC-16, DOC-17, DOC-18, A-002, A-003 |
+| DOC-17 | [Autonomous Development Architecture](archive/17-autonomous-development-architecture.md) | superseded (never built) | founder | `docs/archive/17-autonomous-development-architecture.md` | DOC-16, DOC-18, DOC-19 |
+| DOC-18 | [Autonomous Development Implementation Roadmap](archive/18-autonomous-development-implementation-roadmap.md) | superseded (never built) | founder | `docs/archive/18-autonomous-development-implementation-roadmap.md` | DOC-17, DOC-19 |
+| DOC-19 | [Governance Reconciliation Notes](archive/19-governance-reconciliation-notes.md) | historical | founder | `docs/archive/19-governance-reconciliation-notes.md` | DOC-10, DOC-11, DOC-15, DOC-16, DOC-17, DOC-18 |
 
 ## Migration and relationships
 
@@ -50,17 +51,16 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
 - [Migration notes](archive/README-migration-notes.md) preserve the reconciliation evidence trail.
 - [Adoption notes](archive/README-adoption-notes.md) record VOC-008 semantic corrections.
 
-DOC-17 and DOC-18 are adopted together per VOC-004 (canonical adoption), but describe a system
-that was never built and is not the project's actual direction (noted 2026-07-24; both remain
-`approved`/adopted as historical planning documents, not deleted, but should not be read as
-describing current or planned engineering work). They specify a standalone Control Plane service
-(a durable PostgreSQL work queue, an AI Budget Governor, an Execution Lease Manager, an MCP
-founder interface, etc.) and an 18-phase roadmap to build it. The system that actually shipped
-VOC-010 through VOC-022 is architecturally unrelated: a set of reusable GitHub Actions workflows
-(`KARSIFT/karsift-ai-infra`) wired into this repo's own `.github/workflows/pipeline.yml` - no
-Postgres queue, no Budget Governor, no MCP interface, no Change Contract Registry. This was a
-deliberate decision (see `karsift-ai-infra`'s own README and commit history), not an oversight.
-Their adoption does not implement the Control Plane, activate RL1/RL2, or enable production
-deployment or autonomous production release. It also does not, on its own, cover automatic merge
-into `develop` - that narrower capability (A-003 §10) is separately implemented and live; see
+DOC-17 and DOC-18 were adopted together per VOC-004 (canonical adoption), but describe a system
+that was never built and is not the project's actual direction (noted 2026-07-24; retired to
+`docs/archive/` 2026-08-14 - both are marked `superseded` in their own frontmatter, not deleted,
+and their frozen substantive-body checksums are unchanged, only their location and status
+changed). They specify a standalone Control Plane service (a durable PostgreSQL work queue, an AI
+Budget Governor, an Execution Lease Manager, an MCP founder interface, etc.) and an 18-phase
+roadmap to build it. The later local orchestrator/subagent experiment recorded in
+[ADR-0001](decisions/ADR-0001-agent-orchestration-architecture.md) was architecturally
+unrelated: no Postgres queue, no Budget Governor, no MCP interface, no Change Contract Registry.
+VOC-078 superseded both automation directions: T01 retired the external workflow state
+machine and T02 removed the local orchestrator assets. Neither experiment activated
+RL1/RL2. Current operational state is recorded in
 `docs/governance/a003-transition-state.yaml`.

@@ -1,8 +1,8 @@
 schema_version: 1
 policy: repository-protected-paths
-status: approved-a003-active
+status: approved-voc079-active
 review_routing_identity: m-e-h-r-d-a-a-d
-authority_model: a003-active
+authority_model: voc079-approval-neutral
 default_risk: R1
 
 paths:
@@ -24,13 +24,13 @@ paths:
     minimum_risk: R4
   - path: docs/governance/
     minimum_risk: R3
-  - path: docs/governance/amendments/
+  - path: docs/governance/16-autonomous-development-operating-model.md
     minimum_risk: R4
   - path: docs/governance/a003-transition-state.yaml
     minimum_risk: R4
-  - path: docs/architecture/17-autonomous-development-architecture.md
+  - path: docs/archive/17-autonomous-development-architecture.md
     minimum_risk: R4
-  - path: docs/planning/18-autonomous-development-implementation-roadmap.md
+  - path: docs/archive/18-autonomous-development-implementation-roadmap.md
     minimum_risk: R4
   - path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
     minimum_risk: R4
@@ -63,14 +63,15 @@ hosted_enforcement_status: not-activated
 
 # AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08 - see
 # docs/governance/a003-transition-state.yaml's identical marker/note for the
-# full record (founder's explicit, twice-confirmed request). This file mirrors
-# that one's merge/release/deployment fields and must move in lockstep with
-# it - tooling/governance/validate_repository_foundation.py checks both.
-automatic_merge_allowed: true
-autonomous_merge_allowed: true
+# full historical record. VOC-078-CONTROL-PLANE-RETIRED-2026-08-19 records the
+# later operational retirement of automatic merge and package-driven release;
+# VOC-078-T03 also retired GitHub-side production deployment automation. This
+# file mirrors the lifecycle state and tooling checks both in lockstep.
+automatic_merge_allowed: false
+autonomous_merge_allowed: false
 
-production_deployment: enabled
-autonomous_production_release: enabled
+production_deployment: disabled
+autonomous_production_release: disabled
 rl1_technical_activation: false
 rl2_technical_activation: false
 doc_17_repository_adoption: true

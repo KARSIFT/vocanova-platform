@@ -9,7 +9,7 @@ reviewed_revision: replace-with-commit-sha
 # Legacy/Exceptional Technical Review Request — Change title
 
 This legacy/exceptional template must not be used as a routine R3 approval layer
-under active A-003. It may preserve historical evidence or record qualified external
+under the VOC-079 approval-neutral model. It may preserve historical evidence or record qualified external
 review for a specifically triggered EHR or another independently applicable
 requirement. The one-time VOC-002 migration approval is exhausted and non-reusable.
 
@@ -36,7 +36,7 @@ requirement. The one-time VOC-002 migration approval is exhausted and non-reusab
 - Is the design technically sound within the approved product scope?
 - Are least privilege, failure isolation, and recovery adequate?
 - Are tests and operational evidence proportionate to the risk?
-- Does any issue require R4 founder escalation?
+- Is any R4 evidence incomplete or any action-specific authority unmet?
 
 ## Approval
 

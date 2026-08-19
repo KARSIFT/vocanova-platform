@@ -8,10 +8,8 @@ required_files=(
   .github/CODEOWNERS
   .github/pull_request_template.md
   .github/approved-policy/protected-paths.yaml
-  .github/workflows/repository-governance.yml
+  .github/workflows/governance.yml
   docs/governance/16-autonomous-development-operating-model.md
-  docs/governance/amendments/A-002-governed-autonomous-releases.md
-  docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md
   docs/governance/a003-transition-state.yaml
   docs/governance/approval-matrix.md
   docs/governance/change-risk-classification.md
@@ -19,8 +17,8 @@ required_files=(
   docs/governance/post-merge-activation-checklist.md
   docs/governance/repository-settings.md
   docs/governance/technical-steward-appointment.md
-  docs/architecture/17-autonomous-development-architecture.md
-  docs/planning/18-autonomous-development-implementation-roadmap.md
+  docs/archive/17-autonomous-development-architecture.md
+  docs/archive/18-autonomous-development-implementation-roadmap.md
   docs/templates/change-specification.md
   docs/templates/acceptance-criteria.md
   docs/templates/founder-decision-card.md
@@ -36,6 +34,13 @@ required_files=(
   specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/change.yaml
   tooling/governance/validate_repository_foundation.py
   tooling/governance/tests/test_validate_repository_foundation.py
+  tooling/governance/merge-eligibility/README.md
+  tooling/governance/merge-eligibility/evaluator.py
+  tooling/governance/merge-eligibility/github_adapter.py
+  tooling/governance/merge-eligibility/schema-v1.json
+  tooling/governance/merge-eligibility/fixtures/eligible-r4.json
+  tooling/governance/merge-eligibility/fixtures/blocked-r4.json
+  tooling/governance/tests/test_merge_eligibility.py
 )
 
 for file in "${required_files[@]}"; do
@@ -60,7 +65,9 @@ required_pr_fields=(
   "Analytics/telemetry"
   "Documentation"
   "Independent-verifier report/result"
-  "Required approval class"
+  "Required risk evidence"
+  "Action-specific authority and evidence"
+  "Blocking-findings resolution"
 )
 
 for field in "${required_pr_fields[@]}"; do
@@ -70,10 +77,14 @@ for field in "${required_pr_fields[@]}"; do
   }
 done
 
-amendment=docs/governance/amendments/A-002-governed-autonomous-releases.md
 operating_model=docs/governance/16-autonomous-development-operating-model.md
 appointment=docs/governance/technical-steward-appointment.md
 activation=docs/governance/post-merge-activation-checklist.md
+
+# DOC-16 v2.0 (2026-08-14) folds the former A-002/A-003/A-004 amendments directly
+# into this document and retires the separate amendment files; every check below
+# that used to run against the amendment files now runs against DOC-16 itself,
+# preserved in its "Amendment history" section rather than a standalone file.
 
 grep -Fqx "status: approved" "$operating_model" || {
   echo "DOC-16 must have status: approved." >&2
@@ -83,15 +94,7 @@ grep -Fqx "approved_at: 2026-07-13" "$operating_model" || {
   echo "DOC-16 must record approved_at: 2026-07-13." >&2
   exit 1
 }
-grep -Fqx "status: approved" "$amendment" || {
-  echo "A-002 must have status: approved." >&2
-  exit 1
-}
-grep -Fqx "approved_at: 2026-07-13" "$amendment" || {
-  echo "A-002 must record approved_at: 2026-07-13." >&2
-  exit 1
-}
-if grep -Fq "approval_evidence: pending-github-pull-request" "$operating_model" "$amendment"; then
+if grep -Fq "approval_evidence: pending-github-pull-request" "$operating_model"; then
   echo "Canonical governance contains stale pending approval evidence." >&2
   exit 1
 fi
@@ -135,14 +138,22 @@ if grep -Eqi '^[[:space:]]*Status:[[:space:]]*Activated|^- \[x\].*(autonomous|pr
   exit 1
 fi
 
-grep -Fq "Low-risk, reversible R0-R1 production releases may merge" "$amendment"
-grep -Fq "technical steward" "$amendment"
-grep -Fq "require founder approval" "$amendment"
-grep -Fq "initial public launch" "$amendment"
-grep -Fq "Initial governance bootstrap adoption" "$operating_model"
-grep -Fq "Initial adoption exception" "$amendment"
+grep -Fq "RL1 - Routine release" "$operating_model"
+grep -Fq "technical steward" "$operating_model"
+grep -Fq "R4 does not require founder approval merely because it is R4" "$operating_model"
+grep -Fq "universal evidence contract" "$operating_model"
+grep -Fq "action-specific authority" "$operating_model"
+grep -Fq "initial public launch" "$operating_model"
+grep -Fq "Governance bootstrap history" "$operating_model"
+grep -Fq "bootstrap exception" "$operating_model"
+grep -Fq "Amendment history" "$operating_model"
 grep -Fq "historical initial DOC-16/A-002 bootstrap" docs/governance/approval-matrix.md
-grep -Fq "R3 production changes remain" docs/governance/post-merge-activation-checklist.md
+grep -Fq "No approval from risk class" docs/governance/change-risk-classification.md
+grep -Fq "ADR-0002" docs/decisions/README.md
+grep -Fq "production changes remain blocked" docs/governance/post-merge-activation-checklist.md
+grep -Fq "checks: read" .github/workflows/governance.yml
+grep -Fq "pull-requests: read" .github/workflows/governance.yml
+grep -Fq "merge-eligibility/github_adapter.py" .github/workflows/governance.yml
 
 if grep -Eq 'FOUNDER_GITHUB_USERNAME|TECHNICAL_STEWARD_GITHUB_USERNAME' .github/CODEOWNERS; then
   echo "CODEOWNERS contains an unverifiable identity placeholder." >&2
@@ -173,18 +184,17 @@ done
 
 r4_ruleset_paths=(
   /.github/CODEOWNERS
-  /.github/workflows/governance-policy.yml
+  /.github/workflows/governance.yml
   /scripts/governance/
   /docs/operations/15-ai-native-product-and-engineering-operating-model.md
   /docs/governance/approval-matrix.md
   /docs/governance/change-risk-classification.md
   /docs/governance/protected-areas.md
   /docs/governance/post-merge-activation-checklist.md
-  /docs/governance/amendments/
   /docs/governance/a003-transition-state.yaml
   /docs/governance/16-autonomous-development-operating-model.md
-  /docs/architecture/17-autonomous-development-architecture.md
-  /docs/planning/18-autonomous-development-implementation-roadmap.md
+  /docs/archive/17-autonomous-development-architecture.md
+  /docs/archive/18-autonomous-development-implementation-roadmap.md
   /specs/changes/VOC-002-a003-governance-transition/
   /specs/changes/VOC-003-a003-lifecycle-sync/
   /specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/

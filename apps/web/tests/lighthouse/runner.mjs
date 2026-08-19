@@ -32,7 +32,7 @@
 //   over `lighthouse`.
 //
 // The CI workflow that calls this script (`.github/workflows/
-// lighthouse.yml`) is the single required job for the T09
+// quality.yml`, lighthouse job) is the single required job for the T09
 // acceptance criterion. The script exits with code 0 if every
 // (screen, layout) audit meets every DOC-08 threshold, and
 // exits with code 1 otherwise, so a missed threshold is a hard

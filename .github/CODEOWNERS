@@ -1,8 +1,8 @@
 # @m-e-h-r-d-a-a-d is the verified founder and historical pre-A-003 technical steward.
-# Direct account routing is review routing only: it never proves R3/R4 approval. Under
-# active A-003 it must not recreate standing steward or founder approval for routine
-# R3. No replacement steward team is implied.
-# Codex, Claude Code, bots, and automation identities must not be human authorities.
+# Direct account routing is review routing only: it never proves R3/R4 evidence,
+# role separation, or action-specific authority. Under VOC-079 it must not recreate
+# standing steward or founder approval from any risk label. No replacement steward
+# team is implied; human and AI systems may fill builder/reviewer roles when separate.
 
 # Review routing for governance-critical paths; effective R3/R4 classification is
 # determined by the risk classifier and semantic independent review.
@@ -13,8 +13,8 @@
 /CONTRIBUTING.md                           @m-e-h-r-d-a-a-d
 /SECURITY.md                               @m-e-h-r-d-a-a-d
 /docs/governance/                          @m-e-h-r-d-a-a-d
-/docs/architecture/17-autonomous-development-architecture.md @m-e-h-r-d-a-a-d
-/docs/planning/18-autonomous-development-implementation-roadmap.md @m-e-h-r-d-a-a-d
+/docs/archive/17-autonomous-development-architecture.md @m-e-h-r-d-a-a-d
+/docs/archive/18-autonomous-development-implementation-roadmap.md @m-e-h-r-d-a-a-d
 /docs/operations/15-ai-native-product-and-engineering-operating-model.md @m-e-h-r-d-a-a-d
 /scripts/governance/                       @m-e-h-r-d-a-a-d
 

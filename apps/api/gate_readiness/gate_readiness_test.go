@@ -19,9 +19,10 @@ import (
 // test suite (go test ./...) running through the standard
 // CI pipeline is the load-bearing check the gate makes:
 // any future PR that removes or renames one of these files
-// without updating the corresponding EV-* row fails this
-// test, which fails the package's full-suite run, which
-// blocks merge via the standard R3 required-checks path.
+// without updating the corresponding current evidence
+// fails this test. Evidence deliberately retired by a
+// later adopted package remains in Git history rather than
+// forcing its removed executable back into the repository.
 //
 // The test also records, as t.Log output, the items the
 // gate is explicitly NOT asserting on - the in-scope but
@@ -42,9 +43,10 @@ import (
 // that is supposed to have produced the file; EV is the
 // staging-evidence.md row id the test enforces.
 type evidenceRow struct {
-	Path   string
-	Source string
-	EV     string
+	Path    string
+	Source  string
+	EV      string
+	Retired bool
 }
 
 // inRepoEvidence is the authoritative list of in-repo
@@ -55,7 +57,7 @@ type evidenceRow struct {
 // and resolved via filepath.Join with the test's parent
 // parent).
 //
-// If a future VOC-### adds a new in-repo evidence file the
+// If a future VOC-### adds a new current in-repo evidence file the
 // gate must enforce, add its row here AND add a matching
 // row in staging-evidence.md's "Planned in-repository
 // evidence" table. The two stay in lockstep - a row in one
@@ -95,9 +97,11 @@ var inRepoEvidence = []evidenceRow{
 	{Path: "apps/api/migrations/atlas_tooling_test.go", Source: "T06", EV: "EV-14..EV-15"},
 	{Path: "apps/api/migrations/migration_test.go", Source: "T06", EV: "EV-14..EV-15"},
 
-	// T07 - CI/CD staging-deploy workflow
-	// (VOC-032-AC-07, EV-16..EV-17)
-	{Path: ".github/workflows/deploy-staging.yml", Source: "T07", EV: "EV-16..EV-17"},
+	// VOC-032 T07's former staging-deploy workflow (EV-16..EV-17) was
+	// deliberately retired by VOC-078-T03. Keep the row in lockstep with
+	// staging-evidence.md, but invert its filesystem assertion: historical
+	// evidence stays in Git history while the executable must stay absent.
+	{Path: ".github/workflows/deploy-staging.yml", Source: "T07 (retired by VOC-078-T03)", EV: "EV-16..EV-17", Retired: true},
 
 	// T08 - AI-evaluation-threshold CI gate
 	// (VOC-032-AC-08, EV-18..EV-20)
@@ -170,6 +174,14 @@ func TestInRepoEvidencePresent(t *testing.T) {
 	for _, row := range inRepoEvidence {
 		full := filepath.Join(repoRoot, row.Path)
 		info, err := os.Stat(full)
+		if row.Retired {
+			if err == nil {
+				t.Errorf("retired in-repo evidence for %s must stay absent (%s)", row.EV, row.Path)
+			} else if !os.IsNotExist(err) {
+				t.Errorf("cannot verify retired in-repo evidence for %s (%s): %v", row.EV, row.Path, err)
+			}
+			continue
+		}
 		if err != nil {
 			t.Errorf("missing in-repo evidence for %s (%s): %v", row.EV, row.Path, err)
 			continue
@@ -285,8 +297,8 @@ func TestT13Doc11AmendmentApplied(t *testing.T) {
 // The test is restricted to the apps/api subtree because
 // that is the part of the repository that the standard
 // Go tooling covers; apps/web and infra are exercised by
-// the existing karsift-ai-infra ci.yml workflow and are
-// out of scope for this specific gate.
+// pipeline.yml's own in-house `ci` job (`pnpm validate`) and
+// are out of scope for this specific gate.
 func TestFullInstalledSuiteRuns(t *testing.T) {
 	appsAPIRoot := resolveAppsAPIRoot(t)
 	if _, err := os.Stat(filepath.Join(appsAPIRoot, "go.mod")); err != nil {

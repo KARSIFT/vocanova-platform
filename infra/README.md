@@ -5,21 +5,15 @@ This directory contains two environment layouts:
 - the staging-tier infrastructure from **VOC-032**
 - the production-tier provisioning artifacts from **VOC-037-T06**
 
-> **DOC-11 contradiction caveat (`VOC-032-D02`, resolved at
-> adoption 2026-07-28).** This layout is **not** the
-> target-infrastructure baseline currently described in
-> `docs/operations/11-devops-and-ci-cd.md` §1, which still
-> calls for Cloudflare Workers (frontend) + Render Web
-> Service (backend) + Render PostgreSQL (database) on the
-> `vocanova.com` domain set. The package's founder-directed
-> deploy shape — self-hosted Docker Compose + nginx on the
-> founder's own 2 vCPU / 4 GB server, Cloudflare for DNS /
-> TLS / WAF / CDN only — is the staging-tier reality now.
-> `VOC-032-T13` amends DOC-11 §1 to this shape once
-> `T00`–`T09` have actually landed; until that amendment
-> merges, treat this README as describing the staging tier
-> **as built by VOC-032**, not as the project's permanent,
-> approved target.
+> **DOC-11 contradiction caveat — resolved 2026-07-30.** This layout used to
+> contradict the target-infrastructure baseline described in
+> `docs/operations/11-devops-and-ci-cd.md` §1, which called for Cloudflare Workers
+> (frontend) + Render Web Service (backend) + Render PostgreSQL (database). The
+> `VOC-032-§1-amendment` merged 2026-07-30 and rewrote DOC-11 §1 to match the
+> founder-directed deploy shape actually built here: self-hosted Docker Compose +
+> nginx on the founder's own 2 vCPU / 4 GB server, Cloudflare for DNS/TLS/WAF/CDN
+> only. This README and DOC-11 §1 now describe the same target, not two competing
+> ones.
 
 ## Layout
 
@@ -35,7 +29,10 @@ infra/
 │   ├── cloudflare_origin_port_remap.py                   # shared mutation (script + selftest)
 │   ├── verify-voc067-cutover.sh                          # VOC-067-T05 external :443 checks
 │   ├── rehearse-production-secrets-boundary.sh          # VOC-037 INS-9..INS-11 rehearsal
-│   └── rehearse-production-secrets-boundary.selftest.sh # disposable-mirror harness for the above
+│   ├── rehearse-production-secrets-boundary.selftest.sh # disposable-mirror harness for the above
+│   ├── smoke-test-production.sh                          # scripted post-deploy health/kill-switch/core-loop suite
+│   ├── smoke-test-production.selftest.sh                 # harness for the above against a local fake server
+│   └── validate-nginx-healthcheck-probes.sh              # wraps scripts/foundation/nginx-healthcheck-probe.test.mjs
 ├── nginx/
 │   ├── nginx.conf             # legacy per-tier main config (not loaded by shared edge)
 │   ├── conf.d/
@@ -598,9 +595,8 @@ Founder go/no-go remains a separate `VOC-037-T05` gate.
   `specs/changes/VOC-032-begin-milestone-r1-staging-readiness-docs-product/`
   (specification, acceptance criteria, implementation plan,
   tasks, impact analysis, staging evidence, mock inventory)
-- DOC-11 §1 (target-infrastructure baseline, still pre-amendment
-  at the time of writing — see caveat at the top of this
-  file): `docs/operations/11-devops-and-ci-cd.md`
+- DOC-11 §1 (target-infrastructure baseline, amended 2026-07-30 to match this
+  layout — see caveat at the top of this file): `docs/operations/11-devops-and-ci-cd.md`
 - DOC-12 §5 (R1 gate, including "stable in staging, no
   unresolved critical/high blocker, all required tests pass,
   migration + rollback rehearsed, AI evaluation thresholds

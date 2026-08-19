@@ -1,12 +1,12 @@
 ---
 id: DOC-15
 title: Vocanova AI-Native Product and Engineering Operating Model
-version: 1.0
+version: 1.1
 status: approved
 owner: founder
 canonical_path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
 approved_at: 2026-07-13
-last_reviewed_at: 2026-07-13
+last_reviewed_at: 2026-08-19
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -26,13 +26,14 @@ related_documents:
   - DOC-14
 related_decisions:
   - A-001
+  - ADR-0002
 ---
 
-# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.0
+# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.1
 
 ## Document status
 
-This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. It does **not** define production publication - no staging or production deployment stage exists in the live pipeline (corrected 2026-07-24; see §17.0).
+This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. VOC-078-T03 removed repository deployment and server-monitoring workflows on 2026-08-19 pending a future hosting decision. Historical deployments remain evidence, but GitHub Actions currently provides no staging or production publication mechanism and removing the workflows did not stop any server. See §17 and [DOC-16](../governance/16-autonomous-development-operating-model.md) for current authority.
 
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 
@@ -40,9 +41,12 @@ It consolidates all approved decisions from Decision Groups 1–10 and incorpora
 originally described an aspirational merge/staging model that was never the system actually
 built. §17 has been rewritten to match the live pipeline; those two decision entries carry an
 inline correction note pointing to §17.0 rather than being rewritten in place, to preserve the
-decision register as a historical record. **A-003 (`docs/governance/amendments/A-003-...md`) and
-the live `karsift-ai-infra` pipeline are the actual current authority for merge/review mechanics -
-where this document's remaining prose (outside §17) describes something narrower or different,
+decision register as a historical record. **DOC-16 (`docs/governance/16-autonomous-development-operating-model.md`,
+which folds in the former A-003 amendment and VOC-079 as of its v3.0 revision) and the repository's
+current deterministic workflows are the actual current authority for merge/review mechanics.
+DOC-16 v3.0 makes R0-R4 approval-neutral by class while retaining stronger R4 evidence
+and explicit action-specific authority. Where this document's remaining prose (outside
+§17) describes something narrower or different,
 treat it as historical design intent, not a live contradiction requiring further correction in
 this pass.** A full reconciliation of this document's other 28 sections against current practice
 was out of scope for this correction; it addressed the specific, concrete contradiction an
@@ -61,23 +65,19 @@ The approved operating model is:
 ```text
 Founder discusses and approves product intent
         ↓
-ChatGPT prepares structured decisions, specifications, and impact analysis
+Planner role prepares structured decisions, specifications, and impact analysis
         ↓
 GitHub stores the canonical approved state
         ↓
-Codex implements an approved implementation-ready change package
+Implementer role works from an approved implementation-ready change package
         ↓
 Deterministic CI and required specialist checks run
         ↓
-Claude independently reviews the implementation
+Different reviewer role independently verifies the exact revision
         ↓
-Approved implementation merges automatically into develop
+Separate authorized actor verifies the evidence and merges into develop
         ↓
-Staging deploys automatically
-        ↓
-Founder approves develop → main
-        ↓
-Founder approves publication of main to production
+No package promotion or production release runs during VOC-078 reconstruction
 ```
 
 The key principles are:
@@ -85,10 +85,11 @@ The key principles are:
 - GitHub, not chat history, is the canonical source of truth.
 - Product decisions, living documents, decision records, specifications, code, automation, and review evidence remain traceable in the repository.
 - ChatGPT helps make decisions but does not own permanent truth.
-- Codex implements approved specifications.
-- Claude is the implementation-review authority for merges into `develop`.
+- Humans and AI agents may implement approved specifications.
+- A different human or AI reviewer supplies exact-revision verification.
 - The founder is not required to approve merges into `develop`.
-- The founder retains authority over product decisions, `develop` → `main`, and publication to production.
+- Accountable decision and external-action authority is assigned explicitly; no R0-R4
+  label creates founder approval by itself.
 - Automation responds to validated lifecycle state, not arbitrary Markdown changes.
 - AI review supplements deterministic CI; it does not replace it.
 - Agents operate with least privilege, explicit boundaries, complete auditability, and independent production controls.
@@ -101,7 +102,7 @@ The key principles are:
 This operating model defines:
 
 - The canonical source of truth.
-- The authority of the founder, ChatGPT, Codex, Claude, GitHub Actions, and deployment workflows.
+- The authority of human/agent roles, GitHub Actions, and any future hosting/publication mechanism.
 - Repository and document architecture.
 - Product, architecture, and operations decision records.
 - Change-package structure and lifecycle.
@@ -179,6 +180,8 @@ The founder remains the final authority for:
 - Production rollback, except where a previously approved emergency procedure explicitly authorizes an immediate protective action.
 
 The founder is **not** a routine implementation approver for pull requests targeting `develop`.
+These are explicit decision and external-action assignments, not authority inferred
+from a risk label. DOC-16's universal evidence contract governs every R0-R4 change.
 
 ---
 
@@ -1016,12 +1019,12 @@ Documentation is synchronized
 Migrations are validated
 Rollback information is complete
 The implementation PR merges into develop
-Required staging deployment and verification succeed
+Hosting/deployment evidence succeeds when a separately governed hosting package makes it applicable
 ```
 
 ## 11.3 Definition of Done for `released`
 
-A change reaches `released` only after:
+A change reaches `released` only after a separately governed hosting mechanism exists and:
 
 - Founder-approved release path.
 - Successful production publication.
@@ -1389,6 +1392,10 @@ develop
 
 `main` represents the production-approved state.
 
+*Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.0
+now governs merge/release authority through risk evidence and explicitly assigned
+action-specific authority; no R0-R4 label creates founder approval by itself.*
+
 Rules:
 
 - Protected.
@@ -1524,103 +1531,82 @@ Release 0.3.0
 
 # 17. Amendment A-001 — Development Merge Authority
 
-## 17.0 Rewritten 2026-07-24 to match the real, live pipeline
+## 17.0 Rewritten 2026-08-19 for the VOC-078 control-plane retirement
 
-This section previously described an aspirational operating model (Codex implements, Claude
-reviews, automatic merge, automatic staging deploy) that was never the system actually built.
-The real system is `KARSIFT/karsift-ai-infra`'s reusable GitHub Actions workflows, wired into
-this repository's own `.github/workflows/pipeline.yml`. It is architecturally simpler than what
-was originally specified here (no staging deploy, no Control Plane - see DOC-17/18's own
-superseded note in `docs/README.md`), has more real lifecycle stages than this section
-described (a distinct `plan`/`adopt` split before implementation even starts, and a bounded
-automatic remediation loop), and its actual authority/risk model is A-003 (Section 10 of that
-amendment - `docs/governance/amendments/A-003-governed-autonomous-engineering-authority.md`),
-not the original A-001 text below. This section is kept as historical record of the original
-design intent but the rule that actually governs `develop` merges today is A-003 §10 plus
-`karsift-ai-infra`'s own `merge-gate.yml` - see that repo's README for the definitive mechanism.
-Where this section conflicts with A-003 or the live pipeline, **A-003 and the live pipeline win.**
+VOC-078-T01 removed the three reusable-workflow callers that previously planned,
+adopted, implemented, reviewed, remediated, merged, advanced, and released changes.
+That external state machine is historical evidence, not current behavior. DOC-16
+continues to govern authority; this section describes the repository mechanism.
 
-## 17.1 Canonical rule (as actually implemented)
-
-The real, live pipeline stage flow is:
+## 17.1 Current repository flow
 
 ```text
-Request (free text, a document, or a GitHub issue thread)
+GitHub issue or approved objective
     ↓
-plan - drafts a DRAFT change package (spec, acceptance criteria, tasks); never authorizes anything
+planner (human or AI) drafts a VOC package on a plan/ branch
     ↓
-Human adoption - a founder reviews the draft, edits change.yaml to mark it approved/authorized,
-                 merges the draft PR
+different reviewer verifies the exact package candidate
     ↓
-adopt - opens the real, numbered per-task tracking issue(s) only now, not before
+authorized adoption is recorded in change.yaml and the plan PR merges
     ↓
-implement (per task) - an implementer model writes the diff on a branch, opens a PR
+implementer (human or AI) works on an isolated task branch
     ↓
-ci - deterministic checks (lint, typecheck, build, test, format)
+GitHub Actions runs deterministic CI, governance, quality, and security checks
     ↓
-review - an independent verifier posts a structured, commit-bound PASS / PASS WITH
-         NON-BLOCKING FINDINGS / FAIL verdict
+different reviewer posts an exact-revision PASS / PASS WITH NON-BLOCKING FINDINGS / FAIL
     ↓
-remediate (only on a FAIL verdict or a plain CI failure) - re-dispatches the implementer once,
-           with the failure details attached, escalating to a stronger model on this last
-           attempt; if it fails again, stops and escalates to a human instead of trying a third time
-    ↓
-merge-gate - risk-aware, fails closed: auto-merges into `develop` only when the project's
-             switch is on AND checks are green AND the verdict passed AND this specific
-             package hasn't opted itself out (`automatic_merge_allowed: false` in its own
-             change.yaml) - otherwise requires the founder's literal "approved" comment,
-             which is always a valid decision at any risk class, including R4/unparseable risk
-    ↓
-release - once every task in a package's roster is closed, opens one "Release: <package>" issue;
-          exactly one founder "approved" reply promotes `develop` → `main` via a real PR
-          (never a direct push)
+an authorized actor, different from the implementer, verifies the gates and merges
 ```
 
-There is no automatic staging deployment stage in the live system - `release.yml`'s scope ends at
-the `develop` → `main` promotion PR merging. Any hosted deployment is separate, not-yet-built work.
+Issue creation, labels, and comments trigger no planning or implementation. GitHub
+Actions calls no AI model and holds no merge/release write authority. Remediation is a
+new implementation revision followed by complete checks and fresh independent review.
 
-## 17.2 Authority matrix (as actually implemented)
+## 17.2 Current authority matrix
 
 | Action | Required authority |
 |---|---|
-| Approve product vision, scope, and material behavior | Founder |
-| Approve/adopt a draft change package | Founder (editing `change.yaml`, merging the draft PR) |
-| Draft a change package from a request | `planner` role (model resolved from `karsift-ai-infra`'s `config/roles.yml` - not fixed to any one vendor) |
-| Implement an approved task | `implementer` role (same convention) |
-| Independently verify an implementation | `reviewer` role (same convention - **must** stay a different vendor from `implementer` when possible; see `config/roles.yml`'s own notes for when that's been temporarily compromised and why) |
-| Merge implementation PR into `develop` | Deterministic checks green + reviewer PASS + package not opted out, **or** founder's literal `approved` comment (valid at any risk class) |
-| Merge `develop` into `main` | Founder's literal `approved` reply on the package's release issue - one approval per completed package, not per PR |
-| Publish `main` to production | Not built - out of scope for the live pipeline today |
+| Approve product vision, scope, and material behavior | DOC-16's applicable decision owner |
+| Draft a change package | Planner role; human or AI, no adoption authority |
+| Adopt a package | Applicable DOC-16 authority, recorded against the exact reviewed candidate |
+| Implement an adopted task | Implementer role, different from its reviewer |
+| Independently verify a plan or implementation | Reviewer role with no write access to the reviewed revision |
+| Merge into `develop` | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
+| Promote `develop` to `main` | No current workflow; prohibited during VOC-078 reconstruction |
+| Deploy | No current repository workflow; a future hosting package must separately authorize and define publication |
 
-## 17.3 Risk and `develop`
+Roles are responsibilities, not permanent vendors. The builder never approves or
+merges its own work, and a reviewer that authors a material correction becomes a
+builder whose revision needs fresh independent review.
 
-R0 through R3 implementation PRs may auto-merge into `develop` without founder approval, but only
-when all of the following hold: the project has explicitly enabled the auto-merge switch, CI is
-green, the reviewer's verdict passed, and the specific package hasn't set its own
-`automatic_merge_allowed: false` opt-out. R4, or a PR with no parseable risk declaration at all,
-never auto-merges regardless of any switch - both always require the founder's literal `approved`
-comment. Risk is read from a `Risk classification: R#` line in the PR body; a calling project may
-supply its own deterministic, path-based risk floor (this project's is
-`docs/governance/change-risk-classification.md` /
-`.github/approved-policy/protected-paths.yaml`) that an AI-proposed risk value can raise but never
-lower.
+R0-R4 are consequence classes, not personal-approval classes. R4 requires an explicit
+decision record, impact and contingency evidence, applicable specialist and
+deterministic results, an exact-revision independent verdict, and resolution of every
+blocking finding. Contracts, spending, secrets or personal-data disclosure, production
+access, irreversible external mutations, and initial public or predefined major
+launches retain separately defined action-specific authority. EHR remains exceptional.
 
-A reviewer's `PASS`/`PASS WITH NON-BLOCKING FINDINGS` verdict means the implementation appears
-technically acceptable and compliant with the approved specification. It does not authorize new
-product scope.
+## 17.3 Risk and merge records
 
-## 17.4 Automation level, as evidenced
+Risk is declared in the PR and may be raised by the changed-path classifier or
+independent reviewer. `automatic_merge_allowed` remains a package policy field. The
+Governance workflow consumes it only for the read-only eligibility report; no current
+workflow performs automatic merge. R0–R4 packages default it to `true`; a deliberate
+`false` requires a non-placeholder package-local `automatic_merge_hold_reason`, with
+VOC-079 preserved as the sole pre-transition exception. Unknown or unparseable risk
+fails closed. A passing
+reviewer verdict is technical evidence, not authority to add new product scope or
+execute an external action. The same eligibility contract applies to human-, agent-,
+and future orchestrator-originated work; no `not R4` exception exists.
 
-Automatic merge into `develop` is live and evidenced on this exact repository - it has fired
-correctly on numerous packages since VOC-012 (see
-`docs/governance/a003-transition-state.yaml`'s `automatic_merge_allowed` field for the activation
-record and evidence links). There was no formal ten-pull-request waiting period observed in
-practice before this activation; evidence accumulated organically across the packages that
-preceded and followed VOC-012.
+## 17.4 Automation status
 
-The founder may disable automatic development merges at any time by setting
-`auto_merge_enabled: "false"` in this repository's `pipeline.yml` (a config change, not a
-separate kill-switch mechanism).
+Automatic merge and package-driven release promotion were previously proven, then
+deliberately retired by VOC-078-T01. Historical run evidence remains valid history but
+must not be reported as live capability. Reintroducing either behavior requires a new,
+repository-owned, independently reviewed implementation. The four target workflows are
+`ci.yml`, `governance.yml`, `quality.yml`, and `security.yml`; deployment and duplicate
+workflow removal complete in T03/T04.
 
 ---
 
@@ -1682,23 +1668,17 @@ Claude release review supplements but does not replace founder approval.
 
 ## 19.1 Staging deployment
 
-Every successful merge into `develop` automatically deploys to staging.
-
-The workflow should:
-
-1. Build from the exact merged commit.
-2. Run deployment validation.
-3. Apply approved staging migrations.
-4. Deploy to the Cloudflare staging environment.
-5. Run smoke tests.
-6. Record deployment evidence.
-7. Update related change metadata where appropriate.
+No repository workflow currently deploys to staging. A merge into `develop` changes
+repository history only. VOC-078-T03 removed image publication, SSH deployment,
+migration execution, smoke testing, and remote health polling from GitHub Actions
+without changing runtime assets or inspecting/stopping a server. A future hosting
+package must define the replacement mechanism and evidence.
 
 ## 19.2 Production publication
 
-Production is published only from `main`.
-
-Required flow:
+There is no current repository production-publication mechanism. `main` remains the
+production-history branch, but a push to it does not deploy. Any future publication
+flow requires a separate hosting package and must include at least:
 
 ```text
 Release PR prepared
@@ -1707,13 +1687,7 @@ Required checks and staging evidence complete
         ↓
 Founder approves develop → main
         ↓
-Production workflow prepares deployment
-        ↓
-Protected production environment requests founder approval
-        ↓
-Founder approves publication
-        ↓
-Production deployment runs
+Authorized publication mechanism runs
         ↓
 Smoke tests and health checks run
         ↓
@@ -2041,6 +2015,9 @@ A waiver records:
 Critical security findings cannot be waived merely to meet a deadline.
 
 High-risk waivers require founder approval before production.
+
+*Current authority note: a production or external-effect waiver follows its explicitly
+assigned action authority under DOC-16; risk class alone does not assign the founder.*
 
 ## 22.4 Kill switches
 
@@ -2373,7 +2350,7 @@ Intended product or learning outcome
 
 ## 24.7 Lightweight dashboard
 
-The MVP should use GitHub Actions summaries, PR checks, change metadata, deployment records, and generated Markdown reports before building a custom internal platform.
+The MVP should use GitHub Actions summaries, PR checks, change metadata, historical or future deployment records when available, and generated Markdown reports before building a custom internal platform.
 
 ## 24.8 Structured events
 
@@ -2642,14 +2619,13 @@ It uses the complete standard package.
 The first package follows:
 
 1. Founder-approved specification.
-2. Codex implementation.
+2. Implementation.
 3. Deterministic CI.
-4. Claude review.
-5. Codex remediation where needed.
-6. Automatic merge into `develop` after CI and Claude approval.
-7. Automatic staging deployment.
-8. Founder-controlled `develop` → `main`.
-9. Founder-controlled production publication.
+4. Independent review.
+5. Remediation where needed.
+6. Governed merge into `develop`.
+7. Hosting/deployment evidence when a separately governed hosting mechanism exists.
+8. Governed `develop` → `main` promotion and publication when available.
 
 ## 25.7 Phase 5 — Evaluate
 
@@ -2763,6 +2739,10 @@ The transition is complete when:
 - A release PR can be approved by the founder.
 - Production remains founder-controlled.
 - Manual copying between chat topics and repository files has ended.
+
+*Historical completion criteria: current release and production authority is defined
+by DOC-16 v3.0 and a future hosting package, not by the risk label or this preserved
+v1.0 checklist.*
 
 ## 25.12 Reversibility
 
@@ -2976,19 +2956,18 @@ Promotions from `develop` to `main` use an identifiable release merge commit.
 
 Every implementation PR may merge into `develop` after required CI, specialist checks, and Claude approval. Founder approval is not required.
 
-*Correction 2026-07-24: superseded by A-003 §10 and the live pipeline - see §17.0. Verification is
-not vendor-locked to Claude (the `reviewer` role is config-driven, currently a temporary
-same-vendor compromise), the founder's `approved` comment is always a valid override at any risk
-class, and a per-package `automatic_merge_allowed: false` opt-out can require founder approval
-even when checks/review would otherwise pass. Preserved here as historical record, not current
+*Correction 2026-08-19: superseded by DOC-16's "Branch and merge behavior"
+section and §17. Verification is not vendor-locked, and VOC-078-T01 retired the
+workflow that automatically merged PRs. Preserved as historical record, not current
 rule.*
 
 ### DG5-09 — Automatic staging
 
 Successful merges into `develop` automatically deploy to staging.
 
-*Correction 2026-07-24: never built. No staging deployment stage exists in the live pipeline - see
-§17.0/§17.1. Preserved as historical record, not current rule.*
+*Correction 2026-08-19: staging deployment was built and historically proven, then
+VOC-078-T03 removed its GitHub workflow pending a future hosting decision. A merge to
+`develop` no longer deploys. See §17. Preserved as historical record.*
 
 ### DG5-10 — Protected production
 
@@ -3300,15 +3279,16 @@ Migration uses complete verified document sources and does not reconstruct canon
 
 Codex implementation PRs targeting `develop` may merge automatically after required deterministic CI, specialist checks, and Claude approval.
 
-*Correction 2026-07-24: see DG5-08's identical correction note above and §17.0 - superseded by
-A-003 §10 and the live, vendor-agnostic pipeline. Preserved as historical record.*
+*Correction 2026-08-19: see DG5-08's correction and §17. The current model is
+role-based and the automatic merge workflow was retired by VOC-078-T01. Preserved as
+historical record.*
 
 ### DG10-06 — Automatic staging
 
 Every approved merge into `develop` deploys automatically to staging and runs required verification.
 
-*Correction 2026-07-24: see DG5-09's identical correction note above - never built. Preserved as
-historical record.*
+*Correction 2026-08-19: see DG5-09's correction. Staging deployment was built and is
+scheduled for removal in VOC-078-T03. Preserved as historical record.*
 
 ### DG10-07 — Founder-controlled main and production
 

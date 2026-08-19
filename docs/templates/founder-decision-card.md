@@ -8,11 +8,15 @@ date: YYYY-MM-DD
 
 # Founder Decision Card — Decision title
 
+Use this template only when a specific decision or external action explicitly assigns
+authority to the founder. `risk: R4` alone is not that assignment. Another accountable
+role may use a role-neutral decision record under the same evidence contract.
+
 ## Decision requested
 
 State one consequential decision in a form that can be approved or rejected.
 
-## Why founder authority is required
+## Why this action specifically assigns founder authority
 
 Identify the strategic, financial, legal, product-direction, public-launch,
 user-trust, privacy, or difficult-to-reverse consequence.

@@ -49,8 +49,10 @@ legal, procurement, deployment, or release authorization.
 
 The full semantic pass also repaired stale references to the Confidence Point ledger, review model,
 onboarding profile, journey ordering, sentence persistence, AI UX states, AI timeout policy, and
-roadmap exclusions. DOC-13 and DOC-19 remain proposed; DOC-14 remains not adopted. No application,
-schema, dependency, workflow, governance, infrastructure, deployment, or production state changed.
+roadmap exclusions. DOC-19 remains proposed; DOC-13 was later corrected to `historical`
+(2026-07-24 - see DOC-13's own frontmatter `status_note`); DOC-14 remains not adopted.
+No application, schema, dependency, workflow, governance, infrastructure, deployment,
+or production state changed.
 
 ## Authority boundary
 
