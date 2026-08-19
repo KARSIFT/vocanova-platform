@@ -1,0 +1,103 @@
+schema_version: 1
+id: VOC-078
+slug: clean-github-actions-control-plane
+title: Clean GitHub Actions control plane and pause server-bound automation
+type: governance-and-ci-reconstruction
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 by semantic consequence. The implementation changes .github/workflows, governance
+  enforcement, agent authority, automatic merge/release behavior, and the production
+  deployment trigger. Path classification alone yields at least R3, but retiring the active
+  release/deployment authority model is a consequential governance decision requiring R4.
+canonical_path: specs/changes/VOC-078-clean-github-actions-control-plane
+authority_model: a003-active
+requirement_source: >-
+  GitHub issue #69 plus the founder's 2026-08-19 clarification that the server may change,
+  deployment/server-health automation should not be reconstructed now, and GitHub Actions
+  should become clean and understandable. The clarification remains planning input until
+  this package is adopted.
+requirement_approval_status: not-approved
+base_branch: develop
+base_sha: bca98d6692424b58ca627d3207f30f9bcac03953
+target_branch: develop
+approved_candidate_sha: null
+owners:
+  decision: founder
+  package_preparation: Codex (drafting only)
+  implementation: unassigned
+  independent_verification: unassigned
+approval_status: not-approved
+implementation_authorized: false
+automatic_merge_allowed: false
+production_impact: >-
+  Existing production runtime remains untouched, but repository-driven automatic release,
+  production deployment, staging deployment, and scheduled error-to-issue automation are
+  suspended. No new server is configured and no live environment is mutated by this package.
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+  - id: VOC-078-DEP-00
+    status: >-
+      Founder adoption must explicitly accept the temporary loss of repository-driven
+      staging/production deployment and automatic production release. Runtime services are
+      not stopped; only future workflow-triggered changes are paused.
+  - id: VOC-078-DEP-01
+    status: >-
+      GitHub Free private-repository branch protection and rulesets are unavailable. The
+      package must not claim that required checks or human review are technically enforced
+      when the hosting plan cannot provide that enforcement.
+  - id: VOC-078-DEP-02
+    status: >-
+      A future server/deployment package is required before automated deployment returns.
+      It must be based on the selected hosting architecture rather than copying current SSH,
+      Docker Compose, Cloudflare, or health-probe assumptions.
+affected_areas:
+  - .github/workflows/
+  - .github/README.md
+  - .github/CODEOWNERS
+  - .github/pull_request_template.md
+  - AGENTS.md
+  - CONTRIBUTING.md
+  - docs/governance/
+  - docs/operations/
+  - docs/decisions/ADR-0001-agent-orchestration-architecture.md
+  - orchestrator/
+  - .claude/
+  - .karsift/
+  - package.json (orchestrator scripts only)
+implementation:
+  authorized: false
+  required: true
+  status: not-started
+  target_branch: develop
+  pull_request: null
+  authority_issue: 69
+release:
+  required: true
+  mode: repository-only-control-plane-change
+  production_impact: deployment-automation-paused
+  deployment: prohibited-by-package
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: not-adopted
+adoption_pr: null
+adoption_evidence: null
+implementation_authority_before_adoption: false
+implementation_authority_status: not-authorized
+production_deployment: disabled-by-proposed-scope
+autonomous_production_release: disabled-by-proposed-scope
+ehr: not-triggered
+standing_technical_steward_approval: not-sufficient-for-R4-founder-decision
+blocking_reasons: >-
+  Draft package. Implementation is blocked until founder adoption records acceptance of
+  VOC-078-DEP-00, declares implementation.authorized true, and names the independent verifier.
