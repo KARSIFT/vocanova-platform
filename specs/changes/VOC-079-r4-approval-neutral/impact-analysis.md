@@ -18,6 +18,8 @@ No secret, personal data, production access, or privacy-policy content changes.
 - Humans and AI agents use the same role-separation and evidence rules.
 - A future orchestrator may rely on the policy only after GitHub records all required
   evidence and the repository's deterministic gates pass.
+- The local eligibility evaluator is a pure, read-only policy component. It grants no
+  repository credential and cannot merge or mutate GitHub by itself.
 - Existing historical approvals remain valid evidence for the revisions they governed.
 
 ## Data, migrations, analytics, and accessibility
@@ -32,7 +34,7 @@ to repository governance, templates, tests, and merge-policy automation.
   independent review, exact revision binding, and EHR for unresolved critical conflict.
 - `VOC-079-R01`: Old documentation or an external workflow could keep enforcing founder
   approval. Mitigation: complete semantic inventory, removal of the external gate through
-  VOC-078, and positive R4 eligibility tests.
+  VOC-078, and a local provider-neutral evaluator with positive R4 eligibility tests.
 - `VOC-079-R02`: A named external-action hold could recreate blanket R4 approval.
   Mitigation: each hold must identify a concrete action and evidence condition and is
   tested separately from risk class.

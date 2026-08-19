@@ -6,20 +6,23 @@ Do not implement until this exact package revision is independently reviewed, re
 the one-time founder approval required by the current R4 model, is adopted, and records
 `implementation.authorized: true`. Do not use the proposed rule to approve this package.
 
-Before enforcement changes land, satisfy `VOC-079-DEP-01`: the active call to the
-external `karsift-ai-infra` merge gate must be retired by VOC-078 or changed through a
-separately governed external-repository process. Work occurs on short-lived branches
-from current `origin/develop`; never push directly to `develop` or `main`.
+Before enforcement changes land, satisfy `VOC-079-DEP-01`: VOC-078 must retire the
+active call to the external `karsift-ai-infra` merge gate. VOC-079 then replaces the
+policy-decision portion with a repository-owned, read-only eligibility evaluator; it
+does not recreate the external state machine or add a merge credential. Work occurs on
+short-lived branches from current `origin/develop`; never push directly to `develop` or
+`main`.
 
 ## Sequence
 
 1. **T00 — Reconcile canonical authority.** Update DOC-15/DOC-16, the approval matrix,
    risk classification, protected-area guidance, AGENTS.md, CONTRIBUTING.md, decision
-   indexes, and repository-settings guidance. Distinguish active rules from historical
-   approval evidence.
-2. **T01 — Reconcile enforcement.** Remove any risk-class-only R4 hard block from active
-   in-repository merge-policy code or called workflows. Add a deterministic evidence
-   contract and positive/negative tests. Unknown risk stays fail-closed.
+   indexes, and repository-settings guidance. Add a dedicated decision record and a
+   DOC-16 amendment-history entry. Distinguish active rules from historical evidence.
+2. **T01 — Build the local eligibility evaluator.** After the external call is gone,
+   add a provider-neutral pure policy module and normalized evidence schema. It emits
+   eligible/blocked plus reasons, owns no write token, and performs no GitHub mutation.
+   Add positive/negative tests. Unknown risk stays fail-closed.
 3. **T02 — Reconcile package drafting.** Update change-package templates and validation so
    R0–R4 default to `automatic_merge_allowed: true`; require a documented package-local
    reason for `false`; preserve an explicit transition exception for VOC-079.

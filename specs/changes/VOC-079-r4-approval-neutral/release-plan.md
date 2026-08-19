@@ -14,7 +14,8 @@ class. Separately named action-specific authority and genuinely triggered EHR re
 
 1. Adopt the package under the pre-transition rule.
 2. Complete VOC-078's retirement of the external `karsift-ai-infra` merge gate.
-3. Reconcile canonical authority, enforcement, and package templates without an
+3. Add the local, read-only eligibility evaluator and reconcile canonical authority,
+   enforcement, and package templates without an
    intermediate claim that the new model is already live.
 4. Run positive/negative R4 fixtures and the repository-wide semantic inventory.
 5. Obtain exact-revision independent governance/security verification.

@@ -21,7 +21,7 @@ requirement_source: >-
   the canonical GitHub record.
 requirement_approval_status: pending-exact-revision-adoption
 base_branch: develop
-base_sha: 576dde2608e06380470ac5f5322e5f6c451b557d
+base_sha: 576dde256740aabb8d5d9aabe32d2eb7ba3fdb75
 target_branch: develop
 approved_candidate_sha: null
 owners:
@@ -63,10 +63,12 @@ dependencies:
       package lands and cannot approve later R4 work.
   - id: VOC-079-DEP-01
     status: >-
-      Open. VOC-078 must retire the KARSIFT/karsift-ai-infra merge-gate invocation, or
-      an independently adopted change to that external system must remove its hard R4
-      block. This repository must not claim R4 is approval-neutral while an active
-      called workflow still enforces the opposite.
+      Open. VOC-078 must retire the KARSIFT/karsift-ai-infra merge-gate invocation
+      before VOC-079 activates. VOC-079-T01 then introduces the repository-owned,
+      provider-neutral eligibility evaluator that replaces its policy-decision role.
+      The evaluator is read-only and does not perform merges. This repository must not
+      claim R4 is approval-neutral while an active called workflow still enforces the
+      opposite.
   - id: VOC-079-DEP-02
     status: >-
       Open. Adoption must name the independent verifier and decide whether the
@@ -80,6 +82,7 @@ affected_areas:
   - .github/approved-policy/protected-paths.yaml
   - specs/templates/change-package/
   - scripts/governance/
+  - tooling/governance/merge-eligibility/ (new deterministic policy module and fixtures)
   - docs/governance/
   - docs/operations/15-ai-native-product-and-engineering-operating-model.md
   - docs/decisions/

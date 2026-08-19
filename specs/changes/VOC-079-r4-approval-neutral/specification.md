@@ -60,6 +60,19 @@ orchestrator by responsibility rather than binding them to a vendor or permanent
 Deterministic GitHub Actions may validate the evidence contract; an external
 orchestrator may coordinate humans or agents under the same contract.
 
+### VOC-079-D06 — Eligibility is a local, read-only policy decision
+
+After VOC-078 retires the external state machine, this repository owns a small,
+provider-neutral merge-eligibility evaluator. It consumes normalized evidence (risk,
+package permission, deterministic-check results, exact-revision independent verdict,
+required R4 artifacts, explicit action holds, and EHR state) and emits a deterministic
+`eligible` or `blocked` result with reasons. It has no repository write credential and
+does not merge, approve, comment, dispatch an agent, or mutate GitHub. A separately
+authorized human or orchestrator may use the result to execute a merge.
+
+The implementation records this authority transition in DOC-16's amendment history and
+in a dedicated decision record so later readers can distinguish the old and new models.
+
 ## Scope
 
 In scope:
@@ -68,6 +81,8 @@ In scope:
 - Reconcile `automatic_merge_allowed` guidance and templates for R0–R4.
 - Remove any active in-repository or called merge policy that hard-blocks R4 solely by
   class, after the external `karsift-ai-infra` dependency is retired.
+- Add the repository-owned, read-only eligibility evaluator and its normalized evidence
+  contract; do not add write-capable merge automation.
 - Add positive and negative policy tests for eligible and ineligible R4 revisions.
 - Preserve stronger R4 classification, evidence, contingency, and review requirements.
 - Preserve exact-revision role separation and genuinely triggered EHR.
@@ -78,6 +93,8 @@ Non-goals:
 - No application, API, database, pricing, legal, privacy-policy, or product change.
 - No deployment, server, cloud, DNS, secret, environment, or repository-settings mutation.
 - No implementation of the future hierarchical orchestrator.
+- No GitHub write token or merge executor; this package grants policy eligibility and
+  proves it deterministically, while merge execution remains a separate mechanism.
 - No weakening of deterministic CI, security scanning, protected-path risk floors,
   independent review, rollback evidence, or fail-closed parsing.
 - No rewriting of historical evidence or claims about which authority governed old work.

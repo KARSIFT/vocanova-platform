@@ -24,18 +24,19 @@ Active guidance and validation require different builder and reviewer roles, exa
 revision verdicts, and resolution of blocking findings for every meaningful plan and
 implementation. No vendor-specific identity is made permanent policy.
 
-## VOC-079-AC-02 — R4 is not a hard automatic-merge block
+## VOC-079-AC-02 — R4 is not a hard merge-eligibility block
 
-- Decisions: `VOC-079-D02`
+- Decisions: `VOC-079-D02`, `VOC-079-D06`
 - Tasks: `VOC-079-T01`
 - Tests: `VOC-079-TEST-02`, `VOC-079-TEST-03`
 - Evidence: `VOC-079-EV-02`, `VOC-079-EV-03`
 - Result: pending
 
-Policy tests prove an R4 package with `automatic_merge_allowed: true`, passing checks,
+The local, read-only eligibility evaluator and its policy tests prove an R4 package
+with `automatic_merge_allowed: true`, passing checks,
 complete R4 evidence, an exact-revision independent PASS, no active EHR, and no explicit
-external-effect hold is eligible for the same merge path as R0–R3. The risk value alone
-must not block it.
+external-effect hold is eligible under the same policy as R0–R3. The risk value alone
+must not block it. The evaluator performs no merge or other GitHub write.
 
 ## VOC-079-AC-03 — Unsafe R4 changes still fail closed
 
@@ -73,6 +74,8 @@ pre-transition `false` is explicitly historical and exempt from the new default.
 A repository-wide semantic inventory accounts for every R4/founder/approval/automatic-
 merge reference in active documents, templates, scripts, and workflows. No active
 called external workflow continues to hard-block R4. Contradictions fail validation.
+DOC-16's amendment history and a dedicated decision record preserve the transition,
+reviewed revision, and old/new authority boundary.
 
 ## VOC-079-AC-06 — Change is reversible and has no live-system effect
 

@@ -8,10 +8,11 @@
 - Evidence: `VOC-079-EV-00`, `VOC-079-EV-01`, `VOC-079-EV-05`
 - Status: pending
 
-Update every active authority description in one coherent change. Preserve historical
-records as history and remove their ability to act as current policy.
+Update every active authority description in one coherent change. Add the DOC-16
+amendment-history entry and a dedicated decision record. Preserve historical records as
+history and remove their ability to act as current policy.
 
-## VOC-079-T01 — Remove the R4 hard block and test the evidence gate
+## VOC-079-T01 — Build and test the read-only merge-eligibility evaluator
 
 - Decisions: `VOC-079-D01` through `VOC-079-D03`
 - Acceptance: `VOC-079-AC-01` through `VOC-079-AC-03`, `VOC-079-AC-05`
@@ -19,8 +20,9 @@ records as history and remove their ability to act as current policy.
 - Evidence: `VOC-079-EV-01` through `VOC-079-EV-03`, `VOC-079-EV-05`
 - Status: blocked-by-VOC-079-DEP-01
 
-After the external gate is retired, ensure no active merge policy blocks R4 by class.
-Implement deterministic evidence validation and both eligible/ineligible R4 fixtures.
+After the external gate is retired, add a provider-neutral local policy module that
+validates normalized evidence and emits eligible/blocked reasons. It must own no write
+credential and perform no merge. Add both eligible and ineligible R4 fixtures.
 
 ## VOC-079-T02 — Make package drafting consistent across R0–R4
 

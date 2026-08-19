@@ -26,8 +26,9 @@
 - Fixture: parseable `risk: R4`, `automatic_merge_allowed: true`, complete decision and
   impact records, required R4/specialist evidence, green deterministic checks, exact-SHA
   independent PASS, no EHR, and no external-effect hold.
-- Expected: the normal merge policy reports eligible; no founder token, identity, review,
-  or comment is required by the risk class.
+- Expected: the local read-only evaluator reports eligible; no founder token, identity,
+  review, or comment is required by the risk class. The test also proves the evaluator
+  has no GitHub write or merge path.
 - Evidence: `VOC-079-EV-02`
 
 ## VOC-079-TEST-03 — Fail-closed R4 matrix
@@ -36,8 +37,9 @@
 - Independently remove or fail each required condition: CI, risk evidence, decision
   record, contingency, independent review, exact SHA, blocking-findings resolution,
   EHR clearance, package merge permission, parseable risk, and an action-specific gate.
-- Expected: every negative fixture blocks for its concrete missing condition. A fixture
-  differing from the positive case only by `risk: R4` does not block.
+- Expected: every negative fixture is reported blocked for its concrete missing
+  condition. A fixture differing from the positive case only by `risk: R4` does not
+  block. The pure evaluator performs no external action in any case.
 - Evidence: `VOC-079-EV-03`
 
 ## VOC-079-TEST-04 — Package drafting matrix
@@ -54,7 +56,8 @@
 - Covers: `VOC-079-AC-00`, `VOC-079-AC-05`
 - Procedure: compare canonical docs, AGENTS.md, CONTRIBUTING.md, templates, repository-
   settings guidance, validation scripts, and every active/called workflow. Confirm no
-  external reusable workflow reintroduces the old hard block.
+  external reusable workflow reintroduces the old hard block. Confirm DOC-16's amendment
+  history and the dedicated decision record identify the transition revision.
 - Expected: all active layers implement the same rule and governance validation passes.
 - Evidence: `VOC-079-EV-05`
 
