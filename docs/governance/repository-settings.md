@@ -9,9 +9,9 @@ A-003 governance authority is active. That authority must not be represented as
 hosted or technical activation. VOC-078-T01 retired the workflows that executed
 automatic merge into `develop` and package-driven promotion into `main`; both are
 currently disabled even though historical runs proved the earlier mechanism. RL1/RL2
-technical activation remains disabled. Legacy push-triggered deployment workflows
-remain temporarily present until VOC-078-T03 and must not be treated as authority for
-the reconstruction.
+technical activation remains disabled. VOC-078-T03 removed push-triggered deployment
+and scheduled Sentry monitoring workflows. Removing repository automation did not
+inspect, stop, or mutate any existing server.
 
 ## GitHub rulesets
 
@@ -141,23 +141,20 @@ lint, typecheck, test, build) runs on every PR and has passed across 22+ shipped
 packages (VOC-010 through VOC-022 at minimum). VOC-078-T00 adds the repository-local
 `ci.yml`, `governance.yml`, `quality.yml`, and `security.yml` replacement set.
 VOC-078-T01 has now removed the legacy external control-plane callers after the new
-read-only jobs passed on a real pull request. Older standalone quality/governance and
-server-bound workflows remain temporarily until T03/T04.
+read-only jobs passed on a real pull request. VOC-078-T03 then removed server-bound
+workflows; older standalone quality/governance workflows remain only until T04.
 `docs/migration-manifest.yaml` and `docs/document-graph.yaml` were migrated
 (VOC-007/VOC-008) and later archived to `docs/archive/` as historical evidence
 trails (2026-07-24) - they are available, just not filed as live/current
 documentation. Verified sources for DOC-00 through DOC-13 are canonical and adopted;
 DOC-14 was deliberately reconciled but not adopted (see `docs/README.md`'s index).
 
-**Updated again (2026-08-08):** staging and production deployment are no longer
-unbuilt - `deploy-staging.yml` and `deploy-production.yml` exist, have both run
-successfully many times against real infrastructure (a real server plus
-vocanova.site/Cloudflare DNS), and production deploys are now restricted to `main`
-only via the `production` environment's branch policy. Rollback is a manual,
-proven procedure (redeploy the previous immutable image digest - DOC-11 §3), not
-one-click automation. Per-PR Cloudflare previews genuinely remain unbuilt - that
-part of the original blockers list still holds for previews specifically, not for
-staging/production deployment anymore.
+**Historical deployment record:** the former staging and production workflows ran
+successfully against real infrastructure beginning 2026-08-08, and the production
+environment restricted those runs to `main`. VOC-078-T03 removed both workflows on
+2026-08-19 while deliberately leaving runtime infrastructure and repository settings
+unchanged. Deployment, health polling, and one-click rollback are now unavailable in
+GitHub Actions pending a future hosting package. Per-PR previews remain unbuilt.
 
 The initial governance bootstrap merged through PR #3 and its one-time exception has
 expired. The historical technical-steward appointment and completed dual-capacity
@@ -165,6 +162,6 @@ VOC-002 approval remain permanent evidence, but the role is retired as routine R
 authority and that migration approval cannot be reused. Under active A-003, routine R3
 uses strengthened technical gates and independent verification, while R4 founder
 authority remains unchanged until the adopted VOC-079 transition is implemented.
-Automatic merge into `develop` and autonomous production release are disabled after
-VOC-078-T01; RL1/RL2 technical activation remains disabled. Production deployment is
-still technically push-triggered only until T03 removes those workflows.
+Automatic merge into `develop`, autonomous production release, and repository-driven
+production deployment are disabled after VOC-078-T01/T03; RL1/RL2 technical activation
+remains disabled.

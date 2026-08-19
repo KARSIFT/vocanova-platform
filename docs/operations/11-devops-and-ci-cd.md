@@ -30,10 +30,10 @@ amendments:
     adopted_at: 2026-08-08
     approving_owner: founder
     resolution_recorded_in: specs/changes/VOC-051-add-hourly-sentry-based-log-error-monitoring/change.yaml
-    notes: "Sentry remains the error-monitoring tool §1 already named; nothing is superseded. This amendment records what VOC-051 added around it: apps/web now reports browser-side and server-side errors to Sentry (T01), Layout B gives each application a separate Sentry project per environment tier (four projects, per the package's t00-evidence.md §3), and .github/workflows/error-monitoring.yml queries all four hourly and opens one unlabeled GitHub issue per genuinely new problem (T02). After VOC-078-T01 that issue triggers no planner; a planner must prepare any follow-up package separately. The existing row text is annotated rather than rewritten, consistent with VOC-032-§1-amendment's convention. Detailed in §1's amendment note below."
+    notes: "Sentry remains embedded in runtime applications, but VOC-078-T03 removed the scheduled GitHub workflow that queried Sentry and opened issues. The four-project historical layout and VOC-051 implementation evidence remain valid history; no repository automation currently polls those projects."
 source_files:
   - path: 10-development-workflow.md
-    sha256: 7fdd38cb7f877051907cc68e0930ece507fe3466dab3e008795c2827eeb21aaf
+    sha256: 5b815f2fa19b799726a83dffd46664037e6afa66df0655cab2261b3aed7e56fb
 ---
 # 11 — VocaNova DevOps and CI/CD Plan
 
@@ -88,8 +88,8 @@ is currently deployed against — not a plan:
 | Reverse proxy / TLS termination | `nginx` service (the only host-published service) terminates TLS using a Cloudflare-issued origin certificate (`VOC-032-DEP-01`); real client IP restored from `CF-Connecting-IP` only when the connection genuinely originates from Cloudflare's published IP ranges (never `0.0.0.0/0`); `staging.vocanova.site` → `web`, `api-staging.vocanova.site` → `api`; plain-`80` redirects to `443`; standard security headers set on every response |
 | DNS/TLS/WAF/CDN (edge) | Cloudflare (narrowed role) — DNS, TLS, WAF, and CDN only; **no Cloudflare compute** (no Workers, no OpenNext, no Cloudflare D1/KV/Durable Objects/Queues/R2 at the edge) |
 | Atlas migration tooling | `apps/api/atlas.hcl` + `apps/api/scripts/migrate.sh` apply the existing `apps/api/migrations/*.sql` set; `.down.sql.example` files remain non-executable by Atlas per the existing `apps/api/migrations/README.md` rule |
-| Deploy automation | `.github/workflows/deploy-staging.yml` — build + tag by commit SHA + push to `ghcr.io` on every merge to `develop`, then SSH to the staging host, pull, apply migrations via the `T06` wrapper, `docker compose up -d`, poll `/healthz`; fails closed without tearing down currently-running containers if the health check does not pass within a bounded timeout |
-| Error monitoring | Sentry — **extended 2026-08-08 by `VOC-051-§1-amendment`** to cover `apps/web` browser-side/server-side error reporting and a Sentry-to-GitHub-issue monitoring workflow (see the amendment note below), which runs daily as of 2026-08-15 (founder request, was hourly at adoption); the tool choice itself is unchanged |
+| Deploy automation | Paused/unavailable after VOC-078-T03. Historical workflows deployed by SSH; no repository workflow now builds/pushes deployment images, mutates Cloudflare, deploys, or polls server health. Runtime assets and servers were not changed by the removal. |
+| Error monitoring | Sentry remains embedded in application runtime code. VOC-078-T03 removed the scheduled Sentry-to-GitHub workflow, so GitHub no longer queries Sentry or files monitoring issues automatically. |
 | Uptime monitoring | Better Stack / UptimeRobot (unchanged) |
 | Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP (unchanged) |
 
@@ -133,17 +133,11 @@ production secrets ever reachable from preview/staging/CI (unchanged from v1.0).
 >   is still set on top of that. The full layout record, including which secret feeds which project,
 >   is in `specs/changes/VOC-051-add-hourly-sentry-based-log-error-monitoring/t00-evidence.md` §3.
 >   This also closed a gap: `apps/api` staging had no Sentry wiring at all before VOC-051.
-> - **Sentry data now feeds the governed change loop automatically.**
->   `.github/workflows/error-monitoring.yml` runs daily (changed from hourly 2026-08-15, founder
->   request), queries all four projects for unresolved issues first seen in the preceding 1500
->   minutes (25 hours) using a read-only (`project:read` + `event:read`)
->   Sentry token held as the `SENTRY_API_TOKEN` Actions secret, and opens one plain unlabeled GitHub
->   issue per genuinely new problem — deduplicated on a stable Sentry issue-ID marker embedded in the
->   issue body. After VOC-078-T01, issue creation triggers no planner; a human or AI planner must
->   prepare a separately reviewed change package from the issue. This is the same record-first route
->   AGENTS.md requires of someone who spots a bug, and it changes no release,
->   deployment, or approval gate. The workflow holds `issues: write` and nothing else, and
->   deliberately has no SSH access to either host.
+> - **Historical Sentry automation is paused.** VOC-051 added a daily workflow that queried all
+>   four projects using a read-only Sentry integration token and opened deduplicated GitHub issues.
+>   VOC-078-T03 removed that workflow and its GitHub permission/secret consumption. Application
+>   Sentry instrumentation and the four-project evidence remain unchanged; no current repository
+>   automation queries Sentry or opens monitoring issues.
 > - **Uptime/liveness monitoring is untouched** by this amendment — the "Uptime monitoring" row's
 >   Better Stack / UptimeRobot choice remains as stated and unimplemented here.
 

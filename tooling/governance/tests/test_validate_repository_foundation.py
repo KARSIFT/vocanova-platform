@@ -383,13 +383,13 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assert_failure("control_plane_implementation must remain false")
 
-    def test_production_deployment_enablement_fails(self) -> None:
+    def test_production_deployment_retirement_fails_closed(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "production_deployment: enabled",
             "production_deployment: disabled",
+            "production_deployment: enabled",
         )
-        self.assert_failure("production_deployment must equal 'enabled' after VOC-078 control-plane retirement")
+        self.assert_failure("production_deployment must equal 'disabled' after VOC-078 control-plane retirement")
 
     def test_protected_policy_partial_adoption_fails(self) -> None:
         self.replace(

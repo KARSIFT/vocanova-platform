@@ -69,6 +69,11 @@ automatic merge, and production deployment are not technically active as of 2026
 [the A-003 transition state](../governance/a003-transition-state.yaml) rather than inferring
 activation from this topology.
 
+**Current operational note (2026-08-19):** VOC-078-T03 removed repository deployment
+and server-monitoring workflows. `develop` and `main` remain integration/production
+history branches, but merging either branch does not deploy a server. A future hosting
+package must define replacement publication and verification.
+
 ```text
 feature/* ──PR──► develop ──release PR──► main
                     │                       │
@@ -105,8 +110,9 @@ remaining.
 **Done**: acceptance criteria satisfied, scope respected, required tests pass (unit/integration/
 contract/migration/e2e as applicable), security/authorization correct, migrations tested,
 OpenAPI/generated types synchronized, documentation updated, no secrets exposed, required review
-resolved, merged through a PR, staging deployment succeeds and is verified (production verification
-additionally required for release work).
+resolved, and merged through a PR. Staging/production deployment evidence is required only when an
+active, separately governed hosting package provides that capability; it is unavailable after
+VOC-078-T03.
 
 ## 6. Pull-request standards
 

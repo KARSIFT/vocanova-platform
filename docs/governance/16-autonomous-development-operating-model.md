@@ -75,8 +75,8 @@ artifact categories or authority hierarchy.
 | ChatGPT | Product analysis, specifications, architecture proposals, governance drafting, and decision routing | Cannot approve founder-controlled decisions or implementation |
 | Implementer role | Implementation of approved, implementation-ready changes and applicable tests and documentation | Cannot approve its own work, expand scope, or deploy directly to production |
 | Independent reviewer role | Independent specification, code, architecture, security, and CI/CD verification | Is not a human technical steward and cannot assume legal or organizational accountability |
-| GitHub Actions | Deterministic checks, traceability, gates, and deployment orchestration | Cannot make product or business decisions |
-| Cloudflare | Isolated preview, staging, production deployment, monitoring, and rollback infrastructure | Must not decide whether a release is authorized |
+| GitHub Actions | Deterministic repository checks and traceability | Cannot make product or business decisions, merge, deploy, or monitor servers |
+| Cloudflare | Existing DNS/TLS/WAF/CDN runtime service; future hosting input | Must not be represented as repository deployment automation or decide whether a release is authorized |
 
 Which human or AI system occupies the implementer and independent-reviewer roles is
 chosen per change and recorded with the evidence. The roles must remain separate and
@@ -161,8 +161,8 @@ permanent evidence. EHR must never harden into a standing approval requirement.
 - Direct pushes to `develop` and `main`, unverified merges, and local production
   deployments are prohibited.
 - Working branches are normally squash-merged into `develop`. Release pull requests
-  promote `develop` to `main` with an identifiable merge commit. `main` is the only
-  production deployment source.
+  promote `develop` to `main` with an identifiable merge commit. A future production
+  mechanism may publish only from `main`; no such mechanism is currently installed.
 
 **A pull request may merge automatically into `develop`** when: required
 deterministic checks pass; required independent verification passes; no blocking
@@ -186,9 +186,9 @@ follow the general pull-request rule above. Reintroducing an orchestrator or a s
 merge executor requires a new accepted decision and adopted implementation package;
 the historical authority in the amendment record cannot activate absent machinery.
 
-`develop` is the integrated staging state; successful merges deploy to staging - see
-[repository-settings.md](repository-settings.md) for current staging automation
-status.
+`develop` is the integrated repository state. After VOC-078-T03, merging to it does
+not deploy or poll any staging server. See
+[repository-settings.md](repository-settings.md) for the current automation state.
 
 ## Release classes and production release authority
 
@@ -318,8 +318,8 @@ authority.
 | Secret scanning | Live - GitHub secret scanning and push protection |
 | Preview status | Not built - per-PR Cloudflare previews remain genuinely unbuilt |
 | Independent exact-revision verification | Live as a repository requirement; performed outside Actions and attached to the PR |
-| Staging deployment, health checks | Live - `deploy-staging.yml`, real staging server |
-| Production deployment, health checks | Live - `deploy-production.yml`, real production server, restricted to `main` |
+| Staging deployment, health checks | Paused/unavailable in GitHub Actions after VOC-078-T03; no claim that an existing server was stopped |
+| Production deployment, health checks | Paused/unavailable in GitHub Actions after VOC-078-T03; no claim that an existing server was stopped |
 | Rollback | Manual, proven procedure (redeploy previous immutable image digest) - not one-click automation |
 
 Absence of a tool is never represented by a passing placeholder check. See
@@ -330,10 +330,10 @@ maintained record of what's built versus what's still pending.
 
 This model has already passed its first five implementation pull requests and its
 first production release; it should continue to be reviewed after any serious
-incident and at least quarterly. GitHub Actions agent dispatch and autonomous merge
-are disabled by removal under VOC-078-T01. Until T03 removes server-bound workflows,
-authorized maintainers must also be able to cancel staging/production deployment;
-future automation must expose independent kill switches for every write capability.
+incident and at least quarterly. GitHub Actions agent dispatch, autonomous merge,
+deployment, and scheduled server/error monitoring are disabled by removal under
+VOC-078. Future write automation must expose an independent kill switch for every
+capability.
 
 ## Retirement of the standing technical-steward role
 

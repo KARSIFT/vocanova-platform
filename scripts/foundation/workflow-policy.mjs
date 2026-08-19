@@ -15,6 +15,40 @@ export const RETIRED_CONTROL_PLANE_WORKFLOWS = [
   "pipeline.yml",
 ];
 
+export const RETIRED_SERVER_WORKFLOWS = [
+  "deploy-production.yml",
+  "deploy-staging.yml",
+  "error-monitoring.yml",
+];
+
+const SERVER_CAPABILITY_PATTERNS = [
+  [
+    /\b(?:schedule|workflow_dispatch)\b(?:\s*:|\s*[,\]])/,
+    "scheduled/manual server trigger",
+  ],
+  [
+    /(?:\b(?:ssh|scp|sshpass)\b|\brsync\b[^\n]*\bssh\b|\/ssh-agent@|\/(?:ssh|scp)-action@)/i,
+    "SSH/SCP command or action",
+  ],
+  [
+    /secrets\.(?:(?:STAGING|PRODUCTION)_[A-Z0-9_]+|CLOUDFLARE_[A-Z0-9_]+|SENTRY_[A-Z0-9_]+|GOOGLE_OAUTH_[A-Z0-9_]+)/,
+    "staging/production service credential",
+  ],
+  [
+    /(?:\bSENTRY_(?:API|AUTH)_TOKEN\b|sentry\.io\/api|\bsentry-cli\b)/i,
+    "Sentry API access",
+  ],
+  [
+    /environment:\s*(?:(?:staging|production)\s*(?:$|[},])|\n\s+name:\s*(?:staging|production)\s*$)/im,
+    "deployment environment",
+  ],
+  [
+    /(?:infra\/scripts\/cloudflare|api\.cloudflare\.com\/client\/v4|\bwrangler\s+(?:deploy|publish|delete|secret|kv|r2|d1|queues|pages)\b)/i,
+    "Cloudflare mutation",
+  ],
+  [/vocanova\.site/i, "remote vocanova endpoint"],
+];
+
 const REQUIRED_MARKERS = {
   "ci.yml": [
     "pnpm install --frozen-lockfile",
@@ -126,12 +160,23 @@ export function validateWorkflowDirectory(directory, phase = "additive") {
     }
   }
 
+  for (const filename of RETIRED_SERVER_WORKFLOWS) {
+    if (actual.includes(filename)) {
+      errors.push(`${filename}: retired server-bound workflow is present`);
+    }
+  }
+
   for (const filename of actual) {
     const source = readFileSync(resolve(directory, filename), "utf8");
     if (source.includes("KARSIFT/karsift-ai-infra")) {
       errors.push(
         `${filename}: external control-plane reference is prohibited`,
       );
+    }
+    for (const [pattern, capability] of SERVER_CAPABILITY_PATTERNS) {
+      if (pattern.test(source)) {
+        errors.push(`${filename}: prohibited server capability: ${capability}`);
+      }
     }
   }
 

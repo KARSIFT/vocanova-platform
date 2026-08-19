@@ -22,10 +22,10 @@ remediates, merges, releases, opens task issues, or advances packages, and no wo
 references `KARSIFT/karsift-ai-infra`.
 
 T02 also removed the repository-local orchestrator, Claude subagent assets, vendor
-state, and package launch scripts. During the remaining transition, older standalone
-quality/governance workflows and server-bound deploy/monitor workflows still coexist
-with the four target files. T03 removes server-bound automation; T04 removes
-superseded deterministic duplicates.
+state, and package launch scripts. T03 removed server-bound deployment and scheduled
+monitoring workflows without changing runtime infrastructure or servers. During the
+remaining transition, older standalone quality/governance workflows still coexist
+with the four target files; T04 removes those deterministic duplicates.
 Until then, the exact current inventory is the files in this directory, not the final
 four-file target.
 

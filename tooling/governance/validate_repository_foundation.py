@@ -740,7 +740,7 @@ def validate_a003_lifecycle(validation: Validation) -> None:
     merge_release_retired = {
         "automatic_merge_allowed": "false",
         "autonomous_merge_allowed": "false",
-        "production_deployment": "enabled",
+        "production_deployment": "disabled",
         "autonomous_production_release": "disabled",
     }
     for key, default in merge_release_defaults.items():
@@ -814,7 +814,7 @@ def validate_ownership(validation: Validation) -> None:
     merge_release_retired = {
         "automatic_merge_allowed": "false",
         "autonomous_merge_allowed": "false",
-        "production_deployment": "enabled",
+        "production_deployment": "disabled",
         "autonomous_production_release": "disabled",
     }
     for key, default in merge_release_defaults.items():

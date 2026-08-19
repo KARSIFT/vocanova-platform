@@ -32,7 +32,7 @@ related_decisions:
 
 ## Document status
 
-This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. It does not itself define production-publication mechanics in detail - those live in `deploy-staging.yml`/`deploy-production.yml` and [DOC-16](../governance/16-autonomous-development-operating-model.md). (Corrected 2026-07-24, then corrected again 2026-08-14: this line previously said "no staging or production deployment stage exists in the live pipeline," which was accurate in 2026-07 but is stale now - both stages exist and have run against real infrastructure since 2026-08-08. See §17.0 for the earlier correction and DOC-16 for current release authority.)
+This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. VOC-078-T03 removed repository deployment and server-monitoring workflows on 2026-08-19 pending a future hosting decision. Historical deployments remain evidence, but GitHub Actions currently provides no staging or production publication mechanism and removing the workflows did not stop any server. See §17 and [DOC-16](../governance/16-autonomous-development-operating-model.md) for current authority.
 
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 
@@ -98,7 +98,7 @@ The key principles are:
 This operating model defines:
 
 - The canonical source of truth.
-- The authority of the founder, ChatGPT, Codex, Claude, GitHub Actions, and deployment workflows.
+- The authority of human/agent roles, GitHub Actions, and any future hosting/publication mechanism.
 - Repository and document architecture.
 - Product, architecture, and operations decision records.
 - Change-package structure and lifecycle.
@@ -1013,12 +1013,12 @@ Documentation is synchronized
 Migrations are validated
 Rollback information is complete
 The implementation PR merges into develop
-Required staging deployment and verification succeed
+Hosting/deployment evidence succeeds when a separately governed hosting package makes it applicable
 ```
 
 ## 11.3 Definition of Done for `released`
 
-A change reaches `released` only after:
+A change reaches `released` only after a separately governed hosting mechanism exists and:
 
 - Founder-approved release path.
 - Successful production publication.
@@ -1563,7 +1563,7 @@ new implementation revision followed by complete checks and fresh independent re
 | Independently verify a plan or implementation | Reviewer role with no write access to the reviewed revision |
 | Merge into `develop` | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
 | Promote `develop` to `main` | No current workflow; prohibited during VOC-078 reconstruction |
-| Deploy | Legacy push-triggered workflows remain only until T03; their presence is not authority for this package |
+| Deploy | No current repository workflow; a future hosting package must separately authorize and define publication |
 
 Roles are responsibilities, not permanent vendors. The builder never approves or
 merges its own work, and a reviewer that authors a material correction becomes a
@@ -1646,23 +1646,17 @@ Claude release review supplements but does not replace founder approval.
 
 ## 19.1 Staging deployment
 
-Every successful merge into `develop` automatically deploys to staging.
-
-The workflow should:
-
-1. Build from the exact merged commit.
-2. Run deployment validation.
-3. Apply approved staging migrations.
-4. Deploy to the Cloudflare staging environment.
-5. Run smoke tests.
-6. Record deployment evidence.
-7. Update related change metadata where appropriate.
+No repository workflow currently deploys to staging. A merge into `develop` changes
+repository history only. VOC-078-T03 removed image publication, SSH deployment,
+migration execution, smoke testing, and remote health polling from GitHub Actions
+without changing runtime assets or inspecting/stopping a server. A future hosting
+package must define the replacement mechanism and evidence.
 
 ## 19.2 Production publication
 
-Production is published only from `main`.
-
-Required flow:
+There is no current repository production-publication mechanism. `main` remains the
+production-history branch, but a push to it does not deploy. Any future publication
+flow requires a separate hosting package and must include at least:
 
 ```text
 Release PR prepared
@@ -1671,13 +1665,7 @@ Required checks and staging evidence complete
         ↓
 Founder approves develop → main
         ↓
-Production workflow prepares deployment
-        ↓
-Protected production environment requests founder approval
-        ↓
-Founder approves publication
-        ↓
-Production deployment runs
+Authorized publication mechanism runs
         ↓
 Smoke tests and health checks run
         ↓
@@ -2337,7 +2325,7 @@ Intended product or learning outcome
 
 ## 24.7 Lightweight dashboard
 
-The MVP should use GitHub Actions summaries, PR checks, change metadata, deployment records, and generated Markdown reports before building a custom internal platform.
+The MVP should use GitHub Actions summaries, PR checks, change metadata, historical or future deployment records when available, and generated Markdown reports before building a custom internal platform.
 
 ## 24.8 Structured events
 
@@ -2606,14 +2594,13 @@ It uses the complete standard package.
 The first package follows:
 
 1. Founder-approved specification.
-2. Codex implementation.
+2. Implementation.
 3. Deterministic CI.
-4. Claude review.
-5. Codex remediation where needed.
-6. Automatic merge into `develop` after CI and Claude approval.
-7. Automatic staging deployment.
-8. Founder-controlled `develop` → `main`.
-9. Founder-controlled production publication.
+4. Independent review.
+5. Remediation where needed.
+6. Governed merge into `develop`.
+7. Hosting/deployment evidence when a separately governed hosting mechanism exists.
+8. Governed `develop` → `main` promotion and publication when available.
 
 ## 25.7 Phase 5 — Evaluate
 
@@ -2949,9 +2936,9 @@ rule.*
 
 Successful merges into `develop` automatically deploy to staging.
 
-*Correction 2026-08-19: staging deployment was later built and remains technically
-push-triggered only until VOC-078-T03 removes it. Its temporary presence is not
-deployment authority for the reconstruction. See §17. Preserved as historical record.*
+*Correction 2026-08-19: staging deployment was built and historically proven, then
+VOC-078-T03 removed its GitHub workflow pending a future hosting decision. A merge to
+`develop` no longer deploys. See §17. Preserved as historical record.*
 
 ### DG5-10 — Protected production
 

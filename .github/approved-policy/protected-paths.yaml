@@ -64,12 +64,13 @@ hosted_enforcement_status: not-activated
 # AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08 - see
 # docs/governance/a003-transition-state.yaml's identical marker/note for the
 # full historical record. VOC-078-CONTROL-PLANE-RETIRED-2026-08-19 records the
-# later operational retirement of automatic merge and package-driven release.
-# This file mirrors the lifecycle state and tooling checks both in lockstep.
+# later operational retirement of automatic merge and package-driven release;
+# VOC-078-T03 also retired GitHub-side production deployment automation. This
+# file mirrors the lifecycle state and tooling checks both in lockstep.
 automatic_merge_allowed: false
 autonomous_merge_allowed: false
 
-production_deployment: enabled
+production_deployment: disabled
 autonomous_production_release: disabled
 rl1_technical_activation: false
 rl2_technical_activation: false

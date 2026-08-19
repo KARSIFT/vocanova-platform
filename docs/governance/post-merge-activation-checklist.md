@@ -15,6 +15,11 @@ activation remain disabled; that authorization was not part of this request. The
 sentence above is preserved as historically accurate for the period before this
 date.
 
+**Updated 2026-08-19 for `vocanova-platform`:** VOC-078 removed the executable
+automatic merge/release path and then the staging/production deployment workflows.
+Those capabilities are again technically disabled in this repository. This records
+repository automation only and does not claim that any existing server was stopped.
+
 ## A-003 adoption and effective-activation boundary
 
 A-003 adoption and activation are completed historical facts:

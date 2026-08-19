@@ -45,11 +45,12 @@ rl2_technical_activation: false
 # must move together. This marker is retained as historical authority evidence.
 # VOC-078-CONTROL-PLANE-RETIRED-2026-08-19 records the later operational retirement
 # of automatic merge and package-driven release; tooling validates the resulting
-# mixed transition state. Legacy deployment workflows remain until VOC-078-T03.
+# fully retired transition state. VOC-078-T03 removed server-bound deployment
+# and monitoring workflows without changing live infrastructure or servers.
 automatic_merge_allowed: false
 autonomous_merge_allowed: false
 
-production_deployment: enabled
+production_deployment: disabled
 autonomous_production_release: disabled
 doc_17_repository_adoption: true
 doc_18_repository_adoption: true
