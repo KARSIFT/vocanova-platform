@@ -123,8 +123,15 @@ jobs:
           CI: "1"
           LIGHTHOUSE_URL_PREFIX: http://127.0.0.1:3000
         run: |
-          export LIGHTHOUSE_CHROME_PATH="$(find "$HOME/.cache/ms-playwright" -path '*/chrome-linux*/chrome' -type f | head -1)"
-          test -n "$LIGHTHOUSE_CHROME_PATH"
+          mapfile -t lighthouse_chrome_paths < <(
+            find "$HOME/.cache/ms-playwright" -path '*/chrome-linux*/chrome' -type f -print
+          )
+          if [[ "${#lighthouse_chrome_paths[@]}" -ne 1 ]]; then
+            echo "Expected exactly one Playwright Chrome binary; found ${#lighthouse_chrome_paths[@]}." >&2
+            printf 'Candidate: %s\n' "${lighthouse_chrome_paths[@]}" >&2
+            exit 1
+          fi
+          export LIGHTHOUSE_CHROME_PATH="${lighthouse_chrome_paths[0]}"
           pnpm --filter @vocanova/web test:lighthouse
 
       - name: Stop local test servers

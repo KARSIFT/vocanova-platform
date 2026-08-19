@@ -143,9 +143,8 @@ The dedicated workflow's job time budget is **30 minutes**
 
 - pnpm install against the frozen lockfile: ~2 min
 - `next build` for the production bundle: ~3-5 min
-- `playwright install --with-deps chromium` (first run only;
-  the GitHub-hosted runner image has no cached browser
-  binaries): ~1-2 min
+- `playwright install chromium` (each clean GitHub-hosted
+  runner downloads the lockfile-matched browser binary): ~1-2 min
 - `playwright test` (three projects, thirteen screens, one browser):
   ~1-3 min
 - teardown + report upload: ~30 s
@@ -157,19 +156,25 @@ pays the full download cost. This is the same trade-off
 DOC-10 §7 "Level 2" already accepts for "selected Playwright"
 coverage.
 
-Browser version pinning: the workflow invokes
-`pnpm exec playwright install --with-deps chromium` without
-specifying a version, so the browser that ships with the
-locked `@playwright/test` version is used. The lockfile pins
-the package version, so the browser version is effectively
-pinned by transitivity - no separate `playwright install
---browser=...` config drift to manage.
+Browser version pinning: the replacement `quality.yml` workflow
+invokes `pnpm exec playwright install chromium` without specifying
+a version, so the browser that ships with the locked
+`@playwright/test` version is used. The lockfile pins the package
+version, so the browser version is effectively pinned by
+transitivity - no separate `playwright install --browser=...`
+config drift to manage.
 
-System dependencies (`--with-deps`) install the missing
-shared libraries Chromium needs on `ubuntu-latest`. This
-requires `apt-get`; the workflow only runs on PRs that
-satisfy the `paths` filter, so the cost is paid only when
-the e2e harness is actually exercised.
+The pinned `ubuntu-24.04` GitHub-hosted image already includes the
+Chrome/Chromium system libraries, so the replacement workflow does
+not run Playwright's `--with-deps` apt step. This avoids coupling a
+deterministic browser test to the runner's external apt mirror. The
+exact-head PR proof for VOC-078-T00 is the compatibility evidence for
+that hosted image. Developers on machines without those libraries
+should still run the local bootstrap command documented above:
+`pnpm --filter @vocanova/web exec playwright install --with-deps chromium`.
+The legacy accessibility workflow retains its historical
+`--with-deps` command only during the temporary parallel-verification
+phase and is removed by VOC-078-T04.
 
 ## T07b-specific timing notes
 

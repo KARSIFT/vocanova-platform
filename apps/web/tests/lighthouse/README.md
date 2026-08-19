@@ -132,6 +132,14 @@ playwright install --with-deps chromium` already has it).
 Set `LIGHTHOUSE_CHROME_PATH=/abs/path/to/chrome` to point
 the runner at a specific binary.
 
+In GitHub Actions, the replacement `quality.yml` workflow pins the
+runner to `ubuntu-24.04`, whose hosted image already provides the
+browser system libraries. It therefore runs `playwright install
+chromium` without `--with-deps`, avoiding an unnecessary apt-mirror
+dependency while still downloading the browser revision selected by
+the locked Playwright package. Local machines may still need the
+`--with-deps` bootstrap command above.
+
 ## Layout
 
 ```

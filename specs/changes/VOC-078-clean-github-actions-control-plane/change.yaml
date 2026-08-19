@@ -81,6 +81,8 @@ affected_areas:
   - docs/governance/
   - docs/operations/
   - docs/decisions/ADR-0001-agent-orchestration-architecture.md
+  - apps/web/tests/e2e/README.md
+  - apps/web/tests/lighthouse/README.md
   - orchestrator/
   - .claude/
   - .karsift/
