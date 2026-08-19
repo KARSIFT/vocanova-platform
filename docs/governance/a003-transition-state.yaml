@@ -4,6 +4,7 @@ transition: VOC-002
 frozen_source_sha256: f2b454653a33e6cb76a0eab37c01d48b0174227450c9ea255474f6aac59b4f83
 
 authority_model: a003-active
+current_successor_authority_model: voc079-approval-neutral
 transition_stage: effectively-active
 formal_founder_approval_status: approved-exact-revision
 technical_steward_migration_approval_status: approved-exact-revision-one-time

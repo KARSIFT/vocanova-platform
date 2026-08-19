@@ -5,8 +5,8 @@ settings, create Cloudflare projects, or provision credentials. A repository
 administrator must configure and record the following before autonomous merge or
 release is enabled.
 
-A-003 governance authority is active. That authority must not be represented as
-hosted or technical activation. VOC-078-T01 retired the workflows that executed
+VOC-079 approval-neutral governance authority is active. That authority must not be
+represented as hosted or technical activation. VOC-078-T01 retired the workflows that executed
 automatic merge into `develop` and package-driven promotion into `main`; both are
 currently disabled even though historical runs proved the earlier mechanism. RL1/RL2
 technical activation remains disabled. VOC-078-T03 removed push-triggered deployment
@@ -27,7 +27,7 @@ Configure `develop`:
 - allow squash merge; and
 - restrict bypass to a small human incident-administrator group with audited use.
 
-Configure a non-self-referential R4 control for these exact paths:
+Configure a non-self-referential R4 evidence control for these exact paths:
 
 ```text
 /.github/workflows/governance.yml
@@ -47,9 +47,9 @@ Configure a non-self-referential R4 control for these exact paths:
 /specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/
 ```
 
-Under active A-003, that ruleset must continue non-self-referential verification and
-R4 founder enforcement but must not impose routine standing steward or founder
-approval merely because a change is R3. Where the GitHub plan supports organization-required
+Under active VOC-079 governance, that ruleset must require the complete R4 evidence
+contract without imposing founder or standing technical-steward approval merely from
+the R4 label. Where the GitHub plan supports organization-required
 workflows, run the policy gate from a separately protected default-branch or
 organization source. A status name produced solely by a workflow that the same pull
 request can rewrite is not sufficient protection.
@@ -59,24 +59,25 @@ Configure `main`:
 - include all `develop` protections;
 - accept only release pull requests from `develop` or the documented emergency path;
 - require release, staging, migration, rollback, and health-check gates;
-- enforce strengthened R3 gates without a standing steward/founder requirement solely
-  for R3, and require founder approval for R4 through rulesets/environments or a
-  reviewed approval-gate integration;
+- enforce strengthened R3 gates and the complete R4 evidence contract without a
+  standing founder/steward requirement caused solely by risk class; separately named
+  external-effect authority remains mandatory;
 - use merge commits for release promotion; and
 - prevent an AI or release-bot identity from bypassing required approvals.
 
-GitHub cannot natively express every conditional R0-R4 approval combination using
-CODEOWNERS alone. Use separate protected teams/environments and a reviewed gate that
-validates the effective risk class and attributable approvals. Keep autonomous merge
+GitHub cannot natively express every conditional R0-R4 evidence and action-authority
+combination using CODEOWNERS alone. Use separate protected teams/environments and a
+reviewed gate that validates the effective risk class, exact-revision independent
+verdict, blocking-findings resolution, and any attributable action-specific authority. Keep autonomous merge
 disabled until a repository-owned gate is tested. On the current GitHub Free private-
 repository plan these settings are desired controls, not enforceable hosted reality;
 the pull request must record the evidence explicitly.
 
 Multiple owners on one CODEOWNERS pattern are alternatives: one matching owner can
 satisfy GitHub's native code-owner review requirement. They do not mean that every
-listed owner must approve. Under active A-003, enforce R4 founder authority and
-strengthened R3 gates independently; do not recreate a combined standing
-founder-and-steward requirement merely because both risk effects exist.
+listed owner must approve. Under active VOC-079 governance, CODEOWNERS never proves
+R4 evidence or action-specific authority; do not recreate a standing founder-and-
+steward requirement from ownership routing or risk class.
 
 Enable repository security settings when available:
 
@@ -99,8 +100,9 @@ bot identity as human authority.
 - Distinct implementer-role and independent-reviewer-role identities, recorded per
   pull request. Humans and AI agents may fill either role; no vendor is permanently
   assigned by repository policy.
-- The recorded human founder identity and preserved historical technical-steward
-  identity; no replacement standing steward team is required.
+- Any human identities explicitly assigned action-specific authority, plus the
+  preserved historical founder and technical-steward evidence; no replacement standing
+  steward team is required and no historical identity assignment is reusable approval.
 - GitHub App or OIDC-based credentials with least privilege and short expiry.
 - Separate Cloudflare preview, staging, and production projects/accounts or clearly
   isolated environments.
@@ -123,7 +125,8 @@ Before deployment automation is added, record and validate:
 - feature-flag or traffic-shift rollback where relevant;
 - database backup, restore test, recovery point objective, and recovery time objective;
   and
-- production environment approval rules matching R3/R4.
+- production environment rules matching risk-specific evidence and explicitly assigned
+  production-action authority.
 
 ## Current blockers (rewritten 2026-07-24 - the paragraph below was written during the
 
@@ -162,9 +165,10 @@ GitHub Actions pending a future hosting package. Per-PR previews remain unbuilt.
 The initial governance bootstrap merged through PR #3 and its one-time exception has
 expired. The historical technical-steward appointment and completed dual-capacity
 VOC-002 approval remain permanent evidence, but the role is retired as routine R3
-authority and that migration approval cannot be reused. Under active A-003, routine R3
-uses strengthened technical gates and independent verification, while R4 founder
-authority remains unchanged until the adopted VOC-079 transition is implemented.
+authority and that migration approval cannot be reused. A-003 historically established
+strengthened technical gates and independent verification for routine R3 without
+standing personal approval. VOC-079 now extends that approval-neutral model across
+R0-R4 while retaining stronger R4 evidence and explicit action-specific authority.
 Automatic merge into `develop`, autonomous production release, and repository-driven
 production deployment are disabled after VOC-078-T01/T03; RL1/RL2 technical activation
 remains disabled.

@@ -66,6 +66,7 @@ REQUIRED_FILES = (
     DOC16_PATH,
     A003_STATE_PATH,
     "docs/decisions/README.md",
+    "docs/decisions/ADR-0002-risk-class-approval-neutral-authority.md",
     "scripts/governance/classify-change-risk.sh",
     "scripts/governance/validate-governance.sh",
     "specs/README.md",
@@ -633,6 +634,7 @@ def validate_a003_lifecycle(validation: Validation) -> None:
     else:
         required_active = {
             "authority_model": "a003-active",
+            "current_successor_authority_model": "voc079-approval-neutral",
             "transition_stage": "effectively-active",
             "formal_founder_approval_status": "approved-exact-revision",
             "technical_steward_migration_approval_status": "approved-exact-revision-one-time",
@@ -765,14 +767,15 @@ def validate_a003_lifecycle(validation: Validation) -> None:
 
     authority = validation.read("docs/governance/approval-matrix.md")
     for marker in (
-        "No standing technical-steward approval; no founder approval merely because work is R3",
-        "R4 founder authority remains unchanged",
+        "no class requires founder",
+        "exact-revision review",
+        "separately named external-effect authority still applies",
         "EHR",
         "must never be reused",
-        "CODEOWNERS remains review routing and is not approval evidence",
+        "CODEOWNERS remains review routing",
     ):
         if marker not in authority:
-            validation.error("docs/governance/approval-matrix.md", f"missing A-003 authority marker: {marker}")
+            validation.error("docs/governance/approval-matrix.md", f"missing current authority marker: {marker}")
 
 
 def validate_ownership(validation: Validation) -> None:
@@ -780,8 +783,8 @@ def validate_ownership(validation: Validation) -> None:
     policy_values = validate_restricted_yaml(validation, policy_path)
     policy = validation.read(policy_path)
     expected_policy_state = {
-        "status": "approved-a003-active",
-        "authority_model": "a003-active",
+        "status": "approved-voc079-active",
+        "authority_model": "voc079-approval-neutral",
         "hosted_enforcement_status": "not-activated",
         "rl1_technical_activation": "false",
         "rl2_technical_activation": "false",
@@ -878,6 +881,38 @@ def validate_governance_language(validation: Validation) -> None:
     for marker in PR_MARKERS:
         if marker not in pr:
             validation.error(".github/pull_request_template.md", f"missing required field: {marker}")
+    approval_neutral_sources = {
+        DOC16_PATH: (
+            "universal evidence contract",
+            "R4 does not require founder approval merely because it is R4",
+            "action-specific authority",
+        ),
+        "docs/governance/change-risk-classification.md": (
+            "No approval from risk class",
+            "exact-revision independent verification",
+            "Action-specific authority remains separate from classification",
+        ),
+        "AGENTS.md": (
+            "R0-R4 are consequence classes",
+            "Resolve every blocking finding before merge",
+            "Explicit external-effect authority still applies",
+        ),
+        "CLAUDE.md": (
+            "may occupy the independent-reviewer role",
+            "no class requires founder or standing",
+            "Explicit action-specific authority remains mandatory",
+        ),
+        ".github/pull_request_template.md": (
+            "no founder approval solely because work is R4",
+            "Action-specific authority and evidence",
+            "Blocking-findings resolution",
+        ),
+    }
+    for relative, markers in approval_neutral_sources.items():
+        text = validation.read(relative)
+        for marker in markers:
+            if marker not in text:
+                validation.error(relative, f"missing VOC-079 approval-neutral marker: {marker}")
 
 
 def validate_false_activation(validation: Validation) -> None:

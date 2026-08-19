@@ -29,7 +29,7 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 
 - Previous governance control:
 - Proposed governance control:
-- Active authority model (`A-003 active` unless a governed rollback is evidenced):
+- Active authority model (`VOC-079 approval-neutral` once the governed transition is activated):
 - Governance lifecycle impact (`none` or direction/approval/adoption/activation/sync):
 
 ## Risk and approvals
@@ -37,17 +37,21 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - Risk rationale:
 - CI-detected risk floor:
 - Affected protected areas (or `None`):
-- Required approval class:
+- Required risk evidence:
   - [ ] R0-R2 — independent verifier and applicable gates
   - [ ] R3 — strengthened applicable controls and independent verification; no
         standing steward/founder approval solely because work is R3
-  - [ ] R4 — exact-revision founder approval
+  - [ ] R4 — decision and impact records, contingency/rollback evidence, applicable
+        specialist and deterministic checks, and exact-revision independent review;
+        no founder approval solely because work is R4
   - Historical VOC-002 migration — exhausted and permanently non-reusable
   - Historical initial DOC-16/A-002 bootstrap — expired with PR #3 and unavailable
     to later changes; no checkbox or waiver exists
 - Exceptional-human-review evidence or `N/A — no EHR trigger`:
-- Founder approval link/name or `N/A`:
+- Action-specific authority and evidence or `N/A`:
+- Historical transition approval or `N/A — not reusable`:
 - Exact reviewed head SHA:
+- Blocking-findings resolution:
 - Adopted `develop` SHA or `N/A — pre-merge`:
 - Effective-activation evidence or `N/A — inactive`:
 

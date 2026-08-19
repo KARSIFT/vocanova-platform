@@ -151,9 +151,10 @@ lock → confirm backup readiness → migration preflight → run migration → 
 digest → wait for readiness → deploy frontend → verify → smoke tests → record → notify. Production
 deployments are never automatically cancelled once migration work has begun.
 
-Release authority and technical activation are separate. The required human authority
-depends on the effective R0–R4 risk, RL1–RL3 release class, any predefined founder-controlled launch
-event, and any actual EHR trigger. The deployment sequence may run only after the live governance
+Release authority and technical activation are separate. R0–R4 and RL1–RL3 determine evidence,
+not personal approval by label. Required accountable authority depends on a specifically defined
+production action, external effect, or launch event, plus any actual EHR trigger. The deployment
+sequence may run only after the live governance
 and technically enabled gates permit it; failed migrations, health checks, or smoke tests stop the
 deployment and invoke the governed rollback path. See the
 [canonical governance index](../governance/README.md) and [DOC-19](19-governance-reconciliation-notes.md).

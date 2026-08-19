@@ -38,9 +38,10 @@ A-003 adoption and activation are completed historical facts:
 - [x] VOC-003 synchronizes canonical lifecycle fields without changing frozen A-003
       substantive policy.
 
-Under active A-003, routine R3 does not require a standing technical steward or
-founder approval merely because it is R3; R4 remains founder-controlled and EHR
-remains exceptional-only.
+Under active VOC-079 governance, no R0-R4 class requires founder or standing technical-
+steward approval merely because of its label. R4 retains the strongest evidence
+contract, explicit action-specific authority remains mandatory, and EHR remains
+exceptional-only.
 
 This checklist begins after the initial DOC-16/A-002 governance pull request merges.
 The bootstrap exception expires on that merge. No unchecked item is implied to be
@@ -67,11 +68,11 @@ Record an evidence link, accountable human, and completion date for every item.
       independent verification, stale-approval dismissal, conversation resolution,
       code-owner review, and no unaudited bypass.
 - [ ] Protect `main`: release pull requests only, required release gates, no direct or
-      force pushes, and conditional R3/R4 approvals.
-- [ ] Configure a non-self-referential governance ruleset for the fixed R4 paths in
+      force pushes, and conditional risk evidence/action-specific authority.
+- [ ] Configure a non-self-referential governance evidence ruleset for the fixed R4 paths in
       [repository-settings.md](repository-settings.md).
-- [ ] Test strengthened R3 gates without routine steward/founder approval and unchanged
-      R4 founder enforcement before enabling any technical automation.
+- [ ] Test strengthened R3 gates and complete R4 evidence without risk-class founder/
+      steward approval before enabling any technical automation.
 
 ## Engineering and deployment gates
 
@@ -94,8 +95,8 @@ Record an evidence link, accountable human, and completion date for every item.
       after every applicable prerequisite is implemented, tested, and proven. A-003
       policy permission alone is not technical activation.
 
-Until all applicable activation items are evidenced, R3 production changes remain
-blocked and autonomous production release remains disabled.
+Until all applicable activation items and action-specific production authority are
+evidenced, production changes remain blocked and autonomous production release remains disabled.
 
 **Updated 2026-08-08**: for vocanova-platform-sandbox, the founder explicitly
 authorized automatic production release (see `AGENTS.md`'s "Release and deployment

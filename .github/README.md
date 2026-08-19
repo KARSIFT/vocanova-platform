@@ -35,6 +35,12 @@ branches, pull requests, and comments. GitHub Free does not technically enforce 
 repository branch protection, so policy and evidence must not be described as a hosted
 enforcement capability that does not exist.
 
+Governance is role- and evidence-based across R0-R4. Every meaningful plan or
+implementation is built and independently reviewed by different human or AI roles, with
+the verdict bound to the exact revision and blocking findings resolved. R4 requires the
+strongest risk evidence but no founder approval solely because of its label. Explicit
+action-specific authority and genuinely triggered EHR remain separate gates.
+
 See [`docs/governance/repository-settings.md`](../docs/governance/repository-settings.md)
 for the continuously maintained built-versus-pending record. DOC-17 and DOC-18's
 unbuilt Control Plane remains superseded and archived under `docs/archive/`.

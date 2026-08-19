@@ -67,11 +67,19 @@ bypass failed checks, required review, branch protection, or production gates. S
 AGENTS.md's "Safety" section and DOC-16 for the current R3/R4/EHR authority model -
 kept there as the single source rather than restated here.
 
-The one-time initial DOC-16/A-002 bootstrap may merge with founder approval,
-independent Claude Code verification, and passing repository validation. It does not
-mark steward approval satisfied or authorize production. The exception expires on
-merge; R3 production remains blocked until a qualified human steward is appointed and
-enforcement is active.
+R0-R4 are consequence classes, not personal-approval classes. Every meaningful plan
+and implementation needs a different builder and reviewer, passing deterministic
+checks, an exact-revision verdict, and resolution of blocking findings. R4 additionally
+needs complete decision, impact, contingency, specialist, and risk-specific evidence;
+it does not require founder approval solely because of the label. Contracts, spending,
+secrets or personal-data disclosure, production access, irreversible external effects,
+and initial public or predefined major launches still require their separately defined
+action-specific authority. EHR remains exceptional.
+
+The one-time initial DOC-16/A-002 bootstrap historically merged with founder approval,
+independent Claude Code verification, and passing repository validation. It did not
+mark steward approval satisfied or authorize production. The exception expired on
+merge and cannot be reused as current authority.
 
 VOC-002 was not a bootstrap exception. It was the completed one-time A-003 migration
 governed by pre-A-003 R4 founder and R3 technical-steward approval bound to its exact
@@ -82,3 +90,7 @@ VOC-078-T01 has retired the workflow implementation that previously performed
 automatic merge and package release; reintroducing either requires a separately
 adopted, repository-owned design. See AGENTS.md's "Change workflow" section for the
 current manual evidence and merge path.
+
+VOC-079 was adopted under the former R4 founder rule. Its PR #75 approval is a
+one-time pre-transition record and cannot approve its implementation revision or any
+later R4 work.

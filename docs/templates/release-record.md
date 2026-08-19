@@ -25,8 +25,9 @@ date: YYYY-MM-DD
 | Migrations and data integrity |  |  |
 | Accessibility |  |  |
 | Analytics and documentation |  |  |
-| Active-A-003 strengthened R3 gates |  |  |
-| Founder approval when R4/major launch |  |  |
+| Risk-specific R3/R4 evidence |  |  |
+| Complete R4 evidence when applicable |  |  |
+| Action-specific authority for launch/production/external effects |  |  |
 | EHR status and evidence when triggered |  |  |
 | RL1/RL2 technical activation evidence; policy permission is insufficient |  |  |
 | Rollback rehearsal/readiness |  |  |

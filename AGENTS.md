@@ -5,12 +5,11 @@ may refine them but may not weaken governance or security.
 
 ## Authority and scope
 
-- Follow DOC-15, DOC-16 (a single self-contained document as of its v2.0 revision,
-  which folds in the former A-002/A-003/A-004 amendments - see DOC-16's "Amendment
-  history" section for their original approval evidence), accepted decisions, and
-  approved implementation-ready change specifications in that order. Routine R3
-  protected technical work does not require standing technical-steward or founder
-  approval merely because it is R3, effective since `2026-07-17T16:44:34Z`.
+- Follow DOC-15, DOC-16 (a single self-contained document as of its v3.0 revision,
+  which folds in the former A-002/A-003/A-004 amendments and the VOC-079 transition -
+  see DOC-16's "Amendment history"), accepted decisions, and approved implementation-
+  ready change specifications in that order. R0-R4 are consequence classes: no class
+  requires founder or standing technical-steward approval merely because of its label.
 - GitHub is the canonical repository record. Meaningful implementation requires an
   approved `VOC-###` change package with stable requirements and acceptance criteria;
   a chat prompt or issue alone is not implementation authority.
@@ -26,14 +25,16 @@ may refine them but may not weaken governance or security.
 - Record the objective, approved requirement, risk, protected areas, acceptance
   evidence, validation, independent verification, approvals, and rollback impact in
   the pull request.
-- Use the highest builder, path-classifier, verifier, steward, or founder risk class.
+- Use the highest builder, path-classifier, verifier, specialist, or accountable
+  decision-owner risk class.
 - Never self-approve or weaken a check, ownership rule, test, or risk class to make a
   change pass.
 - The implementer role may implement an approved package and prepare its pull
   request, but it cannot approve or merge its own work. The independent reviewer
   role independently verifies the exact final revision and cannot substitute for
-  required human approval. A human or AI agent may occupy either role, but the roles
-  must be different and this document does not make a permanent vendor assignment.
+  separately defined action-specific authority. A human or AI agent may occupy either
+  role, but the roles must be different and this document does not make a permanent
+  vendor assignment. Resolve every blocking finding before merge.
 - Governance replacements are evaluated under the authority effective before them;
   they cannot authorize their own adoption.
 - Any change to workflow behavior, governance fields, or repository settings must
@@ -48,7 +49,8 @@ When drafting a change package, examine `automatic_merge_allowed` and set it acc
 to the package's declared risk. The field remains a package policy record, but no
 current GitHub workflow reads it or merges a pull request: VOC-078-T01 retired the
 external merge gate. Setting `true` never bypasses risk classification, path-based
-floors, deterministic checks, independent verification, R4 founder authority, or EHR.
+floors, deterministic checks, independent verification, complete R4 evidence,
+action-specific authority, or EHR.
 
 **Drafting defaults by risk class:**
 
@@ -138,11 +140,16 @@ Do not invent or report an unavailable check as passing.
   personal data.
 - Agents do not receive production secrets directly and do not manually run staging
   or production deployment during this reconstruction.
-- Under active A-003, routine R3 uses strengthened controls and independent
-  verification without standing technical-steward or founder approval merely for
-  being R3. R4 remains founder-controlled under the currently effective model until
-  the adopted VOC-079 transition is implemented. EHR is exceptional and must not
-  become a standing approval layer.
+- Under active VOC-079 governance, R0-R4 use proportionate deterministic controls and
+  exact-revision independent verification without founder or standing technical-
+  steward approval merely because of risk class. R4 requires the strongest decision,
+  impact, contingency, specialist, and verification evidence. EHR is exceptional and
+  must not become a standing approval layer.
+- Explicit external-effect authority still applies to contracts, spending, secrets or
+  personal-data disclosure, production access, irreversible external mutations, and
+  initial public or predefined major launches. A hold must name the exact action,
+  accountable role, required evidence, and completion or expiry condition; it cannot
+  be inferred from the R4 label alone.
 - The only bootstrap exception is the initial DOC-16/A-002 adoption defined in
   DOC-16. It permits founder approval, independent Claude Code verification, and
   repository validation to adopt the framework without claiming steward approval.

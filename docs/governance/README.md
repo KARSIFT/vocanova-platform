@@ -6,16 +6,16 @@ workflow. Read these documents together with
 
 DOC-16 is a single, self-contained, current statement of governance authority - it
 used to work alongside three separate amendments (A-002, A-003, A-004), each
-scoped to "supersedes only this clause." As of 2026-08-14, DOC-16 v2.0 folds all
-three amendments' operative rules directly into itself; the amendment files are
-retired and removed, with their approval evidence preserved in DOC-16's own
-"Amendment history" section.
+scoped to "supersedes only this clause." DOC-16 v2.0 folded all three amendments'
+operative rules directly into itself; the amendment files are retired and removed.
+DOC-16 v3.0 adds VOC-079's approval-neutral R4 transition. Historical approval
+evidence remains preserved and non-reusable in DOC-16's "Amendment history" section.
 
 ## Current documents
 
 | Document | Purpose |
 |---|---|
-| [DOC-16](16-autonomous-development-operating-model.md) | Approved canonical autonomous-development operating model - the single current source, including former A-002/A-003/A-004 rules and their approval evidence |
+| [DOC-16](16-autonomous-development-operating-model.md) | Approved canonical autonomous-development operating model, including former A-002/A-003/A-004 rules, VOC-079, and historical evidence |
 | [A-003 transition state](a003-transition-state.yaml) | Machine-readable approval, adoption, activation, and operational truth |
 | [Technical-steward appointment](technical-steward-appointment.md) | Permanent historical evidence; retired as routine R3 approval authority |
 | [Change risk classification](change-risk-classification.md) | R0-R4 classification and verification requirements |
@@ -25,4 +25,6 @@ retired and removed, with their approval evidence preserved in DOC-16's own
 | [Post-merge activation checklist](post-merge-activation-checklist.md) | Tracked steps required before protected or autonomous releases |
 
 Governance changes are protected changes. An author or implementation agent cannot
-be the sole approver of a governance change.
+be the independent reviewer or merger of its own revision. Risk class alone creates no
+founder-approval requirement; complete R4 evidence and action-specific authority still
+apply where relevant.

@@ -255,13 +255,37 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assert_failure("historical evidence marker")
 
-    def test_a003_routine_r3_human_approval_marker_removal_fails(self) -> None:
+    def test_voc079_risk_class_personal_approval_marker_removal_fails(self) -> None:
         self.replace(
             "docs/governance/approval-matrix.md",
-            "No standing technical-steward approval; no founder approval merely because work is R3",
-            "Standing technical-steward and founder approval required for every R3",
+            "no class requires founder",
+            "R4 requires founder approval",
         )
-        self.assert_failure("missing A-003 authority marker")
+        self.assert_failure("missing current authority marker")
+
+    def test_voc079_r4_approval_neutral_doc16_marker_removal_fails(self) -> None:
+        self.replace(
+            "docs/governance/16-autonomous-development-operating-model.md",
+            "R4 does not require founder approval merely because it is R4",
+            "R4 always requires founder approval",
+        )
+        self.assert_failure("missing VOC-079 approval-neutral marker")
+
+    def test_voc079_action_specific_authority_marker_removal_fails(self) -> None:
+        self.replace(
+            ".github/pull_request_template.md",
+            "Action-specific authority and evidence",
+            "Generic approval",
+        )
+        self.assert_failure("missing VOC-079 approval-neutral marker")
+
+    def test_voc079_reviewer_role_neutrality_marker_removal_fails(self) -> None:
+        self.replace(
+            "CLAUDE.md",
+            "may occupy the independent-reviewer role",
+            "is the permanent independent reviewer",
+        )
+        self.assert_failure("missing VOC-079 approval-neutral marker")
 
     def test_a003_rl2_false_activation_fails(self) -> None:
         self.replace(

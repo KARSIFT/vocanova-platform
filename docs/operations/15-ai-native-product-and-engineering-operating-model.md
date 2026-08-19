@@ -1,12 +1,12 @@
 ---
 id: DOC-15
 title: Vocanova AI-Native Product and Engineering Operating Model
-version: 1.0
+version: 1.1
 status: approved
 owner: founder
 canonical_path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
 approved_at: 2026-07-13
-last_reviewed_at: 2026-07-13
+last_reviewed_at: 2026-08-19
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -26,9 +26,10 @@ related_documents:
   - DOC-14
 related_decisions:
   - A-001
+  - ADR-0002
 ---
 
-# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.0
+# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.1
 
 ## Document status
 
@@ -41,9 +42,11 @@ originally described an aspirational merge/staging model that was never the syst
 built. §17 has been rewritten to match the live pipeline; those two decision entries carry an
 inline correction note pointing to §17.0 rather than being rewritten in place, to preserve the
 decision register as a historical record. **DOC-16 (`docs/governance/16-autonomous-development-operating-model.md`,
-which folds in the former A-003 amendment as of its v2.0 revision) and the repository's
-current deterministic workflows are the actual current authority for merge/review mechanics -
-where this document's remaining prose (outside §17) describes something narrower or different,
+which folds in the former A-003 amendment and VOC-079 as of its v3.0 revision) and the repository's
+current deterministic workflows are the actual current authority for merge/review mechanics.
+DOC-16 v3.0 makes R0-R4 approval-neutral by class while retaining stronger R4 evidence
+and explicit action-specific authority. Where this document's remaining prose (outside
+§17) describes something narrower or different,
 treat it as historical design intent, not a live contradiction requiring further correction in
 this pass.** A full reconciliation of this document's other 28 sections against current practice
 was out of scope for this correction; it addressed the specific, concrete contradiction an
@@ -85,7 +88,8 @@ The key principles are:
 - Humans and AI agents may implement approved specifications.
 - A different human or AI reviewer supplies exact-revision verification.
 - The founder is not required to approve merges into `develop`.
-- The founder retains authority over product decisions, `develop` → `main`, and publication to production.
+- Accountable decision and external-action authority is assigned explicitly; no R0-R4
+  label creates founder approval by itself.
 - Automation responds to validated lifecycle state, not arbitrary Markdown changes.
 - AI review supplements deterministic CI; it does not replace it.
 - Agents operate with least privilege, explicit boundaries, complete auditability, and independent production controls.
@@ -176,6 +180,8 @@ The founder remains the final authority for:
 - Production rollback, except where a previously approved emergency procedure explicitly authorizes an immediate protective action.
 
 The founder is **not** a routine implementation approver for pull requests targeting `develop`.
+These are explicit decision and external-action assignments, not authority inferred
+from a risk label. DOC-16's universal evidence contract governs every R0-R4 change.
 
 ---
 
@@ -1386,6 +1392,10 @@ develop
 
 `main` represents the production-approved state.
 
+*Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.0
+now governs merge/release authority through risk evidence and explicitly assigned
+action-specific authority; no R0-R4 label creates founder approval by itself.*
+
 Rules:
 
 - Protected.
@@ -1569,13 +1579,22 @@ Roles are responsibilities, not permanent vendors. The builder never approves or
 merges its own work, and a reviewer that authors a material correction becomes a
 builder whose revision needs fresh independent review.
 
+R0-R4 are consequence classes, not personal-approval classes. R4 requires an explicit
+decision record, impact and contingency evidence, applicable specialist and
+deterministic results, an exact-revision independent verdict, and resolution of every
+blocking finding. Contracts, spending, secrets or personal-data disclosure, production
+access, irreversible external mutations, and initial public or predefined major
+launches retain separately defined action-specific authority. EHR remains exceptional.
+
 ## 17.3 Risk and merge records
 
 Risk is declared in the PR and may be raised by the changed-path classifier or
 independent reviewer. `automatic_merge_allowed` remains a package policy field, but no
 current workflow consumes it or performs automatic merge. Unknown or unparseable risk
 fails closed. A passing reviewer verdict is technical evidence, not authority to add
-new product scope.
+new product scope or execute an external action. The same eligibility contract applies
+to human-, agent-, and future orchestrator-originated work; no `not R4` exception
+exists.
 
 ## 17.4 Automation status
 
@@ -1993,6 +2012,9 @@ A waiver records:
 Critical security findings cannot be waived merely to meet a deadline.
 
 High-risk waivers require founder approval before production.
+
+*Current authority note: a production or external-effect waiver follows its explicitly
+assigned action authority under DOC-16; risk class alone does not assign the founder.*
 
 ## 22.4 Kill switches
 
@@ -2714,6 +2736,10 @@ The transition is complete when:
 - A release PR can be approved by the founder.
 - Production remains founder-controlled.
 - Manual copying between chat topics and repository files has ended.
+
+*Historical completion criteria: current release and production authority is defined
+by DOC-16 v3.0 and a future hosting package, not by the risk label or this preserved
+v1.0 checklist.*
 
 ## 25.12 Reversibility
 

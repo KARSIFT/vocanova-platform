@@ -151,8 +151,10 @@ commit together → Claude migration-risk review. High-risk migrations (drop tab
 primary-key change, user-data deletion, or irreversible transformation) follow the live R0–R4
 classification, protected-area controls, approval matrix, and EHR rules. Required evidence includes
 migration lint, from-zero and upgrade-path tests, destructive-operation detection, recovery proof,
-and independent migration-risk review as applicable. R4 consequences require founder approval;
-routine R3 does not require standing founder or steward approval merely for being R3. Use
+and independent migration-risk review as applicable. R4 consequences require complete decision,
+impact, contingency, specialist, deterministic, and exact-revision review evidence; no R0-R4 class
+requires founder or standing steward approval merely from its label. Production access and
+irreversible external mutation retain separately defined action-specific authority. Use
 expand-and-contract so `develop` does not carry an unrecoverable migration between merge and release.
 See the [canonical governance index](../governance/README.md).
 

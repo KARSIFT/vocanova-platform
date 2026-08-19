@@ -1,8 +1,8 @@
 schema_version: 1
 policy: repository-protected-paths
-status: approved-a003-active
+status: approved-voc079-active
 review_routing_identity: m-e-h-r-d-a-a-d
-authority_model: a003-active
+authority_model: voc079-approval-neutral
 default_risk: R1
 
 paths:

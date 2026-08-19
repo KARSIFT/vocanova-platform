@@ -12,6 +12,10 @@ The one-time VOC-002 approval is exhausted and is not reusable.
 Future EHR engagement is exceptional and must not recreate this permanent role under
 another name.
 
+VOC-079 later made every R0-R4 class approval-neutral. The appointment below remains
+historical evidence only: R4 now requires stronger risk evidence, not founder approval
+from the class label. Separately defined external-action authority remains applicable.
+
 ## Appointment
 
 - Appointing authority: Founder of VocaNova
@@ -42,10 +46,11 @@ The technical-steward capacity covers R3 protected changes involving:
 - audio and voice storage; and
 - repository governance, ownership, validation, and agent authority.
 
-## Separate capacities and approval evidence
+## Historical separate capacities and approval evidence
 
-Founder authority remains separately required for R4 decisions. When a change is
-both R3 and R4, approval evidence must explicitly identify both capacities. One
+Under the pre-A-003/VOC-002 rule then in force, founder authority was separately
+required for R4 decisions. When a change was both R3 and R4, approval evidence had to
+identify both capacities. One
 GitHub approval or approval comment from `@m-e-h-r-d-a-a-d` may evidence both only
 when its text expressly names both the founder and qualified human technical-steward
 capacities and binds the approval to the exact reviewed revision.
@@ -68,4 +73,5 @@ This appointment does not:
   enforcement.
 
 This appointment may be superseded, narrowed, or expanded only through a later
-protected governance change with the approvals required by its effective R3/R4 risk.
+protected governance change satisfying its effective R3/R4 evidence contract and any
+separately applicable action-specific authority.

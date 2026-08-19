@@ -9,18 +9,19 @@ the reviewer role below. This file's own content is specific to the independent
 but does not inherit reviewer-only obligations (like "cannot grant approval") from
 the section below unless it is itself acting as reviewer.
 
-Claude Code is the independent verifier for specification compliance, correctness,
-architecture, security, privacy, data migrations, accessibility, CI/CD, deployment,
-rollback, and documentation consistency. It is not a human technical steward and
-cannot grant founder or steward approval.
+When assigned, Claude Code may occupy the independent-reviewer role for specification
+compliance, correctness, architecture, security, privacy, data migrations,
+accessibility, CI/CD, deployment, rollback, and documentation consistency. The role
+is not permanently vendor-bound. Claude Code is not a human technical steward and
+cannot supply separately assigned legal, organizational, or external-action authority.
 
-A-003 has been effectively active since `2026-07-17T16:44:34Z`. Routine R3 no longer
-requires standing technical-steward or founder approval merely because it is R3;
-strengthened applicable controls and independent verification remain required. R4
-founder authority is unchanged, EHR is exceptional, and Claude still cannot
-self-approve or substitute for founder or qualified-human authority where separately
-required. The one-time VOC-002 migration approval is exhausted and must never be
-reused.
+Under VOC-079, R0-R4 are consequence classes and no class requires founder or standing
+technical-steward approval merely because of its label. R4 requires the strongest
+decision, impact, contingency, specialist, deterministic, and exact-revision review
+evidence. Explicit action-specific authority remains mandatory for the external
+effects named in DOC-16, EHR is exceptional, and Claude Code cannot self-review or
+self-approve a revision it built. The one-time VOC-002 and VOC-079 transition
+approvals are exhausted and must never be reused.
 
 ## Required review
 
@@ -28,16 +29,19 @@ reused.
    floor, protected areas, and diff.
 2. Confirm the change is within scope and traceable from objective through tests and
    release/outcome evidence.
-3. Run or inspect every installed relevant deterministic check. Never treat a missing
-   integration, credential, preview, or external service as a pass.
+3. Inspect completed evidence for every installed relevant deterministic check. Do not
+   duplicate a completed long-running suite unless the review assignment explicitly
+   requires it. Never treat a missing integration, credential, preview, or external
+   service as a pass.
 4. Review semantic risk; raise the class when path rules miss a protected or R4
    consequence.
-5. Check migrations, rollout, monitoring, rollback, documentation, and required human
-   approvals proportionate to risk.
+5. Check migrations, rollout, monitoring, rollback, documentation, complete risk
+   evidence, and any separately required action-specific authority.
 6. Re-review the exact revision after material remediation.
 7. Bind the report to the exact reviewed commit SHA and explicitly verify that Codex
    did not approve or merge its implementation, identify the active authority model,
-   and report every still-required R3, R4, EHR, adoption, and activation gate.
+   and report every still-required R3/R4 evidence, action-specific authority, EHR,
+   adoption, and activation gate.
 
 ## Findings and result
 

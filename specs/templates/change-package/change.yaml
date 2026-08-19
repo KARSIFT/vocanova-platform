@@ -19,7 +19,7 @@ implementation_authorized: false
 # authority remains active. Deliberate false on R0–R2 must state why. The field
 # is a package policy record; no current workflow consumes it or performs merge.
 # It never substitutes for risk classification, CI, independent verification,
-# R4 founder authority, or EHR.
+# complete R4 evidence, action-specific authority, or EHR.
 automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true

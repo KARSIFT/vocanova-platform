@@ -17,12 +17,12 @@ State the approved objective and canonical documents or decisions that authorize
 
 Define bounded scope, explicit exclusions, protected paths, production effect, and
 the highest applicable R0–R4 class. Record the active governance model, any EHR
-trigger, and whether human authority arises from R4 or another explicit rule rather
-than assuming ownership routing proves approval.
+trigger, and whether accountable authority arises from a specific external action;
+risk class and ownership routing do not create permanent personal approval.
 
 ## Verification, approvals, release, and closure
 
-Link deterministic evidence, exact-SHA independent verification, required human
+Link deterministic evidence, exact-SHA independent verification, action-specific
 approvals, deployment/rollback controls, hosted activation, and closure evidence.
 
 ## `automatic_merge_allowed` drafting

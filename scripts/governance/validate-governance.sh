@@ -58,7 +58,9 @@ required_pr_fields=(
   "Analytics/telemetry"
   "Documentation"
   "Independent-verifier report/result"
-  "Required approval class"
+  "Required risk evidence"
+  "Action-specific authority and evidence"
+  "Blocking-findings resolution"
 )
 
 for field in "${required_pr_fields[@]}"; do
@@ -131,13 +133,17 @@ fi
 
 grep -Fq "RL1 - Routine release" "$operating_model"
 grep -Fq "technical steward" "$operating_model"
-grep -Fq "founder approval" "$operating_model"
+grep -Fq "R4 does not require founder approval merely because it is R4" "$operating_model"
+grep -Fq "universal evidence contract" "$operating_model"
+grep -Fq "action-specific authority" "$operating_model"
 grep -Fq "initial public launch" "$operating_model"
 grep -Fq "Governance bootstrap history" "$operating_model"
 grep -Fq "bootstrap exception" "$operating_model"
 grep -Fq "Amendment history" "$operating_model"
 grep -Fq "historical initial DOC-16/A-002 bootstrap" docs/governance/approval-matrix.md
-grep -Fq "R3 production changes remain" docs/governance/post-merge-activation-checklist.md
+grep -Fq "No approval from risk class" docs/governance/change-risk-classification.md
+grep -Fq "ADR-0002" docs/decisions/README.md
+grep -Fq "production changes remain blocked" docs/governance/post-merge-activation-checklist.md
 
 if grep -Eq 'FOUNDER_GITHUB_USERNAME|TECHNICAL_STEWARD_GITHUB_USERNAME' .github/CODEOWNERS; then
   echo "CODEOWNERS contains an unverifiable identity placeholder." >&2
