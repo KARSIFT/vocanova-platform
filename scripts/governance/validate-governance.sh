@@ -8,7 +8,7 @@ required_files=(
   .github/CODEOWNERS
   .github/pull_request_template.md
   .github/approved-policy/protected-paths.yaml
-  .github/workflows/repository-governance.yml
+  .github/workflows/governance.yml
   docs/governance/16-autonomous-development-operating-model.md
   docs/governance/a003-transition-state.yaml
   docs/governance/approval-matrix.md
@@ -34,6 +34,13 @@ required_files=(
   specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/change.yaml
   tooling/governance/validate_repository_foundation.py
   tooling/governance/tests/test_validate_repository_foundation.py
+  tooling/governance/merge-eligibility/README.md
+  tooling/governance/merge-eligibility/evaluator.py
+  tooling/governance/merge-eligibility/github_adapter.py
+  tooling/governance/merge-eligibility/schema-v1.json
+  tooling/governance/merge-eligibility/fixtures/eligible-r4.json
+  tooling/governance/merge-eligibility/fixtures/blocked-r4.json
+  tooling/governance/tests/test_merge_eligibility.py
 )
 
 for file in "${required_files[@]}"; do
@@ -58,7 +65,9 @@ required_pr_fields=(
   "Analytics/telemetry"
   "Documentation"
   "Independent-verifier report/result"
-  "Required approval class"
+  "Required risk evidence"
+  "Action-specific authority and evidence"
+  "Blocking-findings resolution"
 )
 
 for field in "${required_pr_fields[@]}"; do
@@ -131,13 +140,20 @@ fi
 
 grep -Fq "RL1 - Routine release" "$operating_model"
 grep -Fq "technical steward" "$operating_model"
-grep -Fq "founder approval" "$operating_model"
+grep -Fq "R4 does not require founder approval merely because it is R4" "$operating_model"
+grep -Fq "universal evidence contract" "$operating_model"
+grep -Fq "action-specific authority" "$operating_model"
 grep -Fq "initial public launch" "$operating_model"
 grep -Fq "Governance bootstrap history" "$operating_model"
 grep -Fq "bootstrap exception" "$operating_model"
 grep -Fq "Amendment history" "$operating_model"
 grep -Fq "historical initial DOC-16/A-002 bootstrap" docs/governance/approval-matrix.md
-grep -Fq "R3 production changes remain" docs/governance/post-merge-activation-checklist.md
+grep -Fq "No approval from risk class" docs/governance/change-risk-classification.md
+grep -Fq "ADR-0002" docs/decisions/README.md
+grep -Fq "production changes remain blocked" docs/governance/post-merge-activation-checklist.md
+grep -Fq "checks: read" .github/workflows/governance.yml
+grep -Fq "pull-requests: read" .github/workflows/governance.yml
+grep -Fq "merge-eligibility/github_adapter.py" .github/workflows/governance.yml
 
 if grep -Eq 'FOUNDER_GITHUB_USERNAME|TECHNICAL_STEWARD_GITHUB_USERNAME' .github/CODEOWNERS; then
   echo "CODEOWNERS contains an unverifiable identity placeholder." >&2
@@ -168,7 +184,7 @@ done
 
 r4_ruleset_paths=(
   /.github/CODEOWNERS
-  /.github/workflows/governance-policy.yml
+  /.github/workflows/governance.yml
   /scripts/governance/
   /docs/operations/15-ai-native-product-and-engineering-operating-model.md
   /docs/governance/approval-matrix.md

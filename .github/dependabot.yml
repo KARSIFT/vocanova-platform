@@ -7,18 +7,16 @@
 # classification, no independent review path, and no relationship to any
 # adopted change package. `target-branch: develop` below routes every
 # future Dependabot PR through the same branch this repo's own human/agent
-# work goes through, so it flows through the normal CI/governance-policy
+# work goes through, so it flows through the normal CI/Governance
 # checks (and, once merged, the normal release path) instead of a separate
 # direct-to-main channel.
 #
-# KNOWN GAP: governance-policy.yml requires a "Risk classification: R#"
+# KNOWN GAP: governance.yml requires a "Risk classification: R#"
 # line in the PR body for changes to certain paths - Dependabot does not
 # support injecting custom body text, so its PRs will still fail that
-# check until a human (or a follow-up workflow step watching for
-# dependabot[bot]-authored PRs) adds the line, the same manual step used
-# for PR #371. Not solved here - flagging so it isn't mistaken for an
-# oversight if a future Dependabot PR shows the same governance-policy
-# failure PR #371 did.
+# check until a human or agent adds the line; VOC-078-T04 deliberately
+# removed the repository-writing Dependabot classifier. This remains a
+# manual PR-record step, not an authorization bypass.
 version: 2
 updates:
   - package-ecosystem: "npm"

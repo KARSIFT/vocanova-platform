@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "cases": [
+    { "name": "r0-default", "risk": "R0", "automatic_merge_allowed": true, "expected_valid": true },
+    { "name": "r1-default", "risk": "R1", "automatic_merge_allowed": true, "expected_valid": true },
+    { "name": "r2-default", "risk": "R2", "automatic_merge_allowed": true, "expected_valid": true },
+    { "name": "r3-default", "risk": "R3", "automatic_merge_allowed": true, "expected_valid": true },
+    { "name": "r4-default", "risk": "R4", "automatic_merge_allowed": true, "expected_valid": true },
+    { "name": "r0-reasoned-hold", "risk": "R0", "automatic_merge_allowed": false, "automatic_merge_hold_reason": "Package requires a named manual merge window.", "expected_valid": true },
+    { "name": "r1-reasoned-hold", "risk": "R1", "automatic_merge_allowed": false, "automatic_merge_hold_reason": "Package requires a named manual merge window.", "expected_valid": true },
+    { "name": "r2-reasoned-hold", "risk": "R2", "automatic_merge_allowed": false, "automatic_merge_hold_reason": "Package requires a named manual merge window.", "expected_valid": true },
+    { "name": "r3-reasoned-hold", "risk": "R3", "automatic_merge_allowed": false, "automatic_merge_hold_reason": "Package requires a named manual merge window.", "expected_valid": true },
+    { "name": "r4-reasoned-hold", "risk": "R4", "automatic_merge_allowed": false, "automatic_merge_hold_reason": "Package requires a named manual merge window.", "expected_valid": true },
+    { "name": "r0-unreasoned-hold", "risk": "R0", "automatic_merge_allowed": false, "expected_valid": false },
+    { "name": "r1-unreasoned-hold", "risk": "R1", "automatic_merge_allowed": false, "expected_valid": false },
+    { "name": "r2-unreasoned-hold", "risk": "R2", "automatic_merge_allowed": false, "expected_valid": false },
+    { "name": "r3-unreasoned-hold", "risk": "R3", "automatic_merge_allowed": false, "expected_valid": false },
+    { "name": "r4-unreasoned-hold", "risk": "R4", "automatic_merge_allowed": false, "expected_valid": false },
+    { "name": "voc079-transition-exception", "id": "VOC-079", "risk": "R4", "automatic_merge_allowed": false, "transition_exception": true, "expected_valid": true }
+  ]
+}

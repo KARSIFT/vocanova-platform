@@ -130,16 +130,18 @@ tool as required unless it exists or the implementation task includes installing
 - Declared risk: R#
 - Path-detected floor: pending CI
 - Protected areas:
-- Active governance model: active-A-003 / separately governed rollback reference
+- Active governance model: VOC-079 approval-neutral / separately governed rollback reference
 - Independent verifier required: Yes
-- Standing technical-steward approval required: Yes/No and governing reason
+- Builder/reviewer identities and exact reviewed revision:
 - EHR triggered: Yes/No and evidence
-- Founder decision required: Yes/No
-- Approval evidence:
+- Action-specific authority required: Yes/No; name action and accountable role
+- Authority evidence or N/A:
 
-Under active A-003, routine R3 does not require standing steward or founder approval
-merely because it is R3. Record strengthened technical gates. R4 founder authority
-and any triggered EHR remain independently applicable.
+Under VOC-079, no R0-R4 class requires founder or standing technical-steward approval
+merely because of its label. Record proportionate deterministic evidence and exact-
+revision independent review. For R4, also record decision, impact, contingency, and
+applicable specialist evidence. Explicit action-specific authority and any triggered
+EHR remain independently applicable.
 
 ## Assumptions and open questions
 

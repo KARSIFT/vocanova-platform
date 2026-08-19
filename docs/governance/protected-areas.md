@@ -34,19 +34,19 @@ The following are R4 by decision type even when no protected path is changed:
 ## Ownership
 
 `CODEOWNERS` routes review; it is not approval evidence and does not express every
-required approval combination. Under active A-003, routine R3 ownership routing must
-not be interpreted as standing technical-steward or founder approval. R4 founder
-authority remains unchanged. Claude Code may independently verify protected changes
-but is never a human approval authority.
+required evidence or authority combination. No protected path or R0-R4 label creates
+standing technical-steward or founder approval. R4 paths require the complete R4
+evidence contract, including exact-revision independent review by a role different
+from the builder. A human or AI agent may fill either role; vendor identity is not
+authority. Separately defined external-effect authority remains mandatory.
 
 EHR may obtain qualified human expertise for an exceptional triggered matter. It
 must not become permanent ownership or a routine replacement approval layer.
 
 ## Bootstrap boundary
 
-The initial DOC-16/A-002 adoption is protected R4 governance. Its narrowly scoped
-bootstrap rule permits founder approval, independent Claude Code verification, and
+The initial DOC-16/A-002 adoption was protected R4 governance. Its narrowly scoped
+bootstrap rule permitted founder approval, independent Claude Code verification, and
 repository validation to adopt the framework without claiming nonexistent steward
-approval. It authorizes no production or R3 protected technical work. Immediately
-after merge, ordinary R3 steward requirements apply and R3 production remains blocked
-until a qualified human steward and enforcement are configured.
+approval. It authorized no production or later protected work, expired on merge, and
+is preserved only as non-reusable historical evidence.

@@ -8,7 +8,7 @@ what's currently live, and each file's own frontmatter `status` for why it's her
 | Document | Why it's archived |
 |---|---|
 | [DOC-13 — F1 Repository Foundation Execution Package](13-f1-repository-foundation-execution-package.md) | `historical` - F1 is complete; this is the execution record, not a live directive |
-| [DOC-17 — Autonomous Development Architecture](17-autonomous-development-architecture.md) | `superseded` - the "Control Plane" system it specifies was adopted (VOC-004) but never built; the live orchestrator system in [ADR-0001](../decisions/ADR-0001-agent-orchestration-architecture.md) is what actually runs |
+| [DOC-17 — Autonomous Development Architecture](17-autonomous-development-architecture.md) | `superseded` - the "Control Plane" system it specifies was adopted (VOC-004) but never built; the later local orchestrator experiment in [ADR-0001](../decisions/ADR-0001-agent-orchestration-architecture.md) was also superseded and removed by VOC-078 |
 | [DOC-18 — Autonomous Development Implementation Roadmap](18-autonomous-development-implementation-roadmap.md) | `superseded` - the 18-phase build plan for DOC-17's Control Plane; never executed |
 | [DOC-19 — Governance Reconciliation Notes](19-governance-reconciliation-notes.md) | `historical` - its plain-language orientation role is now done directly by DOC-16 v2.0 |
 | [Adoption notes](README-adoption-notes.md) | Non-authoritative record of VOC-008 semantic corrections made before DOC-00-12 adoption |

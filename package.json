@@ -27,9 +27,7 @@
     "build:api": "cd apps/api && go build ./...",
     "format:check": "prettier --check package.json pnpm-workspace.yaml eslint.config.js apps/web packages scripts/foundation docs/development.md infra/README.md && node scripts/foundation/check-go-format.mjs",
     "format": "prettier --write package.json pnpm-workspace.yaml eslint.config.js apps/web packages scripts/foundation docs/development.md infra/README.md && cd apps/api && gofmt -w .",
-    "audit": "pnpm audit --audit-level high",
-    "orchestrator": "node orchestrator/run.mjs",
-    "orchestrator:watch": "node orchestrator/run.mjs --watch"
+    "audit": "pnpm audit --audit-level high"
   },
   "devDependencies": {
     "@vocanova/design-tokens": "workspace:*",

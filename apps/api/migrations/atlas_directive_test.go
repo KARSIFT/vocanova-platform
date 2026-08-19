@@ -15,8 +15,7 @@ import (
 // per-file directive. Any other value (e.g. the historic
 // "-- atlas:txmode transaction" the pre-VOC-033 migration set used) aborts
 // `atlas migrate apply` at directive-parsing time, before any SQL is run.
-// See .karsift/lessons.md 2026-07-29 for the failing reproduction and
-// VOC-033-D00 for the resolution choice (use "file", not delete the line).
+// VOC-033-D00 records the resolution choice: use "file", not delete the line.
 var validAtlasTxmodes = map[string]bool{
 	"none": true,
 	"file": true,
@@ -296,7 +295,7 @@ func TestAtlasTxmodeDirectiveIsValidInEveryMigration(t *testing.T) {
 			t.Fatalf("read %s: %v", name, err)
 		}
 		if invalid != "" {
-			t.Errorf("file %q declares invalid atlas:txmode %q; Atlas v1.x accepts only %v in a per-file directive (see .karsift/lessons.md 2026-07-29 and VOC-033-D00)", name, invalid, sortedValidTxmodeKeys())
+			t.Errorf("file %q declares invalid atlas:txmode %q; Atlas v1.x accepts only %v in a per-file directive (see VOC-033-D00)", name, invalid, sortedValidTxmodeKeys())
 		}
 	}
 }

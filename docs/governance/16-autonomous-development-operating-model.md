@@ -1,34 +1,32 @@
 ---
 id: DOC-16
 title: Vocanova Autonomous Development Operating Model
-version: 2.0
+version: 3.0
 status: approved
 owner: founder
 canonical_path: docs/governance/16-autonomous-development-operating-model.md
 approved_at: 2026-07-13
 approval_evidence: PR-3-founder-approval-comment-4961029533-reviewed-commit-09f97341ff093fd20a70683d88b772e154979330
-last_reviewed_at: 2026-08-14
+last_reviewed_at: 2026-08-19
 review_cycle: quarterly
 supersedes: null
 folds_in:
   - A-002 (Governed Autonomous Releases; approved 2026-07-13, PR #3)
   - A-003 (Governed Autonomous Engineering Authority; effective 2026-07-17T16:44:34Z, PR #8)
   - A-004 (Orchestrator Independent-Verification Merge Authority; approved 2026-08-14, PR #54)
+  - VOC-079 (R4 Approval-Neutral Governance; adopted 2026-08-19, PR #75)
 revision_note: >
-  This v2.0 revision folds A-002, A-003, and A-004's operative rules directly into
-  this document and removes those three amendment files, so current governance
-  reads as one document instead of a base plus three overlays. No underlying rule
-  changes in the folding itself - every rule below already had independent
-  founder-approval evidence in its original amendment (preserved in the Amendment
-  history section). This revision touches an R4-protected path
-  (.github/approved-policy/protected-paths.yaml) and needs its own founder approval
-  on the pull request that introduces it, per this repository's own rule that an
-  author or implementation agent cannot be the sole approver of a governance
-  change - see that pull request for the approval comment once recorded.
+  This v3.0 revision implements VOC-079's approval-neutral R4 authority model.
+  Risk remains consequence-based and R4 retains the strongest evidence contract,
+  but no risk label creates a personal approval requirement. Explicit authority for
+  external effects and genuinely triggered EHR remain independent gates. VOC-079
+  was adopted under the prior R4 founder rule and cannot use this revision to
+  authorize its own transition; that one-time evidence is preserved below.
 related_documents:
   - DOC-15
 related_decisions:
   - A-001
+  - ADR-0002
 ---
 
 # 16 — Vocanova Autonomous Development Operating Model
@@ -54,9 +52,9 @@ sections as not individually reconciled since 2026-07-24.
 Founder approval for this operating model was originally recorded on PR #3 against
 commit `09f97341ff093fd20a70683d88b772e154979330`, merged into `develop` 2026-07-13.
 That approval, and every approval described in "Amendment history" below, remains
-valid, permanent evidence. Folding each amendment's text into this document does not
-revisit or reopen any of those decisions - it only removes the need to read four
-documents to find the current rule.
+valid, permanent historical evidence for its reviewed revision. None is standing or
+reusable authority for a later change. VOC-079 was itself adopted under the former
+R4 founder rule; the new model cannot retroactively authorize its own adoption.
 
 ## Repository conventions
 
@@ -71,16 +69,17 @@ artifact categories or authority hierarchy.
 
 | Role | Responsibility | Prohibited authority |
 |---|---|---|
-| Founder | Consequential strategic, financial, legal, product-direction, public-launch, user-trust, and difficult-to-reverse decisions | Routine implementation approval is not required |
-| ChatGPT | Product analysis, specifications, architecture proposals, governance drafting, and decision routing | Cannot approve founder-controlled decisions or implementation |
+| Accountable decision owner | Owns a specifically assigned product, business, legal, financial, external-effect, or organizational decision | Risk class alone does not make the founder or any other person the owner |
+| Planner role | Product analysis, specifications, architecture proposals, governance drafting, and decision routing | Cannot adopt or independently verify its own meaningful plan |
 | Implementer role | Implementation of approved, implementation-ready changes and applicable tests and documentation | Cannot approve its own work, expand scope, or deploy directly to production |
-| Independent reviewer role | Independent specification, code, architecture, security, and CI/CD verification | Is not a human technical steward and cannot assume legal or organizational accountability |
-| GitHub Actions | Deterministic checks, traceability, gates, and deployment orchestration | Cannot make product or business decisions |
-| Cloudflare | Isolated preview, staging, production deployment, monitoring, and rollback infrastructure | Must not decide whether a release is authorized |
+| Independent reviewer role | Independent specification, code, architecture, security, and CI/CD verification of the exact revision | Cannot be the builder of the reviewed revision or assume separately assigned legal or organizational accountability |
+| GitHub Actions | Deterministic repository checks and traceability | Cannot make product or business decisions, merge, deploy, or monitor servers |
+| Cloudflare | Existing DNS/TLS/WAF/CDN runtime service; future hosting input | Must not be represented as repository deployment automation or decide whether a release is authorized |
 
-Which model or vendor occupies the implementer and independent-reviewer roles is
-configurable and has changed more than once - `karsift-ai-infra`'s `config/roles.yml`
-is the current source of truth for the actual occupant, not this table.
+Any human or AI system may occupy the planner, implementer, or independent-reviewer
+role when it has the necessary capability and access. The builder and reviewer roles
+must remain separate, their identities and exact revisions must be recorded, and no
+external vendor configuration is a source of repository authority.
 
 A permanent qualified-human technical-steward role existed early in this
 repository's history and is now retired as a routine approval authority (see
@@ -130,14 +129,17 @@ independent axes, defined in full in
 [change-risk-classification.md](change-risk-classification.md). In short:
 
 - **R0-R2** routine work needs proportionate deterministic and independent
-  verification. No founder or technical-steward approval.
+  verification.
 - **R3** protected technical work (authentication, secrets, production
   infrastructure, data handling, migrations, CI/CD, governance itself, and similar)
   needs strengthened, risk-specific controls and independent verification. It does
   **not** need founder or technical-steward approval merely for being R3.
 - **R4** consequential decisions (strategy, pricing, legal, material privacy/user-
   trust, launches, difficult-to-reverse actions, or a material expansion of
-  autonomous-system authority) always need explicit founder approval.
+  autonomous-system authority) need the strongest evidence: an explicit decision
+  record, impact analysis, rollback or contingency plan, applicable specialist and
+  deterministic checks, exact-revision independent review, and resolution of every
+  blocking finding. R4 does not require founder approval merely because it is R4.
 - A release inherits the highest class of everything it contains.
 - Risk may be raised at any time by the builder, the path-based CI floor, the
   independent verifier, or the founder. It may only be lowered below a detected
@@ -154,6 +156,14 @@ reversible protective measures may continue, the escalation reason is recorded,
 suitable qualified human expertise is obtained, and the resulting review becomes
 permanent evidence. EHR must never harden into a standing approval requirement.
 
+Risk-class evidence is separate from action-specific authority. Signing a contract,
+committing spend, disclosing secrets or personal data, accessing production, making
+an irreversible external mutation, and performing an initial public or predefined
+major launch remain blocked until the authority and technical controls explicitly
+defined for that action are satisfied. Each such hold must name the action,
+accountable role, required evidence, and completion or expiry condition; it must not
+be a disguised hold on all R4 work.
+
 ## Branch and merge behavior
 
 - `develop` and `main` are the only permanent branches.
@@ -161,41 +171,39 @@ permanent evidence. EHR must never harden into a standing approval requirement.
 - Direct pushes to `develop` and `main`, unverified merges, and local production
   deployments are prohibited.
 - Working branches are normally squash-merged into `develop`. Release pull requests
-  promote `develop` to `main` with an identifiable merge commit. `main` is the only
-  production deployment source.
+  promote `develop` to `main` with an identifiable merge commit. A future production
+  mechanism may publish only from `main`; no such mechanism is currently installed.
 
-**A pull request may merge automatically into `develop`** when: required
-deterministic checks pass; required independent verification passes; no blocking
-finding remains; no active EHR condition exists; any required founder decision has
-already been validly recorded; and repository policy authorizes automatic merge for
-that change. This applies at every risk class through R3 - R3 needs the
-strengthened controls above, but not a standing steward or founder sign-off just
-because it's R3. R4 changes always need founder approval before merge, regardless
-of automation state.
+**A pull request is merge-eligible into `develop`** when: required deterministic
+checks pass; a different reviewer role records a passing verdict bound to the exact
+head revision; no blocking finding remains; risk-specific evidence is complete; no
+active EHR exists; every applicable action-specific authority hold is satisfied; and
+the package has not opted out. This universal evidence contract applies to R0-R4 and
+to human-, agent-, and future orchestrator-originated work. Risk class alone never
+creates a founder-approval gate. Unknown or unparseable risk fails closed.
 
-**An orchestrator-originated pull request** - implemented and independently
-reviewed by dedicated subagents (or an equivalent independent tool) dispatched from
-the same live orchestrator session, per
-[ADR-0001](../decisions/ADR-0001-agent-orchestration-architecture.md) - may merge
-directly once, every time, without exception:
+VOC-078-T01 retired the workflow that previously executed this automatic-merge
+permission. VOC-079-T01 adds a repository-owned pure eligibility evaluator and a
+read-only Governance-workflow adapter. The adapter reads normalized package, check,
+review, exact-revision, R4, EHR, and action-authority evidence and reports an
+`eligible` or `blocked` decision with concrete reasons in the job summary. It cannot
+approve, comment, merge, dispatch, or otherwise mutate GitHub. Until a separately
+adopted repository-owned executor exists, an authorized actor performs the merge after
+verifying the same gates and the exact-SHA result.
 
-1. it is genuinely orchestrator-originated as just defined - not a human
-   contributor, not a different automated system;
-2. this repository's real deterministic checks (lint/typecheck/test/build) actually
-   ran and passed;
-3. the independent reviewer subagent - which never had write access to the change -
-   returned `VERDICT: PASS` or `VERDICT: PASS WITH NON-BLOCKING FINDINGS`, bound to
-   the exact reviewed commit; and
-4. the change is not R4, and does not touch secrets, production data, or an
-   irreversible action.
+The former orchestrator-originated merge path is dormant. VOC-078-T02 superseded
+[ADR-0001](../decisions/ADR-0001-agent-orchestration-architecture.md) and removed the
+repository-local orchestrator and subagent assets, so no current pull request can
+qualify as orchestrator-originated under that path. Human- and agent-authored changes
+follow the general pull-request rule above. Reintroducing an orchestrator or a special
+merge executor requires a new accepted decision and adopted implementation package.
+Any future orchestrator uses the universal evidence contract above; no `not R4`
+exception or parallel vendor-specific authority path exists. The historical authority
+in the amendment record cannot activate absent machinery.
 
-If any condition fails, the change falls back to the full process above - this path
-grants no authority to work around a failed condition, and does not let the
-orchestrator approve its own substantial correction or expand its own authority.
-
-`develop` is the integrated staging state; successful merges deploy to staging - see
-[repository-settings.md](repository-settings.md) for current staging automation
-status.
+`develop` is the integrated repository state. After VOC-078-T03, merging to it does
+not deploy or poll any staging server. See
+[repository-settings.md](repository-settings.md) for the current automation state.
 
 ## Release classes and production release authority
 
@@ -209,17 +217,21 @@ inside a large RL2 release.
   and rollback requirements pass.
 - **RL3 - Protected or major release** (initial public launch, predefined major
   launches, consequential business changes, unusually hard-to-reverse releases):
-  RL3 status alone doesn't imply founder approval, but founder approval is required
-  whenever the release contains an unresolved R4 decision, is a predefined founder-
-  controlled RL3 event, or another explicit protected condition applies. An R3
+  RL3 or R4 status alone does not imply founder approval. An explicitly defined
+  launch or external-effect authority may still require an accountable person's
+  go/no-go before the action. An R3
   technical change does not automatically make its release RL3 - the two are
   evaluated independently.
 
 Automated release authority can never override a failed mandatory check, an
-unresolved blocking finding, active EHR, a missing required R4 founder approval, a
-missing founder approval for a predefined founder-controlled RL3 event, or a
-missing rollback capability. Automation is permission, not an obligation - any gate
-may hold a release for investigation.
+unresolved blocking finding, active EHR, incomplete risk-specific evidence, an unmet
+action-specific authority hold, or a missing rollback capability. Automation is
+permission, not an obligation - any gate may hold a release for investigation.
+
+VOC-078-T01 retired the workflow that previously promoted completed packages from
+`develop` to `main`. This section continues to define release eligibility, but no
+current GitHub workflow executes that promotion. During reconstruction, promotion is
+prohibited; a future hosting/release package must define the replacement.
 
 RL1/RL2 *technical* activation (as opposed to the governance permission described
 above) remains a separate, currently disabled gate - see
@@ -238,8 +250,8 @@ A production release is eligible only when all applicable evidence is attached t
 - successful preview or staging evidence where applicable;
 - security, privacy, accessibility, analytics, migration, and documentation impact;
 - rollback mechanism, trigger, owner, and last known-good reference;
-- all independently applicable approvals, including R4 founder approval and any
-  actually triggered exceptional human review;
+- every applicable action-specific authority record and any actually triggered
+  exceptional human review;
 - protected production environment approval rules satisfied; and
 - post-deployment health checks and outcome-observation owner defined.
 
@@ -264,7 +276,7 @@ A change that materially expands autonomous authority is always R4 - granting ne
 production write authority, enabling a materially broader autonomous production
 capability, removing mandatory independent verification, materially increasing
 autonomous spending authority, materially expanding access to sensitive data, or
-weakening a founder-controlled decision boundary all count.
+weakening an explicit action-specific authority boundary all count.
 
 Governance replacements - including this document's own future revisions - are
 evaluated under the governance rules effective before the proposed replacement; a
@@ -292,7 +304,7 @@ destructive production-data modification, permanent deletion without proven
 recovery, a consequential privacy decision, an extraordinary financial commitment,
 or a major user-trust decision. Where an incident seems to call for one of these,
 use reversible containment first; any remaining consequential action still follows
-normal R4 or EHR rules.
+the R4 evidence contract, action-specific authority, and EHR rules.
 
 Any future break-glass mechanism must be narrowly scoped, time-limited where
 practical, fully auditable, automatically tied to an incident record, reviewed
@@ -319,9 +331,9 @@ authority.
 | Dependency audit | Live - pnpm audit and Dependabot |
 | Secret scanning | Live - GitHub secret scanning and push protection |
 | Preview status | Not built - per-PR Cloudflare previews remain genuinely unbuilt |
-| Independent Claude Code verification | Live - required for merge |
-| Staging deployment, health checks | Live - `deploy-staging.yml`, real staging server |
-| Production deployment, health checks | Live - `deploy-production.yml`, real production server, restricted to `main` |
+| Independent exact-revision verification | Live as a repository requirement; performed outside Actions and attached to the PR |
+| Staging deployment, health checks | Paused/unavailable in GitHub Actions after VOC-078-T03; no claim that an existing server was stopped |
+| Production deployment, health checks | Paused/unavailable in GitHub Actions after VOC-078-T03; no claim that an existing server was stopped |
 | Rollback | Manual, proven procedure (redeploy previous immutable image digest) - not one-click automation |
 
 Absence of a tool is never represented by a passing placeholder check. See
@@ -332,9 +344,10 @@ maintained record of what's built versus what's still pending.
 
 This model has already passed its first five implementation pull requests and its
 first production release; it should continue to be reviewed after any serious
-incident and at least quarterly. Authorized maintainers must be able to disable
-independently: agent dispatch, autonomous merge, preview/staging deployment,
-production deployment, and automated rollback.
+incident and at least quarterly. GitHub Actions agent dispatch, autonomous merge,
+deployment, and scheduled server/error monitoring are disabled by removal under
+VOC-078. Future write automation must expose an independent kill switch for every
+capability.
 
 ## Retirement of the standing technical-steward role
 
@@ -354,10 +367,10 @@ layer.
 
 ## Amendment history
 
-This document previously worked alongside three separate amendments. Each
-amendment's operative rules are now folded directly into the sections above; this
-section preserves the permanent approval evidence for each, so nothing is lost by
-retiring the separate files.
+This document previously worked alongside three separate amendments. Each former
+amendment's operative rules is folded directly into the sections above. The table
+also records the later VOC-079 authority transition. It preserves permanent evidence
+for the revision it governed without making any approval reusable.
 
 | Date | Change (former amendment) | What it did | Evidence |
 |---|---|---|---|
@@ -365,9 +378,11 @@ retiring the separate files.
 | 2026-07-17T16:44:34Z | Governed Autonomous Engineering Authority (formerly "A-003") | Retired the standing qualified-human technical-steward approval requirement for routine R3 protected technical work; introduced EHR as an exceptional-only escalation mechanism | PR #8, approved PR head SHA `c858ebff3d97da88fea830bc32a74f69f59a9ad2`, adopted `develop` SHA `9d5b4bc1d4a72e313b013047601265ee837c34f2`: formal approval [5005389067](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067), independent verification [5005293621](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005293621), repository adoption [5005429197](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005429197), effective activation [5005456622](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622) |
 | 2026-08-14 | Orchestrator Independent-Verification Merge Authority (formerly "A-004") | Let an orchestrator-originated pull request that already satisfies real independent verification merge directly, without also repeating the separate `karsift-ai-infra` pipeline ceremony built for a different, less continuous system | PR #54, founder approval comment [5295002955](https://github.com/KARSIFT/vocanova-platform/pull/54#issuecomment-5295002955), reviewed commit `94f4d2196156c55b3264f955c4d03746ab2cd37a` |
 | 2026-08-14 | This consolidation (v2.0 of this document) | Folded the three amendments above directly into this document and removed the separate amendment files, so current governance reads as one document instead of a base plus three overlays; no underlying rule changed in the folding itself | See this revision's pull-request approval comment once recorded |
+| 2026-08-19 | R4 Approval-Neutral Governance (VOC-079; v3.0 of this document) | Retained R4 as the highest consequence class while replacing its class-wide founder gate with the universal evidence contract and explicit action-specific authority | Adopted package candidate `25a3e246b8f66dd4b92ea9726eb5367c16363018`; PR #75 founder approval [5341799779](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5341799779) and independent package review [5340623965](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5340623965). This one-time pre-transition authority is exhausted by VOC-079 and cannot authorize later work; exact implementation evidence is recorded on the implementation pull requests. |
 
-The one-time VOC-002 migration approval recorded above is exhausted and must never
-be reused to justify a later change. Automatic production-release authority
+The one-time VOC-002 migration approval and VOC-079 pre-transition approval recorded
+above are exhausted and must never be reused to justify a later change. Automatic
+production-release authority
 (2026-08-08, a separate founder decision - see AGENTS.md's "Release and deployment
 authority") is recorded there, not here, since it did not go through this
 amendment pattern.

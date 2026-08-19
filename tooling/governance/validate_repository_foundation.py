@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import re
 import sys
 from collections import defaultdict
@@ -51,6 +52,9 @@ DOC18_BODY_SHA256 = "3d578186804cc2b3b500eec72809b26c03d9f236a4a22d3534daa1e2ba3
 VOC002_PATH = "specs/changes/VOC-002-a003-governance-transition"
 VOC003_PATH = "specs/changes/VOC-003-a003-lifecycle-sync"
 VOC004_PATH = "specs/changes/VOC-004-canonical-adoption-doc-17-doc-18"
+AUTOMATIC_MERGE_EXAMPLES = (
+    "specs/templates/change-package/examples/automatic-merge-drafting.json"
+)
 
 REQUIRED_FILES = (
     "AGENTS.md",
@@ -59,22 +63,30 @@ REQUIRED_FILES = (
     ".github/CODEOWNERS",
     ".github/approved-policy/protected-paths.yaml",
     ".github/pull_request_template.md",
-    ".github/workflows/governance-policy.yml",
-    ".github/workflows/repository-governance.yml",
+    ".github/workflows/governance.yml",
     "docs/README.md",
     DOC17_PATH,
     DOC18_PATH,
     DOC16_PATH,
     A003_STATE_PATH,
     "docs/decisions/README.md",
+    "docs/decisions/ADR-0002-risk-class-approval-neutral-authority.md",
     "scripts/governance/classify-change-risk.sh",
     "scripts/governance/validate-governance.sh",
     "specs/README.md",
+    AUTOMATIC_MERGE_EXAMPLES,
     f"{VOC002_PATH}/change.yaml",
     f"{VOC003_PATH}/change.yaml",
     f"{VOC004_PATH}/change.yaml",
     "tooling/governance/validate_repository_foundation.py",
     "tooling/governance/tests/test_validate_repository_foundation.py",
+    "tooling/governance/merge-eligibility/README.md",
+    "tooling/governance/merge-eligibility/evaluator.py",
+    "tooling/governance/merge-eligibility/github_adapter.py",
+    "tooling/governance/merge-eligibility/schema-v1.json",
+    "tooling/governance/merge-eligibility/fixtures/eligible-r4.json",
+    "tooling/governance/merge-eligibility/fixtures/blocked-r4.json",
+    "tooling/governance/tests/test_merge_eligibility.py",
 )
 
 PROTECTED_PATHS = (
@@ -210,6 +222,194 @@ def validate_restricted_yaml(validation: Validation, relative: str) -> dict[str,
             if level > indent:
                 del contexts[level]
     return top_level
+
+
+def automatic_merge_drafting_error(
+    values: dict[str, object], *, transition_exception: bool = False
+) -> str | None:
+    risk = values.get("risk")
+    if risk not in {f"R{level}" for level in range(5)}:
+        return "automatic-merge drafting requires risk R0 through R4"
+    allowed = values.get("automatic_merge_allowed")
+    if allowed is True or (isinstance(allowed, str) and allowed.casefold() == "true"):
+        return None
+    if not (allowed is False or (isinstance(allowed, str) and allowed.casefold() == "false")):
+        return "automatic_merge_allowed must be explicitly true or false"
+    if (
+        transition_exception
+        and values.get("id") == "VOC-079"
+        and values.get("risk") == "R4"
+    ):
+        return None
+    reason = values.get("automatic_merge_hold_reason")
+    if not isinstance(reason, str) or not reason.strip():
+        return "automatic_merge_allowed false requires automatic_merge_hold_reason"
+    if reason.strip().casefold() in {
+        "n/a",
+        "none",
+        "not applicable",
+        "replace",
+        "tbd",
+        "todo",
+        "unknown",
+    } or "replace with" in reason.casefold():
+        return "automatic_merge_hold_reason must be a non-placeholder package-local rationale"
+    return None
+
+
+def read_package_drafting_values(validation: Validation, relative: str) -> dict[str, str]:
+    wanted = {
+        "id",
+        "risk",
+        "automatic_merge_allowed",
+        "automatic_merge_hold_reason",
+    }
+    values: dict[str, str] = {}
+    for raw in validation.read(relative).splitlines():
+        if not raw or raw[0].isspace() or raw.lstrip().startswith("#") or ":" not in raw:
+            continue
+        key, value = raw.split(":", 1)
+        if key not in wanted:
+            continue
+        if key in values:
+            validation.error(relative, f"duplicate top-level package drafting key: {key}")
+            continue
+        values[key] = strip_restricted_yaml_comment(value).strip().strip("\"'")
+    return values
+
+
+def validate_automatic_merge_drafting(validation: Validation) -> None:
+    template_path = "specs/templates/change-package/change.yaml"
+    template = validate_restricted_yaml(validation, template_path)
+    if template.get("automatic_merge_allowed") != "true":
+        validation.error(template_path, "R0-R4 template default must be automatic_merge_allowed: true")
+    drafting_markers = {
+        "AGENTS.md": (
+            "R0, R1, R2, R3, and R4 all default to",
+            "automatic_merge_hold_reason",
+            "VOC-079 is the sole transition exception",
+        ),
+        "CONTRIBUTING.md": (
+            "defaults to\n`true` for R0–R4",
+            "automatic_merge_hold_reason",
+            "sole\ntransition exception",
+        ),
+        ".github/README.md": (
+            "defaults to `true` across R0–R4",
+            "automatic_merge_hold_reason",
+            "pre-transition exception",
+        ),
+        ".github/pull_request_template.md": (
+            "R0–R4 default to",
+            "automatic_merge_hold_reason",
+            "VOC-079's documented transition value",
+        ),
+        "docs/operations/15-ai-native-product-and-engineering-operating-model.md": (
+            "R0–R4 packages default it to `true`",
+            "automatic_merge_hold_reason",
+            "VOC-079 preserved as the sole pre-transition exception",
+        ),
+        "docs/decisions/ADR-0002-risk-class-approval-neutral-authority.md": (
+            "New R0–R4 packages default `automatic_merge_allowed` to `true`",
+            "automatic_merge_hold_reason",
+            "sole transition exception",
+        ),
+        "specs/templates/change-package/README.md": (
+            "template literal is `true` for R0–R4",
+            "automatic_merge_hold_reason",
+            "sole transition\nexception",
+        ),
+        template_path: (
+            "R0–R4 all default to true",
+            "automatic_merge_hold_reason",
+            "risk label alone is never an opt-out",
+        ),
+    }
+    for relative, markers in drafting_markers.items():
+        source = validation.read(relative)
+        for marker in markers:
+            if marker not in source:
+                validation.error(relative, f"missing automatic-merge drafting rule marker: {marker}")
+
+    try:
+        matrix = json.loads(validation.read(AUTOMATIC_MERGE_EXAMPLES))
+    except json.JSONDecodeError as exc:
+        validation.error(AUTOMATIC_MERGE_EXAMPLES, f"invalid JSON: {exc}")
+        matrix = {}
+    cases = matrix.get("cases") if isinstance(matrix, dict) else None
+    if not isinstance(matrix, dict) or matrix.get("schema_version") != 1 or not isinstance(cases, list):
+        validation.error(AUTOMATIC_MERGE_EXAMPLES, "drafting matrix must use schema_version 1 and a cases array")
+        cases = []
+
+    coverage: defaultdict[str, set[str]] = defaultdict(set)
+    names: set[str] = set()
+    for index, case in enumerate(cases):
+        label = f"case {index + 1}"
+        if not isinstance(case, dict):
+            validation.error(AUTOMATIC_MERGE_EXAMPLES, f"{label} must be an object")
+            continue
+        name = case.get("name")
+        if not isinstance(name, str) or not name or name in names:
+            validation.error(AUTOMATIC_MERGE_EXAMPLES, f"{label} must have a unique non-empty name")
+        else:
+            names.add(name)
+            label = name
+        expected = case.get("expected_valid")
+        if not isinstance(expected, bool):
+            validation.error(AUTOMATIC_MERGE_EXAMPLES, f"{label} expected_valid must be boolean")
+            continue
+        error = automatic_merge_drafting_error(
+            case, transition_exception=case.get("transition_exception") is True
+        )
+        if (error is None) != expected:
+            validation.error(
+                AUTOMATIC_MERGE_EXAMPLES,
+                f"{label} expected_valid={expected} disagrees with policy: {error or 'valid'}",
+            )
+        risk = case.get("risk")
+        if isinstance(risk, str):
+            if case.get("automatic_merge_allowed") is True and expected:
+                coverage["default"].add(risk)
+            elif case.get("automatic_merge_allowed") is False and case.get("automatic_merge_hold_reason") and expected:
+                coverage["reasoned"].add(risk)
+            elif case.get("automatic_merge_allowed") is False and not case.get("automatic_merge_hold_reason") and not expected:
+                coverage["unreasoned"].add(risk)
+    expected_risks = {f"R{level}" for level in range(5)}
+    for category in ("default", "reasoned", "unreasoned"):
+        if coverage[category] != expected_risks:
+            validation.error(AUTOMATIC_MERGE_EXAMPLES, f"{category} examples must cover R0-R4")
+    if "voc079-transition-exception" not in names:
+        validation.error(AUTOMATIC_MERGE_EXAMPLES, "missing VOC-079 transition exception example")
+
+    changes = validation.root / "specs/changes"
+    for package_file in sorted(changes.glob("VOC-*/change.yaml")):
+        match = re.match(r"VOC-(\d{3})-", package_file.parent.name)
+        if not match:
+            continue
+        number = int(match.group(1))
+        if number < 79:
+            continue
+        relative = package_file.relative_to(validation.root).as_posix()
+        values = read_package_drafting_values(validation, relative)
+        if number == 79:
+            source = validation.read(relative)
+            if (
+                values.get("id") != "VOC-079"
+                or values.get("risk") != "R4"
+                or values.get("automatic_merge_allowed") != "false"
+            ):
+                validation.error(relative, "VOC-079 must preserve its pre-transition R4 false exception")
+            for marker in (
+                "currently effective R4 rule governs this transition package",
+                "must not be reused as precedent after adoption",
+            ):
+                if marker not in source:
+                    validation.error(relative, f"missing VOC-079 transition-exception marker: {marker}")
+            error = automatic_merge_drafting_error(values, transition_exception=True)
+        else:
+            error = automatic_merge_drafting_error(values)
+        if error:
+            validation.error(relative, error)
 
 
 def require_complete_directory(validation: Validation, relative: str) -> None:
@@ -634,6 +834,7 @@ def validate_a003_lifecycle(validation: Validation) -> None:
     else:
         required_active = {
             "authority_model": "a003-active",
+            "current_successor_authority_model": "voc079-approval-neutral",
             "transition_stage": "effectively-active",
             "formal_founder_approval_status": "approved-exact-revision",
             "technical_steward_migration_approval_status": "approved-exact-revision-one-time",
@@ -722,7 +923,9 @@ def validate_a003_lifecycle(validation: Validation) -> None:
     # AGENTS.md's "Release and deployment authority" section for the record of
     # that decision - this check requires the same marker text to be present
     # here, not just asserted in a doc elsewhere.
-    autonomy_authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in validation.read(A003_STATE_PATH)
+    state_source = validation.read(A003_STATE_PATH)
+    autonomy_authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in state_source
+    control_plane_retired = "VOC-078-CONTROL-PLANE-RETIRED-2026-08-19" in state_source
     merge_release_defaults = {
         "automatic_merge_allowed": "false",
         "autonomous_merge_allowed": "false",
@@ -735,9 +938,18 @@ def validate_a003_lifecycle(validation: Validation) -> None:
         "production_deployment": "enabled",
         "autonomous_production_release": "enabled",
     }
+    merge_release_retired = {
+        "automatic_merge_allowed": "false",
+        "autonomous_merge_allowed": "false",
+        "production_deployment": "disabled",
+        "autonomous_production_release": "disabled",
+    }
     for key, default in merge_release_defaults.items():
         current = state.get(key)
-        if autonomy_authorized:
+        if control_plane_retired:
+            if current != merge_release_retired[key]:
+                validation.error(A003_STATE_PATH, f"{key} must equal {merge_release_retired[key]!r} after VOC-078 control-plane retirement")
+        elif autonomy_authorized:
             if current != merge_release_authorized[key]:
                 validation.error(A003_STATE_PATH, f"{key} must equal {merge_release_authorized[key]!r} once authorized")
         elif current != default:
@@ -755,14 +967,15 @@ def validate_a003_lifecycle(validation: Validation) -> None:
 
     authority = validation.read("docs/governance/approval-matrix.md")
     for marker in (
-        "No standing technical-steward approval; no founder approval merely because work is R3",
-        "R4 founder authority remains unchanged",
+        "no class requires founder",
+        "exact-revision review",
+        "separately named external-effect authority still applies",
         "EHR",
         "must never be reused",
-        "CODEOWNERS remains review routing and is not approval evidence",
+        "CODEOWNERS remains review routing",
     ):
         if marker not in authority:
-            validation.error("docs/governance/approval-matrix.md", f"missing A-003 authority marker: {marker}")
+            validation.error("docs/governance/approval-matrix.md", f"missing current authority marker: {marker}")
 
 
 def validate_ownership(validation: Validation) -> None:
@@ -770,8 +983,8 @@ def validate_ownership(validation: Validation) -> None:
     policy_values = validate_restricted_yaml(validation, policy_path)
     policy = validation.read(policy_path)
     expected_policy_state = {
-        "status": "approved-a003-active",
-        "authority_model": "a003-active",
+        "status": "approved-voc079-active",
+        "authority_model": "voc079-approval-neutral",
         "hosted_enforcement_status": "not-activated",
         "rl1_technical_activation": "false",
         "rl2_technical_activation": "false",
@@ -787,6 +1000,7 @@ def validate_ownership(validation: Validation) -> None:
     # mirrors docs/governance/a003-transition-state.yaml's merge/release/
     # deployment fields and must move in lockstep with it, never drift apart.
     autonomy_authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in policy
+    control_plane_retired = "VOC-078-CONTROL-PLANE-RETIRED-2026-08-19" in policy
     merge_release_defaults = {
         "automatic_merge_allowed": "false",
         "autonomous_merge_allowed": "false",
@@ -799,9 +1013,18 @@ def validate_ownership(validation: Validation) -> None:
         "production_deployment": "enabled",
         "autonomous_production_release": "enabled",
     }
+    merge_release_retired = {
+        "automatic_merge_allowed": "false",
+        "autonomous_merge_allowed": "false",
+        "production_deployment": "disabled",
+        "autonomous_production_release": "disabled",
+    }
     for key, default in merge_release_defaults.items():
         current = policy_values.get(key)
-        if autonomy_authorized:
+        if control_plane_retired:
+            if current != merge_release_retired[key]:
+                validation.error(policy_path, f"{key} must equal {merge_release_retired[key]!r} after VOC-078 control-plane retirement")
+        elif autonomy_authorized:
             if current != merge_release_authorized[key]:
                 validation.error(policy_path, f"{key} must equal {merge_release_authorized[key]!r} once authorized")
         elif current != default:
@@ -825,11 +1048,22 @@ def validate_ownership(validation: Validation) -> None:
 
 
 def validate_workflow(validation: Validation) -> None:
-    relative = ".github/workflows/repository-governance.yml"
+    relative = ".github/workflows/governance.yml"
     text = validation.read(relative)
-    if not re.search(r"^name:\s*Repository Governance\s*$", text, re.MULTILINE):
-        validation.error(relative, "workflow display name must be Repository Governance")
-    for marker in ("pull_request:", "push:", "- develop", "- main", "contents: read", "timeout-minutes:"):
+    if not re.search(r"^name:\s*Governance\s*$", text, re.MULTILINE):
+        validation.error(relative, "workflow display name must be Governance")
+    for marker in (
+        "pull_request:",
+        "push:",
+        "branches: [develop, main]",
+        "contents: read",
+        "checks: read",
+        "pull-requests: read",
+        "timeout-minutes:",
+        "name: merge eligibility",
+        "merge-eligibility/github_adapter.py",
+        "persist-credentials: false",
+    ):
         if marker not in text:
             validation.error(relative, f"missing workflow control: {marker}")
     for prohibited in ("pull_request_target", "paths:", "paths-ignore:", "contents: write", "secrets.", "codex", "claude"):
@@ -838,6 +1072,81 @@ def validate_workflow(validation: Validation) -> None:
     for action in re.findall(r"^\s*uses:\s*([^\s#]+)", text, re.MULTILINE):
         if not re.fullmatch(r"[^@]+@[0-9a-f]{40}", action):
             validation.error(relative, f"external action is not pinned to a full immutable SHA: {action}")
+    permission_match = re.search(
+        r"^permissions:\s*\n(?P<body>(?: {2}[A-Za-z-]+:\s*[^\n]+\n)+)",
+        text,
+        re.MULTILINE,
+    )
+    expected_permissions = {
+        "contents": "read",
+        "checks": "read",
+        "pull-requests": "read",
+    }
+    if not permission_match:
+        validation.error(relative, "missing parseable top-level permissions block")
+    else:
+        permissions = dict(
+            re.findall(r"^ {2}([A-Za-z-]+):\s*([^\s#]+)", permission_match.group("body"), re.MULTILINE)
+        )
+        if permissions != expected_permissions:
+            validation.error(
+                relative,
+                f"workflow permissions must equal the read-only set {expected_permissions!r}",
+            )
+
+
+def validate_merge_eligibility(validation: Validation) -> None:
+    base = "tooling/governance/merge-eligibility"
+    evaluator = validation.read(f"{base}/evaluator.py")
+    adapter = validation.read(f"{base}/github_adapter.py")
+    schema_text = validation.read(f"{base}/schema-v1.json")
+    try:
+        schema = json.loads(schema_text)
+    except json.JSONDecodeError as exc:
+        validation.error(f"{base}/schema-v1.json", f"invalid JSON schema: {exc}")
+        schema = {}
+    if schema.get("properties", {}).get("schema_version", {}).get("const") != 1:
+        validation.error(f"{base}/schema-v1.json", "schema_version must be pinned to 1")
+    for prohibited in ("urllib", "requests", "http.client", "subprocess", "GITHUB_TOKEN"):
+        if prohibited in evaluator:
+            validation.error(f"{base}/evaluator.py", f"pure evaluator contains prohibited boundary: {prohibited}")
+    if 'method="GET"' not in adapter:
+        validation.error(f"{base}/github_adapter.py", "adapter must make explicit GET-only requests")
+    for prohibited in (
+        'method="POST"',
+        'method="PATCH"',
+        'method="PUT"',
+        'method="DELETE"',
+        "subprocess",
+        "os.system",
+    ):
+        if prohibited in adapter:
+            validation.error(f"{base}/github_adapter.py", f"adapter contains prohibited write/process path: {prohibited}")
+    for marker in (
+        "package.opt_out",
+        "risk.invalid",
+        "review.self_authored",
+        "review.stale",
+        "review.blocking_findings",
+        "review.evidence_missing",
+        "ehr.active",
+        "action_authority.unmet_",
+        "r4_evidence.",
+    ):
+        if marker not in evaluator:
+            validation.error(f"{base}/evaluator.py", f"missing fail-closed policy reason: {marker}")
+    consumption_markers = {
+        "AGENTS.md": "reads it only to report the read-only eligibility decision",
+        "docs/operations/15-ai-native-product-and-engineering-operating-model.md": (
+            "consumes it only for the read-only eligibility report"
+        ),
+        "specs/templates/change-package/change.yaml": (
+            "consumes it only for the read-only\n# eligibility report"
+        ),
+    }
+    for relative, marker in consumption_markers.items():
+        if marker not in validation.read(relative):
+            validation.error(relative, "missing accurate automatic_merge_allowed consumption rule")
 
 
 def validate_governance_language(validation: Validation) -> None:
@@ -858,6 +1167,38 @@ def validate_governance_language(validation: Validation) -> None:
     for marker in PR_MARKERS:
         if marker not in pr:
             validation.error(".github/pull_request_template.md", f"missing required field: {marker}")
+    approval_neutral_sources = {
+        DOC16_PATH: (
+            "universal evidence contract",
+            "R4 does not require founder approval merely because it is R4",
+            "action-specific authority",
+        ),
+        "docs/governance/change-risk-classification.md": (
+            "No approval from risk class",
+            "exact-revision independent verification",
+            "Action-specific authority remains separate from classification",
+        ),
+        "AGENTS.md": (
+            "R0-R4 are consequence classes",
+            "Resolve every blocking finding before merge",
+            "Explicit external-effect authority still applies",
+        ),
+        "CLAUDE.md": (
+            "may occupy the independent-reviewer role",
+            "no class requires founder or standing",
+            "Explicit action-specific authority remains mandatory",
+        ),
+        ".github/pull_request_template.md": (
+            "no founder approval solely because work is R4",
+            "Action-specific authority and evidence",
+            "Blocking-findings resolution",
+        ),
+    }
+    for relative, markers in approval_neutral_sources.items():
+        text = validation.read(relative)
+        for marker in markers:
+            if marker not in text:
+                validation.error(relative, f"missing VOC-079 approval-neutral marker: {marker}")
 
 
 def validate_false_activation(validation: Validation) -> None:
@@ -872,9 +1213,9 @@ def validate_false_activation(validation: Validation) -> None:
     # file, and only when the marker is actually present - "Status: Activated"
     # stays banned everywhere unconditionally, since nothing in this
     # authorization concerns hosted-governance activation.
-    authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in validation.read(
-        ".github/approved-policy/protected-paths.yaml"
-    )
+    policy_source = validation.read(".github/approved-policy/protected-paths.yaml")
+    authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in policy_source
+    retired = "VOC-078-CONTROL-PLANE-RETIRED-2026-08-19" in policy_source
     paths = (
         ".github/approved-policy/protected-paths.yaml",
         "docs/governance/post-merge-activation-checklist.md",
@@ -883,7 +1224,7 @@ def validate_false_activation(validation: Validation) -> None:
     for relative in paths:
         text = validation.read(relative)
         patterns = [r"(?im)^Status:\s*Activated\s*$"]
-        if not (authorized and relative == ".github/approved-policy/protected-paths.yaml"):
+        if not (authorized and not retired and relative == ".github/approved-policy/protected-paths.yaml"):
             patterns += [r"automatic_merge(?:_allowed)?:\s*true", r"autonomous_production_release:\s*enabled"]
         for pattern in patterns:
             if re.search(pattern, text):
@@ -905,6 +1246,7 @@ def validate_repository(root: Path) -> list[str]:
     if (root / ".github/PULL_REQUEST_TEMPLATE.md").exists():
         validation.error(".github/PULL_REQUEST_TEMPLATE.md", "uppercase duplicate PR template is prohibited")
     validate_templates(validation)
+    validate_automatic_merge_drafting(validation)
     validate_package(validation)
     validate_voc_002_package(validation)
     validate_voc_003_package(validation)
@@ -913,6 +1255,7 @@ def validate_repository(root: Path) -> list[str]:
     validate_a003_lifecycle(validation)
     validate_ownership(validation)
     validate_workflow(validation)
+    validate_merge_eligibility(validation)
     validate_governance_language(validation)
     validate_false_activation(validation)
     return sorted(set(validation.errors))

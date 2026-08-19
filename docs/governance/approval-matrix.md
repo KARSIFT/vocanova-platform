@@ -3,7 +3,7 @@
 Verification answers whether evidence supports the change. Approval answers whether
 an accountable authority authorizes it. Both may be required.
 
-## Current active A-003 authority assignment
+## Current approval-neutral authority assignment
 
 - Founder: `@m-e-h-r-d-a-a-d`
 - Historical Qualified Human Technical Steward: `@m-e-h-r-d-a-a-d`
@@ -11,34 +11,36 @@ an accountable authority authorizes it. Both may be required.
   capacities for the completed VOC-002 migration, as recorded in
   [technical-steward-appointment.md](technical-steward-appointment.md)
 
-A-003 is effectively active. The historical steward role is retired as routine R3
-approval authority. Routine R3 does not require founder approval merely because it is
-R3. R4 founder authority remains independently required, and EHR applies only when an
-actual exceptional trigger exists.
+A-003 remains historical authority for retiring the standing steward role. VOC-079
+extends the evidence-driven model across R0-R4: no class requires founder or standing
+technical-steward approval merely because of its label. R4 still requires the strongest
+decision, impact, contingency, specialist, deterministic, and exact-revision review
+evidence. EHR applies only when an actual exceptional trigger exists.
 
-Builders may implement approved work but cannot self-approve or merge it. Independent
-verification remains separate from every human authority.
+Every meaningful plan and implementation has a builder and a different reviewer.
+Builders cannot verify, approve, or merge their own revision. Independent verification
+must name the exact revision and all blocking findings must be resolved. Humans and AI
+agents may fill either role; vendor identity does not create authority.
 
-| Change/action | Independent verification and controls | Human authority | Automation permission |
+| Change/action | Independent verification and controls | Additional action-specific authority | Automation permission |
 |---|---|---|---|
-| Routine R0-R2 | Proportionate deterministic and independent verification | No founder or standing technical-steward approval | Only where separately implemented and proven |
-| Routine R3 protected technical work | Strengthened risk-specific controls and independent verification | No standing technical-steward approval; no founder approval merely because work is R3 | Only where every applicable technical gate is implemented and proven |
-| R4 consequential decision/change | R3 controls too when technically protected | Founder approval required | Cannot bypass founder authority |
-| Initial public or predefined major launch | Independent release review and every applicable technical gate | Founder go/no-go required | Publish only after recorded founder approval and technical activation |
-| Emergency protective rollback using approved runbook | Post-action verification and permanent evidence | Pre-authorized runbook/incident authority; founder only for a new R4 decision | Only a predefined safer-than-waiting action may execute automatically |
-| Change to CI/CD, ownership, approval, agent authority, or this matrix | Independent governance/security review and fail-closed validation | Founder approval when the change is R4; no standing steward approval solely for R3 | Cannot self-modify into effect |
+| Routine R0-R2 | Proportionate deterministic checks and exact-revision independent verification | None from risk class | Only where separately implemented and proven |
+| Routine R3 protected technical work | Strengthened risk-specific controls, specialist evidence, and exact-revision independent verification | None from risk class | Only where every applicable technical gate is implemented and proven |
+| R4 consequential decision/change | R3 controls too when technically protected; explicit decision and impact records; contingency/rollback evidence; exact-revision independent verification | None from risk class; separately named external-effect authority still applies | Eligible only when the complete R4 evidence contract and every explicit hold pass |
+| Initial public or predefined major launch | Complete R4 and independent release evidence plus every applicable technical gate | Recorded go/no-go from the role explicitly assigned launch authority | Publish only after that authority and technical activation are evidenced |
+| Emergency protective rollback using approved runbook | Post-action verification and permanent evidence | Pre-authorized runbook/incident authority; any new external effect uses its separately defined authority | Only a predefined safer-than-waiting action may execute automatically |
+| Change to CI/CD, ownership, approval, agent authority, or this matrix | Independent governance/security review, privilege analysis, contingency evidence, and fail-closed validation | None from risk class; the pre-change rules govern the transition | Cannot self-modify into effect |
 | EHR escalation | Operation stops and qualified expertise is recorded | Exceptional qualified human review for the triggered matter only | Not a routine approval layer |
 
-The one-time VOC-002 migration approval is exhausted and must never be reused.
-CODEOWNERS remains review routing and is not approval evidence.
-R4 founder authority remains unchanged. The migration record must never be reused as
-approval for later work.
+The one-time VOC-002 migration approval and the pre-transition VOC-079 founder approval
+are exhausted and must never be reused. CODEOWNERS remains review routing and is not
+approval evidence. No historical record supplies approval for later work.
 
 ## Approval evidence
 
-An approval is valid only when it is attributable to the configured GitHub identity,
-bound to the reviewed commit or pull-request revision, recorded in GitHub, and not
-dismissed by later material changes. Private chat approval is insufficient.
+An approval or action-specific authority record is valid only when it is attributable
+to the accountable role, bound to the reviewed commit or action, recorded in GitHub,
+and not dismissed by later material changes. Private chat approval is insufficient.
 
 The completed VOC-002 approval explicitly named both founder and technical-steward
 capacities and remains historical evidence only; it cannot approve later work.
@@ -52,9 +54,13 @@ VOC-002 was not an exception: it used the pre-A-003 requirements in full. Its
 technical-steward approval was a one-time migration requirement, is now exhausted,
 and is not a standing future rule.
 
+VOC-079 likewise used the R4 founder rule effective before its transition. The founder
+approval on PR #75 applies only to the adopted package candidate and cannot be treated
+as a class-wide or future approval requirement under the new model.
+
 ## Independent verifier result
 
-The verifier reports `PASS`, `PASS WITH NON-BLOCKING FINDINGS`, or `FAIL`. Any open
-Critical, High, or required Medium finding blocks merge. The builder cannot be the
+For an exact revision, the verifier reports `PASS`, `PASS WITH NON-BLOCKING FINDINGS`,
+or `FAIL`. Any open Critical, High, or required Medium finding blocks merge. The builder cannot be the
 independent verifier. If the verifier authors a substantial correction, all checks
 rerun and a separate independent review is required for the correction.

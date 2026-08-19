@@ -562,7 +562,7 @@ export function validateMockInventory() {
   // scaffolding files would silently re-open the
   // "no accessibility test in CI" gap the package exists to
   // close. The check intentionally stops at the scaffolding
-  // surface (config + test directory + CI workflow) and does
+  // surface (config + test directory + consolidated quality workflow) and does
   // not pin the specific test files inside tests/e2e/ - T07b
   // is free to add, rename, or remove individual specs.
   const t07aScaffolding = [
@@ -571,7 +571,7 @@ export function validateMockInventory() {
     "apps/web/tests/e2e/home-accessibility.spec.ts",
     "apps/web/tests/e2e/axe-helper.ts",
     "apps/web/tests/e2e/mock-api-server.mjs",
-    ".github/workflows/accessibility.yml",
+    ".github/workflows/quality.yml",
   ];
   for (const file of t07aScaffolding) {
     const filePath = path.join(repositoryRoot, file);
@@ -587,7 +587,7 @@ export function validateMockInventory() {
   // remain present for the duration of the package. The
   // check is the same surface-level pattern the T07a
   // scaffolding check uses: directory + entry-point runner
-  // + threshold source-of-truth + CI workflow. A regression
+  // + threshold source-of-truth + consolidated quality workflow. A regression
   // that drops any of these would silently re-open the
   // "no performance budget in CI" gap the package exists
   // to close - the DOC-08 quality-standards thresholds
@@ -604,7 +604,7 @@ export function validateMockInventory() {
     "apps/web/tests/lighthouse/runner.mjs",
     "apps/web/tests/lighthouse/assertions.mjs",
     "apps/web/tests/lighthouse/budget.json",
-    ".github/workflows/lighthouse.yml",
+    ".github/workflows/quality.yml",
   ];
   for (const file of t09Scaffolding) {
     const filePath = path.join(repositoryRoot, file);

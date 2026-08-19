@@ -11,13 +11,20 @@ steward, or founder.
 | R1 | Low-risk behavioral implementation; small blast radius; no sensitive data; backward compatible; independently reversible | Full installed baseline CI, acceptance evidence, independent verifier, preview when relevant | No founder or technical-steward approval | May release automatically after gates; tested revert, flag, or prior-artifact redeploy |
 | R2 | Moderate blast radius, cross-component change, non-destructive schema addition, API addition, significant dependency update, or operational change with tested recovery | R1 plus integration/contract, accessibility, migration, security, performance, or staging checks as applicable | Independent verifier; designated domain review may be required | May release automatically only with staged evidence, monitoring, named rollback owner, and tested recovery |
 | R3 | Authentication/authorization; sensitive-data handling; schema migrations; billing implementation; secrets; production infrastructure; AI-provider controls; audio/voice storage; backups; CI/CD, rollback, security, governance enforcement, or agent authority | All applicable CI; specialist security/architecture/migration/deployment review; independent verifier; explicit protected-area evidence | No standing technical-steward or founder approval solely because work is R3; EHR only when exceptionally triggered | Strengthened controls required; controlled rollout and tested rollback/recovery required; destructive operations require restore evidence |
-| R4 | New or changed strategy, pricing, financial commitment, legal position, privacy policy, material product direction, public promise, user-trust posture, difficult-to-reverse action, initial public launch, or major launch | R3 checks when technical areas are affected; decision record; impact analysis; independent verification | Founder | Founder approval required; explicit go/no-go and rollback or contingency plan |
+| R4 | New or changed strategy, pricing, financial commitment, legal position, privacy policy, material product direction, public promise, user-trust posture, difficult-to-reverse action, initial public launch, or major launch | R3 checks when technical areas are affected; decision record; impact analysis; specialist and deterministic evidence; rollback or contingency plan; exact-revision independent verification; no unresolved blocking finding | No approval from risk class; separately defined action-specific authority remains mandatory | Eligible only with complete R4 evidence, no active EHR, and every explicit external-effect hold satisfied |
 
-The table above is the current active-A-003 authority. The R0-R4 risk definitions and
-verification requirements remain, but routine R3 does not require standing
-technical-steward approval or founder approval merely because it is R3. R4 remains
-founder-controlled. EHR is an exceptional escalation condition, not a routine
-approval layer or risk class.
+The table above is the current VOC-079 authority. R0-R4 remain consequence classes,
+not personal-approval classes. No class requires founder or standing technical-steward
+approval merely because of its label. R4 remains the highest class and requires the
+strongest evidence. EHR is an exceptional escalation condition, not a routine approval
+layer or risk class.
+
+Action-specific authority remains separate from classification. Signing contracts,
+committing spend, disclosing secrets or personal data, accessing production, making an
+irreversible external mutation, and performing an initial public or predefined major
+launch require the explicitly assigned authority and technical controls for that
+action. A hold must name the action, accountable role, evidence, and completion or
+expiry condition; it cannot silently apply to all R4 work.
 
 The completed A-003 transition was fixed at R4 with an R3 protected
 governance/authority effect and was approved under pre-A-003 governance. Its one-time
@@ -45,14 +52,12 @@ classification if the parts produce one combined consequence.
 
 ## Initial governance bootstrap classification
 
-The initial DOC-16/A-002 adoption is R4 because it establishes consequential
-governance. It requires founder approval, independent Claude Code verification, and
-passing repository validation. The one-time bootstrap exception permits that initial
-governance pull request to merge without a nonexistent technical steward, but does
-not lower its risk, satisfy steward approval, authorize production, or apply to any
-later R3/R4 change. The steward requirement is effective immediately after merge;
-R3 production remains blocked until a qualified human steward is appointed and
-enforcement is active.
+The initial DOC-16/A-002 adoption was R4 because it established consequential
+governance. Under the rules then in force it required founder approval, independent
+Claude Code verification, and passing repository validation. The one-time bootstrap
+exception permitted only that pull request to merge without a then-nonexistent
+technical steward. It is historical, expired, non-reusable, and does not describe the
+current R4 authority model.
 
 ## Automated risk floor
 
@@ -66,14 +71,15 @@ reviewed pull request. A comment, label, or approval cannot simply suppress the
 detected floor.
 
 Path classification remains a risk floor, not proof of a human approval requirement.
-Under active A-003, an R3 path does not by itself require founder or standing
-technical-steward approval.
+Under VOC-079, no R0-R4 path floor by itself requires founder or standing technical-
+steward approval.
 
 ## Waivers
 
-Required deterministic security checks and R4 founder approval are not
-builder-waivable. Under active A-003, no waiver may recreate routine steward
-approval; EHR and independently applicable controls remain mandatory when triggered.
+Required deterministic security checks, exact-revision independent review, complete
+R4 evidence, and action-specific authority are not builder-waivable. No waiver may
+recreate routine founder or steward approval from a risk label; EHR and independently
+applicable controls remain mandatory when triggered.
 A time-limited waiver for another blocking check must name
 the authority, reason, scope, expiry, compensating control, follow-up issue, and
 rollback condition. The release record links the waiver.

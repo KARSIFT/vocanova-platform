@@ -16,7 +16,7 @@ last-known-good reference.
 
 ## Independent verification, human approvals, and closure
 
-Record verifier result, R3/R4 approvals, remaining hosted controls, and explicit
+Record verifier result, R3/R4 evidence, remaining hosted controls, and explicit
 closure evidence. Do not conflate repository merge, release, activation, or closure.
-Under active A-003, replace routine R3 steward approval with strengthened applicable
-technical evidence; preserve R4 founder authority and triggered EHR evidence.
+Under the VOC-079 model, use strengthened evidence without a personal approval derived
+from risk class; preserve action-specific authority and triggered EHR evidence.

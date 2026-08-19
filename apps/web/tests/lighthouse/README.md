@@ -132,6 +132,14 @@ playwright install --with-deps chromium` already has it).
 Set `LIGHTHOUSE_CHROME_PATH=/abs/path/to/chrome` to point
 the runner at a specific binary.
 
+In GitHub Actions, the replacement `quality.yml` workflow pins the
+runner to `ubuntu-24.04`, whose hosted image already provides the
+browser system libraries. It therefore runs `playwright install
+chromium` without `--with-deps`, avoiding an unnecessary apt-mirror
+dependency while still downloading the browser revision selected by
+the locked Playwright package. Local machines may still need the
+`--with-deps` bootstrap command above.
+
 ## Layout
 
 ```
@@ -147,11 +155,11 @@ tests/lighthouse/
                          single source of truth
 ```
 
-The CI workflow that calls this suite lives at
-`.github/workflows/lighthouse.yml` and is a required job for
-PRs that touch `apps/web/**`, `apps/web/tests/**`, or the
-workflow file itself (the same `paths` filter the
-`accessibility.yml` workflow uses for T07a/T07b/T08).
+The CI job that calls this suite lives in
+`.github/workflows/quality.yml` and runs for PRs that touch
+`apps/web/**`, shared packages, locked dependencies, or the
+workflow itself. The same workflow owns the T07a/T07b/T08
+accessibility job.
 
 ## Out of scope (recorded for the next implementer)
 
