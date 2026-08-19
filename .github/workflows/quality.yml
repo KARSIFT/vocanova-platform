@@ -123,7 +123,7 @@ jobs:
           CI: "1"
           LIGHTHOUSE_URL_PREFIX: http://127.0.0.1:3000
         run: |
-          export LIGHTHOUSE_CHROME_PATH="$(find "$HOME/.cache/ms-playwright" -path '*/chrome-linux/chrome' -type f | head -1)"
+          export LIGHTHOUSE_CHROME_PATH="$(find "$HOME/.cache/ms-playwright" -path '*/chrome-linux*/chrome' -type f | head -1)"
           test -n "$LIGHTHOUSE_CHROME_PATH"
           pnpm --filter @vocanova/web test:lighthouse
 
