@@ -126,11 +126,12 @@ Before deployment automation is added, record and validate:
 - production environment approval rules matching R3/R4.
 
 ## Current blockers (rewritten 2026-07-24 - the paragraph below was written during the
+
 original repository bootstrap, before any application code existed, and had never been
 updated since; it's preserved as history for the paragraph after it, which is still
 accurate)
 
-*Historical, no longer true:* "The repository currently has no application, package
+_Historical, no longer true:_ "The repository currently has no application, package
 manifest, pnpm lockfile, workspace, test/build scripts... only the dependency-free
 governance policy check can run today; application CI, previews, staging, production,
 and rollback cannot truthfully be automated yet."
@@ -138,7 +139,11 @@ and rollback cannot truthfully be automated yet."
 **Current reality:** `apps/web` and `apps/api` are real, working applications;
 `package.json`/`pnpm-lock.yaml`/the pnpm workspace exist; deterministic CI (format,
 lint, typecheck, test, build) runs on every PR and has passed across 22+ shipped
-packages (VOC-010 through VOC-022 at minimum) via `karsift-ai-infra`'s `ci.yml`.
+packages (VOC-010 through VOC-022 at minimum). VOC-078-T00 adds the repository-local
+`ci.yml`, `governance.yml`, `quality.yml`, and `security.yml` replacement set in
+parallel with the old workflows. This temporary duplication is intentional: the new
+read-only jobs must pass on a real pull request before later VOC-078 tasks delete the
+legacy control-plane, quality, governance, deployment, or monitoring workflows.
 `docs/migration-manifest.yaml` and `docs/document-graph.yaml` were migrated
 (VOC-007/VOC-008) and later archived to `docs/archive/` as historical evidence
 trails (2026-07-24) - they are available, just not filed as live/current

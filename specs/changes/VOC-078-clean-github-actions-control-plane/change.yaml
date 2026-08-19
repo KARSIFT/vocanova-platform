@@ -84,6 +84,7 @@ affected_areas:
   - orchestrator/
   - .claude/
   - .karsift/
+  - scripts/foundation/
   - package.json (orchestrator scripts only)
 implementation:
   authorized: true

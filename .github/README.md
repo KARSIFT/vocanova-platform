@@ -7,10 +7,25 @@ This directory contains repository contribution and governance controls:
 - `ISSUE_TEMPLATE/` provides governed change intake and private security routing.
 - `CODEOWNERS` uses the verified human repository identity for review routing. It is
   not approval evidence and does not create a standing post-A-003 authority.
-- `workflows/governance-policy.yml` validates the governance structure and prevents a
-  pull request from declaring a risk below its changed-path floor.
+- `workflows/ci.yml` runs the repository's deterministic validation command.
+- `workflows/governance.yml` validates repository structure and prevents a pull request
+  from declaring a risk below its changed-path floor.
+- `workflows/quality.yml` runs path-filtered accessibility and Lighthouse checks.
+- `workflows/security.yml` audits dependencies and scans changed history for secrets.
 
-The policy workflow is one of several automated checks now live - see
+## VOC-078 transition
+
+The four workflows above are the additive T00 replacement set. They intentionally run beside
+the legacy workflows during one real pull request so their job graph and results can be proven
+before any old workflow is deleted. All four use a read-only repository token; none can merge,
+open or close issues, release, deploy, access environment secrets, or contact a server.
+
+Until the later VOC-078 retirement tasks merge, `pipeline.yml`, `change-package.yml`,
+`package-release.yml`, the separate quality/governance workflows, and the server-bound workflows
+still exist and retain their previous behavior. Their presence during T00 is deliberate and must
+not be mistaken for the final workflow inventory.
+
+These workflows are part of several automated checks now live - see
 `docs/governance/repository-settings.md`'s "Current reality" section for what
 actually runs today (application CI, independent review, staging and production
 deployment) versus what's still genuinely unbuilt (per-PR Cloudflare previews,
