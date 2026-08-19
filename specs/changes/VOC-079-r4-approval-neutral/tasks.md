@@ -2,7 +2,7 @@
 
 ## VOC-079-T00 — Reconcile canonical governance and contributor guidance
 
-- Decisions: `VOC-079-D00`, `VOC-079-D01`, `VOC-079-D03` through `VOC-079-D05`
+- Decisions: `VOC-079-D00`, `VOC-079-D01`, `VOC-079-D03` through `VOC-079-D06`
 - Acceptance: `VOC-079-AC-00`, `VOC-079-AC-01`, `VOC-079-AC-05`
 - Tests: `VOC-079-TEST-00`, `VOC-079-TEST-01`, `VOC-079-TEST-05`
 - Evidence: `VOC-079-EV-00`, `VOC-079-EV-01`, `VOC-079-EV-05`
@@ -10,11 +10,12 @@
 
 Update every active authority description in one coherent change. Add the DOC-16
 amendment-history entry and a dedicated decision record. Preserve historical records as
-history and remove their ability to act as current policy.
+history and remove their ability to act as current policy. Reconcile DOC-16's old
+`not R4` orchestrator-path condition with the universal evidence contract.
 
 ## VOC-079-T01 — Build and test the read-only merge-eligibility evaluator
 
-- Decisions: `VOC-079-D01` through `VOC-079-D03`
+- Decisions: `VOC-079-D01` through `VOC-079-D03`, `VOC-079-D06`
 - Acceptance: `VOC-079-AC-01` through `VOC-079-AC-03`, `VOC-079-AC-05`
 - Tests: `VOC-079-TEST-01` through `VOC-079-TEST-03`, `VOC-079-TEST-05`
 - Evidence: `VOC-079-EV-01` through `VOC-079-EV-03`, `VOC-079-EV-05`
@@ -22,7 +23,10 @@ history and remove their ability to act as current policy.
 
 After the external gate is retired, add a provider-neutral local policy module that
 validates normalized evidence and emits eligible/blocked reasons. It must own no write
-credential and perform no merge. Add both eligible and ineligible R4 fixtures.
+credential and perform no merge. Add a Governance-workflow adapter with read-only GitHub
+permissions that collects live evidence, invokes the evaluator, and exposes the result
+in the job summary/check result. Add adapter and evaluator fixtures for both eligible
+and ineligible R4 cases.
 
 ## VOC-079-T02 — Make package drafting consistent across R0–R4
 

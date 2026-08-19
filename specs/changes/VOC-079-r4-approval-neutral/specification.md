@@ -70,6 +70,14 @@ required R4 artifacts, explicit action holds, and EHR state) and emits a determi
 does not merge, approve, comment, dispatch an agent, or mutate GitHub. A separately
 authorized human or orchestrator may use the result to execute a merge.
 
+The Governance workflow invokes a read-only adapter on pull requests. The adapter reads
+the pull-request head SHA, checks, reviews, and package evidence through GitHub's API,
+normalizes them against a versioned schema, runs the pure evaluator, and exposes the
+decision and reasons in the job summary/check result. Its workflow permissions are
+limited to `contents: read`, `checks: read`, and `pull-requests: read`; pull-request text
+is treated as data rather than shell source. Fixture tests cover the adapter separately
+from the pure evaluator. No API write call is permitted.
+
 The implementation records this authority transition in DOC-16's amendment history and
 in a dedicated decision record so later readers can distinguish the old and new models.
 
@@ -78,11 +86,14 @@ in a dedicated decision record so later readers can distinguish the old and new 
 In scope:
 
 - Reconcile every active policy statement that makes R4 founder-controlled by class.
+- Remove DOC-16's R4 exclusion from the orchestrator-originated merge path and reconcile
+  that path with the universal evidence contract.
 - Reconcile `automatic_merge_allowed` guidance and templates for R0–R4.
 - Remove any active in-repository or called merge policy that hard-blocks R4 solely by
   class, after the external `karsift-ai-infra` dependency is retired.
 - Add the repository-owned, read-only eligibility evaluator and its normalized evidence
-  contract; do not add write-capable merge automation.
+  contract plus the read-only GitHub evidence adapter; do not add write-capable merge
+  automation.
 - Add positive and negative policy tests for eligible and ineligible R4 revisions.
 - Preserve stronger R4 classification, evidence, contingency, and review requirements.
 - Preserve exact-revision role separation and genuinely triggered EHR.

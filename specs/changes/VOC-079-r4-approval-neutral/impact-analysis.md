@@ -20,6 +20,9 @@ No secret, personal data, production access, or privacy-policy content changes.
   evidence and the repository's deterministic gates pass.
 - The local eligibility evaluator is a pure, read-only policy component. It grants no
   repository credential and cannot merge or mutate GitHub by itself.
+- A read-only Governance-workflow adapter translates live GitHub PR/check/review state
+  into the evaluator schema and publishes only a job summary/check result. It accepts no
+  write permission and treats pull-request content as untrusted data.
 - Existing historical approvals remain valid evidence for the revisions they governed.
 
 ## Data, migrations, analytics, and accessibility

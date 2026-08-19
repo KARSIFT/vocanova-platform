@@ -79,6 +79,7 @@ affected_areas:
   - CONTRIBUTING.md
   - .github/pull_request_template.md
   - .github/README.md
+  - .github/workflows/governance.yml
   - .github/approved-policy/protected-paths.yaml
   - specs/templates/change-package/
   - scripts/governance/

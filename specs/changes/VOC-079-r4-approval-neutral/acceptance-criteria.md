@@ -37,6 +37,8 @@ with `automatic_merge_allowed: true`, passing checks,
 complete R4 evidence, an exact-revision independent PASS, no active EHR, and no explicit
 external-effect hold is eligible under the same policy as R0–R3. The risk value alone
 must not block it. The evaluator performs no merge or other GitHub write.
+On a real pull request, the Governance workflow's read-only adapter reports the same
+decision and reasons in its job summary/check result.
 
 ## VOC-079-AC-03 — Unsafe R4 changes still fail closed
 
@@ -76,6 +78,8 @@ merge reference in active documents, templates, scripts, and workflows. No activ
 called external workflow continues to hard-block R4. Contradictions fail validation.
 DOC-16's amendment history and a dedicated decision record preserve the transition,
 reviewed revision, and old/new authority boundary.
+DOC-16's orchestrator-originated path no longer excludes R4 by class and delegates to
+the same evidence contract used for every contributor type.
 
 ## VOC-079-AC-06 — Change is reversible and has no live-system effect
 

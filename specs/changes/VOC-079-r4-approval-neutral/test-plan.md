@@ -28,7 +28,8 @@
   independent PASS, no EHR, and no external-effect hold.
 - Expected: the local read-only evaluator reports eligible; no founder token, identity,
   review, or comment is required by the risk class. The test also proves the evaluator
-  has no GitHub write or merge path.
+  has no GitHub write or merge path. An adapter fixture and a representative pull
+  request produce the same decision in the Governance job summary/check result.
 - Evidence: `VOC-079-EV-02`
 
 ## VOC-079-TEST-03 — Fail-closed R4 matrix
@@ -39,7 +40,9 @@
   EHR clearance, package merge permission, parseable risk, and an action-specific gate.
 - Expected: every negative fixture is reported blocked for its concrete missing
   condition. A fixture differing from the positive case only by `risk: R4` does not
-  block. The pure evaluator performs no external action in any case.
+  block. The pure evaluator performs no external action in any case. Adapter tests
+  reject untrusted-shell interpolation, stale/mismatched GitHub state, and any attempted
+  API write; workflow-permission assertions allow only contents/checks/pull-request read.
 - Evidence: `VOC-079-EV-03`
 
 ## VOC-079-TEST-04 — Package drafting matrix
@@ -57,7 +60,9 @@
 - Procedure: compare canonical docs, AGENTS.md, CONTRIBUTING.md, templates, repository-
   settings guidance, validation scripts, and every active/called workflow. Confirm no
   external reusable workflow reintroduces the old hard block. Confirm DOC-16's amendment
-  history and the dedicated decision record identify the transition revision.
+  history and the dedicated decision record identify the transition revision. Confirm
+  DOC-16's orchestrator-originated path contains no `not R4` exclusion and relies on the
+  universal evidence contract.
 - Expected: all active layers implement the same rule and governance validation passes.
 - Evidence: `VOC-079-EV-05`
 

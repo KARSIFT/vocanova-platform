@@ -18,11 +18,16 @@ short-lived branches from current `origin/develop`; never push directly to `deve
 1. **T00 — Reconcile canonical authority.** Update DOC-15/DOC-16, the approval matrix,
    risk classification, protected-area guidance, AGENTS.md, CONTRIBUTING.md, decision
    indexes, and repository-settings guidance. Add a dedicated decision record and a
-   DOC-16 amendment-history entry. Distinguish active rules from historical evidence.
+   DOC-16 amendment-history entry. Remove DOC-16's `not R4` orchestrator-path condition
+   and bind that path to the universal evidence contract. Distinguish active rules from
+   historical evidence.
 2. **T01 — Build the local eligibility evaluator.** After the external call is gone,
    add a provider-neutral pure policy module and normalized evidence schema. It emits
    eligible/blocked plus reasons, owns no write token, and performs no GitHub mutation.
-   Add positive/negative tests. Unknown risk stays fail-closed.
+   Add a read-only GitHub adapter invoked by the Governance workflow; it reads live PR,
+   check, review, and package evidence and writes only the Actions job summary/check
+   result. Add adapter and evaluator positive/negative tests. Unknown risk stays
+   fail-closed.
 3. **T02 — Reconcile package drafting.** Update change-package templates and validation so
    R0–R4 default to `automatic_merge_allowed: true`; require a documented package-local
    reason for `false`; preserve an explicit transition exception for VOC-079.
