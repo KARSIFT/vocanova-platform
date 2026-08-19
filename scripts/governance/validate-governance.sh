@@ -8,7 +8,7 @@ required_files=(
   .github/CODEOWNERS
   .github/pull_request_template.md
   .github/approved-policy/protected-paths.yaml
-  .github/workflows/repository-governance.yml
+  .github/workflows/governance.yml
   docs/governance/16-autonomous-development-operating-model.md
   docs/governance/a003-transition-state.yaml
   docs/governance/approval-matrix.md
@@ -168,7 +168,7 @@ done
 
 r4_ruleset_paths=(
   /.github/CODEOWNERS
-  /.github/workflows/governance-policy.yml
+  /.github/workflows/governance.yml
   /scripts/governance/
   /docs/operations/15-ai-native-product-and-engineering-operating-model.md
   /docs/governance/approval-matrix.md

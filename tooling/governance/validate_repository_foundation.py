@@ -59,8 +59,7 @@ REQUIRED_FILES = (
     ".github/CODEOWNERS",
     ".github/approved-policy/protected-paths.yaml",
     ".github/pull_request_template.md",
-    ".github/workflows/governance-policy.yml",
-    ".github/workflows/repository-governance.yml",
+    ".github/workflows/governance.yml",
     "docs/README.md",
     DOC17_PATH,
     DOC18_PATH,
@@ -846,11 +845,11 @@ def validate_ownership(validation: Validation) -> None:
 
 
 def validate_workflow(validation: Validation) -> None:
-    relative = ".github/workflows/repository-governance.yml"
+    relative = ".github/workflows/governance.yml"
     text = validation.read(relative)
-    if not re.search(r"^name:\s*Repository Governance\s*$", text, re.MULTILINE):
-        validation.error(relative, "workflow display name must be Repository Governance")
-    for marker in ("pull_request:", "push:", "- develop", "- main", "contents: read", "timeout-minutes:"):
+    if not re.search(r"^name:\s*Governance\s*$", text, re.MULTILINE):
+        validation.error(relative, "workflow display name must be Governance")
+    for marker in ("pull_request:", "push:", "branches: [develop, main]", "contents: read", "timeout-minutes:"):
         if marker not in text:
             validation.error(relative, f"missing workflow control: {marker}")
     for prohibited in ("pull_request_target", "paths:", "paths-ignore:", "contents: write", "secrets.", "codex", "claude"):

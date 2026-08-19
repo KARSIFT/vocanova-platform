@@ -125,8 +125,8 @@ test("target contract rejects removal of deterministic CI commands", () => {
   );
 });
 
-test("final phase rejects legacy workflow inventory", () => {
-  assert.ok(validateWorkflowDirectory(workflowDirectory, "final").length > 0);
+test("final phase accepts the repository inventory after duplicate removal", () => {
+  assert.deepEqual(validateWorkflowDirectory(workflowDirectory, "final"), []);
 });
 
 test("final phase accepts exactly the four target filenames", () => {

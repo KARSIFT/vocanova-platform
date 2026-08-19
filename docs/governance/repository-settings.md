@@ -18,7 +18,8 @@ inspect, stop, or mutate any existing server.
 Configure `develop`:
 
 - require pull requests and block direct pushes, force pushes, and branch deletion;
-- require `policy / governance-policy` and every installed application CI check;
+- require `Governance / structure`, `Governance / changed-path risk`, and every
+  applicable deterministic CI, Quality, and Security check;
 - require deterministic CI/governance/quality/security checks when the GitHub plan
   supports private-repository rulesets;
 - require conversation resolution and dismiss stale approvals;
@@ -29,7 +30,7 @@ Configure `develop`:
 Configure a non-self-referential R4 control for these exact paths:
 
 ```text
-/.github/workflows/governance-policy.yml
+/.github/workflows/governance.yml
 /.github/CODEOWNERS
 /scripts/governance/
 /docs/operations/15-ai-native-product-and-engineering-operating-model.md
@@ -142,7 +143,9 @@ packages (VOC-010 through VOC-022 at minimum). VOC-078-T00 adds the repository-l
 `ci.yml`, `governance.yml`, `quality.yml`, and `security.yml` replacement set.
 VOC-078-T01 has now removed the legacy external control-plane callers after the new
 read-only jobs passed on a real pull request. VOC-078-T03 then removed server-bound
-workflows; older standalone quality/governance workflows remain only until T04.
+workflows, and T04 removed the superseded standalone quality/governance workflows.
+The current workflow inventory is exactly `ci.yml`, `governance.yml`, `quality.yml`,
+and `security.yml`.
 `docs/migration-manifest.yaml` and `docs/document-graph.yaml` were migrated
 (VOC-007/VOC-008) and later archived to `docs/archive/` as historical evidence
 trails (2026-07-24) - they are available, just not filed as live/current

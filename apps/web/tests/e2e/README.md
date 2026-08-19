@@ -10,7 +10,7 @@ created). Subsequent tasks extend it:
 | T07a      | shipped  | This directory + `playwright.config.ts` + a single Home scan at 1280x720 + the mock API server. **Scaffolding only.**                        |
 | T07b      | shipped  | Every remaining core-loop screen (Discover, Discover/[situation], Discover/[situation]/[word], Reviews, Progress, Onboarding, Settings) plus Home at the 360px and 430px viewports. Explicit keyboard-reachability and non-color-only-feedback assertions on top of the axe scan (axe alone is not sufficient for the T07b acceptance criterion's full wording). |
 | T08       | shipped  | The DOC-10 §7 full core-loop functional flow (auth → onboarding → discover → save → review session → sentence submission → deterministic AI feedback → progress update → settings change → logout → unauthenticated-access rejection). One Playwright test, one representative desktop width (mirrors T07a's "ONE representative desktop width" scope; mobile projects self-skip). |
-| T09       | shipped  | Lighthouse CI budgets in a separate directory (`apps/web/tests/lighthouse/`). 4 screens × 3 layouts = 12 audits, asserting the DOC-08 quality-standards thresholds (Performance 85+, Accessibility 95+, Best Practices 90+) against the same fixed local production build this directory's Playwright config serves. Wired into CI as `.github/workflows/lighthouse.yml`, mirroring this directory's `accessibility.yml` separation pattern. |
+| T09       | shipped  | Lighthouse CI budgets in a separate directory (`apps/web/tests/lighthouse/`). 4 screens × 3 layouts = 12 audits, asserting the DOC-08 quality-standards thresholds (Performance 85+, Accessibility 95+, Best Practices 90+) against the same fixed local production build this directory's Playwright config serves. Wired into the Lighthouse job in `.github/workflows/quality.yml` beside accessibility. |
 | VOC-073   | shipped  | Dedicated accessibility specs for four entry surfaces omitted from T07b: `/signin`, `/` (landing), `/auth/magic`, and `/settings/account` (extracted from `settings-accessibility.spec.ts` into its own file — no duplicate CI run for that screen). |
 
 ## T07b screen × viewport coverage matrix
@@ -125,9 +125,9 @@ config's `testDir` points here.
 T07a / T07b / T08 introduce the first browser-driven test
 harness this repository has ever had (`VOC-031-D00` confirmed
 the absence of Playwright, axe-core, and Lighthouse CI in the
-adopted base). The CI integration is a new workflow file
-(`.github/workflows/accessibility.yml`) that runs separately
-from `pipeline.yml`'s `ci` job - the `ci` job runs `pnpm
+adopted base). The CI integration now lives in the accessibility
+job of `.github/workflows/quality.yml`, separate from `ci.yml` -
+the CI job runs `pnpm
 validate` directly (workspace, format, lint/vet, type, test,
 build), none of which install or invoke Playwright. Wiring the
 e2e suite into that job would couple the entire pnpm validation
@@ -172,9 +172,9 @@ exact-head PR proof for VOC-078-T00 is the compatibility evidence for
 that hosted image. Developers on machines without those libraries
 should still run the local bootstrap command documented above:
 `pnpm --filter @vocanova/web exec playwright install --with-deps chromium`.
-The legacy accessibility workflow retains its historical
-`--with-deps` command only during the temporary parallel-verification
-phase and is removed by VOC-078-T04.
+The superseded standalone accessibility workflow and its historical
+`--with-deps` command were removed by VOC-078-T04 after the consolidated
+Quality job passed on real pull requests.
 
 ## T07b-specific timing notes
 
@@ -252,7 +252,7 @@ the DOC-10 §7 documented core loop. Approach:
   unaffected.
 
 The T08 suite runs in the same
-`.github/workflows/accessibility.yml` job as the T07a/T07b
+`.github/workflows/quality.yml` accessibility job as the T07a/T07b
 scans (no separate CI wiring). T08 self-skips on the
 mobile-360 / mobile-430 projects so it runs exactly once per
 PR.

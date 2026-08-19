@@ -465,16 +465,16 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         self.assert_failure("AI or bot identity")
 
     def test_workflow_write_permission_fails(self) -> None:
-        self.replace(".github/workflows/repository-governance.yml", "contents: read", "contents: write")
+        self.replace(".github/workflows/governance.yml", "contents: read", "contents: write")
         self.assert_failure("contents: read")
 
     def test_pull_request_target_fails(self) -> None:
-        self.replace(".github/workflows/repository-governance.yml", "pull_request:", "pull_request_target:")
+        self.replace(".github/workflows/governance.yml", "pull_request:", "pull_request_target:")
         self.assert_failure("pull_request_target")
 
     def test_path_filtered_workflow_fails(self) -> None:
         self.replace(
-            ".github/workflows/repository-governance.yml",
+            ".github/workflows/governance.yml",
             "  pull_request:\n    branches:",
             "  pull_request:\n    paths:\n      - docs/**\n    branches:",
         )
@@ -482,7 +482,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
 
     def test_unpinned_external_action_fails(self) -> None:
         self.replace(
-            ".github/workflows/repository-governance.yml",
+            ".github/workflows/governance.yml",
             "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
             "actions/checkout@v4",
         )

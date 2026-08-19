@@ -23,11 +23,10 @@ references `KARSIFT/karsift-ai-infra`.
 
 T02 also removed the repository-local orchestrator, Claude subagent assets, vendor
 state, and package launch scripts. T03 removed server-bound deployment and scheduled
-monitoring workflows without changing runtime infrastructure or servers. During the
-remaining transition, older standalone quality/governance workflows still coexist
-with the four target files; T04 removes those deterministic duplicates.
-Until then, the exact current inventory is the files in this directory, not the final
-four-file target.
+monitoring workflows without changing runtime infrastructure or servers. T04 removed
+the five superseded standalone quality/governance workflows after their replacement
+jobs passed on real pull requests. The workflow inventory is now exactly the four files
+listed above.
 
 The four target workflows use read-only repository permissions and deterministic local
 commands. They do not call an AI model or write to GitHub. Requirements, human/agent
