@@ -10,9 +10,8 @@ vendor.
 
 GitHub Actions performs deterministic validation only. It does not trigger an agent,
 draft or adopt a package, implement code, post an AI verdict, remediate a failure,
-merge a pull request, or promote a release. The interim local orchestrator remains
-present until VOC-078-T02, but it is not triggered by issues or workflow events and
-does not replace the required GitHub evidence trail.
+merge a pull request, or promote a release. No repository-local orchestrator, agent
+launcher, or vendor-specific subagent configuration exists after VOC-078-T02.
 
 Vocanova uses two permanent branches:
 

@@ -26,12 +26,12 @@ source_files:
 ## 1. Principles
 
 Approved product documents are the source of truth for product behavior; feature coding begins only
-after requirements and an implementation plan are approved; ChatGPT defines requirements/architecture
-handoffs; Codex is the primary implementation agent; Claude Code is the independent reviewer; GitHub
-is the operational source of truth; GitHub Actions is the CI/CD orchestrator; deterministic tests
-enforce objective rules while Claude evaluates contextual concerns; AI agents never hold unrestricted
-production secrets or merge their own work; database migrations are validated through automated
-tests; product and release authority follows the live R0–R4 and RL1–RL3 governance model. See
+after requirements and an implementation plan are approved; humans or AI agents may fill planning,
+implementation, and review roles, but implementation and independent review remain separate; GitHub
+is the operational source of truth; GitHub Actions runs deterministic repository checks only;
+contextual review runs outside Actions and is bound to an exact revision; AI agents never hold
+unrestricted production secrets or merge their own work; database migrations are validated through
+automated tests; product and release authority follows the live R0–R4 and RL1–RL3 governance model. See
 [DOC-19](19-governance-reconciliation-notes.md) for orientation and the linked canonical sources.
 
 ## 2. Repository

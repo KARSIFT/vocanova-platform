@@ -21,9 +21,11 @@ three external control-plane callers (`pipeline.yml`, `change-package.yml`, and
 remediates, merges, releases, opens task issues, or advances packages, and no workflow
 references `KARSIFT/karsift-ai-infra`.
 
-During the remaining transition, older standalone quality/governance workflows and
-server-bound deploy/monitor workflows still coexist with the four target files. T03
-removes server-bound automation; T04 removes superseded deterministic duplicates.
+T02 also removed the repository-local orchestrator, Claude subagent assets, vendor
+state, and package launch scripts. During the remaining transition, older standalone
+quality/governance workflows and server-bound deploy/monitor workflows still coexist
+with the four target files. T03 removes server-bound automation; T04 removes
+superseded deterministic duplicates.
 Until then, the exact current inventory is the files in this directory, not the final
 four-file target.
 

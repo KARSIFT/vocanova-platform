@@ -78,13 +78,17 @@ affected_areas:
   - .github/pull_request_template.md
   - .github/approved-policy/
   - AGENTS.md
+  - CLAUDE.md
   - CONTRIBUTING.md
+  - docs/README.md
+  - docs/archive/README.md
   - docs/governance/
   - docs/operations/
   - docs/decisions/ADR-0001-agent-orchestration-architecture.md
   - specs/templates/change-package/
   - apps/web/tests/e2e/README.md
   - apps/web/tests/lighthouse/README.md
+  - apps/api/migrations/atlas_directive_test.go
   - orchestrator/
   - .claude/
   - .karsift/

@@ -178,25 +178,13 @@ permission. The authority above remains policy, but GitHub Actions currently per
 deterministic checks only and cannot merge. Until a separately adopted repository-owned
 executor exists, an authorized actor performs the merge after verifying the same gates.
 
-**An orchestrator-originated pull request** - implemented and independently
-reviewed by dedicated subagents (or an equivalent independent tool) dispatched from
-the same live orchestrator session, per
-[ADR-0001](../decisions/ADR-0001-agent-orchestration-architecture.md) - may merge
-directly once, every time, without exception:
-
-1. it is genuinely orchestrator-originated as just defined - not a human
-   contributor, not a different automated system;
-2. this repository's real deterministic checks (lint/typecheck/test/build) actually
-   ran and passed;
-3. the independent reviewer subagent - which never had write access to the change -
-   returned `VERDICT: PASS` or `VERDICT: PASS WITH NON-BLOCKING FINDINGS`, bound to
-   the exact reviewed commit; and
-4. the change is not R4, and does not touch secrets, production data, or an
-   irreversible action.
-
-If any condition fails, the change falls back to the full process above - this path
-grants no authority to work around a failed condition, and does not let the
-orchestrator approve its own substantial correction or expand its own authority.
+The former orchestrator-originated merge path is dormant. VOC-078-T02 superseded
+[ADR-0001](../decisions/ADR-0001-agent-orchestration-architecture.md) and removed the
+repository-local orchestrator and subagent assets, so no current pull request can
+qualify as orchestrator-originated under that path. Human- and agent-authored changes
+follow the general pull-request rule above. Reintroducing an orchestrator or a special
+merge executor requires a new accepted decision and adopted implementation package;
+the historical authority in the amendment record cannot activate absent machinery.
 
 `develop` is the integrated staging state; successful merges deploy to staging - see
 [repository-settings.md](repository-settings.md) for current staging automation

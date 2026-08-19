@@ -556,11 +556,11 @@ jobs:
           chmod +x /tmp/deploy-bundle/apps/api/bin/p1-content-seed
           # T06's migration files. Atlas's default
           # versioned glob is `*.sql`, so the .down.sql
-          # .example files are deliberately NOT copied
-          # (see .karsift/lessons.md on this load-bearing
-          # suffix convention); only the forward
-          # migrations and atlas.sum reach the staging
-          # host's `migrations/` directory.
+          # .example files are deliberately NOT copied;
+          # that suffix keeps rollback examples outside
+          # Atlas's versioned migration glob. Only the
+          # forward migrations and atlas.sum reach the
+          # staging host's `migrations/` directory.
           cp apps/api/migrations/*.sql /tmp/deploy-bundle/apps/api/migrations/
           cp apps/api/migrations/atlas.sum /tmp/deploy-bundle/apps/api/migrations/
           tar -czf "$GITHUB_WORKSPACE/deploy-bundle.tgz" -C /tmp/deploy-bundle .

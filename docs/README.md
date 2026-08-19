@@ -57,12 +57,10 @@ that was never built and is not the project's actual direction (noted 2026-07-24
 and their frozen substantive-body checksums are unchanged, only their location and status
 changed). They specify a standalone Control Plane service (a durable PostgreSQL work queue, an AI
 Budget Governor, an Execution Lease Manager, an MCP founder interface, etc.) and an 18-phase
-roadmap to build it. The system that actually shipped VOC-010 through VOC-022, and the live
-orchestrator/subagent system documented in
-[ADR-0001](decisions/ADR-0001-agent-orchestration-architecture.md) since, are architecturally
+roadmap to build it. The later local orchestrator/subagent experiment recorded in
+[ADR-0001](decisions/ADR-0001-agent-orchestration-architecture.md) was architecturally
 unrelated: no Postgres queue, no Budget Governor, no MCP interface, no Change Contract Registry.
-This was a deliberate repository decision, not an oversight. Their adoption never
-implemented the Control Plane or activated RL1/RL2. VOC-078-T01 later retired the
-external workflow state machine that had implemented automatic merge and package
-release; current operational state is recorded in
+VOC-078 superseded both automation directions: T01 retired the external workflow state
+machine and T02 removed the local orchestrator assets. Neither experiment activated
+RL1/RL2. Current operational state is recorded in
 `docs/governance/a003-transition-state.yaml`.
