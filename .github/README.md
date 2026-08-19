@@ -42,6 +42,10 @@ the verdict bound to the exact revision and blocking findings resolved. R4 requi
 strongest risk evidence but no founder approval solely because of its label. Explicit
 action-specific authority and genuinely triggered EHR remain separate gates.
 
+For new change packages, `automatic_merge_allowed` defaults to `true` across R0–R4;
+any `false` requires a non-placeholder package-local `automatic_merge_hold_reason`.
+VOC-079 retains its explicit pre-transition exception.
+
 VOC-079-T01 adds a pure provider-neutral evaluator under
 `tooling/governance/merge-eligibility/`. The Governance adapter may read contents,
 checks, pull-request metadata, changed files, reviews, and PR review comments. It binds

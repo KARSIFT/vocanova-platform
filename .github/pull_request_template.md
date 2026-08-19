@@ -121,6 +121,9 @@ as JSON data; do not add shell expressions or credentials. Use an empty
 ## Author checklist
 
 - [ ] The effective risk is not below the CI-detected floor.
+- [ ] The package's `automatic_merge_allowed` value was examined; R0–R4 default to
+      `true`, and any `false` includes a package-local `automatic_merge_hold_reason`
+      (except VOC-079's documented transition value).
 - [ ] The change stays within the approved scope and contains no unrelated cleanup.
 - [ ] All installed checks relevant to this change pass; unavailable checks are
       disclosed rather than represented as passing.

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import shutil
 import subprocess
 import sys
@@ -106,6 +107,100 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
     def test_valid_evidence_backed_a003_active_state_passes(self) -> None:
         result = self.run_validator()
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_automatic_merge_drafting_matrix_covers_r0_through_r4(self) -> None:
+        spec = importlib.util.spec_from_file_location("foundation_validator_matrix", VALIDATOR)
+        self.assertIsNotNone(spec)
+        self.assertIsNotNone(spec.loader)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        for level in range(5):
+            risk = f"R{level}"
+            with self.subTest(risk=risk, case="default"):
+                self.assertIsNone(
+                    module.automatic_merge_drafting_error(
+                        {"id": "VOC-080", "risk": risk, "automatic_merge_allowed": True}
+                    )
+                )
+            with self.subTest(risk=risk, case="reasoned hold"):
+                self.assertIsNone(
+                    module.automatic_merge_drafting_error(
+                        {
+                            "id": "VOC-080",
+                            "risk": risk,
+                            "automatic_merge_allowed": False,
+                            "automatic_merge_hold_reason": "Named package-local merge window.",
+                        }
+                    )
+                )
+            with self.subTest(risk=risk, case="unreasoned hold"):
+                self.assertIn(
+                    "requires automatic_merge_hold_reason",
+                    module.automatic_merge_drafting_error(
+                        {"id": "VOC-080", "risk": risk, "automatic_merge_allowed": False}
+                    ),
+                )
+
+    def test_future_package_unreasoned_automatic_merge_hold_fails(self) -> None:
+        package = self.root / "specs/changes/VOC-080-policy-fixture"
+        package.mkdir()
+        (package / "change.yaml").write_text(
+            "id: VOC-080\nrisk: R4\nautomatic_merge_allowed: false\n",
+            encoding="utf-8",
+        )
+        self.assert_failure("automatic_merge_allowed false requires automatic_merge_hold_reason")
+
+    def test_future_package_reasoned_automatic_merge_hold_passes(self) -> None:
+        package = self.root / "specs/changes/VOC-080-policy-fixture"
+        package.mkdir()
+        (package / "change.yaml").write_text(
+            "id: VOC-080\nrisk: R4\nautomatic_merge_allowed: false\n"
+            "automatic_merge_hold_reason: Named package-local merge window.\n",
+            encoding="utf-8",
+        )
+        result = self.run_validator()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_future_package_placeholder_automatic_merge_hold_fails(self) -> None:
+        package = self.root / "specs/changes/VOC-080-policy-fixture"
+        package.mkdir()
+        (package / "change.yaml").write_text(
+            "id: VOC-080\nrisk: R2\nautomatic_merge_allowed: false\n"
+            "automatic_merge_hold_reason: TBD\n",
+            encoding="utf-8",
+        )
+        self.assert_failure("must be a non-placeholder package-local rationale")
+
+    def test_automatic_merge_example_matrix_requires_r0_through_r4(self) -> None:
+        path = self.root / "specs/templates/change-package/examples/automatic-merge-drafting.json"
+        matrix = json.loads(path.read_text(encoding="utf-8"))
+        matrix["cases"] = [case for case in matrix["cases"] if case["name"] != "r4-default"]
+        path.write_text(json.dumps(matrix), encoding="utf-8")
+        self.assert_failure("default examples must cover R0-R4")
+
+    def test_voc079_automatic_merge_transition_marker_is_required(self) -> None:
+        self.replace(
+            "specs/changes/VOC-079-r4-approval-neutral/change.yaml",
+            "must not be reused as precedent after adoption",
+            "marker removed for test",
+        )
+        self.assert_failure("missing VOC-079 transition-exception marker")
+
+    def test_voc079_automatic_merge_transition_exception_stays_r4(self) -> None:
+        self.replace(
+            "specs/changes/VOC-079-r4-approval-neutral/change.yaml",
+            "risk: R4",
+            "risk: R3",
+        )
+        self.assert_failure("must preserve its pre-transition R4 false exception")
+
+    def test_automatic_merge_cross_document_rule_is_required(self) -> None:
+        self.replace(
+            "AGENTS.md",
+            "R0, R1, R2, R3, and R4 all default to",
+            "Only lower risk classes default to",
+        )
+        self.assert_failure("missing automatic-merge drafting rule marker")
 
     def test_classifier_accepts_r4_for_protected_policy(self) -> None:
         result = self.run_classifier("R4")

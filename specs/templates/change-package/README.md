@@ -27,9 +27,16 @@ approvals, deployment/rollback controls, hosted activation, and closure evidence
 
 ## `automatic_merge_allowed` drafting
 
-Set `automatic_merge_allowed` in `change.yaml` per the risk-class rule in
+Set `automatic_merge_allowed` in `change.yaml` per the drafting rule in
 `AGENTS.md` (subsection "Drafting `automatic_merge_allowed` in `change.yaml`")
-before the plan PR is reviewed. The template literal (`true`) matches routine
-R0–R2; R4 packages and deliberate opt-outs must set `false` with a stated
-reason in `change.yaml` while the pre-VOC-079 authority remains active. The field
-is retained as policy metadata; VOC-078-T01 removed the workflow that consumed it.
+before the plan PR is reviewed. The template literal is `true` for R0–R4. A package
+may set `false` only when it also adds a non-placeholder top-level
+`automatic_merge_hold_reason` describing the specific package-local hold; risk class
+alone is not a reason. VOC-079's adopted pre-transition `false` is the sole transition
+exception and is not an example for later packages. Earlier packages remain historical
+records, while validation applies the new drafting rule to VOC-080 and later packages.
+The field remains policy metadata consumed by the Governance workflow's read-only
+eligibility report; no current workflow performs a merge.
+
+The executable R0–R4 example matrix is
+[`examples/automatic-merge-drafting.json`](examples/automatic-merge-drafting.json).

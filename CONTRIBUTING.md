@@ -91,6 +91,11 @@ automatic merge and package release; reintroducing either requires a separately
 adopted, repository-owned design. See AGENTS.md's "Change workflow" section for the
 current manual evidence and merge path.
 
+For new packages, examine `automatic_merge_allowed` before plan review. It defaults to
+`true` for R0–R4; any deliberate `false` must carry a non-placeholder package-local
+`automatic_merge_hold_reason`. VOC-079's adopted pre-transition value is the sole
+transition exception, not a precedent for later drafting.
+
 VOC-079 was adopted under the former R4 founder rule. Its PR #75 approval is a
 one-time pre-transition record and cannot approve its implementation revision or any
 later R4 work.

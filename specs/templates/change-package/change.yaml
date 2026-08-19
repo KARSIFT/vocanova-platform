@@ -11,16 +11,15 @@ canonical_path: specs/changes/VOC-000-replace-with-approved-slug
 
 approval_status: not-approved
 implementation_authorized: false
-# Per AGENTS.md "Drafting automatic_merge_allowed": set per declared risk class
-# before the plan PR is reviewed — do not leave this as an unexamined inherit.
-# R0–R2: true unless the package records a specific reason to require founder
-# eyes on the merge into develop. R3: true or false with stated justification
-# (comment here or adjacent one-line note). R4: false while the pre-VOC-079
-# authority remains active. Deliberate false on R0–R2 must state why. The field
-# is a package policy record. Governance consumes it only for the read-only
+# Per AGENTS.md "Drafting automatic_merge_allowed": examine this field before
+# plan review. R0–R4 all default to true; a risk label alone is never an opt-out.
+# To use false, add an adjacent top-level automatic_merge_hold_reason with the
+# specific package-local rationale (uncomment and replace the example below).
+# The field is a package policy record. Governance consumes it only for the read-only
 # eligibility report; no current workflow uses it to perform a merge.
 # It never substitutes for risk classification, CI, independent verification,
 # complete R4 evidence, action-specific authority, or EHR.
 automatic_merge_allowed: true
+# automatic_merge_hold_reason: REPLACE WITH SPECIFIC PACKAGE-LOCAL HOLD RATIONALE
 production_impact: unknown
 rollback_required: true

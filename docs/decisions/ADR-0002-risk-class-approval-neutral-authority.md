@@ -62,6 +62,9 @@ same universal contract; vendor identity grants no special authority.
   R4 evidence, or action-specific authority.
 - Historical founder and steward approvals remain accurate for their reviewed
   revisions and permanently non-reusable.
+- New R0–R4 packages default `automatic_merge_allowed` to `true`; a deliberate `false`
+  requires a non-placeholder package-local `automatic_merge_hold_reason`. VOC-079's
+  adopted pre-transition value is the sole transition exception.
 - The repository currently has no automatic merge or deployment executor; this
   decision grants none and causes no live-system mutation.
 

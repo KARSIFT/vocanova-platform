@@ -52,6 +52,9 @@ DOC18_BODY_SHA256 = "3d578186804cc2b3b500eec72809b26c03d9f236a4a22d3534daa1e2ba3
 VOC002_PATH = "specs/changes/VOC-002-a003-governance-transition"
 VOC003_PATH = "specs/changes/VOC-003-a003-lifecycle-sync"
 VOC004_PATH = "specs/changes/VOC-004-canonical-adoption-doc-17-doc-18"
+AUTOMATIC_MERGE_EXAMPLES = (
+    "specs/templates/change-package/examples/automatic-merge-drafting.json"
+)
 
 REQUIRED_FILES = (
     "AGENTS.md",
@@ -71,6 +74,7 @@ REQUIRED_FILES = (
     "scripts/governance/classify-change-risk.sh",
     "scripts/governance/validate-governance.sh",
     "specs/README.md",
+    AUTOMATIC_MERGE_EXAMPLES,
     f"{VOC002_PATH}/change.yaml",
     f"{VOC003_PATH}/change.yaml",
     f"{VOC004_PATH}/change.yaml",
@@ -218,6 +222,194 @@ def validate_restricted_yaml(validation: Validation, relative: str) -> dict[str,
             if level > indent:
                 del contexts[level]
     return top_level
+
+
+def automatic_merge_drafting_error(
+    values: dict[str, object], *, transition_exception: bool = False
+) -> str | None:
+    risk = values.get("risk")
+    if risk not in {f"R{level}" for level in range(5)}:
+        return "automatic-merge drafting requires risk R0 through R4"
+    allowed = values.get("automatic_merge_allowed")
+    if allowed is True or (isinstance(allowed, str) and allowed.casefold() == "true"):
+        return None
+    if not (allowed is False or (isinstance(allowed, str) and allowed.casefold() == "false")):
+        return "automatic_merge_allowed must be explicitly true or false"
+    if (
+        transition_exception
+        and values.get("id") == "VOC-079"
+        and values.get("risk") == "R4"
+    ):
+        return None
+    reason = values.get("automatic_merge_hold_reason")
+    if not isinstance(reason, str) or not reason.strip():
+        return "automatic_merge_allowed false requires automatic_merge_hold_reason"
+    if reason.strip().casefold() in {
+        "n/a",
+        "none",
+        "not applicable",
+        "replace",
+        "tbd",
+        "todo",
+        "unknown",
+    } or "replace with" in reason.casefold():
+        return "automatic_merge_hold_reason must be a non-placeholder package-local rationale"
+    return None
+
+
+def read_package_drafting_values(validation: Validation, relative: str) -> dict[str, str]:
+    wanted = {
+        "id",
+        "risk",
+        "automatic_merge_allowed",
+        "automatic_merge_hold_reason",
+    }
+    values: dict[str, str] = {}
+    for raw in validation.read(relative).splitlines():
+        if not raw or raw[0].isspace() or raw.lstrip().startswith("#") or ":" not in raw:
+            continue
+        key, value = raw.split(":", 1)
+        if key not in wanted:
+            continue
+        if key in values:
+            validation.error(relative, f"duplicate top-level package drafting key: {key}")
+            continue
+        values[key] = strip_restricted_yaml_comment(value).strip().strip("\"'")
+    return values
+
+
+def validate_automatic_merge_drafting(validation: Validation) -> None:
+    template_path = "specs/templates/change-package/change.yaml"
+    template = validate_restricted_yaml(validation, template_path)
+    if template.get("automatic_merge_allowed") != "true":
+        validation.error(template_path, "R0-R4 template default must be automatic_merge_allowed: true")
+    drafting_markers = {
+        "AGENTS.md": (
+            "R0, R1, R2, R3, and R4 all default to",
+            "automatic_merge_hold_reason",
+            "VOC-079 is the sole transition exception",
+        ),
+        "CONTRIBUTING.md": (
+            "defaults to\n`true` for R0–R4",
+            "automatic_merge_hold_reason",
+            "sole\ntransition exception",
+        ),
+        ".github/README.md": (
+            "defaults to `true` across R0–R4",
+            "automatic_merge_hold_reason",
+            "pre-transition exception",
+        ),
+        ".github/pull_request_template.md": (
+            "R0–R4 default to",
+            "automatic_merge_hold_reason",
+            "VOC-079's documented transition value",
+        ),
+        "docs/operations/15-ai-native-product-and-engineering-operating-model.md": (
+            "R0–R4 packages default it to `true`",
+            "automatic_merge_hold_reason",
+            "VOC-079 preserved as the sole pre-transition exception",
+        ),
+        "docs/decisions/ADR-0002-risk-class-approval-neutral-authority.md": (
+            "New R0–R4 packages default `automatic_merge_allowed` to `true`",
+            "automatic_merge_hold_reason",
+            "sole transition exception",
+        ),
+        "specs/templates/change-package/README.md": (
+            "template literal is `true` for R0–R4",
+            "automatic_merge_hold_reason",
+            "sole transition\nexception",
+        ),
+        template_path: (
+            "R0–R4 all default to true",
+            "automatic_merge_hold_reason",
+            "risk label alone is never an opt-out",
+        ),
+    }
+    for relative, markers in drafting_markers.items():
+        source = validation.read(relative)
+        for marker in markers:
+            if marker not in source:
+                validation.error(relative, f"missing automatic-merge drafting rule marker: {marker}")
+
+    try:
+        matrix = json.loads(validation.read(AUTOMATIC_MERGE_EXAMPLES))
+    except json.JSONDecodeError as exc:
+        validation.error(AUTOMATIC_MERGE_EXAMPLES, f"invalid JSON: {exc}")
+        matrix = {}
+    cases = matrix.get("cases") if isinstance(matrix, dict) else None
+    if not isinstance(matrix, dict) or matrix.get("schema_version") != 1 or not isinstance(cases, list):
+        validation.error(AUTOMATIC_MERGE_EXAMPLES, "drafting matrix must use schema_version 1 and a cases array")
+        cases = []
+
+    coverage: defaultdict[str, set[str]] = defaultdict(set)
+    names: set[str] = set()
+    for index, case in enumerate(cases):
+        label = f"case {index + 1}"
+        if not isinstance(case, dict):
+            validation.error(AUTOMATIC_MERGE_EXAMPLES, f"{label} must be an object")
+            continue
+        name = case.get("name")
+        if not isinstance(name, str) or not name or name in names:
+            validation.error(AUTOMATIC_MERGE_EXAMPLES, f"{label} must have a unique non-empty name")
+        else:
+            names.add(name)
+            label = name
+        expected = case.get("expected_valid")
+        if not isinstance(expected, bool):
+            validation.error(AUTOMATIC_MERGE_EXAMPLES, f"{label} expected_valid must be boolean")
+            continue
+        error = automatic_merge_drafting_error(
+            case, transition_exception=case.get("transition_exception") is True
+        )
+        if (error is None) != expected:
+            validation.error(
+                AUTOMATIC_MERGE_EXAMPLES,
+                f"{label} expected_valid={expected} disagrees with policy: {error or 'valid'}",
+            )
+        risk = case.get("risk")
+        if isinstance(risk, str):
+            if case.get("automatic_merge_allowed") is True and expected:
+                coverage["default"].add(risk)
+            elif case.get("automatic_merge_allowed") is False and case.get("automatic_merge_hold_reason") and expected:
+                coverage["reasoned"].add(risk)
+            elif case.get("automatic_merge_allowed") is False and not case.get("automatic_merge_hold_reason") and not expected:
+                coverage["unreasoned"].add(risk)
+    expected_risks = {f"R{level}" for level in range(5)}
+    for category in ("default", "reasoned", "unreasoned"):
+        if coverage[category] != expected_risks:
+            validation.error(AUTOMATIC_MERGE_EXAMPLES, f"{category} examples must cover R0-R4")
+    if "voc079-transition-exception" not in names:
+        validation.error(AUTOMATIC_MERGE_EXAMPLES, "missing VOC-079 transition exception example")
+
+    changes = validation.root / "specs/changes"
+    for package_file in sorted(changes.glob("VOC-*/change.yaml")):
+        match = re.match(r"VOC-(\d{3})-", package_file.parent.name)
+        if not match:
+            continue
+        number = int(match.group(1))
+        if number < 79:
+            continue
+        relative = package_file.relative_to(validation.root).as_posix()
+        values = read_package_drafting_values(validation, relative)
+        if number == 79:
+            source = validation.read(relative)
+            if (
+                values.get("id") != "VOC-079"
+                or values.get("risk") != "R4"
+                or values.get("automatic_merge_allowed") != "false"
+            ):
+                validation.error(relative, "VOC-079 must preserve its pre-transition R4 false exception")
+            for marker in (
+                "currently effective R4 rule governs this transition package",
+                "must not be reused as precedent after adoption",
+            ):
+                if marker not in source:
+                    validation.error(relative, f"missing VOC-079 transition-exception marker: {marker}")
+            error = automatic_merge_drafting_error(values, transition_exception=True)
+        else:
+            error = automatic_merge_drafting_error(values)
+        if error:
+            validation.error(relative, error)
 
 
 def require_complete_directory(validation: Validation, relative: str) -> None:
@@ -1054,6 +1246,7 @@ def validate_repository(root: Path) -> list[str]:
     if (root / ".github/PULL_REQUEST_TEMPLATE.md").exists():
         validation.error(".github/PULL_REQUEST_TEMPLATE.md", "uppercase duplicate PR template is prohibited")
     validate_templates(validation)
+    validate_automatic_merge_drafting(validation)
     validate_package(validation)
     validate_voc_002_package(validation)
     validate_voc_003_package(validation)

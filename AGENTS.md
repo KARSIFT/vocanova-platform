@@ -45,31 +45,26 @@ may refine them but may not weaken governance or security.
 
 ### Drafting `automatic_merge_allowed` in `change.yaml`
 
-When drafting a change package, examine `automatic_merge_allowed` and set it according
-to the package's declared risk. The field remains a package policy record. The
+When drafting a change package, examine `automatic_merge_allowed` and set it explicitly.
+The field remains a package policy record. The
 `Governance` workflow reads it only to report the read-only eligibility decision and
 concrete reasons; no current workflow uses it to merge a pull request. VOC-078-T01
 retired the external merge gate. Setting `true` never bypasses risk classification,
 path-based floors, deterministic checks, independent verification, complete R4
 evidence, action-specific authority, or EHR.
 
-**Drafting defaults by risk class:**
+**Drafting default for every risk class:** R0, R1, R2, R3, and R4 all default to
+`automatic_merge_allowed: true`. A risk label alone is never a reason to opt out.
+Set the field to `false` only for a specific package-local hold, and record its
+non-placeholder rationale in the adjacent top-level
+`automatic_merge_hold_reason` field. The reason must identify why this package needs
+an accountable merge hold; separately defined action-specific authority remains an
+independent eligibility condition whether this field is `true` or `false`.
 
-- **R0–R2:** draft with `automatic_merge_allowed: true` unless the package records a
-  specific, package-local reason to require founder eyes on the merge into
-  `develop`.
-- **R3:** decide case-by-case; set `true` or `false` with stated reasoning in
-  `change.yaml` (a comment on the field or an adjacent one-line note), same spirit as
-  `planned_implementation_risk_floor`. Routine R3 does not require standing founder
-  approval merely because of risk class, but some R3 packages may warrant founder
-  eyes on the merge (for example auth, secrets, or production infrastructure).
-- **R4:** set `automatic_merge_allowed: false` explicitly while the currently effective
-  pre-VOC-079 authority remains active. VOC-079's approved replacement changes this
-  default only after its implementation is independently verified and activated.
-
-**Justification:** Any deliberate `false` on an R0–R2 package must state why in
-`change.yaml`. R3 choices must likewise be justified — do not leave the value as an
-unexamined template inherit.
+VOC-079 is the sole transition exception: its adopted package retains the deliberate
+pre-transition `false` governed by the former R4 rule. That historical value is not a
+drafting precedent. Earlier completed or adopted packages remain immutable historical
+records; executable validation applies the new rule to VOC-080 and later packages.
 
 Do not leave the change-package template value unexamined. Review this rule and set
 the field before the plan PR is reviewed.
