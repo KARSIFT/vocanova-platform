@@ -3,7 +3,7 @@ id: VOC-078
 slug: clean-github-actions-control-plane
 title: Clean GitHub Actions control plane and pause server-bound automation
 type: governance-and-ci-reconstruction
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 by semantic consequence. The implementation changes .github/workflows, governance
@@ -17,18 +17,27 @@ requirement_source: >-
   deployment/server-health automation should not be reconstructed now, and GitHub Actions
   should become clean and understandable. The clarification remains planning input until
   this package is adopted.
-requirement_approval_status: not-approved
+requirement_approval_status: founder-approved-exact-revision
 base_branch: develop
 base_sha: bca98d6692424b58ca627d3207f30f9bcac03953
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: fc7f1e82cc06a21278605e52741738d6fdb45fca
 owners:
   decision: founder
   package_preparation: Codex (drafting only)
-  implementation: unassigned
-  independent_verification: unassigned
-approval_status: not-approved
-implementation_authorized: false
+  implementation: Codex
+  independent_verification: Claude Code (exact implementation revision required)
+approvals:
+  package_independent_verification:
+    status: pass-with-non-blocking-findings-exact-revision
+    candidate_sha: fc7f1e82cc06a21278605e52741738d6fdb45fca
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/71#issuecomment-5338367043
+  package_founder:
+    status: approved-exact-revision
+    candidate_sha: fc7f1e82cc06a21278605e52741738d6fdb45fca
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/71#issuecomment-5338422967
+approval_status: adopted
+implementation_authorized: true
 automatic_merge_allowed: false
 production_impact: >-
   Existing production runtime remains untouched, but repository-driven automatic release,
@@ -47,19 +56,21 @@ artifacts:
 dependencies:
   - id: VOC-078-DEP-00
     status: >-
-      Founder adoption must explicitly accept the temporary loss of repository-driven
-      staging/production deployment and automatic production release. Runtime services are
-      not stopped; only future workflow-triggered changes are paused.
+      Resolved by founder approval of exact package revision
+      fc7f1e82cc06a21278605e52741738d6fdb45fca and adoption through PR #71. The
+      temporary loss of repository-driven staging/production deployment and automatic
+      production release is accepted. Runtime services are not stopped; only future
+      workflow-triggered changes are paused.
   - id: VOC-078-DEP-01
     status: >-
-      GitHub Free private-repository branch protection and rulesets are unavailable. The
-      package must not claim that required checks or human review are technically enforced
-      when the hosting plan cannot provide that enforcement.
+      Accepted constraint. GitHub Free private-repository branch protection and rulesets
+      are unavailable. Implementation must not claim that required checks or human review
+      are technically enforced when the hosting plan cannot provide that enforcement.
   - id: VOC-078-DEP-02
     status: >-
-      A future server/deployment package is required before automated deployment returns.
-      It must be based on the selected hosting architecture rather than copying current SSH,
-      Docker Compose, Cloudflare, or health-probe assumptions.
+      Accepted deferral. A future server/deployment package is required before automated
+      deployment returns. It must be based on the selected hosting architecture rather than
+      copying current SSH, Docker Compose, Cloudflare, or health-probe assumptions.
 affected_areas:
   - .github/workflows/
   - .github/README.md
@@ -75,9 +86,9 @@ affected_areas:
   - .karsift/
   - package.json (orchestrator scripts only)
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: not-started
+  status: authorized-not-started
   target_branch: develop
   pull_request: null
   authority_issue: 69
@@ -89,15 +100,14 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted
+adoption_pr: 71
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/71#issuecomment-5338422967
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/71
 implementation_authority_before_adoption: false
-implementation_authority_status: not-authorized
-production_deployment: disabled-by-proposed-scope
-autonomous_production_release: disabled-by-proposed-scope
+implementation_authority_status: authorized
+production_deployment: disabled-by-adopted-scope
+autonomous_production_release: disabled-by-adopted-scope
 ehr: not-triggered
 standing_technical_steward_approval: not-sufficient-for-R4-founder-decision
-blocking_reasons: >-
-  Draft package. Implementation is blocked until founder adoption records acceptance of
-  VOC-078-DEP-00, declares implementation.authorized true, and names the independent verifier.
+blocking_reasons: null

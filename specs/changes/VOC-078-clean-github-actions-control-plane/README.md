@@ -1,6 +1,7 @@
 # VOC-078 — Clean GitHub Actions Control Plane
 
-**Status: draft. This package is not adopted and does not authorize implementation.**
+**Status: adopted. Implementation is authorized; automatic merge and deployment remain
+disabled.**
 
 ## Purpose
 
@@ -16,8 +17,9 @@ automation while the future server architecture is undecided.
   clean, understandable GitHub Actions; do not invest in deployment or server-health logic
   because the server may change.
 
-The clarification is recorded as planning input only. Adoption of this R4 package is the
-canonical approval event.
+The founder approved exact package revision
+`fc7f1e82cc06a21278605e52741738d6fdb45fca` after independent verification, and PR #71
+adopted it into `develop` on 2026-08-19.
 
 ## Proposed outcome
 
