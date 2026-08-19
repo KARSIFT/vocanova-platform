@@ -76,17 +76,20 @@ affected_areas:
   - .github/README.md
   - .github/CODEOWNERS
   - .github/pull_request_template.md
+  - .github/approved-policy/
   - AGENTS.md
   - CONTRIBUTING.md
   - docs/governance/
   - docs/operations/
   - docs/decisions/ADR-0001-agent-orchestration-architecture.md
+  - specs/templates/change-package/
   - apps/web/tests/e2e/README.md
   - apps/web/tests/lighthouse/README.md
   - orchestrator/
   - .claude/
   - .karsift/
   - scripts/foundation/
+  - tooling/governance/
   - package.json (orchestrator scripts only)
 implementation:
   authorized: true

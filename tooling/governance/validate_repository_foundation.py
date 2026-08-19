@@ -722,7 +722,9 @@ def validate_a003_lifecycle(validation: Validation) -> None:
     # AGENTS.md's "Release and deployment authority" section for the record of
     # that decision - this check requires the same marker text to be present
     # here, not just asserted in a doc elsewhere.
-    autonomy_authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in validation.read(A003_STATE_PATH)
+    state_source = validation.read(A003_STATE_PATH)
+    autonomy_authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in state_source
+    control_plane_retired = "VOC-078-CONTROL-PLANE-RETIRED-2026-08-19" in state_source
     merge_release_defaults = {
         "automatic_merge_allowed": "false",
         "autonomous_merge_allowed": "false",
@@ -735,9 +737,18 @@ def validate_a003_lifecycle(validation: Validation) -> None:
         "production_deployment": "enabled",
         "autonomous_production_release": "enabled",
     }
+    merge_release_retired = {
+        "automatic_merge_allowed": "false",
+        "autonomous_merge_allowed": "false",
+        "production_deployment": "enabled",
+        "autonomous_production_release": "disabled",
+    }
     for key, default in merge_release_defaults.items():
         current = state.get(key)
-        if autonomy_authorized:
+        if control_plane_retired:
+            if current != merge_release_retired[key]:
+                validation.error(A003_STATE_PATH, f"{key} must equal {merge_release_retired[key]!r} after VOC-078 control-plane retirement")
+        elif autonomy_authorized:
             if current != merge_release_authorized[key]:
                 validation.error(A003_STATE_PATH, f"{key} must equal {merge_release_authorized[key]!r} once authorized")
         elif current != default:
@@ -787,6 +798,7 @@ def validate_ownership(validation: Validation) -> None:
     # mirrors docs/governance/a003-transition-state.yaml's merge/release/
     # deployment fields and must move in lockstep with it, never drift apart.
     autonomy_authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in policy
+    control_plane_retired = "VOC-078-CONTROL-PLANE-RETIRED-2026-08-19" in policy
     merge_release_defaults = {
         "automatic_merge_allowed": "false",
         "autonomous_merge_allowed": "false",
@@ -799,9 +811,18 @@ def validate_ownership(validation: Validation) -> None:
         "production_deployment": "enabled",
         "autonomous_production_release": "enabled",
     }
+    merge_release_retired = {
+        "automatic_merge_allowed": "false",
+        "autonomous_merge_allowed": "false",
+        "production_deployment": "enabled",
+        "autonomous_production_release": "disabled",
+    }
     for key, default in merge_release_defaults.items():
         current = policy_values.get(key)
-        if autonomy_authorized:
+        if control_plane_retired:
+            if current != merge_release_retired[key]:
+                validation.error(policy_path, f"{key} must equal {merge_release_retired[key]!r} after VOC-078 control-plane retirement")
+        elif autonomy_authorized:
             if current != merge_release_authorized[key]:
                 validation.error(policy_path, f"{key} must equal {merge_release_authorized[key]!r} once authorized")
         elif current != default:
@@ -872,9 +893,9 @@ def validate_false_activation(validation: Validation) -> None:
     # file, and only when the marker is actually present - "Status: Activated"
     # stays banned everywhere unconditionally, since nothing in this
     # authorization concerns hosted-governance activation.
-    authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in validation.read(
-        ".github/approved-policy/protected-paths.yaml"
-    )
+    policy_source = validation.read(".github/approved-policy/protected-paths.yaml")
+    authorized = "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08" in policy_source
+    retired = "VOC-078-CONTROL-PLANE-RETIRED-2026-08-19" in policy_source
     paths = (
         ".github/approved-policy/protected-paths.yaml",
         "docs/governance/post-merge-activation-checklist.md",
@@ -883,7 +904,7 @@ def validate_false_activation(validation: Validation) -> None:
     for relative in paths:
         text = validation.read(relative)
         patterns = [r"(?im)^Status:\s*Activated\s*$"]
-        if not (authorized and relative == ".github/approved-policy/protected-paths.yaml"):
+        if not (authorized and not retired and relative == ".github/approved-policy/protected-paths.yaml"):
             patterns += [r"automatic_merge(?:_allowed)?:\s*true", r"autonomous_production_release:\s*enabled"]
         for pattern in patterns:
             if re.search(pattern, text):

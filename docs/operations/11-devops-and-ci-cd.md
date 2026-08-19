@@ -30,7 +30,7 @@ amendments:
     adopted_at: 2026-08-08
     approving_owner: founder
     resolution_recorded_in: specs/changes/VOC-051-add-hourly-sentry-based-log-error-monitoring/change.yaml
-    notes: "Sentry remains the error-monitoring tool §1 already named; nothing is superseded. This amendment records what VOC-051 added around it: apps/web now reports browser-side and server-side errors to Sentry (T01), Layout B gives each application a separate Sentry project per environment tier (four projects, per the package's t00-evidence.md §3), and .github/workflows/error-monitoring.yml queries all four hourly and opens one unlabeled GitHub issue per genuinely new problem so plan-from-issue drafts a governed change package from it (T02). The existing row text is annotated rather than rewritten, consistent with VOC-032-§1-amendment's convention. Detailed in §1's amendment note below."
+    notes: "Sentry remains the error-monitoring tool §1 already named; nothing is superseded. This amendment records what VOC-051 added around it: apps/web now reports browser-side and server-side errors to Sentry (T01), Layout B gives each application a separate Sentry project per environment tier (four projects, per the package's t00-evidence.md §3), and .github/workflows/error-monitoring.yml queries all four hourly and opens one unlabeled GitHub issue per genuinely new problem (T02). After VOC-078-T01 that issue triggers no planner; a planner must prepare any follow-up package separately. The existing row text is annotated rather than rewritten, consistent with VOC-032-§1-amendment's convention. Detailed in §1's amendment note below."
 source_files:
   - path: 10-development-workflow.md
     sha256: 7fdd38cb7f877051907cc68e0930ece507fe3466dab3e008795c2827eeb21aaf
@@ -139,9 +139,9 @@ production secrets ever reachable from preview/staging/CI (unchanged from v1.0).
 >   minutes (25 hours) using a read-only (`project:read` + `event:read`)
 >   Sentry token held as the `SENTRY_API_TOKEN` Actions secret, and opens one plain unlabeled GitHub
 >   issue per genuinely new problem — deduplicated on a stable Sentry issue-ID marker embedded in the
->   issue body — so `change-package.yml`'s `plan-from-issue` job drafts a change package from it. This is
->   the same route AGENTS.md's "Reporting a bug found outside the normal loop" requires of a human
->   who spots a bug; it is observability feeding that existing loop, and it changes no release,
+>   issue body. After VOC-078-T01, issue creation triggers no planner; a human or AI planner must
+>   prepare a separately reviewed change package from the issue. This is the same record-first route
+>   AGENTS.md requires of someone who spots a bug, and it changes no release,
 >   deployment, or approval gate. The workflow holds `issues: write` and nothing else, and
 >   deliberately has no SSH access to either host.
 > - **Uptime/liveness monitoring is untouched** by this amendment — the "Uptime monitoring" row's

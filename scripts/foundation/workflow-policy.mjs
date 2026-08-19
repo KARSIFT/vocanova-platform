@@ -9,6 +9,12 @@ export const TARGET_WORKFLOWS = [
   "security.yml",
 ];
 
+export const RETIRED_CONTROL_PLANE_WORKFLOWS = [
+  "change-package.yml",
+  "package-release.yml",
+  "pipeline.yml",
+];
+
 const REQUIRED_MARKERS = {
   "ci.yml": [
     "pnpm install --frozen-lockfile",
@@ -110,6 +116,23 @@ export function validateWorkflowDirectory(directory, phase = "additive") {
     }
     const source = readFileSync(resolve(directory, filename), "utf8");
     errors.push(...inspectTargetWorkflow(filename, source));
+  }
+
+  for (const filename of RETIRED_CONTROL_PLANE_WORKFLOWS) {
+    if (actual.includes(filename)) {
+      errors.push(
+        `${filename}: retired external control-plane workflow is present`,
+      );
+    }
+  }
+
+  for (const filename of actual) {
+    const source = readFileSync(resolve(directory, filename), "utf8");
+    if (source.includes("KARSIFT/karsift-ai-infra")) {
+      errors.push(
+        `${filename}: external control-plane reference is prohibited`,
+      );
+    }
   }
 
   if (phase === "final") {

@@ -78,9 +78,9 @@ artifact categories or authority hierarchy.
 | GitHub Actions | Deterministic checks, traceability, gates, and deployment orchestration | Cannot make product or business decisions |
 | Cloudflare | Isolated preview, staging, production deployment, monitoring, and rollback infrastructure | Must not decide whether a release is authorized |
 
-Which model or vendor occupies the implementer and independent-reviewer roles is
-configurable and has changed more than once - `karsift-ai-infra`'s `config/roles.yml`
-is the current source of truth for the actual occupant, not this table.
+Which human or AI system occupies the implementer and independent-reviewer roles is
+chosen per change and recorded with the evidence. The roles must remain separate and
+no external vendor configuration is a source of repository authority.
 
 A permanent qualified-human technical-steward role existed early in this
 repository's history and is now retired as a routine approval authority (see
@@ -173,6 +173,11 @@ strengthened controls above, but not a standing steward or founder sign-off just
 because it's R3. R4 changes always need founder approval before merge, regardless
 of automation state.
 
+VOC-078-T01 retired the workflow that previously executed this automatic-merge
+permission. The authority above remains policy, but GitHub Actions currently performs
+deterministic checks only and cannot merge. Until a separately adopted repository-owned
+executor exists, an authorized actor performs the merge after verifying the same gates.
+
 **An orchestrator-originated pull request** - implemented and independently
 reviewed by dedicated subagents (or an equivalent independent tool) dispatched from
 the same live orchestrator session, per
@@ -220,6 +225,11 @@ unresolved blocking finding, active EHR, a missing required R4 founder approval,
 missing founder approval for a predefined founder-controlled RL3 event, or a
 missing rollback capability. Automation is permission, not an obligation - any gate
 may hold a release for investigation.
+
+VOC-078-T01 retired the workflow that previously promoted completed packages from
+`develop` to `main`. This section continues to define release eligibility, but no
+current GitHub workflow executes that promotion. During reconstruction, promotion is
+prohibited; a future hosting/release package must define the replacement.
 
 RL1/RL2 *technical* activation (as opposed to the governance permission described
 above) remains a separate, currently disabled gate - see
@@ -319,7 +329,7 @@ authority.
 | Dependency audit | Live - pnpm audit and Dependabot |
 | Secret scanning | Live - GitHub secret scanning and push protection |
 | Preview status | Not built - per-PR Cloudflare previews remain genuinely unbuilt |
-| Independent Claude Code verification | Live - required for merge |
+| Independent exact-revision verification | Live as a repository requirement; performed outside Actions and attached to the PR |
 | Staging deployment, health checks | Live - `deploy-staging.yml`, real staging server |
 | Production deployment, health checks | Live - `deploy-production.yml`, real production server, restricted to `main` |
 | Rollback | Manual, proven procedure (redeploy previous immutable image digest) - not one-click automation |
@@ -332,9 +342,10 @@ maintained record of what's built versus what's still pending.
 
 This model has already passed its first five implementation pull requests and its
 first production release; it should continue to be reviewed after any serious
-incident and at least quarterly. Authorized maintainers must be able to disable
-independently: agent dispatch, autonomous merge, preview/staging deployment,
-production deployment, and automated rollback.
+incident and at least quarterly. GitHub Actions agent dispatch and autonomous merge
+are disabled by removal under VOC-078-T01. Until T03 removes server-bound workflows,
+authorized maintainers must also be able to cancel staging/production deployment;
+future automation must expose independent kill switches for every write capability.
 
 ## Retirement of the standing technical-steward role
 

@@ -15,11 +15,11 @@ implementation_authorized: false
 # before the plan PR is reviewed — do not leave this as an unexamined inherit.
 # R0–R2: true unless the package records a specific reason to require founder
 # eyes on the merge into develop. R3: true or false with stated justification
-# (comment here or adjacent one-line note). R4: false (redundant with merge-gate's
-# R4 block; keeps the package record self-describing). Deliberate false on R0–R2
-# must state why. This field is a per-package opt-out from auto-merge, not a
-# substitute for risk classification, CI, independent verification, R4 founder
-# authority, or EHR.
+# (comment here or adjacent one-line note). R4: false while the pre-VOC-079
+# authority remains active. Deliberate false on R0–R2 must state why. The field
+# is a package policy record; no current workflow consumes it or performs merge.
+# It never substitutes for risk classification, CI, independent verification,
+# R4 founder authority, or EHR.
 automatic_merge_allowed: true
 production_impact: unknown
 rollback_required: true

@@ -1,34 +1,18 @@
 # Contributing
 
-## Automated orchestrator PRs
+## Human and agent contributions
 
-Some pull requests in this repository are opened, and sometimes merged, automatically
-by an orchestrator rather than by a human contributor. These are triggered from a
-GitHub issue labeled `agent:ready`; the orchestrator implements and independently
-reviews the change following the roles defined in `.claude/agents/implementer.md`
-and `.claude/agents/reviewer.md`. Depending on which orchestrator path is running -
-the interim `orchestrator/run.mjs` script, which currently sends its own inline
-prompts to the `claude` CLI rather than loading those files as native Claude Code
-subagents, or an interactive Claude Code orchestrator session, which sometimes can
-dispatch them as real subagents and sometimes (recorded live on PR #60) follows
-their instructions directly as a prompt when that mechanism isn't available in the
-current context - the exact dispatch mechanism varies, but the role split and its
-guarantee do not: whichever way it runs, the reviewer role never has write access
-to the change it reviews.
+Humans and AI agents use the same repository workflow: an approved requirement, an
+isolated branch, deterministic checks, an independent exact-revision review by a
+different role, and a pull request into `develop`. Role separation is what matters;
+the policy does not permanently bind planner, implementer, or reviewer duties to one
+vendor.
 
-If you see a PR like this and aren't expecting it, that's normal, not a mistake. For
-the full architecture, see
-[ADR-0001](docs/decisions/ADR-0001-agent-orchestration-architecture.md) (currently
-`status: proposed`, not yet accepted). The merge-authority rules that let a
-qualifying orchestrator-originated PR merge without the standard
-`karsift-ai-infra` pipeline ceremony are defined in
-[DOC-16](docs/governance/16-autonomous-development-operating-model.md)'s "Branch
-and merge behavior" section (folded in from the former "A-004" amendment; see
-DOC-16's "Amendment history" for the original approval evidence). This authority
-only applies when its conditions are met on every occurrence - it does not change
-founder authority over
-R4 changes, protected-area review, or any other governance requirement described
-elsewhere in this document.
+GitHub Actions performs deterministic validation only. It does not trigger an agent,
+draft or adopt a package, implement code, post an AI verdict, remediate a failure,
+merge a pull request, or promote a release. The interim local orchestrator remains
+present until VOC-078-T02, but it is not triggered by issues or workflow events and
+does not replace the required GitHub evidence trail.
 
 Vocanova uses two permanent branches:
 
@@ -94,9 +78,8 @@ VOC-002 was not a bootstrap exception. It was the completed one-time A-003 migra
 governed by pre-A-003 R4 founder and R3 technical-steward approval bound to its exact
 revision. That approval is exhausted and cannot be reused - VOC-002 itself grants no
 standing automatic-merge or autonomous-production-release authority. This does not mean
-those capabilities are disabled system-wide: automatic merge into `develop` is a
-separately implemented and proven gate (DOC-16's "Branch and merge behavior"
-section, live via karsift-ai-infra's merge-gate.yml) with its own authority, not
-derived from VOC-002. See AGENTS.md's
-"Change workflow" section for the current, accurate state of that gate and of
-autonomous production release.
+those capabilities are disabled system-wide as a matter of historical authority.
+VOC-078-T01 has retired the workflow implementation that previously performed
+automatic merge and package release; reintroducing either requires a separately
+adopted, repository-owned design. See AGENTS.md's "Change workflow" section for the
+current manual evidence and merge path.

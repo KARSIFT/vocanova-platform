@@ -31,4 +31,5 @@ Set `automatic_merge_allowed` in `change.yaml` per the risk-class rule in
 `AGENTS.md` (subsection "Drafting `automatic_merge_allowed` in `change.yaml`")
 before the plan PR is reviewed. The template literal (`true`) matches routine
 R0–R2; R4 packages and deliberate opt-outs must set `false` with a stated
-reason in `change.yaml`.
+reason in `change.yaml` while the pre-VOC-079 authority remains active. The field
+is retained as policy metadata; VOC-078-T01 removed the workflow that consumed it.

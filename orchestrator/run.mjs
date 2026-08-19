@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Agent orchestration loop: backlog -> implementer -> reviewer -> merge -> deploy.
-// Replaces karsift-ai-infra's multi-vendor role relay with one process that
-// holds real context across the whole loop instead of re-deriving it from a
+// Temporary local process that holds context across the whole loop instead of
+// re-deriving it from a
 // PR/issue comment at every cold-started step. See orchestrator/RUNBOOK.md.
 //
 // Requires on PATH: git, gh (authenticated, repo write access), claude
@@ -16,10 +16,8 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 
 const CFG = {
-  // vocanova-platform splits develop/main (see the integration_branch fields
-  // in pipeline.yml/change-package.yml and the integration_branch/
-  // production_branch fields in package-release.yml) - tasks merge into
-  // develop, which auto-deploys to staging on push. Set BASE_BRANCH=main
+  // vocanova-platform splits develop/main: tasks merge into develop, which
+  // still auto-deploys to staging on push until VOC-078-T03. Set BASE_BRANCH=main
   // instead only for a GitHub-flow-only project with a single long-lived
   // branch and no separate staging tier.
   baseBranch: process.env.BASE_BRANCH || "develop",
@@ -279,15 +277,12 @@ function mergeAndDeploy(number, branch, issue, reviewText) {
   }
 
   if (!CFG.autoDeployProduction) {
-    commentOnIssue(number, `**Orchestrator:** merged to \`${CFG.baseBranch}\` and staging is healthy. Production promotion is off (AUTO_DEPLOY_PRODUCTION=false) - this repo normally promotes ${CFG.baseBranch} -> ${CFG.productionBranch} at the package level (karsift-ai-infra's release.yml), not per task. Promote manually when ready.`);
+    commentOnIssue(number, `**Orchestrator:** merged to \`${CFG.baseBranch}\` and staging is healthy. Production promotion is off (AUTO_DEPLOY_PRODUCTION=false) and remains prohibited during VOC-078 reconstruction.`);
     return { ok: true, staging: "success", production: "manual" };
   }
 
-  // NOTE: this promotes on every single task merge, which bypasses this
-  // repo's existing package-level release gate (release.yml normally waits
-  // for a whole change package's task roster to close first). Only turn
-  // AUTO_DEPLOY_PRODUCTION on if you've deliberately decided this loop
-  // should replace that gate, not by default.
+  // NOTE: production promotion is not authorized during VOC-078 reconstruction.
+  // This legacy branch remains only until T02 deletes the temporary orchestrator.
   log(number, `promoting ${CFG.baseBranch} -> ${CFG.productionBranch}`);
   const promo = sh("gh", [
     "pr", "create",

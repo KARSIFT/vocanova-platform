@@ -5,17 +5,13 @@ settings, create Cloudflare projects, or provision credentials. A repository
 administrator must configure and record the following before autonomous merge or
 release is enabled.
 
-A-003 governance authority is active. That activation must not be represented as
-hosted or technical activation. Automatic merge into `develop` (DOC-16's "Branch
-and merge behavior" section) is implemented, tested, and proven - live since
-VOC-012 (see `docs/governance/a003-transition-state.yaml`). RL1/RL2 technical
-activation remain disabled or unimplemented; production deployment and autonomous
-production release (DOC-16's "Release classes and production release authority"
-section, a distinct, narrower gate than develop-merge) were also disabled at the
-time this paragraph was first written (corrected 2026-07-24, previously conflated
-develop-merge with production-release authority) but have since been separately
-enabled (2026-08-08) - see "Current reality" below and AGENTS.md's "Release and
-deployment authority" section for that later, distinct decision.
+A-003 governance authority is active. That authority must not be represented as
+hosted or technical activation. VOC-078-T01 retired the workflows that executed
+automatic merge into `develop` and package-driven promotion into `main`; both are
+currently disabled even though historical runs proved the earlier mechanism. RL1/RL2
+technical activation remains disabled. Legacy push-triggered deployment workflows
+remain temporarily present until VOC-078-T03 and must not be treated as authority for
+the reconstruction.
 
 ## GitHub rulesets
 
@@ -23,7 +19,8 @@ Configure `develop`:
 
 - require pull requests and block direct pushes, force pushes, and branch deletion;
 - require `policy / governance-policy` and every installed application CI check;
-- require the independent Claude Code verifier status check;
+- require deterministic CI/governance/quality/security checks when the GitHub plan
+  supports private-repository rulesets;
 - require conversation resolution and dismiss stale approvals;
 - require code-owner review for protected paths;
 - allow squash merge; and
@@ -70,7 +67,9 @@ Configure `main`:
 GitHub cannot natively express every conditional R0-R4 approval combination using
 CODEOWNERS alone. Use separate protected teams/environments and a reviewed gate that
 validates the effective risk class and attributable approvals. Keep autonomous merge
-disabled until that gate is tested.
+disabled until a repository-owned gate is tested. On the current GitHub Free private-
+repository plan these settings are desired controls, not enforceable hosted reality;
+the pull request must record the evidence explicitly.
 
 Multiple owners on one CODEOWNERS pattern are alternatives: one matching owner can
 satisfy GitHub's native code-owner review requirement. They do not mean that every
@@ -96,9 +95,9 @@ bot identity as human authority.
 
 ## Required identities and credentials
 
-- Distinct implementer-role and independent-reviewer-role identities (currently both
-  Cursor-backed, per karsift-ai-infra's `config/roles.yml` - configurable, not a
-  permanent Codex/Claude assignment).
+- Distinct implementer-role and independent-reviewer-role identities, recorded per
+  pull request. Humans and AI agents may fill either role; no vendor is permanently
+  assigned by repository policy.
 - The recorded human founder identity and preserved historical technical-steward
   identity; no replacement standing steward team is required.
 - GitHub App or OIDC-based credentials with least privilege and short expiry.
@@ -140,10 +139,10 @@ and rollback cannot truthfully be automated yet."
 `package.json`/`pnpm-lock.yaml`/the pnpm workspace exist; deterministic CI (format,
 lint, typecheck, test, build) runs on every PR and has passed across 22+ shipped
 packages (VOC-010 through VOC-022 at minimum). VOC-078-T00 adds the repository-local
-`ci.yml`, `governance.yml`, `quality.yml`, and `security.yml` replacement set in
-parallel with the old workflows. This temporary duplication is intentional: the new
-read-only jobs must pass on a real pull request before later VOC-078 tasks delete the
-legacy control-plane, quality, governance, deployment, or monitoring workflows.
+`ci.yml`, `governance.yml`, `quality.yml`, and `security.yml` replacement set.
+VOC-078-T01 has now removed the legacy external control-plane callers after the new
+read-only jobs passed on a real pull request. Older standalone quality/governance and
+server-bound workflows remain temporarily until T03/T04.
 `docs/migration-manifest.yaml` and `docs/document-graph.yaml` were migrated
 (VOC-007/VOC-008) and later archived to `docs/archive/` as historical evidence
 trails (2026-07-24) - they are available, just not filed as live/current
@@ -165,6 +164,7 @@ expired. The historical technical-steward appointment and completed dual-capacit
 VOC-002 approval remain permanent evidence, but the role is retired as routine R3
 authority and that migration approval cannot be reused. Under active A-003, routine R3
 uses strengthened technical gates and independent verification, while R4 founder
-authority remains unchanged. Automatic merge into `develop` is live (see above); RL1/RL2
-technical activation and autonomous production release remain disabled until
-separately implemented, tested, and proven.
+authority remains unchanged until the adopted VOC-079 transition is implemented.
+Automatic merge into `develop` and autonomous production release are disabled after
+VOC-078-T01; RL1/RL2 technical activation remains disabled. Production deployment is
+still technically push-triggered only until T03 removes those workflows.

@@ -13,15 +13,11 @@ name: deploy-production
 # until t05-live-cutover-evidence.md records cloudflare_remap_api_status:
 # absent. T04 then removes remaining :8443 URL qualifications.
 #
-# Auto-deploys on every push to main (2026-08-08, founder's explicit, twice-
-# confirmed request - see AGENTS.md's "Release and deployment authority"
-# section): release.yml's own auto_release_enabled path is what actually
-# produces that push (a checked, merged promotion PR), so by the time this
-# fires the code has already passed CI + independent review on every task
-# PR that went into it. workflow_dispatch stays available as a manual
-# override/retry path with the same input defaults a push run resolves to
-# automatically (see each `inputs.X || 'default'` below) - nothing about
-# manual dispatch changed.
+# Still triggers on every push to main until VOC-078-T03 removes this workflow.
+# VOC-078-T01 retired the package promotion workflow, so no repository automation
+# should produce such a push during reconstruction. The trigger's temporary presence
+# is not deployment authority. workflow_dispatch also remains technically present
+# until T03 but must not be used for this package.
 
 on:
   push:

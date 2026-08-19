@@ -1,4 +1,4 @@
-# Running the agent orchestrator
+# Running the agent orchestrator (temporary, pending VOC-078-T02 removal)
 
 What this is: one script that runs the implement → review → merge → deploy
 loop end-to-end, holding real context the whole way instead of relaying
@@ -32,12 +32,12 @@ Environment variables (all optional, sane defaults shown):
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `BASE_BRANCH` | `develop` | branch tasks are built from and merged into. This repo splits `develop`/`main` (see the `integration_branch` fields in `pipeline.yml`/`change-package.yml` and the `integration_branch`/`production_branch` fields in `package-release.yml`) — `develop` is correct here. Only set this to `main` for a GitHub-flow-only project with a single long-lived branch. |
+| `BASE_BRANCH` | `develop` | branch tasks are built from and merged into. This repo uses `develop` for integration and `main` for production history. |
 | `PRODUCTION_BRANCH` | `main` | where `BASE_BRANCH` gets promoted to when `AUTO_DEPLOY_PRODUCTION=true` |
 | `MAX_ATTEMPTS` | `3` | implement/review retries before escalating to a human |
 | `READY_LABEL` | `agent:ready` | issue label the `--watch` poller looks for |
 | `POLL_INTERVAL_SECONDS` | `60` | how often `--watch` checks for new labeled issues |
-| `AUTO_DEPLOY_PRODUCTION` | `false` | if `true`, opens and merges a `develop`→`main` promotion PR (which itself triggers `deploy-production.yml`'s push trigger) once staging is healthy — **on every single task**, not per completed package. **Leave this `false`.** This repo already has a package-level release gate (`karsift-ai-infra`'s `release.yml`, which waits for a whole change package's task roster to close before promoting) — turning this on bypasses that gate and promotes after every individual task instead. Only enable it if you've deliberately decided this loop should replace that gate, and this is a live app with real users, so don't flip it lightly. Until then, review each staging result yourself and promote through your existing process. |
+| `AUTO_DEPLOY_PRODUCTION` | `false` | **Leave this false.** Promotion is prohibited during VOC-078 reconstruction; the previous package release workflow was retired in T01 and no replacement is authorized. |
 | `IMPLEMENTER_MODEL` / `REVIEWER_MODEL` | CLI default | pin specific models if you want; leave unset to use whatever `claude` defaults to |
 
 Neither `deploy-staging.yml` nor `deploy-production.yml` is triggered directly by this script — both already fire on their own `push` trigger (to `develop` and `main` respectively). The orchestrator merges, then watches for the run that push already started; it never dispatches these workflows itself, which matters for `deploy-production.yml` specifically since its `workflow_dispatch` inputs (production hostnames, Cloudflare cutover mode) are meant for a deliberate manual re-run, not an automated one.
@@ -84,23 +84,10 @@ issues, they'll just burn 3 attempts and escalate anyway), real product
 ambiguity, and a production deploy repeating a rollback. Everything else is
 meant to run without you.
 
-## 6. Relationship to the existing pipeline files
+## 6. Relationship to GitHub Actions
 
-This runs alongside `.github/workflows/pipeline.yml` / `change-package.yml` /
-`package-release.yml`, not instead of them (that three-file split, plus
-`ci` moving in-house, is a behavior-preserving reorg - same jobs, same
-triggers, same logic, just grouped by real `needs:` dependency instead of one
-12-job file). Together they still own the change-package/task-roster model
-end to end: `plan`/`plan-from-issue` draft a package, `adopt` opens its task
-roster (`change-package.yml`); `review`/`remediate` are the cold-started
-fallback for any task not picked up by a live orchestrator session, `merge-gate`
-merges once checks and an independent-verification `VERDICT:` comment both
-pass, from either source - it doesn't care who posted the verdict
-(`pipeline.yml`); and `release`/`auto-advance` remain the only mechanism that
-promotes `develop` to `main` and triggers production deployment, gated on a
-package's whole roster closing (`package-release.yml`). None of that is
-scheduled for retirement: it stays load-bearing regardless of how much of the
-day-to-day implementation work the orchestrator ends up handling directly.
-`pipeline.yml`'s `ci` job is not a call into `karsift-ai-infra` - it runs
-`pnpm validate` directly - but that's an implementation detail of the check,
-not a relationship change with this script.
+VOC-078-T01 retired the external planning/review/merge/release workflow relay.
+GitHub Actions now performs deterministic checks only; it does not trigger this
+script or act as its fallback. Any use before T02 removal must still create an
+ordinary pull request, run the repository checks, attach exact-revision independent
+review, and obey DOC-16. Production promotion is disabled during reconstruction.

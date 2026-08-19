@@ -5,6 +5,7 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 import {
+  RETIRED_CONTROL_PLANE_WORKFLOWS,
   TARGET_WORKFLOWS,
   inspectCommonWorkflowPolicy,
   inspectTargetWorkflow,
@@ -14,11 +15,36 @@ import {
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 const workflowDirectory = resolve(repositoryRoot, ".github/workflows");
 
-test("the four target workflows pass the additive policy", () => {
+test("the target workflows pass after external control-plane retirement", () => {
   assert.deepEqual(
     validateWorkflowDirectory(workflowDirectory, "additive"),
     [],
   );
+});
+
+test("retired workflow filenames and external control-plane calls are rejected", () => {
+  const temporary = mkdtempSync(resolve(tmpdir(), "vocanova-workflows-"));
+  try {
+    for (const filename of TARGET_WORKFLOWS) {
+      writeFileSync(
+        resolve(temporary, filename),
+        readFileSync(resolve(workflowDirectory, filename), "utf8"),
+      );
+    }
+    writeFileSync(
+      resolve(temporary, RETIRED_CONTROL_PLANE_WORKFLOWS[0]),
+      "name: retired\n",
+    );
+    writeFileSync(
+      resolve(temporary, "external.yml"),
+      "jobs:\n  call:\n    uses: KARSIFT/karsift-ai-infra/.github/workflows/review.yml@deadbeef\n",
+    );
+    const errors = validateWorkflowDirectory(temporary, "additive");
+    assert.ok(errors.some((error) => error.includes("retired external")));
+    assert.ok(errors.some((error) => error.includes("external control-plane")));
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
 });
 
 test("common policy rejects write permission, unsafe triggers, and floating actions", () => {

@@ -63,14 +63,9 @@
 #
 # Mirror of the .github/workflows/accessibility.yml and
 # .github/workflows/lighthouse.yml pattern from VOC-031-T07a/
-# T09: this is a separate, purpose-specific workflow file, NOT
-# a new job in pipeline.yml, because pipeline.yml's own header
-# (see the comment block at the top of pipeline.yml) states
-# "Deploy is out of scope" and its `ci`/`release` jobs have
-# contracts (`pnpm validate` for ci, package-completion
-# detection for release) that a multi-minute production-image
-# build + SSH deploy would regress for every PR regardless of
-# whether staging-deploy coverage applies.
+# T09: this is a separate, purpose-specific workflow file, not
+# a deterministic pull-request check. A multi-minute image build
+# and SSH deployment must never be part of read-only PR validation.
 #
 # Staging host layout this workflow assumes (founder-set-up
 # per T11's infra/README.md; this is the load-bearing
@@ -221,7 +216,7 @@
 #     `Set up Go for the P1 content seed build` step.
 #   * .github/workflows/accessibility.yml + lighthouse.yml
 #     — the design pattern this workflow mirrors (separate
-#     workflow file, NOT a pipeline.yml job).
+#     workflow file, not a CI job).
 #   * docs/operations/11-devops-and-ci-cd.md §3 — the kill
 #     switches and migration-rollback rules the api/web
 #     containers honor at runtime; this workflow neither

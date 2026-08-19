@@ -63,14 +63,14 @@ hosted_enforcement_status: not-activated
 
 # AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08 - see
 # docs/governance/a003-transition-state.yaml's identical marker/note for the
-# full record (founder's explicit, twice-confirmed request). This file mirrors
-# that one's merge/release/deployment fields and must move in lockstep with
-# it - tooling/governance/validate_repository_foundation.py checks both.
-automatic_merge_allowed: true
-autonomous_merge_allowed: true
+# full historical record. VOC-078-CONTROL-PLANE-RETIRED-2026-08-19 records the
+# later operational retirement of automatic merge and package-driven release.
+# This file mirrors the lifecycle state and tooling checks both in lockstep.
+automatic_merge_allowed: false
+autonomous_merge_allowed: false
 
 production_deployment: enabled
-autonomous_production_release: enabled
+autonomous_production_release: disabled
 rl1_technical_activation: false
 rl2_technical_activation: false
 doc_17_repository_adoption: true

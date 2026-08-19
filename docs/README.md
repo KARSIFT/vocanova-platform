@@ -61,9 +61,8 @@ roadmap to build it. The system that actually shipped VOC-010 through VOC-022, a
 orchestrator/subagent system documented in
 [ADR-0001](decisions/ADR-0001-agent-orchestration-architecture.md) since, are architecturally
 unrelated: no Postgres queue, no Budget Governor, no MCP interface, no Change Contract Registry.
-This was a deliberate decision (see `karsift-ai-infra`'s own README and commit history), not an
-oversight. Their adoption never implemented the Control Plane, activated RL1/RL2, or enabled
-production deployment or autonomous production release, and retiring them to `docs/archive/`
-changes none of that - it also does not, on its own, cover automatic merge into `develop` - that
-narrower capability (DOC-16's "Branch and merge behavior") is separately implemented and live; see
+This was a deliberate repository decision, not an oversight. Their adoption never
+implemented the Control Plane or activated RL1/RL2. VOC-078-T01 later retired the
+external workflow state machine that had implemented automatic merge and package
+release; current operational state is recorded in
 `docs/governance/a003-transition-state.yaml`.

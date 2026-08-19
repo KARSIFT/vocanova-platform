@@ -279,49 +279,37 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         )
         self.assert_failure("rl1_technical_activation must remain false")
 
-    def test_a003_automatic_merge_enablement_fails(self) -> None:
-        # 2026-08-08: the repository is now authorized (see the
-        # AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08 marker in
-        # a003-transition-state.yaml) and this field's required value is
-        # "true", not "false" - the tripwire this test exercises is that
-        # DEVIATING from the currently-required value (in either direction)
-        # still fails closed, not that the field is frozen at one constant
-        # forever regardless of authorization.
+    def test_a003_automatic_merge_retirement_fails_closed(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "automatic_merge_allowed: true",
             "automatic_merge_allowed: false",
+            "automatic_merge_allowed: true",
         )
-        self.assert_failure("automatic_merge_allowed must equal 'true' once authorized")
+        self.assert_failure("automatic_merge_allowed must equal 'false' after VOC-078 control-plane retirement")
 
-    def test_a003_automatic_merge_enablement_without_marker_fails(self) -> None:
-        # The other half of the same tripwire: the marker and the four
-        # merge/release/deployment fields must move together. Flipping a
-        # field to the authorized value while REMOVING the marker (as if
-        # someone tried to sneak the capability in without the recorded
-        # authorization) must fail just as hard as the reverse.
+    def test_a003_retirement_without_marker_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08",
+            "VOC-078-CONTROL-PLANE-RETIRED-2026-08-19",
             "MARKER-REMOVED-FOR-TEST",
         )
-        self.assert_failure("automatic_merge_allowed must remain 'false' without an authorization marker")
+        self.assert_failure("automatic_merge_allowed must equal 'true' once authorized")
 
     def test_a003_autonomous_merge_enablement_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "autonomous_merge_allowed: true",
             "autonomous_merge_allowed: false",
+            "autonomous_merge_allowed: true",
         )
-        self.assert_failure("autonomous_merge_allowed must equal 'true' once authorized")
+        self.assert_failure("autonomous_merge_allowed must equal 'false' after VOC-078 control-plane retirement")
 
     def test_a003_autonomous_production_enablement_fails(self) -> None:
         self.replace(
             "docs/governance/a003-transition-state.yaml",
-            "autonomous_production_release: enabled",
             "autonomous_production_release: disabled",
+            "autonomous_production_release: enabled",
         )
-        self.assert_failure("autonomous_production_release must equal 'enabled' once authorized")
+        self.assert_failure("autonomous_production_release must equal 'disabled' after VOC-078 control-plane retirement")
 
     def test_a003_doc_17_adoption_fails(self) -> None:
         self.replace(
@@ -401,7 +389,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
             "production_deployment: enabled",
             "production_deployment: disabled",
         )
-        self.assert_failure("production_deployment must equal 'enabled' once authorized")
+        self.assert_failure("production_deployment must equal 'enabled' after VOC-078 control-plane retirement")
 
     def test_protected_policy_partial_adoption_fails(self) -> None:
         self.replace(

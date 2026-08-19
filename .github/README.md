@@ -15,31 +15,25 @@ This directory contains repository contribution and governance controls:
 
 ## VOC-078 transition
 
-The four workflows above are the additive T00 replacement set. They intentionally run beside
-the legacy workflows during one real pull request so their job graph and results can be proven
-before any old workflow is deleted. All four use a read-only repository token; none can merge,
-open or close issues, release, deploy, access environment secrets, or contact a server.
+T00 proved the four replacement workflows on a real pull request. T01 removed the
+three external control-plane callers (`pipeline.yml`, `change-package.yml`, and
+`package-release.yml`). GitHub Actions no longer plans, adopts, implements, reviews,
+remediates, merges, releases, opens task issues, or advances packages, and no workflow
+references `KARSIFT/karsift-ai-infra`.
 
-Until the later VOC-078 retirement tasks merge, `pipeline.yml`, `change-package.yml`,
-`package-release.yml`, the separate quality/governance workflows, and the server-bound workflows
-still exist and retain their previous behavior. Their presence during T00 is deliberate and must
-not be mistaken for the final workflow inventory.
+During the remaining transition, older standalone quality/governance workflows and
+server-bound deploy/monitor workflows still coexist with the four target files. T03
+removes server-bound automation; T04 removes superseded deterministic duplicates.
+Until then, the exact current inventory is the files in this directory, not the final
+four-file target.
 
-These workflows are part of several automated checks now live - see
-`docs/governance/repository-settings.md`'s "Current reality" section for what
-actually runs today (application CI, independent review, staging and production
-deployment) versus what's still genuinely unbuilt (per-PR Cloudflare previews,
-one-click rollback automation). Treat that section, not this paragraph, as the
-source of truth for current automation state - this file only describes what
-lives in `.github/` itself. See
-[`docs/governance/repository-settings.md`](../docs/governance/repository-settings.md)
-for the required administrator settings and credentials.
+The four target workflows use read-only repository permissions and deterministic local
+commands. They do not call an AI model or write to GitHub. Requirements, human/agent
+work, independent review, and merge decisions are recorded through ordinary issues,
+branches, pull requests, and comments. GitHub Free does not technically enforce private-
+repository branch protection, so policy and evidence must not be described as a hosted
+enforcement capability that does not exist.
 
-A-003 governance authority is active. These files do not technically activate RL1 or
-RL2, production deployment, or autonomous production release. (Automatic merge into
-`develop` specifically - a distinct, narrower gate, DOC-16's "Branch and merge
-behavior" section - is separately implemented and live via karsift-ai-infra's
-merge-gate.yml; see `docs/governance/a003-transition-state.yaml`'s
-`automatic_merge_allowed` field.) DOC-17 and DOC-18's Control Plane architecture is
-superseded and archived (`docs/archive/`) - not something these files, or anything
-else, still needs to "activate."
+See [`docs/governance/repository-settings.md`](../docs/governance/repository-settings.md)
+for the continuously maintained built-versus-pending record. DOC-17 and DOC-18's
+unbuilt Control Plane remains superseded and archived under `docs/archive/`.

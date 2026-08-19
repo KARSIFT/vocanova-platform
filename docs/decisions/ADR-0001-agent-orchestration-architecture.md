@@ -14,12 +14,12 @@ related_changes: [PR-50, PR-51]
 ## Context
 
 Vocanova already owns real infrastructure: a GitHub repo, GitHub Actions, Docker Compose,
-staging and production servers, Cloudflare, and a database. Development has been driven by
-`karsift-ai-infra`'s `pipeline.yml` — a relay of stateless GitHub Actions jobs
+staging and production servers, Cloudflare, and a database. Development had been driven by
+an external relay of stateless GitHub Actions jobs
 (`plan → adopt → implement → ci → review → remediate → merge-gate → release`), each cold-started
 and re-deriving context from PR/issue comment text, with the `implementer`/`reviewer`/`planner`
-roles filled by a constantly-swapped roster of AI vendors (`karsift-ai-infra/config/roles.yml`,
-15+ vendor changes in under three weeks — mostly chasing quota, not quality).
+roles filled by a constantly-swapped roster of AI vendors (15+ vendor changes in under
+three weeks — mostly chasing quota, not quality). VOC-078-T01 later retired that relay.
 
 In practice this made development slow and fragile: VOC-072-T00, a single "record this secret
 name" task, took 5 full implement/review rounds over 2 days because the task itself required a
@@ -78,10 +78,8 @@ churn instead of one process holding context.
   quota, not quality, and was the direct cause of most pipeline failures this repo has seen — a
   stable default with one deliberate cross-vendor hop (Reviewer → Cursor) captures the actual
   benefit without the instability.
-- The karsift-ai-infra-backed `implement`/`adopt` (in `change-package.yml`) and `review`/
-  `merge-gate` (in `pipeline.yml`) jobs are not retired by this ADR — they keep running in
-  parallel. Retiring them is a deliberate future decision, made only after the design above is
-  proven, not a side effect of accepting this record.
+- This ADR did not itself retire the external jobs. VOC-078 later made and adopted that
+  deliberate decision; T01 removed them after deterministic replacements were proven.
 
 ## Alternatives considered
 
@@ -106,17 +104,14 @@ unsafe territory as trust in the system grows.
 
 ## Migration and rollback
 
-Additive only. `pipeline.yml`/`change-package.yml`/`package-release.yml` and `karsift-ai-infra`
-keep running exactly as they do today (behavior-preserving split across those three files, VOC
-CI-cleanup); nothing here requires touching them further. Rollback is simply not building the
-Routine/subagent flow described in §3–§7 — there is nothing to revert on the existing pipeline
-since it was never changed.
+This proposed ADR was additive when written. VOC-078 superseded that migration
+assumption and removed the external workflow relay in T01. The local orchestrator
+remains only as a temporary artifact until VOC-078-T02 and is not a replacement
+Actions control plane.
 
 ## Affected documents and system areas
 
-- `.github/workflows/pipeline.yml` (`review`/`merge-gate`) and `change-package.yml`
-  (`implement`/`adopt`) — eventual retirement of these jobs is a deliberate future decision, out
-  of scope for this ADR.
+- Retired external workflow callers — historical context only after VOC-078-T01.
 - `orchestrator/run.mjs`, `orchestrator/RUNBOOK.md` — interim implementation (PR #50, PR #51),
   stays in place per §8.
 - `CLAUDE.md` — needs the `@AGENTS.md` import (§5), not yet made.

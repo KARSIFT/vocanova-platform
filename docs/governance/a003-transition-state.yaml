@@ -42,17 +42,15 @@ rl2_technical_activation: false
 # marker string is checked by tooling/governance/validate_repository_foundation.py
 # (validate_a003) - removing it without also reverting these four fields to
 # their prior false/disabled values fails validation, and vice versa; the two
-# must move together. See AGENTS.md's "Release and deployment authority"
-# section for the full record. karsift-ai-infra's release.yml now runs with
-# `auto_release_enabled: "true"` (package-release.yml's release job) and
-# deploy-production.yml triggers on every push to `main`. RL1/RL2 technical
-# activation were NOT part of this request and remain a separate, distinct,
-# still-disabled gate below - do not treat this marker as covering them too.
-automatic_merge_allowed: true
-autonomous_merge_allowed: true
+# must move together. This marker is retained as historical authority evidence.
+# VOC-078-CONTROL-PLANE-RETIRED-2026-08-19 records the later operational retirement
+# of automatic merge and package-driven release; tooling validates the resulting
+# mixed transition state. Legacy deployment workflows remain until VOC-078-T03.
+automatic_merge_allowed: false
+autonomous_merge_allowed: false
 
 production_deployment: enabled
-autonomous_production_release: enabled
+autonomous_production_release: disabled
 doc_17_repository_adoption: true
 doc_18_repository_adoption: true
 control_plane_implementation: false
