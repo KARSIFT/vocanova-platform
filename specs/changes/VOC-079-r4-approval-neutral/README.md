@@ -18,3 +18,8 @@ The proposal does not make R4 low risk. R4 keeps its consequence-based classific
 impact analysis, decision record, contingency evidence, and stronger independent
 verification. It removes only the approval and automatic-merge prohibition caused by
 the class label itself.
+
+The pre-merge implementation evidence and transition boundary are consolidated in
+[`t03-verification-record.md`](t03-verification-record.md). That record does not claim
+activation: exact-revision T03 review, the one-time pre-transition implementation
+approval, stack merge, and post-merge verification remain separate recorded events.
