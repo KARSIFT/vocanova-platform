@@ -1,0 +1,113 @@
+schema_version: 1
+
+id: VOC-079
+slug: r4-approval-neutral
+title: Make R4 approval-neutral and verification-driven
+
+type: governance-authority-transition
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because this package changes consequential governance, approval boundaries,
+  automatic-merge authority, and autonomous-system authority. It also touches paths
+  with explicit R4 floors. The transition must be evaluated under the authority in
+  force before it and cannot authorize its own adoption.
+canonical_path: specs/changes/VOC-079-r4-approval-neutral
+authority_model: a003-active-before-transition
+requirement_source: >-
+  GitHub issue #74 and the founder's 2026-08-19 request to stop asking for approval
+  solely because a change is R4 and to make R4 operate like the other risk classes.
+  The request is planning input until this exact package revision is adopted through
+  the canonical GitHub record.
+requirement_approval_status: pending-exact-revision-adoption
+base_branch: develop
+base_sha: 576dde2608e06380470ac5f5322e5f6c451b557d
+target_branch: develop
+approved_candidate_sha: null
+owners:
+  decision: founder-for-this-transition-only
+  package_preparation: Codex (drafting only)
+  implementation: unassigned
+  independent_verification: unassigned-independent-reviewer
+approvals:
+  package_independent_verification:
+    status: pending
+    candidate_sha: null
+    evidence: null
+  package_founder:
+    status: pending-one-time-transition-approval
+    candidate_sha: null
+    evidence: null
+approval_status: not-approved
+implementation_authorized: false
+# The currently effective R4 rule governs this transition package. It therefore
+# opts out of automatic merge. This value does not describe the proposed post-
+# transition default and must not be reused as precedent after adoption.
+automatic_merge_allowed: false
+production_impact: none-direct
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+  - id: VOC-079-DEP-00
+    status: >-
+      Open. The exact transition revision needs the one final founder approval required
+      by the governance effective before it. That authority is exhausted when this
+      package lands and cannot approve later R4 work.
+  - id: VOC-079-DEP-01
+    status: >-
+      Open. VOC-078 must retire the KARSIFT/karsift-ai-infra merge-gate invocation, or
+      an independently adopted change to that external system must remove its hard R4
+      block. This repository must not claim R4 is approval-neutral while an active
+      called workflow still enforces the opposite.
+  - id: VOC-079-DEP-02
+    status: >-
+      Open. Adoption must name the independent verifier and decide whether the
+      implementation lands as one reconciliation PR or as ordered task PRs. Builder
+      and verifier must remain different roles and exact revisions must be recorded.
+affected_areas:
+  - AGENTS.md
+  - CONTRIBUTING.md
+  - .github/pull_request_template.md
+  - .github/README.md
+  - .github/approved-policy/protected-paths.yaml
+  - specs/templates/change-package/
+  - scripts/governance/
+  - docs/governance/
+  - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+  - docs/decisions/
+  - repository merge-policy tests and workflows, if present after VOC-078
+implementation:
+  authorized: false
+  required: true
+  status: blocked-pending-adoption-and-dependencies
+  target_branch: develop
+  pull_request: null
+  authority_issue: 74
+release:
+  required: true
+  mode: repository-governance-only
+  production_impact: none-direct
+  deployment: prohibited-by-package
+  automatic_merge: false
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: not-adopted
+adoption_pr: null
+adoption_evidence: null
+repository_adoption_evidence: null
+implementation_authority_before_adoption: false
+implementation_authority_status: not-authorized
+production_deployment: prohibited
+ehr: not-triggered
+blocking_reasons:
+  - VOC-079-DEP-00
+  - VOC-079-DEP-01
+  - VOC-079-DEP-02
