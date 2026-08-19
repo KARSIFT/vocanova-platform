@@ -5,7 +5,7 @@ slug: r4-approval-neutral
 title: Make R4 approval-neutral and verification-driven
 
 type: governance-authority-transition
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because this package changes consequential governance, approval boundaries,
@@ -17,29 +17,29 @@ authority_model: a003-active-before-transition
 requirement_source: >-
   GitHub issue #74 and the founder's 2026-08-19 request to stop asking for approval
   solely because a change is R4 and to make R4 operate like the other risk classes.
-  The request is planning input until this exact package revision is adopted through
-  the canonical GitHub record.
-requirement_approval_status: pending-exact-revision-adoption
+  Founder approval of exact candidate 25a3e246b8f66dd4b92ea9726eb5367c16363018
+  is recorded on PR #75.
+requirement_approval_status: founder-approved-exact-revision
 base_branch: develop
 base_sha: 576dde256740aabb8d5d9aabe32d2eb7ba3fdb75
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: 25a3e246b8f66dd4b92ea9726eb5367c16363018
 owners:
   decision: founder-for-this-transition-only
   package_preparation: Codex (drafting only)
-  implementation: unassigned
-  independent_verification: unassigned-independent-reviewer
+  implementation: Codex
+  independent_verification: Claude Code (exact implementation revision required)
 approvals:
   package_independent_verification:
-    status: pending
-    candidate_sha: null
-    evidence: null
+    status: pass-with-non-blocking-findings-exact-revision
+    candidate_sha: 25a3e246b8f66dd4b92ea9726eb5367c16363018
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5340623965
   package_founder:
-    status: pending-one-time-transition-approval
-    candidate_sha: null
-    evidence: null
-approval_status: not-approved
-implementation_authorized: false
+    status: approved-exact-revision
+    candidate_sha: 25a3e246b8f66dd4b92ea9726eb5367c16363018
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5341799779
+approval_status: adopted
+implementation_authorized: true
 # The currently effective R4 rule governs this transition package. It therefore
 # opts out of automatic merge. This value does not describe the proposed post-
 # transition default and must not be reused as precedent after adoption.
@@ -58,9 +58,10 @@ artifacts:
 dependencies:
   - id: VOC-079-DEP-00
     status: >-
-      Open. The exact transition revision needs the one final founder approval required
-      by the governance effective before it. That authority is exhausted when this
-      package lands and cannot approve later R4 work.
+      Resolved for package adoption. Founder approval of exact candidate
+      25a3e246b8f66dd4b92ea9726eb5367c16363018 is recorded on PR #75. The
+      approval is limited to this package candidate, is exhausted when the transition
+      lands, and cannot approve later R4 work or the eventual implementation revision.
   - id: VOC-079-DEP-01
     status: >-
       Open. VOC-078 must retire the KARSIFT/karsift-ai-infra merge-gate invocation
@@ -71,9 +72,10 @@ dependencies:
       opposite.
   - id: VOC-079-DEP-02
     status: >-
-      Open. Adoption must name the independent verifier and decide whether the
-      implementation lands as one reconciliation PR or as ordered task PRs. Builder
-      and verifier must remain different roles and exact revisions must be recorded.
+      Resolved at adoption. Codex is assigned as implementation coordinator, Claude
+      Code is the independent exact-revision verifier, and T00 through T03 land as
+      ordered, separately evidenced task changes. Builder and verifier remain different
+      roles; any verifier-authored material correction requires fresh independent review.
 affected_areas:
   - AGENTS.md
   - CONTRIBUTING.md
@@ -89,9 +91,9 @@ affected_areas:
   - docs/decisions/
   - repository merge-policy tests and workflows, if present after VOC-078
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: blocked-pending-adoption-and-dependencies
+  status: authorized-blocked-by-VOC-079-DEP-01
   target_branch: develop
   pull_request: null
   authority_issue: 74
@@ -103,15 +105,13 @@ release:
   automatic_merge: false
   migration_required: false
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
-repository_adoption_evidence: null
+repository_adoption_status: adopted-on-pr-75-merge
+adoption_pr: 75
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5341799779
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/75
 implementation_authority_before_adoption: false
-implementation_authority_status: not-authorized
+implementation_authority_status: authorized-after-adoption
 production_deployment: prohibited
 ehr: not-triggered
 blocking_reasons:
-  - VOC-079-DEP-00
   - VOC-079-DEP-01
-  - VOC-079-DEP-02
