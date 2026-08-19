@@ -34,6 +34,13 @@ required_files=(
   specs/changes/VOC-004-canonical-adoption-doc-17-doc-18/change.yaml
   tooling/governance/validate_repository_foundation.py
   tooling/governance/tests/test_validate_repository_foundation.py
+  tooling/governance/merge-eligibility/README.md
+  tooling/governance/merge-eligibility/evaluator.py
+  tooling/governance/merge-eligibility/github_adapter.py
+  tooling/governance/merge-eligibility/schema-v1.json
+  tooling/governance/merge-eligibility/fixtures/eligible-r4.json
+  tooling/governance/merge-eligibility/fixtures/blocked-r4.json
+  tooling/governance/tests/test_merge_eligibility.py
 )
 
 for file in "${required_files[@]}"; do
@@ -144,6 +151,9 @@ grep -Fq "historical initial DOC-16/A-002 bootstrap" docs/governance/approval-ma
 grep -Fq "No approval from risk class" docs/governance/change-risk-classification.md
 grep -Fq "ADR-0002" docs/decisions/README.md
 grep -Fq "production changes remain blocked" docs/governance/post-merge-activation-checklist.md
+grep -Fq "checks: read" .github/workflows/governance.yml
+grep -Fq "pull-requests: read" .github/workflows/governance.yml
+grep -Fq "merge-eligibility/github_adapter.py" .github/workflows/governance.yml
 
 if grep -Eq 'FOUNDER_GITHUB_USERNAME|TECHNICAL_STEWARD_GITHUB_USERNAME' .github/CODEOWNERS; then
   echo "CODEOWNERS contains an unverifiable identity placeholder." >&2

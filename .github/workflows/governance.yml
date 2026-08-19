@@ -11,6 +11,8 @@ on:
 
 permissions:
   contents: read
+  checks: read
+  pull-requests: read
 
 concurrency:
   group: governance-${{ github.event.pull_request.number || github.ref }}
@@ -68,3 +70,31 @@ jobs:
           --head "$HEAD_SHA"
           --pr-body-file "$RUNNER_TEMP/pr-body.md"
           --require-declaration
+
+  eligibility:
+    name: merge eligibility
+    if: github.event_name == 'pull_request'
+    needs: [structure, risk]
+    runs-on: ubuntu-24.04
+    # The adapter may need to observe CI's full 30-minute validation contract.
+    timeout-minutes: 35
+    steps:
+      - name: Check out reviewed revision without persisted credentials
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.12"
+
+      - name: Evaluate normalized merge evidence read-only
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          python3 tooling/governance/merge-eligibility/github_adapter.py
+          --repository-root .
+          --event-path "$GITHUB_EVENT_PATH"
+          --summary-path "$GITHUB_STEP_SUMMARY"
+          --wait-seconds 1800

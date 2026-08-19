@@ -70,6 +70,33 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - Implementer provenance:
 - Verifier provenance:
 
+Complete the machine-readable block after exact-revision independent review. Keep it
+as JSON data; do not add shell expressions or credentials. Use an empty
+`action_authority` array only when no action-specific hold applies.
+
+<!-- merge-eligibility-evidence-v1
+{
+  "builder": { "identity": "", "role": "implementer" },
+  "reviewer": {
+    "identity": "",
+    "role": "independent-reviewer",
+    "reviewed_sha": "",
+    "verdict": "",
+    "blocking_findings_resolved": false,
+    "evidence_url": ""
+  },
+  "risk_evidence": {
+    "decision_record": false,
+    "impact_assessment": false,
+    "contingency_plan": false,
+    "specialist_evidence": false,
+    "deterministic_evidence": false
+  },
+  "ehr": { "active": false },
+  "action_authority": []
+}
+-->
+
 ## Impact assessments
 
 - Security and privacy:

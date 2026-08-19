@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import re
 import sys
 from collections import defaultdict
@@ -75,6 +76,13 @@ REQUIRED_FILES = (
     f"{VOC004_PATH}/change.yaml",
     "tooling/governance/validate_repository_foundation.py",
     "tooling/governance/tests/test_validate_repository_foundation.py",
+    "tooling/governance/merge-eligibility/README.md",
+    "tooling/governance/merge-eligibility/evaluator.py",
+    "tooling/governance/merge-eligibility/github_adapter.py",
+    "tooling/governance/merge-eligibility/schema-v1.json",
+    "tooling/governance/merge-eligibility/fixtures/eligible-r4.json",
+    "tooling/governance/merge-eligibility/fixtures/blocked-r4.json",
+    "tooling/governance/tests/test_merge_eligibility.py",
 )
 
 PROTECTED_PATHS = (
@@ -852,7 +860,18 @@ def validate_workflow(validation: Validation) -> None:
     text = validation.read(relative)
     if not re.search(r"^name:\s*Governance\s*$", text, re.MULTILINE):
         validation.error(relative, "workflow display name must be Governance")
-    for marker in ("pull_request:", "push:", "branches: [develop, main]", "contents: read", "timeout-minutes:"):
+    for marker in (
+        "pull_request:",
+        "push:",
+        "branches: [develop, main]",
+        "contents: read",
+        "checks: read",
+        "pull-requests: read",
+        "timeout-minutes:",
+        "name: merge eligibility",
+        "merge-eligibility/github_adapter.py",
+        "persist-credentials: false",
+    ):
         if marker not in text:
             validation.error(relative, f"missing workflow control: {marker}")
     for prohibited in ("pull_request_target", "paths:", "paths-ignore:", "contents: write", "secrets.", "codex", "claude"):
@@ -861,6 +880,81 @@ def validate_workflow(validation: Validation) -> None:
     for action in re.findall(r"^\s*uses:\s*([^\s#]+)", text, re.MULTILINE):
         if not re.fullmatch(r"[^@]+@[0-9a-f]{40}", action):
             validation.error(relative, f"external action is not pinned to a full immutable SHA: {action}")
+    permission_match = re.search(
+        r"^permissions:\s*\n(?P<body>(?: {2}[A-Za-z-]+:\s*[^\n]+\n)+)",
+        text,
+        re.MULTILINE,
+    )
+    expected_permissions = {
+        "contents": "read",
+        "checks": "read",
+        "pull-requests": "read",
+    }
+    if not permission_match:
+        validation.error(relative, "missing parseable top-level permissions block")
+    else:
+        permissions = dict(
+            re.findall(r"^ {2}([A-Za-z-]+):\s*([^\s#]+)", permission_match.group("body"), re.MULTILINE)
+        )
+        if permissions != expected_permissions:
+            validation.error(
+                relative,
+                f"workflow permissions must equal the read-only set {expected_permissions!r}",
+            )
+
+
+def validate_merge_eligibility(validation: Validation) -> None:
+    base = "tooling/governance/merge-eligibility"
+    evaluator = validation.read(f"{base}/evaluator.py")
+    adapter = validation.read(f"{base}/github_adapter.py")
+    schema_text = validation.read(f"{base}/schema-v1.json")
+    try:
+        schema = json.loads(schema_text)
+    except json.JSONDecodeError as exc:
+        validation.error(f"{base}/schema-v1.json", f"invalid JSON schema: {exc}")
+        schema = {}
+    if schema.get("properties", {}).get("schema_version", {}).get("const") != 1:
+        validation.error(f"{base}/schema-v1.json", "schema_version must be pinned to 1")
+    for prohibited in ("urllib", "requests", "http.client", "subprocess", "GITHUB_TOKEN"):
+        if prohibited in evaluator:
+            validation.error(f"{base}/evaluator.py", f"pure evaluator contains prohibited boundary: {prohibited}")
+    if 'method="GET"' not in adapter:
+        validation.error(f"{base}/github_adapter.py", "adapter must make explicit GET-only requests")
+    for prohibited in (
+        'method="POST"',
+        'method="PATCH"',
+        'method="PUT"',
+        'method="DELETE"',
+        "subprocess",
+        "os.system",
+    ):
+        if prohibited in adapter:
+            validation.error(f"{base}/github_adapter.py", f"adapter contains prohibited write/process path: {prohibited}")
+    for marker in (
+        "package.opt_out",
+        "risk.invalid",
+        "review.self_authored",
+        "review.stale",
+        "review.blocking_findings",
+        "review.evidence_missing",
+        "ehr.active",
+        "action_authority.unmet_",
+        "r4_evidence.",
+    ):
+        if marker not in evaluator:
+            validation.error(f"{base}/evaluator.py", f"missing fail-closed policy reason: {marker}")
+    consumption_markers = {
+        "AGENTS.md": "reads it only to report the read-only eligibility decision",
+        "docs/operations/15-ai-native-product-and-engineering-operating-model.md": (
+            "consumes it only for the read-only eligibility report"
+        ),
+        "specs/templates/change-package/change.yaml": (
+            "consumes it only for the read-only\n# eligibility report"
+        ),
+    }
+    for relative, marker in consumption_markers.items():
+        if marker not in validation.read(relative):
+            validation.error(relative, "missing accurate automatic_merge_allowed consumption rule")
 
 
 def validate_governance_language(validation: Validation) -> None:
@@ -968,6 +1062,7 @@ def validate_repository(root: Path) -> list[str]:
     validate_a003_lifecycle(validation)
     validate_ownership(validation)
     validate_workflow(validation)
+    validate_merge_eligibility(validation)
     validate_governance_language(validation)
     validate_false_activation(validation)
     return sorted(set(validation.errors))

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "pull_request": {
+    "number": 79,
+    "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "author": "example-author"
+  },
+  "risk": "R4",
+  "package": {
+    "path": "specs/changes/VOC-999-policy-fixture",
+    "automatic_merge_allowed": true
+  },
+  "checks": {
+    "required": ["validate", "structure", "changed-path risk", "dependency audit", "secret scan"],
+    "observed": [
+      { "name": "validate", "status": "completed", "conclusion": "success", "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+      { "name": "structure", "status": "completed", "conclusion": "success", "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+      { "name": "changed-path risk", "status": "completed", "conclusion": "success", "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+      { "name": "dependency audit", "status": "completed", "conclusion": "success", "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" },
+      { "name": "secret scan", "status": "completed", "conclusion": "success", "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" }
+    ]
+  },
+  "roles": {
+    "builder": { "identity": "builder-agent", "role": "implementer" },
+    "reviewer": {
+      "identity": "reviewer-human",
+      "role": "independent-reviewer",
+      "reviewed_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "verdict": "pass",
+      "blocking_findings_resolved": true,
+      "evidence_url": "https://github.com/KARSIFT/vocanova-platform/pull/79#issuecomment-example"
+    }
+  },
+  "risk_evidence": {
+    "decision_record": true,
+    "impact_assessment": true,
+    "contingency_plan": true,
+    "specialist_evidence": true,
+    "deterministic_evidence": true
+  },
+  "ehr": { "active": false },
+  "action_authority": []
+}

@@ -8,7 +8,10 @@ release is enabled.
 VOC-079 approval-neutral governance authority is active. That authority must not be
 represented as hosted or technical activation. VOC-078-T01 retired the workflows that executed
 automatic merge into `develop` and package-driven promotion into `main`; both are
-currently disabled even though historical runs proved the earlier mechanism. RL1/RL2
+currently disabled even though historical runs proved the earlier mechanism.
+VOC-079-T01 restores only the repository-owned, read-only policy decision: the
+Governance workflow reports eligibility and concrete reasons but has no GitHub write or
+merge authority. RL1/RL2
 technical activation remains disabled. VOC-078-T03 removed push-triggered deployment
 and scheduled Sentry monitoring workflows. Removing repository automation did not
 inspect, stop, or mutate any existing server.
@@ -148,7 +151,8 @@ VOC-078-T01 has now removed the legacy external control-plane callers after the 
 read-only jobs passed on a real pull request. VOC-078-T03 then removed server-bound
 workflows, and T04 removed the superseded standalone quality/governance workflows.
 The current workflow inventory is exactly `ci.yml`, `governance.yml`, `quality.yml`,
-and `security.yml`.
+and `security.yml`. VOC-079-T01 extends `governance.yml` with a read-only evidence
+adapter and pure eligibility evaluator; it does not add a workflow or an executor.
 `docs/migration-manifest.yaml` and `docs/document-graph.yaml` were migrated
 (VOC-007/VOC-008) and later archived to `docs/archive/` as historical evidence
 trails (2026-07-24) - they are available, just not filed as live/current

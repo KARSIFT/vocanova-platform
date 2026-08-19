@@ -20,7 +20,15 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         shutil.copytree(
             REPOSITORY_ROOT,
             self.root,
-            ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"),
+            ignore=shutil.ignore_patterns(
+                ".git",
+                ".next",
+                "node_modules",
+                "dist",
+                "coverage",
+                "__pycache__",
+                "*.pyc",
+            ),
         )
 
     def tearDown(self) -> None:
@@ -491,6 +499,35 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
     def test_workflow_write_permission_fails(self) -> None:
         self.replace(".github/workflows/governance.yml", "contents: read", "contents: write")
         self.assert_failure("contents: read")
+
+    def test_merge_eligibility_permission_expansion_fails(self) -> None:
+        self.replace(".github/workflows/governance.yml", "checks: read", "checks: write")
+        self.assert_failure("checks: read")
+
+    def test_missing_merge_eligibility_adapter_fails(self) -> None:
+        (self.root / "tooling/governance/merge-eligibility/github_adapter.py").unlink()
+        self.assert_failure("github_adapter.py")
+
+    def test_merge_eligibility_adapter_write_method_fails(self) -> None:
+        self.replace(
+            "tooling/governance/merge-eligibility/github_adapter.py",
+            'method="GET"',
+            'method="POST"',
+        )
+        self.assert_failure("prohibited write/process path")
+
+    def test_merge_eligibility_schema_version_change_fails(self) -> None:
+        self.replace(
+            "tooling/governance/merge-eligibility/schema-v1.json",
+            '"schema_version": { "const": 1 }',
+            '"schema_version": { "const": 2 }',
+        )
+        self.assert_failure("schema_version must be pinned to 1")
+
+    def test_merge_eligibility_evaluator_network_boundary_fails(self) -> None:
+        path = self.root / "tooling/governance/merge-eligibility/evaluator.py"
+        path.write_text(path.read_text(encoding="utf-8") + "\nimport urllib\n", encoding="utf-8")
+        self.assert_failure("pure evaluator contains prohibited boundary")
 
     def test_pull_request_target_fails(self) -> None:
         self.replace(".github/workflows/governance.yml", "pull_request:", "pull_request_target:")

@@ -17,7 +17,8 @@ implementation_authorized: false
 # eyes on the merge into develop. R3: true or false with stated justification
 # (comment here or adjacent one-line note). R4: false while the pre-VOC-079
 # authority remains active. Deliberate false on R0–R2 must state why. The field
-# is a package policy record; no current workflow consumes it or performs merge.
+# is a package policy record. Governance consumes it only for the read-only
+# eligibility report; no current workflow uses it to perform a merge.
 # It never substitutes for risk classification, CI, independent verification,
 # complete R4 evidence, action-specific authority, or EHR.
 automatic_merge_allowed: true

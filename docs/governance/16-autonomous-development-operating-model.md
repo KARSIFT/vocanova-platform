@@ -183,9 +183,13 @@ to human-, agent-, and future orchestrator-originated work. Risk class alone nev
 creates a founder-approval gate. Unknown or unparseable risk fails closed.
 
 VOC-078-T01 retired the workflow that previously executed this automatic-merge
-permission. The authority above remains policy, but GitHub Actions currently performs
-deterministic checks only and cannot merge. Until a separately adopted repository-owned
-executor exists, an authorized actor performs the merge after verifying the same gates.
+permission. VOC-079-T01 adds a repository-owned pure eligibility evaluator and a
+read-only Governance-workflow adapter. The adapter reads normalized package, check,
+review, exact-revision, R4, EHR, and action-authority evidence and reports an
+`eligible` or `blocked` decision with concrete reasons in the job summary. It cannot
+approve, comment, merge, dispatch, or otherwise mutate GitHub. Until a separately
+adopted repository-owned executor exists, an authorized actor performs the merge after
+verifying the same gates and the exact-SHA result.
 
 The former orchestrator-originated merge path is dormant. VOC-078-T02 superseded
 [ADR-0001](../decisions/ADR-0001-agent-orchestration-architecture.md) and removed the

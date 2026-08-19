@@ -1589,12 +1589,12 @@ launches retain separately defined action-specific authority. EHR remains except
 ## 17.3 Risk and merge records
 
 Risk is declared in the PR and may be raised by the changed-path classifier or
-independent reviewer. `automatic_merge_allowed` remains a package policy field, but no
-current workflow consumes it or performs automatic merge. Unknown or unparseable risk
-fails closed. A passing reviewer verdict is technical evidence, not authority to add
-new product scope or execute an external action. The same eligibility contract applies
-to human-, agent-, and future orchestrator-originated work; no `not R4` exception
-exists.
+independent reviewer. `automatic_merge_allowed` remains a package policy field. The
+Governance workflow consumes it only for the read-only eligibility report; no current
+workflow performs automatic merge. Unknown or unparseable risk fails closed. A passing
+reviewer verdict is technical evidence, not authority to add new product scope or
+execute an external action. The same eligibility contract applies to human-, agent-,
+and future orchestrator-originated work; no `not R4` exception exists.
 
 ## 17.4 Automation status
 

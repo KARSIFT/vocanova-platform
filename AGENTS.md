@@ -46,11 +46,12 @@ may refine them but may not weaken governance or security.
 ### Drafting `automatic_merge_allowed` in `change.yaml`
 
 When drafting a change package, examine `automatic_merge_allowed` and set it according
-to the package's declared risk. The field remains a package policy record, but no
-current GitHub workflow reads it or merges a pull request: VOC-078-T01 retired the
-external merge gate. Setting `true` never bypasses risk classification, path-based
-floors, deterministic checks, independent verification, complete R4 evidence,
-action-specific authority, or EHR.
+to the package's declared risk. The field remains a package policy record. The
+`Governance` workflow reads it only to report the read-only eligibility decision and
+concrete reasons; no current workflow uses it to merge a pull request. VOC-078-T01
+retired the external merge gate. Setting `true` never bypasses risk classification,
+path-based floors, deterministic checks, independent verification, complete R4
+evidence, action-specific authority, or EHR.
 
 **Drafting defaults by risk class:**
 

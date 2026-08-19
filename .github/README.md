@@ -8,8 +8,9 @@ This directory contains repository contribution and governance controls:
 - `CODEOWNERS` uses the verified human repository identity for review routing. It is
   not approval evidence and does not create a standing post-A-003 authority.
 - `workflows/ci.yml` runs the repository's deterministic validation command.
-- `workflows/governance.yml` validates repository structure and prevents a pull request
-  from declaring a risk below its changed-path floor.
+- `workflows/governance.yml` validates repository structure, prevents a pull request
+  from declaring a risk below its changed-path floor, and reports the read-only
+  normalized merge-eligibility decision and concrete reasons.
 - `workflows/quality.yml` runs path-filtered accessibility and Lighthouse checks.
 - `workflows/security.yml` audits dependencies and scans changed history for secrets.
 
@@ -40,6 +41,16 @@ implementation is built and independently reviewed by different human or AI role
 the verdict bound to the exact revision and blocking findings resolved. R4 requires the
 strongest risk evidence but no founder approval solely because of its label. Explicit
 action-specific authority and genuinely triggered EHR remain separate gates.
+
+VOC-079-T01 adds a pure provider-neutral evaluator under
+`tooling/governance/merge-eligibility/`. The Governance adapter may read contents,
+checks, pull-request metadata, changed files, reviews, and PR review comments. It binds
+the declared review evidence URL to a live exact-SHA passing record and writes only
+normalized evidence, its decision, and reasons to the Actions job summary; it has no approval,
+comment, merge, dispatch, or other GitHub write path. A blocked policy decision is
+reported as data rather than turning the reporting job into a merge executor. The job
+conclusion reports adapter execution, while the summary reports eligibility; external
+reviewer identity is recorded provenance, not falsely claimed hosted attribution.
 
 See [`docs/governance/repository-settings.md`](../docs/governance/repository-settings.md)
 for the continuously maintained built-versus-pending record. DOC-17 and DOC-18's
