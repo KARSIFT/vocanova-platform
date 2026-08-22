@@ -74,6 +74,12 @@ The credential-free Cloudflare path is:
 | `pnpm --filter @vocanova/web cloudflare:limits`        | Enforce the 3 MiB compressed target and record the local startup profile against the 1,000 ms platform limit.                                    |
 | `pnpm --filter @vocanova/web cloudflare:compatibility` | Scan the request runtime for unsupported globals, unbounded body buffering, floating Promises, remote bindings, and missing service-binding use. |
 
+Run `cloudflare:build` before `cloudflare:typegen` or `cloudflare:typecheck`.
+Wrangler includes the configured OpenNext main-module declaration in its generated
+hash only after `.open-next/worker.js` exists; enforcing this order keeps clean and
+incremental checkouts byte-consistent. The stable `pnpm ci:web` command owns that
+ordering.
+
 `wrangler.jsonc` defines local, staging, and production names but contains no resource
 ID, credential, route, or deploy authority. Local preview uses only simulation. T03
 does not run `deploy`, `upload`, remote development, or any Cloudflare account query.

@@ -77,9 +77,10 @@ unbuilt Control Plane remains superseded and archived under `docs/archive/`.
 The workflow inventory remains exactly four. T00 documents the Cloudflare target and
 external Ruflo boundary; it does not change workflow behavior or repository settings.
 T01 provides the refactored CI foundation. T03 extends its stable `web` entry point
-with generated Wrangler types, OpenNext transformation, Worker compatibility scans,
-credential-free dry-run and size/startup checks, and representative local workerd
-requests through an API service binding. T04 and later tasks add Worker API/D1 checks.
+with an OpenNext transformation followed by generated Wrangler type verification,
+Worker compatibility scans, credential-free dry-run and size/startup checks, and
+representative local workerd requests through an API service binding. T04 and later
+tasks add Worker API/D1 checks.
 Only `ci.yml` may eventually contain held Cloudflare version/deployment jobs, keeping
 the four-file invariant. Pull-request jobs never receive deployment credentials.
 
