@@ -173,9 +173,10 @@ be a disguised hold on all R4 work.
 - Direct pushes to `develop` and `main`, unverified merges, and local production
   deployments are prohibited.
 - Working branches are normally squash-merged into `develop`. Release pull requests
-  promote `develop` to `main` with an identifiable merge commit. VOC-080-T10 may add
-  held Cloudflare publication from exact reviewed `main` history; no such mechanism is
-  currently installed.
+  promote `develop` to `main` with an identifiable merge commit. VOC-080-T10 installs
+  a held Cloudflare publication state machine, but its committed manifest blocks
+  before environment jobs and secrets; it creates no automatic branch-to-environment
+  effect.
 
 **A pull request is merge-eligible into `develop`** when: required deterministic
 checks pass; a different reviewer role records a passing verdict bound to the exact
@@ -206,9 +207,10 @@ supporting provenance only, and the historical authority in the amendment record
 cannot activate absent machinery.
 
 `develop` is the integrated repository state. Merging to it does not deploy or poll
-any environment. VOC-080 selects Cloudflare Workers/D1, but live staging remains held
-until T10 exists and `VOC-080-HOLD-00` is completed. See
-[repository-settings.md](repository-settings.md) for the current automation state.
+any environment. T10's manual state machine is present but fail-closed in repository
+state; live staging remains held until `VOC-080-HOLD-00` is completed by a separate
+reviewed activation. See [repository-settings.md](repository-settings.md) and the
+[Cloudflare delivery runbook](../operations/cloudflare-delivery.md).
 
 ## Release classes and production release authority
 
@@ -236,8 +238,9 @@ permission, not an obligation - any gate may hold a release for investigation.
 VOC-078-T01 retired the workflow that previously promoted completed packages from
 `develop` to `main`. This section continues to define release eligibility, but no
 current GitHub workflow executes that promotion. Promotion uses a separately reviewed
-`develop`-to-`main` pull request. VOC-080-T10 may define held Cloudflare publication,
-but it cannot turn repository promotion into live deployment without its action holds.
+`develop`-to-`main` pull request. VOC-080-T10 defines held Cloudflare publication, but
+its manifest, placeholder resources, credential absence, and action holds prevent
+repository promotion from becoming live deployment.
 
 RL1/RL2 _technical_ activation (as opposed to the governance permission described
 above) remains a separate, currently disabled gate - see
@@ -340,10 +343,10 @@ authority.
 | Preview status                                                                                  | Not built - per-PR Cloudflare previews remain genuinely unbuilt                                                                                                                                                                                                                                          |
 | Independent exact-revision verification                                                         | Live as a repository requirement; performed outside Actions and attached to the PR                                                                                                                                                                                                                       |
 | External Ruflo coordination                                                                     | Exact `3.38.16` operator-side installation and synthetic rehearsal recorded by VOC-080-T02; frozen patched graph, zero high/critical audit, advisory-permission limitation, and deny boundary are in the [runbook](../operations/ruflo-external-orchestration.md); never repository/production authority |
-| Staging deployment, health checks                                                               | Unavailable; future Cloudflare activation is held by VOC-080-HOLD-00                                                                                                                                                                                                                                     |
-| Production deployment, health checks                                                            | Unavailable; future Cloudflare activation is held by VOC-080-HOLD-01                                                                                                                                                                                                                                     |
+| Staging deployment, health checks                                                               | Held T10 state machine and mocked smoke exist; no environment/resource/secret is configured and VOC-080-HOLD-00 blocks activation                                                                                                                                                                       |
+| Production deployment, health checks                                                            | Held T10 state machine and mocked smoke/rollback exist; no environment/resource/secret is configured and VOC-080-HOLD-01 blocks activation                                                                                                                                                              |
 | Production data migration                                                                       | Unavailable and prohibited without VOC-080-HOLD-02                                                                                                                                                                                                                                                       |
-| Rollback                                                                                        | Target is prior Worker-version promotion plus forward-corrective D1 handling; automation not yet installed                                                                                                                                                                                               |
+| Rollback                                                                                        | Held exact prior-version rollback and forward-corrective D1 contract are installed and mocked; no live rehearsal or authority is claimed                                                                                                                                                                 |
 
 Absence of a tool is never represented by a passing placeholder check. See
 [repository-settings.md](repository-settings.md) for the fuller, continuously

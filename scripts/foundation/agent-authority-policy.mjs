@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+import { inspectDeliveryWorkflow } from "./cloudflare-delivery-policy.mjs";
+
 export const PROHIBITED_AGENT_PATHS = [
   ".claude/agents",
   ".karsift",
@@ -197,6 +199,20 @@ export function validateAgentAuthority(repositoryRoot) {
   }
 
   const workflowDirectory = resolve(repositoryRoot, ".github/workflows");
+  const heldDeliveryWorkflow = resolve(workflowDirectory, "ci.yml");
+  let heldDeliveryWorkflowValid = false;
+  if (existsSync(heldDeliveryWorkflow)) {
+    const deliveryErrors = inspectDeliveryWorkflow(
+      readFileSync(heldDeliveryWorkflow, "utf8"),
+    );
+    heldDeliveryWorkflowValid = deliveryErrors.length === 0;
+    errors.push(
+      ...deliveryErrors.map(
+        (error) =>
+          `${heldDeliveryWorkflow}: unsafe held delivery policy: ${error}`,
+      ),
+    );
+  }
   for (const path of filesBelow(workflowDirectory)) {
     if (!/\.ya?ml$/.test(path)) continue;
     const source = readFileSync(path, "utf8");
@@ -212,6 +228,7 @@ export function validateAgentAuthority(repositoryRoot) {
     (path) =>
       !/\.test\.[cm]?[jt]s$/.test(path) &&
       !path.endsWith("agent-authority-policy.mjs") &&
+      !path.endsWith("cloudflare-delivery-policy.mjs") &&
       !path.endsWith("workflow-policy.mjs"),
   );
 
@@ -231,6 +248,7 @@ export function validateAgentAuthority(repositoryRoot) {
       }
     }
     for (const [pattern, capability] of PROHIBITED_EXTERNAL_EFFECT_PATTERNS) {
+      if (path === heldDeliveryWorkflow && heldDeliveryWorkflowValid) continue;
       if (pattern.test(source)) {
         errors.push(`${path}: prohibited external effect: ${capability}`);
         break;

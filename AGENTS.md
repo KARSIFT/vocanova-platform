@@ -198,14 +198,14 @@ approval issue, or advances a package. Promotion is a separately reviewed pull r
 The previous automatic-release delegation remains historical evidence but has no
 executable workflow after VOC-078-T01.
 
-There is no repository workflow for staging or production deployment, server health
-polling, Cloudflare mutation, or scheduled Sentry-to-GitHub monitoring after T03.
-Merging a branch changes repository history only. VOC-080-T10 may establish held,
-environment-scoped Cloudflare delivery behavior only after web/API/D1 parity. Until
-then, no workflow provisions or deploys Cloudflare. `VOC-080-HOLD-00` gates staging
-resources/secrets, `HOLD-01` gates production traffic and D1 migrations, and `HOLD-02`
-gates production learner data. The repository makes no claim that an already-running
-service was inspected or stopped.
+There is no active repository deployment, server-health polling, or scheduled
+Sentry-to-GitHub monitoring. VOC-080-T10 adds a held manual Cloudflare delivery state
+machine inside `ci.yml`; its committed manifest deliberately fails before environment
+jobs or secrets, while PRs run credential-free dry runs only. Merging a branch still
+changes repository history only. `VOC-080-HOLD-00` gates staging resources/secrets,
+`HOLD-01` gates production traffic and D1 migrations, and `HOLD-02` gates production
+learner data. See `docs/operations/cloudflare-delivery.md`. The repository makes no
+claim that Cloudflare or an already-running server was inspected, changed, or stopped.
 
 ChatGPT may receive read-only access to KARSIFT/vocanova-platform for
 repository-grounded product analysis, architecture analysis, specification

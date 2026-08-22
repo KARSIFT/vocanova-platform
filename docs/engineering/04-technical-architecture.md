@@ -203,8 +203,9 @@ automatic merge or deployment is technically active.
 ## 20. CI/CD
 
 Backend/frontend tests, type checks, security checks, generated-code checks, Worker dry runs, and
-D1 migration/parity checks belong in CI as their tasks land. Live Cloudflare deployment remains
-absent until T10 and the applicable action hold. See [10](../operations/10-development-workflow.md) for the full pipeline and
+D1 migration/parity checks belong in CI. T10 adds a held manual Cloudflare state machine after
+parity, but live deployment remains blocked by its committed manifest and the applicable action
+hold. See [10](../operations/10-development-workflow.md) for the full pipeline and
 the [canonical governance index](../governance/README.md) for merge/deploy authority, with
 [DOC-19](../archive/19-governance-reconciliation-notes.md) available as historical orientation.
 

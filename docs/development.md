@@ -102,11 +102,13 @@ commands are:
 | `pnpm --filter @vocanova/api-worker test:data-conversion`      | Run the synthetic type conversion, local D1 chunk/import, resume, replay, correction, reconciliation, and privacy suite.       |
 | `pnpm --filter @vocanova/api-worker openapi:check`             | Compare Hono's generated operational OpenAPI with the committed deterministic artifact.                                        |
 | `pnpm --filter @vocanova/api-worker contract:check`            | Bind the Worker migration baseline to the canonical Go `/api/v1` OpenAPI and API client.                                       |
-| `pnpm --filter @vocanova/api-worker dry-run`                   | Bundle the Worker without uploading, provisioning, or querying Cloudflare.                                                     |
+| `pnpm --filter @vocanova/api-worker dry-run`                   | Bundle local, held staging, and held production Worker configs without uploading, provisioning, or querying Cloudflare.        |
 | `pnpm ci:worker-api`                                           | Run the complete Worker API/local-D1 hosted command, including API-client compatibility.                                       |
+| `pnpm ci:delivery`                                             | Validate the held Cloudflare manifest, environment isolation, workflow sequence, action holds, and migration ceiling.          |
 
-`wrangler.jsonc` contains one local D1 name and the non-remote sentinel ID
-`local`; it contains no Cloudflare account/resource identifier or credential.
+`wrangler.jsonc` contains the local D1 name/sentinel plus distinct staging/production
+names with `held-*` non-resource sentinels; it contains no Cloudflare account/resource
+identifier or credential.
 Vitest applies all seven forward migrations to isolated local D1 storage twice,
 proving from-empty and replay behavior. T05 adds requester-scoped identity, OAuth
 state, magic links, sessions, onboarding, settings, email change, and account
@@ -115,8 +117,10 @@ including persistent D1 limits, mocked provider/email boundaries, and privacy-sa
 `waitUntil` telemetry. The committed runtime AI kill switch remains off; normal CI
 uses no paid provider or provider secret.
 Email and OAuth providers remain injected boundaries in tests; no local command sends
-email or contacts a provider. T10 owns future staging/production D1 identifiers,
-environment secrets, routes, and held deployment/migration commands.
+email or contacts a provider. T10 now owns the held staging/production manifest,
+placeholder D1/routes, environment names, dry runs, and delivery state machine. Real
+identifiers, environment secrets, routes, authority, and live actions remain absent;
+see the [delivery runbook](operations/cloudflare-delivery.md).
 
 T09's data-conversion command accepts only the committed synthetic PostgreSQL-shaped
 fixture. It applies prepared, bounded D1 batches to local test storage, checkpoints

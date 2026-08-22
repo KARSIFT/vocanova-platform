@@ -17,12 +17,12 @@ and scheduled Sentry monitoring workflows. Removing repository automation did no
 inspect, stop, or mutate any existing server.
 
 VOC-080 selects Cloudflare Workers/D1 as the target and external Ruflo as optional
-coordination. T00 changes documentation only: it does not mutate GitHub settings,
-create Cloudflare resources, install Ruflo, configure secrets, or deploy. T01 applies
-only supported GitHub hardening with the immediate settings record below;
-T10 may add held Cloudflare delivery after parity. Ruflo never receives a GitHub write
-token, Cloudflare credential, production secret/data, DNS permission, or deployment
-authority.
+coordination. T00 changed documentation only and T01 applied only the supported GitHub
+hardening recorded below. T10 now adds held Cloudflare delivery code after parity, but
+does not mutate settings, create a GitHub environment or Cloudflare resource, configure
+a secret, or deploy. Its manifest blocks before credentialed jobs. Ruflo never receives
+a GitHub write token, Cloudflare credential, production secret/data, DNS permission,
+or deployment authority.
 
 ## Hosted state recorded by VOC-080-T01
 
@@ -158,7 +158,14 @@ No credential value belongs in the repository.
 
 ## Cloudflare and release configuration
 
-Before VOC-080-T10 delivery automation is added, record and validate:
+T10 records and validates the repository-owned portion in
+[`cloudflare-delivery.md`](../operations/cloudflare-delivery.md): locked Wrangler
+commands, distinct logical Worker/D1/environment names, credential-free dry runs,
+ordered version/migration/promotion/smoke/rollback behavior, cost ceilings, exact-SHA
+gating, and evidence format. The committed D1 IDs/routes are non-resource sentinels and
+activation remains held.
+
+Before a future activation change can authorize either environment, record and validate:
 
 - approved OpenNext, Worker API, D1 migration, dry-run, version, and deploy commands
   from the implemented package scripts;
@@ -206,9 +213,10 @@ DOC-14 was deliberately reconciled but not adopted (see `docs/README.md`'s index
 successfully against real infrastructure beginning 2026-08-08, and the production
 environment restricted those runs to `main`. VOC-078-T03 removed both workflows on
 2026-08-19 while deliberately leaving runtime infrastructure and repository settings
-unchanged. Deployment, health polling, and one-click rollback are now unavailable in
-GitHub Actions. ADR-0003 selects the replacement, but implementation remains pending
-VOC-080-T03/T04/T10 and its action holds. Per-PR previews remain unbuilt.
+unchanged. Server deployment and health polling remain unavailable. ADR-0003's
+replacement now has Worker/D1 parity and T10's held GitHub Actions state machine, but
+no live environment job is eligible until its manifest and action hold are separately
+activated. Per-PR previews remain unbuilt.
 
 The initial governance bootstrap merged through PR #3 and its one-time exception has
 expired. The historical technical-steward appointment and completed dual-capacity

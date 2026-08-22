@@ -66,32 +66,33 @@ Staging (from `develop`), Production (from `main`).
 > repository documentation only and does not inspect a server or create Cloudflare,
 > DNS, secret, data, or deployment state.
 
-| Capability   | Current repository state                                                                             | VOC-080 target                                                                                                 |
-| ------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Web          | OpenNext build/config/workerd proof implemented; historical Docker assets remain; no deploy workflow | Next.js 16 through OpenNext on a Cloudflare Web Worker                                                         |
-| API          | Hono Module Worker foundation plus Go/Huma parity reference; no deployment                           | TypeScript Module Worker using Hono and generated bindings                                                     |
-| Data         | Local D1 forward migration/tests plus PostgreSQL source reference                                    | Separate local/staging/production Cloudflare D1 databases                                                      |
-| Web-to-API   | HTTPS server path                                                                                    | Cloudflare service binding where practical; HTTPS contract remains `/api/v1`                                   |
-| Assets/async | Docker/Nginx and synchronous server assumptions                                                      | Workers Static Assets; Queue/Workflow/DO/R2 only for a measured requirement                                    |
-| CI/CD        | Four deterministic workflows with stable subsystem/aggregate checks; no deployment                   | Credential-free Worker dry runs, then held environment-scoped version/migration/promotion jobs inside `ci.yml` |
-| Secrets      | No deployment secrets in PRs or agents                                                               | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo                                         |
-| Rollback     | Historical image/server procedure                                                                    | Recorded prior Worker versions plus expand/migrate/contract and forward-corrective D1 handling                 |
+| Capability   | Current repository state                                                                            | VOC-080 target                                                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Web          | OpenNext/workerd parity plus held T10 delivery config; historical Docker assets remain              | Next.js 16 through OpenNext on a Cloudflare Web Worker                                         |
+| API          | Full Hono/D1 contract parity plus held T10 delivery config and Go/Huma reference                    | TypeScript Module Worker using Hono and generated bindings                                     |
+| Data         | Local D1 forward migration/tests plus PostgreSQL source reference                                   | Separate local/staging/production Cloudflare D1 databases                                      |
+| Web-to-API   | HTTPS server path                                                                                   | Cloudflare service binding where practical; HTTPS contract remains `/api/v1`                   |
+| Assets/async | Docker/Nginx and synchronous server assumptions                                                     | Workers Static Assets; Queue/Workflow/DO/R2 only for a measured requirement                    |
+| CI/CD        | Four deterministic workflows; credential-free three-environment dry runs and held T10 state machine | Separately activated environment-scoped version/migration/promotion jobs inside `ci.yml`       |
+| Secrets      | No deployment secrets in PRs or agents                                                              | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo                         |
+| Rollback     | Historical image/server procedure                                                                   | Recorded prior Worker versions plus expand/migrate/contract and forward-corrective D1 handling |
 
-No current workflow deploys to Preview, Staging, or Production. T10 may add the held
-jobs only after Worker/D1 parity; live staging requires `VOC-080-HOLD-00`, production
-traffic or D1 migration requires `HOLD-01`, and production learner data requires
-`HOLD-02`.
+No current workflow run can deploy to Preview, Staging, or Production. T10's manual
+jobs exist after Worker/D1 parity, but the committed manifest, D1/route sentinels, and
+missing authority evidence block before secrets. Live staging requires
+`VOC-080-HOLD-00`, production traffic or D1 migration requires `HOLD-01`, and
+production learner data requires `HOLD-02`.
 
 ### 1.1 Deterministic GitHub Actions foundation
 
 The workflow inventory is exactly four files and has one responsibility per file:
 
-| Workflow         | Stable evidence                                                                           | Trigger and authority                                                         |
-| ---------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `ci.yml`         | `foundation`, `packages`, `web`, and transitional `api`, summarized by `CI / ci required` | Pull requests and pushes for `develop`/`main`; read-only, no deployment       |
-| `governance.yml` | `structure`, `changed-path risk`, and read-only `merge eligibility`                       | Pull-request evidence plus protected-branch structure checks; no GitHub write |
-| `quality.yml`    | accessibility and Lighthouse, summarized by `Quality / quality required`                  | Web/shared/lockfile changes on pull requests only                             |
-| `security.yml`   | dependency audit and secret scan, summarized by `Security / security required`            | Pull requests and protected-branch pushes; no secret consumption              |
+| Workflow         | Stable evidence                                                                                          | Trigger and authority                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `ci.yml`         | foundation, packages, web, Worker API, transitional Go API, held delivery policy, and `CI / ci required` | PR/push validation plus a held manual gate; no eligible live deployment in current state |
+| `governance.yml` | `structure`, `changed-path risk`, and read-only `merge eligibility`                                      | Pull-request evidence plus protected-branch structure checks; no GitHub write            |
+| `quality.yml`    | accessibility and Lighthouse, summarized by `Quality / quality required`                                 | Web/shared/lockfile changes on pull requests only                                        |
+| `security.yml`   | dependency audit and secret scan, summarized by `Security / security required`                           | Pull requests and protected-branch pushes; no secret consumption                         |
 
 All runner jobs have explicit timeouts and Bash semantics. Every external action uses
 a reviewed full commit SHA, and every checkout disables persisted credentials. A local
@@ -121,8 +122,10 @@ verifies generated D1 bindings, Hono operational OpenAPI, the canonical 25-opera
 Go `/api/v1` migration baseline, API-client path compatibility, privacy-safe
 problems/logs, explicit credentialed CORS, prepared statements, a forward STRICT D1
 migration applied from empty and replayed in workerd, static safety rules, build, and
-credential-free Wrangler dry-run. Its Wrangler configuration is local-only; T10 owns
-staging/production D1 IDs, secrets, routes, and held migration/deployment behavior.
+credential-free Wrangler dry-run. T10 adds distinct staging/production environments
+with non-resource D1/route sentinels, credential-free dry runs, and held
+migration/version/promotion/rollback behavior. Real IDs, routes, environment secrets,
+and activation evidence remain absent.
 
 VOC-080-T05 extends that existing job rather than adding a workflow. The second
 forward migration and workerd fixtures cover 13 identity/account operations, secure
@@ -194,7 +197,7 @@ is currently deployed against — not a plan:
 | Reverse proxy / TLS termination                                         | `nginx` service (the only host-published service) terminates TLS using a Cloudflare-issued origin certificate (`VOC-032-DEP-01`); real client IP restored from `CF-Connecting-IP` only when the connection genuinely originates from Cloudflare's published IP ranges (never `0.0.0.0/0`); `staging.vocanova.site` → `web`, `api-staging.vocanova.site` → `api`; plain-`80` redirects to `443`; standard security headers set on every response |
 | DNS/TLS/WAF/CDN (edge)                                                  | Cloudflare (narrowed role) — DNS, TLS, WAF, and CDN only; **no Cloudflare compute** (no Workers, no OpenNext, no Cloudflare D1/KV/Durable Objects/Queues/R2 at the edge)                                                                                                                                                                                                                                                                        |
 | Atlas migration tooling                                                 | `apps/api/atlas.hcl` + `apps/api/scripts/migrate.sh` apply the existing `apps/api/migrations/*.sql` set; `.down.sql.example` files remain non-executable by Atlas per the existing `apps/api/migrations/README.md` rule                                                                                                                                                                                                                         |
-| Deploy automation                                                       | Paused/unavailable after VOC-078-T03. Historical workflows deployed by SSH; no repository workflow now builds/pushes deployment images, mutates Cloudflare, deploys, or polls server health. Runtime assets and servers were not changed by the removal.                                                                                                                                                                                        |
+| Deploy automation                                                       | Paused after VOC-078-T03. Historical workflows deployed by SSH. T10 later added a held manual Cloudflare state machine, but its committed manifest blocks before environment jobs or secrets; it neither builds/pushes deployment images nor polls server health. Runtime assets and servers were not changed by either repository-only transition.                                                                                             |
 | Error monitoring                                                        | Sentry remains embedded in application runtime code. VOC-078-T03 removed the scheduled Sentry-to-GitHub workflow, so GitHub no longer queries Sentry or files monitoring issues automatically.                                                                                                                                                                                                                                                  |
 | Uptime monitoring                                                       | Better Stack / UptimeRobot (unchanged)                                                                                                                                                                                                                                                                                                                                                                                                          |
 | Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP (unchanged)                                                                                                                                                                                                                                                                                                                                                                                                                   |
