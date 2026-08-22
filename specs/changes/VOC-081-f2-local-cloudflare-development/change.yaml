@@ -1,0 +1,130 @@
+schema_version: 1
+
+id: VOC-081
+slug: f2-local-cloudflare-development
+title: Deterministic local Cloudflare development and F2 acceptance gate
+
+type: application-foundation-developer-experience
+status: adopted
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the implementation changes Worker development configuration, local D1
+  migration execution, API/auth origins, multi-process lifecycle, CI aggregation, and
+  contributor commands. Everything remains local and credential-free, but a defect could
+  hide migration, service-binding, authorization-origin, or process-cleanup failures.
+canonical_path: specs/changes/VOC-081-f2-local-cloudflare-development
+authority_model: voc-079-approval-neutral-active
+requirement_source: >-
+  GitHub issue #101, created from the 2026-08-23 post-VOC-080 F2 audit authorized by
+  the user's direction to continue implementing the approved product plan.
+requirement_approval_status: direction-recorded-and-independent-plan-review-pass
+base_branch: agent/voc-080-t12-final-verification
+base_sha: 1d5494fb001a4bbae8a76f48df6d5814a1807838
+target_branch: develop
+approved_candidate_sha: 111323e5275b3ed2a2e86440ef087a44f0d00bde
+owners:
+  decision: user-direction-with-role-neutral-independent-plan-review
+  package_preparation: Codex (planner role only)
+  implementation: different builder role after adoption
+  independent_verification: different exact-revision Cloudflare/Workers/D1/security reviewer
+approvals:
+  requirement_direction:
+    status: recorded
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/101
+  package_independent_verification:
+    status: pass-exact-revision
+    candidate_sha: 111323e5275b3ed2a2e86440ef087a44f0d00bde
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/102#issuecomment-5383027287
+approval_status: adopted
+implementation_authorized: true
+automatic_merge_allowed: true
+production_impact: >-
+  None. The package is restricted to local workerd/D1 development, credential-free CI,
+  documentation, and repository evidence. It cannot create, query, mutate, or deploy a
+  Cloudflare resource and cannot release staging or production holds.
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+  - id: VOC-081-DEP-00
+    status: >-
+      Resolved for package adoption. Exact candidate
+      111323e5275b3ed2a2e86440ef087a44f0d00bde received a PASS from a different-role
+      read-only Cloudflare Workers, OpenNext, D1, security, CI, governance, and
+      developer-experience reviewer with no blocking findings. PR #102 records the
+      report and exact-SHA hosted proof.
+  - id: VOC-081-DEP-01
+    status: >-
+      Repository implementation is stacked on VOC-080-T12 exact SHA
+      1d5494fb001a4bbae8a76f48df6d5814a1807838. VOC-081 may be prepared on that
+      base but F2 cannot be accepted until the complete VOC-080 stack is integrated.
+  - id: VOC-081-DEP-02
+    status: >-
+      Wrangler 4.125.0 and OpenNext 1.20.2 are the locked implementation surface.
+      Any version change requires explicit dependency review and regenerated evidence.
+  - id: VOC-081-DEP-03
+    status: >-
+      F3 staging remains held by VOC-080-HOLD-00. Local F2 proof neither requires nor
+      authorizes a Cloudflare account, remote binding, resource, credential, or deployment.
+action_specific_holds: []
+inherited_holds:
+  - VOC-080-HOLD-00
+  - VOC-080-HOLD-01
+  - VOC-080-HOLD-02
+affected_areas:
+  - package.json
+  - apps/web/package.json
+  - apps/web/next.config.ts
+  - apps/web/wrangler.jsonc
+  - apps/web/.env.example
+  - apps/api-worker/package.json
+  - apps/api-worker/wrangler.jsonc
+  - apps/api-worker/worker-configuration.d.ts
+  - apps/api-worker/test/identity-parity.test.ts
+  - scripts/foundation/
+  - scripts/foundation/agent-authority-policy.mjs
+  - .github/workflows/ci.yml
+  - .gitignore
+  - AGENTS.md
+  - CLAUDE.md
+  - README.md
+  - CONTRIBUTING.md
+  - docs/development.md
+  - docs/operations/10-development-workflow.md
+  - docs/operations/11-devops-and-ci-cd.md
+  - docs/operations/cloudflare-delivery.md
+  - docs/product/12-mvp-implementation-plan.md
+implementation:
+  authorized: true
+  required: true
+  status: authorized-after-pr-102-adoption
+  target_branch: develop
+  pull_request: null
+  authority_issue: 101
+release:
+  required: false
+  mode: repository-only-local-development
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: policy-eligible-only-no-current-merge-executor
+  migration_required: local-D1-only
+  rollback_required: true
+repository_adoption_status: adopted-on-pr-102-merge
+adoption_pr: 102
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/102#issuecomment-5383027287
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/102
+implementation_authority_before_adoption: false
+implementation_authority_status: authorized-after-adoption
+production_deployment: disabled
+staging_deployment: held-by-VOC-080-HOLD-00
+production_data_access: held-by-VOC-080-HOLD-02
+autonomous_production_release: disabled
+ehr: not-triggered
+blocking_reasons: []
