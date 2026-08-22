@@ -1,10 +1,11 @@
 # Operations Documentation
 
-| ID     | Document                                                                                                     | Status   | Owner   | Related                        |
-| ------ | ------------------------------------------------------------------------------------------------------------ | -------- | ------- | ------------------------------ |
-| DOC-10 | [Development Workflow](10-development-workflow.md)                                                           | approved | founder | DOC-11, DOC-15, DOC-16, DOC-19 |
-| DOC-11 | [DevOps and CI/CD Plan](11-devops-and-ci-cd.md)                                                              | approved | founder | DOC-10, DOC-16, DOC-19         |
-| DOC-15 | [AI-Native Product and Engineering Operating Model](15-ai-native-product-and-engineering-operating-model.md) | approved | founder | DOC-16                         |
+| ID      | Document                                                                                                     | Status   | Owner    | Related                        |
+| ------- | ------------------------------------------------------------------------------------------------------------ | -------- | -------- | ------------------------------ |
+| DOC-10  | [Development Workflow](10-development-workflow.md)                                                           | approved | founder  | DOC-11, DOC-15, DOC-16, DOC-19 |
+| DOC-11  | [DevOps and CI/CD Plan](11-devops-and-ci-cd.md)                                                              | approved | founder  | DOC-10, DOC-16, DOC-19         |
+| DOC-15  | [AI-Native Product and Engineering Operating Model](15-ai-native-product-and-engineering-operating-model.md) | approved | founder  | DOC-16                         |
+| RUNBOOK | [External Ruflo orchestration](ruflo-external-orchestration.md)                                              | active   | operator | ADR-0004, VOC-080-T02          |
 
 VOC-080 amends the active operating direction: Cloudflare Workers/D1 replaces the
 owned-server target, and Ruflo may coordinate roles only from an external,

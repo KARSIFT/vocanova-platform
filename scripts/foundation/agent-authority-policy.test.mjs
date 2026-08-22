@@ -12,17 +12,28 @@ test("the repository has no executable local agent authority", () => {
   assert.deepEqual(validateAgentAuthority(repositoryRoot), []);
 });
 
-test("retired assets, triggers, launchers, and autonomous completion fail closed", () => {
+test("local orchestration, authority replacement, and external effects fail closed", () => {
   const temporary = mkdtempSync(resolve(tmpdir(), "vocanova-agent-policy-"));
   try {
     mkdirSync(resolve(temporary, ".claude/agents"), { recursive: true });
+    mkdirSync(resolve(temporary, ".agents"), { recursive: true });
+    mkdirSync(resolve(temporary, ".claude-flow"), { recursive: true });
+    mkdirSync(resolve(temporary, ".swarm"), { recursive: true });
     mkdirSync(resolve(temporary, ".github/workflows"), { recursive: true });
     mkdirSync(resolve(temporary, "scripts"), { recursive: true });
     writeFileSync(
       resolve(temporary, "package.json"),
       JSON.stringify({
-        scripts: { orchestrator: "node orchestrator/run.mjs" },
+        scripts: {
+          orchestrator: "node orchestrator/run.mjs",
+          ruflo: "npx ruflo init --force",
+        },
+        devDependencies: { ruflo: "3.38.16" },
       }),
+    );
+    writeFileSync(
+      resolve(temporary, "AGENTS.md"),
+      "# Project\n\n## Ruflo + Codex Automated Workflow\n",
     );
     writeFileSync(
       resolve(temporary, ".github/workflows/agent.yml"),
@@ -69,17 +80,65 @@ test("retired assets, triggers, launchers, and autonomous completion fail closed
       resolve(temporary, "scripts/graphql.mjs"),
       "await graphql(`mutation { closeIssue(input: $input) { issue { id } } }`);\n",
     );
+    writeFileSync(
+      resolve(temporary, "scripts/ruflo.sh"),
+      "npx ruflo@3.38.16 swarm init --topology hierarchical\n",
+    );
+    writeFileSync(
+      resolve(temporary, "scripts/approve.sh"),
+      "gh pr review 123 --approve\n",
+    );
+    writeFileSync(
+      resolve(temporary, "scripts/comment.sh"),
+      "gh pr comment 123 --body pass\n",
+    );
+    writeFileSync(
+      resolve(temporary, "scripts/dispatch.mjs"),
+      "await octokit.rest.actions.createWorkflowDispatch({ workflow_id: 1 });\n",
+    );
+    writeFileSync(
+      resolve(temporary, "scripts/cloudflare.sh"),
+      "wrangler deploy --env production\n",
+    );
+    writeFileSync(
+      resolve(temporary, "scripts/cloudflare-token.sh"),
+      'test -n "$CLOUDFLARE_API_TOKEN"\n',
+    );
+    writeFileSync(
+      resolve(temporary, "scripts/learner-export.sh"),
+      "psql \"$PRODUCTION_DATABASE_URL\" -c 'copy learners to stdout'\n",
+    );
+    writeFileSync(
+      resolve(temporary, "scripts/provider-secret.sh"),
+      'test -n "$ANTHROPIC_API_KEY"\n',
+    );
+    writeFileSync(
+      resolve(temporary, "scripts/spend.sh"),
+      'test "$RUFLO_SPENDING_AUTHORITY" = approved\n',
+    );
 
     const errors = validateAgentAuthority(temporary);
-    assert.ok(errors.some((error) => error.includes("retired agent path")));
-    assert.ok(errors.some((error) => error.includes("retired orchestrator")));
+    assert.ok(errors.some((error) => error.includes("agent state")));
+    assert.ok(
+      errors.some((error) => error.includes("orchestrator dependency")),
+    );
+    assert.ok(errors.some((error) => error.includes("package script")));
+    assert.ok(errors.some((error) => error.includes("AGENTS.md")));
     assert.equal(
       errors.filter((error) => error.includes("issue/comment trigger")).length,
       6,
     );
+    assert.ok(
+      errors.filter((error) => error.includes("GitHub write/completion"))
+        .length >= 9,
+    );
+    assert.ok(
+      errors.some((error) => error.includes("external-orchestrator launcher")),
+    );
     assert.equal(
-      errors.filter((error) => error.includes("completion command")).length,
-      6,
+      errors.filter((error) => error.includes("prohibited external effect"))
+        .length,
+      5,
     );
   } finally {
     rmSync(temporary, { recursive: true, force: true });

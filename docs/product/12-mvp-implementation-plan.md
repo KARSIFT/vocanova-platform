@@ -39,7 +39,10 @@ adapt the web to OpenNext/workerd, port the API and domains to Hono/D1 with Go p
 rehearse synthetic data conversion, add held Cloudflare delivery controls, and only
 then retire server assets. [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md)
 governs runtime/data; [ADR-0004](../decisions/ADR-0004-external-ruflo-orchestration.md)
-governs orchestration.
+governs orchestration. T02's
+[external runbook](../operations/ruflo-external-orchestration.md) records the exact
+locked installation and synthetic planner/task-orchestrator/builder/reviewer handoff;
+it adds no product, repository, or live-system authority.
 
 Every provider name in the preserved v1.0 role examples maps to a role, not permanent
 authority: planner, builder, specialist, independent reviewer, or accountable external-

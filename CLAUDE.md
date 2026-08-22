@@ -66,7 +66,9 @@ Claude Code has no repository-write, merge, deployment, secret, production-data,
 founder, or technical-steward authority.
 
 Under VOC-080, review Cloudflare/OpenNext/Hono/D1 changes against ADR-0003 and external
-Ruflo coordination against ADR-0004. A Ruflo assignment is task routing, not authority;
+Ruflo coordination against ADR-0004 and the
+[external operator runbook](docs/operations/ruflo-external-orchestration.md). A Ruflo
+assignment is task routing, not authority;
 it cannot relax scope, exact-SHA review, action holds, or GitHub evidence. Reviewers do
 not run a completed long suite or start a background process merely to duplicate
 builder evidence. Cloudflare staging, production, DNS, secret, and learner-data actions
