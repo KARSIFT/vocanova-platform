@@ -1,6 +1,7 @@
 # VOC-081 — Deterministic local Cloudflare development and F2 acceptance gate
 
-Status: draft; implementation is not authorized.
+Status: adopted for repository-only implementation after PR #102 merges; no live action
+or deployment is authorized.
 
 VOC-080 makes the active repository Cloudflare-native and proves the web Worker, API
 Worker, D1, service binding, and held delivery separately. The next dependency in

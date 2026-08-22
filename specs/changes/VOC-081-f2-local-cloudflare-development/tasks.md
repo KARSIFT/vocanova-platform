@@ -6,7 +6,7 @@
 - Acceptance: AC-01, AC-04
 - Tests: TEST-00
 - Evidence: EV-00
-- Status: blocked-until-adoption
+- Status: authorized-after-pr-102-merge
 
 Define canonical ports/origins/state, set supported Next configuration to prevent
 generated nested agent files, update the local OAuth callback and identity-parity
