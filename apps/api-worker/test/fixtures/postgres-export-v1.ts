@@ -5,7 +5,7 @@ const id = (value: number): string =>
 const bytea = (character: string): string =>
   `\\x${character.repeat(64).toUpperCase()}`;
 
-const t0 = "2026-08-22T03:30:00.123+03:30";
+const t0 = "2026-08-22T03:30:00.123456+03:30";
 const t1 = "2026-08-22T04:30:00.123+03:30";
 const t2 = "2026-08-22T05:30:00.123+03:30";
 const t3 = "2026-08-23T03:30:00.123+03:30";
@@ -83,7 +83,7 @@ export function syntheticPostgresExport(): Record<string, unknown> {
           feedback_json: {
             suggestions: ["synthetic"],
             score: 1,
-            confidence: 0.75,
+            confidence: 0.123456789012345,
           },
           feedback_text: "Synthetic feedback content must never enter logs.",
           error_code: null,
@@ -165,7 +165,7 @@ export function syntheticPostgresExport(): Record<string, unknown> {
           review_step_after: 1,
           answered_at: t1,
           response_time_ms: "9007199254740991",
-          selected_option_meaning_id: null,
+          selected_option_meaning_id: meaning,
           typed_answer: null,
           was_hint_used: false,
           source: "review",
@@ -398,6 +398,7 @@ export function syntheticPostgresExport(): Record<string, unknown> {
           avatar_url: null,
           status: "active",
           onboarding_status: "completed",
+          is_synthetic_test_account: true,
           email_verified_at: t1,
           last_login_at: null,
           deleted_at: null,

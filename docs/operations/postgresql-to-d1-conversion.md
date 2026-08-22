@@ -24,8 +24,10 @@ only a normalized, versioned object with these exact top-level fields:
 `tables` must contain exactly the 25 active PostgreSQL tables. Every row must contain
 exactly the versioned fields in
 `apps/api-worker/src/data-conversion/schema.ts`; missing and unknown fields fail closed.
-The committed inventory check compares that contract against every active PostgreSQL
-column and its D1 destination column so schema drift cannot silently omit data.
+The committed inventory check parses inline definitions and `ALTER TABLE ... ADD
+COLUMN`, then compares every active PostgreSQL/D1 column name and declared type with
+the conversion field kind. Unparseable or newly added schema fails the inventory until
+the versioned contract is deliberately reconciled.
 
 The T09 implementation rejects `source.synthetic != true`. Accessing, exporting,
 transforming, uploading, or deleting production learner data remains prohibited until
@@ -39,12 +41,16 @@ future reviewed change; a chat instruction or repository merge is not sufficient
 The converter applies these canonical representations before any D1 write:
 
 - UUIDs become lowercase 36-character text.
-- `timestamptz` values require an explicit timezone and become millisecond UTC ISO-8601.
+- `timestamptz` values require an explicit timezone and become millisecond UTC ISO-8601;
+  PostgreSQL microseconds are deterministically truncated by that representation.
 - PostgreSQL `date` values remain validated `YYYY-MM-DD` text.
 - booleans become constrained `0` or `1` integers.
+- the legacy synthetic-smoke-account marker is preserved as a constrained integer and
+  retains its one-marked-account uniqueness rule in D1.
 - integers may arrive as JSON integers or canonical decimal strings, but values outside
   JavaScript's safe-integer range are rejected before D1 binding.
-- `jsonb` becomes recursively key-sorted JSON text.
+- `jsonb` becomes recursively key-sorted JSON text. Fractional values use canonical
+  finite JavaScript-number serialization; unsafe integral precision is rejected.
 - 32-byte `bytea` hashes become lowercase 64-character hexadecimal text.
 - nullable PostgreSQL display/avatar/provider-email fields use the D1 empty-string
   representation where the D1 contract is non-null.
@@ -59,10 +65,26 @@ order, and the entire normalized plan receives a SHA-256 checksum.
 
 ## Local D1 import and recovery
 
-Each table is split into bounded chunks (default 50 rows, maximum 500). A chunk uses
-prepared D1 statements and one atomic `batch()` containing both its deterministic
-upserts and its checkpoint update. The checkpoint lives in `platform_metadata` under
-`data_conversion:<export_id>` and records the plan checksum and next chunk.
+Every new export ID is a full replacement of the 25 converted tables. The plan first
+clears them in reverse foreign-key order and then imports in forward dependency order.
+Each bounded clear/upsert mutation and its checkpoint are one atomic `batch()`. Clears
+select at most 41 ordered IDs, delete at most 40, and stay on the same checkpoint until
+the table is empty. This deliberately targets an offline cutover database: running it
+against an application accepting writes would discard concurrent data and remains
+prohibited without `VOC-080-HOLD-02`.
+
+Upserts are bounded by both count and encoded size: at most 40 row statements plus one
+checkpoint, at most 1,000,000 estimated encoded bytes for a row statement, and at most
+1,500,000 bytes per import batch (including conservative SQL/transport and checkpoint
+allowances). The schema inventory also proves fewer than D1's 100 bound parameters and
+less than its 100,000-byte SQL limit per upsert. These repository caps are stricter than
+Cloudflare's current 2,000,000-byte row and free-plan 50-query invocation ceilings; see
+the [official D1 limits](https://developers.cloudflare.com/d1/platform/limits/).
+`applyD1ImportPlan` advances at most one batch per call: an upsert invocation uses at
+most 42 D1 queries including checkpoint load, while a clear invocation uses at most 43
+including its bounded ID lookup. The checkpoint lives in `platform_metadata` under
+`data_conversion:<export_id>` and records the plan checksum and next chunk; the caller
+re-invokes until the machine-readable result reports `completed: true`.
 
 This gives the following recovery rules:
 
@@ -70,8 +92,9 @@ This gives the following recovery rules:
 2. Retrying the same export ID and checksum resumes at the first unapplied chunk.
 3. Re-running a completed export is a no-op.
 4. Reusing an export ID with different normalized data is rejected as stale.
-5. A forward correction is a complete corrected export with a new export ID; upserts
-   make the correction idempotent while reconciliation proves the final full state.
+5. A forward correction is a complete corrected export with a new export ID. Its
+   reverse-order clear removes stale/newly excluded rows before deterministic re-import,
+   and reconciliation proves the final full state.
 
 T09 runs this path only through the local workerd/D1 test binding. It does not run
 `wrangler d1 execute --remote`, query an account, create a database, or use a credential.
@@ -103,7 +126,8 @@ pnpm --filter @vocanova/api-worker data-conversion:inventory
 ```
 
 The first command runs exact shape/type/adversarial tests, fresh local D1 import,
-idempotent replay, interrupted resume, stale-checkpoint rejection, forward correction,
+idempotent replay, interrupted resume, malformed/stale-checkpoint rejection, byte and
+statement bounds, alternate/composite uniqueness, deletion-safe forward correction,
 foreign-key/count/checksum/domain reconciliation, and log-redaction assertions. The
 second command proves all 25 PostgreSQL tables/columns map exactly and classifies the
 six D1-only runtime tables that have no PostgreSQL source rows.

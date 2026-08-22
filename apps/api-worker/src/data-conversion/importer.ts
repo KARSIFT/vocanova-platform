@@ -1,5 +1,8 @@
 import {
   canonicalJson,
+  D1_IMPORT_MAX_ROW_BYTES,
+  estimateUpsertChunkBytes,
+  estimateUpsertStatementBytes,
   sha256,
   type D1ImportPlan,
   type D1ImportRow,
@@ -24,8 +27,9 @@ export type ImportResult = Readonly<{
   planChecksum: string;
   resumedFromChunk: number;
   appliedChunks: number;
+  appliedBatches: number;
   totalChunks: number;
-  completed: true;
+  completed: boolean;
 }>;
 
 export type TableReconciliation = Readonly<{
@@ -84,72 +88,88 @@ export async function applyD1ImportPlan(
       planChecksum: plan.checksum,
       resumedFromChunk,
       appliedChunks: 0,
+      appliedBatches: 0,
       totalChunks: plan.chunks.length,
       completed: true,
     };
   }
 
-  let appliedChunks = 0;
-  for (
-    let index = checkpoint.nextChunk;
-    index < plan.chunks.length;
-    index += 1
-  ) {
-    if (options.failBeforeChunk === index) {
+  const index = checkpoint.nextChunk;
+  if (options.failBeforeChunk === index) {
+    throw new Error(`data conversion: injected failure before chunk ${index}`);
+  }
+  const chunk = plan.chunks[index];
+  if (!chunk || chunk.index !== index) {
+    throw new Error("data conversion: import plan chunk order is invalid");
+  }
+  const spec = requireTableSpec(chunk.table);
+  let statements: D1PreparedStatement[];
+  let nextChunk = index + 1;
+
+  if (chunk.operation === "clear") {
+    if (chunk.rows.length !== 0) {
+      throw new Error("data conversion: clear chunk contains rows");
+    }
+    const existingRows = await database
+      .prepare(buildSelectIdsSql(spec))
+      .bind(plan.chunkSize + 1)
+      .all<{ id: string }>();
+    const ids = existingRows.results.map((row) => row.id);
+    const hasMore = ids.length > plan.chunkSize;
+    statements = ids
+      .slice(0, plan.chunkSize)
+      .map((id) => database.prepare(buildDeleteByIdSql(spec)).bind(id));
+    if (hasMore) nextChunk = index;
+  } else if (chunk.operation === "upsert") {
+    if (
+      chunk.rows.length < 1 ||
+      chunk.rows.length > plan.chunkSize ||
+      chunk.encodedBytes !==
+        estimateUpsertChunkBytes(chunk.table, chunk.rows) ||
+      chunk.encodedBytes > plan.maxChunkBytes ||
+      chunk.rows.some(
+        (row) =>
+          estimateUpsertStatementBytes(chunk.table, row) >
+          D1_IMPORT_MAX_ROW_BYTES,
+      )
+    ) {
       throw new Error(
-        `data conversion: injected failure before chunk ${index}`,
+        "data conversion: import plan chunk exceeds its statement or encoded-byte bounds",
       );
     }
-    const chunk = plan.chunks[index];
-    if (!chunk || chunk.index !== index) {
-      throw new Error("data conversion: import plan chunk order is invalid");
-    }
-    const spec = requireTableSpec(chunk.table);
     const upsertSql = buildUpsertSql(spec);
-    const statements = chunk.rows.map((row) =>
+    statements = chunk.rows.map((row) =>
       database
         .prepare(upsertSql)
         .bind(...targetColumns(spec).map((column) => row[column] ?? null)),
     );
-    const nextChunk = index + 1;
-    statements.push(
-      database.prepare(STORE_CHECKPOINT_SQL).bind(
-        checkpointKey,
-        canonicalJson({
-          schemaVersion: CHECKPOINT_SCHEMA_VERSION,
-          planChecksum: plan.checksum,
-          nextChunk,
-          completed: nextChunk === plan.chunks.length,
-        }),
-        plan.exportedAt,
-      ),
-    );
-    await database.batch(statements);
-    appliedChunks += 1;
+  } else {
+    throw new Error("data conversion: import plan chunk operation is invalid");
   }
 
-  if (plan.chunks.length === 0) {
-    await database.batch([
-      database.prepare(STORE_CHECKPOINT_SQL).bind(
-        checkpointKey,
-        canonicalJson({
-          schemaVersion: CHECKPOINT_SCHEMA_VERSION,
-          planChecksum: plan.checksum,
-          nextChunk: 0,
-          completed: true,
-        }),
-        plan.exportedAt,
-      ),
-    ]);
-  }
+  const completed = nextChunk === plan.chunks.length;
+  statements.push(
+    database.prepare(STORE_CHECKPOINT_SQL).bind(
+      checkpointKey,
+      canonicalJson({
+        schemaVersion: CHECKPOINT_SCHEMA_VERSION,
+        planChecksum: plan.checksum,
+        nextChunk,
+        completed,
+      }),
+      plan.exportedAt,
+    ),
+  );
+  await database.batch(statements);
 
   return {
     exportId: plan.exportId,
     planChecksum: plan.checksum,
     resumedFromChunk,
-    appliedChunks,
+    appliedChunks: nextChunk > index ? 1 : 0,
+    appliedBatches: 1,
     totalChunks: plan.chunks.length,
-    completed: true,
+    completed,
   };
 }
 
@@ -276,6 +296,14 @@ function buildUpsertSql(spec: TableSpec): string {
     .map((column) => `${column} = excluded.${column}`)
     .join(", ");
   return `INSERT INTO ${spec.name} (${columns.join(", ")}) VALUES (${columns.map((_, index) => `?${index + 1}`).join(", ")}) ON CONFLICT(id) DO UPDATE SET ${updates}`;
+}
+
+function buildSelectIdsSql(spec: TableSpec): string {
+  return `SELECT id FROM ${spec.name} ORDER BY id LIMIT ?1`;
+}
+
+function buildDeleteByIdSql(spec: TableSpec): string {
+  return `DELETE FROM ${spec.name} WHERE id = ?1`;
 }
 
 function buildSelectSql(spec: TableSpec): string {

@@ -51,6 +51,7 @@ export const DATA_TABLES = [
       field("avatar_url", "text", { nullable: true, defaultWhenNull: "" }),
       field("status", "text"),
       field("onboarding_status", "text"),
+      field("is_synthetic_test_account", "boolean"),
       field("email_verified_at", "timestamp", { nullable: true }),
       field("last_login_at", "timestamp", { nullable: true }),
       field("deleted_at", "timestamp", { nullable: true }),

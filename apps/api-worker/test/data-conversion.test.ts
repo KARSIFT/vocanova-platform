@@ -1,7 +1,12 @@
 import { env } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 
-import { convertPostgresExport } from "../src/data-conversion/converter.js";
+import {
+  D1_IMPORT_MAX_CHUNK_BYTES,
+  D1_IMPORT_MAX_ROW_BYTES,
+  convertPostgresExport,
+  type D1ImportPlan,
+} from "../src/data-conversion/converter.js";
 import {
   applyD1ImportPlan,
   reconcileD1Import,
@@ -43,6 +48,12 @@ describe("PostgreSQL-to-D1 conversion", () => {
   it("normalizes PostgreSQL values deterministically independent of object order", async () => {
     const first = syntheticPostgresExport();
     const second = syntheticPostgresExport();
+    const extraWord = structuredClone(rowOf(first, "canonical_words"));
+    extraWord.id = "00000000-0000-0000-0000-00000000ff01";
+    extraWord.text = "Ordering proof";
+    extraWord.normalized_text = "ordering-proof";
+    tableRows(first, "canonical_words").unshift(extraWord);
+    tableRows(second, "canonical_words").push(structuredClone(extraWord));
     const secondTables = tablesOf(second);
     second.tables = Object.fromEntries(Object.entries(secondTables).reverse());
 
@@ -52,7 +63,10 @@ describe("PostgreSQL-to-D1 conversion", () => {
     ]);
 
     expect(firstPlan.checksum).toBe(secondPlan.checksum);
-    expect(firstPlan.chunks).toHaveLength(25);
+    expect(firstPlan.chunks).toHaveLength(51);
+    expect(firstPlan.expectedRows.canonical_words.map((row) => row.id)).toEqual(
+      [...firstPlan.expectedRows.canonical_words.map((row) => row.id)].sort(),
+    );
     expect(firstPlan.expectedRows.users[0]).toMatchObject({
       email: "synthetic@example.invalid",
       display_name: "",
@@ -69,7 +83,11 @@ describe("PostgreSQL-to-D1 conversion", () => {
       metadata_json: '{"fixture":true,"ordering":{"a":1,"z":2}}',
       response_time_ms: Number.MAX_SAFE_INTEGER,
       was_hint_used: 0,
+      selected_option_meaning_id: "00000000-0000-0000-0000-00000000000b",
     });
+    expect(firstPlan.expectedRows.ai_feedback_attempts[0]?.feedback_json).toBe(
+      '{"confidence":0.123456789012345,"score":1,"suggestions":["synthetic"]}',
+    );
     expect(
       firstPlan.expectedRows.confidence_point_ledger[0]?.metadata_json,
     ).toBe('{"a":1,"z":"last"}');
@@ -103,11 +121,45 @@ describe("PostgreSQL-to-D1 conversion", () => {
       "duplicate id",
     );
 
+    const oversized = syntheticPostgresExport();
+    rowOf(oversized, "ai_feedback_attempts").feedback_text = "x".repeat(
+      D1_IMPORT_MAX_ROW_BYTES,
+    );
+    await expect(convertPostgresExport(oversized)).rejects.toThrow(
+      "import guardrail",
+    );
+
     const held = syntheticPostgresExport();
     sourceOf(held).synthetic = false;
     await expect(convertPostgresExport(held)).rejects.toThrow(
       "VOC-080-HOLD-02",
     );
+  });
+
+  it("bounds encoded D1 batches by statement count and bytes", async () => {
+    const fixture = syntheticPostgresExport();
+    const extra = structuredClone(rowOf(fixture, "ai_feedback_attempts"));
+    extra.id = "00000000-0000-0000-0000-00000000ff02";
+    extra.request_hash = "b".repeat(64);
+    extra.feedback_text = "x".repeat(3_000);
+    tableRows(fixture, "ai_feedback_attempts").push(extra);
+
+    const plan = await convertPostgresExport(fixture, {
+      chunkSize: 40,
+      maxChunkBytes: 12_000,
+    });
+    const feedbackChunks = plan.chunks.filter(
+      (chunk) =>
+        chunk.operation === "upsert" && chunk.table === "ai_feedback_attempts",
+    );
+    expect(feedbackChunks).toHaveLength(2);
+    expect(
+      plan.chunks.every(
+        (chunk) =>
+          chunk.rows.length <= 40 &&
+          chunk.encodedBytes <= D1_IMPORT_MAX_CHUNK_BYTES,
+      ),
+    ).toBe(true);
   });
 
   it("fails before import when a converted foreign key has no parent", async () => {
@@ -137,13 +189,14 @@ describe("PostgreSQL-to-D1 conversion", () => {
     const plan = await convertPostgresExport(fixtureFor("fresh"), {
       chunkSize: 1,
     });
-    const result = await applyD1ImportPlan(env.DB, plan);
+    const result = await runImport(env.DB, plan);
     const report = await reconcileD1Import(env.DB, plan);
 
     expect(result).toMatchObject({
       resumedFromChunk: 0,
-      appliedChunks: 25,
-      totalChunks: 25,
+      appliedChunks: 50,
+      appliedBatches: 50,
+      totalChunks: 50,
       completed: true,
     });
     expect(report.status).toBe("pass");
@@ -173,7 +226,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     const plan = await convertPostgresExport(fixtureFor("rerun"), {
       chunkSize: 2,
     });
-    await applyD1ImportPlan(env.DB, plan);
+    await runImport(env.DB, plan);
     const rerun = await applyD1ImportPlan(env.DB, plan);
 
     expect(rerun.appliedChunks).toBe(0);
@@ -185,20 +238,39 @@ describe("PostgreSQL-to-D1 conversion", () => {
     const plan = await convertPostgresExport(fixtureFor("resume"), {
       chunkSize: 1,
     });
+    await runUntilChunk(env.DB, plan, 30);
     await expect(
-      applyD1ImportPlan(env.DB, plan, { failBeforeChunk: 12 }),
-    ).rejects.toThrow("injected failure before chunk 12");
+      applyD1ImportPlan(env.DB, plan, { failBeforeChunk: 30 }),
+    ).rejects.toThrow("injected failure before chunk 30");
 
     const resumed = await applyD1ImportPlan(env.DB, plan);
-    expect(resumed.resumedFromChunk).toBe(12);
-    expect(resumed.appliedChunks).toBe(13);
+    expect(resumed.resumedFromChunk).toBe(30);
+    expect(resumed.appliedChunks).toBe(1);
+    await runImport(env.DB, plan);
     expect((await reconcileD1Import(env.DB, plan)).status).toBe("pass");
+  });
+
+  it("fails closed on a malformed or inconsistent persisted checkpoint", async () => {
+    const plan = await convertPostgresExport(fixtureFor("bad-checkpoint"));
+    await env.DB.prepare(
+      "INSERT INTO platform_metadata (key, value_json, updated_at) VALUES (?1, ?2, ?3)",
+    )
+      .bind(
+        "data_conversion:voc080-t09-bad-checkpoint",
+        '{"completed":false}',
+        plan.exportedAt,
+      )
+      .run();
+
+    await expect(applyD1ImportPlan(env.DB, plan)).rejects.toThrow(
+      "checkpoint shape is invalid",
+    );
   });
 
   it("rejects a changed plan under a completed export id", async () => {
     const initialFixture = fixtureFor("stale");
     const initial = await convertPostgresExport(initialFixture);
-    await applyD1ImportPlan(env.DB, initial);
+    await runImport(env.DB, initial);
 
     const changedFixture = fixtureFor("stale");
     rowOf(changedFixture, "review_attempts").response_time_ms = 42;
@@ -210,18 +282,109 @@ describe("PostgreSQL-to-D1 conversion", () => {
   });
 
   it("rehearses forward correction as a new full-export checkpoint", async () => {
-    const initial = await convertPostgresExport(fixtureFor("correction-base"));
-    await applyD1ImportPlan(env.DB, initial);
+    const initialFixture = fixtureFor("correction-base");
+    const identity = structuredClone(
+      rowOf(initialFixture, "external_identities"),
+    );
+    identity.id = "00000000-0000-0000-0000-00000000ff03";
+    identity.provider_subject = "synthetic-forward-correction-subject";
+    tableRows(initialFixture, "external_identities").push(identity);
+    const initial = await convertPostgresExport(initialFixture);
+    await runImport(env.DB, initial);
 
-    const correctionFixture = fixtureFor("correction-1");
+    const correctionFixture = structuredClone(initialFixture);
+    correctionFixture.export_id = "voc080-t09-correction-1";
+    tableRows(correctionFixture, "external_identities")[1]!.deleted_at =
+      "2026-08-22T05:30:00.123+03:30";
     rowOf(correctionFixture, "confidence_point_ledger").amount = 12;
     rowOf(correctionFixture, "confidence_point_ledger").balance_after = 12;
     const correction = await convertPostgresExport(correctionFixture);
-    await applyD1ImportPlan(env.DB, correction);
+    await runImport(env.DB, correction);
     const report = await reconcileD1Import(env.DB, correction);
 
     expect(report.status).toBe("pass");
     expect(report.domainAggregates.confidencePointDelta).toBe(12);
+    expect(report.tables.external_identities).toMatchObject({
+      sourceCount: 2,
+      excludedCount: 1,
+      expectedCount: 1,
+      actualCount: 1,
+      matches: true,
+    });
+    expect(
+      await env.DB.prepare(
+        "SELECT COUNT(*) AS count FROM external_identities WHERE id = ?1",
+      )
+        .bind(identity.id)
+        .first<{ count: number }>(),
+    ).toEqual({ count: 0 });
+  });
+
+  it("clears a large corrected table in resumable 40-row invocation slices", async () => {
+    const initialFixture = fixtureFor("bounded-clear-base");
+    const template = rowOf(initialFixture, "canonical_words");
+    for (let index = 0; index < 40; index += 1) {
+      const row = structuredClone(template);
+      row.id = `00000000-0000-0000-0000-${(0x1000 + index).toString(16).padStart(12, "0")}`;
+      row.text = `Bounded clear ${index}`;
+      row.normalized_text = `bounded-clear-${index}`;
+      tableRows(initialFixture, "canonical_words").push(row);
+    }
+    await runImport(
+      env.DB,
+      await convertPostgresExport(initialFixture, { chunkSize: 40 }),
+    );
+
+    const correction = await convertPostgresExport(
+      fixtureFor("bounded-clear-correction"),
+      { chunkSize: 40 },
+    );
+    const clearIndex = correction.chunks.findIndex(
+      (chunk) =>
+        chunk.operation === "clear" && chunk.table === "canonical_words",
+    );
+    await runUntilChunk(env.DB, correction, clearIndex);
+
+    const partial = await applyD1ImportPlan(env.DB, correction);
+    expect(partial).toMatchObject({
+      resumedFromChunk: clearIndex,
+      appliedChunks: 0,
+      appliedBatches: 1,
+      completed: false,
+    });
+    expect(
+      await env.DB.prepare(
+        "SELECT COUNT(*) AS count FROM canonical_words",
+      ).first<{
+        count: number;
+      }>(),
+    ).toEqual({ count: 1 });
+
+    const finishedClear = await applyD1ImportPlan(env.DB, correction);
+    expect(finishedClear).toMatchObject({
+      resumedFromChunk: clearIndex,
+      appliedChunks: 1,
+      appliedBatches: 1,
+    });
+    await runImport(env.DB, correction);
+    expect((await reconcileD1Import(env.DB, correction)).status).toBe("pass");
+  });
+
+  it("lets D1 reject alternate/composite uniqueness conflicts atomically", async () => {
+    const fixture = fixtureFor("alternate-unique");
+    const duplicate = structuredClone(rowOf(fixture, "canonical_words"));
+    duplicate.id = "00000000-0000-0000-0000-00000000ff04";
+    tableRows(fixture, "canonical_words").push(duplicate);
+    const plan = await convertPostgresExport(fixture, { chunkSize: 40 });
+
+    await expect(runImport(env.DB, plan)).rejects.toThrow();
+    expect(
+      await env.DB.prepare(
+        "SELECT COUNT(*) AS count FROM canonical_words",
+      ).first<{
+        count: number;
+      }>(),
+    ).toEqual({ count: 0 });
   });
 
   it("keeps a failed D1 chunk atomic and recovers with a new full correction", async () => {
@@ -240,7 +403,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
       chunkSize: 10,
     });
 
-    await expect(applyD1ImportPlan(env.DB, brokenPlan)).rejects.toThrow();
+    await expect(runImport(env.DB, brokenPlan)).rejects.toThrow();
     const validRowAfterFailure = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM canonical_words WHERE id = ?1",
     )
@@ -254,7 +417,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     const correctedPlan = await convertPostgresExport(correctedFixture, {
       chunkSize: 10,
     });
-    await applyD1ImportPlan(env.DB, correctedPlan);
+    await runImport(env.DB, correctedPlan);
     expect((await reconcileD1Import(env.DB, correctedPlan)).status).toBe(
       "pass",
     );
@@ -293,4 +456,43 @@ function fixtureFor(suffix: string): Record<string, unknown> {
   const fixture = syntheticPostgresExport();
   fixture.export_id = `voc080-t09-${suffix}`;
   return fixture;
+}
+
+async function runImport(
+  database: D1Database,
+  plan: D1ImportPlan,
+): Promise<Awaited<ReturnType<typeof applyD1ImportPlan>>> {
+  let firstResumedFromChunk: number | undefined;
+  let appliedChunks = 0;
+  let appliedBatches = 0;
+  for (let attempt = 0; attempt < 10_000; attempt += 1) {
+    const result = await applyD1ImportPlan(database, plan);
+    firstResumedFromChunk ??= result.resumedFromChunk;
+    appliedChunks += result.appliedChunks;
+    appliedBatches += result.appliedBatches;
+    if (result.completed) {
+      return {
+        ...result,
+        resumedFromChunk: firstResumedFromChunk,
+        appliedChunks,
+        appliedBatches,
+      };
+    }
+  }
+  throw new Error("test import did not complete within bounded invocations");
+}
+
+async function runUntilChunk(
+  database: D1Database,
+  plan: D1ImportPlan,
+  targetChunk: number,
+): Promise<void> {
+  for (let attempt = 0; attempt < 10_000; attempt += 1) {
+    const result = await applyD1ImportPlan(database, plan);
+    if (result.resumedFromChunk + result.appliedChunks >= targetChunk) return;
+    if (result.completed) {
+      throw new Error(`test import completed before chunk ${targetChunk}`);
+    }
+  }
+  throw new Error(`test import did not reach chunk ${targetChunk}`);
 }

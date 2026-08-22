@@ -13,8 +13,10 @@ export type D1ImportRow = Readonly<Record<string, D1ImportValue>>;
 
 export type ImportChunk = Readonly<{
   index: number;
+  operation: "clear" | "upsert";
   table: DataTableName;
   rows: readonly D1ImportRow[];
+  encodedBytes: number;
 }>;
 
 export type D1ImportPlan = Readonly<{
@@ -23,6 +25,7 @@ export type D1ImportPlan = Readonly<{
   exportedAt: string;
   checksum: string;
   chunkSize: number;
+  maxChunkBytes: number;
   chunks: readonly ImportChunk[];
   expectedRows: Readonly<Record<DataTableName, readonly D1ImportRow[]>>;
   sourceCounts: Readonly<Record<DataTableName, number>>;
@@ -46,6 +49,18 @@ const UUID_PATTERN =
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const TIMESTAMP_PATTERN = /^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$/i;
 const HEX_32_PATTERN = /^[0-9a-f]{64}$/i;
+
+// These repository guardrails are deliberately stricter than Cloudflare's D1
+// platform limits. A batch has at most 41 statements (40 rows plus its atomic
+// checkpoint), every statement has fewer than 100 bindings, and encoded row
+// payloads stay far below D1's 2,000,000-byte row ceiling. The byte estimate
+// includes a conservative allowance for SQL and transport framing.
+export const D1_IMPORT_MAX_ROWS_PER_CHUNK = 40;
+export const D1_IMPORT_MAX_ROW_BYTES = 1_000_000;
+export const D1_IMPORT_MAX_CHUNK_BYTES = 1_500_000;
+export const D1_IMPORT_MIN_CHUNK_BYTES = 8_192;
+const D1_IMPORT_STATEMENT_OVERHEAD_BYTES = 4_096;
+const D1_IMPORT_CHECKPOINT_RESERVE_BYTES = 4_096;
 
 const FOREIGN_KEYS = [
   ["external_identities", "user_id", "users"],
@@ -84,13 +99,27 @@ const FOREIGN_KEYS = [
 
 export async function convertPostgresExport(
   input: unknown,
-  options: Readonly<{ chunkSize?: number }> = {},
+  options: Readonly<{ chunkSize?: number; maxChunkBytes?: number }> = {},
 ): Promise<D1ImportPlan> {
   const document = validateDocument(input);
-  const chunkSize = options.chunkSize ?? 50;
-  if (!Number.isSafeInteger(chunkSize) || chunkSize < 1 || chunkSize > 500) {
+  const chunkSize = options.chunkSize ?? D1_IMPORT_MAX_ROWS_PER_CHUNK;
+  if (
+    !Number.isSafeInteger(chunkSize) ||
+    chunkSize < 1 ||
+    chunkSize > D1_IMPORT_MAX_ROWS_PER_CHUNK
+  ) {
     throw new Error(
-      "data conversion: chunkSize must be an integer from 1 to 500",
+      `data conversion: chunkSize must be an integer from 1 to ${D1_IMPORT_MAX_ROWS_PER_CHUNK}`,
+    );
+  }
+  const maxChunkBytes = options.maxChunkBytes ?? D1_IMPORT_MAX_CHUNK_BYTES;
+  if (
+    !Number.isSafeInteger(maxChunkBytes) ||
+    maxChunkBytes < D1_IMPORT_MIN_CHUNK_BYTES ||
+    maxChunkBytes > D1_IMPORT_MAX_CHUNK_BYTES
+  ) {
+    throw new Error(
+      `data conversion: maxChunkBytes must be an integer from ${D1_IMPORT_MIN_CHUNK_BYTES} to ${D1_IMPORT_MAX_CHUNK_BYTES}`,
     );
   }
 
@@ -149,13 +178,62 @@ export async function convertPostgresExport(
   validateRelationships(expectedRows);
 
   const chunks: ImportChunk[] = [];
+  // A new export ID is a complete replacement. Clearing in reverse dependency
+  // order makes rows omitted by a correction (including newly soft-deleted
+  // identities) disappear without violating foreign keys. Every clear and its
+  // checkpoint are atomic, so interruption resumes deterministically.
+  for (const tableName of [...DATA_TABLE_NAMES].reverse()) {
+    chunks.push({
+      index: chunks.length,
+      operation: "clear",
+      table: tableName,
+      rows: [],
+      encodedBytes:
+        encodedByteLength(`DELETE FROM ${tableName}`) +
+        D1_IMPORT_CHECKPOINT_RESERVE_BYTES,
+    });
+  }
   for (const tableName of DATA_TABLE_NAMES) {
     const rows = expectedRows[tableName];
-    for (let offset = 0; offset < rows.length; offset += chunkSize) {
+    let pendingRows: D1ImportRow[] = [];
+    let pendingBytes = D1_IMPORT_CHECKPOINT_RESERVE_BYTES;
+    for (const row of rows) {
+      const rowBytes = estimateUpsertStatementBytes(tableName, row);
+      if (rowBytes > D1_IMPORT_MAX_ROW_BYTES) {
+        throw new Error(
+          `data conversion: ${tableName} row ${String(row.id)} exceeds the ${D1_IMPORT_MAX_ROW_BYTES}-byte import guardrail`,
+        );
+      }
+      if (
+        pendingRows.length > 0 &&
+        (pendingRows.length >= chunkSize ||
+          pendingBytes + rowBytes > maxChunkBytes)
+      ) {
+        chunks.push({
+          index: chunks.length,
+          operation: "upsert",
+          table: tableName,
+          rows: pendingRows,
+          encodedBytes: pendingBytes,
+        });
+        pendingRows = [];
+        pendingBytes = D1_IMPORT_CHECKPOINT_RESERVE_BYTES;
+      }
+      if (pendingBytes + rowBytes > maxChunkBytes) {
+        throw new Error(
+          `data conversion: ${tableName} row ${String(row.id)} cannot fit the configured encoded batch bound`,
+        );
+      }
+      pendingRows.push(row);
+      pendingBytes += rowBytes;
+    }
+    if (pendingRows.length > 0) {
       chunks.push({
         index: chunks.length,
+        operation: "upsert",
         table: tableName,
-        rows: rows.slice(offset, offset + chunkSize),
+        rows: pendingRows,
+        encodedBytes: pendingBytes,
       });
     }
   }
@@ -170,6 +248,8 @@ export async function convertPostgresExport(
       exportId: document.export_id,
       exportedAt,
       chunkSize,
+      maxChunkBytes,
+      chunks,
       expectedRows,
       excludedCounts,
     }),
@@ -181,12 +261,44 @@ export async function convertPostgresExport(
     exportedAt,
     checksum,
     chunkSize,
+    maxChunkBytes,
     chunks,
     expectedRows,
     sourceCounts,
     excludedCounts,
     redactedFieldCount,
   };
+}
+
+export function estimateUpsertStatementBytes(
+  tableName: DataTableName,
+  row: D1ImportRow,
+): number {
+  const spec = requireTableSpec(tableName);
+  const values = spec.fields.map(
+    (field) => row[field.target ?? field.source] ?? null,
+  );
+  return (
+    encodedByteLength(canonicalJson({ table: tableName, values })) +
+    D1_IMPORT_STATEMENT_OVERHEAD_BYTES
+  );
+}
+
+export function estimateUpsertChunkBytes(
+  tableName: DataTableName,
+  rows: readonly D1ImportRow[],
+): number {
+  return (
+    D1_IMPORT_CHECKPOINT_RESERVE_BYTES +
+    rows.reduce(
+      (total, row) => total + estimateUpsertStatementBytes(tableName, row),
+      0,
+    )
+  );
+}
+
+function encodedByteLength(value: string): number {
+  return new TextEncoder().encode(value).byteLength;
 }
 
 function validateDocument(input: unknown): SourceExport {

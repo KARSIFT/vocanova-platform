@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -58,15 +59,41 @@ for (const tableName of DATA_TABLE_NAMES) {
     ...(spec.sourceOnlyFields ?? []).map((field) => field.source),
   ];
   const targetFields = spec.fields.map((field) => field.target ?? field.source);
+  const postgresTable = requireTable(postgresTables, tableName);
+  const d1Table = requireTable(d1Tables, tableName);
   assert.deepEqual(
     [...sourceFields].sort(),
-    [...requireTable(postgresTables, tableName)].sort(),
+    [...postgresTable.keys()].sort(),
     `${tableName}: PostgreSQL export fields drifted`,
   );
   assert.deepEqual(
     [...targetFields].sort(),
-    [...requireTable(d1Tables, tableName)].sort(),
+    [...d1Table.keys()].sort(),
     `${tableName}: D1 import fields drifted`,
+  );
+  for (const field of [...spec.fields, ...(spec.sourceOnlyFields ?? [])]) {
+    assert.equal(
+      postgresTable.get(field.source)?.toLowerCase(),
+      postgresTypeFor(field.kind),
+      `${tableName}.${field.source}: PostgreSQL field kind drifted`,
+    );
+  }
+  for (const field of spec.fields) {
+    const target = field.target ?? field.source;
+    assert.equal(
+      d1Table.get(target)?.toUpperCase(),
+      d1TypeFor(field.kind),
+      `${tableName}.${target}: D1 field kind drifted`,
+    );
+  }
+  assert.ok(
+    targetFields.length < 100,
+    `${tableName}: import exceeds D1's 100-bound-parameter query limit`,
+  );
+  const upsertSql = `INSERT INTO ${tableName} (${targetFields.join(", ")}) VALUES (${targetFields.map((_, index) => `?${index + 1}`).join(", ")})`;
+  assert.ok(
+    Buffer.byteLength(upsertSql, "utf8") < 100_000,
+    `${tableName}: import exceeds D1's 100,000-byte SQL statement limit`,
   );
 }
 
@@ -87,16 +114,32 @@ async function readSqlDirectory(directory) {
 
 function extractTables(sql, acceptedTypes) {
   const tables = new Map();
+  const accepted = new Set(acceptedTypes.map((type) => type.toLowerCase()));
   const tablePattern =
     /CREATE TABLE\s+([a-z_]+)\s*\(([\s\S]*?)\n\)(?:\s+WITHOUT ROWID)?(?:,\s*STRICT|\s+STRICT)?;/g;
   for (const match of sql.matchAll(tablePattern)) {
     const [, name, body] = match;
-    const columns = [];
+    const columns = new Map();
     for (const line of body.split("\n")) {
       const column = line.match(/^\s{2}([a-z_][a-z0-9_]*)\s+([A-Za-z]+)/);
-      if (column && acceptedTypes.includes(column[2])) columns.push(column[1]);
+      if (column && accepted.has(column[2].toLowerCase())) {
+        columns.set(column[1], column[2]);
+      }
     }
     tables.set(name, columns);
+  }
+  const addColumnPattern =
+    /ALTER TABLE\s+(?:IF EXISTS\s+)?([a-z_]+)\s+ADD COLUMN\s+(?:IF NOT EXISTS\s+)?([a-z_][a-z0-9_]*)\s+([A-Za-z]+)/gi;
+  for (const match of sql.matchAll(addColumnPattern)) {
+    const [, tableName, columnName, type] = match;
+    if (!accepted.has(type.toLowerCase())) continue;
+    const table = tables.get(tableName);
+    assert.ok(table, `ALTER TABLE references unparsed table ${tableName}`);
+    assert.ok(
+      !table.has(columnName),
+      `${tableName}.${columnName} is added twice`,
+    );
+    table.set(columnName, type);
   }
   return tables;
 }
@@ -105,4 +148,21 @@ function requireTable(tables, name) {
   const columns = tables.get(name);
   assert.ok(columns, `missing parsed table ${name}`);
   return columns;
+}
+
+function postgresTypeFor(kind) {
+  return {
+    boolean: "boolean",
+    bytea: "bytea",
+    date: "date",
+    integer: "integer",
+    json: "jsonb",
+    text: "text",
+    timestamp: "timestamptz",
+    uuid: "uuid",
+  }[kind];
+}
+
+function d1TypeFor(kind) {
+  return kind === "boolean" || kind === "integer" ? "INTEGER" : "TEXT";
 }
