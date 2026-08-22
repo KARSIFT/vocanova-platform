@@ -107,7 +107,7 @@ commands are:
 
 `wrangler.jsonc` contains one local D1 name and the non-remote sentinel ID
 `local`; it contains no Cloudflare account/resource identifier or credential.
-Vitest applies all six forward migrations to isolated local D1 storage twice,
+Vitest applies all seven forward migrations to isolated local D1 storage twice,
 proving from-empty and replay behavior. T05 adds requester-scoped identity, OAuth
 state, magic links, sessions, onboarding, settings, email change, and account
 deactivation. T06-T08 add content/review, mission/progress, and AI-feedback parity,

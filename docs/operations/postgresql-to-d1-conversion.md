@@ -120,16 +120,37 @@ the six domain aggregates from those same rows. It stores only its last ID, row 
 rolling checksum, cumulative counters, and completed-table evidence under
 `data_reconciliation:<export_id>`. Retrying after a read or checkpoint failure re-reads
 at most the same page and cannot double-count because the cursor and cumulative values
-advance together with the prepared checkpoint write.
+advance together with the prepared checkpoint write. The signed Confidence Point delta
+uses exact `BigInt` arithmetic and a canonical decimal checkpoint value across pages;
+only the final safe-integer total is emitted as a JSON number.
+
+Before the first page, reconciliation acquires a plan-bound row named
+`data_reconciliation_write_lock`. The seventh local D1 migration installs
+insert/update/delete triggers on every converted table; while that row exists, any
+target mutation aborts with a canonical error. A missing lock invalidates an
+in-progress cursor and restarts from the first table under a newly acquired lock. This
+makes the page chain one stable database generation rather than relying only on the
+offline-cutover instruction. Initial acquisition uses at most three additional bounded
+metadata queries; normal page calls use one lock lookup, one 11-row page query, and one
+checkpoint write in addition to checkpoint loading.
 
 The protected conversion step precomputes the identical 10-row expected checksum chain
-and expected aggregate totals once and binds both into the overall plan checksum.
+with its page-ending row IDs, plus expected aggregate totals, and binds them into the
+overall plan checksum. Every resumed non-empty cursor must match one of those exact
+page endpoints; a well-shaped cursor that skips or rewrites an unverified prefix fails
+closed.
 Reconciliation therefore never iterates an expected table, performs a D1 full-table
 aggregate, or materializes a D1 table/result set in one Worker invocation. Persisted
 table evidence is checked back against the plan's counts and checksums, and the
 `matches` flag is recomputed semantically. A completed receipt is not treated as a
 permanent cache: invoking reconciliation again starts a new bounded pass, so a later
-database mutation cannot return a stale PASS.
+database mutation cannot return a stale PASS. A completed report deliberately leaves
+the write lock active while its evidence is recorded. The caller then invokes
+`releaseD1ReconciliationWriteLock`; it verifies the plan-bound completed checkpoint
+before removing the guard. Releasing an incomplete or different plan fails closed. If
+a process stops mid-pass, retry the same plan to resume; do not delete the lock or run a
+forward correction until that pass completes or a separately reviewed recovery records
+why its prefix is being abandoned.
 
 The report contains no row values, email, provider subject, token/hash, idempotency key,
 typed answer, sentence, AI feedback, or error content. Full converted rows remain an
@@ -149,15 +170,17 @@ idempotent replay, interrupted resume, malformed/stale-checkpoint rejection, byt
 statement bounds, alternate/composite uniqueness, deletion-safe forward correction,
 multi-page reconciliation interruption/retry without expected-table scans,
 semantically inconsistent reconciliation-checkpoint rejection, completed-receipt
-revalidation, bounded foreign-key/count/checksum/domain reconciliation, and
-log-redaction assertions. The
+revalidation, mutation rejection while an in-progress prefix exists, exact signed
+aggregate cancellation/overflow, bounded foreign-key/count/checksum/domain
+reconciliation, and log-redaction assertions. The
 second command proves all 25 PostgreSQL tables/columns map exactly and classifies the
 six D1-only runtime tables that have no PostgreSQL source rows.
 
 ## Repository rollback
 
-Reverting VOC-080-T09 removes the converter, D1 synthetic-account parity migration,
-fixture, local rehearsal, command, and this documentation. It does not reverse a remote
-schema or dataset because T09 performs no remote action. If a future authorized
-migration has begun, data recovery uses its recorded forward-correction or separately
-authorized restore procedure; a source-code revert alone is not data rollback.
+Reverting VOC-080-T09 removes the converter, D1 synthetic-account parity and
+reconciliation-guard migrations, fixture, local rehearsal, command, and this
+documentation. It does not reverse a remote schema or dataset because T09 performs no
+remote action. If a future authorized migration has begun, data recovery uses its
+recorded forward-correction or separately authorized restore procedure; a source-code
+revert alone is not data rollback.

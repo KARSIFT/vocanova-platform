@@ -72,8 +72,14 @@ export type ReconciliationProgress = Readonly<{
 export type ReconciliationResult =
   ReconciliationProgress | ReconciliationReport;
 
+type CheckpointDomainAggregates = Readonly<
+  Omit<DataDomainAggregates, "confidencePointDelta"> & {
+    confidencePointDelta: string;
+  }
+>;
+
 type ReconciliationCheckpoint = Readonly<{
-  schemaVersion: "vocanova-d1-reconciliation-checkpoint-v2";
+  schemaVersion: "vocanova-d1-reconciliation-checkpoint-v3";
   planChecksum: string;
   tableIndex: number;
   current: Readonly<{
@@ -83,15 +89,23 @@ type ReconciliationCheckpoint = Readonly<{
   }>;
   tables: Readonly<Partial<Record<DataTableName, TableReconciliation>>>;
   foreignKeyViolations: number;
-  domainAggregates: ReconciliationReport["domainAggregates"];
+  domainAggregates: CheckpointDomainAggregates;
   completed: boolean;
+}>;
+
+type ReconciliationWriteLock = Readonly<{
+  schemaVersion: "vocanova-d1-reconciliation-write-lock-v1";
+  exportId: string;
+  planChecksum: string;
 }>;
 
 const CHECKPOINT_SCHEMA_VERSION = "vocanova-d1-import-checkpoint-v1";
 const RECONCILIATION_CHECKPOINT_SCHEMA_VERSION =
-  "vocanova-d1-reconciliation-checkpoint-v2";
+  "vocanova-d1-reconciliation-checkpoint-v3";
 const RECONCILIATION_PROGRESS_SCHEMA_VERSION =
   "vocanova-d1-reconciliation-progress-v1";
+const RECONCILIATION_WRITE_LOCK_SCHEMA_VERSION =
+  "vocanova-d1-reconciliation-write-lock-v1";
 export const D1_RECONCILIATION_MAX_PAGE_BYTES = 12_000_000;
 const CHECKSUM_PATTERN = /^[0-9a-f]{64}$/;
 const CANONICAL_ID_PATTERN =
@@ -100,6 +114,7 @@ const LOAD_CHECKPOINT_SQL =
   "SELECT value_json FROM platform_metadata WHERE key = ?1";
 const STORE_CHECKPOINT_SQL =
   "INSERT INTO platform_metadata (key, value_json, updated_at) VALUES (?1, ?2, ?3) ON CONFLICT(key) DO UPDATE SET value_json = excluded.value_json, updated_at = excluded.updated_at";
+const RECONCILIATION_WRITE_LOCK_KEY = "data_reconciliation_write_lock";
 
 export async function applyD1ImportPlan(
   database: D1Database,
@@ -222,14 +237,24 @@ export async function reconcileD1Import(
     .prepare(LOAD_CHECKPOINT_SQL)
     .bind(checkpointKey)
     .first<{ value_json: string }>();
-  let checkpoint = existing
+  const persistedCheckpoint = existing
     ? parseReconciliationCheckpoint(existing.value_json, plan)
-    : await initialReconciliationCheckpoint(plan);
+    : null;
+  let checkpoint =
+    persistedCheckpoint ?? (await initialReconciliationCheckpoint(plan));
+  const lockAlreadyExisted = await ensureReconciliationWriteLock(
+    database,
+    plan,
+  );
 
   // A completed receipt is evidence for the invocation that produced it, not a
   // permanent cache of database truth. Any later call starts a fresh bounded
   // pass so a post-checkpoint mutation can never return a stale PASS.
   if (checkpoint.completed) {
+    checkpoint = await initialReconciliationCheckpoint(plan);
+  } else if (persistedCheckpoint && !lockAlreadyExisted) {
+    // Without the lock, a persisted prefix has no continuity guarantee. Restart
+    // from the first table under the newly acquired database-enforced guard.
     checkpoint = await initialReconciliationCheckpoint(plan);
   }
 
@@ -371,6 +396,43 @@ export async function reconcileD1Import(
   );
 }
 
+export async function releaseD1ReconciliationWriteLock(
+  database: D1Database,
+  plan: D1ImportPlan,
+): Promise<void> {
+  const checkpoint = await database
+    .prepare(LOAD_CHECKPOINT_SQL)
+    .bind(reconciliationCheckpointKeyFor(plan.exportId))
+    .first<{ value_json: string }>();
+  if (!checkpoint) {
+    throw new Error(
+      "data conversion: cannot release reconciliation lock without a checkpoint",
+    );
+  }
+  const parsedCheckpoint = parseReconciliationCheckpoint(
+    checkpoint.value_json,
+    plan,
+  );
+  if (!parsedCheckpoint.completed) {
+    throw new Error(
+      "data conversion: cannot release reconciliation lock before exact reconciliation completes",
+    );
+  }
+
+  const existingLock = await loadReconciliationWriteLock(database);
+  if (!existingLock) return;
+  validateReconciliationWriteLock(existingLock, plan);
+  await database
+    .prepare("DELETE FROM platform_metadata WHERE key = ?1 AND value_json = ?2")
+    .bind(RECONCILIATION_WRITE_LOCK_KEY, existingLock)
+    .run();
+  if (await loadReconciliationWriteLock(database)) {
+    throw new Error(
+      "data conversion: reconciliation write lock was not released",
+    );
+  }
+}
+
 function initialCheckpoint(plan: D1ImportPlan): Checkpoint {
   return {
     schemaVersion: CHECKPOINT_SCHEMA_VERSION,
@@ -467,7 +529,7 @@ function parseReconciliationCheckpoint(
     !isRecord(parsed.current) ||
     !isRecord(parsed.tables) ||
     !isNonNegativeSafeInteger(parsed.foreignKeyViolations) ||
-    !isDomainAggregates(parsed.domainAggregates)
+    !isCheckpointDomainAggregates(parsed.domainAggregates)
   ) {
     throw new Error(
       "data conversion: reconciliation checkpoint is stale or inconsistent",
@@ -497,6 +559,24 @@ function parseReconciliationCheckpoint(
   }
 
   const tableIndex = Number(parsed.tableIndex);
+  const currentRowCount = Number(parsed.current.rowCount);
+  if (currentRowCount > 0) {
+    const currentTable = DATA_TABLE_NAMES[tableIndex];
+    const expectedPage = currentTable
+      ? plan.expectedPageEvidence[currentTable].find(
+          (page) => page.rowCount === currentRowCount,
+        )
+      : undefined;
+    if (
+      !expectedPage ||
+      expectedPage.lastId !== parsed.current.lastId ||
+      expectedPage.checksum !== parsed.current.rollingChecksum
+    ) {
+      throw new Error(
+        "data conversion: reconciliation checkpoint cursor is not bound to an exact expected prefix",
+      );
+    }
+  }
   const completedTableNames = DATA_TABLE_NAMES.slice(0, tableIndex);
   requireExactObjectKeys(
     parsed.tables,
@@ -509,7 +589,7 @@ function parseReconciliationCheckpoint(
   validateCheckpointAggregates(
     parsed.domainAggregates,
     tableIndex,
-    Number(parsed.current.rowCount),
+    currentRowCount,
     parsed.tables,
     plan,
   );
@@ -527,7 +607,7 @@ function parseReconciliationCheckpoint(
 }
 
 function validateCheckpointAggregates(
-  actual: DataDomainAggregates,
+  actual: CheckpointDomainAggregates,
   tableIndex: number,
   currentRowCount: number,
   tables: Readonly<Record<string, unknown>>,
@@ -552,7 +632,7 @@ function validateCheckpointAggregates(
       tableIndex > aggregateTableIndex &&
       isRecord(tableEvidence) &&
       tableEvidence.matches === true &&
-      actual[field] !== plan.expectedDomainAggregates[field]
+      aggregateValueIsDifferent(actual, plan.expectedDomainAggregates, field)
     ) {
       throw new Error(
         `data conversion: reconciliation checkpoint aggregate ${field} is inconsistent with matching table evidence`,
@@ -561,13 +641,32 @@ function validateCheckpointAggregates(
     if (
       (tableIndex < aggregateTableIndex ||
         (tableIndex === aggregateTableIndex && currentRowCount === 0)) &&
-      actual[field] !== 0
+      aggregateValueIsNotZero(actual, field)
     ) {
       throw new Error(
         `data conversion: reconciliation checkpoint aggregate ${field} advances before its table`,
       );
     }
   }
+}
+
+function aggregateValueIsDifferent(
+  actual: CheckpointDomainAggregates,
+  expected: DataDomainAggregates,
+  field: keyof DataDomainAggregates,
+): boolean {
+  return field === "confidencePointDelta"
+    ? actual.confidencePointDelta !== String(expected.confidencePointDelta)
+    : actual[field] !== expected[field];
+}
+
+function aggregateValueIsNotZero(
+  actual: CheckpointDomainAggregates,
+  field: keyof DataDomainAggregates,
+): boolean {
+  return field === "confidencePointDelta"
+    ? actual.confidencePointDelta !== "0"
+    : actual[field] !== 0;
 }
 
 function validateTableReconciliation(
@@ -646,6 +745,84 @@ async function storeReconciliationCheckpoint(
     .run();
 }
 
+async function ensureReconciliationWriteLock(
+  database: D1Database,
+  plan: D1ImportPlan,
+): Promise<boolean> {
+  const existing = await loadReconciliationWriteLock(database);
+  if (existing) {
+    validateReconciliationWriteLock(existing, plan);
+    return true;
+  }
+
+  const value = canonicalJson(reconciliationWriteLockFor(plan));
+  await database
+    .prepare(
+      "INSERT OR IGNORE INTO platform_metadata (key, value_json, updated_at) VALUES (?1, ?2, ?3)",
+    )
+    .bind(RECONCILIATION_WRITE_LOCK_KEY, value, plan.exportedAt)
+    .run();
+  const acquired = await loadReconciliationWriteLock(database);
+  if (!acquired) {
+    throw new Error(
+      "data conversion: reconciliation write lock was not acquired",
+    );
+  }
+  validateReconciliationWriteLock(acquired, plan);
+  return false;
+}
+
+async function loadReconciliationWriteLock(
+  database: D1Database,
+): Promise<string | null> {
+  const row = await database
+    .prepare(LOAD_CHECKPOINT_SQL)
+    .bind(RECONCILIATION_WRITE_LOCK_KEY)
+    .first<{ value_json: string }>();
+  return row?.value_json ?? null;
+}
+
+function reconciliationWriteLockFor(
+  plan: D1ImportPlan,
+): ReconciliationWriteLock {
+  return {
+    schemaVersion: RECONCILIATION_WRITE_LOCK_SCHEMA_VERSION,
+    exportId: plan.exportId,
+    planChecksum: plan.checksum,
+  };
+}
+
+function validateReconciliationWriteLock(
+  value: string,
+  plan: D1ImportPlan,
+): void {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new Error(
+      "data conversion: reconciliation write lock is not valid JSON",
+    );
+  }
+  if (!isRecord(parsed)) {
+    throw new Error("data conversion: reconciliation write lock is invalid");
+  }
+  requireExactObjectKeys(
+    parsed,
+    ["exportId", "planChecksum", "schemaVersion"],
+    "reconciliation write lock",
+  );
+  if (
+    parsed.schemaVersion !== RECONCILIATION_WRITE_LOCK_SCHEMA_VERSION ||
+    parsed.exportId !== plan.exportId ||
+    parsed.planChecksum !== plan.checksum
+  ) {
+    throw new Error(
+      "data conversion: reconciliation write lock belongs to another plan",
+    );
+  }
+}
+
 function buildReconciliationReport(
   plan: D1ImportPlan,
   checkpoint: ReconciliationCheckpoint,
@@ -658,12 +835,18 @@ function buildReconciliationReport(
     TableReconciliation
   >;
   const expectedDomainAggregates = plan.expectedDomainAggregates;
+  const domainAggregates: DataDomainAggregates = {
+    ...checkpoint.domainAggregates,
+    confidencePointDelta: exactSafeInteger(
+      BigInt(checkpoint.domainAggregates.confidencePointDelta),
+      "confidence-point aggregate",
+    ),
+  };
   const allTablesMatch = DATA_TABLE_NAMES.every(
     (tableName) => tables[tableName]?.matches === true,
   );
   const aggregatesMatch =
-    canonicalJson(checkpoint.domainAggregates) ===
-    canonicalJson(expectedDomainAggregates);
+    canonicalJson(domainAggregates) === canonicalJson(expectedDomainAggregates);
   return {
     schemaVersion: DATA_RECONCILIATION_SCHEMA_VERSION,
     exportId: plan.exportId,
@@ -674,7 +857,7 @@ function buildReconciliationReport(
         : "fail",
     tables,
     foreignKeyViolations: checkpoint.foreignKeyViolations,
-    domainAggregates: checkpoint.domainAggregates,
+    domainAggregates,
     expectedDomainAggregates,
     redactedFieldCount: plan.redactedFieldCount,
   };
@@ -774,22 +957,22 @@ function encodedByteLength(value: string): number {
   return new TextEncoder().encode(value).byteLength;
 }
 
-function emptyDomainAggregates(): DataDomainAggregates {
+function emptyDomainAggregates(): CheckpointDomainAggregates {
   return {
     activeUsers: 0,
     activeSavedWords: 0,
     reviewAttempts: 0,
     completedMissions: 0,
-    confidencePointDelta: 0,
+    confidencePointDelta: "0",
     successfulAiFeedbackAttempts: 0,
   };
 }
 
 function addActualPageAggregates(
-  previous: DataDomainAggregates,
+  previous: CheckpointDomainAggregates,
   table: DataTableName,
   rows: readonly D1ImportRow[],
-): DataDomainAggregates {
+): CheckpointDomainAggregates {
   const next = { ...previous };
   switch (table) {
     case "users":
@@ -808,7 +991,8 @@ function addActualPageAggregates(
         (row) => row.status === "completed",
       ).length;
       break;
-    case "confidence_point_ledger":
+    case "confidence_point_ledger": {
+      let exactDelta = BigInt(next.confidencePointDelta);
       for (const row of rows) {
         if (
           typeof row.amount !== "number" ||
@@ -818,24 +1002,38 @@ function addActualPageAggregates(
             "data conversion: confidence-point aggregate encountered an unsafe value",
           );
         }
-        next.confidencePointDelta += row.amount;
+        exactDelta += BigInt(row.amount);
       }
+      next.confidencePointDelta = exactDelta.toString();
       break;
+    }
     case "ai_feedback_attempts":
       next.successfulAiFeedbackAttempts += rows.filter(
         (row) => row.status === "succeeded",
       ).length;
       break;
   }
-  if (!isDomainAggregates(next)) {
+  if (!isCheckpointDomainAggregates(next)) {
     throw new Error("data conversion: aggregate accumulation overflowed");
   }
   return next;
 }
 
-function isDomainAggregates(
+function exactSafeInteger(value: bigint, location: string): number {
+  if (
+    value < BigInt(Number.MIN_SAFE_INTEGER) ||
+    value > BigInt(Number.MAX_SAFE_INTEGER)
+  ) {
+    throw new Error(
+      `data conversion: ${location} exceeds safe integer precision`,
+    );
+  }
+  return Number(value);
+}
+
+function isCheckpointDomainAggregates(
   value: unknown,
-): value is ReconciliationReport["domainAggregates"] {
+): value is CheckpointDomainAggregates {
   if (!isRecord(value)) return false;
   const keys = [
     "activeSavedWords",
@@ -848,5 +1046,9 @@ function isDomainAggregates(
   if (Object.keys(value).sort().join(",") !== keys.sort().join(",")) {
     return false;
   }
-  return keys.every((key) => Number.isSafeInteger(value[key]));
+  return keys.every((key) =>
+    key === "confidencePointDelta"
+      ? typeof value[key] === "string" && /^(?:0|-?[1-9]\d*)$/.test(value[key])
+      : isNonNegativeSafeInteger(value[key]),
+  );
 }

@@ -10,6 +10,7 @@ import {
 import {
   applyD1ImportPlan,
   reconcileD1Import,
+  releaseD1ReconciliationWriteLock,
   type ReconciliationReport,
 } from "../src/data-conversion/importer.js";
 import {
@@ -166,6 +167,57 @@ describe("PostgreSQL-to-D1 conversion", () => {
     ).toBe(true);
   });
 
+  it("uses exact signed arithmetic for domain aggregates", async () => {
+    const fixture = fixtureFor("exact-signed-aggregate");
+    const template = rowOf(fixture, "confidence_point_ledger");
+    const amounts = [
+      Number.MAX_SAFE_INTEGER,
+      2,
+      1,
+      -1,
+      1,
+      -1,
+      1,
+      -1,
+      1,
+      -1,
+      -2,
+    ];
+    tablesOf(fixture).confidence_point_ledger = amounts.map(
+      (amount, index) => ({
+        ...structuredClone(template),
+        id: `00000000-0000-0000-0000-${(0xff10 + index).toString(16).padStart(12, "0")}`,
+        amount,
+        balance_after: 0,
+        idempotency_key: `synthetic-exact-aggregate-${index}`,
+      }),
+    );
+    const plan = await convertPostgresExport(fixture);
+    expect(plan.expectedDomainAggregates.confidencePointDelta).toBe(
+      Number.MAX_SAFE_INTEGER,
+    );
+    await runImport(env.DB, plan);
+    expect(
+      (await runReconciliation(env.DB, plan)).domainAggregates
+        .confidencePointDelta,
+    ).toBe(Number.MAX_SAFE_INTEGER);
+
+    const overflowing = fixtureFor("overflowing-signed-aggregate");
+    const overflowTemplate = rowOf(overflowing, "confidence_point_ledger");
+    tablesOf(overflowing).confidence_point_ledger = [
+      { ...structuredClone(overflowTemplate), amount: Number.MAX_SAFE_INTEGER },
+      {
+        ...structuredClone(overflowTemplate),
+        id: "00000000-0000-0000-0000-00000000ff20",
+        amount: 1,
+        idempotency_key: "synthetic-overflow-aggregate",
+      },
+    ];
+    await expect(convertPostgresExport(overflowing)).rejects.toThrow(
+      "confidence-point aggregate exceeds safe integer precision",
+    );
+  });
+
   it("fails before import when a converted foreign key has no parent", async () => {
     const fixture = syntheticPostgresExport();
     rowOf(fixture, "user_words").meaning_id =
@@ -199,10 +251,10 @@ describe("PostgreSQL-to-D1 conversion", () => {
     expect(result).toMatchObject({
       resumedFromChunk: 0,
       appliedChunks: 50,
-      appliedBatches: 50,
       totalChunks: 50,
       completed: true,
     });
+    expect(result.appliedBatches).toBeGreaterThanOrEqual(result.appliedChunks);
     expect(report.status).toBe("pass");
     expect(report.foreignKeyViolations).toBe(0);
     expect(Object.values(report.tables).every((table) => table.matches)).toBe(
@@ -320,6 +372,9 @@ describe("PostgreSQL-to-D1 conversion", () => {
     await expect(reconcileD1Import(env.DB, plan)).rejects.toThrow(
       "checkpoint aggregate activeUsers is inconsistent",
     );
+    await env.DB.prepare("DELETE FROM platform_metadata WHERE key IN (?1, ?2)")
+      .bind(key, "data_reconciliation_write_lock")
+      .run();
   });
 
   it("reruns a completed reconciliation instead of returning a stale pass", async () => {
@@ -415,6 +470,31 @@ describe("PostgreSQL-to-D1 conversion", () => {
       "canonical_words",
       10,
     );
+    const reconciliationKey =
+      "data_reconciliation:voc080-t09-bounded-clear-base";
+    const storedCheckpoint = await env.DB.prepare(
+      "SELECT value_json FROM platform_metadata WHERE key = ?1",
+    )
+      .bind(reconciliationKey)
+      .first<{ value_json: string }>();
+    const validCheckpoint = storedCheckpoint?.value_json ?? "";
+    const forgedCheckpoint = JSON.parse(validCheckpoint) as {
+      current: { rollingChecksum: string };
+    };
+    forgedCheckpoint.current.rollingChecksum = "a".repeat(64);
+    await env.DB.prepare(
+      "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
+    )
+      .bind(JSON.stringify(forgedCheckpoint), reconciliationKey)
+      .run();
+    await expect(
+      reconcileD1Import(env.DB, guardedReconciliationPlan),
+    ).rejects.toThrow("cursor is not bound to an exact expected prefix");
+    await env.DB.prepare(
+      "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
+    )
+      .bind(validCheckpoint, reconciliationKey)
+      .run();
     await expect(
       reconcileD1Import(env.DB, guardedReconciliationPlan, {
         failBeforePage: { table: "canonical_words", processedRows: 10 },
@@ -422,6 +502,14 @@ describe("PostgreSQL-to-D1 conversion", () => {
     ).rejects.toThrow(
       "injected reconciliation failure before canonical_words row 10",
     );
+    await expect(
+      env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
+        .bind(
+          "Mutation during reconciliation",
+          initialPlan.expectedRows.canonical_words[0]?.id,
+        )
+        .run(),
+    ).rejects.toThrow("data reconciliation write lock is active");
     expect(
       (await runReconciliation(env.DB, guardedReconciliationPlan)).status,
     ).toBe("pass");
@@ -613,7 +701,10 @@ async function runReconciliation(
 ): Promise<ReconciliationReport> {
   for (let attempt = 0; attempt < 10_000; attempt += 1) {
     const result = await reconcileD1Import(database, plan);
-    if (result.status !== "pending") return result;
+    if (result.status !== "pending") {
+      await releaseD1ReconciliationWriteLock(database, plan);
+      return result;
+    }
   }
   throw new Error("test reconciliation did not complete within bounded pages");
 }

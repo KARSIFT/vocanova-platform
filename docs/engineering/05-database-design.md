@@ -387,8 +387,10 @@ VOC-080-T09 binds a versioned normalized export contract to all 25 active Postgr
 their D1 destination columns. Synthetic conversion lowercases UUID/bytea representations,
 canonicalizes UTC timestamps and JSON, converts booleans, rejects unsafe integers, orders foreign
 keys, and applies bounded local-D1 batches with checksum-bound atomic checkpoints. Reconciliation
-compares per-table counts/checksums, foreign keys, and domain aggregates without exposing learner
-content or authentication material. The active recovery and authority boundary is documented in
+compares per-table counts/checksums, foreign keys, and exact domain aggregates without exposing
+learner content or authentication material. A plan-bound D1 write guard freezes converted tables
+across the bounded multi-invocation page chain and is explicitly released only after completed
+evidence is recorded. The active recovery and authority boundary is documented in
 the [PostgreSQL-to-D1 conversion runbook](../operations/postgresql-to-d1-conversion.md).
 
 Migration order: extensions → users → external_identities → user_onboarding_profiles →

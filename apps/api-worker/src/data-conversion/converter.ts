@@ -20,6 +20,12 @@ export type DataDomainAggregates = Readonly<{
   successfulAiFeedbackAttempts: number;
 }>;
 
+export type ExpectedPageEvidence = Readonly<{
+  rowCount: number;
+  lastId: string;
+  checksum: string;
+}>;
+
 export type ImportChunk = Readonly<{
   index: number;
   operation: "clear" | "upsert";
@@ -38,6 +44,9 @@ export type D1ImportPlan = Readonly<{
   chunks: readonly ImportChunk[];
   expectedRows: Readonly<Record<DataTableName, readonly D1ImportRow[]>>;
   expectedChecksums: Readonly<Record<DataTableName, string>>;
+  expectedPageEvidence: Readonly<
+    Record<DataTableName, readonly ExpectedPageEvidence[]>
+  >;
   expectedDomainAggregates: DataDomainAggregates;
   sourceCounts: Readonly<Record<DataTableName, number>>;
   excludedCounts: Readonly<Record<DataTableName, number>>;
@@ -190,7 +199,8 @@ export async function convertPostgresExport(
 
   validateRelationships(expectedRows);
 
-  const expectedChecksums = await checksumExpectedTables(expectedRows);
+  const { expectedChecksums, expectedPageEvidence } =
+    await checksumExpectedTables(expectedRows);
   const expectedDomainAggregates = aggregateExpectedRows(expectedRows);
   const chunks: ImportChunk[] = [];
   // A new export ID is a complete replacement. Clearing in reverse dependency
@@ -267,6 +277,7 @@ export async function convertPostgresExport(
       chunks,
       expectedRows,
       expectedChecksums,
+      expectedPageEvidence,
       expectedDomainAggregates,
       excludedCounts,
     }),
@@ -282,6 +293,7 @@ export async function convertPostgresExport(
     chunks,
     expectedRows,
     expectedChecksums,
+    expectedPageEvidence,
     expectedDomainAggregates,
     sourceCounts,
     excludedCounts,
@@ -566,32 +578,51 @@ function validateRelationships(
 
 async function checksumExpectedTables(
   rowsByTable: Readonly<Record<DataTableName, readonly D1ImportRow[]>>,
-): Promise<Record<DataTableName, string>> {
-  const checksums = {} as Record<DataTableName, string>;
+): Promise<{
+  expectedChecksums: Record<DataTableName, string>;
+  expectedPageEvidence: Record<DataTableName, readonly ExpectedPageEvidence[]>;
+}> {
+  const expectedChecksums = {} as Record<DataTableName, string>;
+  const expectedPageEvidence = {} as Record<
+    DataTableName,
+    readonly ExpectedPageEvidence[]
+  >;
   const emptyChecksum = await sha256(D1_RECONCILIATION_CHAIN_SEED);
   for (const tableName of DATA_TABLE_NAMES) {
     let checksum = emptyChecksum;
     const rows = rowsByTable[tableName];
+    const pages: ExpectedPageEvidence[] = [];
     for (
       let offset = 0;
       offset < rows.length;
       offset += D1_RECONCILIATION_PAGE_ROWS
     ) {
+      const page = rows.slice(offset, offset + D1_RECONCILIATION_PAGE_ROWS);
       checksum = await sha256(
         canonicalJson({
           previous: checksum,
-          rows: rows.slice(offset, offset + D1_RECONCILIATION_PAGE_ROWS),
+          rows: page,
         }),
       );
+      pages.push({
+        rowCount: offset + page.length,
+        lastId: String(page.at(-1)?.id),
+        checksum,
+      });
     }
-    checksums[tableName] = checksum;
+    expectedChecksums[tableName] = checksum;
+    expectedPageEvidence[tableName] = pages;
   }
-  return checksums;
+  return { expectedChecksums, expectedPageEvidence };
 }
 
 function aggregateExpectedRows(
   rows: Readonly<Record<DataTableName, readonly D1ImportRow[]>>,
 ): DataDomainAggregates {
+  const confidencePointDelta = rows.confidence_point_ledger.reduce(
+    (total, row) => total + BigInt(requireSafeInteger(row.amount, "amount")),
+    0n,
+  );
   return {
     activeUsers: rows.users.filter((row) => row.status === "active").length,
     activeSavedWords: rows.user_words.filter((row) => row.deleted_at === null)
@@ -600,14 +631,33 @@ function aggregateExpectedRows(
     completedMissions: rows.daily_mission_snapshots.filter(
       (row) => row.status === "completed",
     ).length,
-    confidencePointDelta: rows.confidence_point_ledger.reduce(
-      (total, row) => total + Number(row.amount),
-      0,
+    confidencePointDelta: exactSafeInteger(
+      confidencePointDelta,
+      "confidence-point aggregate",
     ),
     successfulAiFeedbackAttempts: rows.ai_feedback_attempts.filter(
       (row) => row.status === "succeeded",
     ).length,
   };
+}
+
+function requireSafeInteger(value: unknown, location: string): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value)) {
+    throw new Error(`data conversion: ${location} is not a safe integer`);
+  }
+  return value;
+}
+
+function exactSafeInteger(value: bigint, location: string): number {
+  if (
+    value < BigInt(Number.MIN_SAFE_INTEGER) ||
+    value > BigInt(Number.MAX_SAFE_INTEGER)
+  ) {
+    throw new Error(
+      `data conversion: ${location} exceeds safe integer precision`,
+    );
+  }
+  return Number(value);
 }
 
 function requireTableSpec(name: DataTableName): TableSpec {
