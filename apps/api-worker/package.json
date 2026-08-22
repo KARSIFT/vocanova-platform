@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json --pretty false",
-    "ci": "pnpm run lint && pnpm run types:check && pnpm run typecheck && pnpm run safety:check && pnpm run test && pnpm run openapi:check && pnpm run contract:check && pnpm run dry-run",
+    "ci": "pnpm run lint && pnpm run types:check && pnpm run typecheck && pnpm run safety:check && pnpm run data-conversion:inventory && pnpm run test && pnpm run openapi:check && pnpm run contract:check && pnpm run dry-run",
     "contract:check": "node scripts/check-contract-drift.mjs",
     "contract:write": "node scripts/check-contract-drift.mjs --write",
+    "data-conversion:inventory": "pnpm run build && node scripts/check-data-conversion-inventory.mjs",
     "dev": "wrangler dev --local",
     "dry-run": "wrangler deploy --dry-run --experimental-provision=false --outdir .wrangler/dry-run",
     "lint": "eslint src test scripts vitest.config.ts",
@@ -15,6 +16,7 @@
     "openapi:write": "pnpm run build && node scripts/generate-openapi.mjs --write",
     "safety:check": "node scripts/check-worker-safety.mjs",
     "test": "vitest run",
+    "test:data-conversion": "pnpm run data-conversion:inventory && vitest run test/data-conversion.test.ts",
     "typecheck": "tsc --noEmit --pretty false",
     "types:check": "wrangler types worker-configuration.d.ts --env-interface CloudflareEnv --check",
     "types:write": "wrangler types worker-configuration.d.ts --env-interface CloudflareEnv"
