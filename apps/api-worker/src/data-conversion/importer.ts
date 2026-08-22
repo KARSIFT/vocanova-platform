@@ -41,6 +41,7 @@ export type TableReconciliation = Readonly<{
   excludedCount: number;
   expectedCount: number;
   actualCount: number;
+  expectedPrefixMatched: boolean;
   expectedChecksum: string;
   actualChecksum: string;
   matches: boolean;
@@ -80,7 +81,7 @@ type CheckpointDomainAggregates = Readonly<
 >;
 
 type ReconciliationCheckpoint = Readonly<{
-  schemaVersion: "vocanova-d1-reconciliation-checkpoint-v4";
+  schemaVersion: "vocanova-d1-reconciliation-checkpoint-v5";
   generation: string;
   planChecksum: string;
   tableIndex: number;
@@ -88,6 +89,7 @@ type ReconciliationCheckpoint = Readonly<{
     rowCount: number;
     rollingChecksum: string;
     lastId: string;
+    expectedPrefixMatched: boolean;
   }>;
   tables: Readonly<Partial<Record<DataTableName, TableReconciliation>>>;
   foreignKeyViolations: number;
@@ -105,7 +107,7 @@ type ReconciliationWriteLock = Readonly<{
 
 const CHECKPOINT_SCHEMA_VERSION = "vocanova-d1-import-checkpoint-v1";
 const RECONCILIATION_CHECKPOINT_SCHEMA_VERSION =
-  "vocanova-d1-reconciliation-checkpoint-v4";
+  "vocanova-d1-reconciliation-checkpoint-v5";
 const RECONCILIATION_PROGRESS_SCHEMA_VERSION =
   "vocanova-d1-reconciliation-progress-v1";
 const RECONCILIATION_WRITE_LOCK_SCHEMA_VERSION =
@@ -314,6 +316,13 @@ export async function reconcileD1Import(
           pageRows,
         ),
         lastId,
+        expectedPrefixMatched: checkpoint.current.expectedPrefixMatched,
+      };
+      nextCurrent = {
+        ...nextCurrent,
+        expectedPrefixMatched:
+          nextCurrent.expectedPrefixMatched &&
+          cursorMatchesExpectedPrefix(plan, tableName, nextCurrent),
       };
     }
     const nextForeignKeyViolations =
@@ -349,6 +358,7 @@ export async function reconcileD1Import(
     const expectedChecksum = plan.expectedChecksums[tableName];
     const actualChecksum = nextCurrent.rollingChecksum;
     const matches =
+      nextCurrent.expectedPrefixMatched &&
       expectedRows.length === nextCurrent.rowCount &&
       expectedChecksum === actualChecksum;
     const nextTableIndex = checkpoint.tableIndex + 1;
@@ -366,6 +376,7 @@ export async function reconcileD1Import(
           excludedCount: plan.excludedCounts[tableName],
           expectedCount: expectedRows.length,
           actualCount: nextCurrent.rowCount,
+          expectedPrefixMatched: nextCurrent.expectedPrefixMatched,
           expectedChecksum,
           actualChecksum,
           matches,
@@ -417,10 +428,15 @@ export async function releaseD1ReconciliationWriteLock(
     );
   }
 
-  await session
+  const releaseResult = await session
     .prepare("DELETE FROM platform_metadata WHERE key = ?1 AND value_json = ?2")
     .bind(RECONCILIATION_WRITE_LOCK_KEY, existingLock)
     .run();
+  if ((releaseResult.meta.changes ?? 0) !== 1) {
+    throw new Error(
+      "data conversion: reconciliation write lock release lost its conditional race",
+    );
+  }
   const remainingLock = await loadReconciliationWriteLock(session);
   if (remainingLock === existingLock) {
     throw new Error(
@@ -547,7 +563,7 @@ function parseReconciliationCheckpoint(
   }
   requireExactObjectKeys(
     parsed.current,
-    ["lastId", "rollingChecksum", "rowCount"],
+    ["expectedPrefixMatched", "lastId", "rollingChecksum", "rowCount"],
     "reconciliation checkpoint current cursor",
   );
   if (
@@ -555,11 +571,14 @@ function parseReconciliationCheckpoint(
     Number(parsed.current.rowCount) < 0 ||
     typeof parsed.current.rollingChecksum !== "string" ||
     !CHECKSUM_PATTERN.test(parsed.current.rollingChecksum) ||
+    typeof parsed.current.expectedPrefixMatched !== "boolean" ||
     typeof parsed.current.lastId !== "string" ||
     (parsed.current.lastId !== "" &&
       !CANONICAL_ID_PATTERN.test(parsed.current.lastId)) ||
     (Number(parsed.current.rowCount) === 0) !==
       (parsed.current.lastId === "") ||
+    (Number(parsed.current.rowCount) === 0 &&
+      parsed.current.expectedPrefixMatched !== true) ||
     (Number(parsed.current.rowCount) > 0 &&
       Number(parsed.current.rowCount) % D1_RECONCILIATION_PAGE_ROWS !== 0)
   ) {
@@ -570,7 +589,7 @@ function parseReconciliationCheckpoint(
 
   const tableIndex = Number(parsed.tableIndex);
   const currentRowCount = Number(parsed.current.rowCount);
-  if (currentRowCount > 0) {
+  if (currentRowCount > 0 && parsed.current.expectedPrefixMatched === true) {
     const currentTable = DATA_TABLE_NAMES[tableIndex];
     const expectedPageIndex = currentRowCount / D1_RECONCILIATION_PAGE_ROWS - 1;
     const expectedPage = currentTable
@@ -697,6 +716,7 @@ function validateTableReconciliation(
       "excludedCount",
       "expectedChecksum",
       "expectedCount",
+      "expectedPrefixMatched",
       "matches",
       "sourceCount",
     ],
@@ -707,6 +727,7 @@ function validateTableReconciliation(
     !isNonNegativeSafeInteger(value.excludedCount) ||
     !isNonNegativeSafeInteger(value.expectedCount) ||
     !isNonNegativeSafeInteger(value.actualCount) ||
+    typeof value.expectedPrefixMatched !== "boolean" ||
     typeof value.expectedChecksum !== "string" ||
     !CHECKSUM_PATTERN.test(value.expectedChecksum) ||
     typeof value.actualChecksum !== "string" ||
@@ -717,7 +738,8 @@ function validateTableReconciliation(
     value.expectedCount !== plan.expectedRows[tableName].length ||
     value.expectedChecksum !== plan.expectedChecksums[tableName] ||
     value.matches !==
-      (value.expectedCount === value.actualCount &&
+      (value.expectedPrefixMatched &&
+        value.expectedCount === value.actualCount &&
         value.expectedChecksum === value.actualChecksum)
   ) {
     throw new Error(
@@ -760,12 +782,17 @@ async function advanceReconciliationWriteLock(
   };
   const previousValue = canonicalJson(previous);
   const nextValue = canonicalJson(next);
-  await database
+  const transitionResult = await database
     .prepare(
       "UPDATE platform_metadata SET value_json = ?1, updated_at = ?2 WHERE key = ?3 AND value_json = ?4",
     )
     .bind(nextValue, updatedAt, RECONCILIATION_WRITE_LOCK_KEY, previousValue)
     .run();
+  if ((transitionResult.meta.changes ?? 0) !== 1) {
+    throw new Error(
+      "data conversion: reconciliation state changed concurrently",
+    );
+  }
   const stored = await loadReconciliationWriteLock(database);
   if (stored !== nextValue) {
     throw new Error(
@@ -915,7 +942,24 @@ async function emptyReconciliationCursor(): Promise<
     rowCount: 0,
     rollingChecksum: await sha256(D1_RECONCILIATION_CHAIN_SEED),
     lastId: "",
+    expectedPrefixMatched: true,
   };
+}
+
+function cursorMatchesExpectedPrefix(
+  plan: D1ImportPlan,
+  tableName: DataTableName,
+  cursor: ReconciliationCheckpoint["current"],
+): boolean {
+  if (cursor.rowCount === 0) return true;
+  const pageIndex =
+    Math.ceil(cursor.rowCount / D1_RECONCILIATION_PAGE_ROWS) - 1;
+  const expectedPage = plan.expectedPageEvidence[tableName][pageIndex];
+  return (
+    expectedPage?.rowCount === cursor.rowCount &&
+    expectedPage.lastId === cursor.lastId &&
+    expectedPage.checksum === cursor.rollingChecksum
+  );
 }
 
 async function advanceRollingChecksum(

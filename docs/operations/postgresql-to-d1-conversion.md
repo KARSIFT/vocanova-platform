@@ -106,6 +106,7 @@ destructive production action.
 `reconcileD1Import` emits `vocanova-d1-reconciliation-v2` with:
 
 - source, excluded, expected, and actual count for every table;
+- the irreversible expected-prefix match result for every table;
 - expected and actual SHA-256 checksum for canonical target rows;
 - bounded per-row parent-reference violation count across every canonical page;
 - active-user, active-saved-word, review-attempt, completed-mission, Confidence Point
@@ -121,8 +122,11 @@ completion lookahead), rejects a
 canonicalized 10-row page above 12,000,000 bytes, advances a SHA-256 page chain, checks
 that page's declared parent references with bounded indexed lookups, and accumulates
 the six domain aggregates from those same rows. It stores only its generation nonce,
-last ID, row count, rolling checksum, cumulative counters, and completed-table evidence
-inside the global `data_reconciliation_write_lock` row. Retrying after a read or state
+last ID, row count, rolling checksum, irreversible expected-prefix match bit, cumulative
+counters, and completed-table evidence inside the global
+`data_reconciliation_write_lock` row. A genuine target mismatch flips that bit and
+continues through bounded pages to a machine-readable FAIL; a cursor that still claims
+to match must equal the plan's exact page evidence. Retrying after a read or state
 transition failure re-reads at most the same page and cannot double-count because each
 cursor advance is a compare-and-swap update of that exact generation. The signed
 Confidence Point delta
@@ -144,14 +148,18 @@ for at most seven queries. This remains below the committed 50-query ceiling.
 
 The protected conversion step precomputes the identical 10-row expected checksum chain
 with its page-ending row IDs, plus expected aggregate totals, and binds them into the
-overall plan checksum. Every resumed non-empty cursor must match one of those exact
-page endpoints by direct page-index lookup; no invocation linearly scans prior page
-evidence. A well-shaped cursor that skips or rewrites an unverified prefix fails closed.
+overall plan checksum. Every resumed non-empty cursor that still claims an expected
+prefix match must equal one of those exact page endpoints by direct page-index lookup;
+no invocation linearly scans prior page evidence. A mismatched cursor remains
+irreversibly marked and can finish only as FAIL. A cursor that skips or rewrites a
+claimed matching prefix fails closed.
 Reconciliation therefore never iterates an expected table, performs a D1 full-table
 aggregate, or materializes a D1 table/result set in one Worker invocation. Persisted
 table evidence is checked back against the plan's counts and checksums, and the
 `matches` flag is recomputed semantically. The invocation that completes a pass is the
-only invocation that receives its report. The report is a single-use receipt and
+only invocation that receives its report. The conditional transition must affect
+exactly one row, so simultaneous callers that calculated the same final checkpoint do
+not both become producers. The report is a single-use receipt and
 deliberately leaves its exact generation lock active while a consumer validates and
 records the evidence; a later reconciliation caller fails closed instead of replaying
 that completed PASS. The consumer then passes the report's
@@ -186,7 +194,8 @@ idempotent replay, interrupted resume, malformed/stale-checkpoint rejection, byt
 statement bounds, alternate/composite uniqueness, deletion-safe forward correction,
 multi-page reconciliation interruption/retry without expected-table scans,
 semantically inconsistent reconciliation-checkpoint rejection, single-use completed
-receipts, lock-loss/reacquisition failure recovery, stale-generation release rejection,
+receipts, concurrent final-page/release arbitration, lock-loss/reacquisition failure
+recovery to a machine-readable mismatch, stale-generation release rejection,
 mutation rejection while an in-progress prefix exists, exact signed
 aggregate cancellation/overflow, bounded foreign-key/count/checksum/domain
 reconciliation, and log-redaction assertions. The

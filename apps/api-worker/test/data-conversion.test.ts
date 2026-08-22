@@ -564,7 +564,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     });
   }, 15_000);
 
-  it("restarts from zero after lock loss even when reacquisition then fails", async () => {
+  it("restarts from zero after lock loss and reports a changed prefix", async () => {
     const fixture = fixtureFor("lock-loss-restart");
     const template = rowOf(fixture, "canonical_words");
     for (let index = 0; index < 10; index += 1) {
@@ -604,18 +604,31 @@ describe("PostgreSQL-to-D1 conversion", () => {
       tableIndex: 0,
       current: { rowCount: 0 },
     });
-    await expect(completeReconciliation(env.DB, plan)).rejects.toThrow(
-      "cursor is not bound to an exact expected prefix",
-    );
-    await env.DB.prepare("DELETE FROM platform_metadata WHERE key = ?1")
-      .bind("data_reconciliation_write_lock")
-      .run();
+    await consumeReconciliation(env.DB, plan, (report) => {
+      expect(report.status).toBe("fail");
+      expect(report.tables.canonical_words.matches).toBe(false);
+      expect(report.tables.canonical_words.expectedPrefixMatched).toBe(false);
+    });
   }, 15_000);
 
   it("binds completed evidence and release to the exact generation", async () => {
     const plan = await convertPostgresExport(fixtureFor("release-generation"));
     await runImport(env.DB, plan);
-    const completedA = await completeReconciliation(env.DB, plan);
+    await runUntilFinalReconciliationPage(env.DB, plan);
+    const finalPageResults = await Promise.allSettled([
+      reconcileD1Import(env.DB, plan),
+      reconcileD1Import(env.DB, plan),
+    ]);
+    const completedReports = finalPageResults.flatMap((result) =>
+      result.status === "fulfilled" && result.value.status !== "pending"
+        ? [result.value]
+        : [],
+    );
+    expect(completedReports).toHaveLength(1);
+    expect(
+      finalPageResults.filter((result) => result.status === "rejected"),
+    ).toHaveLength(1);
+    const completedA = completedReports[0]!;
     expect(completedA.status).toBe("pass");
 
     await expect(reconcileD1Import(env.DB, plan)).rejects.toThrow(
@@ -630,11 +643,24 @@ describe("PostgreSQL-to-D1 conversion", () => {
         .run(),
     ).rejects.toThrow("data reconciliation write lock is active");
 
-    await releaseD1ReconciliationWriteLock(
-      env.DB,
-      plan,
-      completedA.reconciliationGeneration,
-    );
+    const duplicateReleaseResults = await Promise.allSettled([
+      releaseD1ReconciliationWriteLock(
+        env.DB,
+        plan,
+        completedA.reconciliationGeneration,
+      ),
+      releaseD1ReconciliationWriteLock(
+        env.DB,
+        plan,
+        completedA.reconciliationGeneration,
+      ),
+    ]);
+    expect(
+      duplicateReleaseResults.filter((result) => result.status === "fulfilled"),
+    ).toHaveLength(1);
+    expect(
+      duplicateReleaseResults.filter((result) => result.status === "rejected"),
+    ).toHaveLength(1);
     await env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
       .bind(
         "Mutation after generation A release",
@@ -888,4 +914,23 @@ async function runUntilReconciliationPage(
     }
   }
   throw new Error(`test reconciliation did not reach ${String(table)}`);
+}
+
+async function runUntilFinalReconciliationPage(
+  database: D1Database,
+  plan: D1ImportPlan,
+): Promise<void> {
+  for (let attempt = 0; attempt < 10_000; attempt += 1) {
+    const result = await reconcileD1Import(database, plan);
+    if (
+      result.status === "pending" &&
+      result.completedTables === DATA_TABLE_NAMES.length - 1
+    ) {
+      return;
+    }
+    if (result.status !== "pending") {
+      throw new Error("test reconciliation completed before its final page");
+    }
+  }
+  throw new Error("test reconciliation did not reach its final page");
 }
