@@ -59,3 +59,16 @@ reviewer identity is recorded provenance, not falsely claimed hosted attribution
 See [`docs/governance/repository-settings.md`](../docs/governance/repository-settings.md)
 for the continuously maintained built-versus-pending record. DOC-17 and DOC-18's
 unbuilt Control Plane remains superseded and archived under `docs/archive/`.
+
+## VOC-080 direction
+
+The workflow inventory remains exactly four. T00 documents the Cloudflare target and
+external Ruflo boundary; it does not change workflow behavior or repository settings.
+Later tasks refactor CI first, then add credential-free OpenNext/Worker/D1 checks.
+Only `ci.yml` may eventually contain held Cloudflare version/deployment jobs, keeping
+the four-file invariant. Pull-request jobs never receive deployment credentials.
+
+Ruflo runs outside the repository and GitHub Actions. It may coordinate separate
+participants, but no issue/comment trigger, tracked launcher, workflow, or Ruflo tool
+may approve, merge, close, dispatch, deploy, access Cloudflare credentials, or consume
+production data. GitHub evidence and the read-only eligibility result remain canonical.

@@ -1,12 +1,12 @@
 ---
 id: DOC-15
 title: Vocanova AI-Native Product and Engineering Operating Model
-version: 1.1
+version: 1.2
 status: approved
 owner: founder
 canonical_path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
 approved_at: 2026-07-13
-last_reviewed_at: 2026-08-19
+last_reviewed_at: 2026-08-22
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -27,13 +27,38 @@ related_documents:
 related_decisions:
   - A-001
   - ADR-0002
+  - ADR-0003
+  - ADR-0004
+revision_note: >
+  VOC-080 selects the Cloudflare-native runtime and external Ruflo coordination
+  model. Provider names remain historical examples, not permanent role authority;
+  owned-server and automatic-staging clauses remain history, not current behavior.
 ---
 
-# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.1
+# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.2
 
 ## Document status
 
-This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. VOC-078-T03 removed repository deployment and server-monitoring workflows on 2026-08-19 pending a future hosting decision. Historical deployments remain evidence, but GitHub Actions currently provides no staging or production publication mechanism and removing the workflows did not stop any server. See §17 and [DOC-16](../governance/16-autonomous-development-operating-model.md) for current authority.
+This document is approved and defines the operating model for product decisions, specifications,
+implementation, review, repository governance, and release for Vocanova. VOC-078-T03 removed
+repository deployment and server-monitoring workflows on 2026-08-19. VOC-080 now selects the
+Cloudflare-native target in [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md)
+and external Ruflo boundary in
+[ADR-0004](../decisions/ADR-0004-external-ruflo-orchestration.md). Historical deployments remain
+evidence, but GitHub Actions currently provides no staging or production publication mechanism;
+T00 neither deploys Cloudflare nor inspects/stops a server. See §17 and
+[DOC-16](../governance/16-autonomous-development-operating-model.md) for current authority.
+
+**VOC-080 amendment (2026-08-22):** The current runtime/data target is OpenNext on a Cloudflare Web
+Worker, a TypeScript/Hono API Worker, and separate D1 databases, migrated behind contract and domain
+parity before Go/PostgreSQL/server assets retire. Ruflo may coordinate planner, builder, tester,
+specialist, reviewer, and task-orchestrator roles only from an external, pinned, deny-by-default
+installation. GitHub stays canonical; Ruflo cannot approve, merge, close, dispatch, deploy, access
+secrets/production data, spend, or launch. Every unreconciled body clause that permanently assigns a
+role to ChatGPT, Codex, or Claude instead maps to the provider-neutral role named by its function.
+Every clause that states `develop` automatically deploys, or that an owned server is the final target,
+is historical. Repository implementation, Cloudflare provisioning, staging, production, DNS,
+spending, and production-data access remain separate events governed by VOC-080's explicit holds.
 
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 
@@ -42,9 +67,9 @@ originally described an aspirational merge/staging model that was never the syst
 built. §17 has been rewritten to match the live pipeline; those two decision entries carry an
 inline correction note pointing to §17.0 rather than being rewritten in place, to preserve the
 decision register as a historical record. **DOC-16 (`docs/governance/16-autonomous-development-operating-model.md`,
-which folds in the former A-003 amendment and VOC-079 as of its v3.0 revision) and the repository's
+which folds in the former A-003 amendment, VOC-079, and VOC-080 boundaries as of its v3.1 revision) and the repository's
 current deterministic workflows are the actual current authority for merge/review mechanics.
-DOC-16 v3.0 makes R0-R4 approval-neutral by class while retaining stronger R4 evidence
+DOC-16 v3.1 keeps R0-R4 approval-neutral by class while retaining stronger R4 evidence
 and explicit action-specific authority. Where this document's remaining prose (outside
 §17) describes something narrower or different,
 treat it as historical design intent, not a live contradiction requiring further correction in
@@ -77,7 +102,7 @@ Different reviewer role independently verifies the exact revision
         ↓
 Separate authorized actor verifies the evidence and merges into develop
         ↓
-No package promotion or production release runs during VOC-078 reconstruction
+No live Cloudflare action runs until the applicable VOC-080 task and action hold pass
 ```
 
 The key principles are:
@@ -813,21 +838,37 @@ Required sections:
 # Specification
 
 ## Problem
+
 ## Desired outcome
+
 ## Users affected
+
 ## In scope
+
 ## Out of scope
+
 ## Functional requirements
+
 ## User experience requirements
+
 ## Business rules
+
 ## Data requirements
+
 ## API requirements
+
 ## Security and privacy requirements
+
 ## Accessibility requirements
+
 ## Performance expectations
+
 ## Error and edge-case behavior
+
 ## Compatibility requirements
+
 ## Assumptions
+
 ## Open questions
 ```
 
@@ -914,15 +955,25 @@ Required sections:
 
 ```markdown
 ## Technical approach
+
 ## Components affected
+
 ## Data-model changes
+
 ## API changes
+
 ## Migration approach
+
 ## Security controls
+
 ## Testing approach
+
 ## Deployment approach
+
 ## Rollback approach
+
 ## Implementation sequence
+
 ## Known technical risks
 ```
 
@@ -1392,9 +1443,9 @@ develop
 
 `main` represents the production-approved state.
 
-*Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.0
+_Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.0
 now governs merge/release authority through risk evidence and explicitly assigned
-action-specific authority; no R0-R4 label creates founder approval by itself.*
+action-specific authority; no R0-R4 label creates founder approval by itself._
 
 Rules:
 
@@ -1564,16 +1615,16 @@ new implementation revision followed by complete checks and fresh independent re
 
 ## 17.2 Current authority matrix
 
-| Action | Required authority |
-|---|---|
-| Approve product vision, scope, and material behavior | DOC-16's applicable decision owner |
-| Draft a change package | Planner role; human or AI, no adoption authority |
-| Adopt a package | Applicable DOC-16 authority, recorded against the exact reviewed candidate |
-| Implement an adopted task | Implementer role, different from its reviewer |
-| Independently verify a plan or implementation | Reviewer role with no write access to the reviewed revision |
-| Merge into `develop` | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
-| Promote `develop` to `main` | No current workflow; prohibited during VOC-078 reconstruction |
-| Deploy | No current repository workflow; a future hosting package must separately authorize and define publication |
+| Action                                               | Required authority                                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Approve product vision, scope, and material behavior | DOC-16's applicable decision owner                                                                                        |
+| Draft a change package                               | Planner role; human or AI, no adoption authority                                                                          |
+| Adopt a package                                      | Applicable DOC-16 authority, recorded against the exact reviewed candidate                                                |
+| Implement an adopted task                            | Implementer role, different from its reviewer                                                                             |
+| Independently verify a plan or implementation        | Reviewer role with no write access to the reviewed revision                                                               |
+| Merge into `develop`                                 | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
+| Promote `develop` to `main`                          | Separately reviewed pull request; no current promotion workflow                                                           |
+| Deploy                                               | No current repository workflow; VOC-080-T10 may define held Cloudflare publication after parity                           |
 
 Roles are responsibilities, not permanent vendors. The builder never approves or
 merges its own work, and a reviewer that authors a material correction becomes a
@@ -1634,16 +1685,16 @@ Claude review
 
 Examples:
 
-| Affected area | Additional checks |
-|---|---|
-| Database | Migration validation, rollback review, integrity checks |
-| API | Contract and integration tests |
-| Authentication | Security tests, authorization review, session checks |
-| User interface | Component tests, journey tests, accessibility checks |
-| Infrastructure | Deployment validation and permission review |
-| Dependencies | Vulnerability, license, provenance, install-script review |
-| AI behavior | Prompt and evaluation regression checks |
-| Governance | Independent review of authority and policy impact |
+| Affected area  | Additional checks                                         |
+| -------------- | --------------------------------------------------------- |
+| Database       | Migration validation, rollback review, integrity checks   |
+| API            | Contract and integration tests                            |
+| Authentication | Security tests, authorization review, session checks      |
+| User interface | Component tests, journey tests, accessibility checks      |
+| Infrastructure | Deployment validation and permission review               |
+| Dependencies   | Vulnerability, license, provenance, install-script review |
+| AI behavior    | Prompt and evaluation regression checks                   |
+| Governance     | Independent review of authority and policy impact         |
 
 ## 18.3 Main and release checks
 
@@ -1671,14 +1722,14 @@ Claude release review supplements but does not replace founder approval.
 No repository workflow currently deploys to staging. A merge into `develop` changes
 repository history only. VOC-078-T03 removed image publication, SSH deployment,
 migration execution, smoke testing, and remote health polling from GitHub Actions
-without changing runtime assets or inspecting/stopping a server. A future hosting
-package must define the replacement mechanism and evidence.
+without changing runtime assets or inspecting/stopping a server. ADR-0003 selects
+Cloudflare Workers/D1; VOC-080-T10 must define the held replacement mechanism and evidence after parity.
 
 ## 19.2 Production publication
 
 There is no current repository production-publication mechanism. `main` remains the
 production-history branch, but a push to it does not deploy. Any future publication
-flow requires a separate hosting package and must include at least:
+flow requires VOC-080-T10, the applicable action hold, and at least:
 
 ```text
 Release PR prepared
@@ -2016,8 +2067,8 @@ Critical security findings cannot be waived merely to meet a deadline.
 
 High-risk waivers require founder approval before production.
 
-*Current authority note: a production or external-effect waiver follows its explicitly
-assigned action authority under DOC-16; risk class alone does not assign the founder.*
+_Current authority note: a production or external-effect waiver follows its explicitly
+assigned action authority under DOC-16; risk class alone does not assign the founder._
 
 ## 22.4 Kill switches
 
@@ -2242,15 +2293,15 @@ Claude may perform semantic consistency review.
 
 Recommended:
 
-| Document category | Cadence |
-|---|---:|
-| Product Bible | Every six months or major strategy change |
-| MVP PRD | Monthly during active MVP development |
-| Architecture | Quarterly or at major change |
-| Database and APIs | Before affected implementation |
-| Security and operations | Quarterly and before production milestones |
-| Market research | When a material product decision depends on it |
-| Operating model | Quarterly and after major incidents |
+| Document category       |                                        Cadence |
+| ----------------------- | ---------------------------------------------: |
+| Product Bible           |      Every six months or major strategy change |
+| MVP PRD                 |          Monthly during active MVP development |
+| Architecture            |                   Quarterly or at major change |
+| Database and APIs       |                 Before affected implementation |
+| Security and operations |     Quarterly and before production milestones |
+| Market research         | When a material product decision depends on it |
+| Operating model         |            Quarterly and after major incidents |
 
 Review schedules may create issues, but do not automatically change content.
 
@@ -2482,19 +2533,19 @@ Automation Level 1 — Assisted execution with Claude-approved develop merges
 
 This means:
 
-| Activity | Authority |
-|---|---|
-| Product decision | Founder |
-| Specification drafting | ChatGPT-assisted |
-| Repository updates | Codex-assisted |
-| Implementation | Codex |
-| Deterministic validation | GitHub Actions |
-| Technical review | Claude |
-| Merge into `develop` | CI + Claude |
-| Staging deployment | Automatic |
-| Release PR | Automation-assisted |
-| Merge into `main` | Founder |
-| Production publication | Founder |
+| Activity                 | Authority           |
+| ------------------------ | ------------------- |
+| Product decision         | Founder             |
+| Specification drafting   | ChatGPT-assisted    |
+| Repository updates       | Codex-assisted      |
+| Implementation           | Codex               |
+| Deterministic validation | GitHub Actions      |
+| Technical review         | Claude              |
+| Merge into `develop`     | CI + Claude         |
+| Staging deployment       | Automatic           |
+| Release PR               | Automation-assisted |
+| Merge into `main`        | Founder             |
+| Production publication   | Founder             |
 
 Future automation may expand only with evidence.
 
@@ -2740,9 +2791,9 @@ The transition is complete when:
 - Production remains founder-controlled.
 - Manual copying between chat topics and repository files has ended.
 
-*Historical completion criteria: current release and production authority is defined
-by DOC-16 v3.0 and a future hosting package, not by the risk label or this preserved
-v1.0 checklist.*
+_Historical completion criteria: current release and production authority is defined
+by DOC-16 v3.1 and VOC-080's held Cloudflare program, not by the risk label or this
+preserved v1.0 checklist._
 
 ## 25.12 Reversibility
 
@@ -2956,18 +3007,19 @@ Promotions from `develop` to `main` use an identifiable release merge commit.
 
 Every implementation PR may merge into `develop` after required CI, specialist checks, and Claude approval. Founder approval is not required.
 
-*Correction 2026-08-19: superseded by DOC-16's "Branch and merge behavior"
+_Correction 2026-08-19: superseded by DOC-16's "Branch and merge behavior"
 section and §17. Verification is not vendor-locked, and VOC-078-T01 retired the
 workflow that automatically merged PRs. Preserved as historical record, not current
-rule.*
+rule._
 
 ### DG5-09 — Automatic staging
 
 Successful merges into `develop` automatically deploy to staging.
 
-*Correction 2026-08-19: staging deployment was built and historically proven, then
-VOC-078-T03 removed its GitHub workflow pending a future hosting decision. A merge to
-`develop` no longer deploys. See §17. Preserved as historical record.*
+_Correction 2026-08-19: staging deployment was built and historically proven, then
+VOC-078-T03 removed its GitHub workflow. ADR-0003 now selects Cloudflare, but a merge to
+`develop` still does not deploy; VOC-080-T10 and `HOLD-00` are pending. See §17.
+Preserved as historical record._
 
 ### DG5-10 — Protected production
 
@@ -3279,16 +3331,16 @@ Migration uses complete verified document sources and does not reconstruct canon
 
 Codex implementation PRs targeting `develop` may merge automatically after required deterministic CI, specialist checks, and Claude approval.
 
-*Correction 2026-08-19: see DG5-08's correction and §17. The current model is
+_Correction 2026-08-19: see DG5-08's correction and §17. The current model is
 role-based and the automatic merge workflow was retired by VOC-078-T01. Preserved as
-historical record.*
+historical record._
 
 ### DG10-06 — Automatic staging
 
 Every approved merge into `develop` deploys automatically to staging and runs required verification.
 
-*Correction 2026-08-19: see DG5-09's correction. Staging deployment was built and is
-scheduled for removal in VOC-078-T03. Preserved as historical record.*
+_Correction 2026-08-19: see DG5-09's correction. Staging deployment was built and is
+scheduled for removal in VOC-078-T03. Preserved as historical record._
 
 ### DG10-07 — Founder-controlled main and production
 

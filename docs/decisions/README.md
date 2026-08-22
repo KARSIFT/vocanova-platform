@@ -20,10 +20,12 @@ action-specific authority and genuinely triggered EHR remain separate gates.
 
 ## Index
 
-| Record | Status | Decision |
-|---|---|---|
-| [ADR-0001](ADR-0001-agent-orchestration-architecture.md) | Superseded by VOC-078 | Retired repository-local agent orchestration architecture |
-| [ADR-0002](ADR-0002-risk-class-approval-neutral-authority.md) | Accepted | Risk class determines evidence, not personal approval |
+| Record                                                        | Status                | Decision                                                                                                             |
+| ------------------------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [ADR-0001](ADR-0001-agent-orchestration-architecture.md)      | Superseded by VOC-078 | Retired repository-local agent orchestration architecture                                                            |
+| [ADR-0002](ADR-0002-risk-class-approval-neutral-authority.md) | Accepted              | Risk class determines evidence, not personal approval                                                                |
+| [ADR-0003](ADR-0003-cloudflare-native-runtime-and-data.md)    | Accepted              | Cloudflare Workers, OpenNext, Hono, and D1 replace the owned-server target through a parity-gated migration          |
+| [ADR-0004](ADR-0004-external-ruflo-orchestration.md)          | Accepted              | Ruflo coordinates external provider-neutral roles while GitHub remains canonical and authority stays deny-by-default |
 
 ## Template
 

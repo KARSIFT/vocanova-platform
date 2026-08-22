@@ -23,9 +23,9 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 
 ## Existing-file reconciliation
 
-| Path | Classification | Preserved content | Reconciliation |
-|---|---|---|---|
-| path | present-compatible / present-needs-reconciliation / absent-approved-to-create / material-conflict |  |  |
+| Path | Classification                                                                                    | Preserved content | Reconciliation |
+| ---- | ------------------------------------------------------------------------------------------------- | ----------------- | -------------- |
+| path | present-compatible / present-needs-reconciliation / absent-approved-to-create / material-conflict |                   |                |
 
 - Previous governance control:
 - Proposed governance control:
@@ -58,8 +58,8 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 ## Acceptance-criteria evidence
 
 | Criterion | Test or observable evidence | Result |
-|---|---|---|
-| AC-## |  |  |
+| --------- | --------------------------- | ------ |
+| AC-##     |                             |        |
 
 ## Validation evidence
 
@@ -69,6 +69,7 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - Independent-verifier report/result:
 - Implementer provenance:
 - Verifier provenance:
+- External-orchestrator provenance/version or `N/A` (provenance only; never authority):
 
 Complete the machine-readable block after exact-revision independent review. Keep it
 as JSON data; do not add shell expressions or credentials. Use an empty
@@ -106,6 +107,7 @@ as JSON data; do not add shell expressions or credentials. Use an empty
 - Accessibility:
 - Documentation:
 - Cloudflare/deployment/operations:
+- Ruflo/orchestrator permission impact or `N/A`:
 
 ## Release and outcome
 
@@ -130,3 +132,5 @@ as JSON data; do not add shell expressions or credentials. Use an empty
 - [ ] No secrets, credentials, or unnecessary personal data are included.
 - [ ] Material changes after review will dismiss or renew approvals and verification.
 - [ ] AI implementation/review provenance is disclosed above.
+- [ ] No external orchestrator received GitHub write/merge, Cloudflare, secret,
+      production-data, deployment, spending, DNS, or launch authority.
