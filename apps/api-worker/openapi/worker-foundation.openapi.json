@@ -79,7 +79,7 @@
           },
           "migrationStatus": {
             "enum": [
-              "identity-account-parity"
+              "content-review-parity"
             ],
             "type": "string"
           },
@@ -105,7 +105,7 @@
     }
   },
   "info": {
-    "description": "Operational Worker/D1 migration target. Identity and account endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
+    "description": "Operational Worker/D1 migration target. Identity, account, content, learning, and review endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
     "title": "VocaNova Worker API migration target",
     "version": "0.1.0"
   },
@@ -389,6 +389,346 @@
         ]
       }
     },
+    "/api/v1/canonical-words/{wordSlug}": {
+      "get": {
+        "operationId": "GetCanonicalWord",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "wordSlug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "word": {
+                      "properties": {
+                        "difficultyLevel": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "meanings": {
+                          "items": {
+                            "properties": {
+                              "examples": {
+                                "items": {
+                                  "properties": {
+                                    "exampleText": {
+                                      "type": "string"
+                                    },
+                                    "id": {
+                                      "format": "uuid",
+                                      "type": "string"
+                                    },
+                                    "situationLabel": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "exampleText"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "id": {
+                                "format": "uuid",
+                                "type": "string"
+                              },
+                              "learnerDefinition": {
+                                "type": "string"
+                              },
+                              "partOfSpeech": {
+                                "type": "string"
+                              },
+                              "saved": {
+                                "type": "boolean"
+                              },
+                              "shortDefinition": {
+                                "type": "string"
+                              },
+                              "usageNotes": {
+                                "items": {
+                                  "properties": {
+                                    "id": {
+                                      "format": "uuid",
+                                      "type": "string"
+                                    },
+                                    "noteText": {
+                                      "type": "string"
+                                    },
+                                    "noteType": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "id",
+                                    "noteType",
+                                    "noteText"
+                                  ],
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "userWordId": {
+                                "format": "uuid",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id",
+                              "partOfSpeech",
+                              "shortDefinition",
+                              "saved",
+                              "examples",
+                              "usageNotes"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "wordType": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "text",
+                        "slug",
+                        "wordType",
+                        "meanings"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "word"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Content and learning"
+        ]
+      }
+    },
+    "/api/v1/journey-situations": {
+      "get": {
+        "operationId": "ListJourneySituations",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "category": {
+                            "type": "string"
+                          },
+                          "displayOrder": {
+                            "type": "integer"
+                          },
+                          "id": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "levelBand": {
+                            "type": "string"
+                          },
+                          "shortDescription": {
+                            "type": "string"
+                          },
+                          "slug": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "slug",
+                          "title",
+                          "shortDescription",
+                          "category",
+                          "displayOrder"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Content and learning"
+        ]
+      }
+    },
+    "/api/v1/journey-situations/{slug}": {
+      "get": {
+        "operationId": "GetJourneySituation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "meanings": {
+                      "items": {
+                        "properties": {
+                          "meaningId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "partOfSpeech": {
+                            "type": "string"
+                          },
+                          "saved": {
+                            "type": "boolean"
+                          },
+                          "shortDefinition": {
+                            "type": "string"
+                          },
+                          "wordId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "wordSlug": {
+                            "type": "string"
+                          },
+                          "wordText": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "meaningId",
+                          "wordId",
+                          "wordSlug",
+                          "wordText",
+                          "partOfSpeech",
+                          "shortDefinition",
+                          "saved"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "situation": {
+                      "properties": {
+                        "category": {
+                          "type": "string"
+                        },
+                        "displayOrder": {
+                          "type": "integer"
+                        },
+                        "id": {
+                          "format": "uuid",
+                          "type": "string"
+                        },
+                        "levelBand": {
+                          "type": "string"
+                        },
+                        "shortDescription": {
+                          "type": "string"
+                        },
+                        "slug": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "slug",
+                        "title",
+                        "shortDescription",
+                        "category",
+                        "displayOrder"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "situation",
+                    "meanings"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Content and learning"
+        ]
+      }
+    },
     "/api/v1/me": {
       "get": {
         "operationId": "GetCurrentUser",
@@ -648,6 +988,321 @@
         ]
       }
     },
+    "/api/v1/reviews/due": {
+      "get": {
+        "operationId": "GetReviewsDue",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "meaningId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "partOfSpeech": {
+                            "type": "string"
+                          },
+                          "reviewStep": {
+                            "type": "integer"
+                          },
+                          "shortDefinition": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "userWordId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "wordId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "wordSlug": {
+                            "type": "string"
+                          },
+                          "wordText": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "userWordId",
+                          "meaningId",
+                          "wordId",
+                          "wordText",
+                          "wordSlug",
+                          "partOfSpeech",
+                          "shortDefinition",
+                          "status",
+                          "reviewStep"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    },
+                    "totalCount": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "items",
+                    "totalCount"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Content and learning"
+        ]
+      }
+    },
+    "/api/v1/reviews/submissions": {
+      "post": {
+        "operationId": "SubmitReview",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "answeredAt": {
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "attemptType": {
+                    "default": "review",
+                    "enum": [
+                      "review"
+                    ],
+                    "type": "string"
+                  },
+                  "clientAttemptId": {
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "meaningId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "additionalProperties": {},
+                    "type": "object"
+                  },
+                  "promptType": {
+                    "enum": [
+                      "multiple_choice",
+                      "self_check"
+                    ],
+                    "type": "string"
+                  },
+                  "rating": {
+                    "enum": [
+                      "again",
+                      "hard",
+                      "good",
+                      "easy"
+                    ],
+                    "type": "string"
+                  },
+                  "responseTimeMs": {
+                    "default": 0,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "result": {
+                    "enum": [
+                      "correct",
+                      "incorrect",
+                      "skipped"
+                    ],
+                    "type": "string"
+                  },
+                  "selectedOptionMeaningId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "source": {
+                    "default": "review",
+                    "enum": [
+                      "review",
+                      "review_session"
+                    ],
+                    "type": "string"
+                  },
+                  "typedAnswer": {
+                    "type": "string"
+                  },
+                  "userWordId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "wasHintUsed": {
+                    "default": false,
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "userWordId",
+                  "meaningId",
+                  "promptType",
+                  "result",
+                  "answeredAt",
+                  "clientAttemptId"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "answeredAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "attemptId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "attemptType": {
+                      "type": "string"
+                    },
+                    "clientAttemptId": {
+                      "type": "string"
+                    },
+                    "meaningId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "nextReviewAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "promptType": {
+                      "enum": [
+                        "multiple_choice",
+                        "self_check"
+                      ],
+                      "type": "string"
+                    },
+                    "rating": {
+                      "enum": [
+                        "again",
+                        "hard",
+                        "good",
+                        "easy"
+                      ],
+                      "type": "string"
+                    },
+                    "responseTimeMs": {
+                      "type": "integer"
+                    },
+                    "result": {
+                      "enum": [
+                        "correct",
+                        "incorrect",
+                        "skipped"
+                      ],
+                      "type": "string"
+                    },
+                    "reviewStepAfter": {
+                      "type": "integer"
+                    },
+                    "reviewStepBefore": {
+                      "type": "integer"
+                    },
+                    "selectedOptionMeaningId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "typedAnswer": {
+                      "type": "string"
+                    },
+                    "userWordId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "wasHintUsed": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "attemptId",
+                    "userWordId",
+                    "meaningId",
+                    "attemptType",
+                    "promptType",
+                    "result",
+                    "rating",
+                    "reviewStepBefore",
+                    "reviewStepAfter",
+                    "answeredAt",
+                    "responseTimeMs",
+                    "wasHintUsed",
+                    "source",
+                    "clientAttemptId",
+                    "nextReviewAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Content and learning"
+        ]
+      }
+    },
     "/api/v1/settings": {
       "get": {
         "operationId": "GetSettings",
@@ -895,6 +1550,242 @@
         },
         "tags": [
           "Identity and account"
+        ]
+      }
+    },
+    "/api/v1/user-words": {
+      "get": {
+        "operationId": "ListSavedWords",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "addedAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "meaningId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "partOfSpeech": {
+                            "type": "string"
+                          },
+                          "saved": {
+                            "type": "boolean"
+                          },
+                          "shortDefinition": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "userWordId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "wordId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "wordSlug": {
+                            "type": "string"
+                          },
+                          "wordText": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "userWordId",
+                          "meaningId",
+                          "wordId",
+                          "wordText",
+                          "wordSlug",
+                          "partOfSpeech",
+                          "shortDefinition",
+                          "status",
+                          "source",
+                          "saved",
+                          "addedAt"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Content and learning"
+        ]
+      },
+      "post": {
+        "operationId": "SaveUserWord",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "meaningId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "source": {
+                    "enum": [
+                      "journey",
+                      "search",
+                      "manual"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "meaningId",
+                  "source"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "addedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "meaningId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "partOfSpeech": {
+                      "type": "string"
+                    },
+                    "saved": {
+                      "type": "boolean"
+                    },
+                    "shortDefinition": {
+                      "type": "string"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "userWordId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "wordId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "wordSlug": {
+                      "type": "string"
+                    },
+                    "wordText": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "userWordId",
+                    "meaningId",
+                    "wordId",
+                    "wordText",
+                    "wordSlug",
+                    "partOfSpeech",
+                    "shortDefinition",
+                    "status",
+                    "source",
+                    "saved",
+                    "addedAt"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Content and learning"
+        ]
+      }
+    },
+    "/api/v1/user-words/{meaningId}": {
+      "delete": {
+        "operationId": "UnsaveUserWord",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "meaningId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response"
+          }
+        },
+        "tags": [
+          "Content and learning"
         ]
       }
     },

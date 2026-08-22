@@ -28,7 +28,7 @@ const clientExceptions = {
   "/api/v1/auth/oauth/google/callback":
     "OAuth provider redirect target; navigated by the browser/provider rather than VocanovaClient",
 };
-const identityOperationIds = new Set([
+const workerOperationIds = new Set([
   "GetCurrentUser",
   "RequestMagicLink",
   "ConsumeMagicLink",
@@ -42,8 +42,16 @@ const identityOperationIds = new Set([
   "RequestEmailChangeLink",
   "ConsumeEmailChangeLink",
   "CreateAccountDeletionRequest",
+  "ListJourneySituations",
+  "GetJourneySituation",
+  "GetCanonicalWord",
+  "ListSavedWords",
+  "SaveUserWord",
+  "UnsaveUserWord",
+  "GetReviewsDue",
+  "SubmitReview",
 ]);
-const identitySuccessStatus = {
+const workerSuccessStatus = {
   CompleteOnboarding: 200,
   ConsumeEmailChangeLink: 200,
   ConsumeMagicLink: 200,
@@ -57,6 +65,14 @@ const identitySuccessStatus = {
   RequestEmailChangeLink: 204,
   RequestMagicLink: 204,
   UpdateSettings: 200,
+  GetCanonicalWord: 200,
+  GetJourneySituation: 200,
+  GetReviewsDue: 200,
+  ListJourneySituations: 200,
+  ListSavedWords: 200,
+  SaveUserWord: 200,
+  SubmitReview: 200,
+  UnsaveUserWord: 204,
 };
 const worker = JSON.parse(await readFile(workerPath, "utf8"));
 const workerCandidates = Object.entries(worker.paths)
@@ -67,21 +83,21 @@ const workerCandidates = Object.entries(worker.paths)
       path: route,
     })),
   )
-  .filter((operation) => identityOperationIds.has(operation.operationId))
+  .filter((operation) => workerOperationIds.has(operation.operationId))
   .sort((left, right) => left.operationId.localeCompare(right.operationId));
-const canonicalIdentityCandidates = operations
-  .filter((operation) => identityOperationIds.has(operation.operationId))
+const canonicalWorkerCandidates = operations
+  .filter((operation) => workerOperationIds.has(operation.operationId))
   .sort((left, right) => left.operationId.localeCompare(right.operationId));
-const workerOperations = identityManifest(worker, workerCandidates);
-const canonicalIdentityOperations = identityManifest(
+const workerOperations = operationManifest(worker, workerCandidates);
+const canonicalWorkerOperations = operationManifest(
   canonical,
-  canonicalIdentityCandidates,
+  canonicalWorkerCandidates,
 );
 const expected = {
   canonical: "apps/api/openapi/vocanova.openapi.json",
   sha256: createHash("sha256").update(canonicalBytes).digest("hex"),
   clientExceptions,
-  workerIdentityOperations: workerOperations,
+  workerMigratedOperations: workerOperations,
   operations,
 };
 const serialized = await format(JSON.stringify(expected), { parser: "json" });
@@ -111,13 +127,13 @@ assert.equal(canonical.openapi, "3.1.0");
 assert.ok(operations.length > 0, "canonical API has no operations");
 assert.deepEqual(
   workerOperations,
-  canonicalIdentityOperations,
-  "Worker identity/account method, path, or operationId drifted from the canonical Go contract",
+  canonicalWorkerOperations,
+  "Worker migrated operation method, path, parameters, or shape drifted from the canonical Go contract",
 );
 assert.equal(
   workerOperations.length,
-  identityOperationIds.size,
-  "Worker identity/account parity manifest is incomplete",
+  workerOperationIds.size,
+  "Worker migrated parity manifest is incomplete",
 );
 assert.deepEqual(
   Object.keys(clientExceptions),
@@ -127,14 +143,14 @@ assert.deepEqual(
   "client-path exceptions must be exact, documented, and minimal",
 );
 process.stdout.write(
-  `Public contract drift check: PASS (${operations.length} canonical operations; ${workerOperations.length} Worker identity/account operations; API client coverage present)\n`,
+  `Public contract drift check: PASS (${operations.length} canonical operations; ${workerOperations.length} Worker migrated operations; API client coverage present)\n`,
 );
 
-function identityManifest(document, candidates) {
+function operationManifest(document, candidates) {
   return candidates.map((candidate) => {
     const operation =
       document.paths[candidate.path][candidate.method.toLowerCase()];
-    const successStatus = identitySuccessStatus[candidate.operationId];
+    const successStatus = workerSuccessStatus[candidate.operationId];
     assert.ok(
       operation.responses[String(successStatus)],
       `${candidate.operationId} is missing successful response ${successStatus}`,
