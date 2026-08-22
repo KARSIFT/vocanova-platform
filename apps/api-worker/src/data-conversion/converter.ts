@@ -11,6 +11,15 @@ import {
 export type D1ImportValue = string | number | null;
 export type D1ImportRow = Readonly<Record<string, D1ImportValue>>;
 
+export type DataDomainAggregates = Readonly<{
+  activeUsers: number;
+  activeSavedWords: number;
+  reviewAttempts: number;
+  completedMissions: number;
+  confidencePointDelta: number;
+  successfulAiFeedbackAttempts: number;
+}>;
+
 export type ImportChunk = Readonly<{
   index: number;
   operation: "clear" | "upsert";
@@ -28,6 +37,8 @@ export type D1ImportPlan = Readonly<{
   maxChunkBytes: number;
   chunks: readonly ImportChunk[];
   expectedRows: Readonly<Record<DataTableName, readonly D1ImportRow[]>>;
+  expectedChecksums: Readonly<Record<DataTableName, string>>;
+  expectedDomainAggregates: DataDomainAggregates;
   sourceCounts: Readonly<Record<DataTableName, number>>;
   excludedCounts: Readonly<Record<DataTableName, number>>;
   redactedFieldCount: number;
@@ -59,10 +70,12 @@ export const D1_IMPORT_MAX_ROWS_PER_CHUNK = 40;
 export const D1_IMPORT_MAX_ROW_BYTES = 1_000_000;
 export const D1_IMPORT_MAX_CHUNK_BYTES = 1_500_000;
 export const D1_IMPORT_MIN_CHUNK_BYTES = 8_192;
+export const D1_RECONCILIATION_PAGE_ROWS = 10;
+export const D1_RECONCILIATION_CHAIN_SEED = "vocanova-d1-page-chain-v1";
 const D1_IMPORT_STATEMENT_OVERHEAD_BYTES = 4_096;
 const D1_IMPORT_CHECKPOINT_RESERVE_BYTES = 4_096;
 
-const FOREIGN_KEYS = [
+export const DATA_FOREIGN_KEYS = [
   ["external_identities", "user_id", "users"],
   ["user_onboarding_profiles", "user_id", "users"],
   ["user_settings", "user_id", "users"],
@@ -177,6 +190,8 @@ export async function convertPostgresExport(
 
   validateRelationships(expectedRows);
 
+  const expectedChecksums = await checksumExpectedTables(expectedRows);
+  const expectedDomainAggregates = aggregateExpectedRows(expectedRows);
   const chunks: ImportChunk[] = [];
   // A new export ID is a complete replacement. Clearing in reverse dependency
   // order makes rows omitted by a correction (including newly soft-deleted
@@ -251,6 +266,8 @@ export async function convertPostgresExport(
       maxChunkBytes,
       chunks,
       expectedRows,
+      expectedChecksums,
+      expectedDomainAggregates,
       excludedCounts,
     }),
   );
@@ -264,6 +281,8 @@ export async function convertPostgresExport(
     maxChunkBytes,
     chunks,
     expectedRows,
+    expectedChecksums,
+    expectedDomainAggregates,
     sourceCounts,
     excludedCounts,
     redactedFieldCount,
@@ -530,7 +549,7 @@ function validateRelationships(
       new Set(rowsByTable[table].map((row) => String(row.id))),
     ]),
   );
-  for (const [table, fieldName, referencedTable] of FOREIGN_KEYS) {
+  for (const [table, fieldName, referencedTable] of DATA_FOREIGN_KEYS) {
     const referencedIds = idsByTable.get(referencedTable);
     if (!referencedIds)
       throw new Error("data conversion: internal FK schema error");
@@ -543,6 +562,52 @@ function validateRelationships(
       }
     }
   }
+}
+
+async function checksumExpectedTables(
+  rowsByTable: Readonly<Record<DataTableName, readonly D1ImportRow[]>>,
+): Promise<Record<DataTableName, string>> {
+  const checksums = {} as Record<DataTableName, string>;
+  const emptyChecksum = await sha256(D1_RECONCILIATION_CHAIN_SEED);
+  for (const tableName of DATA_TABLE_NAMES) {
+    let checksum = emptyChecksum;
+    const rows = rowsByTable[tableName];
+    for (
+      let offset = 0;
+      offset < rows.length;
+      offset += D1_RECONCILIATION_PAGE_ROWS
+    ) {
+      checksum = await sha256(
+        canonicalJson({
+          previous: checksum,
+          rows: rows.slice(offset, offset + D1_RECONCILIATION_PAGE_ROWS),
+        }),
+      );
+    }
+    checksums[tableName] = checksum;
+  }
+  return checksums;
+}
+
+function aggregateExpectedRows(
+  rows: Readonly<Record<DataTableName, readonly D1ImportRow[]>>,
+): DataDomainAggregates {
+  return {
+    activeUsers: rows.users.filter((row) => row.status === "active").length,
+    activeSavedWords: rows.user_words.filter((row) => row.deleted_at === null)
+      .length,
+    reviewAttempts: rows.review_attempts.length,
+    completedMissions: rows.daily_mission_snapshots.filter(
+      (row) => row.status === "completed",
+    ).length,
+    confidencePointDelta: rows.confidence_point_ledger.reduce(
+      (total, row) => total + Number(row.amount),
+      0,
+    ),
+    successfulAiFeedbackAttempts: rows.ai_feedback_attempts.filter(
+      (row) => row.status === "succeeded",
+    ).length,
+  };
 }
 
 function requireTableSpec(name: DataTableName): TableSpec {

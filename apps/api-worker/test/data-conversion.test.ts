@@ -271,6 +271,76 @@ describe("PostgreSQL-to-D1 conversion", () => {
     );
   });
 
+  it("fails closed on semantically inconsistent reconciliation evidence", async () => {
+    const plan = await convertPostgresExport(
+      fixtureFor("bad-reconciliation-checkpoint"),
+    );
+    await runImport(env.DB, plan);
+    await reconcileD1Import(env.DB, plan);
+
+    const key = "data_reconciliation:voc080-t09-bad-reconciliation-checkpoint";
+    const stored = await env.DB.prepare(
+      "SELECT value_json FROM platform_metadata WHERE key = ?1",
+    )
+      .bind(key)
+      .first<{ value_json: string }>();
+    const checkpoint = JSON.parse(stored?.value_json ?? "null") as {
+      domainAggregates: { activeUsers: number };
+      tables: { users: { matches: boolean; sourceCount: number } };
+    };
+    checkpoint.tables.users.sourceCount = 99;
+    await env.DB.prepare(
+      "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
+    )
+      .bind(JSON.stringify(checkpoint), key)
+      .run();
+
+    await expect(reconcileD1Import(env.DB, plan)).rejects.toThrow(
+      "checkpoint table users has invalid evidence",
+    );
+
+    checkpoint.tables.users.sourceCount = plan.sourceCounts.users;
+    checkpoint.tables.users.matches = false;
+    await env.DB.prepare(
+      "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
+    )
+      .bind(JSON.stringify(checkpoint), key)
+      .run();
+    await expect(reconcileD1Import(env.DB, plan)).rejects.toThrow(
+      "checkpoint table users has invalid evidence",
+    );
+
+    checkpoint.tables.users.matches = true;
+    checkpoint.domainAggregates.activeUsers = 99;
+    await env.DB.prepare(
+      "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
+    )
+      .bind(JSON.stringify(checkpoint), key)
+      .run();
+    await expect(reconcileD1Import(env.DB, plan)).rejects.toThrow(
+      "checkpoint aggregate activeUsers is inconsistent",
+    );
+  });
+
+  it("reruns a completed reconciliation instead of returning a stale pass", async () => {
+    const plan = await convertPostgresExport(
+      fixtureFor("stale-reconciliation"),
+    );
+    await runImport(env.DB, plan);
+    expect((await runReconciliation(env.DB, plan)).status).toBe("pass");
+
+    await env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
+      .bind(
+        "Post-checkpoint mutation",
+        plan.expectedRows.canonical_words[0]?.id,
+      )
+      .run();
+
+    const restarted = await reconcileD1Import(env.DB, plan);
+    expect(restarted.status).toBe("pending");
+    expect((await runReconciliation(env.DB, plan)).status).toBe("fail");
+  });
+
   it("rejects a changed plan under a completed export id", async () => {
     const initialFixture = fixtureFor("stale");
     const initial = await convertPostgresExport(initialFixture);
@@ -338,20 +408,23 @@ describe("PostgreSQL-to-D1 conversion", () => {
       chunkSize: 10,
     });
     await runImport(env.DB, initialPlan);
+    const guardedReconciliationPlan = forbidExpectedTableScans(initialPlan);
     await runUntilReconciliationPage(
       env.DB,
-      initialPlan,
+      guardedReconciliationPlan,
       "canonical_words",
       10,
     );
     await expect(
-      reconcileD1Import(env.DB, initialPlan, {
+      reconcileD1Import(env.DB, guardedReconciliationPlan, {
         failBeforePage: { table: "canonical_words", processedRows: 10 },
       }),
     ).rejects.toThrow(
       "injected reconciliation failure before canonical_words row 10",
     );
-    expect((await runReconciliation(env.DB, initialPlan)).status).toBe("pass");
+    expect(
+      (await runReconciliation(env.DB, guardedReconciliationPlan)).status,
+    ).toBe("pass");
 
     const correction = await convertPostgresExport(
       fixtureFor("bounded-clear-correction"),
@@ -474,6 +547,25 @@ function fixtureFor(suffix: string): Record<string, unknown> {
   const fixture = syntheticPostgresExport();
   fixture.export_id = `voc080-t09-${suffix}`;
   return fixture;
+}
+
+function forbidExpectedTableScans(plan: D1ImportPlan): D1ImportPlan {
+  const expectedRows = Object.fromEntries(
+    DATA_TABLE_NAMES.map((tableName) => [
+      tableName,
+      new Proxy(plan.expectedRows[tableName], {
+        get(target, property, receiver) {
+          if (property !== "length") {
+            throw new Error(
+              `reconciliation scanned expected ${tableName} rows through ${String(property)}`,
+            );
+          }
+          return Reflect.get(target, property, receiver);
+        },
+      }),
+    ]),
+  ) as D1ImportPlan["expectedRows"];
+  return { ...plan, expectedRows };
 }
 
 async function runImport(

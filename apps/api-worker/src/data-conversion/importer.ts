@@ -1,9 +1,13 @@
 import {
   canonicalJson,
+  DATA_FOREIGN_KEYS,
+  D1_RECONCILIATION_CHAIN_SEED,
+  D1_RECONCILIATION_PAGE_ROWS,
   D1_IMPORT_MAX_ROW_BYTES,
   estimateUpsertChunkBytes,
   estimateUpsertStatementBytes,
   sha256,
+  type DataDomainAggregates,
   type D1ImportPlan,
   type D1ImportRow,
 } from "./converter.js";
@@ -49,14 +53,7 @@ export type ReconciliationReport = Readonly<{
   status: "pass" | "fail";
   tables: Readonly<Record<DataTableName, TableReconciliation>>;
   foreignKeyViolations: number;
-  domainAggregates: Readonly<{
-    activeUsers: number;
-    activeSavedWords: number;
-    reviewAttempts: number;
-    completedMissions: number;
-    confidencePointDelta: number;
-    successfulAiFeedbackAttempts: number;
-  }>;
+  domainAggregates: DataDomainAggregates;
   expectedDomainAggregates: ReconciliationReport["domainAggregates"];
   redactedFieldCount: number;
 }>;
@@ -76,7 +73,7 @@ export type ReconciliationResult =
   ReconciliationProgress | ReconciliationReport;
 
 type ReconciliationCheckpoint = Readonly<{
-  schemaVersion: "vocanova-d1-reconciliation-checkpoint-v1";
+  schemaVersion: "vocanova-d1-reconciliation-checkpoint-v2";
   planChecksum: string;
   tableIndex: number;
   current: Readonly<{
@@ -85,17 +82,16 @@ type ReconciliationCheckpoint = Readonly<{
     lastId: string;
   }>;
   tables: Readonly<Partial<Record<DataTableName, TableReconciliation>>>;
-  foreignKeyViolations: number | null;
-  domainAggregates: ReconciliationReport["domainAggregates"] | null;
+  foreignKeyViolations: number;
+  domainAggregates: ReconciliationReport["domainAggregates"];
   completed: boolean;
 }>;
 
 const CHECKPOINT_SCHEMA_VERSION = "vocanova-d1-import-checkpoint-v1";
 const RECONCILIATION_CHECKPOINT_SCHEMA_VERSION =
-  "vocanova-d1-reconciliation-checkpoint-v1";
+  "vocanova-d1-reconciliation-checkpoint-v2";
 const RECONCILIATION_PROGRESS_SCHEMA_VERSION =
   "vocanova-d1-reconciliation-progress-v1";
-export const D1_RECONCILIATION_PAGE_ROWS = 10;
 export const D1_RECONCILIATION_MAX_PAGE_BYTES = 12_000_000;
 const CHECKSUM_PATTERN = /^[0-9a-f]{64}$/;
 const CANONICAL_ID_PATTERN =
@@ -226,11 +222,16 @@ export async function reconcileD1Import(
     .prepare(LOAD_CHECKPOINT_SQL)
     .bind(checkpointKey)
     .first<{ value_json: string }>();
-  const checkpoint = existing
+  let checkpoint = existing
     ? parseReconciliationCheckpoint(existing.value_json, plan)
     : await initialReconciliationCheckpoint(plan);
 
-  if (checkpoint.completed) return buildReconciliationReport(plan, checkpoint);
+  // A completed receipt is evidence for the invocation that produced it, not a
+  // permanent cache of database truth. Any later call starts a fresh bounded
+  // pass so a post-checkpoint mutation can never return a stale PASS.
+  if (checkpoint.completed) {
+    checkpoint = await initialReconciliationCheckpoint(plan);
+  }
 
   if (checkpoint.tableIndex < DATA_TABLE_NAMES.length) {
     const tableName = DATA_TABLE_NAMES[checkpoint.tableIndex];
@@ -259,6 +260,17 @@ export async function reconcileD1Import(
           columns.map((column) => [column, row[column] ?? null]),
         ),
       );
+    const pageForeignKeyViolations = actualResult.results
+      .slice(0, D1_RECONCILIATION_PAGE_ROWS)
+      .reduce((total, row) => {
+        const value = row.__foreign_key_violations;
+        if (!isNonNegativeSafeInteger(value)) {
+          throw new Error(
+            `data conversion: foreign-key reconciliation for ${tableName} returned an unsafe value`,
+          );
+        }
+        return total + value;
+      }, 0);
     const pageBytes = encodedByteLength(canonicalJson(pageRows));
     if (pageBytes > D1_RECONCILIATION_MAX_PAGE_BYTES) {
       throw new Error(
@@ -287,11 +299,25 @@ export async function reconcileD1Import(
         lastId,
       };
     }
+    const nextForeignKeyViolations =
+      checkpoint.foreignKeyViolations + pageForeignKeyViolations;
+    if (!isNonNegativeSafeInteger(nextForeignKeyViolations)) {
+      throw new Error(
+        "data conversion: foreign-key reconciliation count overflowed",
+      );
+    }
+    const nextDomainAggregates = addActualPageAggregates(
+      checkpoint.domainAggregates,
+      tableName,
+      pageRows,
+    );
 
     if (hasMore) {
       const nextCheckpoint: ReconciliationCheckpoint = {
         ...checkpoint,
         current: nextCurrent,
+        foreignKeyViolations: nextForeignKeyViolations,
+        domainAggregates: nextDomainAggregates,
       };
       await storeReconciliationCheckpoint(
         database,
@@ -303,15 +329,19 @@ export async function reconcileD1Import(
     }
 
     const expectedRows = plan.expectedRows[tableName];
-    const expectedChecksum = await checksumRowsByPage(expectedRows);
+    const expectedChecksum = plan.expectedChecksums[tableName];
     const actualChecksum = nextCurrent.rollingChecksum;
     const matches =
       expectedRows.length === nextCurrent.rowCount &&
       expectedChecksum === actualChecksum;
+    const nextTableIndex = checkpoint.tableIndex + 1;
     const nextCheckpoint: ReconciliationCheckpoint = {
       ...checkpoint,
-      tableIndex: checkpoint.tableIndex + 1,
+      tableIndex: nextTableIndex,
       current: await emptyReconciliationCursor(),
+      foreignKeyViolations: nextForeignKeyViolations,
+      domainAggregates: nextDomainAggregates,
+      completed: nextTableIndex === DATA_TABLE_NAMES.length,
       tables: {
         ...checkpoint.tables,
         [tableName]: {
@@ -331,24 +361,14 @@ export async function reconcileD1Import(
       nextCheckpoint,
       plan.exportedAt,
     );
-    return reconciliationProgress(plan, nextCheckpoint, tableName);
+    return nextCheckpoint.completed
+      ? buildReconciliationReport(plan, nextCheckpoint)
+      : reconciliationProgress(plan, nextCheckpoint, tableName);
   }
 
-  const foreignKeyViolations = await readForeignKeyViolationCount(database);
-  const domainAggregates = await readDomainAggregates(database);
-  const completedCheckpoint: ReconciliationCheckpoint = {
-    ...checkpoint,
-    foreignKeyViolations,
-    domainAggregates,
-    completed: true,
-  };
-  await storeReconciliationCheckpoint(
-    database,
-    checkpointKey,
-    completedCheckpoint,
-    plan.exportedAt,
+  throw new Error(
+    "data conversion: incomplete reconciliation checkpoint has no remaining table",
   );
-  return buildReconciliationReport(plan, completedCheckpoint);
 }
 
 function initialCheckpoint(plan: D1ImportPlan): Checkpoint {
@@ -400,8 +420,8 @@ async function initialReconciliationCheckpoint(
     tableIndex: 0,
     current: await emptyReconciliationCursor(),
     tables: {},
-    foreignKeyViolations: null,
-    domainAggregates: null,
+    foreignKeyViolations: 0,
+    domainAggregates: emptyDomainAggregates(),
     completed: false,
   };
 }
@@ -445,7 +465,9 @@ function parseReconciliationCheckpoint(
     Number(parsed.tableIndex) < 0 ||
     Number(parsed.tableIndex) > DATA_TABLE_NAMES.length ||
     !isRecord(parsed.current) ||
-    !isRecord(parsed.tables)
+    !isRecord(parsed.tables) ||
+    !isNonNegativeSafeInteger(parsed.foreignKeyViolations) ||
+    !isDomainAggregates(parsed.domainAggregates)
   ) {
     throw new Error(
       "data conversion: reconciliation checkpoint is stale or inconsistent",
@@ -463,7 +485,11 @@ function parseReconciliationCheckpoint(
     !CHECKSUM_PATTERN.test(parsed.current.rollingChecksum) ||
     typeof parsed.current.lastId !== "string" ||
     (parsed.current.lastId !== "" &&
-      !CANONICAL_ID_PATTERN.test(parsed.current.lastId))
+      !CANONICAL_ID_PATTERN.test(parsed.current.lastId)) ||
+    (Number(parsed.current.rowCount) === 0) !==
+      (parsed.current.lastId === "") ||
+    (Number(parsed.current.rowCount) > 0 &&
+      Number(parsed.current.rowCount) % D1_RECONCILIATION_PAGE_ROWS !== 0)
   ) {
     throw new Error(
       "data conversion: reconciliation checkpoint cursor is invalid",
@@ -478,33 +504,76 @@ function parseReconciliationCheckpoint(
     "reconciliation checkpoint tables",
   );
   for (const tableName of completedTableNames) {
-    validateTableReconciliation(parsed.tables[tableName], tableName);
+    validateTableReconciliation(parsed.tables[tableName], tableName, plan);
   }
+  validateCheckpointAggregates(
+    parsed.domainAggregates,
+    tableIndex,
+    Number(parsed.current.rowCount),
+    parsed.tables,
+    plan,
+  );
 
-  if (parsed.completed) {
-    if (
-      tableIndex !== DATA_TABLE_NAMES.length ||
-      !isNonNegativeSafeInteger(parsed.foreignKeyViolations) ||
-      !isDomainAggregates(parsed.domainAggregates)
-    ) {
-      throw new Error(
-        "data conversion: completed reconciliation checkpoint is inconsistent",
-      );
-    }
-  } else if (
-    parsed.foreignKeyViolations !== null ||
-    parsed.domainAggregates !== null
+  if (
+    parsed.completed !== (tableIndex === DATA_TABLE_NAMES.length) ||
+    (parsed.completed &&
+      (Number(parsed.current.rowCount) !== 0 || parsed.current.lastId !== ""))
   ) {
     throw new Error(
-      "data conversion: incomplete reconciliation checkpoint has final evidence",
+      "data conversion: completed reconciliation checkpoint is inconsistent",
     );
   }
   return parsed as ReconciliationCheckpoint;
 }
 
+function validateCheckpointAggregates(
+  actual: DataDomainAggregates,
+  tableIndex: number,
+  currentRowCount: number,
+  tables: Readonly<Record<string, unknown>>,
+  plan: D1ImportPlan,
+): void {
+  const contracts = [
+    ["activeUsers", "users"],
+    ["activeSavedWords", "user_words"],
+    ["reviewAttempts", "review_attempts"],
+    ["completedMissions", "daily_mission_snapshots"],
+    ["confidencePointDelta", "confidence_point_ledger"],
+    ["successfulAiFeedbackAttempts", "ai_feedback_attempts"],
+  ] as const satisfies readonly (readonly [
+    keyof DataDomainAggregates,
+    DataTableName,
+  ])[];
+
+  for (const [field, tableName] of contracts) {
+    const aggregateTableIndex = DATA_TABLE_NAMES.indexOf(tableName);
+    const tableEvidence = tables[tableName];
+    if (
+      tableIndex > aggregateTableIndex &&
+      isRecord(tableEvidence) &&
+      tableEvidence.matches === true &&
+      actual[field] !== plan.expectedDomainAggregates[field]
+    ) {
+      throw new Error(
+        `data conversion: reconciliation checkpoint aggregate ${field} is inconsistent with matching table evidence`,
+      );
+    }
+    if (
+      (tableIndex < aggregateTableIndex ||
+        (tableIndex === aggregateTableIndex && currentRowCount === 0)) &&
+      actual[field] !== 0
+    ) {
+      throw new Error(
+        `data conversion: reconciliation checkpoint aggregate ${field} advances before its table`,
+      );
+    }
+  }
+}
+
 function validateTableReconciliation(
   value: unknown,
   tableName: DataTableName,
+  plan: D1ImportPlan,
 ): asserts value is TableReconciliation {
   if (!isRecord(value)) {
     throw new Error(
@@ -533,7 +602,14 @@ function validateTableReconciliation(
     !CHECKSUM_PATTERN.test(value.expectedChecksum) ||
     typeof value.actualChecksum !== "string" ||
     !CHECKSUM_PATTERN.test(value.actualChecksum) ||
-    typeof value.matches !== "boolean"
+    typeof value.matches !== "boolean" ||
+    value.sourceCount !== plan.sourceCounts[tableName] ||
+    value.excludedCount !== plan.excludedCounts[tableName] ||
+    value.expectedCount !== plan.expectedRows[tableName].length ||
+    value.expectedChecksum !== plan.expectedChecksums[tableName] ||
+    value.matches !==
+      (value.expectedCount === value.actualCount &&
+        value.expectedChecksum === value.actualChecksum)
   ) {
     throw new Error(
       `data conversion: reconciliation checkpoint table ${tableName} has invalid evidence`,
@@ -574,18 +650,14 @@ function buildReconciliationReport(
   plan: D1ImportPlan,
   checkpoint: ReconciliationCheckpoint,
 ): ReconciliationReport {
-  if (
-    !checkpoint.completed ||
-    checkpoint.foreignKeyViolations === null ||
-    checkpoint.domainAggregates === null
-  ) {
+  if (!checkpoint.completed) {
     throw new Error("data conversion: reconciliation is not complete");
   }
   const tables = checkpoint.tables as Record<
     DataTableName,
     TableReconciliation
   >;
-  const expectedDomainAggregates = expectedAggregates(plan.expectedRows);
+  const expectedDomainAggregates = plan.expectedDomainAggregates;
   const allTablesMatch = DATA_TABLE_NAMES.every(
     (tableName) => tables[tableName]?.matches === true,
   );
@@ -613,7 +685,7 @@ async function emptyReconciliationCursor(): Promise<
 > {
   return {
     rowCount: 0,
-    rollingChecksum: await sha256("vocanova-d1-page-chain-v1"),
+    rollingChecksum: await sha256(D1_RECONCILIATION_CHAIN_SEED),
     lastId: "",
   };
 }
@@ -623,23 +695,6 @@ async function advanceRollingChecksum(
   rows: readonly D1ImportRow[],
 ): Promise<string> {
   return sha256(canonicalJson({ previous, rows }));
-}
-
-async function checksumRowsByPage(
-  rows: readonly D1ImportRow[],
-): Promise<string> {
-  let checksum = (await emptyReconciliationCursor()).rollingChecksum;
-  for (
-    let offset = 0;
-    offset < rows.length;
-    offset += D1_RECONCILIATION_PAGE_ROWS
-  ) {
-    checksum = await advanceRollingChecksum(
-      checksum,
-      rows.slice(offset, offset + D1_RECONCILIATION_PAGE_ROWS),
-    );
-  }
-  return checksum;
 }
 
 function requireExactObjectKeys(
@@ -701,98 +756,81 @@ function buildDeleteByIdSql(spec: TableSpec): string {
 }
 
 function buildPagedSelectSql(spec: TableSpec): string {
-  return `SELECT ${targetColumns(spec).join(", ")} FROM ${spec.name} WHERE id > ?1 ORDER BY id LIMIT ?2`;
+  const columns = targetColumns(spec).map(
+    (column) => `source.${column} AS ${column}`,
+  );
+  const foreignKeyChecks = DATA_FOREIGN_KEYS.filter(
+    ([table]) => table === spec.name,
+  ).map(
+    ([, field, referencedTable]) =>
+      `CASE WHEN source.${field} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ${referencedTable} AS parent WHERE parent.id = source.${field}) THEN 1 ELSE 0 END`,
+  );
+  const violationExpression =
+    foreignKeyChecks.length === 0 ? "0" : foreignKeyChecks.join(" + ");
+  return `SELECT ${columns.join(", ")}, (${violationExpression}) AS __foreign_key_violations FROM ${spec.name} AS source WHERE source.id > ?1 ORDER BY source.id LIMIT ?2`;
 }
 
 function encodedByteLength(value: string): number {
   return new TextEncoder().encode(value).byteLength;
 }
 
-async function readForeignKeyViolationCount(
-  database: D1Database,
-): Promise<number> {
-  const result = await database
-    .prepare("SELECT COUNT(*) AS value FROM pragma_foreign_key_check")
-    .first<{ value: number }>();
-  if (!isNonNegativeSafeInteger(result?.value)) {
-    throw new Error(
-      "data conversion: foreign-key reconciliation returned an unsafe value",
-    );
-  }
-  return result.value;
-}
-
-async function readDomainAggregates(
-  database: D1Database,
-): Promise<ReconciliationReport["domainAggregates"]> {
-  const results = await database.batch([
-    database.prepare(
-      "SELECT COUNT(*) AS value FROM users WHERE status = 'active'",
-    ),
-    database.prepare(
-      "SELECT COUNT(*) AS value FROM user_words WHERE deleted_at IS NULL",
-    ),
-    database.prepare("SELECT COUNT(*) AS value FROM review_attempts"),
-    database.prepare(
-      "SELECT COUNT(*) AS value FROM daily_mission_snapshots WHERE status = 'completed'",
-    ),
-    database.prepare(
-      "SELECT COALESCE(SUM(amount), 0) AS value FROM confidence_point_ledger",
-    ),
-    database.prepare(
-      "SELECT COUNT(*) AS value FROM ai_feedback_attempts WHERE status = 'succeeded'",
-    ),
-  ]);
+function emptyDomainAggregates(): DataDomainAggregates {
   return {
-    activeUsers: resultValue(requireBatchResult(results, 0)),
-    activeSavedWords: resultValue(requireBatchResult(results, 1)),
-    reviewAttempts: resultValue(requireBatchResult(results, 2)),
-    completedMissions: resultValue(requireBatchResult(results, 3)),
-    confidencePointDelta: resultValue(requireBatchResult(results, 4)),
-    successfulAiFeedbackAttempts: resultValue(requireBatchResult(results, 5)),
+    activeUsers: 0,
+    activeSavedWords: 0,
+    reviewAttempts: 0,
+    completedMissions: 0,
+    confidencePointDelta: 0,
+    successfulAiFeedbackAttempts: 0,
   };
 }
 
-function requireBatchResult(
-  results: readonly D1Result[],
-  index: number,
-): D1Result {
-  const result = results[index];
-  if (!result)
-    throw new Error("data conversion: aggregate batch is incomplete");
-  return result;
-}
-
-function resultValue(result: D1Result): number {
-  const row = result.results[0] as Record<string, unknown> | undefined;
-  const value = row?.value;
-  if (typeof value !== "number" || !Number.isSafeInteger(value)) {
-    throw new Error(
-      "data conversion: aggregate query returned an unsafe value",
-    );
+function addActualPageAggregates(
+  previous: DataDomainAggregates,
+  table: DataTableName,
+  rows: readonly D1ImportRow[],
+): DataDomainAggregates {
+  const next = { ...previous };
+  switch (table) {
+    case "users":
+      next.activeUsers += rows.filter((row) => row.status === "active").length;
+      break;
+    case "user_words":
+      next.activeSavedWords += rows.filter(
+        (row) => row.deleted_at === null,
+      ).length;
+      break;
+    case "review_attempts":
+      next.reviewAttempts += rows.length;
+      break;
+    case "daily_mission_snapshots":
+      next.completedMissions += rows.filter(
+        (row) => row.status === "completed",
+      ).length;
+      break;
+    case "confidence_point_ledger":
+      for (const row of rows) {
+        if (
+          typeof row.amount !== "number" ||
+          !Number.isSafeInteger(row.amount)
+        ) {
+          throw new Error(
+            "data conversion: confidence-point aggregate encountered an unsafe value",
+          );
+        }
+        next.confidencePointDelta += row.amount;
+      }
+      break;
+    case "ai_feedback_attempts":
+      next.successfulAiFeedbackAttempts += rows.filter(
+        (row) => row.status === "succeeded",
+      ).length;
+      break;
   }
-  return value;
-}
-
-function expectedAggregates(
-  rows: Readonly<Record<DataTableName, readonly D1ImportRow[]>>,
-): ReconciliationReport["domainAggregates"] {
-  return {
-    activeUsers: rows.users.filter((row) => row.status === "active").length,
-    activeSavedWords: rows.user_words.filter((row) => row.deleted_at === null)
-      .length,
-    reviewAttempts: rows.review_attempts.length,
-    completedMissions: rows.daily_mission_snapshots.filter(
-      (row) => row.status === "completed",
-    ).length,
-    confidencePointDelta: rows.confidence_point_ledger.reduce(
-      (total, row) => total + Number(row.amount),
-      0,
-    ),
-    successfulAiFeedbackAttempts: rows.ai_feedback_attempts.filter(
-      (row) => row.status === "succeeded",
-    ).length,
-  };
+  if (!isDomainAggregates(next)) {
+    throw new Error("data conversion: aggregate accumulation overflowed");
+  }
+  return next;
 }
 
 function isDomainAggregates(

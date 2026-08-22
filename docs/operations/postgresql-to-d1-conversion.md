@@ -107,21 +107,29 @@ destructive production action.
 
 - source, excluded, expected, and actual count for every table;
 - expected and actual SHA-256 checksum for canonical target rows;
-- `PRAGMA foreign_key_check` violation count;
+- bounded per-row parent-reference violation count across every canonical page;
 - active-user, active-saved-word, review-attempt, completed-mission, Confidence Point
   delta, and successful-AI-feedback aggregates;
 - the number of sensitive fields withheld from evidence.
 
 Reconciliation is also a resumable state machine. Each call fetches at most 11 ordered
 rows from one table (10 hashed rows plus one completion lookahead), rejects a
-canonicalized 10-row page above 12,000,000 bytes, advances a SHA-256 page chain, and
-stores only its last ID, row count, rolling checksum, and
-completed-table evidence under `data_reconciliation:<export_id>`. Empty-page detection
-finalizes a table; a final bounded invocation counts foreign-key violations and reads
-the six aggregates. Retrying after a read or checkpoint failure re-reads at most the
-same page and cannot double-count because the cursor advances only with its prepared
-checkpoint write. The expected rows use the identical 10-row page chain, so final
-checksums are exact without materializing a D1 table or its result set in memory.
+canonicalized 10-row page above 12,000,000 bytes, advances a SHA-256 page chain, checks
+that page's declared parent references with bounded indexed lookups, and accumulates
+the six domain aggregates from those same rows. It stores only its last ID, row count,
+rolling checksum, cumulative counters, and completed-table evidence under
+`data_reconciliation:<export_id>`. Retrying after a read or checkpoint failure re-reads
+at most the same page and cannot double-count because the cursor and cumulative values
+advance together with the prepared checkpoint write.
+
+The protected conversion step precomputes the identical 10-row expected checksum chain
+and expected aggregate totals once and binds both into the overall plan checksum.
+Reconciliation therefore never iterates an expected table, performs a D1 full-table
+aggregate, or materializes a D1 table/result set in one Worker invocation. Persisted
+table evidence is checked back against the plan's counts and checksums, and the
+`matches` flag is recomputed semantically. A completed receipt is not treated as a
+permanent cache: invoking reconciliation again starts a new bounded pass, so a later
+database mutation cannot return a stale PASS.
 
 The report contains no row values, email, provider subject, token/hash, idempotency key,
 typed answer, sentence, AI feedback, or error content. Full converted rows remain an
@@ -139,8 +147,10 @@ pnpm --filter @vocanova/api-worker data-conversion:inventory
 The first command runs exact shape/type/adversarial tests, fresh local D1 import,
 idempotent replay, interrupted resume, malformed/stale-checkpoint rejection, byte and
 statement bounds, alternate/composite uniqueness, deletion-safe forward correction,
-multi-page reconciliation interruption/retry, foreign-key/count/checksum/domain
-reconciliation, and log-redaction assertions. The
+multi-page reconciliation interruption/retry without expected-table scans,
+semantically inconsistent reconciliation-checkpoint rejection, completed-receipt
+revalidation, bounded foreign-key/count/checksum/domain reconciliation, and
+log-redaction assertions. The
 second command proves all 25 PostgreSQL tables/columns map exactly and classifies the
 six D1-only runtime tables that have no PostgreSQL source rows.
 
