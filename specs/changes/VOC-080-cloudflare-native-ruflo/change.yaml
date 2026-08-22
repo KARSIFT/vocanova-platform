@@ -1,0 +1,178 @@
+schema_version: 1
+
+id: VOC-080
+slug: cloudflare-native-ruflo
+title: Cloudflare-native runtime, evidence-driven CI/CD, and external Ruflo orchestration
+
+type: architecture-runtime-cicd-orchestration-migration
+status: adopted
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because this package changes CI/CD behavior, deployment authority, runtime language,
+  database semantics, authentication and learner-data paths, production architecture, and
+  external agent-orchestration authority. It touches paths with R3 and R4 floors and requires
+  the strongest decision, impact, contingency, specialist, deterministic, migration, and
+  exact-revision independent-review evidence.
+canonical_path: specs/changes/VOC-080-cloudflare-native-ruflo
+authority_model: voc-079-approval-neutral-active
+requirement_source: >-
+  GitHub issue #85 and the founder's 2026-08-22 request to correct CI/CD first, replace
+  server hosting with Cloudflare staging and production, remove technical obstacles to
+  Cloudflare, and adopt ruvnet/ruflo for continued VocaNova implementation.
+requirement_approval_status: founder-direction-recorded-and-independent-plan-review-pass
+base_branch: develop
+base_sha: b0bb000e7dce9c3c3b4253d27767046bbc87302f
+target_branch: develop
+approved_candidate_sha: 6fb00a0b64e6f2d4adceb24a9caeffd9af98c779
+owners:
+  decision: founder-direction-with-role-neutral-independent-plan-review
+  package_preparation: Codex (planner role only)
+  implementation: role-separated builders coordinated externally after adoption
+  independent_verification: provider-neutral independent reviewers bound to each exact revision
+approvals:
+  requirement_direction:
+    status: recorded
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/85
+  package_independent_verification:
+    status: pass-exact-revision
+    candidate_sha: 6fb00a0b64e6f2d4adceb24a9caeffd9af98c779
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747
+approval_status: adopted
+implementation_authorized: true
+automatic_merge_allowed: true
+production_impact: >-
+  Repository changes prepare an eventual replacement of server-hosted staging and production
+  with Cloudflare Workers and D1. Plan adoption, repository implementation, Cloudflare resource
+  creation, staging activation, production activation, DNS changes, and retirement of any old
+  runtime are distinct events. This package grants no live-system access by itself.
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+  - id: VOC-080-DEP-00
+    status: >-
+      Resolved for package adoption. The exact candidate
+      6fb00a0b64e6f2d4adceb24a9caeffd9af98c779 received a PASS from a different-role
+      independent reviewer with no blocking findings. The review covered architecture,
+      governance, Cloudflare, security, data migration, CI/CD, Ruflo authority, rollback,
+      and AC-00 through AC-11.
+  - id: VOC-080-DEP-01
+    status: >-
+      Accepted platform constraint. GitHub Free does not expose branch protection or rulesets
+      for this private repository. Workflows and documents must not claim unavailable hosted
+      enforcement; supported repository settings are hardened and recorded separately.
+  - id: VOC-080-DEP-02
+    status: >-
+      Open for activation only. A Cloudflare account, separate staging and production resources,
+      least-privilege credentials, cost limits, and accountable external-effect authority are
+      required before any live resource mutation or deployment. They are not prerequisites for
+      repository-only implementation and local workerd/D1 validation.
+  - id: VOC-080-DEP-03
+    status: >-
+      Open for data cutover only. Production PostgreSQL inventory, export, conversion, integrity
+      reconciliation, privacy controls, and rollback evidence require separately authorized
+      production-data access. Reconstruction uses only synthetic fixtures.
+  - id: VOC-080-DEP-04
+    status: >-
+      Open for Ruflo activation. The exact Ruflo npm release and integrity must be pinned and
+      audited. Its initializer must not overwrite AGENTS.md or install unreviewed repository
+      hooks, and its GitHub/deployment tools remain outside the permission envelope.
+action_specific_holds:
+  - id: VOC-080-HOLD-00
+    action: create-or-mutate-cloudflare-staging-resources-and-secrets
+    accountable_role: cloudflare-account-owner-or-delegated-deployment-operator
+    required_evidence: >-
+      Adopted resource manifest, cost envelope, least-privilege credential scope, exact-revision
+      task review, passing local and hosted checks, and explicit staging activation record.
+    completion_or_expiry:
+      completed once the named staging resources are provisioned and the
+      evidence is recorded; expires if the resource manifest or reviewed revision changes.
+  - id: VOC-080-HOLD-01
+    action: deploy-or-route-production-traffic-or-apply-production-d1-migrations
+    accountable_role: cloudflare-account-owner-or-delegated-production-operator
+    required_evidence: >-
+      Staging parity and soak evidence, migration reconciliation, rollback rehearsal, budget
+      acceptance, exact immutable versions, applicable launch authority, and explicit production
+      activation for the named revision and resources.
+    completion_or_expiry:
+      one activation only; expires on revision, schema, route, resource, or
+      authority change.
+  - id: VOC-080-HOLD-02
+    action: access-export-transform-or-delete-production-learner-data
+    accountable_role: production-data-owner-or-explicitly-delegated-data-migration-operator
+    required_evidence: >-
+      Data-minimization plan, access scope, protected execution environment, reconciliation
+      queries, backup/restore readiness, audit trail, and explicit time-bounded authority.
+    completion_or_expiry:
+      expires at the recorded migration window or immediately after the
+      authorized dataset and reconciliation are complete.
+affected_areas:
+  - .github/workflows/
+  - .github/actions/ (new local deterministic setup actions if justified)
+  - .github/README.md
+  - .github/CODEOWNERS
+  - .github/pull_request_template.md
+  - .github/approved-policy/
+  - AGENTS.md
+  - CLAUDE.md
+  - CONTRIBUTING.md
+  - package.json
+  - pnpm-lock.yaml
+  - pnpm-workspace.yaml
+  - apps/web/
+  - apps/api/
+  - apps/worker-api/ (new temporary migration target; final name decided by ADR)
+  - packages/api-client/
+  - scripts/foundation/
+  - scripts/governance/
+  - tooling/governance/
+  - infra/
+  - docs/README.md
+  - docs/architecture/
+  - docs/decisions/
+  - docs/design/08-web-app-design.md
+  - docs/engineering/04-technical-architecture.md
+  - docs/engineering/05-database-design.md
+  - docs/engineering/06-backend-design.md
+  - docs/engineering/07-api-contract-and-dto-design.md
+  - docs/engineering/09-ai-features.md
+  - docs/operations/10-development-workflow.md
+  - docs/operations/11-devops-and-ci-cd.md
+  - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+  - docs/governance/16-autonomous-development-operating-model.md
+  - docs/product/12-mvp-implementation-plan.md
+  - specs/templates/change-package/
+implementation:
+  authorized: true
+  required: true
+  status: authorized-after-pr-86-adoption
+  target_branch: develop
+  pull_request: null
+  authority_issue: 85
+release:
+  required: true
+  mode: staged-repository-migration-then-separately-authorized-cloudflare-activation
+  production_impact: future-runtime-and-data-platform-replacement
+  deployment: prohibited-until-action-specific-holds-complete
+  automatic_merge: policy-eligible-only-no-current-merge-executor
+  migration_required: true
+  rollback_required: true
+repository_adoption_status: adopted-on-pr-86-merge
+adoption_pr: 86
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/86
+implementation_authority_before_adoption: false
+implementation_authority_status: authorized-after-adoption
+production_deployment: held-by-VOC-080-HOLD-01
+staging_deployment: held-by-VOC-080-HOLD-00
+production_data_access: held-by-VOC-080-HOLD-02
+autonomous_production_release: disabled
+ehr: not-triggered
+blocking_reasons: []
