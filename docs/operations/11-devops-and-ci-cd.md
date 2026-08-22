@@ -1,7 +1,7 @@
 ---
 id: DOC-11
 title: VocaNova DevOps and CI/CD Plan
-version: 1.2
+version: 1.3
 document_type: operations-plan
 status: approved
 owner: founder
@@ -18,6 +18,13 @@ related_decisions:
   - ADR-0003
 adoption_change: VOC-008
 amendments:
+  - id: VOC-080-ci-foundation-amendment
+    title: "Four-workflow deterministic CI foundation"
+    adopted_in: VOC-080
+    adopted_at: 2026-08-22
+    approving_owner: approved-voc-080-package
+    resolution_recorded_in: specs/changes/VOC-080-cloudflare-native-ruflo/change.yaml
+    notes: "T01 splits CI into stable subsystem checks and aggregates, adds reusable pinned setup and correctness-neutral caches, and records supported GitHub hardening without adding deployment authority."
   - id: VOC-080-cloudflare-native-amendment
     title: "Cloudflare Workers and D1 replace the active owned-server target"
     adopted_in: VOC-080
@@ -59,21 +66,47 @@ Staging (from `develop`), Production (from `main`).
 > repository documentation only and does not inspect a server or create Cloudflare,
 > DNS, secret, data, or deployment state.
 
-| Capability   | Current repository state                                     | VOC-080 target                                                                                             |
-| ------------ | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| Web          | Next.js standalone/Docker assets remain; no deploy workflow  | Next.js 16 through OpenNext on a Cloudflare Web Worker                                                     |
-| API          | Go/Huma/Ent/PostgreSQL parity reference                      | TypeScript Module Worker using Hono and generated bindings                                                 |
-| Data         | PostgreSQL source schema/reference; no repository deployment | Separate local/staging/production Cloudflare D1 databases                                                  |
-| Web-to-API   | HTTPS server path                                            | Cloudflare service binding where practical; HTTPS contract remains `/api/v1`                               |
-| Assets/async | Docker/Nginx and synchronous server assumptions              | Workers Static Assets; Queue/Workflow/DO/R2 only for a measured requirement                                |
-| CI/CD        | Exactly four deterministic workflows; no deployment          | Credential-free PR dry runs, then held environment-scoped version/migration/promotion jobs inside `ci.yml` |
-| Secrets      | No deployment secrets in PRs or agents                       | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo                                     |
-| Rollback     | Historical image/server procedure                            | Recorded prior Worker versions plus expand/migrate/contract and forward-corrective D1 handling             |
+| Capability   | Current repository state                                                           | VOC-080 target                                                                                                 |
+| ------------ | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Web          | Next.js standalone/Docker assets remain; no deploy workflow                        | Next.js 16 through OpenNext on a Cloudflare Web Worker                                                         |
+| API          | Go/Huma/Ent/PostgreSQL parity reference                                            | TypeScript Module Worker using Hono and generated bindings                                                     |
+| Data         | PostgreSQL source schema/reference; no repository deployment                       | Separate local/staging/production Cloudflare D1 databases                                                      |
+| Web-to-API   | HTTPS server path                                                                  | Cloudflare service binding where practical; HTTPS contract remains `/api/v1`                                   |
+| Assets/async | Docker/Nginx and synchronous server assumptions                                    | Workers Static Assets; Queue/Workflow/DO/R2 only for a measured requirement                                    |
+| CI/CD        | Four deterministic workflows with stable subsystem/aggregate checks; no deployment | Credential-free Worker dry runs, then held environment-scoped version/migration/promotion jobs inside `ci.yml` |
+| Secrets      | No deployment secrets in PRs or agents                                             | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo                                         |
+| Rollback     | Historical image/server procedure                                                  | Recorded prior Worker versions plus expand/migrate/contract and forward-corrective D1 handling                 |
 
 No current workflow deploys to Preview, Staging, or Production. T10 may add the held
 jobs only after Worker/D1 parity; live staging requires `VOC-080-HOLD-00`, production
 traffic or D1 migration requires `HOLD-01`, and production learner data requires
 `HOLD-02`.
+
+### 1.1 Deterministic GitHub Actions foundation
+
+The workflow inventory is exactly four files and has one responsibility per file:
+
+| Workflow         | Stable evidence                                                                           | Trigger and authority                                                         |
+| ---------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `ci.yml`         | `foundation`, `packages`, `web`, and transitional `api`, summarized by `CI / ci required` | Pull requests and pushes for `develop`/`main`; read-only, no deployment       |
+| `governance.yml` | `structure`, `changed-path risk`, and read-only `merge eligibility`                       | Pull-request evidence plus protected-branch structure checks; no GitHub write |
+| `quality.yml`    | accessibility and Lighthouse, summarized by `Quality / quality required`                  | Web/shared/lockfile changes on pull requests only                             |
+| `security.yml`   | dependency audit and secret scan, summarized by `Security / security required`            | Pull requests and protected-branch pushes; no secret consumption              |
+
+All runner jobs have explicit timeouts and Bash semantics. Every external action uses
+a reviewed full commit SHA, and every checkout disables persisted credentials. A local
+composite action reuses the pinned Node, pnpm, and optional Go setup. Its caches contain
+only pnpm's content-addressed store and Go download/build caches; `node_modules` is not
+cached, the lockfile remains frozen, and a cache hit never skips a check. Browser
+reports are uploaded only on failure and retained for three days. Fail-fast aggregation
+is explicit: the stable `required` result is blocked by any failed, cancelled, or
+skipped subsystem, and the same script has a synthetic negative contract test.
+
+The subsystem `pnpm ci:*` commands are local entry points, not CI-only behavior;
+`pnpm validate` remains the full pre-review gate. This design follows the applicable
+parts of mature Workers/Hono/OpenNext repositories—pinned dependencies, focused checks,
+non-short-circuiting evidence, and workerd-oriented separation—without importing their
+release bots, write permissions, vendor services, or repository scale.
 
 > **Amendment note (`VOC-032-§1-amendment`, adopted 2026-07-30 via VOC-032; founder as approving
 > owner).** The Frontend/Backend/Database rows of the target-infrastructure table below and the

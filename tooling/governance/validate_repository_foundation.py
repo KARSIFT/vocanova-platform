@@ -94,6 +94,7 @@ PROTECTED_PATHS = (
     "CLAUDE.md",
     ".github/CODEOWNERS",
     ".github/pull_request_template.md",
+    ".github/actions/",
     ".github/workflows/",
     ".github/approved-policy/",
     "scripts/governance/",

@@ -11,34 +11,105 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: validate
+  foundation:
+    name: foundation
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - name: Check out reviewed revision
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-      - name: Set up Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: .nvmrc
+          persist-credentials: false
 
-      - name: Set up Go
-        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+      - name: Set up repository toolchain
+        uses: ./.github/actions/setup-toolchain
         with:
-          go-version-file: apps/api/go.mod
+          install-go: "true"
 
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@11.14.0 --activate
+      - name: Validate foundation
+        run: pnpm run ci:foundation
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+  packages:
+    name: packages
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out reviewed revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
-      - name: Validate repository
-        run: pnpm validate
+      - name: Set up repository toolchain
+        uses: ./.github/actions/setup-toolchain
+
+      - name: Validate shared packages
+        run: pnpm run ci:packages
+
+  web:
+    name: web
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out reviewed revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up repository toolchain
+        uses: ./.github/actions/setup-toolchain
+
+      - name: Validate web application
+        run: pnpm run ci:web
+
+  api:
+    name: api
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out reviewed revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up repository toolchain
+        uses: ./.github/actions/setup-toolchain
+        with:
+          install-dependencies: "false"
+          install-go: "true"
+
+      - name: Validate API reference implementation
+        run: pnpm run ci:api
+
+  required:
+    name: ci required
+    if: always()
+    needs: [foundation, packages, web, api]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out aggregate policy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require every subsystem
+        env:
+          API_RESULT: ${{ needs.api.result }}
+          FOUNDATION_RESULT: ${{ needs.foundation.result }}
+          PACKAGES_RESULT: ${{ needs.packages.result }}
+          WEB_RESULT: ${{ needs.web.result }}
+        run: >-
+          bash scripts/foundation/require-successful-jobs.sh
+          "api=$API_RESULT"
+          "foundation=$FOUNDATION_RESULT"
+          "packages=$PACKAGES_RESULT"
+          "web=$WEB_RESULT"

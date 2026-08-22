@@ -60,6 +60,12 @@ pnpm validate
 pnpm audit
 ```
 
+Hosted CI exposes the same contract as stable `foundation`, `packages`, `web`, and
+`api` jobs with a single `CI / ci required` aggregate. Use the matching `pnpm ci:*`
+command for focused reproduction, then rerun `pnpm validate` before exact-revision
+review. Quality and Security likewise publish uniquely named stable aggregates; caches
+never replace a frozen install or a deterministic check.
+
 Governance validation remains independently required where applicable - see
 AGENTS.md's ["Current validation"](AGENTS.md#current-validation) section for the
 exact current commands, kept in one place rather than duplicated here so the two

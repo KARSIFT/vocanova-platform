@@ -57,5 +57,7 @@ missing package metadata.
 
 The package risk is the adopted planning floor. The PR declaration may equal or raise
 that floor when changed paths or independent review identify higher consequences, but
-it may never lower it. The hosted adapter waits up to the CI workflow's 30-minute
-validation contract before reporting missing or incomplete check evidence.
+it may never lower it. The hosted adapter requires every stable CI and Security
+subsystem plus their uniquely named aggregate checks, adds the three Quality checks
+for web-facing paths, and waits up to 30 minutes before reporting missing or incomplete
+check evidence.

@@ -11,10 +11,16 @@ on:
       - package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
+      - .github/actions/setup-toolchain/**
       - .github/workflows/quality.yml
+      - scripts/foundation/require-successful-jobs.sh
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    shell: bash
 
 concurrency:
   group: quality-${{ github.event.pull_request.number }}
@@ -27,18 +33,12 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out reviewed revision
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-      - name: Set up Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: .nvmrc
+          persist-credentials: false
 
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@11.14.0 --activate
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Set up repository toolchain
+        uses: ./.github/actions/setup-toolchain
 
       - name: Build shared packages
         run: pnpm run build:packages
@@ -65,7 +65,8 @@ jobs:
         with:
           name: quality-playwright-report
           path: apps/web/playwright-report/
-          retention-days: 7
+          if-no-files-found: ignore
+          retention-days: 3
 
       - name: Upload Playwright results on failure
         if: failure()
@@ -73,7 +74,8 @@ jobs:
         with:
           name: quality-playwright-results
           path: apps/web/test-results/
-          retention-days: 7
+          if-no-files-found: ignore
+          retention-days: 3
 
   lighthouse:
     name: lighthouse
@@ -81,18 +83,12 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Check out reviewed revision
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-
-      - name: Set up Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: .nvmrc
+          persist-credentials: false
 
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@11.14.0 --activate
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Set up repository toolchain
+        uses: ./.github/actions/setup-toolchain
 
       - name: Build shared packages
         run: pnpm run build:packages
@@ -146,4 +142,26 @@ jobs:
         with:
           name: quality-lighthouse-reports
           path: apps/web/lighthouse-reports/
-          retention-days: 7
+          if-no-files-found: ignore
+          retention-days: 3
+
+  required:
+    name: quality required
+    if: always()
+    needs: [accessibility, lighthouse]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Check out aggregate policy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require every quality subsystem
+        env:
+          ACCESSIBILITY_RESULT: ${{ needs.accessibility.result }}
+          LIGHTHOUSE_RESULT: ${{ needs.lighthouse.result }}
+        run: >-
+          bash scripts/foundation/require-successful-jobs.sh
+          "accessibility=$ACCESSIBILITY_RESULT"
+          "lighthouse=$LIGHTHOUSE_RESULT"
