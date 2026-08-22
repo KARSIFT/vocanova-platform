@@ -10,4 +10,6 @@
 
 DOC-04/05/06/07/09 are amended by
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md): the target is
-OpenNext + Hono Workers + D1, while Go/PostgreSQL remains the VOC-080 parity reference.
+OpenNext + Hono Workers + D1. VOC-080-T11 retired the former Go/PostgreSQL parity
+runtime from the active tree; compact contract and source-schema snapshots retain
+deterministic migration evidence.

@@ -34,9 +34,9 @@ source_files:
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) is the current
 runtime and data direction. VocaNova targets Next.js through OpenNext on a Cloudflare
 Web Worker, a TypeScript/Hono Cloudflare API Worker, and Cloudflare D1. The existing
-Go/PostgreSQL/Docker implementation remains a parity reference during the staged
-migration and is removed only after VOC-080's contract, domain, data, workerd, and
-rollback gates pass. Where the preserved v1.0 body names Go, Ent, PostgreSQL, Docker,
+Go/PostgreSQL/Docker implementation served as the staged parity reference through
+T10; T11 removed it from the active tree after contract, domain, data, workerd, and
+rollback gates passed. Where the preserved v1.0 body names Go, Ent, PostgreSQL, Docker,
 Render, or an owned server as the final target, ADR-0003 supersedes that runtime choice
 without changing the product behavior or domain boundaries documented here.
 
@@ -87,8 +87,7 @@ name, not `vocanova`):
 vocanova-platform/
 apps/
   web/          # Next.js/OpenNext Worker target
-  api/          # Go/PostgreSQL parity reference during VOC-080
-  worker-api/   # TypeScript/Hono/D1 migration target
+  api-worker/   # TypeScript/Hono/D1 API runtime
   mobile/       # Future Expo app
 packages/
   api-client/
@@ -96,7 +95,7 @@ packages/
   eslint-config/
   typescript-config/
 docs/
-infra/
+infrastructure/ # held Cloudflare delivery/retirement manifests
 scripts/
 .github/
 ```
@@ -114,8 +113,7 @@ Next.js (App Router) + React + TypeScript + Tailwind + shadcn/ui + TanStack Quer
 TypeScript Module Worker + Hono + schema-driven validation/OpenAPI + typed D1 repositories and
 generated Cloudflare binding types. The modular-monolith business modules remain `auth`, `user`,
 `settings`, `vocabulary`, `journey`, `review`, `sentence`, `aifeedback`, `mission`, `progress`, and
-`streak`. Business logic must not depend directly on Hono, D1, auth SDKs, or AI SDKs. The Go stack
-remains the migration oracle until parity is complete.
+`streak`. Business logic must not depend directly on Hono, D1, auth SDKs, or AI SDKs.
 
 ## 8. API architecture
 
@@ -135,7 +133,7 @@ provider — business tables reference Vocanova user IDs, never provider IDs dir
 Cloudflare D1 with explicit SQLite schema and forward-only Wrangler migrations. Separate local,
 staging, and production databases retain clear domain ownership, canonical UTC timestamp encoding,
 and IANA timezone strings for daily logic. [05](05-database-design.md) defines the target mapping;
-PostgreSQL remains a conversion source and behavioral reference until cutover.
+the retired PostgreSQL schema snapshot remains only a synthetic conversion oracle.
 
 ## 11. Spaced repetition
 
@@ -185,8 +183,8 @@ errors, database health, AI usage, job failures.
 
 ## 18. Testing strategy
 
-API: unit, workerd, local D1 migration/repository, contract-parity, authorization, atomicity, and
-consistency tests, plus Go/PostgreSQL reference tests during migration. Frontend: Vitest, React
+API: unit, workerd, local D1 migration/repository, contract-snapshot, authorization, atomicity, and
+consistency tests. Frontend: Vitest, React
 Testing Library, Playwright, accessibility, Lighthouse, OpenNext build/dry-run, and workerd requests.
 AI: fake-provider tests and evaluation fixtures; never a paid provider in normal CI. Coverage is
 risk-based, not a flat percentage target.
@@ -222,7 +220,6 @@ postponed until then.
 ## Final technology stack
 
 Frontend: Next.js, TypeScript, Tailwind, shadcn/ui, OpenNext, Cloudflare Workers. Backend:
-TypeScript, Hono, generated bindings, D1; Go/Huma/Ent/PostgreSQL remains the temporary parity
-reference. Auth: Google OAuth + email magic link. AI: provider abstraction, one provider operated at
+TypeScript, Hono, generated bindings, D1. Auth: Google OAuth + email magic link. AI: provider abstraction, one provider operated at
 a time. Infrastructure: managed Cloudflare Workers/D1 with no owned server. Future: Expo; async
 Cloudflare capabilities only after a measured requirement.

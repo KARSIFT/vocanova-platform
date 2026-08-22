@@ -64,7 +64,7 @@ pnpm audit
 ```
 
 Hosted CI exposes the same contract as stable `foundation`, `packages`, `web`, and
-`api` jobs with a single `CI / ci required` aggregate. Use the matching `pnpm ci:*`
+`worker api` jobs with a single `CI / ci required` aggregate. Use the matching `pnpm ci:*`
 command for focused reproduction, then rerun `pnpm validate` before exact-revision
 review. Quality and Security likewise publish uniquely named stable aggregates; caches
 never replace a frozen install or a deterministic check.
@@ -79,10 +79,11 @@ an unavailable tool or external deployment passed.
 
 The active technical target is defined by
 [ADR-0003](docs/decisions/ADR-0003-cloudflare-native-runtime-and-data.md): OpenNext on
-Workers, a Hono API Worker, and D1. The Go/PostgreSQL/Docker stack remains a parity
-reference until VOC-080 proves the replacement. Repository work uses local workerd/D1
-and credential-free dry runs; no contributor or pull-request job receives Cloudflare
-deployment credentials.
+Workers, a Hono API Worker, and D1. VOC-080-T03 through T10 completed the parity chain,
+and T11 removed the old Go/PostgreSQL/Docker runtime from the active tree. Immutable Git
+history and compact contract/conversion snapshots preserve the migration evidence.
+Repository work uses local workerd/D1 and credential-free dry runs; no contributor or
+pull-request job receives Cloudflare deployment credentials.
 
 Repository protections apply to contributors and automation actors alike; never
 bypass failed checks, required review, branch protection, or production gates. See

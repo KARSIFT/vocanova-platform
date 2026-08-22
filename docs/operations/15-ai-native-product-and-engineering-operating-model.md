@@ -49,9 +49,10 @@ evidence, but GitHub Actions currently provides no staging or production publica
 T00 neither deploys Cloudflare nor inspects/stops a server. See §17 and
 [DOC-16](../governance/16-autonomous-development-operating-model.md) for current authority.
 
-**VOC-080 amendment (2026-08-22):** The current runtime/data target is OpenNext on a Cloudflare Web
-Worker, a TypeScript/Hono API Worker, and separate D1 databases, migrated behind contract and domain
-parity before Go/PostgreSQL/server assets retire. Ruflo may coordinate planner, builder, tester,
+**VOC-080 amendment (2026-08-22):** The current runtime/data implementation is OpenNext on a Cloudflare
+Web Worker, a TypeScript/Hono API Worker, and D1. T03-T10 established contract, domain, data, web, and
+held-delivery parity; T11 then retired the Go/PostgreSQL/server assets from the active repository tree
+without inspecting, mutating, or stopping a live server. Ruflo may coordinate planner, builder, tester,
 specialist, reviewer, and task-orchestrator roles only from an external, pinned, deny-by-default
 installation. GitHub stays canonical; Ruflo cannot approve, merge, close, dispatch, deploy, access
 secrets/production data, spend, or launch. Every unreconciled body clause that permanently assigns a
@@ -1629,7 +1630,7 @@ new implementation revision followed by complete checks and fresh independent re
 | Independently verify a plan or implementation        | Reviewer role with no write access to the reviewed revision                                                               |
 | Merge into `develop`                                 | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
 | Promote `develop` to `main`                          | Separately reviewed pull request; no current promotion workflow                                                           |
-| Deploy                                               | T10 held manual Cloudflare state machine exists; current manifest blocks before environment jobs/secrets                   |
+| Deploy                                               | T10 held manual Cloudflare state machine exists; current manifest blocks before environment jobs/secrets                  |
 
 Roles are responsibilities, not permanent vendors. The builder never approves or
 merges its own work, and a reviewer that authors a material correction becomes a
@@ -1727,9 +1728,10 @@ Claude release review supplements but does not replace founder approval.
 No repository workflow run is currently eligible to deploy to staging. A merge into
 `develop` changes repository history only. VOC-078-T03 removed image publication, SSH
 deployment, migration execution, smoke testing, and remote health polling without
-changing runtime assets or inspecting/stopping a server. T10 now defines the held
-Cloudflare replacement after parity: credential-free dry runs and mocked policy/smoke
-evidence pass, while its manifest blocks before environment jobs or secrets.
+changing runtime assets or inspecting/stopping a server. T10 defines the held Cloudflare
+replacement after parity: credential-free dry runs and mocked policy/smoke evidence pass,
+while its manifest blocks before environment jobs or secrets. T11 subsequently removed
+the old runtime from the active repository tree only; it made no claim about live state.
 
 ## 19.2 Production publication
 

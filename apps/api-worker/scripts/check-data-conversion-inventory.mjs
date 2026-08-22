@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { Buffer } from "node:buffer";
+import { createHash } from "node:crypto";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -10,31 +11,42 @@ import {
 } from "../dist/data-conversion/schema.js";
 
 const workerRoot = process.cwd();
-const repositoryRoot = path.resolve(workerRoot, "../..");
-const postgresRoot = path.join(repositoryRoot, "apps/api/migrations");
+const sourceManifestPath = path.join(
+  workerRoot,
+  "test/fixtures/postgres-schema-v1.json",
+);
 const d1Root = path.join(workerRoot, "migrations");
 
-const [postgresSchema, d1Schema] = await Promise.all([
-  readSqlDirectory(postgresRoot),
+const [sourceManifest, d1Schema] = await Promise.all([
+  readFile(sourceManifestPath, "utf8").then(JSON.parse),
   readSqlDirectory(d1Root),
 ]);
 
-const postgresTables = extractTables(postgresSchema, [
-  "uuid",
-  "text",
-  "boolean",
-  "bytea",
-  "integer",
-  "timestamptz",
-  "date",
-  "jsonb",
-]);
+assert.equal(
+  sourceManifest.schema_version,
+  "vocanova-postgresql-source-schema-v1",
+);
+assert.equal(sourceManifest.retired_at_task, "VOC-080-T11");
+assert.match(sourceManifest.retired_source_revision, /^[0-9a-f]{40}$/);
+assert.equal(
+  sourceManifest.canonical_tables_sha256,
+  createHash("sha256")
+    .update(JSON.stringify(sourceManifest.tables))
+    .digest("hex"),
+  "retired PostgreSQL source-schema snapshot hash drifted",
+);
+const postgresTables = new Map(
+  Object.entries(sourceManifest.tables).map(([table, columns]) => [
+    table,
+    new Map(Object.entries(columns)),
+  ]),
+);
 const d1Tables = extractTables(d1Schema, ["TEXT", "INTEGER"]);
 
 assert.deepEqual(
   [...postgresTables.keys()].sort(),
   [...DATA_TABLE_NAMES].sort(),
-  "the conversion contract must cover every active PostgreSQL source table",
+  "the conversion contract must cover every retired PostgreSQL source table",
 );
 
 const allowedD1OnlyTables = [
@@ -113,7 +125,7 @@ assert.equal(
 );
 
 process.stdout.write(
-  `Data conversion inventory: PASS (${DATA_TABLE_NAMES.length} PostgreSQL tables mapped exactly; ${allowedD1OnlyTables.length} D1-only runtime tables classified)\n`,
+  `Data conversion inventory: PASS (${DATA_TABLE_NAMES.length} retired PostgreSQL schema tables mapped exactly; ${allowedD1OnlyTables.length} D1-only runtime tables classified)\n`,
 );
 
 async function readSqlDirectory(directory) {
