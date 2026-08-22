@@ -5,7 +5,7 @@ slug: cloudflare-native-ruflo
 title: Cloudflare-native runtime, evidence-driven CI/CD, and external Ruflo orchestration
 
 type: architecture-runtime-cicd-orchestration-migration
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because this package changes CI/CD behavior, deployment authority, runtime language,
@@ -19,11 +19,11 @@ requirement_source: >-
   GitHub issue #85 and the founder's 2026-08-22 request to correct CI/CD first, replace
   server hosting with Cloudflare staging and production, remove technical obstacles to
   Cloudflare, and adopt ruvnet/ruflo for continued VocaNova implementation.
-requirement_approval_status: founder-direction-recorded-plan-candidate-pending-review
+requirement_approval_status: founder-direction-recorded-and-independent-plan-review-pass
 base_branch: develop
 base_sha: b0bb000e7dce9c3c3b4253d27767046bbc87302f
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: 6fb00a0b64e6f2d4adceb24a9caeffd9af98c779
 owners:
   decision: founder-direction-with-role-neutral-independent-plan-review
   package_preparation: Codex (planner role only)
@@ -34,11 +34,11 @@ approvals:
     status: recorded
     evidence: https://github.com/KARSIFT/vocanova-platform/issues/85
   package_independent_verification:
-    status: pending
-    candidate_sha: null
-    evidence: null
-approval_status: pending-independent-review-and-adoption
-implementation_authorized: false
+    status: pass-exact-revision
+    candidate_sha: 6fb00a0b64e6f2d4adceb24a9caeffd9af98c779
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747
+approval_status: adopted
+implementation_authorized: true
 automatic_merge_allowed: true
 production_impact: >-
   Repository changes prepare an eventual replacement of server-hosted staging and production
@@ -58,8 +58,11 @@ artifacts:
 dependencies:
   - id: VOC-080-DEP-00
     status: >-
-      Open. The exact package candidate requires independent architecture, governance,
-      Cloudflare, security, and data-migration review before adoption.
+      Resolved for package adoption. The exact candidate
+      6fb00a0b64e6f2d4adceb24a9caeffd9af98c779 received a PASS from a different-role
+      independent reviewer with no blocking findings. The review covered architecture,
+      governance, Cloudflare, security, data migration, CI/CD, Ruflo authority, rollback,
+      and AC-00 through AC-11.
   - id: VOC-080-DEP-01
     status: >-
       Accepted platform constraint. GitHub Free does not expose branch protection or rulesets
@@ -147,9 +150,9 @@ affected_areas:
   - docs/product/12-mvp-implementation-plan.md
   - specs/templates/change-package/
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: blocked-pending-package-adoption
+  status: authorized-after-pr-86-adoption
   target_branch: develop
   pull_request: null
   authority_issue: 85
@@ -161,16 +164,15 @@ release:
   automatic_merge: policy-eligible-only-no-current-merge-executor
   migration_required: true
   rollback_required: true
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
-repository_adoption_evidence: null
+repository_adoption_status: adopted-on-pr-86-merge
+adoption_pr: 86
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/86
 implementation_authority_before_adoption: false
-implementation_authority_status: not-authorized
+implementation_authority_status: authorized-after-adoption
 production_deployment: held-by-VOC-080-HOLD-01
 staging_deployment: held-by-VOC-080-HOLD-00
 production_data_access: held-by-VOC-080-HOLD-02
 autonomous_production_release: disabled
 ehr: not-triggered
-blocking_reasons:
-  - VOC-080-DEP-00
+blocking_reasons: []

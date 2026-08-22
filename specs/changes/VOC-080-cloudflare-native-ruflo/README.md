@@ -1,8 +1,9 @@
 # VOC-080 — Cloudflare-native runtime, evidence-driven CI/CD, and external Ruflo orchestration
 
-Status: draft. This package is not implementation authority until its exact candidate
-revision is independently reviewed, the adoption record is complete, and the plan PR
-is merged by a role other than the package author.
+Status: adopted for repository-only implementation authority on merge of plan PR #86.
+The exact candidate revision received independent review, and the adoption record is
+complete. A role other than the package author must merge the plan PR before implementation
+begins.
 
 VOC-080 replaces the old server-hosting direction with a staged Cloudflare-native
 architecture and defines Ruflo as an external development orchestrator. GitHub remains
