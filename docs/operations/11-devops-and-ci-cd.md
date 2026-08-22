@@ -66,16 +66,16 @@ Staging (from `develop`), Production (from `main`).
 > repository documentation only and does not inspect a server or create Cloudflare,
 > DNS, secret, data, or deployment state.
 
-| Capability   | Current repository state                                                           | VOC-080 target                                                                                                 |
-| ------------ | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Web          | Next.js standalone/Docker assets remain; no deploy workflow                        | Next.js 16 through OpenNext on a Cloudflare Web Worker                                                         |
-| API          | Go/Huma/Ent/PostgreSQL parity reference                                            | TypeScript Module Worker using Hono and generated bindings                                                     |
-| Data         | PostgreSQL source schema/reference; no repository deployment                       | Separate local/staging/production Cloudflare D1 databases                                                      |
-| Web-to-API   | HTTPS server path                                                                  | Cloudflare service binding where practical; HTTPS contract remains `/api/v1`                                   |
-| Assets/async | Docker/Nginx and synchronous server assumptions                                    | Workers Static Assets; Queue/Workflow/DO/R2 only for a measured requirement                                    |
-| CI/CD        | Four deterministic workflows with stable subsystem/aggregate checks; no deployment | Credential-free Worker dry runs, then held environment-scoped version/migration/promotion jobs inside `ci.yml` |
-| Secrets      | No deployment secrets in PRs or agents                                             | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo                                         |
-| Rollback     | Historical image/server procedure                                                  | Recorded prior Worker versions plus expand/migrate/contract and forward-corrective D1 handling                 |
+| Capability   | Current repository state                                                                             | VOC-080 target                                                                                                 |
+| ------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Web          | OpenNext build/config/workerd proof implemented; historical Docker assets remain; no deploy workflow | Next.js 16 through OpenNext on a Cloudflare Web Worker                                                         |
+| API          | Go/Huma/Ent/PostgreSQL parity reference                                                              | TypeScript Module Worker using Hono and generated bindings                                                     |
+| Data         | PostgreSQL source schema/reference; no repository deployment                                         | Separate local/staging/production Cloudflare D1 databases                                                      |
+| Web-to-API   | HTTPS server path                                                                                    | Cloudflare service binding where practical; HTTPS contract remains `/api/v1`                                   |
+| Assets/async | Docker/Nginx and synchronous server assumptions                                                      | Workers Static Assets; Queue/Workflow/DO/R2 only for a measured requirement                                    |
+| CI/CD        | Four deterministic workflows with stable subsystem/aggregate checks; no deployment                   | Credential-free Worker dry runs, then held environment-scoped version/migration/promotion jobs inside `ci.yml` |
+| Secrets      | No deployment secrets in PRs or agents                                                               | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo                                         |
+| Rollback     | Historical image/server procedure                                                                    | Recorded prior Worker versions plus expand/migrate/contract and forward-corrective D1 handling                 |
 
 No current workflow deploys to Preview, Staging, or Production. T10 may add the held
 jobs only after Worker/D1 parity; live staging requires `VOC-080-HOLD-00`, production
@@ -107,6 +107,14 @@ The subsystem `pnpm ci:*` commands are local entry points, not CI-only behavior;
 parts of mature Workers/Hono/OpenNext repositories—pinned dependencies, focused checks,
 non-short-circuiting evidence, and workerd-oriented separation—without importing their
 release bots, write permissions, vendor services, or repository scale.
+
+VOC-080-T03 makes `pnpm ci:web` the credential-free Worker gate. It verifies committed
+Wrangler types, scans the runtime boundary, transforms the Next.js build through
+OpenNext, performs a Wrangler dry run, enforces the 3 MiB compressed target and records
+the local startup profile, then sends representative static/SSR/RSC/middleware/auth/API
+requests through two Workers in local workerd. A plain `next build` remains useful for
+UI checks but is not Cloudflare compatibility evidence. No T03 command uploads a
+version, queries an account, provisions a resource, or deploys.
 
 > **Amendment note (`VOC-032-§1-amendment`, adopted 2026-07-30 via VOC-032; founder as approving
 > owner).** The Frontend/Backend/Database rows of the target-infrastructure table below and the

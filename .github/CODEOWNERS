@@ -54,9 +54,11 @@
 /scripts/rollback/                         @m-e-h-r-d-a-a-d
 /infrastructure/                           @m-e-h-r-d-a-a-d
 /infra/                                    @m-e-h-r-d-a-a-d
-/wrangler.json                             @m-e-h-r-d-a-a-d
-/wrangler.jsonc                            @m-e-h-r-d-a-a-d
-/wrangler.toml                             @m-e-h-r-d-a-a-d
+**/wrangler.json                           @m-e-h-r-d-a-a-d
+**/wrangler.jsonc                          @m-e-h-r-d-a-a-d
+**/wrangler.toml                           @m-e-h-r-d-a-a-d
+**/open-next.config.*                      @m-e-h-r-d-a-a-d
+**/worker-configuration.d.ts               @m-e-h-r-d-a-a-d
 /.env                                      @m-e-h-r-d-a-a-d
 /.env.*                                    @m-e-h-r-d-a-a-d
 

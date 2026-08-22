@@ -1,5 +1,11 @@
 # apps/web/Dockerfile
 #
+# Historical VOC-032 standalone image retained as a parity reference during
+# VOC-080. VOC-080-T03 removed `output: standalone` from the active Next config,
+# so this file is no longer a supported build/deploy path. T11 removes it only
+# after Worker API/data parity; use the credential-free OpenNext/workerd commands
+# documented in docs/development.md for the active web runtime.
+#
 # Multi-stage build for the vocanova web app
 # (apps/web, Next.js 16 App Router). The final
 # image is a minimal Node.js-on-Alpine container

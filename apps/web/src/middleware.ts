@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { getApiBaseURL } from "./lib/env";
+import { fetchApiFromServer } from "./lib/server-api-transport";
 
 export const config = {
   matcher: [
@@ -17,19 +18,13 @@ export const config = {
   ],
 };
 
-export const runtime = "nodejs";
-
 interface CurrentUserResponse {
   onboardingStatus?: "not_started" | "in_progress" | "completed";
 }
 
 const AUTH_CHECK_FAILURE_EVENT = "middleware_auth_check_failure";
 
-// `apps/web` has no shared server-side logger yet, and this package's scope
-// excludes introducing a logging dependency. A single-line JSON payload on
-// stderr is what the deployed `web` container's json-file log driver captures
-// (see infra/docker-compose.yml's `*default-logging`), so these lines are
-// greppable via `docker compose logs web` without SSH-time instrumentation.
+// Workers Logs captures this structured line when observability is enabled.
 // The payload deliberately carries no cookie or credential material.
 
 function logAuthCheckFailure({
@@ -62,7 +57,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   let meResponse: Response;
   try {
-    meResponse = await fetch(`${apiBaseURL}/api/v1/me`, {
+    meResponse = await fetchApiFromServer(`${apiBaseURL}/api/v1/me`, {
       method: "GET",
       headers: {
         Accept: "application/json",

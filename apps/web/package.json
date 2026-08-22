@@ -7,6 +7,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "cloudflare:build": "opennextjs-cloudflare build",
+    "cloudflare:preview": "opennextjs-cloudflare preview",
+    "cloudflare:preview:test": "node scripts/test-workerd.mjs",
+    "cloudflare:typegen": "wrangler types worker-configuration.d.ts --env-interface CloudflareEnv",
+    "cloudflare:typecheck": "wrangler types worker-configuration.d.ts --env-interface CloudflareEnv --check",
+    "cloudflare:dry-run": "wrangler deploy --dry-run --experimental-provision=false --env='' --outdir .wrangler/dry-run",
+    "cloudflare:limits": "node scripts/check-worker-limits.mjs",
+    "cloudflare:compatibility": "node scripts/check-worker-compatibility.mjs",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit --pretty false",
     "typecheck:e2e": "tsc -p tests/tsconfig.json --noEmit --pretty false",
@@ -16,6 +24,7 @@
     "generate:tokens": "node scripts/generate-tokens-css.mjs"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "1.20.2",
     "@sentry/nextjs": "^10.69.0",
     "@vocanova/api-client": "workspace:*",
     "next": "16.3.0",
@@ -34,6 +43,7 @@
     "axe-core": "4.13.0",
     "chrome-launcher": "1.2.1",
     "lighthouse": "13.4.1",
-    "tailwindcss": "4.3.3"
+    "tailwindcss": "4.3.3",
+    "wrangler": "4.125.0"
   }
 }
