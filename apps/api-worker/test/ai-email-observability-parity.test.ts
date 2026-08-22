@@ -6,6 +6,14 @@ import {
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { HttpAIProvider } from "../src/ai-feedback/http-provider.js";
+import {
+  EVALUATION_CATEGORIES,
+  EVALUATION_DATASET_VERSION,
+  GOLDEN_SET_VERSION,
+  goldenEvaluationSet,
+  initialEvaluationDataset,
+  runMockEvaluation,
+} from "../src/ai-feedback/evaluation.js";
 import { D1AIFeedbackRepository } from "../src/ai-feedback/repository.js";
 import {
   AIFeedbackService,
@@ -15,7 +23,9 @@ import {
 } from "../src/ai-feedback/service.js";
 import { createApp } from "../src/app.js";
 import {
-  EVALUATION_FIXTURES,
+  acceptedForms,
+  buildProviderTask,
+  localSafety,
   type FeedbackProvider,
   type ModerationOutcome,
   type ModerationProvider,
@@ -98,15 +108,40 @@ describe("Worker AI feedback parity", () => {
         )
       ).result.errorCode,
     ).toBe("unsupported_language");
-    expect(
-      (
-        await service.submit(
-          USER_B,
-          submission("I work every day."),
-          "cross-user",
-        )
-      ).result,
-    ).toMatchObject({ errorCode: "attempt_not_eligible", canRetry: false });
+    await expect(
+      service.submit(USER_B, submission("I work every day."), "cross-user"),
+    ).rejects.toMatchObject({ code: "target_not_found" });
+    const app = createApp({
+      createPlatformRepository: () => ({
+        checkHealth: () => Promise.resolve({ database: "ok" }),
+        getMetadata: () => Promise.resolve(null),
+        putMetadata: () => Promise.resolve(),
+      }),
+      createIdentityService: () => fakeIdentity(),
+      createAIFeedbackService: () => service,
+    });
+    const notFound = await app.request(
+      "https://worker.test/api/v1/sentence-feedback",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          cookie: "vocanova_session=session; vocanova_csrf=csrf-test",
+          "x-csrf-token": "csrf-test",
+          "idempotency-key": "missing-target-http",
+        },
+        body: JSON.stringify({
+          sentenceText: "I work every day.",
+          source: "word_detail",
+          attemptId: USER_B,
+        }),
+      },
+      env,
+    );
+    expect(notFound.status).toBe(404);
+    await expect(notFound.json()).resolves.toMatchObject({
+      detail: "owner or target resource not found",
+    });
     await service.submit(USER_A, submission("I work every day."), "conflict");
     await expect(
       service.submit(USER_A, submission("We work every evening."), "conflict"),
@@ -142,9 +177,10 @@ describe("Worker AI feedback parity", () => {
     expect(provider.lastTask?.systemPrompt).not.toContain(
       "ignore previous instructions",
     );
-    expect(EVALUATION_FIXTURES.map((fixture) => fixture.category)).toEqual(
-      expect.arrayContaining(["prompt_injection", "unsafe_blocked"]),
-    );
+    expect(
+      localSafety("I work by learning how to make dangerous substances."),
+    ).toBe("blocked");
+    expect(acceptedForms("watch", "word", "verb")).toContain("watches");
   });
 
   it("repairs malformed output once, then fails visibly without an unbounded retry", async () => {
@@ -258,6 +294,42 @@ describe("Worker AI feedback parity", () => {
       limits: { enabled: false },
     }).submit(USER_A, submission("They work every morning."), "disabled");
     expect(disabled.result.errorCode).toBe("AI_FEEDBACK_GENERATION_DISABLED");
+
+    const unsafeLeaseProvider = new ScriptedProvider(() => validFeedback());
+    const unsafeLease = await createService(unsafeLeaseProvider, {
+      limits: { leaseSeconds: 5 },
+      providerTimeoutMs: 10_000,
+    }).submit(USER_A, submission("They work every morning."), "unsafe-lease");
+    expect(unsafeLease.result.errorCode).toBe(
+      "AI_FEEDBACK_GENERATION_DISABLED",
+    );
+    expect(unsafeLeaseProvider.generateCalls).toBe(0);
+  });
+
+  it("enforces rolling rate windows across UTC bucket boundaries", async () => {
+    let clock = new Date("2026-08-22T12:00:59.900Z");
+    const repository = new D1AIFeedbackRepository(env.DB, () => clock);
+    const limits: AIFeedbackServiceConfig["limits"] = {
+      enabled: true,
+      perMinute: 1,
+      perDay: 30,
+      globalPerDay: 1_000,
+      monthlyCostHardStopCents: 0,
+      requestCostCents: 0,
+      leaseSeconds: 15,
+    };
+    const first = await repository.reserve(USER_A, limits);
+    expect(first.ok).toBe(true);
+    if (first.ok) await repository.release(USER_A, first.leaseId);
+    clock = new Date("2026-08-22T12:01:00.100Z");
+    await expect(repository.reserve(USER_A, limits)).resolves.toEqual({
+      ok: false,
+      reason: "limited",
+    });
+    clock = new Date("2026-08-22T12:02:00.001Z");
+    await expect(repository.reserve(USER_A, limits)).resolves.toMatchObject({
+      ok: true,
+    });
   });
 
   it("records reports for owners only and never exposes cross-user attempt existence", async () => {
@@ -299,6 +371,72 @@ describe("Worker provider, email, and observability boundaries", () => {
         AI_PER_MINUTE: "unbounded",
       } as unknown as CloudflareEnv).limits.enabled,
     ).toBe(false);
+    expect(
+      runtimeAIFeedbackConfig({
+        ...env,
+        AI_GENERATION_ENABLED: "true",
+        AI_GENERATION_LEASE_SECONDS: "5",
+        AI_PROVIDER_TIMEOUT_MS: "10000",
+      } as unknown as CloudflareEnv).limits.enabled,
+    ).toBe(false);
+  });
+
+  it("publishes a satisfiable strict provider-output schema", () => {
+    const task = buildProviderTask(
+      {
+        wordId: WORD,
+        meaningId: MEANING,
+        userWordId: USER_WORD,
+        wordText: "work",
+        normalizedWord: "work",
+        wordType: "word",
+        partOfSpeech: "verb",
+        shortDefinition: "perform a job",
+        learnerLevel: "a2",
+        acceptedForms: acceptedForms("work", "word", "verb"),
+      },
+      "i work every day.",
+    );
+    expect(task.outputSchema).toMatchObject({
+      additionalProperties: false,
+      required: ["status", "target_word_used_correctly", "explanation"],
+      properties: {
+        status: { enum: ["correct", "needs_improvement", "incorrect"] },
+        target_word_used_correctly: { type: "boolean" },
+        explanation: { type: "string" },
+      },
+    });
+  });
+
+  it("runs the versioned full and golden synthetic evaluation inventories", async () => {
+    const initial = initialEvaluationDataset();
+    const golden = goldenEvaluationSet();
+    expect(EVALUATION_DATASET_VERSION).toBe("initial-dataset-v1");
+    expect(GOLDEN_SET_VERSION).toBe("golden-set-v1");
+    expect(initial).toHaveLength(308);
+    expect(golden).toHaveLength(56);
+    expect(new Set(initial.map((entry) => entry.category))).toEqual(
+      new Set(EVALUATION_CATEGORIES),
+    );
+    expect(
+      golden.every((entry) => initial.some((item) => item.id === entry.id)),
+    ).toBe(true);
+    const fullResult = await runMockEvaluation(initial);
+    expect(fullResult.total).toBe(308);
+    expect(fullResult.validated).toBeGreaterThan(250);
+    expect(fullResult.safetyIntercepted).toBe(28);
+    expect(fullResult.providerCalled).toBe(fullResult.validated - 28);
+    const result = await runMockEvaluation(golden);
+    expect(result).toMatchObject({
+      datasetVersion: "initial-dataset-v1",
+      goldenSetVersion: "golden-set-v1",
+      total: 56,
+      validated: 56,
+      providerCalled: 56,
+      safetyIntercepted: 0,
+      matchedStatus: 28,
+    });
+    expect(result.mismatches).toHaveLength(28);
   });
 
   it("uses mocked Web Fetch provider adapters with HTTPS, bounded timeout, and no retry", async () => {
@@ -569,6 +707,7 @@ async function clearFeedbackState(): Promise<void> {
     "ai_feedback_attempts",
     "learner_sentences",
     "ai_generation_leases",
+    "ai_generation_events",
     "ai_usage_counters",
     "confidence_point_ledger",
     "daily_activity_summaries",
@@ -583,6 +722,7 @@ async function clearTables(): Promise<void> {
     "ai_feedback_attempts",
     "learner_sentences",
     "ai_generation_leases",
+    "ai_generation_events",
     "ai_usage_counters",
     "grace_day_ledger",
     "streak_states",

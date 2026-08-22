@@ -140,8 +140,8 @@ export class D1AIFeedbackRepository {
     const now = this.now();
     const timestamp = now.toISOString();
     const leaseId = crypto.randomUUID();
-    const minute = timestamp.slice(0, 16);
-    const day = timestamp.slice(0, 10);
+    const minuteAgo = new Date(now.getTime() - 60_000).toISOString();
+    const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1_000).toISOString();
     const month = timestamp.slice(0, 7);
     if (limits.monthlyCostHardStopCents > 0 && limits.requestCostCents > 0) {
       const current = await this.database
@@ -160,61 +160,63 @@ export class D1AIFeedbackRepository {
     const expiresAt = new Date(
       now.getTime() + limits.leaseSeconds * 1_000,
     ).toISOString();
-    const checks: Array<[string, string, string, number, number]> = [
-      ["user_minute", userId, minute, limits.perMinute, 0],
-      ["user_day", userId, day, limits.perDay, 0],
-      ["global_day", "global", day, limits.globalPerDay, 0],
-      ["global_month", "global", month, 0, limits.monthlyCostHardStopCents],
-    ];
     try {
       await this.database.batch([
         this.database
           .prepare("DELETE FROM ai_generation_leases WHERE expires_at <= ?1")
           .bind(timestamp),
-        ...checks.map(([scope, subject, period, countLimit, costLimit]) =>
-          this.database
-            .prepare(
-              `SELECT CASE WHEN
-                 (?4 > 0 AND COALESCE((SELECT request_count FROM ai_usage_counters
-                    WHERE scope = ?1 AND subject = ?2 AND period = ?3), 0) >= ?4)
-                 OR (?5 > 0 AND COALESCE((SELECT estimated_cost_cents FROM ai_usage_counters
-                    WHERE scope = ?1 AND subject = ?2 AND period = ?3), 0) + ?6 >= ?5)
-               THEN json('') ELSE 1 END`,
-            )
-            .bind(
-              scope,
-              subject,
-              period,
-              countLimit,
-              costLimit,
-              limits.requestCostCents,
-            ),
+        this.database
+          .prepare("DELETE FROM ai_generation_events WHERE occurred_at < ?1")
+          .bind(dayAgo),
+        rollingUserLimitStatement(
+          this.database,
+          userId,
+          minuteAgo,
+          limits.perMinute,
         ),
+        rollingUserLimitStatement(this.database, userId, dayAgo, limits.perDay),
+        rollingGlobalLimitStatement(this.database, dayAgo, limits.globalPerDay),
+        this.database
+          .prepare(
+            `SELECT CASE WHEN ?2 > 0 AND COALESCE((
+               SELECT estimated_cost_cents FROM ai_usage_counters
+               WHERE scope = 'global_month' AND subject = 'global' AND period = ?1
+             ), 0) + ?3 >= ?2 THEN json('') ELSE 1 END`,
+          )
+          .bind(
+            month,
+            limits.monthlyCostHardStopCents,
+            limits.requestCostCents,
+          ),
         this.database
           .prepare(
             `INSERT INTO ai_generation_leases (user_id, lease_id, expires_at, created_at)
              VALUES (?1, ?2, ?3, ?4)`,
           )
           .bind(userId, leaseId, expiresAt, timestamp),
-        ...checks.map(([scope, subject, period]) =>
-          this.database
-            .prepare(
-              `INSERT INTO ai_usage_counters
-               (scope, subject, period, request_count, estimated_cost_cents, updated_at)
-               VALUES (?1, ?2, ?3, 1, ?4, ?5)
-               ON CONFLICT(scope, subject, period) DO UPDATE SET
-                 request_count = request_count + 1,
-                 estimated_cost_cents = estimated_cost_cents + excluded.estimated_cost_cents,
-                 updated_at = excluded.updated_at`,
-            )
-            .bind(
-              scope,
-              subject,
-              period,
-              scope === "global_month" ? limits.requestCostCents : 0,
-              timestamp,
-            ),
-        ),
+        this.database
+          .prepare(
+            `INSERT INTO ai_generation_events
+             (id, user_id, occurred_at, estimated_cost_cents)
+             VALUES (?1, ?2, ?3, ?4)`,
+          )
+          .bind(
+            crypto.randomUUID(),
+            userId,
+            timestamp,
+            limits.requestCostCents,
+          ),
+        this.database
+          .prepare(
+            `INSERT INTO ai_usage_counters
+             (scope, subject, period, request_count, estimated_cost_cents, updated_at)
+             VALUES ('global_month', 'global', ?1, 1, ?2, ?3)
+             ON CONFLICT(scope, subject, period) DO UPDATE SET
+               request_count = request_count + 1,
+               estimated_cost_cents = estimated_cost_cents + excluded.estimated_cost_cents,
+               updated_at = excluded.updated_at`,
+          )
+          .bind(month, limits.requestCostCents, timestamp),
       ]);
       return { ok: true, leaseId };
     } catch {
@@ -441,6 +443,36 @@ export class D1AIFeedbackRepository {
         ),
     ];
   }
+}
+
+function rollingUserLimitStatement(
+  database: D1Database,
+  userId: string,
+  start: string,
+  limit: number,
+): D1PreparedStatement {
+  return database
+    .prepare(
+      `SELECT CASE WHEN ?3 > 0 AND
+         (SELECT COUNT(*) FROM ai_generation_events
+          WHERE user_id = ?1 AND occurred_at >= ?2) >= ?3
+       THEN json('') ELSE 1 END`,
+    )
+    .bind(userId, start, limit);
+}
+
+function rollingGlobalLimitStatement(
+  database: D1Database,
+  start: string,
+  limit: number,
+): D1PreparedStatement {
+  return database
+    .prepare(
+      `SELECT CASE WHEN ?2 > 0 AND
+         (SELECT COUNT(*) FROM ai_generation_events WHERE occurred_at >= ?1) >= ?2
+       THEN json('') ELSE 1 END`,
+    )
+    .bind(start, limit);
 }
 
 function pointStatement(

@@ -61,6 +61,16 @@ CREATE TABLE ai_usage_counters (
   PRIMARY KEY (scope, subject, period)
 ) WITHOUT ROWID, STRICT;
 
+CREATE TABLE ai_generation_events (
+  id TEXT PRIMARY KEY NOT NULL CHECK (length(id) = 36 AND id NOT GLOB '*[^0-9a-f-]*'),
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  occurred_at TEXT NOT NULL CHECK (occurred_at GLOB '????-??-??T??:??:??.???Z'),
+  estimated_cost_cents INTEGER NOT NULL DEFAULT 0 CHECK (estimated_cost_cents >= 0)
+) STRICT;
+CREATE INDEX ai_generation_events_user_time_idx
+  ON ai_generation_events (user_id, occurred_at);
+CREATE INDEX ai_generation_events_time_idx ON ai_generation_events (occurred_at);
+
 CREATE TABLE ai_generation_leases (
   user_id TEXT PRIMARY KEY NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   lease_id TEXT NOT NULL UNIQUE CHECK (length(lease_id) = 36 AND lease_id NOT GLOB '*[^0-9a-f-]*'),

@@ -109,6 +109,7 @@ export function registerAIFeedbackRoutes(
           "Feedback result, which may include a business-level error code",
         content: json(FeedbackResult),
       },
+      404: { description: "Owner or target resource not found" },
     },
   });
   app.openAPIRegistry.registerPath({

@@ -1614,6 +1614,9 @@
               }
             },
             "description": "Feedback result, which may include a business-level error code"
+          },
+          "404": {
+            "description": "Owner or target resource not found"
           }
         },
         "tags": [

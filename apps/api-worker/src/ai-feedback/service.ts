@@ -75,6 +75,11 @@ export class AIFeedbackService {
       telemetry: this.record(errorCode.toLowerCase(), startedAt),
     });
     if (!input.sentenceText) return failure("invalid_input", true);
+    if (
+      this.config.limits.leaseSeconds * 1_000 <=
+      this.config.providerTimeoutMs
+    )
+      return failure(ERROR.generationDisabled, true);
     let target;
     try {
       target = await this.repository.loadTarget(
@@ -84,7 +89,7 @@ export class AIFeedbackService {
       );
     } catch (error) {
       if (error instanceof AIFeedbackError && error.code === "target_not_found")
-        return failure("attempt_not_eligible", false);
+        throw error;
       throw error;
     }
     const validation = validateSentence(input.sentenceText, target);
@@ -281,6 +286,9 @@ export function runtimeAIFeedbackConfig(
   try {
     const enabled = String(env.AI_GENERATION_ENABLED);
     if (!["true", "false"].includes(enabled)) return disabled;
+    const leaseSeconds = integer(env.AI_GENERATION_LEASE_SECONDS, 5, 60);
+    const providerTimeoutMs = integer(env.AI_PROVIDER_TIMEOUT_MS, 100, 10_000);
+    if (leaseSeconds * 1_000 <= providerTimeoutMs) return disabled;
     return {
       limits: {
         enabled: enabled === "true",
@@ -293,9 +301,9 @@ export function runtimeAIFeedbackConfig(
           100_000_000,
         ),
         requestCostCents: integer(env.AI_REQUEST_COST_CENTS, 0, 1_000_000),
-        leaseSeconds: integer(env.AI_GENERATION_LEASE_SECONDS, 5, 60),
+        leaseSeconds,
       },
-      providerTimeoutMs: integer(env.AI_PROVIDER_TIMEOUT_MS, 100, 10_000),
+      providerTimeoutMs,
       release: env.RELEASE,
     };
   } catch {
