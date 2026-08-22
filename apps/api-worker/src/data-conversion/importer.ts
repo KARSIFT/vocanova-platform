@@ -50,6 +50,7 @@ export type ReconciliationReport = Readonly<{
   schemaVersion: typeof DATA_RECONCILIATION_SCHEMA_VERSION;
   exportId: string;
   planChecksum: string;
+  reconciliationGeneration: string;
   status: "pass" | "fail";
   tables: Readonly<Record<DataTableName, TableReconciliation>>;
   foreignKeyViolations: number;
@@ -239,13 +240,14 @@ export async function reconcileD1Import(
   const lock = await acquireOrLoadReconciliationWriteLock(session, plan);
   const checkpoint = lock.checkpoint;
 
-  // A completed receipt is evidence for the invocation that produced it, not a
-  // permanent cache of database truth. While its generation-bound lock remains,
-  // however, table triggers prove that the completed evidence is still current.
-  // The caller releases that exact state before a later invocation can acquire a
-  // fresh generation and start a new bounded pass.
+  // A completed receipt is single-use evidence returned only to the invocation
+  // that produced it. A later reader cannot safely distinguish that receipt from
+  // one already consumed by another caller, so it must fail closed until the
+  // producer releases the exact generation recorded in its report.
   if (checkpoint.completed) {
-    return buildReconciliationReport(plan, checkpoint);
+    throw new Error(
+      "data conversion: completed reconciliation awaits generation-bound release",
+    );
   }
 
   if (checkpoint.tableIndex < DATA_TABLE_NAMES.length) {
@@ -389,7 +391,13 @@ export async function reconcileD1Import(
 export async function releaseD1ReconciliationWriteLock(
   database: D1Database,
   plan: D1ImportPlan,
+  reconciliationGeneration: string,
 ): Promise<void> {
+  if (!CANONICAL_ID_PATTERN.test(reconciliationGeneration)) {
+    throw new Error(
+      "data conversion: reconciliation release generation is invalid",
+    );
+  }
   const session = database.withSession("first-primary");
   const existingLock = await loadReconciliationWriteLock(session);
   if (!existingLock) {
@@ -398,6 +406,11 @@ export async function releaseD1ReconciliationWriteLock(
     );
   }
   const lock = parseReconciliationWriteLock(existingLock, plan);
+  if (lock.generation !== reconciliationGeneration) {
+    throw new Error(
+      "data conversion: reconciliation release generation does not match the completed receipt",
+    );
+  }
   if (!lock.checkpoint.completed) {
     throw new Error(
       "data conversion: cannot release reconciliation lock before exact reconciliation completes",
@@ -882,6 +895,7 @@ function buildReconciliationReport(
     schemaVersion: DATA_RECONCILIATION_SCHEMA_VERSION,
     exportId: plan.exportId,
     planChecksum: plan.checksum,
+    reconciliationGeneration: checkpoint.generation,
     status:
       allTablesMatch && checkpoint.foreignKeyViolations === 0 && aggregatesMatch
         ? "pass"

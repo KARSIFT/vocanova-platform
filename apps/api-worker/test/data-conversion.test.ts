@@ -197,10 +197,11 @@ describe("PostgreSQL-to-D1 conversion", () => {
       Number.MAX_SAFE_INTEGER,
     );
     await runImport(env.DB, plan);
-    expect(
-      (await runReconciliation(env.DB, plan)).domainAggregates
-        .confidencePointDelta,
-    ).toBe(Number.MAX_SAFE_INTEGER);
+    await consumeReconciliation(env.DB, plan, (report) => {
+      expect(report.domainAggregates.confidencePointDelta).toBe(
+        Number.MAX_SAFE_INTEGER,
+      );
+    });
 
     const overflowing = fixtureFor("overflowing-signed-aggregate");
     const overflowTemplate = rowOf(overflowing, "confidence_point_ledger");
@@ -248,7 +249,6 @@ describe("PostgreSQL-to-D1 conversion", () => {
       chunkSize: 1,
     });
     const result = await runImport(env.DB, plan);
-    const report = await runReconciliation(env.DB, plan);
 
     expect(result).toMatchObject({
       resumedFromChunk: 0,
@@ -257,27 +257,29 @@ describe("PostgreSQL-to-D1 conversion", () => {
       completed: true,
     });
     expect(result.appliedBatches).toBeGreaterThanOrEqual(result.appliedChunks);
-    expect(report.status).toBe("pass");
-    expect(report.foreignKeyViolations).toBe(0);
-    expect(Object.values(report.tables).every((table) => table.matches)).toBe(
-      true,
-    );
-    expect(report.domainAggregates).toEqual({
-      activeUsers: 1,
-      activeSavedWords: 1,
-      reviewAttempts: 1,
-      completedMissions: 1,
-      confidencePointDelta: 10,
-      successfulAiFeedbackAttempts: 1,
-    });
-    expect(report.redactedFieldCount).toBeGreaterThan(0);
+    await consumeReconciliation(env.DB, plan, async (report) => {
+      expect(report.status).toBe("pass");
+      expect(report.foreignKeyViolations).toBe(0);
+      expect(Object.values(report.tables).every((table) => table.matches)).toBe(
+        true,
+      );
+      expect(report.domainAggregates).toEqual({
+        activeUsers: 1,
+        activeSavedWords: 1,
+        reviewAttempts: 1,
+        completedMissions: 1,
+        confidencePointDelta: 10,
+        successfulAiFeedbackAttempts: 1,
+      });
+      expect(report.redactedFieldCount).toBeGreaterThan(0);
 
-    const serialized = JSON.stringify(report);
-    expect(serialized).not.toContain("Synthetic learner content");
-    expect(serialized).not.toContain("synthetic@example.invalid");
-    expect(serialized).not.toContain("synthetic-idempotency-key");
-    expect(serialized).not.toContain("a".repeat(64));
-    console.info(`VOC080_RECONCILIATION ${serialized}`);
+      const serialized = JSON.stringify(report);
+      expect(serialized).not.toContain("Synthetic learner content");
+      expect(serialized).not.toContain("synthetic@example.invalid");
+      expect(serialized).not.toContain("synthetic-idempotency-key");
+      expect(serialized).not.toContain("a".repeat(64));
+      console.info(`VOC080_RECONCILIATION ${serialized}`);
+    });
   });
 
   it("makes a completed rerun a no-op", async () => {
@@ -289,7 +291,9 @@ describe("PostgreSQL-to-D1 conversion", () => {
 
     expect(rerun.appliedChunks).toBe(0);
     expect(rerun.resumedFromChunk).toBe(plan.chunks.length);
-    expect((await runReconciliation(env.DB, plan)).status).toBe("pass");
+    await consumeReconciliation(env.DB, plan, (report) => {
+      expect(report.status).toBe("pass");
+    });
   });
 
   it("resumes after an injected partial failure from the last atomic checkpoint", async () => {
@@ -305,7 +309,9 @@ describe("PostgreSQL-to-D1 conversion", () => {
     expect(resumed.resumedFromChunk).toBe(30);
     expect(resumed.appliedChunks).toBe(1);
     await runImport(env.DB, plan);
-    expect((await runReconciliation(env.DB, plan)).status).toBe("pass");
+    await consumeReconciliation(env.DB, plan, (report) => {
+      expect(report.status).toBe("pass");
+    });
   });
 
   it("fails closed on a malformed or inconsistent persisted checkpoint", async () => {
@@ -386,7 +392,9 @@ describe("PostgreSQL-to-D1 conversion", () => {
       fixtureFor("stale-reconciliation"),
     );
     await runImport(env.DB, plan);
-    expect((await runReconciliation(env.DB, plan)).status).toBe("pass");
+    await consumeReconciliation(env.DB, plan, (report) => {
+      expect(report.status).toBe("pass");
+    });
 
     await env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
       .bind(
@@ -397,7 +405,9 @@ describe("PostgreSQL-to-D1 conversion", () => {
 
     const restarted = await reconcileD1Import(env.DB, plan);
     expect(restarted.status).toBe("pending");
-    expect((await runReconciliation(env.DB, plan)).status).toBe("fail");
+    await consumeReconciliation(env.DB, plan, (report) => {
+      expect(report.status).toBe("fail");
+    });
   });
 
   it("rejects a changed plan under a completed export id", async () => {
@@ -433,24 +443,24 @@ describe("PostgreSQL-to-D1 conversion", () => {
     rowOf(correctionFixture, "confidence_point_ledger").balance_after = 12;
     const correction = await convertPostgresExport(correctionFixture);
     await runImport(env.DB, correction);
-    const report = await runReconciliation(env.DB, correction);
-
-    expect(report.status).toBe("pass");
-    expect(report.domainAggregates.confidencePointDelta).toBe(12);
-    expect(report.tables.external_identities).toMatchObject({
-      sourceCount: 2,
-      excludedCount: 1,
-      expectedCount: 1,
-      actualCount: 1,
-      matches: true,
+    await consumeReconciliation(env.DB, correction, async (report) => {
+      expect(report.status).toBe("pass");
+      expect(report.domainAggregates.confidencePointDelta).toBe(12);
+      expect(report.tables.external_identities).toMatchObject({
+        sourceCount: 2,
+        excludedCount: 1,
+        expectedCount: 1,
+        actualCount: 1,
+        matches: true,
+      });
+      expect(
+        await env.DB.prepare(
+          "SELECT COUNT(*) AS count FROM external_identities WHERE id = ?1",
+        )
+          .bind(identity.id)
+          .first<{ count: number }>(),
+      ).toEqual({ count: 0 });
     });
-    expect(
-      await env.DB.prepare(
-        "SELECT COUNT(*) AS count FROM external_identities WHERE id = ?1",
-      )
-        .bind(identity.id)
-        .first<{ count: number }>(),
-    ).toEqual({ count: 0 });
   });
 
   it("resumes bounded clearing and multi-page reconciliation", async () => {
@@ -513,9 +523,9 @@ describe("PostgreSQL-to-D1 conversion", () => {
         )
         .run(),
     ).rejects.toThrow("data reconciliation write lock is active");
-    expect(
-      (await runReconciliation(env.DB, guardedReconciliationPlan)).status,
-    ).toBe("pass");
+    await consumeReconciliation(env.DB, guardedReconciliationPlan, (report) => {
+      expect(report.status).toBe("pass");
+    });
 
     const correction = await convertPostgresExport(
       fixtureFor("bounded-clear-correction"),
@@ -549,7 +559,9 @@ describe("PostgreSQL-to-D1 conversion", () => {
       appliedBatches: 1,
     });
     await runImport(env.DB, correction);
-    expect((await runReconciliation(env.DB, correction)).status).toBe("pass");
+    await consumeReconciliation(env.DB, correction, (report) => {
+      expect(report.status).toBe("pass");
+    });
   }, 15_000);
 
   it("restarts from zero after lock loss even when reacquisition then fails", async () => {
@@ -592,7 +604,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
       tableIndex: 0,
       current: { rowCount: 0 },
     });
-    await expect(runReconciliation(env.DB, plan)).rejects.toThrow(
+    await expect(completeReconciliation(env.DB, plan)).rejects.toThrow(
       "cursor is not bound to an exact expected prefix",
     );
     await env.DB.prepare("DELETE FROM platform_metadata WHERE key = ?1")
@@ -600,33 +612,66 @@ describe("PostgreSQL-to-D1 conversion", () => {
       .run();
   }, 15_000);
 
-  it("does not let a completed release delete a concurrent fresh generation", async () => {
+  it("binds completed evidence and release to the exact generation", async () => {
     const plan = await convertPostgresExport(fixtureFor("release-generation"));
     await runImport(env.DB, plan);
-    let completed: ReconciliationReport | undefined;
-    for (let attempt = 0; attempt < 10_000; attempt += 1) {
-      const result = await reconcileD1Import(env.DB, plan);
-      if (result.status !== "pending") {
-        completed = result;
-        break;
-      }
-    }
-    expect(completed?.status).toBe("pass");
+    const completedA = await completeReconciliation(env.DB, plan);
+    expect(completedA.status).toBe("pass");
 
-    await Promise.all([
-      releaseD1ReconciliationWriteLock(env.DB, plan),
-      reconcileD1Import(env.DB, plan),
-    ]);
+    await expect(reconcileD1Import(env.DB, plan)).rejects.toThrow(
+      "completed reconciliation awaits generation-bound release",
+    );
+    await expect(
+      env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
+        .bind(
+          "Mutation while completed evidence is consumed",
+          plan.expectedRows.canonical_words[0]?.id,
+        )
+        .run(),
+    ).rejects.toThrow("data reconciliation write lock is active");
+
+    await releaseD1ReconciliationWriteLock(
+      env.DB,
+      plan,
+      completedA.reconciliationGeneration,
+    );
+    await env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
+      .bind(
+        "Mutation after generation A release",
+        plan.expectedRows.canonical_words[0]?.id,
+      )
+      .run();
+
     const restarted = await reconcileD1Import(env.DB, plan);
     expect(restarted.status).toBe("pending");
-    expect(
-      await env.DB.prepare(
-        "SELECT COUNT(*) AS count FROM platform_metadata WHERE key = ?1",
-      )
-        .bind("data_reconciliation_write_lock")
-        .first<{ count: number }>(),
-    ).toEqual({ count: 1 });
-    expect((await runReconciliation(env.DB, plan)).status).toBe("pass");
+    const completedB = await completeReconciliation(env.DB, plan);
+    expect(completedB.status).toBe("fail");
+    expect(completedB.reconciliationGeneration).not.toBe(
+      completedA.reconciliationGeneration,
+    );
+
+    await expect(
+      releaseD1ReconciliationWriteLock(
+        env.DB,
+        plan,
+        completedA.reconciliationGeneration,
+      ),
+    ).rejects.toThrow(
+      "reconciliation release generation does not match the completed receipt",
+    );
+    await expect(
+      env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
+        .bind(
+          "Mutation after stale generation A release",
+          plan.expectedRows.canonical_words[0]?.id,
+        )
+        .run(),
+    ).rejects.toThrow("data reconciliation write lock is active");
+    await releaseD1ReconciliationWriteLock(
+      env.DB,
+      plan,
+      completedB.reconciliationGeneration,
+    );
   }, 15_000);
 
   it("lets D1 reject alternate/composite uniqueness conflicts atomically", async () => {
@@ -677,9 +722,9 @@ describe("PostgreSQL-to-D1 conversion", () => {
       chunkSize: 10,
     });
     await runImport(env.DB, correctedPlan);
-    expect((await runReconciliation(env.DB, correctedPlan)).status).toBe(
-      "pass",
-    );
+    await consumeReconciliation(env.DB, correctedPlan, (report) => {
+      expect(report.status).toBe("pass");
+    });
   });
 });
 
@@ -793,18 +838,34 @@ async function runUntilChunk(
   throw new Error(`test import did not reach chunk ${targetChunk}`);
 }
 
-async function runReconciliation(
+async function completeReconciliation(
   database: D1Database,
   plan: D1ImportPlan,
 ): Promise<ReconciliationReport> {
   for (let attempt = 0; attempt < 10_000; attempt += 1) {
     const result = await reconcileD1Import(database, plan);
     if (result.status !== "pending") {
-      await releaseD1ReconciliationWriteLock(database, plan);
       return result;
     }
   }
   throw new Error("test reconciliation did not complete within bounded pages");
+}
+
+async function consumeReconciliation<T>(
+  database: D1Database,
+  plan: D1ImportPlan,
+  consume: (report: ReconciliationReport) => T | Promise<T>,
+): Promise<T> {
+  const report = await completeReconciliation(database, plan);
+  try {
+    return await consume(report);
+  } finally {
+    await releaseD1ReconciliationWriteLock(
+      database,
+      plan,
+      report.reconciliationGeneration,
+    );
+  }
 }
 
 async function runUntilReconciliationPage(

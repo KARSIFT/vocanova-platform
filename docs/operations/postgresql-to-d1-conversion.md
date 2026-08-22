@@ -103,14 +103,16 @@ destructive production action.
 
 ## Reconciliation and privacy
 
-`reconcileD1Import` emits `vocanova-d1-reconciliation-v1` with:
+`reconcileD1Import` emits `vocanova-d1-reconciliation-v2` with:
 
 - source, excluded, expected, and actual count for every table;
 - expected and actual SHA-256 checksum for canonical target rows;
 - bounded per-row parent-reference violation count across every canonical page;
 - active-user, active-saved-word, review-attempt, completed-mission, Confidence Point
   delta, and successful-AI-feedback aggregates;
-- the number of sensitive fields withheld from evidence.
+- the number of sensitive fields withheld from evidence; and
+- the random reconciliation generation that binds this single-use receipt to its
+  still-active write lock.
 
 Reconciliation is also a resumable state machine. Each call uses a
 [primary-anchored D1 Session](https://developers.cloudflare.com/d1/best-practices/read-replication/#start-a-session-with-all-latest-data)
@@ -148,18 +150,23 @@ evidence. A well-shaped cursor that skips or rewrites an unverified prefix fails
 Reconciliation therefore never iterates an expected table, performs a D1 full-table
 aggregate, or materializes a D1 table/result set in one Worker invocation. Persisted
 table evidence is checked back against the plan's counts and checksums, and the
-`matches` flag is recomputed semantically. A completed receipt is reusable only while
-its exact generation lock remains, because the triggers make later target mutation
-impossible. A completed report deliberately leaves that write lock active while its
-evidence is recorded. The caller then invokes `releaseD1ReconciliationWriteLock`; it
-conditionally deletes only the exact plan-bound, generation-bound completed state it
-verified. A concurrent fresh generation cannot be deleted by the old release. After
-release, the next invocation creates a new generation and starts a bounded pass, so a
-later database mutation cannot return a stale PASS. Releasing an incomplete or
-different plan fails closed. If
-a process stops mid-pass, retry the same plan to resume; do not delete the lock or run a
-forward correction until that pass completes or a separately reviewed recovery records
-why its prefix is being abandoned.
+`matches` flag is recomputed semantically. The invocation that completes a pass is the
+only invocation that receives its report. The report is a single-use receipt and
+deliberately leaves its exact generation lock active while a consumer validates and
+records the evidence; a later reconciliation caller fails closed instead of replaying
+that completed PASS. The consumer then passes the report's
+`reconciliationGeneration` to `releaseD1ReconciliationWriteLock`. Release requires an
+exact plan and generation match and conditionally deletes only the completed state it
+loaded. A stale receipt cannot release a newer generation, and target triggers keep the
+database immutable until the correct receipt is consumed. After release, the next
+invocation creates a new generation and starts a bounded pass, so a later database
+mutation cannot return a stale PASS. Releasing an incomplete, malformed, stale, or
+different-plan receipt fails closed.
+
+If a process stops mid-pass, retry the same plan to resume. If it stops after completing
+the pass but before its receipt is durably recorded and released, later calls remain
+blocked by design; do not delete the lock or run a forward correction until a separately
+reviewed recovery records why that completed receipt is being abandoned.
 
 The report contains no row values, email, provider subject, token/hash, idempotency key,
 typed answer, sentence, AI feedback, or error content. Full converted rows remain an
@@ -178,8 +185,8 @@ The first command runs exact shape/type/adversarial tests, fresh local D1 import
 idempotent replay, interrupted resume, malformed/stale-checkpoint rejection, byte and
 statement bounds, alternate/composite uniqueness, deletion-safe forward correction,
 multi-page reconciliation interruption/retry without expected-table scans,
-semantically inconsistent reconciliation-checkpoint rejection, completed-receipt
-revalidation, lock-loss/reacquisition failure recovery, concurrent release/restart,
+semantically inconsistent reconciliation-checkpoint rejection, single-use completed
+receipts, lock-loss/reacquisition failure recovery, stale-generation release rejection,
 mutation rejection while an in-progress prefix exists, exact signed
 aggregate cancellation/overflow, bounded foreign-key/count/checksum/domain
 reconciliation, and log-redaction assertions. The

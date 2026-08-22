@@ -1,6 +1,6 @@
 export const DATA_EXPORT_SCHEMA_VERSION = "vocanova-postgres-export-v1";
 export const DATA_RECONCILIATION_SCHEMA_VERSION =
-  "vocanova-d1-reconciliation-v1";
+  "vocanova-d1-reconciliation-v2";
 
 export type FieldKind =
   | "boolean"
