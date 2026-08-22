@@ -107,7 +107,7 @@ commands are:
 
 `wrangler.jsonc` contains one local D1 name and the non-remote sentinel ID
 `local`; it contains no Cloudflare account/resource identifier or credential.
-Vitest applies all five forward migrations to isolated local D1 storage twice,
+Vitest applies all six forward migrations to isolated local D1 storage twice,
 proving from-empty and replay behavior. T05 adds requester-scoped identity, OAuth
 state, magic links, sessions, onboarding, settings, email change, and account
 deactivation. T06-T08 add content/review, mission/progress, and AI-feedback parity,
@@ -120,10 +120,11 @@ environment secrets, routes, and held deployment/migration commands.
 
 T09's data-conversion command accepts only the committed synthetic PostgreSQL-shaped
 fixture. It applies prepared, bounded D1 batches to local test storage, checkpoints
-each chunk atomically, and proves rerun, interrupted-resume, forward-correction,
-foreign-key, checksum, count, domain-aggregate, and privacy-safe evidence. It cannot
-use production data or a remote D1 binding. The complete contract and recovery rules
-are in the [conversion runbook](operations/postgresql-to-d1-conversion.md).
+each mutation, and reconciles through bounded resumable pages. It proves rerun,
+interrupted-resume, forward-correction, foreign-key, checksum, count, domain-aggregate,
+and privacy-safe evidence. It cannot use production data or a remote D1 binding. The
+complete contract and recovery rules are in the
+[conversion runbook](operations/postgresql-to-d1-conversion.md).
 
 Run API commands from `apps/api`:
 

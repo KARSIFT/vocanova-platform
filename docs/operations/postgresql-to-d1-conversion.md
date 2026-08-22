@@ -112,6 +112,17 @@ destructive production action.
   delta, and successful-AI-feedback aggregates;
 - the number of sensitive fields withheld from evidence.
 
+Reconciliation is also a resumable state machine. Each call fetches at most 11 ordered
+rows from one table (10 hashed rows plus one completion lookahead), rejects a
+canonicalized 10-row page above 12,000,000 bytes, advances a SHA-256 page chain, and
+stores only its last ID, row count, rolling checksum, and
+completed-table evidence under `data_reconciliation:<export_id>`. Empty-page detection
+finalizes a table; a final bounded invocation counts foreign-key violations and reads
+the six aggregates. Retrying after a read or checkpoint failure re-reads at most the
+same page and cannot double-count because the cursor advances only with its prepared
+checkpoint write. The expected rows use the identical 10-row page chain, so final
+checksums are exact without materializing a D1 table or its result set in memory.
+
 The report contains no row values, email, provider subject, token/hash, idempotency key,
 typed answer, sentence, AI feedback, or error content. Full converted rows remain an
 in-memory protected import plan and are never written to routine logs.
@@ -128,14 +139,15 @@ pnpm --filter @vocanova/api-worker data-conversion:inventory
 The first command runs exact shape/type/adversarial tests, fresh local D1 import,
 idempotent replay, interrupted resume, malformed/stale-checkpoint rejection, byte and
 statement bounds, alternate/composite uniqueness, deletion-safe forward correction,
-foreign-key/count/checksum/domain reconciliation, and log-redaction assertions. The
+multi-page reconciliation interruption/retry, foreign-key/count/checksum/domain
+reconciliation, and log-redaction assertions. The
 second command proves all 25 PostgreSQL tables/columns map exactly and classifies the
 six D1-only runtime tables that have no PostgreSQL source rows.
 
 ## Repository rollback
 
-Reverting VOC-080-T09 removes only the converter, fixture, local rehearsal, command,
-and this documentation. It does not reverse a remote schema or dataset because T09
-performs no remote action. If a future authorized migration has begun, data recovery
-uses its recorded forward-correction or separately authorized restore procedure; a
-source-code revert alone is not data rollback.
+Reverting VOC-080-T09 removes the converter, D1 synthetic-account parity migration,
+fixture, local rehearsal, command, and this documentation. It does not reverse a remote
+schema or dataset because T09 performs no remote action. If a future authorized
+migration has begun, data recovery uses its recorded forward-correction or separately
+authorized restore procedure; a source-code revert alone is not data rollback.

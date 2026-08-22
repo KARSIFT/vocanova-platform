@@ -10,8 +10,12 @@ import {
 import {
   applyD1ImportPlan,
   reconcileD1Import,
+  type ReconciliationReport,
 } from "../src/data-conversion/importer.js";
-import { DATA_TABLE_NAMES } from "../src/data-conversion/schema.js";
+import {
+  DATA_TABLE_NAMES,
+  type DataTableName,
+} from "../src/data-conversion/schema.js";
 import { syntheticPostgresExport } from "./fixtures/postgres-export-v1.js";
 
 describe("PostgreSQL-to-D1 conversion", () => {
@@ -190,7 +194,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
       chunkSize: 1,
     });
     const result = await runImport(env.DB, plan);
-    const report = await reconcileD1Import(env.DB, plan);
+    const report = await runReconciliation(env.DB, plan);
 
     expect(result).toMatchObject({
       resumedFromChunk: 0,
@@ -231,7 +235,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
 
     expect(rerun.appliedChunks).toBe(0);
     expect(rerun.resumedFromChunk).toBe(plan.chunks.length);
-    expect((await reconcileD1Import(env.DB, plan)).status).toBe("pass");
+    expect((await runReconciliation(env.DB, plan)).status).toBe("pass");
   });
 
   it("resumes after an injected partial failure from the last atomic checkpoint", async () => {
@@ -247,7 +251,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     expect(resumed.resumedFromChunk).toBe(30);
     expect(resumed.appliedChunks).toBe(1);
     await runImport(env.DB, plan);
-    expect((await reconcileD1Import(env.DB, plan)).status).toBe("pass");
+    expect((await runReconciliation(env.DB, plan)).status).toBe("pass");
   });
 
   it("fails closed on a malformed or inconsistent persisted checkpoint", async () => {
@@ -300,7 +304,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     rowOf(correctionFixture, "confidence_point_ledger").balance_after = 12;
     const correction = await convertPostgresExport(correctionFixture);
     await runImport(env.DB, correction);
-    const report = await reconcileD1Import(env.DB, correction);
+    const report = await runReconciliation(env.DB, correction);
 
     expect(report.status).toBe("pass");
     expect(report.domainAggregates.confidencePointDelta).toBe(12);
@@ -320,24 +324,38 @@ describe("PostgreSQL-to-D1 conversion", () => {
     ).toEqual({ count: 0 });
   });
 
-  it("clears a large corrected table in resumable 40-row invocation slices", async () => {
+  it("resumes bounded clearing and multi-page reconciliation", async () => {
     const initialFixture = fixtureFor("bounded-clear-base");
     const template = rowOf(initialFixture, "canonical_words");
-    for (let index = 0; index < 40; index += 1) {
+    for (let index = 0; index < 10; index += 1) {
       const row = structuredClone(template);
       row.id = `00000000-0000-0000-0000-${(0x1000 + index).toString(16).padStart(12, "0")}`;
       row.text = `Bounded clear ${index}`;
       row.normalized_text = `bounded-clear-${index}`;
       tableRows(initialFixture, "canonical_words").push(row);
     }
-    await runImport(
+    const initialPlan = await convertPostgresExport(initialFixture, {
+      chunkSize: 10,
+    });
+    await runImport(env.DB, initialPlan);
+    await runUntilReconciliationPage(
       env.DB,
-      await convertPostgresExport(initialFixture, { chunkSize: 40 }),
+      initialPlan,
+      "canonical_words",
+      10,
     );
+    await expect(
+      reconcileD1Import(env.DB, initialPlan, {
+        failBeforePage: { table: "canonical_words", processedRows: 10 },
+      }),
+    ).rejects.toThrow(
+      "injected reconciliation failure before canonical_words row 10",
+    );
+    expect((await runReconciliation(env.DB, initialPlan)).status).toBe("pass");
 
     const correction = await convertPostgresExport(
       fixtureFor("bounded-clear-correction"),
-      { chunkSize: 40 },
+      { chunkSize: 10 },
     );
     const clearIndex = correction.chunks.findIndex(
       (chunk) =>
@@ -367,8 +385,8 @@ describe("PostgreSQL-to-D1 conversion", () => {
       appliedBatches: 1,
     });
     await runImport(env.DB, correction);
-    expect((await reconcileD1Import(env.DB, correction)).status).toBe("pass");
-  });
+    expect((await runReconciliation(env.DB, correction)).status).toBe("pass");
+  }, 15_000);
 
   it("lets D1 reject alternate/composite uniqueness conflicts atomically", async () => {
     const fixture = fixtureFor("alternate-unique");
@@ -418,7 +436,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
       chunkSize: 10,
     });
     await runImport(env.DB, correctedPlan);
-    expect((await reconcileD1Import(env.DB, correctedPlan)).status).toBe(
+    expect((await runReconciliation(env.DB, correctedPlan)).status).toBe(
       "pass",
     );
   });
@@ -495,4 +513,37 @@ async function runUntilChunk(
     }
   }
   throw new Error(`test import did not reach chunk ${targetChunk}`);
+}
+
+async function runReconciliation(
+  database: D1Database,
+  plan: D1ImportPlan,
+): Promise<ReconciliationReport> {
+  for (let attempt = 0; attempt < 10_000; attempt += 1) {
+    const result = await reconcileD1Import(database, plan);
+    if (result.status !== "pending") return result;
+  }
+  throw new Error("test reconciliation did not complete within bounded pages");
+}
+
+async function runUntilReconciliationPage(
+  database: D1Database,
+  plan: D1ImportPlan,
+  table: DataTableName,
+  processedRows: number,
+): Promise<void> {
+  for (let attempt = 0; attempt < 10_000; attempt += 1) {
+    const result = await reconcileD1Import(database, plan);
+    if (
+      result.status === "pending" &&
+      result.table === table &&
+      result.processedRowsInTable === processedRows
+    ) {
+      return;
+    }
+    if (result.status !== "pending") {
+      throw new Error(`test reconciliation completed before ${String(table)}`);
+    }
+  }
+  throw new Error(`test reconciliation did not reach ${String(table)}`);
 }
