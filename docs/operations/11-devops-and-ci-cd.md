@@ -131,6 +131,15 @@ settings/onboarding idempotency, email change, deactivation rollback, and rate/k
 switches. Email and OAuth stay injected, credential-free boundaries; the task neither
 contacts providers nor provisions or migrates a remote D1 database.
 
+VOC-080-T06 through T08 complete the 25-operation Worker contract inventory and
+extend the same job through five forward D1 migrations. Workerd fixtures cover
+content/reviews, missions/progress, sentence-feedback persistence, deterministic
+validation and safety, bounded provider repair/timeouts, persistent rate/cost and
+concurrency gates, the provider-neutral email HTTP boundary, and redacted
+`waitUntil` telemetry. Normal CI uses mocks and no paid-provider secret. The
+committed local runtime keeps `AI_GENERATION_ENABLED=false`; enabling or wiring a
+real provider remains separate from this credential-free parity proof.
+
 > **Amendment note (`VOC-032-§1-amendment`, adopted 2026-07-30 via VOC-032; founder as approving
 > owner).** The Frontend/Backend/Database rows of the target-infrastructure table below and the
 > `vocanova.com` domain set in the next paragraph were the **original (v1.0) baseline** as of

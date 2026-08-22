@@ -2,8 +2,9 @@
 
 `worker-foundation.openapi.json` is generated from the Hono route registry.
 `public-contract-baseline.json` binds this migration workspace to the canonical
-Go `/api/v1` OpenAPI document until every endpoint has passed Worker parity. Its
-identity/account manifest compares all 13 migrated operation IDs, methods, paths,
+Go `/api/v1` OpenAPI document while the Go implementation remains the behavioral
+oracle through final runtime retirement. Its complete manifest compares all 25
+operation IDs, methods, paths,
 primary success statuses, public request/response fields, required fields, and
 query/header parameters against the Go reference.
 
