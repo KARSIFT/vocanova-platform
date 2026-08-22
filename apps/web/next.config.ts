@@ -9,12 +9,18 @@
 
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import { withSentryConfig } from "@sentry/nextjs";
+import type { NextConfig } from "next";
 
 if (process.env.NODE_ENV === "development") {
   void initOpenNextCloudflareForDev();
 }
 
-const nextConfig = {};
+// VOC-081-T00: Next 16.3 otherwise creates nested AGENTS.md/CLAUDE.md files
+// when an AI coding agent is detected. Repository authority is maintained at
+// the repository root, so local development must never generate replacements.
+const nextConfig = {
+  agentRules: false,
+} satisfies NextConfig;
 
 // VOC-051-T01: hand-adapted equivalent of the @sentry/nextjs wizard's
 // `withSentryConfig` options block. No `org`/`project`/`authToken` is set and

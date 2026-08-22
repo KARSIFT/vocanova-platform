@@ -4,6 +4,8 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+import { validateLocalDevelopmentRepository } from "./local-development-policy.mjs";
+
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../..",
@@ -30,6 +32,8 @@ const prohibitedDirectories = [
 
 export function validateWorkspace() {
   const errors = [];
+
+  errors.push(...validateLocalDevelopmentRepository(repositoryRoot));
 
   for (const relative of requiredDirectories) {
     if (!existsSync(path.join(repositoryRoot, relative))) {

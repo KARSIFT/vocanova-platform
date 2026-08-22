@@ -111,11 +111,11 @@ describe("Worker API migration target", () => {
   it("allows only configured credentialed CORS origins", async () => {
     const allowed = await exports.default.fetch(
       new Request("https://api.example.test/configz", {
-        headers: { Origin: "http://localhost:3000" },
+        headers: { Origin: "http://127.0.0.1:3000" },
       }),
     );
     expect(allowed.headers.get("access-control-allow-origin")).toBe(
-      "http://localhost:3000",
+      "http://127.0.0.1:3000",
     );
     expect(allowed.headers.get("access-control-allow-credentials")).toBe(
       "true",
@@ -132,7 +132,7 @@ describe("Worker API migration target", () => {
       new Request("https://api.example.test/configz", {
         method: "OPTIONS",
         headers: {
-          Origin: "http://localhost:3000",
+          Origin: "http://127.0.0.1:3000",
           "Access-Control-Request-Method": "GET",
           "Access-Control-Request-Headers": "Content-Type",
         },
