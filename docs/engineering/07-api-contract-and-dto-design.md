@@ -30,8 +30,9 @@ source_files:
 
 The public `/api/v1` OpenAPI contract and observable behavior are the migration seam
 defined by [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md).
-Hono and schema-driven TypeScript DTOs become the target implementation while the Go/
-Huma contract remains the oracle until deterministic drift and parity tests pass. No
+Hono and schema-driven TypeScript DTOs are the runtime implementation. T11 replaced
+the former Go/Huma oracle with the frozen parity snapshot after deterministic drift
+and parity tests passed. No
 endpoint may silently change because its storage moves from PostgreSQL to D1.
 
 ## Core API decisions
@@ -132,17 +133,17 @@ unlinkable aggregates may remain, subject to legal review.
 
 ## OpenAPI rules
 
-The generated OpenAPI 3.1 artifact is committed at
-`apps/api/openapi/vocanova.openapi.json` and is the input to client generation and CI drift checks.
+The generated operational OpenAPI 3.1 artifact is committed at
+`apps/api-worker/openapi/worker-foundation.openapi.json`; CI compares it with the
+frozen retired-source contract snapshot and API client.
 Operation IDs: `<Verb><Resource>` (e.g. `GetCurrentUser`, `SubmitReview`,
 `CreateLearnerSentence`). Must include examples, validation metadata, error responses, stable
 operation IDs.
 
 ## Testing requirements
 
-Unit, handler, service, workerd, contract-parity, OpenAPI golden-file, local D1 integration/migration,
-auth, CSRF, cross-user, atomicity, consistency, and idempotency tests. Go/PostgreSQL contract tests
-remain the migration oracle until retirement.
+Unit, handler, service, workerd, contract-snapshot, OpenAPI golden-file, local D1 integration/migration,
+auth, CSRF, cross-user, atomicity, consistency, and idempotency tests.
 
 ## Builder handoff
 

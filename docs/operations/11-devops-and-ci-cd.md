@@ -62,20 +62,21 @@ Staging (from `develop`), Production (from `main`).
 > [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) supersedes
 > both the original Render split and VOC-032's later self-hosted Docker/Nginx stack as
 > the active target. The historical tables and runbooks below are preserved to explain
-> what existed; they do not authorize or describe the final architecture. T00 changes
-> repository documentation only and does not inspect a server or create Cloudflare,
-> DNS, secret, data, or deployment state.
+> what existed; they do not authorize or describe the final architecture. T03-T10
+> completed the repository parity chain, and T11 removed the old runtime assets from
+> the active tree. None of those repository changes inspected, mutated, or stopped a
+> live server or created Cloudflare, DNS, secret, data, or deployment state.
 
-| Capability   | Current repository state                                                                            | VOC-080 target                                                                                 |
-| ------------ | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Web          | OpenNext/workerd parity plus held T10 delivery config; historical Docker assets remain              | Next.js 16 through OpenNext on a Cloudflare Web Worker                                         |
-| API          | Full Hono/D1 contract parity plus held T10 delivery config and Go/Huma reference                    | TypeScript Module Worker using Hono and generated bindings                                     |
-| Data         | Local D1 forward migration/tests plus PostgreSQL source reference                                   | Separate local/staging/production Cloudflare D1 databases                                      |
-| Web-to-API   | HTTPS server path                                                                                   | Cloudflare service binding where practical; HTTPS contract remains `/api/v1`                   |
-| Assets/async | Docker/Nginx and synchronous server assumptions                                                     | Workers Static Assets; Queue/Workflow/DO/R2 only for a measured requirement                    |
-| CI/CD        | Four deterministic workflows; credential-free three-environment dry runs and held T10 state machine | Separately activated environment-scoped version/migration/promotion jobs inside `ci.yml`       |
-| Secrets      | No deployment secrets in PRs or agents                                                              | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo                         |
-| Rollback     | Historical image/server procedure                                                                   | Recorded prior Worker versions plus expand/migrate/contract and forward-corrective D1 handling |
+| Capability   | Current repository state                                                                            | Separately held live state                                                       |
+| ------------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Web          | Next.js 16 transformed by OpenNext and tested in local workerd as a Cloudflare Web Worker           | Cloudflare Worker version upload, route, and traffic activation                  |
+| API          | TypeScript/Hono Module Worker with generated bindings and complete local workerd contract parity    | Cloudflare Worker version upload, service binding, route, and traffic activation |
+| Data         | Forward-only D1 migrations, local D1 tests, and compact retired PostgreSQL conversion fixtures      | Separate staging/production D1 creation and any remote migration                 |
+| Web-to-API   | Local workerd service binding plus preserved HTTPS `/api/v1` contract                               | Environment-specific service binding and route activation                        |
+| Assets/async | Workers Static Assets; Queue/Workflow/DO/R2 remain absent until a measured requirement              | Any separately reviewed product binding or resource                              |
+| CI/CD        | Four deterministic workflows; credential-free three-environment dry runs and held T10 state machine | Environment-scoped version/migration/promotion activation inside `ci.yml`        |
+| Secrets      | No deployment secrets in PRs or agents                                                              | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo           |
+| Rollback     | Repository reverts plus mocked prior-Worker-version and forward-corrective D1 contracts             | Authorized version traffic restoration or separately authorized D1 recovery      |
 
 No current workflow run can deploy to Preview, Staging, or Production. T10's manual
 jobs exist after Worker/D1 parity, but the committed manifest, D1/route sentinels, and
@@ -87,17 +88,17 @@ production learner data requires `HOLD-02`.
 
 The workflow inventory is exactly four files and has one responsibility per file:
 
-| Workflow         | Stable evidence                                                                                          | Trigger and authority                                                                    |
-| ---------------- | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `ci.yml`         | foundation, packages, web, Worker API, transitional Go API, held delivery policy, and `CI / ci required` | PR/push validation plus a held manual gate; no eligible live deployment in current state |
-| `governance.yml` | `structure`, `changed-path risk`, and read-only `merge eligibility`                                      | Pull-request evidence plus protected-branch structure checks; no GitHub write            |
-| `quality.yml`    | accessibility and Lighthouse, summarized by `Quality / quality required`                                 | Web/shared/lockfile changes on pull requests only                                        |
-| `security.yml`   | dependency audit and secret scan, summarized by `Security / security required`                           | Pull requests and protected-branch pushes; no secret consumption                         |
+| Workflow         | Stable evidence                                                                                | Trigger and authority                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `ci.yml`         | foundation/retirement, packages, web, Worker API, held delivery policy, and `CI / ci required` | PR/push validation plus a held manual gate; no eligible live deployment in current state |
+| `governance.yml` | `structure`, `changed-path risk`, and read-only `merge eligibility`                            | Pull-request evidence plus protected-branch structure checks; no GitHub write            |
+| `quality.yml`    | accessibility and Lighthouse, summarized by `Quality / quality required`                       | Web/shared/lockfile changes on pull requests only                                        |
+| `security.yml`   | dependency audit and secret scan, summarized by `Security / security required`                 | Pull requests and protected-branch pushes; no secret consumption                         |
 
 All runner jobs have explicit timeouts and Bash semantics. Every external action uses
 a reviewed full commit SHA, and every checkout disables persisted credentials. A local
-composite action reuses the pinned Node, pnpm, and optional Go setup. Its caches contain
-only pnpm's content-addressed store and Go download/build caches; `node_modules` is not
+composite action reuses the pinned Node and pnpm setup. Its cache contains only pnpm's
+content-addressed store; `node_modules` is not
 cached, the lockfile remains frozen, and a cache hit never skips a check. Browser
 reports are uploaded only on failure and retained for three days. Fail-fast aggregation
 is explicit: the stable `required` result is blocked by any failed, cancelled, or
@@ -118,8 +119,8 @@ UI checks but is not Cloudflare compatibility evidence. No T03 command uploads a
 version, queries an account, provisions a resource, or deploys.
 
 VOC-080-T04 adds the separate `worker api` CI job without adding a workflow file. It
-verifies generated D1 bindings, Hono operational OpenAPI, the canonical 25-operation
-Go `/api/v1` migration baseline, API-client path compatibility, privacy-safe
+verifies generated D1 bindings, Hono operational OpenAPI, the frozen 25-operation
+`/api/v1` migration baseline, API-client path compatibility, privacy-safe
 problems/logs, explicit credentialed CORS, prepared statements, a forward STRICT D1
 migration applied from empty and replayed in workerd, static safety rules, build, and
 credential-free Wrangler dry-run. T10 adds distinct staging/production environments
@@ -182,9 +183,10 @@ credential-free and never contacts a remote D1 database.
 | Uptime monitoring                                                       | Better Stack / UptimeRobot                                | Unchanged                                                                                                                                   |
 | Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP                                         | Unchanged                                                                                                                                   |
 
-**Amended (v1.1) target infrastructure baseline** (2026-07-30, adopted via VOC-032; founder as
-approving owner). This is the shape `T00`–`T09` actually built and that the staging environment
-is currently deployed against — not a plan:
+**Historical amended (v1.1) infrastructure baseline** (2026-07-30, adopted via VOC-032;
+founder as approving owner; superseded in the repository on 2026-08-23 by
+VOC-080-T11). This is the shape `T00`–`T09` actually built. It is retained as a
+historical record, not as a claim about any live server that T11 did not inspect:
 
 | Area                                                                    | Decision (v1.1, as actually built by VOC-032 `T00`–`T09`)                                                                                                                                                                                                                                                                                                                                                                                       |
 | ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -197,17 +199,18 @@ is currently deployed against — not a plan:
 | Reverse proxy / TLS termination                                         | `nginx` service (the only host-published service) terminates TLS using a Cloudflare-issued origin certificate (`VOC-032-DEP-01`); real client IP restored from `CF-Connecting-IP` only when the connection genuinely originates from Cloudflare's published IP ranges (never `0.0.0.0/0`); `staging.vocanova.site` → `web`, `api-staging.vocanova.site` → `api`; plain-`80` redirects to `443`; standard security headers set on every response |
 | DNS/TLS/WAF/CDN (edge)                                                  | Cloudflare (narrowed role) — DNS, TLS, WAF, and CDN only; **no Cloudflare compute** (no Workers, no OpenNext, no Cloudflare D1/KV/Durable Objects/Queues/R2 at the edge)                                                                                                                                                                                                                                                                        |
 | Atlas migration tooling                                                 | `apps/api/atlas.hcl` + `apps/api/scripts/migrate.sh` apply the existing `apps/api/migrations/*.sql` set; `.down.sql.example` files remain non-executable by Atlas per the existing `apps/api/migrations/README.md` rule                                                                                                                                                                                                                         |
-| Deploy automation                                                       | Paused after VOC-078-T03. Historical workflows deployed by SSH. T10 later added a held manual Cloudflare state machine, but its committed manifest blocks before environment jobs or secrets; it neither builds/pushes deployment images nor polls server health. Runtime assets and servers were not changed by either repository-only transition.                                                                                             |
+| Deploy automation                                                       | Paused after VOC-078-T03. Historical workflows deployed by SSH. T10 later added a held manual Cloudflare state machine, but its committed manifest blocks before environment jobs or secrets; it neither builds/pushes deployment images nor polls server health. T03 and T10 did not change runtime assets or servers; T11 later removed old assets from Git only and still made no live-server claim.                                         |
 | Error monitoring                                                        | Sentry remains embedded in application runtime code. VOC-078-T03 removed the scheduled Sentry-to-GitHub workflow, so GitHub no longer queries Sentry or files monitoring issues automatically.                                                                                                                                                                                                                                                  |
 | Uptime monitoring                                                       | Better Stack / UptimeRobot (unchanged)                                                                                                                                                                                                                                                                                                                                                                                                          |
 | Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP (unchanged)                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
-This table is an implementation target, not authority to procure vendors, incur spend, create
-infrastructure, deploy, or release. Each such action requires its own approved change package and
-the authority applicable at execution time. The v1.1 rows above describe the staging tier that
-already exists as a result of VOC-032 `T00`–`T09`; RL1/RL2 technical activation remains
-disabled per `docs/governance/a003-transition-state.yaml` and is not authorized by this
-amendment. **Updated 2026-08-08**: production-tier deployment and autonomous production
+This table is historical evidence, not an implementation target or authority to procure
+vendors, incur spend, create infrastructure, deploy, or release. Each such action requires its
+own approved change package and the authority applicable at execution time. The v1.1 rows above
+record the staging tier built by VOC-032 `T00`–`T09`; T11 removed its repository assets without
+inspecting or asserting its live state. RL1/RL2 technical activation remains disabled per
+`docs/governance/a003-transition-state.yaml` and is not authorized by this amendment.
+**Updated 2026-08-08**: production-tier deployment and autonomous production
 release, previously also listed here as disabled, are no longer disabled -
 `docs/governance/a003-transition-state.yaml` itself now records both as enabled,
 following the founder's explicit authorization (see `AGENTS.md`'s "Release and

@@ -249,6 +249,10 @@ class GitHubAdapterTests(unittest.TestCase):
             for index, name in enumerate(names, 1)
         ]
 
+    def test_base_checks_follow_the_active_worker_api_job(self) -> None:
+        self.assertIn("worker api", BASE_REQUIRED_CHECKS)
+        self.assertNotIn("api", BASE_REQUIRED_CHECKS)
+
     def test_adapter_normalizes_live_reads_to_same_eligible_decision(self) -> None:
         client = FakeReadClient(self.checks())
         evidence, review_count = build_normalized_evidence(

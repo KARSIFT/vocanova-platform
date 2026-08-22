@@ -36,6 +36,9 @@ provider-neutral roles but cannot approve, merge, deploy, access secrets or prod
 data, or turn issues/comments into execution. The four Actions workflows remain
 deterministic evidence only. Repository migration proceeds through VOC-080's stacked,
 independently reviewed tasks; live Cloudflare and data actions remain separately held.
+VOC-080-T11 completed the repository-only retirement after the exact T03-T10 parity
+chain: the active tree now contains only the OpenNext/Hono/D1 runtime. That removal did
+not inspect, mutate, or stop a live server.
 The [external Ruflo runbook](ruflo-external-orchestration.md) is the operational source
 for the exact installation, supply-chain overrides, worktree ownership, sanitized
 memory, reviewer non-duplication, and synthetic rehearsal. Its upstream permission
@@ -65,10 +68,6 @@ vocanova-platform/
 │   ├── migrations/
 │   ├── openapi/
 │   └── src/{domain,http,repositories}/
-├── apps/api/                      # Go backend module
-│   ├── ent/schema/
-│   ├── migrations/
-│   └── openapi/vocanova.openapi.json
 ├── packages/{api-client,design-tokens,eslint-config,typescript-config}/
 ├── docs/{product,research,design,engineering,operations,architecture,planning,governance}/
 ├── scripts/
@@ -79,11 +78,12 @@ vocanova-platform/
 ```
 
 The canonical document corpus is split by category and indexed in [docs/README.md](../README.md).
-The Go backend remains a parity-reference module at `apps/api` during VOC-080. The
-target TypeScript Worker API is now a pnpm workspace at `apps/api-worker`; T04 adds
-its typed runtime/data/contract foundation and first local D1 migration. T05 adds the
-identity/session/account/settings slice and second migration with workerd parity and
-failure-injection evidence. It replaces Go only after the T11 parity gate.
+The TypeScript Worker API is the active API runtime at `apps/api-worker`. T04-T08 built
+its typed runtime, contract, domains, and local D1 migrations; T09 proved deterministic
+synthetic conversion; T10 added held delivery controls. T11 then removed the former
+Go/PostgreSQL implementation after that complete parity evidence existed. The frozen
+contract and PostgreSQL-schema snapshots retain only the deterministic migration
+oracles, not an executable second runtime.
 
 ## 3. Branch strategy
 
@@ -155,9 +155,9 @@ impact, documentation impact, known risks, and review status.
 ## 7. Testing strategy
 
 Layers: end-to-end → integration/contract → component/service → unit, with most tests below the
-end-to-end layer. During migration, Go/PostgreSQL reference tests and Worker/D1 unit, repository,
-workerd, migration, auth, atomicity, consistency, contract-parity, and AI-response tests all run as
-applicable. Frontend: utility,
+end-to-end layer. Worker/D1 unit, repository, workerd, migration, auth, atomicity,
+consistency, frozen-contract, data-conversion, and AI-response tests run as applicable.
+Frontend: utility,
 component, form, feature-level, error/empty/loading/success states, accessibility, responsive,
 API-integration tests. End-to-end (Playwright) covers the full core loop: auth → discover → save →
 review session → sentence submission → deterministic AI feedback → progress update → settings change
@@ -176,9 +176,10 @@ different-role review); **Level 3** (separately authorized Cloudflare staging ch
 
 ## 8. Database migrations
 
-Target flow: `explicit SQLite schema → Wrangler D1 migration → local D1 rehearsal → parity and
-reconciliation`. During coexistence, PostgreSQL/Ent/Atlas remains the source-model test path.
-Categorize risk, run from-zero/upgrade/idempotency and integration tests, commit schema and code
+Active flow: `explicit SQLite schema → Wrangler D1 migration → local D1 rehearsal →
+reconciliation`. The retired PostgreSQL schema is retained only as a compact, immutable
+conversion-inventory fixture; it is not an executable migration path. Categorize risk,
+run from-zero/upgrade/idempotency and integration tests, commit schema and code
 together, and obtain independent migration-risk review. High-risk migrations (drop table/column, populated type change, large-table rewrite,
 primary-key change, user-data deletion, or irreversible transformation) follow the live R0–R4
 classification, protected-area controls, approval matrix, and EHR rules. Required evidence includes

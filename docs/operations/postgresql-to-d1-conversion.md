@@ -21,13 +21,15 @@ only a normalized, versioned object with these exact top-level fields:
 }
 ```
 
-`tables` must contain exactly the 25 active PostgreSQL tables. Every row must contain
+`tables` must contain exactly the 25 retired PostgreSQL source tables. Every row must contain
 exactly the versioned fields in
 `apps/api-worker/src/data-conversion/schema.ts`; missing and unknown fields fail closed.
-The committed inventory check parses inline definitions and `ALTER TABLE ... ADD
-COLUMN`, then compares every active PostgreSQL/D1 column name and declared type with
-the conversion field kind. Unparseable or newly added schema fails the inventory until
-the versioned contract is deliberately reconciled.
+After VOC-080-T11, the committed inventory check reads the compact, immutable
+`apps/api-worker/test/fixtures/postgres-schema-v1.json` source-schema snapshot and
+compares every retired PostgreSQL and active D1 column name and declared type with the
+conversion field kind. An unparseable or deliberately changed snapshot fails the
+inventory until the versioned conversion contract is reconciled. The snapshot is a
+non-runtime migration oracle; no executable PostgreSQL implementation remains active.
 
 The T09 implementation rejects `source.synthetic != true`. Accessing, exporting,
 transforming, uploading, or deleting production learner data remains prohibited until
@@ -199,7 +201,7 @@ recovery to a machine-readable mismatch, stale-generation release rejection,
 mutation rejection while an in-progress prefix exists, exact signed
 aggregate cancellation/overflow, bounded foreign-key/count/checksum/domain
 reconciliation, and log-redaction assertions. The
-second command proves all 25 PostgreSQL tables/columns map exactly and classifies the
+second command proves all 25 retired PostgreSQL source tables/columns map exactly and classifies the
 six D1-only runtime tables that have no PostgreSQL source rows.
 
 ## Repository rollback

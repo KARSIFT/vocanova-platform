@@ -6,7 +6,7 @@
 // accessibility scans: every step is exercised against real
 // client components, real network calls, and the real Next.js
 // auth-gate middleware, with the mock API server (see
-// mock-api-server.mjs) standing in for the Go/Postgres backend
+// mock-api-server.mjs) standing in for the API contract boundary
 // the same way it does for the T07 scans.
 //
 // Flow (one Playwright test, one browser context):

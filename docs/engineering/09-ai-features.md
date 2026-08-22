@@ -32,9 +32,10 @@ source_files:
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) moves the
 provider boundary, validation, persistence, mission updates, rate/cost controls, and
 privacy-safe telemetry into the Hono API Worker. The web Worker never calls an AI
-provider directly. D1 replaces PostgreSQL for target persistence after parity. The
+provider directly. D1 replaced PostgreSQL for runtime persistence after parity and
+T11 retirement. The
 product, teaching, safety, evaluation, privacy, and failure requirements below remain
-unchanged; references to the Go backend or PostgreSQL identify the migration oracle.
+unchanged; preserved references to the Go backend or PostgreSQL are historical context.
 Normal CI remains deterministic and never calls a paid provider.
 
 ## 1. Purpose and product principle

@@ -23,7 +23,8 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
 
 - [ADR-0003](decisions/ADR-0003-cloudflare-native-runtime-and-data.md) selects
   OpenNext on a Cloudflare Web Worker, a Hono API Worker, and D1 through VOC-080's
-  parity-gated migration. Go/PostgreSQL/Docker is transitional, not the final target.
+  parity-gated migration. T11 retired the transitional Go/PostgreSQL/Docker/server
+  implementation from the active tree after the full T03-T10 evidence chain.
 - [ADR-0004](decisions/ADR-0004-external-ruflo-orchestration.md) permits pinned Ruflo
   outside the repository for provider-neutral role coordination. GitHub stays
   canonical and Ruflo receives no merge, deployment, secret, production-data,

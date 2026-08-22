@@ -30,8 +30,9 @@ source_files:
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) makes a
 TypeScript Module Worker using Hono, generated bindings, typed repositories, and D1
-the target backend. The Go/Huma/Ent/PostgreSQL implementation remains the read-only
-behavioral oracle while domains are ported. The feature boundaries, workflows,
+the target backend. T11 removed the former Go/Huma/Ent/PostgreSQL behavioral oracle
+from the active tree after parity; compact contract/schema snapshots retain the
+migration evidence. The feature boundaries, workflows,
 authorization rules, idempotency, and observable `/api/v1` behavior below remain
 requirements; Go- or PostgreSQL-specific implementation directions are transitional.
 
@@ -63,7 +64,7 @@ apps/worker-api/
   migrations/
   test/{unit,workerd,parity}/
 
-apps/api/ # Go/PostgreSQL parity reference until VOC-080-T11
+apps/api-worker/ # Hono/D1 runtime
 ```
 
 ## 5. API design
@@ -167,8 +168,8 @@ HTTPS, CSRF protection, CORS allowlist, secure cookies, hashed tokens, input val
 ## 17. Testing
 
 Required target evidence: unit, service, HTTP, workerd, local D1 repository/migration, contract
-parity, authorization, atomicity/consistency, and security tests. Go tests, build, PostgreSQL
-integration, Ent consistency, and Atlas validation remain reference checks until T11.
+parity, authorization, atomicity/consistency, security, contract-snapshot, and
+retired-source conversion tests.
 
 ## 18. VOC-080 implementation order
 

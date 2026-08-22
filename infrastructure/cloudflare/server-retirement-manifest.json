@@ -1,0 +1,46 @@
+{
+  "schema_version": "vocanova-server-retirement-v1",
+  "status": "retired-from-active-tree",
+  "task": "VOC-080-T11",
+  "parity_evidence": {
+    "web_worker": "a82714639eeae6458ad3c3d027778c369e90ff5b",
+    "api_foundation": "6d68e20d4a1b5bb5a97fe5eb469dd6cd5ab5ee22",
+    "identity_account": "f18c4dfb8bd95e675d58b22472a2fdbb4ebd7e42",
+    "content_review": "e44424a727aa9b548c561147188a220f6cfc7c67",
+    "missions_progress": "de2b3d0f4bf0105cb74d5abaa9a5ab826ee75dd1",
+    "ai_email_observability": "2bce45c1d22ce53eedcdabb457d9849a254a8069",
+    "data_conversion": "631899874d27839969895db0590a52524b9507ca",
+    "held_delivery": "203ac878d7a054de0826188924446e5d24a6dd43"
+  },
+  "active_runtime": {
+    "web": "apps/web",
+    "api": "apps/api-worker",
+    "data_migrations": "apps/api-worker/migrations",
+    "delivery": "infrastructure/cloudflare/delivery-manifest.json"
+  },
+  "retired_paths": [
+    ".dockerignore",
+    "apps/api/",
+    "apps/web/Dockerfile",
+    "apps/web/playwright.staging.config.ts",
+    "apps/web/tests/staging-e2e/",
+    "infra/",
+    "scripts/foundation/check-go-format.mjs",
+    "scripts/foundation/cors-parity.test.mjs",
+    "scripts/foundation/deploy-production-oauth-port.test.mjs",
+    "scripts/foundation/docker-compose-production-api-base-url-port.test.mjs",
+    "scripts/foundation/mock-inventory.mjs",
+    "scripts/foundation/mock-inventory.test.mjs",
+    "scripts/foundation/nginx-healthcheck-probe.test.mjs",
+    "scripts/foundation/voc067-cutover-bridge-gate.test.mjs"
+  ],
+  "retained_non_runtime_snapshots": {
+    "api_contract": "apps/api-worker/openapi/public-contract-baseline.json",
+    "postgresql_schema": "apps/api-worker/test/fixtures/postgres-schema-v1.json",
+    "synthetic_export": "apps/api-worker/test/fixtures/postgres-export-v1.ts"
+  },
+  "historical_evidence_roots": ["docs/archive/", "specs/changes/"],
+  "live_server_inspected": false,
+  "live_server_mutated": false,
+  "live_server_stopped": false
+}

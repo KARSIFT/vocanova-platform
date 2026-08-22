@@ -37,7 +37,7 @@ BASE_REQUIRED_CHECKS = (
     "foundation",
     "packages",
     "web",
-    "api",
+    "worker api",
     "ci required",
     "structure",
     "changed-path risk",
