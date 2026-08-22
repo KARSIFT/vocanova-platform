@@ -9,6 +9,8 @@ import {
   type WordDetail,
   type WordMeaning,
 } from "../domain/content-learning.js";
+import { MISSION_POLICY_VERSION, localDate } from "../domain/missions.js";
+import { D1MissionsRepository } from "../missions/repository.js";
 
 type Row = Record<string, string | number | null>;
 
@@ -237,7 +239,7 @@ export class D1ContentLearningRepository {
              VALUES (?1, ?2, ?3, 'new', ?4, 0, ?5, ?5, ?5)`,
           )
           .bind(wordId, userId, meaningId, source, timestamp);
-    await this.database.batch([
+    const statements = [
       mutation,
       this.database
         .prepare(
@@ -245,7 +247,21 @@ export class D1ContentLearningRepository {
            VALUES (?1, ?2, 'user_words:save', ?3, ?4, ?5)`,
         )
         .bind(crypto.randomUUID(), userId, key, fingerprint, timestamp),
-    ]);
+    ];
+    if (!existing) {
+      statements.push(
+        this.pointLedgerStatement(
+          userId,
+          2,
+          "word_added",
+          "user_word",
+          wordId,
+          `user_word:${wordId}:added`,
+          timestamp,
+        ),
+      );
+    }
+    await this.database.batch(statements);
     return this.savedMeaning(userId, meaningId);
   }
 
@@ -397,6 +413,13 @@ export class D1ContentLearningRepository {
     );
     const attemptId = crypto.randomUUID();
     const timestamp = this.now().toISOString();
+    const missionWiring = await this.reviewMissionStatements(
+      userId,
+      attemptId,
+      normalized.result,
+      normalized.rating,
+      timestamp,
+    );
     await this.database.batch([
       this.database
         .prepare(
@@ -457,6 +480,7 @@ export class D1ContentLearningRepository {
            VALUES (?1, ?2, 'reviews:submit', ?3, ?4, ?5)`,
         )
         .bind(crypto.randomUUID(), userId, key, fingerprint, timestamp),
+      ...missionWiring.statements,
     ]);
     return (await this.attemptByClientId(userId, normalized.clientAttemptId))!;
   }
@@ -584,6 +608,192 @@ export class D1ContentLearningRepository {
       .bind(userId, clientAttemptId)
       .first<Row>();
     return row ? attemptFromRow(row) : null;
+  }
+
+  private pointLedgerStatement(
+    userId: string,
+    amount: number,
+    reason: string,
+    sourceType: string,
+    sourceId: string,
+    key: string,
+    timestamp: string,
+    metadataJson: string | null = null,
+  ): D1PreparedStatement {
+    return this.database
+      .prepare(
+        `INSERT INTO confidence_point_ledger
+         (id, user_id, amount, balance_after, reason, source_type, source_id,
+          idempotency_key, metadata_json, occurred_at, created_at, updated_at)
+         VALUES (?1, ?2, ?3,
+           coalesce((SELECT balance_after FROM confidence_point_ledger
+                     WHERE user_id = ?2 ORDER BY occurred_at DESC, rowid DESC LIMIT 1), 0) + ?3,
+           ?4, ?5, ?6, ?7, ?8, ?9, ?9, ?9)
+         ON CONFLICT(user_id, idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING`,
+      )
+      .bind(
+        crypto.randomUUID(),
+        userId,
+        amount,
+        reason,
+        sourceType,
+        sourceId,
+        key,
+        metadataJson,
+        timestamp,
+      );
+  }
+
+  private async reviewMissionStatements(
+    userId: string,
+    attemptId: string,
+    result: string,
+    rating: string,
+    timestamp: string,
+  ): Promise<{
+    statements: D1PreparedStatement[];
+  }> {
+    const missions = new D1MissionsRepository(this.database, this.now);
+    const settings = await missions.resolveSettings(userId, "");
+    const today = localDate(this.now(), settings.timezone);
+    const correct = result === "correct" ? 1 : 0;
+    const skipped = result === "skipped" ? 1 : 0;
+    const reward = skipped
+      ? 0
+      : rating === "again"
+        ? 1
+        : rating === "hard"
+          ? 2
+          : rating === "easy"
+            ? 6
+            : 5;
+    const ledgerMetadata = JSON.stringify({
+      localDate: today,
+      timezone: settings.timezone,
+    });
+    const completionKey = `daily_mission:${userId}:${today}:completed`;
+    const statements: D1PreparedStatement[] = [
+      this.database
+        .prepare(
+          `UPDATE daily_mission_snapshots SET status = 'missed', updated_at = ?1
+           WHERE user_id = ?2 AND local_date < ?3 AND status = 'open'`,
+        )
+        .bind(timestamp, userId, today),
+      this.database
+        .prepare(
+          `INSERT INTO daily_mission_snapshots
+           (id, user_id, local_date, timezone, review_target, reviews_completed,
+            policy_version, status, grace_applied, created_at, updated_at)
+           VALUES (?1, ?2, ?3, ?4, ?5, 0, ?6, 'open', 0, ?7, ?7)
+           ON CONFLICT(user_id, local_date) DO NOTHING`,
+        )
+        .bind(
+          crypto.randomUUID(),
+          userId,
+          today,
+          settings.timezone,
+          settings.reviewTarget,
+          MISSION_POLICY_VERSION,
+          timestamp,
+        ),
+      this.database
+        .prepare(
+          `UPDATE daily_mission_snapshots
+           SET reviews_completed = min(reviews_completed + 1, review_target), updated_at = ?1
+           WHERE user_id = ?2 AND local_date = ?3`,
+        )
+        .bind(timestamp, userId, today),
+      this.database
+        .prepare(
+          `INSERT INTO daily_activity_summaries
+           (id, user_id, local_date, timezone, reviews_attempted, reviews_correct,
+            reviews_skipped, created_at, updated_at)
+           VALUES (?1, ?2, ?3, ?4, 1, ?5, ?6, ?7, ?7)
+           ON CONFLICT(user_id, local_date) DO UPDATE SET
+             reviews_attempted = reviews_attempted + 1,
+             reviews_correct = reviews_correct + excluded.reviews_correct,
+             reviews_skipped = reviews_skipped + excluded.reviews_skipped,
+             updated_at = excluded.updated_at`,
+        )
+        .bind(
+          crypto.randomUUID(),
+          userId,
+          today,
+          settings.timezone,
+          correct,
+          skipped,
+          timestamp,
+        ),
+    ];
+    if (reward > 0) {
+      statements.push(
+        this.pointLedgerStatement(
+          userId,
+          reward,
+          "review_correct",
+          "review_attempt",
+          attemptId,
+          `review_attempt:${attemptId}:rated`,
+          timestamp,
+          ledgerMetadata,
+        ),
+      );
+    }
+    statements.push(
+      this.database
+        .prepare(
+          `INSERT INTO confidence_point_ledger
+           (id, user_id, amount, balance_after, reason, source_type, source_id,
+            idempotency_key, metadata_json, occurred_at, created_at, updated_at)
+           SELECT ?1, ?2, 10,
+             coalesce((SELECT balance_after FROM confidence_point_ledger
+                       WHERE user_id = ?2 ORDER BY occurred_at DESC, rowid DESC LIMIT 1), 0) + 10,
+             'daily_mission_completed', 'daily_mission', id,
+             ?3, ?4, ?5, ?5, ?5
+           FROM daily_mission_snapshots
+           WHERE user_id = ?2 AND local_date = ?6 AND status = 'open'
+             AND reviews_completed >= review_target
+           ON CONFLICT(user_id, idempotency_key) WHERE idempotency_key IS NOT NULL DO NOTHING`,
+        )
+        .bind(
+          crypto.randomUUID(),
+          userId,
+          completionKey,
+          ledgerMetadata,
+          timestamp,
+          today,
+        ),
+      this.database
+        .prepare(
+          `UPDATE daily_mission_snapshots SET status = 'completed', completed_at = ?1, updated_at = ?1
+           WHERE user_id = ?2 AND local_date = ?3 AND status = 'open'
+             AND reviews_completed >= review_target`,
+        )
+        .bind(timestamp, userId, today),
+      this.database
+        .prepare(
+          `UPDATE daily_activity_summaries
+           SET confidence_points_earned = coalesce((
+             SELECT sum(amount) FROM confidence_point_ledger
+             WHERE user_id = ?1
+               AND json_extract(metadata_json, '$.localDate') = ?2
+           ), 0), updated_at = ?3
+           WHERE user_id = ?1 AND local_date = ?2`,
+        )
+        .bind(userId, today, timestamp),
+    );
+    statements.push(
+      ...(await missions.reconciliationStatements(
+        userId,
+        settings.timezone,
+        today,
+        true,
+        completionKey,
+      )),
+    );
+    return {
+      statements,
+    };
   }
 }
 

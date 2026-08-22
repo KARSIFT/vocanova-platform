@@ -15,7 +15,7 @@ describe("D1 platform repository", () => {
     const migrationCount = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM d1_migrations",
     ).first<{ count: number }>();
-    expect(migrationCount?.count).toBe(3);
+    expect(migrationCount?.count).toBe(4);
   });
 
   it("binds dynamic values instead of interpolating SQL", async () => {

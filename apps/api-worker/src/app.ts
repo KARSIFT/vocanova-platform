@@ -9,6 +9,8 @@ import { registerIdentityRoutes } from "./identity/routes.js";
 import { IdentityService, identityConfig } from "./identity/service.js";
 import { D1ContentLearningRepository } from "./content/repository.js";
 import { registerContentLearningRoutes } from "./content/routes.js";
+import { D1MissionsRepository } from "./missions/repository.js";
+import { registerMissionsRoutes } from "./missions/routes.js";
 import {
   ProblemSchema,
   createProblem,
@@ -34,7 +36,7 @@ const ConfigSchema = z
     release: z.string(),
     runtime: z.literal("cloudflare-workers"),
     data: z.literal("d1"),
-    migrationStatus: z.literal("content-review-parity"),
+    migrationStatus: z.literal("missions-progress-parity"),
   })
   .openapi("RuntimeConfig");
 
@@ -78,7 +80,7 @@ export const OPENAPI_DOCUMENT_CONFIG = {
     title: "VocaNova Worker API migration target",
     version: "0.1.0",
     description:
-      "Operational Worker/D1 migration target. Identity, account, content, learning, and review endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
+      "Operational Worker/D1 migration target. Identity, learner data, missions, gamification, and progress endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
   },
 };
 
@@ -145,7 +147,7 @@ export function createApp(
         release: config.value.release,
         runtime: "cloudflare-workers" as const,
         data: "d1" as const,
-        migrationStatus: "content-review-parity" as const,
+        migrationStatus: "missions-progress-parity" as const,
       },
       200,
     );
@@ -165,6 +167,11 @@ export function createApp(
     app,
     identityFactory,
     (env) => new D1ContentLearningRepository(env.DB),
+  );
+  registerMissionsRoutes(
+    app,
+    identityFactory,
+    (env) => new D1MissionsRepository(env.DB),
   );
 
   app.doc31("/openapi.json", OPENAPI_DOCUMENT_CONFIG);
