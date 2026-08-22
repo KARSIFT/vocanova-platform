@@ -11,6 +11,7 @@ const repositoryRoot = path.resolve(
 
 const requiredDirectories = [
   "apps/web",
+  "apps/api-worker",
   "apps/api/cmd",
   "apps/api/app",
   "apps/api/business",
@@ -49,13 +50,14 @@ export function validateWorkspace() {
   );
   if (
     !workspace.includes("- apps/web") ||
+    !workspace.includes("- apps/api-worker") ||
     !workspace.includes("- packages/*")
   ) {
     errors.push(
-      "pnpm workspace patterns do not include web and shared packages",
+      "pnpm workspace patterns do not include web, Worker API, and shared packages",
     );
   }
-  if (workspace.includes("apps/api")) {
+  if (/^\s*-\s+apps\/api\s*$/m.test(workspace)) {
     errors.push("apps/api must not be a pnpm workspace project");
   }
 
@@ -70,6 +72,7 @@ export function validateWorkspace() {
   );
   const expected = new Set([
     "apps/web",
+    "apps/api-worker",
     "packages/api-client",
     "packages/design-tokens",
     "packages/eslint-config",

@@ -1,5 +1,6 @@
 packages:
   - apps/web
+  - apps/api-worker
   - packages/*
 
 # Forces patched versions of two transitive high-severity advisories `pnpm

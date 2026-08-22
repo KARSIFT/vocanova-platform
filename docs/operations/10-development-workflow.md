@@ -61,6 +61,10 @@ structure:
 ```text
 vocanova-platform/
 ├── apps/web/                      # Next.js
+├── apps/api-worker/               # Hono Module Worker + local D1 target
+│   ├── migrations/
+│   ├── openapi/
+│   └── src/{domain,http,repositories}/
 ├── apps/api/                      # Go backend module
 │   ├── ent/schema/
 │   ├── migrations/
@@ -76,8 +80,9 @@ vocanova-platform/
 
 The canonical document corpus is split by category and indexed in [docs/README.md](../README.md).
 The Go backend remains a parity-reference module at `apps/api` during VOC-080. The
-target TypeScript Worker API joins the pnpm workspace in T04 and replaces Go only
-after the T11 parity gate.
+target TypeScript Worker API is now a pnpm workspace at `apps/api-worker`; T04 adds
+only its typed runtime/data/contract foundation and local D1 migration. It replaces
+Go only after the T11 parity gate.
 
 ## 3. Branch strategy
 

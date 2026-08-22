@@ -55,6 +55,7 @@ const REQUIRED_MARKERS = {
     "pnpm run ci:foundation",
     "pnpm run ci:packages",
     "pnpm run ci:web",
+    "pnpm run ci:worker-api",
     "pnpm run ci:api",
     "name: ci required",
     "scripts/foundation/require-successful-jobs.sh",

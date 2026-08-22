@@ -11,6 +11,9 @@ This directory preserves two historical environment layouts:
 > below is therefore retained only as migration/parity history and is not an active
 > build or deployment path. T11 removes the old assets only after full API/data parity.
 > No current repository workflow deploys either architecture.
+> The active Worker API/D1 foundation is under `apps/api-worker`; it uses only
+> isolated local workerd/D1 evidence and does not make this historical Compose
+> layout a migration or deployment input.
 
 > **DOC-11 contradiction caveat — resolved 2026-07-30.** This layout used to
 > contradict the target-infrastructure baseline described in

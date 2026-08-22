@@ -1,0 +1,129 @@
+{
+  "canonical": "apps/api/openapi/vocanova.openapi.json",
+  "sha256": "1cd45ff53f7361ad253c7f8b47c3cc7e398a871787bc1f11953528a0d6340a1b",
+  "clientExceptions": {
+    "/api/v1/auth/oauth/google/callback": "OAuth provider redirect target; navigated by the browser/provider rather than VocanovaClient"
+  },
+  "operations": [
+    {
+      "method": "POST",
+      "operationId": "Logout",
+      "path": "/api/v1/auth/logout"
+    },
+    {
+      "method": "POST",
+      "operationId": "RequestMagicLink",
+      "path": "/api/v1/auth/magic-links"
+    },
+    {
+      "method": "POST",
+      "operationId": "ConsumeMagicLink",
+      "path": "/api/v1/auth/magic-links/consume"
+    },
+    {
+      "method": "GET",
+      "operationId": "OAuthCallback",
+      "path": "/api/v1/auth/oauth/google/callback"
+    },
+    {
+      "method": "POST",
+      "operationId": "OAuthStart",
+      "path": "/api/v1/auth/oauth/google/start"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetCanonicalWord",
+      "path": "/api/v1/canonical-words/{wordSlug}"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetDailyMission",
+      "path": "/api/v1/daily-mission"
+    },
+    {
+      "method": "GET",
+      "operationId": "ListJourneySituations",
+      "path": "/api/v1/journey-situations"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetJourneySituation",
+      "path": "/api/v1/journey-situations/{slug}"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetCurrentUser",
+      "path": "/api/v1/me"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetOnboarding",
+      "path": "/api/v1/onboarding"
+    },
+    {
+      "method": "POST",
+      "operationId": "CompleteOnboarding",
+      "path": "/api/v1/onboarding"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetProgress",
+      "path": "/api/v1/progress"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetReviewsDue",
+      "path": "/api/v1/reviews/due"
+    },
+    {
+      "method": "POST",
+      "operationId": "SubmitReview",
+      "path": "/api/v1/reviews/submissions"
+    },
+    {
+      "method": "POST",
+      "operationId": "SubmitSentenceFeedback",
+      "path": "/api/v1/sentence-feedback"
+    },
+    {
+      "method": "POST",
+      "operationId": "ReportSentenceFeedback",
+      "path": "/api/v1/sentence-feedback/{attemptId}/reports"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetSettings",
+      "path": "/api/v1/settings"
+    },
+    {
+      "method": "PATCH",
+      "operationId": "UpdateSettings",
+      "path": "/api/v1/settings"
+    },
+    {
+      "method": "POST",
+      "operationId": "RequestEmailChangeLink",
+      "path": "/api/v1/settings/email-change-links"
+    },
+    {
+      "method": "POST",
+      "operationId": "ConsumeEmailChangeLink",
+      "path": "/api/v1/settings/email-change-links/consume"
+    },
+    {
+      "method": "GET",
+      "operationId": "ListSavedWords",
+      "path": "/api/v1/user-words"
+    },
+    {
+      "method": "POST",
+      "operationId": "SaveUserWord",
+      "path": "/api/v1/user-words"
+    },
+    {
+      "method": "DELETE",
+      "operationId": "UnsaveUserWord",
+      "path": "/api/v1/user-words/{meaningId}"
+    }
+  ]
+}

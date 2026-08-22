@@ -11,7 +11,8 @@ This directory contains repository contribution and governance controls:
   bootstrap. It installs the frozen dependency graph and caches only
   correctness-neutral download stores.
 - `workflows/ci.yml` runs stable foundation, shared-package, OpenNext/workerd web,
-  and transitional Go-API checks plus the single `CI / ci required` aggregate.
+  Worker API/local-D1, and transitional Go-reference checks plus the single
+  `CI / ci required` aggregate.
 - `workflows/governance.yml` validates repository structure, prevents a pull request
   from declaring a risk below its changed-path floor, and reports the read-only
   normalized merge-eligibility decision and concrete reasons.
@@ -80,7 +81,11 @@ T01 provides the refactored CI foundation. T03 extends its stable `web` entry po
 with an OpenNext transformation followed by generated Wrangler type verification,
 Worker compatibility scans, credential-free dry-run and size/startup checks, and
 representative local workerd requests through an API service binding. T04 and later
-tasks add Worker API/D1 checks.
+tasks extend the Cloudflare migration with API and data checks.
+T04 adds a distinct credential-free `worker api` job for generated bindings,
+Hono/OpenAPI and canonical-contract drift, local D1 migrations, workerd tests,
+safety scans, build, and Wrangler dry-run. The Go job remains an independent
+parity-reference check until the final migration gate.
 Only `ci.yml` may eventually contain held Cloudflare version/deployment jobs, keeping
 the four-file invariant. Pull-request jobs never receive deployment credentials.
 

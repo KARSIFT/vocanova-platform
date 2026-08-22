@@ -70,6 +70,22 @@ jobs:
       - name: Validate web application
         run: pnpm run ci:web
 
+  worker-api:
+    name: worker api
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out reviewed revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up repository toolchain
+        uses: ./.github/actions/setup-toolchain
+
+      - name: Validate Worker API and local D1
+        run: pnpm run ci:worker-api
+
   api:
     name: api
     runs-on: ubuntu-24.04
@@ -92,7 +108,7 @@ jobs:
   required:
     name: ci required
     if: always()
-    needs: [foundation, packages, web, api]
+    needs: [foundation, packages, web, worker-api, api]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -107,9 +123,11 @@ jobs:
           FOUNDATION_RESULT: ${{ needs.foundation.result }}
           PACKAGES_RESULT: ${{ needs.packages.result }}
           WEB_RESULT: ${{ needs.web.result }}
+          WORKER_API_RESULT: ${{ needs.worker-api.result }}
         run: >-
           bash scripts/foundation/require-successful-jobs.sh
           "api=$API_RESULT"
           "foundation=$FOUNDATION_RESULT"
           "packages=$PACKAGES_RESULT"
           "web=$WEB_RESULT"
+          "worker-api=$WORKER_API_RESULT"
