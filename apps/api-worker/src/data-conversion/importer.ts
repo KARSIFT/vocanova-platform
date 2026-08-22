@@ -79,7 +79,8 @@ type CheckpointDomainAggregates = Readonly<
 >;
 
 type ReconciliationCheckpoint = Readonly<{
-  schemaVersion: "vocanova-d1-reconciliation-checkpoint-v3";
+  schemaVersion: "vocanova-d1-reconciliation-checkpoint-v4";
+  generation: string;
   planChecksum: string;
   tableIndex: number;
   current: Readonly<{
@@ -94,18 +95,20 @@ type ReconciliationCheckpoint = Readonly<{
 }>;
 
 type ReconciliationWriteLock = Readonly<{
-  schemaVersion: "vocanova-d1-reconciliation-write-lock-v1";
+  schemaVersion: "vocanova-d1-reconciliation-write-lock-v2";
   exportId: string;
   planChecksum: string;
+  generation: string;
+  checkpoint: ReconciliationCheckpoint;
 }>;
 
 const CHECKPOINT_SCHEMA_VERSION = "vocanova-d1-import-checkpoint-v1";
 const RECONCILIATION_CHECKPOINT_SCHEMA_VERSION =
-  "vocanova-d1-reconciliation-checkpoint-v3";
+  "vocanova-d1-reconciliation-checkpoint-v4";
 const RECONCILIATION_PROGRESS_SCHEMA_VERSION =
   "vocanova-d1-reconciliation-progress-v1";
 const RECONCILIATION_WRITE_LOCK_SCHEMA_VERSION =
-  "vocanova-d1-reconciliation-write-lock-v1";
+  "vocanova-d1-reconciliation-write-lock-v2";
 export const D1_RECONCILIATION_MAX_PAGE_BYTES = 12_000_000;
 const CHECKSUM_PATTERN = /^[0-9a-f]{64}$/;
 const CANONICAL_ID_PATTERN =
@@ -232,30 +235,17 @@ export async function reconcileD1Import(
     }>;
   }> = {},
 ): Promise<ReconciliationResult> {
-  const checkpointKey = reconciliationCheckpointKeyFor(plan.exportId);
-  const existing = await database
-    .prepare(LOAD_CHECKPOINT_SQL)
-    .bind(checkpointKey)
-    .first<{ value_json: string }>();
-  const persistedCheckpoint = existing
-    ? parseReconciliationCheckpoint(existing.value_json, plan)
-    : null;
-  let checkpoint =
-    persistedCheckpoint ?? (await initialReconciliationCheckpoint(plan));
-  const lockAlreadyExisted = await ensureReconciliationWriteLock(
-    database,
-    plan,
-  );
+  const session = database.withSession("first-primary");
+  const lock = await acquireOrLoadReconciliationWriteLock(session, plan);
+  const checkpoint = lock.checkpoint;
 
   // A completed receipt is evidence for the invocation that produced it, not a
-  // permanent cache of database truth. Any later call starts a fresh bounded
-  // pass so a post-checkpoint mutation can never return a stale PASS.
+  // permanent cache of database truth. While its generation-bound lock remains,
+  // however, table triggers prove that the completed evidence is still current.
+  // The caller releases that exact state before a later invocation can acquire a
+  // fresh generation and start a new bounded pass.
   if (checkpoint.completed) {
-    checkpoint = await initialReconciliationCheckpoint(plan);
-  } else if (persistedCheckpoint && !lockAlreadyExisted) {
-    // Without the lock, a persisted prefix has no continuity guarantee. Restart
-    // from the first table under the newly acquired database-enforced guard.
-    checkpoint = await initialReconciliationCheckpoint(plan);
+    return buildReconciliationReport(plan, checkpoint);
   }
 
   if (checkpoint.tableIndex < DATA_TABLE_NAMES.length) {
@@ -273,7 +263,7 @@ export async function reconcileD1Import(
     }
     const spec = requireTableSpec(tableName);
     const columns = targetColumns(spec);
-    const actualResult = await database
+    const actualResult = await session
       .prepare(buildPagedSelectSql(spec))
       .bind(checkpoint.current.lastId, D1_RECONCILIATION_PAGE_ROWS + 1)
       .all<Record<string, string | number | null>>();
@@ -344,9 +334,9 @@ export async function reconcileD1Import(
         foreignKeyViolations: nextForeignKeyViolations,
         domainAggregates: nextDomainAggregates,
       };
-      await storeReconciliationCheckpoint(
-        database,
-        checkpointKey,
+      await advanceReconciliationWriteLock(
+        session,
+        lock,
         nextCheckpoint,
         plan.exportedAt,
       );
@@ -380,9 +370,9 @@ export async function reconcileD1Import(
         },
       },
     };
-    await storeReconciliationCheckpoint(
-      database,
-      checkpointKey,
+    await advanceReconciliationWriteLock(
+      session,
+      lock,
       nextCheckpoint,
       plan.exportedAt,
     );
@@ -400,36 +390,37 @@ export async function releaseD1ReconciliationWriteLock(
   database: D1Database,
   plan: D1ImportPlan,
 ): Promise<void> {
-  const checkpoint = await database
-    .prepare(LOAD_CHECKPOINT_SQL)
-    .bind(reconciliationCheckpointKeyFor(plan.exportId))
-    .first<{ value_json: string }>();
-  if (!checkpoint) {
+  const session = database.withSession("first-primary");
+  const existingLock = await loadReconciliationWriteLock(session);
+  if (!existingLock) {
     throw new Error(
-      "data conversion: cannot release reconciliation lock without a checkpoint",
+      "data conversion: cannot release a missing reconciliation lock",
     );
   }
-  const parsedCheckpoint = parseReconciliationCheckpoint(
-    checkpoint.value_json,
-    plan,
-  );
-  if (!parsedCheckpoint.completed) {
+  const lock = parseReconciliationWriteLock(existingLock, plan);
+  if (!lock.checkpoint.completed) {
     throw new Error(
       "data conversion: cannot release reconciliation lock before exact reconciliation completes",
     );
   }
 
-  const existingLock = await loadReconciliationWriteLock(database);
-  if (!existingLock) return;
-  validateReconciliationWriteLock(existingLock, plan);
-  await database
+  await session
     .prepare("DELETE FROM platform_metadata WHERE key = ?1 AND value_json = ?2")
     .bind(RECONCILIATION_WRITE_LOCK_KEY, existingLock)
     .run();
-  if (await loadReconciliationWriteLock(database)) {
+  const remainingLock = await loadReconciliationWriteLock(session);
+  if (remainingLock === existingLock) {
     throw new Error(
       "data conversion: reconciliation write lock was not released",
     );
+  }
+  if (remainingLock) {
+    const replacement = parseReconciliationWriteLock(remainingLock, plan);
+    if (replacement.generation === lock.generation) {
+      throw new Error(
+        "data conversion: reconciliation state changed during release",
+      );
+    }
   }
 }
 
@@ -475,9 +466,11 @@ function parseCheckpoint(value: string, plan: D1ImportPlan): Checkpoint {
 
 async function initialReconciliationCheckpoint(
   plan: D1ImportPlan,
+  generation: string,
 ): Promise<ReconciliationCheckpoint> {
   return {
     schemaVersion: RECONCILIATION_CHECKPOINT_SCHEMA_VERSION,
+    generation,
     planChecksum: plan.checksum,
     tableIndex: 0,
     current: await emptyReconciliationCursor(),
@@ -491,6 +484,7 @@ async function initialReconciliationCheckpoint(
 function parseReconciliationCheckpoint(
   value: string,
   plan: D1ImportPlan,
+  generation: string,
 ): ReconciliationCheckpoint {
   let parsed: unknown;
   try {
@@ -512,6 +506,7 @@ function parseReconciliationCheckpoint(
       "current",
       "domainAggregates",
       "foreignKeyViolations",
+      "generation",
       "planChecksum",
       "schemaVersion",
       "tableIndex",
@@ -521,6 +516,8 @@ function parseReconciliationCheckpoint(
   );
   if (
     parsed.schemaVersion !== RECONCILIATION_CHECKPOINT_SCHEMA_VERSION ||
+    parsed.generation !== generation ||
+    !CANONICAL_ID_PATTERN.test(generation) ||
     parsed.planChecksum !== plan.checksum ||
     typeof parsed.completed !== "boolean" ||
     !Number.isSafeInteger(parsed.tableIndex) ||
@@ -562,13 +559,13 @@ function parseReconciliationCheckpoint(
   const currentRowCount = Number(parsed.current.rowCount);
   if (currentRowCount > 0) {
     const currentTable = DATA_TABLE_NAMES[tableIndex];
+    const expectedPageIndex = currentRowCount / D1_RECONCILIATION_PAGE_ROWS - 1;
     const expectedPage = currentTable
-      ? plan.expectedPageEvidence[currentTable].find(
-          (page) => page.rowCount === currentRowCount,
-        )
+      ? plan.expectedPageEvidence[currentTable][expectedPageIndex]
       : undefined;
     if (
       !expectedPage ||
+      expectedPage.rowCount !== currentRowCount ||
       expectedPage.lastId !== parsed.current.lastId ||
       expectedPage.checksum !== parsed.current.rollingChecksum
     ) {
@@ -733,47 +730,68 @@ function reconciliationProgress(
   };
 }
 
-async function storeReconciliationCheckpoint(
-  database: D1Database,
-  key: string,
+async function advanceReconciliationWriteLock(
+  database: D1DatabaseSession,
+  previous: ReconciliationWriteLock,
   checkpoint: ReconciliationCheckpoint,
   updatedAt: string,
-): Promise<void> {
-  await database
-    .prepare(STORE_CHECKPOINT_SQL)
-    .bind(key, canonicalJson(checkpoint), updatedAt)
-    .run();
-}
-
-async function ensureReconciliationWriteLock(
-  database: D1Database,
-  plan: D1ImportPlan,
-): Promise<boolean> {
-  const existing = await loadReconciliationWriteLock(database);
-  if (existing) {
-    validateReconciliationWriteLock(existing, plan);
-    return true;
-  }
-
-  const value = canonicalJson(reconciliationWriteLockFor(plan));
-  await database
-    .prepare(
-      "INSERT OR IGNORE INTO platform_metadata (key, value_json, updated_at) VALUES (?1, ?2, ?3)",
-    )
-    .bind(RECONCILIATION_WRITE_LOCK_KEY, value, plan.exportedAt)
-    .run();
-  const acquired = await loadReconciliationWriteLock(database);
-  if (!acquired) {
+): Promise<ReconciliationWriteLock> {
+  if (checkpoint.generation !== previous.generation) {
     throw new Error(
-      "data conversion: reconciliation write lock was not acquired",
+      "data conversion: reconciliation checkpoint changed lock generation",
     );
   }
-  validateReconciliationWriteLock(acquired, plan);
-  return false;
+  const next: ReconciliationWriteLock = {
+    ...previous,
+    checkpoint,
+  };
+  const previousValue = canonicalJson(previous);
+  const nextValue = canonicalJson(next);
+  await database
+    .prepare(
+      "UPDATE platform_metadata SET value_json = ?1, updated_at = ?2 WHERE key = ?3 AND value_json = ?4",
+    )
+    .bind(nextValue, updatedAt, RECONCILIATION_WRITE_LOCK_KEY, previousValue)
+    .run();
+  const stored = await loadReconciliationWriteLock(database);
+  if (stored !== nextValue) {
+    throw new Error(
+      "data conversion: reconciliation state changed concurrently",
+    );
+  }
+  return next;
+}
+
+async function acquireOrLoadReconciliationWriteLock(
+  database: D1DatabaseSession,
+  plan: D1ImportPlan,
+): Promise<ReconciliationWriteLock> {
+  const generation = crypto.randomUUID();
+  const checkpoint = await initialReconciliationCheckpoint(plan, generation);
+  const candidate = reconciliationWriteLockFor(plan, generation, checkpoint);
+  const value = canonicalJson(candidate);
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    await database
+      .prepare(
+        "INSERT OR IGNORE INTO platform_metadata (key, value_json, updated_at) VALUES (?1, ?2, ?3)",
+      )
+      .bind(RECONCILIATION_WRITE_LOCK_KEY, value, plan.exportedAt)
+      .run();
+    const acquired = await loadReconciliationWriteLock(database);
+    if (acquired) {
+      return parseReconciliationWriteLock(acquired, plan);
+    }
+    // A completed generation can be conditionally released between this
+    // invocation's INSERT OR IGNORE and confirming load. Retry once in the same
+    // primary-anchored session; a persistent absence still fails closed.
+  }
+  throw new Error(
+    "data conversion: reconciliation write lock was not acquired",
+  );
 }
 
 async function loadReconciliationWriteLock(
-  database: D1Database,
+  database: D1DatabaseSession,
 ): Promise<string | null> {
   const row = await database
     .prepare(LOAD_CHECKPOINT_SQL)
@@ -784,18 +802,22 @@ async function loadReconciliationWriteLock(
 
 function reconciliationWriteLockFor(
   plan: D1ImportPlan,
+  generation: string,
+  checkpoint: ReconciliationCheckpoint,
 ): ReconciliationWriteLock {
   return {
     schemaVersion: RECONCILIATION_WRITE_LOCK_SCHEMA_VERSION,
     exportId: plan.exportId,
     planChecksum: plan.checksum,
+    generation,
+    checkpoint,
   };
 }
 
-function validateReconciliationWriteLock(
+function parseReconciliationWriteLock(
   value: string,
   plan: D1ImportPlan,
-): void {
+): ReconciliationWriteLock {
   let parsed: unknown;
   try {
     parsed = JSON.parse(value);
@@ -809,18 +831,27 @@ function validateReconciliationWriteLock(
   }
   requireExactObjectKeys(
     parsed,
-    ["exportId", "planChecksum", "schemaVersion"],
+    ["checkpoint", "exportId", "generation", "planChecksum", "schemaVersion"],
     "reconciliation write lock",
   );
   if (
     parsed.schemaVersion !== RECONCILIATION_WRITE_LOCK_SCHEMA_VERSION ||
     parsed.exportId !== plan.exportId ||
-    parsed.planChecksum !== plan.checksum
+    parsed.planChecksum !== plan.checksum ||
+    typeof parsed.generation !== "string" ||
+    !CANONICAL_ID_PATTERN.test(parsed.generation) ||
+    !isRecord(parsed.checkpoint)
   ) {
     throw new Error(
       "data conversion: reconciliation write lock belongs to another plan",
     );
   }
+  const checkpoint = parseReconciliationCheckpoint(
+    canonicalJson(parsed.checkpoint),
+    plan,
+    parsed.generation,
+  );
+  return { ...parsed, checkpoint } as ReconciliationWriteLock;
 }
 
 function buildReconciliationReport(
@@ -905,10 +936,6 @@ function isNonNegativeSafeInteger(value: unknown): value is number {
 
 function checkpointKeyFor(exportId: string): string {
   return `data_conversion:${exportId}`;
-}
-
-function reconciliationCheckpointKeyFor(exportId: string): string {
-  return `data_reconciliation:${exportId}`;
 }
 
 function requireTableSpec(name: DataTableName): TableSpec {

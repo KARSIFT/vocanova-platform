@@ -228,6 +228,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
   });
 
   it("records an explicit exclusion for soft-deleted external identities", async () => {
+    const baseline = await convertPostgresExport(syntheticPostgresExport());
     const fixture = syntheticPostgresExport();
     const deleted = structuredClone(rowOf(fixture, "external_identities"));
     deleted.id = "00000000-0000-0000-0000-00000000fffe";
@@ -239,6 +240,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     expect(plan.sourceCounts.external_identities).toBe(2);
     expect(plan.excludedCounts.external_identities).toBe(1);
     expect(plan.expectedRows.external_identities).toHaveLength(1);
+    expect(plan.redactedFieldCount).toBe(baseline.redactedFieldCount + 2);
   });
 
   it("imports fresh local D1 chunks and emits exact privacy-safe reconciliation", async () => {
@@ -330,50 +332,52 @@ describe("PostgreSQL-to-D1 conversion", () => {
     await runImport(env.DB, plan);
     await reconcileD1Import(env.DB, plan);
 
-    const key = "data_reconciliation:voc080-t09-bad-reconciliation-checkpoint";
+    const key = "data_reconciliation_write_lock";
     const stored = await env.DB.prepare(
       "SELECT value_json FROM platform_metadata WHERE key = ?1",
     )
       .bind(key)
       .first<{ value_json: string }>();
-    const checkpoint = JSON.parse(stored?.value_json ?? "null") as {
-      domainAggregates: { activeUsers: number };
-      tables: { users: { matches: boolean; sourceCount: number } };
+    const lock = JSON.parse(stored?.value_json ?? "null") as {
+      checkpoint: {
+        domainAggregates: { activeUsers: number };
+        tables: { users: { matches: boolean; sourceCount: number } };
+      };
     };
-    checkpoint.tables.users.sourceCount = 99;
+    lock.checkpoint.tables.users.sourceCount = 99;
     await env.DB.prepare(
       "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
     )
-      .bind(JSON.stringify(checkpoint), key)
+      .bind(JSON.stringify(lock), key)
       .run();
 
     await expect(reconcileD1Import(env.DB, plan)).rejects.toThrow(
       "checkpoint table users has invalid evidence",
     );
 
-    checkpoint.tables.users.sourceCount = plan.sourceCounts.users;
-    checkpoint.tables.users.matches = false;
+    lock.checkpoint.tables.users.sourceCount = plan.sourceCounts.users;
+    lock.checkpoint.tables.users.matches = false;
     await env.DB.prepare(
       "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
     )
-      .bind(JSON.stringify(checkpoint), key)
+      .bind(JSON.stringify(lock), key)
       .run();
     await expect(reconcileD1Import(env.DB, plan)).rejects.toThrow(
       "checkpoint table users has invalid evidence",
     );
 
-    checkpoint.tables.users.matches = true;
-    checkpoint.domainAggregates.activeUsers = 99;
+    lock.checkpoint.tables.users.matches = true;
+    lock.checkpoint.domainAggregates.activeUsers = 99;
     await env.DB.prepare(
       "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
     )
-      .bind(JSON.stringify(checkpoint), key)
+      .bind(JSON.stringify(lock), key)
       .run();
     await expect(reconcileD1Import(env.DB, plan)).rejects.toThrow(
       "checkpoint aggregate activeUsers is inconsistent",
     );
-    await env.DB.prepare("DELETE FROM platform_metadata WHERE key IN (?1, ?2)")
-      .bind(key, "data_reconciliation_write_lock")
+    await env.DB.prepare("DELETE FROM platform_metadata WHERE key = ?1")
+      .bind(key)
       .run();
   });
 
@@ -470,22 +474,21 @@ describe("PostgreSQL-to-D1 conversion", () => {
       "canonical_words",
       10,
     );
-    const reconciliationKey =
-      "data_reconciliation:voc080-t09-bounded-clear-base";
+    const reconciliationKey = "data_reconciliation_write_lock";
     const storedCheckpoint = await env.DB.prepare(
       "SELECT value_json FROM platform_metadata WHERE key = ?1",
     )
       .bind(reconciliationKey)
       .first<{ value_json: string }>();
-    const validCheckpoint = storedCheckpoint?.value_json ?? "";
-    const forgedCheckpoint = JSON.parse(validCheckpoint) as {
-      current: { rollingChecksum: string };
+    const validLock = storedCheckpoint?.value_json ?? "";
+    const forgedLock = JSON.parse(validLock) as {
+      checkpoint: { current: { rollingChecksum: string } };
     };
-    forgedCheckpoint.current.rollingChecksum = "a".repeat(64);
+    forgedLock.checkpoint.current.rollingChecksum = "a".repeat(64);
     await env.DB.prepare(
       "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
     )
-      .bind(JSON.stringify(forgedCheckpoint), reconciliationKey)
+      .bind(JSON.stringify(forgedLock), reconciliationKey)
       .run();
     await expect(
       reconcileD1Import(env.DB, guardedReconciliationPlan),
@@ -493,7 +496,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     await env.DB.prepare(
       "UPDATE platform_metadata SET value_json = ?1 WHERE key = ?2",
     )
-      .bind(validCheckpoint, reconciliationKey)
+      .bind(validLock, reconciliationKey)
       .run();
     await expect(
       reconcileD1Import(env.DB, guardedReconciliationPlan, {
@@ -547,6 +550,83 @@ describe("PostgreSQL-to-D1 conversion", () => {
     });
     await runImport(env.DB, correction);
     expect((await runReconciliation(env.DB, correction)).status).toBe("pass");
+  }, 15_000);
+
+  it("restarts from zero after lock loss even when reacquisition then fails", async () => {
+    const fixture = fixtureFor("lock-loss-restart");
+    const template = rowOf(fixture, "canonical_words");
+    for (let index = 0; index < 10; index += 1) {
+      const row = structuredClone(template);
+      row.id = `00000000-0000-0000-0000-${(0x2000 + index).toString(16).padStart(12, "0")}`;
+      row.text = `Lock continuity ${index}`;
+      row.normalized_text = `lock-continuity-${index}`;
+      tableRows(fixture, "canonical_words").push(row);
+    }
+    const convertedPlan = await convertPostgresExport(fixture);
+    const changedPrefixId = convertedPlan.expectedRows.canonical_words[0]?.id;
+    const plan = forbidExpectedTableScans(convertedPlan);
+    await runImport(env.DB, plan);
+    await runUntilReconciliationPage(env.DB, plan, "canonical_words", 10);
+
+    await env.DB.prepare("DELETE FROM platform_metadata WHERE key = ?1")
+      .bind("data_reconciliation_write_lock")
+      .run();
+    await env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
+      .bind("Changed while the lock was absent", changedPrefixId)
+      .run();
+
+    await expect(
+      reconcileD1Import(env.DB, plan, {
+        failBeforePage: { table: "users", processedRows: 0 },
+      }),
+    ).rejects.toThrow("injected reconciliation failure before users row 0");
+    const restartedLock = await env.DB.prepare(
+      "SELECT value_json FROM platform_metadata WHERE key = ?1",
+    )
+      .bind("data_reconciliation_write_lock")
+      .first<{ value_json: string }>();
+    const restartedState = JSON.parse(restartedLock?.value_json ?? "null") as {
+      checkpoint: { tableIndex: number; current: { rowCount: number } };
+    };
+    expect(restartedState.checkpoint).toMatchObject({
+      tableIndex: 0,
+      current: { rowCount: 0 },
+    });
+    await expect(runReconciliation(env.DB, plan)).rejects.toThrow(
+      "cursor is not bound to an exact expected prefix",
+    );
+    await env.DB.prepare("DELETE FROM platform_metadata WHERE key = ?1")
+      .bind("data_reconciliation_write_lock")
+      .run();
+  }, 15_000);
+
+  it("does not let a completed release delete a concurrent fresh generation", async () => {
+    const plan = await convertPostgresExport(fixtureFor("release-generation"));
+    await runImport(env.DB, plan);
+    let completed: ReconciliationReport | undefined;
+    for (let attempt = 0; attempt < 10_000; attempt += 1) {
+      const result = await reconcileD1Import(env.DB, plan);
+      if (result.status !== "pending") {
+        completed = result;
+        break;
+      }
+    }
+    expect(completed?.status).toBe("pass");
+
+    await Promise.all([
+      releaseD1ReconciliationWriteLock(env.DB, plan),
+      reconcileD1Import(env.DB, plan),
+    ]);
+    const restarted = await reconcileD1Import(env.DB, plan);
+    expect(restarted.status).toBe("pending");
+    expect(
+      await env.DB.prepare(
+        "SELECT COUNT(*) AS count FROM platform_metadata WHERE key = ?1",
+      )
+        .bind("data_reconciliation_write_lock")
+        .first<{ count: number }>(),
+    ).toEqual({ count: 1 });
+    expect((await runReconciliation(env.DB, plan)).status).toBe("pass");
   }, 15_000);
 
   it("lets D1 reject alternate/composite uniqueness conflicts atomically", async () => {
@@ -653,7 +733,25 @@ function forbidExpectedTableScans(plan: D1ImportPlan): D1ImportPlan {
       }),
     ]),
   ) as D1ImportPlan["expectedRows"];
-  return { ...plan, expectedRows };
+  const expectedPageEvidence = Object.fromEntries(
+    DATA_TABLE_NAMES.map((tableName) => [
+      tableName,
+      new Proxy(plan.expectedPageEvidence[tableName], {
+        get(target, property, receiver) {
+          if (
+            property !== "length" &&
+            !/^(?:0|[1-9]\d*)$/.test(String(property))
+          ) {
+            throw new Error(
+              `reconciliation scanned expected ${tableName} page evidence through ${String(property)}`,
+            );
+          }
+          return Reflect.get(target, property, receiver);
+        },
+      }),
+    ]),
+  ) as D1ImportPlan["expectedPageEvidence"];
+  return { ...plan, expectedRows, expectedPageEvidence };
 }
 
 async function runImport(

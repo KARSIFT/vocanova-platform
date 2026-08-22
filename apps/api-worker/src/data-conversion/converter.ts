@@ -171,6 +171,12 @@ export async function convertPostgresExport(
       }
       seenIds.add(normalizedId);
 
+      for (const field of [...spec.fields, ...(spec.sourceOnlyFields ?? [])]) {
+        if (field.sensitive && row[field.source] !== null) {
+          redactedFieldCount += 1;
+        }
+      }
+
       if (tableName === "external_identities" && row.deleted_at !== null) {
         continue;
       }
@@ -183,7 +189,6 @@ export async function convertPostgresExport(
         }
         const targetName = field.target ?? field.source;
         target[targetName] = normalizeField(field, value, tableName, rowIndex);
-        if (field.sensitive && value !== null) redactedFieldCount += 1;
       }
 
       applySemanticConversions(tableName, target);
@@ -280,6 +285,7 @@ export async function convertPostgresExport(
       expectedPageEvidence,
       expectedDomainAggregates,
       excludedCounts,
+      redactedFieldCount,
     }),
   );
 

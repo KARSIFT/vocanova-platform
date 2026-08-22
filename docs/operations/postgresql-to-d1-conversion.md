@@ -112,42 +112,51 @@ destructive production action.
   delta, and successful-AI-feedback aggregates;
 - the number of sensitive fields withheld from evidence.
 
-Reconciliation is also a resumable state machine. Each call fetches at most 11 ordered
-rows from one table (10 hashed rows plus one completion lookahead), rejects a
+Reconciliation is also a resumable state machine. Each call uses a
+[primary-anchored D1 Session](https://developers.cloudflare.com/d1/best-practices/read-replication/#start-a-session-with-all-latest-data)
+and fetches at most 11 ordered rows from one table (10 hashed rows plus one
+completion lookahead), rejects a
 canonicalized 10-row page above 12,000,000 bytes, advances a SHA-256 page chain, checks
 that page's declared parent references with bounded indexed lookups, and accumulates
-the six domain aggregates from those same rows. It stores only its last ID, row count,
-rolling checksum, cumulative counters, and completed-table evidence under
-`data_reconciliation:<export_id>`. Retrying after a read or checkpoint failure re-reads
-at most the same page and cannot double-count because the cursor and cumulative values
-advance together with the prepared checkpoint write. The signed Confidence Point delta
+the six domain aggregates from those same rows. It stores only its generation nonce,
+last ID, row count, rolling checksum, cumulative counters, and completed-table evidence
+inside the global `data_reconciliation_write_lock` row. Retrying after a read or state
+transition failure re-reads at most the same page and cannot double-count because each
+cursor advance is a compare-and-swap update of that exact generation. The signed
+Confidence Point delta
 uses exact `BigInt` arithmetic and a canonical decimal checkpoint value across pages;
 only the final safe-integer total is emitted as a JSON number.
 
-Before the first page, reconciliation acquires a plan-bound row named
-`data_reconciliation_write_lock`. The seventh local D1 migration installs
+Before the first page, reconciliation atomically acquires a plan-bound, random-generation
+row named `data_reconciliation_write_lock`; its initial zero cursor is part of that same
+row, so no stale prefix can survive lock loss or a failed restart. The seventh local D1
+migration installs
 insert/update/delete triggers on every converted table; while that row exists, any
-target mutation aborts with a canonical error. A missing lock invalidates an
-in-progress cursor and restarts from the first table under a newly acquired lock. This
+target mutation aborts with a canonical error. A missing lock necessarily starts a new
+generation from the first table under the newly acquired guard. This
 makes the page chain one stable database generation rather than relying only on the
-offline-cutover instruction. Initial acquisition uses at most three additional bounded
-metadata queries; normal page calls use one lock lookup, one 11-row page query, and one
-checkpoint write in addition to checkpoint loading.
+offline-cutover instruction. A page invocation uses one conditional lock insert, one
+lock load, one 11-row page query, one compare-and-swap state update, and one confirming
+load. A concurrent completed-generation release can add one bounded insert/load retry,
+for at most seven queries. This remains below the committed 50-query ceiling.
 
 The protected conversion step precomputes the identical 10-row expected checksum chain
 with its page-ending row IDs, plus expected aggregate totals, and binds them into the
 overall plan checksum. Every resumed non-empty cursor must match one of those exact
-page endpoints; a well-shaped cursor that skips or rewrites an unverified prefix fails
-closed.
+page endpoints by direct page-index lookup; no invocation linearly scans prior page
+evidence. A well-shaped cursor that skips or rewrites an unverified prefix fails closed.
 Reconciliation therefore never iterates an expected table, performs a D1 full-table
 aggregate, or materializes a D1 table/result set in one Worker invocation. Persisted
 table evidence is checked back against the plan's counts and checksums, and the
-`matches` flag is recomputed semantically. A completed receipt is not treated as a
-permanent cache: invoking reconciliation again starts a new bounded pass, so a later
-database mutation cannot return a stale PASS. A completed report deliberately leaves
-the write lock active while its evidence is recorded. The caller then invokes
-`releaseD1ReconciliationWriteLock`; it verifies the plan-bound completed checkpoint
-before removing the guard. Releasing an incomplete or different plan fails closed. If
+`matches` flag is recomputed semantically. A completed receipt is reusable only while
+its exact generation lock remains, because the triggers make later target mutation
+impossible. A completed report deliberately leaves that write lock active while its
+evidence is recorded. The caller then invokes `releaseD1ReconciliationWriteLock`; it
+conditionally deletes only the exact plan-bound, generation-bound completed state it
+verified. A concurrent fresh generation cannot be deleted by the old release. After
+release, the next invocation creates a new generation and starts a bounded pass, so a
+later database mutation cannot return a stale PASS. Releasing an incomplete or
+different plan fails closed. If
 a process stops mid-pass, retry the same plan to resume; do not delete the lock or run a
 forward correction until that pass completes or a separately reviewed recovery records
 why its prefix is being abandoned.
@@ -170,7 +179,8 @@ idempotent replay, interrupted resume, malformed/stale-checkpoint rejection, byt
 statement bounds, alternate/composite uniqueness, deletion-safe forward correction,
 multi-page reconciliation interruption/retry without expected-table scans,
 semantically inconsistent reconciliation-checkpoint rejection, completed-receipt
-revalidation, mutation rejection while an in-progress prefix exists, exact signed
+revalidation, lock-loss/reacquisition failure recovery, concurrent release/restart,
+mutation rejection while an in-progress prefix exists, exact signed
 aggregate cancellation/overflow, bounded foreign-key/count/checksum/domain
 reconciliation, and log-redaction assertions. The
 second command proves all 25 PostgreSQL tables/columns map exactly and classifies the
