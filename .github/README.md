@@ -86,6 +86,11 @@ T04 adds a distinct credential-free `worker api` job for generated bindings,
 Hono/OpenAPI and canonical-contract drift, local D1 migrations, workerd tests,
 safety scans, build, and Wrangler dry-run. The Go job remains an independent
 parity-reference check until the final migration gate.
+T05 keeps that same job and workflow inventory while extending it with the second
+forward D1 migration and 13 identity/account operations. Contract evidence now binds
+method, path, operation ID, primary success status, parameters, and public field shape
+to the generated Go reference; workerd fixtures cover hashing, expiry, replay,
+requester isolation, CSRF, rate/kill switches, idempotency, and injected D1 failures.
 Only `ci.yml` may eventually contain held Cloudflare version/deployment jobs, keeping
 the four-file invariant. Pull-request jobs never receive deployment credentials.
 

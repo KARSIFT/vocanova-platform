@@ -81,8 +81,9 @@ vocanova-platform/
 The canonical document corpus is split by category and indexed in [docs/README.md](../README.md).
 The Go backend remains a parity-reference module at `apps/api` during VOC-080. The
 target TypeScript Worker API is now a pnpm workspace at `apps/api-worker`; T04 adds
-only its typed runtime/data/contract foundation and local D1 migration. It replaces
-Go only after the T11 parity gate.
+its typed runtime/data/contract foundation and first local D1 migration. T05 adds the
+identity/session/account/settings slice and second migration with workerd parity and
+failure-injection evidence. It replaces Go only after the T11 parity gate.
 
 ## 3. Branch strategy
 

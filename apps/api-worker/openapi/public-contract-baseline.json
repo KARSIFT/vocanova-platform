@@ -1,10 +1,264 @@
 {
   "canonical": "apps/api/openapi/vocanova.openapi.json",
-  "sha256": "1cd45ff53f7361ad253c7f8b47c3cc7e398a871787bc1f11953528a0d6340a1b",
+  "sha256": "18905f12ffd371bf2eaa4da23af3531bf296cb62e8e223c9c7a2fcea022e0715",
   "clientExceptions": {
     "/api/v1/auth/oauth/google/callback": "OAuth provider redirect target; navigated by the browser/provider rather than VocanovaClient"
   },
+  "workerIdentityOperations": [
+    {
+      "method": "POST",
+      "operationId": "CompleteOnboarding",
+      "path": "/api/v1/onboarding",
+      "successStatus": 200,
+      "parameters": [],
+      "request": {
+        "properties": [
+          "dailyReviewTarget",
+          "englishLevel",
+          "learningGoal",
+          "mainUseCase",
+          "nativeLanguage"
+        ],
+        "required": [
+          "dailyReviewTarget",
+          "englishLevel",
+          "learningGoal",
+          "mainUseCase",
+          "nativeLanguage"
+        ]
+      },
+      "response": {
+        "properties": [
+          "completedAt",
+          "dailyReviewTarget",
+          "englishLevel",
+          "learningGoal",
+          "mainUseCase",
+          "nativeLanguage",
+          "status"
+        ],
+        "required": ["status"]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "ConsumeEmailChangeLink",
+      "path": "/api/v1/settings/email-change-links/consume",
+      "successStatus": 200,
+      "parameters": [],
+      "request": { "properties": ["token"], "required": ["token"] },
+      "response": {
+        "properties": ["changedAt", "email", "previousEmail"],
+        "required": ["changedAt", "email", "previousEmail"]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "ConsumeMagicLink",
+      "path": "/api/v1/auth/magic-links/consume",
+      "successStatus": 200,
+      "parameters": [],
+      "request": {
+        "properties": ["email", "token"],
+        "required": ["email", "token"]
+      },
+      "response": {
+        "properties": [
+          "avatarUrl",
+          "displayName",
+          "email",
+          "emailVerifiedAt",
+          "onboardingStatus"
+        ],
+        "required": ["onboardingStatus"]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "CreateAccountDeletionRequest",
+      "path": "/api/v1/account-deletion-requests",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "header", "name": "Idempotency-Key", "required": true }
+      ],
+      "request": null,
+      "response": {
+        "properties": [
+          "idempotencyKey",
+          "purgeAfter",
+          "replayed",
+          "requestedAt",
+          "status",
+          "userId"
+        ],
+        "required": [
+          "idempotencyKey",
+          "purgeAfter",
+          "replayed",
+          "requestedAt",
+          "status",
+          "userId"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetCurrentUser",
+      "path": "/api/v1/me",
+      "successStatus": 200,
+      "parameters": [],
+      "request": null,
+      "response": {
+        "properties": [
+          "avatarUrl",
+          "displayName",
+          "email",
+          "emailVerifiedAt",
+          "onboardingStatus"
+        ],
+        "required": ["onboardingStatus"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetOnboarding",
+      "path": "/api/v1/onboarding",
+      "successStatus": 200,
+      "parameters": [],
+      "request": null,
+      "response": {
+        "properties": [
+          "completedAt",
+          "dailyReviewTarget",
+          "englishLevel",
+          "learningGoal",
+          "mainUseCase",
+          "nativeLanguage",
+          "status"
+        ],
+        "required": ["status"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetSettings",
+      "path": "/api/v1/settings",
+      "successStatus": 200,
+      "parameters": [],
+      "request": null,
+      "response": {
+        "properties": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ],
+        "required": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "Logout",
+      "path": "/api/v1/auth/logout",
+      "successStatus": 204,
+      "parameters": [
+        { "in": "header", "name": "X-CSRF-Token", "required": false }
+      ],
+      "request": null,
+      "response": null
+    },
+    {
+      "method": "GET",
+      "operationId": "OAuthCallback",
+      "path": "/api/v1/auth/oauth/google/callback",
+      "successStatus": 302,
+      "parameters": [
+        { "in": "query", "name": "code", "required": false },
+        { "in": "query", "name": "error", "required": false },
+        { "in": "query", "name": "state", "required": false }
+      ],
+      "request": null,
+      "response": null
+    },
+    {
+      "method": "POST",
+      "operationId": "OAuthStart",
+      "path": "/api/v1/auth/oauth/google/start",
+      "successStatus": 200,
+      "parameters": [],
+      "request": { "properties": ["redirectUri"], "required": ["redirectUri"] },
+      "response": { "properties": ["url"], "required": ["url"] }
+    },
+    {
+      "method": "POST",
+      "operationId": "RequestEmailChangeLink",
+      "path": "/api/v1/settings/email-change-links",
+      "successStatus": 204,
+      "parameters": [],
+      "request": { "properties": ["newEmail"], "required": ["newEmail"] },
+      "response": null
+    },
+    {
+      "method": "POST",
+      "operationId": "RequestMagicLink",
+      "path": "/api/v1/auth/magic-links",
+      "successStatus": 204,
+      "parameters": [],
+      "request": { "properties": ["email"], "required": ["email"] },
+      "response": null
+    },
+    {
+      "method": "PATCH",
+      "operationId": "UpdateSettings",
+      "path": "/api/v1/settings",
+      "successStatus": 200,
+      "parameters": [],
+      "request": {
+        "properties": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ],
+        "required": []
+      },
+      "response": {
+        "properties": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ],
+        "required": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ]
+      }
+    }
+  ],
   "operations": [
+    {
+      "method": "POST",
+      "operationId": "CreateAccountDeletionRequest",
+      "path": "/api/v1/account-deletion-requests"
+    },
     {
       "method": "POST",
       "operationId": "Logout",
@@ -50,11 +304,7 @@
       "operationId": "GetJourneySituation",
       "path": "/api/v1/journey-situations/{slug}"
     },
-    {
-      "method": "GET",
-      "operationId": "GetCurrentUser",
-      "path": "/api/v1/me"
-    },
+    { "method": "GET", "operationId": "GetCurrentUser", "path": "/api/v1/me" },
     {
       "method": "GET",
       "operationId": "GetOnboarding",

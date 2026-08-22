@@ -3,7 +3,7 @@ import { env, exports } from "cloudflare:workers";
 
 import { createApp } from "../src/app.js";
 
-describe("Worker API foundation", () => {
+describe("Worker API migration target", () => {
   it("reports D1 health without exposing configuration", async () => {
     const response = await exports.default.fetch(
       "https://api.example.test/healthz",
@@ -27,7 +27,7 @@ describe("Worker API foundation", () => {
       release: "local",
       runtime: "cloudflare-workers",
       data: "d1",
-      migrationStatus: "foundation",
+      migrationStatus: "identity-account-parity",
     });
     expect(text.toLowerCase()).not.toMatch(/token|secret|password|database_id/);
   });
@@ -70,7 +70,7 @@ describe("Worker API foundation", () => {
     });
   });
 
-  it("serves the deterministic Hono-generated OpenAPI foundation", async () => {
+  it("serves the deterministic Hono-generated OpenAPI migration contract", async () => {
     const response = await exports.default.fetch(
       "https://api.example.test/openapi.json",
     );
@@ -81,6 +81,17 @@ describe("Worker API foundation", () => {
     };
     expect(document.openapi).toBe("3.1.0");
     expect(Object.keys(document.paths).sort()).toEqual([
+      "/api/v1/account-deletion-requests",
+      "/api/v1/auth/logout",
+      "/api/v1/auth/magic-links",
+      "/api/v1/auth/magic-links/consume",
+      "/api/v1/auth/oauth/google/callback",
+      "/api/v1/auth/oauth/google/start",
+      "/api/v1/me",
+      "/api/v1/onboarding",
+      "/api/v1/settings",
+      "/api/v1/settings/email-change-links",
+      "/api/v1/settings/email-change-links/consume",
       "/configz",
       "/healthz",
     ]);

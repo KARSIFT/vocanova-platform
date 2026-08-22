@@ -30,7 +30,7 @@ export function createProblem(
 
 export function problemResponse(
   context: Context,
-  status: 400 | 404 | 500 | 503,
+  status: 400 | 401 | 403 | 404 | 409 | 422 | 429 | 500 | 503,
   title: string,
   detail: string,
 ): Response {

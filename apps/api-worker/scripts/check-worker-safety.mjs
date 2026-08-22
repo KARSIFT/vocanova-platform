@@ -35,12 +35,20 @@ for (const file of migrationFiles) {
       `${path.relative(root, file)}: destructive migration statement`,
     );
   }
-  for (const marker of ["STRICT", "json_valid", "CHECK"]) {
+  for (const marker of ["STRICT", "CHECK"]) {
     if (!source.includes(marker)) {
       findings.push(
         `${path.relative(root, file)}: missing ${marker} constraint`,
       );
     }
+  }
+  if (
+    /\b[a-z0-9_]+_json\s+TEXT\b/i.test(source) &&
+    !source.includes("json_valid")
+  ) {
+    findings.push(
+      `${path.relative(root, file)}: JSON column lacks json_valid constraint`,
+    );
   }
 }
 

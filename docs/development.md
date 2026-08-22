@@ -90,21 +90,24 @@ version upload must supply the authoritative platform startup measurement.
 The TypeScript API target lives at `apps/api-worker`; `apps/api` remains the Go
 contract and behavior reference until full parity. Its credential-free commands are:
 
-| Command                                             | Purpose                                                                                          |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `pnpm --filter @vocanova/api-worker types:write`    | Regenerate D1/runtime binding types from the local Wrangler configuration.                       |
-| `pnpm --filter @vocanova/api-worker types:check`    | Fail when committed Wrangler types are stale.                                                    |
-| `pnpm --filter @vocanova/api-worker test`           | Run Hono, CORS, redaction, repository, migration, and D1 tests inside local workerd.             |
-| `pnpm --filter @vocanova/api-worker safety:check`   | Reject dynamic/unsafe SQL, destructive foundation migrations, sensitive logs, and remote config. |
-| `pnpm --filter @vocanova/api-worker openapi:check`  | Compare Hono's generated operational OpenAPI with the committed deterministic artifact.          |
-| `pnpm --filter @vocanova/api-worker contract:check` | Bind the Worker migration baseline to the canonical Go `/api/v1` OpenAPI and API client.         |
-| `pnpm --filter @vocanova/api-worker dry-run`        | Bundle the Worker without uploading, provisioning, or querying Cloudflare.                       |
-| `pnpm ci:worker-api`                                | Run the complete Worker API/local-D1 hosted command, including API-client compatibility.         |
+| Command                                             | Purpose                                                                                             |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `pnpm --filter @vocanova/api-worker types:write`    | Regenerate D1/runtime binding types from the local Wrangler configuration.                          |
+| `pnpm --filter @vocanova/api-worker types:check`    | Fail when committed Wrangler types are stale.                                                       |
+| `pnpm --filter @vocanova/api-worker test`           | Run Hono, CORS, redaction, identity/account parity, repository, migration, and D1 tests in workerd. |
+| `pnpm --filter @vocanova/api-worker safety:check`   | Reject dynamic/unsafe SQL, destructive foundation migrations, sensitive logs, and remote config.    |
+| `pnpm --filter @vocanova/api-worker openapi:check`  | Compare Hono's generated operational OpenAPI with the committed deterministic artifact.             |
+| `pnpm --filter @vocanova/api-worker contract:check` | Bind the Worker migration baseline to the canonical Go `/api/v1` OpenAPI and API client.            |
+| `pnpm --filter @vocanova/api-worker dry-run`        | Bundle the Worker without uploading, provisioning, or querying Cloudflare.                          |
+| `pnpm ci:worker-api`                                | Run the complete Worker API/local-D1 hosted command, including API-client compatibility.            |
 
 `wrangler.jsonc` contains one local D1 name and the non-remote sentinel ID
 `local`; it contains no Cloudflare account/resource identifier or credential.
-Vitest applies the forward migration to isolated local D1 storage twice, proving
-from-empty and replay behavior. T10 owns future staging/production D1 identifiers,
+Vitest applies both forward migrations to isolated local D1 storage twice, proving
+from-empty and replay behavior. T05 adds requester-scoped identity, OAuth state,
+magic links, sessions, onboarding, settings, email change, and account deactivation.
+Email and OAuth providers remain injected boundaries in tests; no local command sends
+email or contacts a provider. T10 owns future staging/production D1 identifiers,
 environment secrets, routes, and held deployment/migration commands.
 
 Run API commands from `apps/api`:
