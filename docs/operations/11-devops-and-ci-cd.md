@@ -272,10 +272,14 @@ production secrets ever reachable from preview/staging/CI (unchanged from v1.0).
 > unchanged choice, so the "Error monitoring" row no longer under-describes the mechanism actually
 > in place:
 >
-> - **`apps/web` now reports errors to Sentry** (`VOC-051-T01`), via `@sentry/nextjs` across the
->   browser, server, and edge runtimes. Previously only `apps/api` did. The SDK is a no-op when its
->   DSN is unset, matching `apps/api`'s existing behaviour, so an unconfigured environment reports
->   nothing rather than failing.
+> - **`apps/web` began reporting errors to Sentry in `VOC-051-T01`.** Its historical
+>   implementation used `@sentry/nextjs` across the browser, server, and edge runtimes;
+>   previously only `apps/api` reported errors. `VOC-083-T01/T02` superseded that SDK/runtime
+>   detail with exact `@sentry/cloudflare@10.69.0` Worker/request instrumentation and
+>   `@sentry/react@10.69.0` browser instrumentation, with no `@sentry/nextjs` dependency or
+>   source import. The current adapters remain no-ops when their DSNs are unset, matching
+>   `apps/api`'s existing behaviour, so an unconfigured environment reports nothing rather than
+>   failing.
 > - **The "separate Sentry environments per environment tier" requirement in the paragraph above is
 >   satisfied by separate Sentry _projects_, not only by the `environment` event tag.** VOC-051
 >   adopted a four-project layout — `prod-api`, `prod-web`, `stage-api`, `stage-web` under the
@@ -287,8 +291,9 @@ production secrets ever reachable from preview/staging/CI (unchanged from v1.0).
 > - **Historical Sentry automation is paused.** VOC-051 added a daily workflow that queried all
 >   four projects using a read-only Sentry integration token and opened deduplicated GitHub issues.
 >   VOC-078-T03 removed that workflow and its GitHub permission/secret consumption. Application
->   Sentry instrumentation and the four-project evidence remain unchanged; no current repository
->   automation queries Sentry or opens monitoring issues.
+>   Application Sentry instrumentation and the four-project evidence remained present when that
+>   automation was removed; `VOC-083` later adapted the web SDK/runtime boundary as recorded
+>   above. No current repository automation queries Sentry or opens monitoring issues.
 > - **Uptime/liveness monitoring is untouched** by this amendment — the "Uptime monitoring" row's
 >   Better Stack / UptimeRobot choice remains as stated and unimplemented here.
 

@@ -66,12 +66,13 @@ also passed. A ten-commit repository-only rollback rehearsal to the exact T01
 revision `9f11195ed186e214fade57884e66ca96f2498ebc` passed. These records establish
 T02's complete AC-01–AC-04 evidence; they do not close T03 or claim any live effect.
 
-T03's candidate reconciliation inventories every declared affected surface and records
-that no additional runtime, configuration, dependency, or active-document edit was
-necessary because T02 reconciled those surfaces. T03 still requires its own exact-SHA
-specialist verdict, hosted proof, and ordinary repository rollback before AC-05 or
-package closure can be marked complete. This record does not pre-claim a T03 PR number,
-final SHA, review, hosted result, or live Sentry/Cloudflare outcome.
+T03's candidate reconciliation inventories every declared affected surface and corrects
+DOC-11's stale active `@sentry/nextjs` runtime statement. T02 had already reconciled
+the runtime, configuration, dependency, CI, test, development-guide, and ADR surfaces.
+T03 still requires its own exact-SHA specialist verdict, hosted proof, and ordinary
+repository rollback before AC-05 or package closure can be marked complete. This
+record does not pre-claim a T03 PR number, final SHA, review, hosted result, or live
+Sentry/Cloudflare outcome.
 
 The plan was prepared on `agent/voc-081-t04-f2-evidence` at
 `a8694932671ad9c44fd2a97c128b14e6089e5faf`; it deliberately has no dependency on

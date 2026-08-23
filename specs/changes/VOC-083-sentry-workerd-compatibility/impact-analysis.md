@@ -66,6 +66,12 @@ current truthful claims; historical Sentry packages remain historical evidence. 
 change commands/jobs only inside `ci.yml`; all four workflows and credential-free
 pull-request behavior remain invariant.
 
+T03 found that DOC-11's active VOC-051 amendment still described `@sentry/nextjs` as
+the current web implementation. T03 preserves that history while superseding its SDK
+and runtime detail with the implemented `@sentry/cloudflare` Worker/request adapter and
+`@sentry/react` browser adapter. The development guide and ADR already describe the
+current implementation and require no further change.
+
 ## Risks, dependencies, and evidence
 
 - `VOC-083-RISK-00`: a broad alias/update hides runtime Wasm by removing required

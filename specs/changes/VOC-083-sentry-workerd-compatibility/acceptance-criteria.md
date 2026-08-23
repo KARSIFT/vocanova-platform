@@ -73,9 +73,10 @@ documentation, lockfile, and exact affected-file inventory agree. `ci:web` build
 before compatibility/dry-run/smoke and local-stack builds/scans its own fresh output;
 no check accepts stale or partial artifacts. T02's exact review and hosted results are
 recorded in the package evidence. The T03 candidate inventory reconciles the package
-documentation, but T03's own exact review and hosted proof remain pending; no
-unperformed Sentry API or source-map upload, Cloudflare mutation/deploy, secret, or
-production-data access is claimed.
+documentation and corrects DOC-11's stale active `@sentry/nextjs` runtime statement,
+but T03's own exact review and hosted proof remain pending; no unperformed Sentry API
+or source-map upload, Cloudflare mutation/deploy, secret, or production-data access is
+claimed.
 
 ## VOC-083-AC-05 — Exact-revision verification and rollback are complete
 

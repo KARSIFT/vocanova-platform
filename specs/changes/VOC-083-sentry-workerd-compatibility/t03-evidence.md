@@ -14,7 +14,8 @@ be reviewed independently.
 
 ## Historical review record (preserved)
 
-The following FAILs remain historical evidence and are not reinterpreted as approval:
+The following historical verdicts remain exact-revision evidence. FAILs are not
+reinterpreted as approval:
 
 - Plan candidate `682b33ec1a126e8924395f7d7f7eb26191f2a57a`: FAIL,
   [formal review comment 5385262973](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973).
@@ -61,7 +62,7 @@ The exact hosted records for the completed implementation stages are:
   `e79f04402055d7ebbb1ccfbaf8e7a1dd1b85185c` is preserved in PR #115.
 - T02's ten-commit rollback to the exact T01 revision
   `9f11195ed186e214fade57884e66ca96f2498ebc` is preserved in PR #116.
-- T03's documentation chain (the two prior package-doc commits and this amendment)
+- T03's four-commit documentation chain
   remains pending its own final ordinary repository rollback. No T03 rollback or
   closure is claimed here.
 
@@ -92,10 +93,11 @@ exact-final-SHA review, hosted proof, and ordinary rollback remain open for AC-0
 
 ## Declared affected-surface inventory
 
-Every declared affected surface below was reconciled by T01/T02. No additional
-runtime, configuration, dependency, or active-document edit was necessary for T03;
-T03 adds only this package-local candidate record and the related package metadata/
-status reconciliation.
+Every declared runtime, configuration, dependency, CI, and test surface below was
+reconciled by T01/T02. T03 found and corrected DOC-11's stale active claim that the
+web application still used `@sentry/nextjs`; the other active documentation surfaces
+required no further edit. T03 also adds this package-local candidate record and the
+related package metadata/status reconciliation.
 
 ### Web runtime, configuration, environment, and generated binding surfaces
 
@@ -139,9 +141,10 @@ status reconciliation.
 
 - `specs/changes/VOC-083-sentry-workerd-compatibility/`
 
-The package surface is the only T03 edit area. The active runtime/configuration/
-dependency/documentation surfaces above required no further change after T02's
-reconciliation. AC-05 remains pending until a different-role specialist binds a
-verdict to T03's exact final SHA, hosted proof is recorded, and the ordinary rollback
-is completed. No Sentry API, source-map upload, Cloudflare mutation, deployment,
-credential, production-data access, or live-system action is authorized or claimed.
+T03 edits only the package surface and DOC-11. The active runtime, configuration,
+dependency, CI, test, development-guide, and ADR surfaces required no further change
+after T02's reconciliation. AC-05 remains pending until a different-role specialist
+binds a verdict to T03's exact final SHA, hosted proof is recorded, and the ordinary
+rollback is completed. No Sentry API, source-map upload, Cloudflare mutation,
+deployment, credential, production-data access, or live-system action is authorized
+or claimed.

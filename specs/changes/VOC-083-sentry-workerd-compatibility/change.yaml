@@ -194,7 +194,7 @@ affected_areas:
 implementation:
   authorized: true
   required: true
-  status: T00-complete; T01-complete-merged-PR-115; T02-complete-exact-SHA-e3a71a13eedfc8fef05b580280047e41f320de48-merged-PR-116; T03-candidate-pending-own-exact-SHA-review-hosted-proof-and-ordinary-rollback
+  status: T00-complete; T01-complete-merged-PR-115; T02-complete-exact-SHA-e3a71a13eedfc8fef05b580280047e41f320de48-merged-PR-116; T03-candidate-DOC-11-reconciled-pending-own-exact-SHA-review-hosted-proof-and-ordinary-rollback
   target_branch: develop
   pull_request: null
   authority_issue: 105
@@ -223,5 +223,6 @@ post_adoption_task_gates:
   - T02-pr-116-exact-SHA-ab1b24d527f2d71649efb61cc1a8475535de282b-independent-review-fail-preserved
   - T02-complete-exact-SHA-e3a71a13eedfc8fef05b580280047e41f320de48-independent-pass-comment-5386580099-merged-23da9da69bb27529994e70d4bf6e9a0a78ea26b6-hosted-and-post-merge-evidence-recorded
   - T02-rollback-pass-ten-commits-to-exact-T01-9f11195ed186e214fade57884e66ca96f2498ebc-no-live-effects
+  - T03-DOC-11-current-Sentry-runtime-claim-reconciled
   - T03-candidate-pending-own-exact-final-SHA-specialist-review-hosted-proof-and-ordinary-rollback
   - T02-failure-requires-updated-T00-decision-T01-revision-and-fresh-exact-SHA-review

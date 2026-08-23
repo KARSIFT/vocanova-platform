@@ -73,9 +73,9 @@ the exact T01 revision `9f11195ed186e214fade57884e66ca96f2498ebc` passed.
 
 Reconcile affected active docs, run the proportionate final checks, independently
 review the exact final revision with Cloudflare/Workers/Sentry specialization, and
-rehearse repository-only rollback. The candidate inventory records that no additional
-runtime/configuration/dependency/active-document edit was necessary because T02
-reconciled every declared affected surface. T03 must request and record its own
-exact-SHA review after the preserved prior FAIL, plus hosted proof and an ordinary
-rollback, before closure. Do not claim a T03 PR number, final SHA, review, hosted
-result, or any live Sentry/Cloudflare outcome in advance.
+rehearse repository-only rollback. The candidate inventory records that T02
+reconciled the runtime/configuration/dependency/CI/test surfaces and that T03 corrected
+DOC-11's stale active `@sentry/nextjs` runtime statement. T03 must request and record
+its own exact-SHA review after the preserved prior FAIL, plus hosted proof and an
+ordinary rollback, before closure. Do not claim a T03 PR number, final SHA, review,
+hosted result, or any live Sentry/Cloudflare outcome in advance.
