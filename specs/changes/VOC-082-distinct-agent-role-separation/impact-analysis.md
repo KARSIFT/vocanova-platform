@@ -32,7 +32,8 @@ fixtures.
 Affected canonical/active surfaces are:
 
 - authority: `AGENTS.md`, DOC-15, DOC-16, approval matrix, risk classification,
-  protected areas, repository settings, governance index;
+  protected areas, post-merge activation checklist, repository settings, governance
+  index;
 - contributor/reviewer operation: `CONTRIBUTING.md`, `CLAUDE.md`, `.github/README.md`,
   pull-request template, DOC-10, external Ruflo runbook;
 - rationale and templates: ADR-0004 clarification, new ADR-0005, decisions index,
@@ -40,10 +41,27 @@ Affected canonical/active surfaces are:
 - deterministic evidence: merge-eligibility README and synthetic R4 fixture identity
   labels, foundation validator, and its unit tests.
 
-`docs/templates/technical-approval-request.md` is inspected but is not expected to
-change: it is already explicitly limited to historical/EHR human review. Historical
-change packages, archived documents, transition evidence, and generated visual records
-remain immutable.
+The active-inventory scan classifies every remaining named-provider occurrence:
+
+- `docs/governance/post-merge-activation-checklist.md` lines 61-63, DOC-10's Codex task-
+  size example, and the change-specification template's Codex owner example require T00
+  reconciliation to provider-neutral actors; all are already included in T00's affected
+  surfaces.
+- `CLAUDE.md` is a tool-specific entry point but shall point to a provider-neutral
+  reviewer role and must not imply exclusive authority.
+- AGENTS.md's ChatGPT read-only clause is a capability/permission ceiling, not a
+  permanent planner/reviewer assignment; T00 shall preserve that boundary while making
+  the role model explicit.
+- `docs/templates/technical-approval-request.md` is already limited to historical/EHR
+  human review, `technical-steward-appointment.md` and bootstrap references are immutable
+  history, and the validator's “exact-SHA Claude Code” marker protects VOC-004 historical
+  evidence. These are inspect-and-preserve surfaces, not active vendor authority.
+- DOC-15's unreconciled historical provider examples stay governed by its active
+  provider-neutral amendment and §17; T00 updates only active/current wording and
+  preserves its decision register history.
+
+Historical change packages, archived documents, transition evidence, and generated
+visual records remain immutable.
 
 ## Evaluator and CI/CD
 
@@ -84,12 +102,16 @@ proportionate.
   Mitigation: update active policy only and preserve immutable history.
 - `VOC-082-RISK-05`: a clarification silently changes merge evaluator semantics.
   Mitigation: byte-for-byte protected file inventory and a separate-issue stop rule.
+- `VOC-082-RISK-06`: an unchecked activation item retains named-vendor identities after
+  higher-level docs become neutral. Mitigation: make the post-merge checklist an
+  explicit T00 surface and test all unchecked current requirements.
 
 ## Rollback and contingency
 
 Each implementation task is independently revertible. Reverse T01 then T00 in a
 disposable worktree, run governance validation/classification/diff checks after each
 revert, and confirm the exact adopted base tree. A rollback restores the prior ambiguity
-but does not affect GitHub settings, merged history, runtime, data, Cloudflare, or a
-live system. If semantic consensus cannot be reached, do not adopt or implement; keep
-issue #109 open and continue under the pre-VOC-082 text.
+including the checklist's Codex/Claude identity item, but does not affect GitHub
+settings, merged history, runtime, data, Cloudflare, or a live system. If semantic
+consensus cannot be reached, do not adopt or implement; keep issue #109 open and
+continue under the pre-VOC-082 text.

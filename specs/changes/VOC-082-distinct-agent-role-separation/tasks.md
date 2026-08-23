@@ -9,12 +9,14 @@
 - Status: blocked-pending-plan-adoption
 
 Create ADR-0005 and update DOC-15, DOC-16, governance indexes/guidance, AGENTS.md,
-CONTRIBUTING.md, CLAUDE.md, `.github` guidance/template, DOC-10, the external Ruflo
-runbook, ADR-0004 cross-reference, decisions index, and active evidence/change-package
-templates. Define role/actor/provenance, include valid separately instantiated AI-agent
-and invalid same-actor examples, preserve scoped cross-model evidence requirements,
-and keep action-specific authority separate. Preserve history and make no executable
-workflow/evaluator change.
+the post-merge activation checklist, CONTRIBUTING.md, CLAUDE.md, `.github` guidance/
+template, DOC-10, the external Ruflo runbook, ADR-0004 cross-reference, decisions index,
+and active evidence/change-package templates. Replace the checklist's active
+Codex/Claude identity requirement and other active vendor-owned task examples with
+distinct actor/role wording. Define role/actor/provenance, include valid separately
+instantiated AI-agent and invalid same-actor examples, preserve scoped cross-model
+evidence requirements, and keep action-specific authority separate. Preserve
+historical/EHR/tool-specific records and make no executable workflow/evaluator change.
 
 ## VOC-082-T01 — Add fail-closed clarification evidence and final verification
 

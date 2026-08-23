@@ -73,9 +73,12 @@ also show that the same actor relabeled into another role is invalid.
 
 ### VOC-082-R03 — Model/provider neutrality with defense in depth
 
-Active guidance shall say that using another model or provider is allowed operational
-hardening but does not grant approval, merge, legal, financial, production, or release
-authority. It shall preserve any explicitly applicable cross-model verification
+Active guidance—including the unchecked identity-configuration items in
+`docs/governance/post-merge-activation-checklist.md`—shall say that using another model
+or provider is allowed operational hardening but does not grant approval, merge, legal,
+financial, production, or release authority. The checklist shall request distinct,
+least-privilege implementer and independent-verifier actors rather than Codex and Claude
+Code identities. It shall preserve any explicitly applicable cross-model verification
 requirement as an evidence control under the pre-change rules and describe local
 orchestrator conventions as local execution policy, not canonical authority.
 
@@ -89,10 +92,14 @@ irreversible-mutation, or launch authority hold.
 
 ### VOC-082-R05 — Provider-neutral templates and examples
 
-Contributor, pull-request, verification-report, change-package, and external Ruflo
-guidance shall use role/actor terminology. Historical vendor-specific evidence may stay
-historical. The active eligible/blocked R4 fixtures shall demonstrate that an AI
-reviewer identity is valid without changing their logical outcomes.
+Contributor, pull-request, verification-report, change-package, post-merge activation,
+and external Ruflo guidance shall use role/actor terminology. Active task examples such
+as DOC-10 and the change-specification template shall not assign implementation to a
+permanent vendor. Historical vendor-specific evidence, the tool-specific `CLAUDE.md`
+entry point, the explicitly bounded ChatGPT read-only rule, and the EHR-only qualified-
+human template may stay when accurately classified and linked to provider-neutral
+canonical authority. The active eligible/blocked R4 fixtures shall demonstrate that an
+AI reviewer identity is valid without changing their logical outcomes.
 
 ### VOC-082-R06 — Evaluator semantics stay unchanged
 

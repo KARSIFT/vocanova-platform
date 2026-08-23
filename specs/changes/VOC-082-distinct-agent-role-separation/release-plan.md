@@ -21,6 +21,8 @@ Cloudflare, DNS, secret, production-data, spending, or launch action is authoriz
 
 - wording permits the same actor to relabel and self-review;
 - wording makes a human, model, provider, or orchestrator the source of authority;
+- an active or unchecked activation requirement hard-codes Codex, Claude Code, or
+  another vendor as the required implementer/reviewer identity;
 - a scoped cross-model evidence control is removed or misrepresented;
 - a builder may approve or merge its own revision;
 - reviewer edits do not require fresh independent review;
@@ -33,8 +35,9 @@ Cloudflare, DNS, secret, production-data, spending, or launch action is authoriz
 
 Revert T01 then T00 in a disposable worktree and validate each predecessor. Rollback
 removes documentation, template, synthetic-label, and policy-test clarification only.
-It does not revoke historical evidence or touch settings, branches with open PRs,
-runtime, data, Cloudflare, or live systems.
+It restores the prior named-vendor checklist wording along with the other documented
+ambiguity; it does not revoke historical evidence or touch settings, branches with open
+PRs, runtime, data, Cloudflare, or live systems.
 
 ## Closure evidence
 

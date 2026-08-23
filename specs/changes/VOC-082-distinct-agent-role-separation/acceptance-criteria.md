@@ -35,7 +35,9 @@ merge.
 
 All active guidance says different model/provider selection may harden independence
 but does not create authority. Any narrower explicit cross-model evidence rule remains
-intact and is described as an evidence control, not a vendor assignment.
+intact and is described as an evidence control, not a vendor assignment. The active
+post-merge activation checklist requests distinct least-privilege implementer and
+independent-verifier actors without requiring Codex or Claude Code identities.
 
 ## VOC-082-AC-03 — Self-review and material-correction rules remain fail-closed
 
@@ -58,9 +60,10 @@ reviewer.
 - Evidence: EV-02
 - Result: pending
 
-Contributor and evidence templates record actor/role, exact SHA, verdict, resolved
-findings, authorship independence, and optional runtime provenance. They state that
-technical review and merge eligibility cannot substitute for an action-specific hold.
+Contributor, activation-checklist, and evidence templates record actor/role, exact SHA,
+verdict, resolved findings, authorship independence, and optional runtime provenance.
+They state that technical review and merge eligibility cannot substitute for an action-
+specific hold.
 
 ## VOC-082-AC-05 — Evaluator behavior and workflow inventory do not change
 

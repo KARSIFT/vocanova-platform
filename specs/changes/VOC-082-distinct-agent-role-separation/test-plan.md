@@ -5,9 +5,13 @@
 - Covers: AC-00
 - Procedure: inventory active governance, contributor, reviewer, template, decision,
   and runbook surfaces; compare terminology, links, metadata versions, protected paths,
-  and amendment history; explicitly classify historical/exception-only files.
+  unchecked activation requirements, and amendment history. Scan named-provider role
+  occurrences and explicitly classify each as reconcile-active, compatible tool/
+  permission boundary, or historical/exception-only preservation.
 - Expected: active policy has one compatible actor/role/provenance contract; historical
-  evidence remains unchanged and no affected active surface is omitted.
+  evidence remains unchanged; the post-merge checklist, DOC-10 task-size example, and
+  change-specification owner example are reconciled; and no affected active surface is
+  omitted.
 - Evidence: EV-00.
 
 ## VOC-082-TEST-01 — Valid and invalid role examples
@@ -16,7 +20,7 @@
 - Procedure: inspect canonical worked examples and synthesize (a) separate AI planner,
   builder, reviewer, and non-author merge actor; (b) same-actor role relabeling; (c) a
   reviewer material edit followed by self-verdict; and (d) human-only or vendor-only
-  review wording.
+  review wording, including the pre-VOC-082 Codex/Claude activation-checklist item.
 - Expected: (a) is allowed when all ordinary evidence/permission gates pass; (b)-(d)
   are rejected or corrected, and explicit applicable cross-model controls remain.
 - Evidence: EV-01.
@@ -24,10 +28,11 @@
 ## VOC-082-TEST-02 — Evidence and authority template audit
 
 - Covers: AC-02, AC-04
-- Procedure: fill the PR, change-specification, verification-report, and package
-  templates with synthetic non-sensitive actor identities; verify exact SHA, role,
-  authorship independence, verdict, blocking findings, optional runtime provenance,
-  and action-authority fields cannot be conflated.
+- Procedure: fill the PR, post-merge activation checklist, change-specification,
+  verification-report, and package templates with synthetic non-sensitive actor
+  identities; verify exact SHA, role, authorship independence, verdict, blocking
+  findings, least privilege, optional runtime provenance, and action-authority fields
+  cannot be conflated.
 - Expected: an AI reviewer is valid; model/provider metadata supplies no authority; a
   passing review cannot clear an unsatisfied external-effect hold.
 - Evidence: EV-02.
@@ -48,7 +53,8 @@
 - Procedure: compare the implementation with its adopted base and verify no diff in
   `evaluator.py`, `github_adapter.py`, `schema-v1.json`, `.github/workflows/`, action
   permissions, package schemas, or application/runtime paths. Run risk classification,
-  YAML/JSON parsing, exact four-workflow inventory, and hosted path-applicable checks.
+  YAML/JSON parsing, exact four-workflow inventory, a final active named-provider scan,
+  and hosted path-applicable checks.
 - Expected: only approved docs/templates/foundation-policy/fixture-label paths change;
   four deterministic workflows remain and no write/deploy job runs.
 - Evidence: EV-04.

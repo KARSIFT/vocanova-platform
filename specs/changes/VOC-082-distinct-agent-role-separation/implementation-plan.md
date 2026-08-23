@@ -12,10 +12,11 @@ self-modification rule.
 ## Sequence
 
 1. **T00 — Canonical policy and operational guidance.** Create ADR-0005 and reconcile
-   active authority, contributor, reviewer, template, and Ruflo documentation. Add one
-   valid AI-only worked example and one invalid same-actor relabeling example. Update
-   DOC-15/DOC-16 versions and DOC-16 amendment history without rewriting historical
-   evidence.
+   active authority, post-merge activation, contributor, reviewer, template, and Ruflo
+   documentation. Replace the checklist's Codex/Claude identity requirement with
+   distinct least-privilege implementer/verifier actors. Add one valid AI-only worked
+   example and one invalid same-actor relabeling example. Update DOC-15/DOC-16 versions
+   and DOC-16 amendment history without rewriting historical evidence.
 2. **T01 — Deterministic guard and final evidence.** Add narrow foundation-validation
    invariants and negative fixtures, neutralize the synthetic merge-eligibility actor
    labels, prove evaluator/workflow byte identity, run full governance checks, obtain
@@ -28,10 +29,16 @@ clarification, absent-approved-to-create, or historical-preserve:
 
 - `ADR-0005` is absent and approved to create only after package adoption.
 - Active governance/contributor/template/runbook files need compatible clarification.
+- The post-merge activation checklist's unchecked Codex/Claude identity requirement,
+  DOC-10's Codex sizing example, and the change-specification template's Codex owner
+  example are present-needs-reconciliation active guidance.
+- `CLAUDE.md` remains a tool-specific entry point with no exclusive reviewer authority;
+  the AGENTS.md ChatGPT clause remains a scoped read-only permission boundary.
 - ADR-0004 may receive a non-semantic cross-reference/clarification; its accepted
   Cloudflare/Ruflo decision and evidence remain unchanged.
-- `docs/templates/technical-approval-request.md`, historical packages, archived docs,
-  transition records, and evidence artifacts are inspect-and-preserve surfaces.
+- `docs/templates/technical-approval-request.md`, the technical-steward appointment,
+  historical bootstrap/vendor markers, historical packages, archived docs, transition
+  records, and evidence artifacts are inspect-and-preserve surfaces.
 
 ## Canonical wording contract
 

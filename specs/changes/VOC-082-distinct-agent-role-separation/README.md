@@ -23,8 +23,16 @@ an actor, and an optional model/provider choice explicit enough.
 - Reviewer evidence remains distinct from action-specific authority for contracts,
   spending, secrets or personal-data disclosure, production access, irreversible
   external mutations, and initial public or predefined major launches.
+- The active post-merge activation checklist requests distinct least-privilege
+  implementer and verifier actors without hard-coding Codex or Claude Code as the
+  required identities; any scoped cross-model control remains evidence hardening.
 - The merge-eligibility evaluator remains read-only and semantically unchanged; the
   clarification does not create an executor or hosted identity guarantee.
+
+The first independent review of exact SHA
+`5db667afb47987d9343f78975e3d5cacb03dd3dc` failed because the active post-merge
+activation checklist was missing from the planned inventory. That FAIL remains
+historical evidence. This amended draft is pending fresh exact-SHA review.
 
 ## Authority boundary
 

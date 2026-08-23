@@ -32,8 +32,12 @@ approvals:
   issue_intake:
     status: recorded-for-planning
     evidence: https://github.com/KARSIFT/vocanova-platform/issues/109
+  prior_package_independent_verification:
+    status: fail-blocking-omitted-active-governance-surface
+    candidate_sha: 5db667afb47987d9343f78975e3d5cacb03dd3dc
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385195955
   package_independent_verification:
-    status: pending
+    status: pending-fresh-exact-sha-after-remediation
     candidate_sha: null
     evidence: null
 approval_status: not-approved
@@ -88,6 +92,7 @@ affected_areas:
   - docs/governance/approval-matrix.md
   - docs/governance/change-risk-classification.md
   - docs/governance/protected-areas.md
+  - docs/governance/post-merge-activation-checklist.md
   - docs/governance/repository-settings.md
   - docs/decisions/ADR-0004-external-ruflo-orchestration.md
   - docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md
@@ -128,5 +133,5 @@ production_data_access: held-by-VOC-080-HOLD-02
 autonomous_production_release: disabled
 ehr: not-triggered
 blocking_reasons:
-  - exact plan candidate has not received independent review
+  - remediated exact plan candidate has not received fresh independent review
   - package has not been adopted
