@@ -12,6 +12,7 @@ import {
   LOCAL_D1_PATHS,
   runLocalD1Migrations,
 } from "../../apps/api-worker/scripts/local-d1-init.mjs";
+import { assertCleanWorkerdOutput } from "../../apps/web/scripts/test-workerd.mjs";
 import { LOCAL_DEVELOPMENT_CONTRACT } from "./local-development-policy.mjs";
 import {
   READINESS_TIMEOUT_MS,
@@ -461,6 +462,13 @@ export async function runLocalStackCycle(
     evidence = await probeImpl(fetchImpl);
   } finally {
     await children.stopAll("SIGTERM");
+  }
+  for (const record of children.records) {
+    assertCleanWorkerdOutput(
+      `${record.label} local-stack smoke`,
+      record.output ?? "",
+      record.diagnostics ?? [],
+    );
   }
   if (children.records.some((record) => !record.settled)) {
     throw new Error("A local-stack child survived bounded shutdown");

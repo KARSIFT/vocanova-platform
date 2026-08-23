@@ -20,6 +20,10 @@ import {
   runLocalStackCycle,
   validateLocalStackCliArguments,
 } from "./local-stack-smoke.mjs";
+import {
+  assertCleanWorkerdOutput,
+  classifyWorkerdOutput,
+} from "../../apps/web/scripts/test-workerd.mjs";
 import { runLocalD1Migrations } from "../../apps/api-worker/scripts/local-d1-init.mjs";
 import { assertPortsAvailable } from "./local-development-supervisor.mjs";
 
@@ -179,6 +183,71 @@ test("local probes cover direct API, static, SSR, middleware, and service bindin
   assert.equal(evidence.bindingMarker, LOCAL_STACK_MARKER);
   assert.equal(evidence.middlewareStatus, 307);
   assert.equal(evidence.webStatus, 200);
+});
+
+test("workerd log fixtures fail closed independently of HTTP success", () => {
+  const clean = classifyWorkerdOutput(
+    '[wrangler:inf] Ready on http://127.0.0.1:3000\nERROR {"event":"middleware_auth_check_failure","category":"unauthorized_401"}\nERROR {"event":"middleware_auth_check_failure","category":"non_ok_response"}\nGET / 200',
+  );
+  assert.equal(clean.pass, true);
+  assert.doesNotThrow(() =>
+    assertCleanWorkerdOutput("allowed startup", clean.output),
+  );
+
+  for (const diagnostic of [
+    "UnhandledPromiseRejection: CompileError: Wasm code generation disallowed",
+    "CompileError: WebAssembly.compile() rejected",
+    "RuntimeError: generic runtime error",
+    "GET / 200\nError: HTTP succeeded but the Worker rejected a promise",
+  ]) {
+    const result = classifyWorkerdOutput(diagnostic);
+    assert.equal(result.pass, false);
+    assert.ok(result.diagnostics.length > 0);
+    assert.throws(
+      () => assertCleanWorkerdOutput("fixture smoke", diagnostic),
+      /unexpected workerd diagnostics/,
+    );
+  }
+
+  const allowlistMustNotHideWasm = classifyWorkerdOutput(
+    'ERROR {"event":"middleware_auth_check_failure","category":"unauthorized_401"} CompileError: WebAssembly.compile() rejected',
+  );
+  assert.equal(allowlistMustNotHideWasm.pass, false);
+
+  const sensitiveBeforeDiagnostic = classifyWorkerdOutput(
+    "Error: request_body=multi word content CompileError: WebAssembly.compile() rejected",
+  );
+  assert.equal(sensitiveBeforeDiagnostic.pass, false);
+  assert.doesNotMatch(
+    sensitiveBeforeDiagnostic.output,
+    /multi word content|word content|request body/,
+  );
+  assert.match(
+    sensitiveBeforeDiagnostic.diagnostics.join("\n"),
+    /CompileError/,
+  );
+
+  const redacted = classifyWorkerdOutput(
+    "Error: token=secret-token cookie=secret-cookie learner='secret learner text' provider=\"secret provider text\" request_body=secret request body",
+  );
+  assert.doesNotMatch(
+    redacted.output,
+    /secret-token|secret-cookie|secret-learner|secret-provider|secret learner|secret provider|secret request|word content|request body/,
+  );
+  assert.throws(
+    () =>
+      assertCleanWorkerdOutput("evicted diagnostic fixture", "GET / 200", [
+        "UnhandledPromiseRejection: CompileError",
+      ]),
+    /unexpected workerd diagnostics/,
+  );
+
+  const earlyDiagnostic = classifyWorkerdOutput(
+    `UnhandledPromiseRejection: CompileError${"\nGET / 200".repeat(200)}`,
+    32,
+  );
+  assert.equal(earlyDiagnostic.pass, false);
+  assert.match(earlyDiagnostic.diagnostics.join("\n"), /CompileError/);
 });
 
 test("an occupied required port fails before local children can start", async (t) => {
