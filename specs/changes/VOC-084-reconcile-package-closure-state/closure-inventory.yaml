@@ -705,6 +705,10 @@ tasks:
       security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32637819859
       quality: not-applicable-path-filter
       failure_history:
+        - revision: aa63cd6811c42b1ac02327fe64b6fdd44bce1235
+          result: fail
+          reason: normalized-exact-review-evidence-not-yet-attached-read-only-eligibility-failed-closed
+          evidence: https://github.com/KARSIFT/vocanova-platform/actions/runs/32637325844
         - {
             result: fail,
             reason: missing-exact-risk-declaration,
@@ -955,6 +959,7 @@ file_classifications:
       path: specs/changes/VOC-082-distinct-agent-role-separation/final-evidence.md,
       classification: historical,
       basis: immutable-candidate-and-integration-evidence,
+      reconciliation_required: VOC-084-T02-explicitly-label-superseded-integration-pending-wording,
     }
   - {
       path: specs/changes/VOC-082-distinct-agent-role-separation/impact-analysis.md,
