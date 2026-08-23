@@ -34,13 +34,18 @@ FAIL_VERDICT = re.compile(
     re.IGNORECASE | re.MULTILINE,
 )
 BASE_REQUIRED_CHECKS = (
-    "validate",
+    "foundation",
+    "packages",
+    "web",
+    "api",
+    "ci required",
     "structure",
     "changed-path risk",
     "dependency audit",
     "secret scan",
+    "security required",
 )
-QUALITY_REQUIRED_CHECKS = ("accessibility", "lighthouse")
+QUALITY_REQUIRED_CHECKS = ("accessibility", "lighthouse", "quality required")
 RISK_RANK = {f"R{level}": level for level in range(5)}
 
 
@@ -318,12 +323,14 @@ def _needs_quality(filename: Any) -> bool:
     return (
         filename.startswith("apps/web/")
         or filename.startswith("packages/")
+        or filename.startswith(".github/actions/setup-toolchain/")
         or filename
         in {
             "package.json",
             "pnpm-lock.yaml",
             "pnpm-workspace.yaml",
             ".github/workflows/quality.yml",
+            "scripts/foundation/require-successful-jobs.sh",
         }
     )
 

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -9,6 +10,7 @@ import {
   RETIRED_SERVER_WORKFLOWS,
   TARGET_WORKFLOWS,
   inspectCommonWorkflowPolicy,
+  inspectSetupAction,
   inspectTargetWorkflow,
   validateWorkflowDirectory,
 } from "./workflow-policy.mjs";
@@ -20,6 +22,24 @@ test("the target workflows pass after external control-plane retirement", () => 
   assert.deepEqual(
     validateWorkflowDirectory(workflowDirectory, "additive"),
     [],
+  );
+});
+
+test("the shared toolchain action is pinned and cache-safe", () => {
+  const source = readFileSync(
+    resolve(repositoryRoot, ".github/actions/setup-toolchain/action.yml"),
+    "utf8",
+  );
+  assert.deepEqual(inspectSetupAction(source), []);
+  assert.ok(
+    inspectSetupAction(source.replace("cache: true", "cache: false")).some(
+      (error) => error.includes("pnpm/action-setup"),
+    ),
+  );
+  assert.ok(
+    inspectSetupAction(`${source}\n# cache node_modules\n`).some((error) =>
+      error.includes("node_modules"),
+    ),
   );
 });
 
@@ -117,12 +137,33 @@ test("target contract rejects removal of deterministic CI commands", () => {
   const source = readFileSync(
     resolve(workflowDirectory, "ci.yml"),
     "utf8",
-  ).replace("pnpm install --frozen-lockfile", "pnpm install");
+  ).replace("pnpm run ci:web", "pnpm run lint:web");
   assert.ok(
     inspectTargetWorkflow("ci.yml", source).some((error) =>
-      error.includes("pnpm install --frozen-lockfile"),
+      error.includes("pnpm run ci:web"),
     ),
   );
+});
+
+test("required-job aggregation blocks a synthetic subsystem failure", () => {
+  const script = resolve(
+    repositoryRoot,
+    "scripts/foundation/require-successful-jobs.sh",
+  );
+  const passing = spawnSync(
+    "bash",
+    [script, "foundation=success", "web=success"],
+    { encoding: "utf8" },
+  );
+  assert.equal(passing.status, 0, passing.stderr);
+
+  const blocked = spawnSync(
+    "bash",
+    [script, "foundation=success", "web=failure"],
+    { encoding: "utf8" },
+  );
+  assert.equal(blocked.status, 1);
+  assert.match(blocked.stderr, /required jobs did not succeed/);
 });
 
 test("final phase accepts the repository inventory after duplicate removal", () => {

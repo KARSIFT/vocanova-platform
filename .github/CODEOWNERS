@@ -8,6 +8,7 @@
 # determined by the risk classifier and semantic independent review.
 /.github/CODEOWNERS                         @m-e-h-r-d-a-a-d
 /.github/approved-policy/                   @m-e-h-r-d-a-a-d
+/.github/actions/                           @m-e-h-r-d-a-a-d
 /.github/pull_request_template.md           @m-e-h-r-d-a-a-d
 /.github/workflows/                        @m-e-h-r-d-a-a-d
 /CONTRIBUTING.md                           @m-e-h-r-d-a-a-d

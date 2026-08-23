@@ -18,19 +18,43 @@ inspect, stop, or mutate any existing server.
 
 VOC-080 selects Cloudflare Workers/D1 as the target and external Ruflo as optional
 coordination. T00 changes documentation only: it does not mutate GitHub settings,
-create Cloudflare resources, install Ruflo, configure secrets, or deploy. T01 will
-propose only supported GitHub hardening with an immediate settings-record update;
+create Cloudflare resources, install Ruflo, configure secrets, or deploy. T01 applies
+only supported GitHub hardening with the immediate settings record below;
 T10 may add held Cloudflare delivery after parity. Ruflo never receives a GitHub write
 token, Cloudflare credential, production secret/data, DNS permission, or deployment
 authority.
+
+## Hosted state recorded by VOC-080-T01
+
+The following supported repository settings were read, hardened, and read back through
+the GitHub API on 2026-08-22. This is hosted state, not a claim that unsupported
+controls exist:
+
+| Setting                         | Before T01                                                          | Recorded T01 state                                                                                           |
+| ------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Default `GITHUB_TOKEN`          | `write`                                                             | `read`; pull-request approval permission remains disabled                                                    |
+| Allowed Actions                 | all actions; immutable-SHA policy disabled                          | GitHub-owned actions plus `pnpm/action-setup@*` and `trufflesecurity/trufflehog@*`; full-SHA policy required |
+| Merge methods                   | merge commit, squash, and rebase enabled                            | merge commit and squash enabled; rebase disabled; automatic merge disabled                                   |
+| Branch deletion                 | automatic deletion disabled                                         | unchanged while the governed VOC-080 stack has dependent branch bases                                        |
+| Dependabot vulnerability alerts | disabled                                                            | enabled; automated security-fix PRs remain disabled                                                          |
+| Branch protection/rulesets      | API returned GitHub Free private-repository `403`                   | unavailable; the desired controls below remain policy, not hosted enforcement                                |
+| Environment state               | historical `production` environment exists with no protection rules | unchanged; T01 did not read environment secrets or mutate any environment                                    |
+
+The selected-action allowlist is intentionally small. Repository-local composite
+actions remain usable, GitHub-owned setup/check-out/artifact actions are allowed, and
+the two named third-party actions cover pinned pnpm setup and secret scanning. The
+separate full-SHA policy prevents those wildcard repository allowlist entries from
+authorizing floating refs. T01 made no Cloudflare, DNS, deployment, environment,
+secret, production-data, or server change.
 
 ## GitHub rulesets
 
 Configure `develop`:
 
 - require pull requests and block direct pushes, force pushes, and branch deletion;
-- require `Governance / structure`, `Governance / changed-path risk`, and every
-  applicable deterministic CI, Quality, and Security check;
+- require `CI / ci required`, `Security / security required`, `Governance / structure`,
+  `Governance / changed-path risk`, `Governance / merge eligibility`, and the
+  path-applicable `Quality / quality required` check;
 - require deterministic CI/governance/quality/security checks when the GitHub plan
   supports private-repository rulesets;
 - require conversation resolution and dismiss stale approvals;
@@ -97,6 +121,14 @@ Enable repository security settings when available:
 - private vulnerability reporting;
 - Actions restricted to reviewed, immutable action SHAs; and
 - minimal default workflow token permissions.
+
+Of this list, T01 has enabled Dependabot vulnerability alerts, full-SHA Actions
+enforcement, a selected-action allowlist, and minimal default workflow-token
+permissions. Secret scanning/push protection and private vulnerability reporting are
+not claimed because the API did not expose an enabled supported control for this
+private GitHub Free repository. Automated Dependabot security-fix PRs remain disabled
+to avoid creating an unreviewed path around the governed package workflow; the
+checked-in weekly dependency-update configuration continues to target `develop`.
 
 The verified human repository identity `@m-e-h-r-d-a-a-d` is formally recorded as
 founder and as the historical pre-A-003 qualified human technical steward in

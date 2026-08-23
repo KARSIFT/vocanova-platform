@@ -137,7 +137,10 @@ runner to `ubuntu-24.04`, whose hosted image already provides the
 browser system libraries. It therefore runs `playwright install
 chromium` without `--with-deps`, avoiding an unnecessary apt-mirror
 dependency while still downloading the browser revision selected by
-the locked Playwright package. Local machines may still need the
+the locked Playwright package. VOC-080-T01 reuses the repository's local
+toolchain action and a correctness-neutral pnpm-store cache, then reports the
+Lighthouse and accessibility outcomes through the stable `Quality / quality required`
+aggregate. Local machines may still need the
 `--with-deps` bootstrap command above.
 
 ## Layout

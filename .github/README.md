@@ -7,12 +7,19 @@ This directory contains repository contribution and governance controls:
 - `ISSUE_TEMPLATE/` provides governed change intake and private security routing.
 - `CODEOWNERS` uses the verified human repository identity for review routing. It is
   not approval evidence and does not create a standing post-A-003 authority.
-- `workflows/ci.yml` runs the repository's deterministic validation command.
+- `actions/setup-toolchain/action.yml` is the shared pinned Node/pnpm/optional-Go
+  bootstrap. It installs the frozen dependency graph and caches only
+  correctness-neutral download stores.
+- `workflows/ci.yml` runs stable foundation, shared-package, web, and transitional
+  Go-API checks plus the single `CI / ci required` aggregate.
 - `workflows/governance.yml` validates repository structure, prevents a pull request
   from declaring a risk below its changed-path floor, and reports the read-only
   normalized merge-eligibility decision and concrete reasons.
-- `workflows/quality.yml` runs path-filtered accessibility and Lighthouse checks.
-- `workflows/security.yml` audits dependencies and scans changed history for secrets.
+- `workflows/quality.yml` runs path-filtered accessibility and Lighthouse checks plus
+  `Quality / quality required`.
+- `workflows/security.yml` audits dependencies, scans changed history for secrets,
+  proves the scanner's synthetic rejection contract, and publishes
+  `Security / security required`.
 
 ## VOC-078 transition
 
@@ -29,8 +36,13 @@ the five superseded standalone quality/governance workflows after their replacem
 jobs passed on real pull requests. The workflow inventory is now exactly the four files
 listed above.
 
-The four target workflows use read-only repository permissions and deterministic local
-commands. They do not call an AI model or write to GitHub. Requirements, human/agent
+The four target workflows use explicit Bash semantics, read-only repository
+permissions, immutable action SHAs, non-persisted checkout credentials, pinned runner
+images, timeouts, cancellation, bounded failure artifacts, and deterministic local
+commands. Subsystem jobs do not hide one another's results, while stable aggregate
+checks provide durable branch-protection names. The shared cache cannot change
+correctness: frozen installation and every validation command still execute. The
+workflows do not call an AI model or write to GitHub. Requirements, human/agent
 work, independent review, and merge decisions are recorded through ordinary issues,
 branches, pull requests, and comments. GitHub Free does not technically enforce private-
 repository branch protection, so policy and evidence must not be described as a hosted
@@ -64,7 +76,8 @@ unbuilt Control Plane remains superseded and archived under `docs/archive/`.
 
 The workflow inventory remains exactly four. T00 documents the Cloudflare target and
 external Ruflo boundary; it does not change workflow behavior or repository settings.
-Later tasks refactor CI first, then add credential-free OpenNext/Worker/D1 checks.
+T01 provides the refactored CI foundation; later tasks add credential-free
+OpenNext/Worker/D1 checks.
 Only `ci.yml` may eventually contain held Cloudflare version/deployment jobs, keeping
 the four-file invariant. Pull-request jobs never receive deployment credentials.
 

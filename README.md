@@ -1,9 +1,11 @@
 # Vocanova
 
 Vocanova is an AI-powered platform for practical English learning. It is maintained
-by KARSIFT as a pnpm and Go monorepo. The repository is public; see
-`docs/governance/repository-settings.md` for the security posture that implies
-(secret scanning/push protection enabled, no assumption of a private audience).
+by KARSIFT as a pnpm and Go monorepo. The repository is currently private on GitHub
+Free, but private visibility is not a data-security boundary. See
+`docs/governance/repository-settings.md` for the exact hosted posture: vulnerability
+alerts and pinned selected Actions are enabled, while branch rulesets and hosted
+secret-scanning/push-protection enforcement are not claimed.
 
 Its canonical roots are `apps/web`, `apps/api`, and the shared packages under `packages/`.
 Real, shipped product surfaces exist today - `apps/web` has working Home, Progress, and
@@ -31,4 +33,3 @@ bounded executable change packages. Documents 00–13 were migrated and adopted 
 (VOC-007/VOC-008); DOC-14 was deliberately reconciled but not adopted (see
 [docs/README.md](docs/README.md) for the full index and each document's actual status -
 that index, not this paragraph, is the source of truth for migration state going forward).
-

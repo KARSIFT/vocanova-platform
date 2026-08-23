@@ -127,9 +127,8 @@ harness this repository has ever had (`VOC-031-D00` confirmed
 the absence of Playwright, axe-core, and Lighthouse CI in the
 adopted base). The CI integration now lives in the accessibility
 job of `.github/workflows/quality.yml`, separate from `ci.yml` -
-the CI job runs `pnpm
-validate` directly (workspace, format, lint/vet, type, test,
-build), none of which install or invoke Playwright. Wiring the
+the CI workflow runs the same deterministic validation contract through stable
+foundation, package, web, and API subsystem jobs, none of which install or invoke Playwright. Wiring the
 e2e suite into that job would couple the entire pnpm validation
 chain to a multi-minute Playwright browser install and
 production build, regressing PR feedback time for changes
@@ -138,7 +137,7 @@ workflow keeps the cost local to PRs that touch
 `apps/web/**` or `apps/web/tests/**` (the `paths` filter) and
 keeps the rest of the validation chain's contract intact.
 
-The dedicated workflow's job time budget is **30 minutes**
+Each browser job has a **30 minute** time budget
 (timeout-minutes), which covers:
 
 - pnpm install against the frozen lockfile: ~2 min
@@ -149,12 +148,11 @@ The dedicated workflow's job time budget is **30 minutes**
   ~1-3 min
 - teardown + report upload: ~30 s
 
-The first-time browser install is the largest unknown. It is
-**not** suppressed on cache miss: a CI run with a cached
-browser skips the install, but a clean-runner path always
-pays the full download cost. This is the same trade-off
-DOC-10 §7 "Level 2" already accepts for "selected Playwright"
-coverage.
+The first-time browser install is the largest unknown. The shared toolchain action
+caches only pnpm's content-addressed package store; it never caches `node_modules` or
+changes the frozen-install result. Playwright still verifies or downloads the browser
+revision selected by the lockfile on every clean runner. This is the same trade-off
+DOC-10 §7 "Level 2" already accepts for "selected Playwright" coverage.
 
 Browser version pinning: the replacement `quality.yml` workflow
 invokes `pnpm exec playwright install chromium` without specifying

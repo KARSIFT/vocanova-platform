@@ -3,19 +3,19 @@
 Protected areas create an R3 floor unless a more consequential R4 rule applies.
 Protection covers both current paths and equivalent future paths.
 
-| Area | Current or anticipated paths/change types | Required specialist concern |
-|---|---|---|
-| Authentication and authorization | `/apps/**/auth/`, `/packages/auth/`, middleware, sessions, roles, access policy | Security and authorization review |
-| Database schemas and migrations | `/packages/database/`, `/database/`, `/db/`, `/migrations/`, schema files | Data integrity, forward/backward compatibility, recovery |
-| Billing and payments | `/packages/billing/`, `/payments/`, checkout, invoices, webhooks | Financial correctness, authorization, idempotency |
-| Secrets and credentials | secret policy, environment bindings, token issuance, `.env` handling | Exposure prevention, rotation, least privilege |
-| Production infrastructure | `/infrastructure/`, `/infra/`, Cloudflare/Wrangler config, environment configuration | Deployment permissions, isolation, rollback |
-| AI provider configuration | `/packages/ai/`, provider clients, prompts used as controls, model routing, quotas | Privacy, cost, safety, evaluation |
-| Sensitive-data handling | personal data models, exports, deletion, retention, logs, analytics identifiers | Privacy, minimization, retention, access |
-| Audio and voice storage | recording upload, object storage, transcription inputs, retention/deletion | Consent, privacy, encryption, lifecycle |
-| Backup and recovery | backup schedules, restore scripts/runbooks, recovery objectives | Restore testing and evidence |
-| Deployment and rollback | `/.github/workflows/`, deploy scripts, release/rollback policy | Supply chain, permissions, environment gates |
-| Repository governance | `/.github/CODEOWNERS`, branch/ruleset policy, `/CONTRIBUTING.md`, `/SECURITY.md`, `/docs/governance/`, agent instructions | Independent policy and authority review |
+| Area                             | Current or anticipated paths/change types                                                                                 | Required specialist concern                              |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Authentication and authorization | `/apps/**/auth/`, `/packages/auth/`, middleware, sessions, roles, access policy                                           | Security and authorization review                        |
+| Database schemas and migrations  | `/packages/database/`, `/database/`, `/db/`, `/migrations/`, schema files                                                 | Data integrity, forward/backward compatibility, recovery |
+| Billing and payments             | `/packages/billing/`, `/payments/`, checkout, invoices, webhooks                                                          | Financial correctness, authorization, idempotency        |
+| Secrets and credentials          | secret policy, environment bindings, token issuance, `.env` handling                                                      | Exposure prevention, rotation, least privilege           |
+| Production infrastructure        | `/infrastructure/`, `/infra/`, Cloudflare/Wrangler config, environment configuration                                      | Deployment permissions, isolation, rollback              |
+| AI provider configuration        | `/packages/ai/`, provider clients, prompts used as controls, model routing, quotas                                        | Privacy, cost, safety, evaluation                        |
+| Sensitive-data handling          | personal data models, exports, deletion, retention, logs, analytics identifiers                                           | Privacy, minimization, retention, access                 |
+| Audio and voice storage          | recording upload, object storage, transcription inputs, retention/deletion                                                | Consent, privacy, encryption, lifecycle                  |
+| Backup and recovery              | backup schedules, restore scripts/runbooks, recovery objectives                                                           | Restore testing and evidence                             |
+| Deployment and rollback          | `/.github/actions/`, `/.github/workflows/`, deploy scripts, release/rollback policy                                       | Supply chain, permissions, environment gates             |
+| Repository governance            | `/.github/CODEOWNERS`, branch/ruleset policy, `/CONTRIBUTING.md`, `/SECURITY.md`, `/docs/governance/`, agent instructions | Independent policy and authority review                  |
 
 ## Semantic protection
 

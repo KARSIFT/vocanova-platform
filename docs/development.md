@@ -32,6 +32,25 @@ official Go toolchain distribution and no repository secret.
 | `pnpm format`       | Apply Prettier and `gofmt` formatting.                                          |
 | `pnpm audit`        | Fail when the pnpm production dependency graph has a high or critical advisory. |
 
+The full `pnpm validate` command remains the pre-review local gate. GitHub Actions
+uses the following stable subsystem entry points so a failure names the affected
+surface while preserving the same underlying scripts:
+
+| Command              | Hosted check surface                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------ |
+| `pnpm ci:foundation` | Workspace shape, formatting, shared-package prerequisite build, and foundation tests |
+| `pnpm ci:packages`   | Shared-package lint, typecheck, build, and API-client tests                          |
+| `pnpm ci:web`        | Shared prerequisite build plus web lint, typecheck, middleware tests, and build      |
+| `pnpm ci:api`        | Transitional Go API vet, tests, and build                                            |
+
+The commands intentionally overlap where a subsystem must prove its own prerequisites.
+The `CI / ci required` job succeeds only when every named subsystem succeeds. Quality and
+Security have equivalent stable `quality required` and `security required` aggregates. The shared
+`.github/actions/setup-toolchain` action reads the exact versions already declared in
+the repository, installs with the frozen lockfile, and caches only package-manager or
+Go download/build stores. Cache contents are an optimization: `node_modules` is never
+cached, and a miss cannot skip installation or validation.
+
 The audit policy permits moderate and low advisories to be reported without failing;
 all reported advisories remain visible and must be recorded in the pull request.
 
@@ -60,6 +79,8 @@ go test ./...
   bypass it with a non-frozen CI install; reconcile dependencies in an authorized
   change.
 - `pnpm validate` stops at the first failing child command and preserves its output.
+- A `ci:*` command is useful for reproducing one hosted subsystem, but it is not a
+  substitute for the full local gate when several surfaces changed.
 - Go may download `go1.26.5` on first use. A network failure is not a passing API
   check; restore official toolchain access and rerun it.
 - An agent/CI sandbox may have an unreachable internal `GOPROXY` (e.g. a private-network
