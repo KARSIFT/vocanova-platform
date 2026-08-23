@@ -2,6 +2,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { inspectDeliveryWorkflow } from "./cloudflare-delivery-policy.mjs";
+
 export const TARGET_WORKFLOWS = [
   "ci.yml",
   "governance.yml",
@@ -49,6 +51,13 @@ const SERVER_CAPABILITY_PATTERNS = [
   [/vocanova\.site/i, "remote vocanova endpoint"],
 ];
 
+const CI_HELD_DELIVERY_CAPABILITIES = new Set([
+  "scheduled/manual server trigger",
+  "staging/production service credential",
+  "deployment environment",
+  "Cloudflare mutation",
+]);
+
 const REQUIRED_MARKERS = {
   "ci.yml": [
     "./.github/actions/setup-toolchain",
@@ -57,6 +66,11 @@ const REQUIRED_MARKERS = {
     "pnpm run ci:web",
     "pnpm run ci:worker-api",
     "pnpm run ci:api",
+    "pnpm run ci:delivery",
+    "name: cloudflare delivery policy",
+    "name: cloudflare delivery gate",
+    "name: cloudflare staging",
+    "name: cloudflare production",
     "name: ci required",
     "scripts/foundation/require-successful-jobs.sh",
   ],
@@ -135,8 +149,14 @@ export function inspectCommonWorkflowPolicy(filename, source) {
   if (!/^defaults:\n  run:\n    shell: bash$/m.test(source)) {
     errors.push(`${filename}: run steps must use the explicit bash shell`);
   }
-  if (!/^concurrency:\n(?:  .+\n)+  cancel-in-progress: true$/m.test(source)) {
-    errors.push(`${filename}: cancel-in-progress concurrency is required`);
+  const expectedCancellation =
+    filename === "ci.yml"
+      ? "cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}"
+      : "cancel-in-progress: true";
+  if (!source.includes(expectedCancellation)) {
+    errors.push(
+      `${filename}: required concurrency cancellation policy is missing`,
+    );
   }
 
   errors.push(...inspectImmutableReferences(filename, source));
@@ -208,6 +228,9 @@ export function inspectTargetWorkflow(filename, source) {
       errors.push(`${filename}: missing required marker: ${marker}`);
     }
   }
+  if (filename === "ci.yml") {
+    errors.push(...inspectDeliveryWorkflow(source));
+  }
   return errors;
 }
 
@@ -248,6 +271,12 @@ export function validateWorkflowDirectory(directory, phase = "additive") {
       );
     }
     for (const [pattern, capability] of SERVER_CAPABILITY_PATTERNS) {
+      if (
+        filename === "ci.yml" &&
+        CI_HELD_DELIVERY_CAPABILITIES.has(capability)
+      ) {
+        continue;
+      }
       if (pattern.test(source)) {
         errors.push(`${filename}: prohibited server capability: ${capability}`);
       }

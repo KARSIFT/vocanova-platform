@@ -1629,7 +1629,7 @@ new implementation revision followed by complete checks and fresh independent re
 | Independently verify a plan or implementation        | Reviewer role with no write access to the reviewed revision                                                               |
 | Merge into `develop`                                 | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
 | Promote `develop` to `main`                          | Separately reviewed pull request; no current promotion workflow                                                           |
-| Deploy                                               | No current repository workflow; VOC-080-T10 may define held Cloudflare publication after parity                           |
+| Deploy                                               | T10 held manual Cloudflare state machine exists; current manifest blocks before environment jobs/secrets                   |
 
 Roles are responsibilities, not permanent vendors. The builder never approves or
 merges its own work, and a reviewer that authors a material correction becomes a
@@ -1724,17 +1724,18 @@ Claude release review supplements but does not replace founder approval.
 
 ## 19.1 Staging deployment
 
-No repository workflow currently deploys to staging. A merge into `develop` changes
-repository history only. VOC-078-T03 removed image publication, SSH deployment,
-migration execution, smoke testing, and remote health polling from GitHub Actions
-without changing runtime assets or inspecting/stopping a server. ADR-0003 selects
-Cloudflare Workers/D1; VOC-080-T10 must define the held replacement mechanism and evidence after parity.
+No repository workflow run is currently eligible to deploy to staging. A merge into
+`develop` changes repository history only. VOC-078-T03 removed image publication, SSH
+deployment, migration execution, smoke testing, and remote health polling without
+changing runtime assets or inspecting/stopping a server. T10 now defines the held
+Cloudflare replacement after parity: credential-free dry runs and mocked policy/smoke
+evidence pass, while its manifest blocks before environment jobs or secrets.
 
 ## 19.2 Production publication
 
-There is no current repository production-publication mechanism. `main` remains the
-production-history branch, but a push to it does not deploy. Any future publication
-flow requires VOC-080-T10, the applicable action hold, and at least:
+There is no currently eligible production publication. `main` remains the
+production-history branch, and a push to it does not deploy. T10's manual flow requires
+a separate activation change, the applicable action hold, and at least:
 
 ```text
 Release PR prepared
@@ -3023,7 +3024,8 @@ Successful merges into `develop` automatically deploy to staging.
 
 _Correction 2026-08-19: staging deployment was built and historically proven, then
 VOC-078-T03 removed its GitHub workflow. ADR-0003 now selects Cloudflare, but a merge to
-`develop` still does not deploy; VOC-080-T10 and `HOLD-00` are pending. See §17.
+`develop` still does not deploy; T10's held replacement exists, while `HOLD-00` and
+live activation remain pending. See §17.
 Preserved as historical record._
 
 ### DG5-10 — Protected production

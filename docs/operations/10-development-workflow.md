@@ -95,16 +95,17 @@ automatic merge, and production deployment are not technically active as of 2026
 [the A-003 transition state](../governance/a003-transition-state.yaml) rather than inferring
 activation from this topology.
 
-**Current operational note (2026-08-22):** VOC-078-T03 removed repository deployment
-and server-monitoring workflows. VOC-080 has now selected Cloudflare Workers and D1,
-but T00 does not provision or deploy them. `develop` and `main` remain integration and
-production-history branches; merging either branch has no live effect until T10's
-controls exist and the applicable VOC-080 action hold is separately completed.
+**Current operational note (2026-08-22):** VOC-078-T03 removed server deployment and
+monitoring workflows. VOC-080 selected Cloudflare Workers and D1, and T10 now supplies
+a held manual delivery state machine after parity. Its manifest blocks before
+environment jobs/secrets, so `develop` and `main` remain integration and
+production-history branches with no live effect until the applicable action hold and
+separate activation change complete.
 
 ```text
 feature/* ──PR──► develop ──release PR──► main
                     │                       │
-          Future Cloudflare staging  Production-history source
+          Held Cloudflare staging    Production-history source
 ```
 
 Task branches: `<type>/<issue-number>-<short-description>` (`feature/`, `fix/`, `hotfix/`,
@@ -138,8 +139,9 @@ remaining.
 contract/migration/e2e as applicable), security/authorization correct, migrations tested,
 OpenAPI/generated types synchronized, documentation updated, no secrets exposed, required review
 resolved, and merged through a PR. Staging/production deployment evidence is required only when an
-active, separately authorized Cloudflare delivery task provides that capability; it remains
-unavailable until VOC-080-T10 and the applicable hold are complete.
+active, separately authorized Cloudflare delivery task provides that capability. T10's
+mocked/held mechanism exists, but live evidence remains unavailable until the applicable hold and
+activation change complete.
 
 ## 6. Pull-request standards
 

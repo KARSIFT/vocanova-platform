@@ -1,0 +1,75 @@
+{
+  "schema_version": "vocanova-cloudflare-delivery-v1",
+  "status": "held",
+  "wrangler_version": "4.125.0",
+  "workflow": ".github/workflows/ci.yml",
+  "limits": {
+    "max_migrations_per_release": 20,
+    "max_smoke_attempts": 10,
+    "max_smoke_seconds": 300,
+    "max_api_gzip_bytes": 1048576,
+    "max_web_gzip_bytes": 3145728
+  },
+  "environments": {
+    "staging": {
+      "state": "held",
+      "hold_id": "VOC-080-HOLD-00",
+      "required_ref": "refs/heads/develop",
+      "github_environment": "cloudflare-staging",
+      "cost_ceiling_cents": 0,
+      "workers": {
+        "api": "vocanova-api-staging",
+        "web": "vocanova-web-staging"
+      },
+      "d1": {
+        "binding": "DB",
+        "database_name": "vocanova-staging",
+        "database_id": "held-staging-d1"
+      },
+      "secret_scopes": {
+        "github": "cloudflare-staging",
+        "api_worker": "vocanova-api-staging",
+        "web_worker": "vocanova-web-staging"
+      },
+      "routes": {
+        "api": "https://api-staging.invalid",
+        "web": "https://web-staging.invalid"
+      },
+      "authority_evidence_url": null,
+      "resource_manifest_evidence_url": null,
+      "rollback_rehearsal_url": null,
+      "authorization_expires_at": null
+    },
+    "production": {
+      "state": "held",
+      "hold_id": "VOC-080-HOLD-01",
+      "required_ref": "refs/heads/main",
+      "github_environment": "cloudflare-production",
+      "cost_ceiling_cents": 0,
+      "workers": {
+        "api": "vocanova-api-production",
+        "web": "vocanova-web-production"
+      },
+      "d1": {
+        "binding": "DB",
+        "database_name": "vocanova-production",
+        "database_id": "held-production-d1"
+      },
+      "secret_scopes": {
+        "github": "cloudflare-production",
+        "api_worker": "vocanova-api-production",
+        "web_worker": "vocanova-web-production"
+      },
+      "routes": {
+        "api": "https://api-production.invalid",
+        "web": "https://web-production.invalid"
+      },
+      "authority_evidence_url": null,
+      "resource_manifest_evidence_url": null,
+      "rollback_rehearsal_url": null,
+      "staging_evidence_url": null,
+      "backup_evidence_url": null,
+      "authorization_expires_at": null
+    }
+  }
+}

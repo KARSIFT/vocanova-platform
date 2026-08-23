@@ -91,8 +91,16 @@ forward D1 migration and 13 identity/account operations. Contract evidence now b
 method, path, operation ID, primary success status, parameters, and public field shape
 to the generated Go reference; workerd fixtures cover hashing, expiry, replay,
 requester isolation, CSRF, rate/kill switches, idempotency, and injected D1 failures.
-Only `ci.yml` may eventually contain held Cloudflare version/deployment jobs, keeping
-the four-file invariant. Pull-request jobs never receive deployment credentials.
+T06-T08 complete Worker contract/domain parity, and T09 adds synthetic-only
+PostgreSQL-to-D1 conversion and exact reconciliation. T10 keeps the four-file
+invariant and adds the held delivery state machine only to `ci.yml`: PR/push jobs
+dry-run local/staging/production configurations without credentials; a manual event
+must pass all CI plus the exact-SHA/action-hold gate before either named environment
+can read its own Cloudflare token. The committed manifest is held, uses non-resource
+D1 sentinels and `.invalid` routes, and therefore blocks every live environment job.
+No GitHub environment, secret, Cloudflare resource, migration, route, or deployment
+was created by T10. See the
+[delivery runbook](../docs/operations/cloudflare-delivery.md).
 
 Ruflo runs outside the repository and GitHub Actions. It may coordinate separate
 participants, but no issue/comment trigger, tracked launcher, workflow, or Ruflo tool
