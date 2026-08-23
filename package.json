@@ -10,6 +10,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter @vocanova/web dev",
+    "dev:init": "pnpm --filter @vocanova/api-worker run migrate:local",
     "validate": "pnpm run validate:workspace && pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
     "ci:foundation": "pnpm run validate:workspace && pnpm run format:check && pnpm run build:packages && pnpm run ci:retirement && pnpm run ci:final-evidence && node --test scripts/foundation/*.test.mjs",
     "ci:packages": "pnpm run lint:packages && pnpm run typecheck:packages && pnpm run build:packages && pnpm --filter @vocanova/api-client test",

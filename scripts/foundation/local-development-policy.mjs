@@ -24,6 +24,7 @@ export const LOCAL_DEVELOPMENT_CONTRACT = Object.freeze({
 
 const LOCAL_SOURCE_FILES = Object.freeze({
   apiIdentityFixture: "apps/api-worker/test/identity-parity.test.ts",
+  apiLocalD1Init: "apps/api-worker/scripts/local-d1-init.mjs",
   apiPackage: "apps/api-worker/package.json",
   apiTypes: "apps/api-worker/worker-configuration.d.ts",
   apiWrangler: "apps/api-worker/wrangler.jsonc",
@@ -100,9 +101,9 @@ export function validateLocalDevelopmentCommand(name, command) {
     for (const required of [
       "DB",
       "--local",
+      "--config",
+      "wrangler.jsonc",
       "--persist-to",
-      "--experimental-provision=false",
-      "--experimental-auto-create=false",
     ]) {
       if (!command.includes(required)) {
         errors.push(`${name}: local D1 migration must include ${required}`);
@@ -111,6 +112,11 @@ export function validateLocalDevelopmentCommand(name, command) {
     if (!command.includes(LOCAL_DEVELOPMENT_CONTRACT.developerStateDirectory)) {
       errors.push(
         `${name}: local D1 migration must use ${LOCAL_DEVELOPMENT_CONTRACT.developerStateDirectory}`,
+      );
+    }
+    if (/(?:^|\s)--env(?:=|\s)/i.test(command)) {
+      errors.push(
+        `${name}: local D1 migration must use the top-level local config without --env`,
       );
     }
   }
@@ -292,6 +298,38 @@ export function validateLocalDevelopmentSources(sources) {
     "apps/api-worker/package.json",
     errors,
   );
+  if (
+    rootScripts["dev:init"] !==
+    "pnpm --filter @vocanova/api-worker run migrate:local"
+  ) {
+    errors.push(
+      "dev:init must delegate to the API local migration entry point",
+    );
+  }
+  if (apiScripts["migrate:local"] !== "node scripts/local-d1-init.mjs") {
+    errors.push(
+      "api-worker:migrate:local must use the reviewed local D1 initializer",
+    );
+  }
+  for (const marker of [
+    'EXPECTED_WRANGLER_VERSION = "4.125.0"',
+    'LOCAL_D1_BINDING = "DB"',
+    '"migrations"',
+    '"apply"',
+    '"--local"',
+    '"--config"',
+    '"--persist-to"',
+    'WRANGLER_SEND_METRICS: "false"',
+    "delete environment[key]",
+    "validateLocalD1CliArguments(process.argv.slice(2))",
+  ]) {
+    requireLiteral(
+      errors,
+      sources.apiLocalD1Init,
+      marker,
+      "local D1 initializer",
+    );
+  }
   for (const [name, command] of Object.entries({
     dev: rootScripts.dev,
     "dev:init": rootScripts["dev:init"],
