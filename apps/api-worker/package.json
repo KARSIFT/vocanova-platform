@@ -14,6 +14,7 @@
     "dry-run:production": "wrangler deploy --dry-run --experimental-provision=false --experimental-auto-create=false --env production --outdir .wrangler/dry-run/production",
     "dry-run:staging": "wrangler deploy --dry-run --experimental-provision=false --experimental-auto-create=false --env staging --outdir .wrangler/dry-run/staging",
     "lint": "eslint src test scripts vitest.config.ts",
+    "migrate:local": "node scripts/local-d1-init.mjs",
     "openapi:check": "pnpm run build && node scripts/generate-openapi.mjs --check",
     "openapi:write": "pnpm run build && node scripts/generate-openapi.mjs --write",
     "safety:check": "node scripts/check-worker-safety.mjs",

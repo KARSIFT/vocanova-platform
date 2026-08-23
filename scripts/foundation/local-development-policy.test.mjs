@@ -17,6 +17,7 @@ const repositoryRoot = resolve(import.meta.dirname, "../..");
 function repositorySources() {
   const paths = {
     apiIdentityFixture: "apps/api-worker/test/identity-parity.test.ts",
+    apiLocalD1Init: "apps/api-worker/scripts/local-d1-init.mjs",
     apiPackage: "apps/api-worker/package.json",
     apiTypes: "apps/api-worker/worker-configuration.d.ts",
     apiWrangler: "apps/api-worker/wrangler.jsonc",
@@ -148,12 +149,60 @@ test("unsafe local commands and incomplete D1 initialization fail closed", () =>
     "wrangler d1 migrations apply DB --local",
   );
   for (const missing of [
+    "--config",
+    "wrangler.jsonc",
     "--persist-to",
-    "--experimental-provision=false",
-    "--experimental-auto-create=false",
     LOCAL_DEVELOPMENT_CONTRACT.developerStateDirectory,
   ]) {
     assert.ok(incomplete.some((error) => error.includes(missing)));
+  }
+
+  const wrongEnvironment = validateLocalDevelopmentCommand(
+    "dev:init",
+    "wrangler d1 migrations apply DB --local --config wrangler.jsonc --persist-to .wrangler/state/vocanova-local --env staging",
+  );
+  assert.ok(
+    wrongEnvironment.some((error) => error.includes("staging or production")),
+  );
+});
+
+test("local D1 scripts and policy markers cannot drift", () => {
+  const fixtures = [
+    [
+      "rootPackage",
+      '"dev:init": "pnpm --filter @vocanova/api-worker run migrate:local"',
+      '"dev:init": "wrangler d1 migrations apply DB --remote"',
+      "delegate to the API local migration",
+    ],
+    [
+      "apiPackage",
+      '"migrate:local": "node scripts/local-d1-init.mjs"',
+      '"migrate:local": "wrangler d1 migrations apply DB --remote"',
+      "reviewed local D1 initializer",
+    ],
+    ["apiLocalD1Init", '"--local"', '"--remote"', 'must equal "--local"'],
+    [
+      "apiLocalD1Init",
+      'WRANGLER_SEND_METRICS: "false"',
+      'WRANGLER_SEND_METRICS: "true"',
+      "WRANGLER_SEND_METRICS",
+    ],
+    [
+      "apiLocalD1Init",
+      "validateLocalD1CliArguments(process.argv.slice(2))",
+      "validateLocalD1CliArguments([])",
+      "process.argv.slice(2)",
+    ],
+  ];
+
+  for (const [name, before, after, expected] of fixtures) {
+    const errors = validateLocalDevelopmentSources(
+      mutatedSources(name, before, after),
+    );
+    assert.ok(
+      errors.some((error) => error.includes(expected)),
+      `${name} mutation reports ${expected}: ${errors.join("; ")}`,
+    );
   }
 });
 
