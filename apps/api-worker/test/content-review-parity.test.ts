@@ -342,6 +342,8 @@ describe("Worker content, learning, and review parity", () => {
       ["DELETE", `/api/v1/user-words/${MEANING_A}`],
       ["GET", "/api/v1/reviews/due"],
       ["POST", "/api/v1/reviews/submissions"],
+      ["GET", "/api/v1/daily-mission"],
+      ["GET", "/api/v1/progress"],
     ]) {
       const response = await app.request(
         `http://worker.test${path}`,
@@ -372,6 +374,11 @@ function review(overrides: Partial<ReviewSubmission>): ReviewSubmission {
 
 async function clearTables(): Promise<void> {
   for (const table of [
+    "grace_day_ledger",
+    "streak_states",
+    "confidence_point_ledger",
+    "daily_activity_summaries",
+    "daily_mission_snapshots",
     "review_attempts",
     "idempotency_keys",
     "user_words",

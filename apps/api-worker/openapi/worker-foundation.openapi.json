@@ -79,7 +79,7 @@
           },
           "migrationStatus": {
             "enum": [
-              "content-review-parity"
+              "missions-progress-parity"
             ],
             "type": "string"
           },
@@ -105,7 +105,7 @@
     }
   },
   "info": {
-    "description": "Operational Worker/D1 migration target. Identity, account, content, learning, and review endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
+    "description": "Operational Worker/D1 migration target. Identity, learner data, missions, gamification, and progress endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
     "title": "VocaNova Worker API migration target",
     "version": "0.1.0"
   },
@@ -530,6 +530,120 @@
         },
         "tags": [
           "Content and learning"
+        ]
+      }
+    },
+    "/api/v1/daily-mission": {
+      "get": {
+        "operationId": "GetDailyMission",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "completedAt": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "graceApplied": {
+                      "type": "boolean"
+                    },
+                    "localDate": {
+                      "format": "date",
+                      "type": "string"
+                    },
+                    "newWordsCompleted": {
+                      "type": "integer"
+                    },
+                    "newWordTarget": {
+                      "type": "integer"
+                    },
+                    "policyVersion": {
+                      "type": "string"
+                    },
+                    "reviewsCompleted": {
+                      "type": "integer"
+                    },
+                    "reviewTarget": {
+                      "type": "integer"
+                    },
+                    "sentencePracticesCompleted": {
+                      "type": "integer"
+                    },
+                    "sentencePracticeTarget": {
+                      "type": "integer"
+                    },
+                    "status": {
+                      "enum": [
+                        "open",
+                        "completed",
+                        "missed",
+                        "protected"
+                      ],
+                      "type": "string"
+                    },
+                    "streak": {
+                      "properties": {
+                        "currentStreakCount": {
+                          "type": "integer"
+                        },
+                        "graceDayBalance": {
+                          "type": "integer"
+                        },
+                        "longestStreakCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "enum": [
+                            "active",
+                            "at_risk",
+                            "broken"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "currentStreakCount",
+                        "longestStreakCount",
+                        "status",
+                        "graceDayBalance"
+                      ],
+                      "type": "object"
+                    },
+                    "timezone": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "localDate",
+                    "timezone",
+                    "reviewTarget",
+                    "reviewsCompleted",
+                    "policyVersion",
+                    "status",
+                    "graceApplied",
+                    "streak"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Today's daily mission projection"
+          }
+        },
+        "tags": [
+          "Missions"
         ]
       }
     },
@@ -985,6 +1099,93 @@
         },
         "tags": [
           "Identity and account"
+        ]
+      }
+    },
+    "/api/v1/progress": {
+      "get": {
+        "operationId": "GetProgress",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "timezone",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "completionHistory": {
+                      "items": {
+                        "properties": {
+                          "completed": {
+                            "type": "boolean"
+                          },
+                          "localDate": {
+                            "format": "date",
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "localDate",
+                          "completed"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "confidencePointsBalance": {
+                      "type": "integer"
+                    },
+                    "streak": {
+                      "properties": {
+                        "currentStreakCount": {
+                          "type": "integer"
+                        },
+                        "graceDayBalance": {
+                          "type": "integer"
+                        },
+                        "longestStreakCount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "enum": [
+                            "active",
+                            "at_risk",
+                            "broken"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "currentStreakCount",
+                        "longestStreakCount",
+                        "status",
+                        "graceDayBalance"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "confidencePointsBalance",
+                    "streak",
+                    "completionHistory"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Progress projection"
+          }
+        },
+        "tags": [
+          "Missions"
         ]
       }
     },

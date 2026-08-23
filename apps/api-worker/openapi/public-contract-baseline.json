@@ -130,6 +130,41 @@
     },
     {
       "method": "GET",
+      "operationId": "GetDailyMission",
+      "path": "/api/v1/daily-mission",
+      "successStatus": 200,
+      "parameters": [{ "in": "query", "name": "timezone", "required": false }],
+      "request": null,
+      "response": {
+        "properties": [
+          "completedAt",
+          "graceApplied",
+          "localDate",
+          "newWordTarget",
+          "newWordsCompleted",
+          "policyVersion",
+          "reviewTarget",
+          "reviewsCompleted",
+          "sentencePracticeTarget",
+          "sentencePracticesCompleted",
+          "status",
+          "streak",
+          "timezone"
+        ],
+        "required": [
+          "graceApplied",
+          "localDate",
+          "policyVersion",
+          "reviewTarget",
+          "reviewsCompleted",
+          "status",
+          "streak",
+          "timezone"
+        ]
+      }
+    },
+    {
+      "method": "GET",
       "operationId": "GetJourneySituation",
       "path": "/api/v1/journey-situations/{slug}",
       "successStatus": 200,
@@ -158,6 +193,22 @@
           "status"
         ],
         "required": ["status"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetProgress",
+      "path": "/api/v1/progress",
+      "successStatus": 200,
+      "parameters": [{ "in": "query", "name": "timezone", "required": false }],
+      "request": null,
+      "response": {
+        "properties": [
+          "completionHistory",
+          "confidencePointsBalance",
+          "streak"
+        ],
+        "required": ["completionHistory", "confidencePointsBalance", "streak"]
       }
     },
     {
