@@ -1,0 +1,120 @@
+schema_version: 1
+
+id: VOC-084
+slug: reconcile-package-closure-state
+title: Reconcile completed change-package closure state
+
+type: governance-evidence-reconciliation
+status: draft
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the package changes canonical lifecycle and acceptance evidence for four
+  completed packages, including the R4 Cloudflare architecture transition, and adds a
+  fail-closed repository validation contract. A false completion or false pending state
+  could misroute later planning or issue closure. It changes no runtime, authority model,
+  hosted setting, live resource, secret, production data, or deployment state.
+canonical_path: specs/changes/VOC-084-reconcile-package-closure-state
+base_branch: develop
+base_sha: d4078924ae6d0be52628973e84be51734d93a5a9
+target_branch: develop
+requirement_source: >-
+  GitHub issue #118, reporting that active VOC-080 through VOC-083 package records
+  contradict their merged exact-revision review, hosted, rollback, and post-merge evidence.
+requirement_approval_status: reported-defect-plan-candidate-not-yet-independently-reviewed
+
+owners:
+  decision: repository-governance-decision-owner-after-independent-plan-review
+  package_preparation: Codex planner role
+  implementation: separate role-selected builders after adoption
+  independent_verification: different non-author reviewer bound to each exact revision
+
+approvals:
+  requirement_direction:
+    status: recorded-for-planning
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/118
+  package_independent_verification:
+    status: pending
+    candidate_sha: null
+    evidence: null
+
+approval_status: not-approved
+implementation_authorized: false
+automatic_merge_allowed: true
+production_impact: none-repository-evidence-only
+rollback_required: true
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-084-DEP-00
+    status: open-until-plan-review
+    description: >-
+      A different-role reviewer must verify the complete plan candidate and the evidence
+      sources before adoption. The package cannot approve its own reconciliation rules.
+  - id: VOC-084-DEP-01
+    status: implementation-precondition
+    description: >-
+      Each completed task and criterion may be marked complete only from an exact merged
+      head, merge commit, independent verdict, hosted result, rollback record, and relevant
+      post-merge result already present in the canonical GitHub or repository evidence.
+  - id: VOC-084-DEP-02
+    status: accepted-boundary
+    description: >-
+      GitHub issue #119 owns public-repository settings/documentation drift. VOC-084 must
+      not change repository settings or absorb that unrelated scope.
+
+action_specific_holds: []
+inherited_holds:
+  - VOC-080-HOLD-00
+  - VOC-080-HOLD-01
+  - VOC-080-HOLD-02
+
+affected_areas:
+  - specs/changes/VOC-080-cloudflare-native-ruflo/
+  - specs/changes/VOC-081-f2-local-cloudflare-development/
+  - specs/changes/VOC-082-distinct-agent-role-separation/
+  - specs/changes/VOC-083-sentry-workerd-compatibility/
+  - specs/changes/VOC-084-reconcile-package-closure-state/
+  - scripts/foundation/ (new static closure-consistency validator and tests)
+  - package.json (foundation validation aggregation only)
+  - GitHub issue #85 (post-merge repository-only closure record)
+  - GitHub issue #118 (post-merge defect closure record)
+
+implementation:
+  authorized: false
+  required: true
+  status: pending-plan-review-and-adoption
+  target_branch: develop
+  pull_request: null
+  authority_issue: 118
+
+release:
+  required: false
+  mode: repository-only-evidence-reconciliation
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: policy-eligible-only-no-current-merge-executor
+  migration_required: false
+  rollback_required: true
+
+repository_adoption_status: not-adopted
+adoption_pr: null
+adoption_evidence: null
+implementation_authority_before_adoption: false
+implementation_authority_status: unavailable-before-adoption
+production_deployment: held-by-VOC-080-HOLD-01
+staging_deployment: held-by-VOC-080-HOLD-00
+production_data_access: held-by-VOC-080-HOLD-02
+autonomous_production_release: disabled
+ehr: not-triggered
+blocking_reasons:
+  - pending-independent-exact-plan-review
+  - pending-plan-adoption
