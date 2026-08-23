@@ -17,7 +17,10 @@ pnpm install --frozen-lockfile
 
 | Command                         | Purpose                                                                                                    |
 | ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `pnpm dev`                      | Run the Next.js development server with local Cloudflare binding simulation.                               |
+| `pnpm dev:init`                 | Apply all forward D1 migrations to the explicit ignored developer-local state.                             |
+| `pnpm dev`                      | Initialize D1, then supervise the API Worker on 8080 and Next hot reload on 3000.                          |
+| `pnpm dev:workers`              | Build OpenNext, initialize D1, then supervise the API and web Workers with their service binding.          |
+| `pnpm test:local-stack`         | Prove the disposable two-Worker/D1 stack, persistence, binding, failure, cleanup, and clean-tree contract. |
 | `pnpm validate`                 | Run workspace, format, lint, type, test, and build validation.                                             |
 | `pnpm lint`                     | Lint web, packages, and Worker API.                                                                        |
 | `pnpm typecheck`                | Type-check the web, Worker API, and shared packages.                                                       |
@@ -32,16 +35,19 @@ The full `pnpm validate` command remains the pre-review local gate. GitHub Actio
 uses the following stable subsystem entry points so a failure names the affected
 surface while preserving the same underlying scripts:
 
-| Command              | Hosted check surface                                                                                           |
-| -------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `pnpm ci:foundation` | Workspace shape, formatting, shared-package prerequisite build, and foundation tests                           |
-| `pnpm ci:packages`   | Shared-package lint, typecheck, build, and API-client tests                                                    |
-| `pnpm ci:web`        | Web lint/type/unit plus OpenNext build, typed config, dry-run/limits, and workerd proof                        |
-| `pnpm ci:worker-api` | API-client compatibility plus Hono/Worker/D1 lint, types, safety, workerd, contract, build, and dry-run        |
-| `pnpm ci:retirement` | Prove the active Go/server runtime, host assets, dependencies, and stale execution instructions remain retired |
+| Command               | Hosted check surface                                                                                           |
+| --------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `pnpm ci:foundation`  | Workspace shape, formatting, shared-package prerequisite build, repository evidence, and foundation tests      |
+| `pnpm ci:packages`    | Shared-package lint, typecheck, build, and API-client tests                                                    |
+| `pnpm ci:web`         | Web lint/type/unit plus OpenNext build, typed config, dry-run/limits, and workerd proof                        |
+| `pnpm ci:worker-api`  | API-client compatibility plus Hono/Worker/D1 lint, types, safety, workerd, contract, build, and dry-run        |
+| `pnpm ci:local-stack` | Lifecycle negatives plus the real disposable two-Worker/D1 integration smoke                                   |
+| `pnpm ci:retirement`  | Prove the active Go/server runtime, host assets, dependencies, and stale execution instructions remain retired |
+| `pnpm ci:f2-evidence` | Fail closed if the VOC-081 F2 record, task chain, command contract, limitations, or held gates drift           |
 
 The commands intentionally overlap where a subsystem must prove its own prerequisites.
-The `CI / ci required` job succeeds only when every named subsystem succeeds. Quality and
+The `CI / ci required` job succeeds only when every named subsystem, including the
+separate `local stack` job, succeeds. Quality and
 Security have equivalent stable `quality required` and `security required` aggregates. The shared
 `.github/actions/setup-toolchain` action reads the exact versions already declared in
 the repository, installs with the frozen lockfile, and caches only the package-manager
@@ -52,6 +58,35 @@ The audit policy permits moderate and low advisories to be reported without fail
 all reported advisories remain visible and must be recorded in the pull request.
 
 ## Project-specific commands
+
+### Local development loops
+
+The canonical local endpoints are web `http://127.0.0.1:3000` and API
+`http://127.0.0.1:8080`. Both loops preflight those exact ports and fail with a concrete
+owner/action message when either is occupied; they never silently choose another port.
+
+`pnpm dev` is the fast edit loop: it applies migrations, starts the local API Worker,
+waits for API health/config, and then starts Next hot reload. Web server-side requests
+use the documented HTTP fallback in this loop. `pnpm dev:workers` is the slower,
+production-like loop: it first builds OpenNext, applies migrations, starts API
+Wrangler, and then starts web Wrangler. Its committed `API` service binding connects
+`vocanova-web-local` to the matching `vocanova-api-local` session while both loopback
+URLs remain directly reachable.
+
+The supervisor owns its children, forwards `SIGINT`/`SIGTERM`, stops siblings when one
+fails, escalates after a bounded grace period, and exits nonzero on startup/readiness or
+child failure. These process semantics are validated on Linux CI and Unix-like hosts.
+Native Windows process behavior is not claimed; use WSL2 or another Linux environment.
+
+Developer D1 state lives only at `.wrangler/state/vocanova-local` and is ignored by
+Git. `pnpm dev:init` is repeatable and never resets that directory. To preserve state,
+archive that exact directory before a repository rollback. To deliberately start
+empty, stop every local loop and remove only the exact
+`.wrangler/state/vocanova-local` directory using a file manager or another explicitly
+targeted operation. Never use a broad recursive deletion against `.wrangler`, the
+repository, a workspace root, or a home directory. `pnpm test:local-stack` never uses
+developer state: it creates one OS-temporary root per run and removes it only after all
+children have stopped and ports are clear.
 
 Use `pnpm --filter @vocanova/web dev`, `build`, `start`, `lint`, or `typecheck` for
 the Next.js application. `build`/`start` remain fast Node-based UI
@@ -141,6 +176,10 @@ complete contract and recovery rules are in the
 - `pnpm validate` stops at the first failing child command and preserves its output.
 - A `ci:*` command is useful for reproducing one hosted subsystem, but it is not a
   substitute for the full local gate when several surfaces changed.
+- `pnpm dev` and `pnpm dev:workers` require ports 3000 and 8080 to be free. Stop the
+  named occupying process and retry; do not edit the commands to accept a fallback.
+- If local D1 contents should survive a branch change, archive only
+  `.wrangler/state/vocanova-local`. Repository rollback does not remove ignored state.
 - Worker/D1 migration and integration checks are local-only. The held manual delivery
   state machine is ineligible in the committed manifest; ordinary development and PR
   commands do not deploy, run a remote migration, or access staging/production state.
