@@ -35,6 +35,10 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
   nothing in a fresh clone. No live Cloudflare deployment exists merely because the
   decisions are accepted; VOC-080's ordered tasks and action-specific holds govern
   implementation and external effects.
+- [VOC-081's F2 record](operations/voc-081-f2-evidence.md) binds the local D1,
+  supervised-loop, service-binding, disposable-stack, CI, and limitation evidence. Its
+  candidate state becomes effective only after integration and revalidation; F3 and
+  every inherited live-action hold remain unresolved.
 
 ## Canonical document index
 

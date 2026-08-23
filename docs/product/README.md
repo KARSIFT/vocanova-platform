@@ -8,6 +8,9 @@
 
 DOC-12's product milestones remain authoritative, while VOC-080 supplies the current
 technical migration sequence to Cloudflare Workers/D1 and the external Ruflo role model.
+VOC-081 supplies the contributor-verifiable F2 candidate, whose
+[evidence record](../operations/voc-081-f2-evidence.md) remains integration-pending;
+F3, A1 acceptance, and production are not implied.
 
 [Migration notes](../archive/README-migration-notes.md) preserve VOC-007 source reconciliation evidence;
 [adoption notes](../archive/README-adoption-notes.md) record the VOC-008 semantic correction decisions.

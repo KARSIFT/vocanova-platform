@@ -11,8 +11,9 @@ This directory contains repository contribution and governance controls:
   bootstrap. It installs the frozen dependency graph and caches only
   correctness-neutral download stores.
 - `workflows/ci.yml` runs stable foundation, shared-package, OpenNext/workerd web,
-  Worker API/local-D1, retirement-policy, and held delivery checks plus the single
-  `CI / ci required` aggregate.
+  Worker API/local-D1, disposable two-Worker local-stack, retirement-policy, and held
+  delivery checks plus the single `CI / ci required` aggregate. The aggregate requires
+  the local-stack result and fails closed when it fails or is cancelled.
 - `workflows/governance.yml` validates repository structure, prevents a pull request
   from declaring a risk below its changed-path floor, and reports the read-only
   normalized merge-eligibility decision and concrete reasons.
@@ -107,6 +108,11 @@ parity chain. The foundation retirement policy prevents those executable surface
 stale commands from returning. Historical change packages and archived evidence are
 unchanged; compact API-contract and PostgreSQL-schema snapshots remain only as
 deterministic Worker conversion fixtures. No live server was inspected or stopped.
+
+VOC-081 keeps the four-file inventory. Its `local stack` job uses no credential,
+remote binding, Cloudflare account, or deploy path; it builds and starts disposable
+local workerd/D1 processes, proves the web-to-API service binding and D1 restart
+persistence, then requires bounded cleanup before `CI / ci required` may pass.
 
 Ruflo runs outside the repository and GitHub Actions. It may coordinate separate
 participants, but no issue/comment trigger, tracked launcher, workflow, or Ruflo tool

@@ -13,6 +13,11 @@ Journey/Discover (including situation drill-down) screens (VOC-018 through VOC-0
 against the wired design-token system - not skeletons awaiting later approved changes. See
 the [local development guide](docs/development.md) for exact tools and commands.
 
+The contributor entry points are `pnpm dev:init` for repeatable local D1 migrations,
+`pnpm dev` for the supervised Next/API edit loop, `pnpm dev:workers` for the supervised
+two-Worker loop, and `pnpm test:local-stack` for disposable end-to-end foundation
+proof. They are loopback-only and credential-free; staging and production remain held.
+
 ## Documentation
 
 - [Documentation index](docs/README.md)

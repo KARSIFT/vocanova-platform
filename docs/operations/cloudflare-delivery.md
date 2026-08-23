@@ -28,17 +28,17 @@ DNS names, credentials, or deployable production configuration.
 
 ## Environment isolation
 
-| Surface | Staging | Production |
-| --- | --- | --- |
-| Action hold | `VOC-080-HOLD-00` | `VOC-080-HOLD-01` |
-| Required branch at activation | `develop` | `main` |
-| GitHub environment name | `cloudflare-staging` | `cloudflare-production` |
-| API Worker | `vocanova-api-staging` | `vocanova-api-production` |
-| Web Worker | `vocanova-web-staging` | `vocanova-web-production` |
-| D1 database | `vocanova-staging` | `vocanova-production` |
-| D1 ID in this held revision | `held-staging-d1` | `held-production-d1` |
-| Route in this held revision | `.invalid` staging names | `.invalid` production names |
-| GitHub/Worker secret scope | staging only | production only |
+| Surface                       | Staging                  | Production                  |
+| ----------------------------- | ------------------------ | --------------------------- |
+| Action hold                   | `VOC-080-HOLD-00`        | `VOC-080-HOLD-01`           |
+| Required branch at activation | `develop`                | `main`                      |
+| GitHub environment name       | `cloudflare-staging`     | `cloudflare-production`     |
+| API Worker                    | `vocanova-api-staging`   | `vocanova-api-production`   |
+| Web Worker                    | `vocanova-web-staging`   | `vocanova-web-production`   |
+| D1 database                   | `vocanova-staging`       | `vocanova-production`       |
+| D1 ID in this held revision   | `held-staging-d1`        | `held-production-d1`        |
+| Route in this held revision   | `.invalid` staging names | `.invalid` production names |
+| GitHub/Worker secret scope    | staging only             | production only             |
 
 The two environment jobs use the same _secret names_ because Wrangler recognizes
 them, but GitHub resolves their values from different named environments. Those jobs
@@ -134,3 +134,14 @@ retry, unhealthy D1, release drift, and non-HTML web output.
 Real PR evidence consists only of local/workerd tests and credential-free Wrangler
 dry runs. A live delivery may be claimed only from a separately authorized run that
 records its actual version IDs and outcome.
+
+## Local development is not delivery
+
+VOC-081's `pnpm dev:init`, `pnpm dev`, `pnpm dev:workers`, and
+`pnpm test:local-stack` are separate local-only capabilities. The D1 initializer uses
+the locked Wrangler `d1 migrations apply DB --local` command, the API config, and the
+explicit `.wrangler/state/vocanova-local` persistence root. Wrangler 4.125.0 does not
+accept the delivery dry-run `--experimental-provision=false` or
+`--experimental-auto-create=false` flags on `d1 migrations apply`; the explicit
+`--local` selection and fail-closed command policy provide that boundary instead.
+Nothing in the local commands releases this runbook's staging or production holds.

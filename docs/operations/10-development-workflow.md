@@ -1,13 +1,13 @@
 ---
 id: DOC-10
 title: VocaNova Development Workflow
-version: 1.1
+version: 1.2
 document_type: engineering-workflow
 status: approved
 owner: founder
 canonical_path: docs/operations/10-development-workflow.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
+last_reviewed_at: 2026-08-23
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -43,6 +43,14 @@ The [external Ruflo runbook](ruflo-external-orchestration.md) is the operational
 for the exact installation, supply-chain overrides, worktree ownership, sanitized
 memory, reviewer non-duplication, and synthetic rehearsal. Its upstream permission
 manifest is advisory, not an enforcement or approval layer.
+
+VOC-081 adds the contributor-verifiable local F2 contract without activating a live
+environment. `pnpm dev` supervises the API Worker plus Next hot reload;
+`pnpm dev:workers` supervises both Workers with their committed service binding; and
+`pnpm test:local-stack` uses disposable D1 state to prove the complete boundary. The
+canonical loopback endpoints are web `127.0.0.1:3000` and API `127.0.0.1:8080`.
+Occupied ports fail rather than rebind. Linux/Unix process semantics are the supported
+contract; native Windows is not claimed.
 
 ## 1. Principles
 
@@ -173,6 +181,14 @@ drift, build, basic security); **Level 2** (full PR checks — reference Postgre
 integration/migration tests, contract parity, workerd, component tests, selected Playwright, and
 different-role review); **Level 3** (separately authorized Cloudflare staging checks); **Level 4**
 (separately authorized production release checks).
+
+The Level 2 foundation path includes the required `local stack` job. It initializes
+fresh temporary D1 state, runs both local Workers, proves direct browser routes and the
+web `API` service binding, restarts once to prove persistence, and verifies child/port
+cleanup. Contributor loops instead retain ignored state only at
+`.wrangler/state/vocanova-local`; repository rollback does not delete it. Archive or
+remove only that exact directory after stopping the loops—never recursively target a
+workspace or home directory.
 
 ## 8. Database migrations
 

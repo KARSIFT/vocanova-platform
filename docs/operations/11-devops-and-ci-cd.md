@@ -1,13 +1,13 @@
 ---
 id: DOC-11
 title: VocaNova DevOps and CI/CD Plan
-version: 1.3
+version: 1.4
 document_type: operations-plan
 status: approved
 owner: founder
 canonical_path: docs/operations/11-devops-and-ci-cd.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
+last_reviewed_at: 2026-08-23
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -18,6 +18,13 @@ related_decisions:
   - ADR-0003
 adoption_change: VOC-008
 amendments:
+  - id: VOC-081-local-stack-amendment
+    title: "Required disposable local Workers stack evidence"
+    adopted_in: VOC-081
+    adopted_at: 2026-08-23
+    approving_owner: approved-voc-081-package
+    resolution_recorded_in: specs/changes/VOC-081-f2-local-cloudflare-development/change.yaml
+    notes: "T03 adds one credential-free local-stack job inside ci.yml and makes the stable CI aggregate require it; T04 records the integration-pending F2 evidence without releasing any live hold."
   - id: VOC-080-ci-foundation-amendment
     title: "Four-workflow deterministic CI foundation"
     adopted_in: VOC-080
@@ -88,12 +95,12 @@ production learner data requires `HOLD-02`.
 
 The workflow inventory is exactly four files and has one responsibility per file:
 
-| Workflow         | Stable evidence                                                                                | Trigger and authority                                                                    |
-| ---------------- | ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `ci.yml`         | foundation/retirement, packages, web, Worker API, held delivery policy, and `CI / ci required` | PR/push validation plus a held manual gate; no eligible live deployment in current state |
-| `governance.yml` | `structure`, `changed-path risk`, and read-only `merge eligibility`                            | Pull-request evidence plus protected-branch structure checks; no GitHub write            |
-| `quality.yml`    | accessibility and Lighthouse, summarized by `Quality / quality required`                       | Web/shared/lockfile changes on pull requests only                                        |
-| `security.yml`   | dependency audit and secret scan, summarized by `Security / security required`                 | Pull requests and protected-branch pushes; no secret consumption                         |
+| Workflow         | Stable evidence                                                                                                        | Trigger and authority                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `ci.yml`         | foundation/retirement, packages, web, Worker API, disposable local stack, held delivery policy, and `CI / ci required` | PR/push validation plus a held manual gate; no eligible live deployment in current state |
+| `governance.yml` | `structure`, `changed-path risk`, and read-only `merge eligibility`                                                    | Pull-request evidence plus protected-branch structure checks; no GitHub write            |
+| `quality.yml`    | accessibility and Lighthouse, summarized by `Quality / quality required`                                               | Web/shared/lockfile changes on pull requests only                                        |
+| `security.yml`   | dependency audit and secret scan, summarized by `Security / security required`                                         | Pull requests and protected-branch pushes; no secret consumption                         |
 
 All runner jobs have explicit timeouts and Bash semantics. Every external action uses
 a reviewed full commit SHA, and every checkout disables persisted credentials. A local
@@ -103,6 +110,13 @@ cached, the lockfile remains frozen, and a cache hit never skips a check. Browse
 reports are uploaded only on failure and retained for three days. Fail-fast aggregation
 is explicit: the stable `required` result is blocked by any failed, cancelled, or
 skipped subsystem, and the same script has a synthetic negative contract test.
+
+VOC-081 adds `pnpm ci:local-stack` as a distinct required job inside `ci.yml`. It uses
+fresh OS-temporary D1 state, loopback-only Workers, a non-secret service-binding marker,
+one controlled restart, negative lifecycle fixtures, and bounded cleanup. The stable
+aggregate explicitly needs its result; synthetic policy proves a failed local-stack
+result cannot pass `CI / ci required`. The job has read-only permissions and receives
+no Cloudflare credential, remote binding, environment, or deploy capability.
 
 The subsystem `pnpm ci:*` commands are local entry points, not CI-only behavior;
 `pnpm validate` remains the full pre-review gate. This design follows the applicable

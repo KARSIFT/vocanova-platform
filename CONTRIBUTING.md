@@ -63,8 +63,9 @@ pnpm validate
 pnpm audit
 ```
 
-Hosted CI exposes the same contract as stable `foundation`, `packages`, `web`, and
-`worker api` jobs with a single `CI / ci required` aggregate. Use the matching `pnpm ci:*`
+Hosted CI exposes the same contract as stable `foundation`, `packages`, `web`,
+`worker api`, and disposable `local stack` jobs with a single `CI / ci required`
+aggregate. The aggregate cannot pass when local-stack evidence fails. Use the matching `pnpm ci:*`
 command for focused reproduction, then rerun `pnpm validate` before exact-revision
 review. Quality and Security likewise publish uniquely named stable aggregates; caches
 never replace a frozen install or a deterministic check.
@@ -84,6 +85,12 @@ and T11 removed the old Go/PostgreSQL/Docker runtime from the active tree. Immut
 history and compact contract/conversion snapshots preserve the migration evidence.
 Repository work uses local workerd/D1 and credential-free dry runs; no contributor or
 pull-request job receives Cloudflare deployment credentials.
+
+Use `pnpm dev` for the supervised Next/API edit loop and `pnpm dev:workers` for the
+supervised two-Worker/service-binding loop. Both own loopback ports 3000 and 8080 and
+share only the ignored `.wrangler/state/vocanova-local` developer state. The supported
+process contract is Linux/Unix; use WSL2 on Windows. See the local guide before
+archiving or deliberately removing that exact state directory.
 
 Repository protections apply to contributors and automation actors alike; never
 bypass failed checks, required review, branch protection, or production gates. See
