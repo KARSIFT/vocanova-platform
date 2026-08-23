@@ -1,8 +1,10 @@
 # VOC-083 — Workers-safe Sentry instrumentation and workerd rejection detection
 
-Status: adopted through PR #111. Repository-only implementation and the bounded,
-credential-free isolated probes defined by T00 are authorized after adoption. All
-inherited VOC-080 holds and action-specific authority boundaries remain in force.
+Status: adopted through PR #111. T00, T01, and T02 are complete through the
+repository-only, credential-free evidence recorded below. T03 has a documentation
+and closure candidate in [`t03-evidence.md`](t03-evidence.md), but remains pending
+its own exact-final-SHA specialist review, hosted proof, and ordinary rollback.
+All inherited VOC-080 holds and action-specific authority boundaries remain in force.
 
 The independent exact-SHA plan reviews of
 [`682b33ec1a126e8924395f7d7f7eb26191f2a57a`](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973)
@@ -40,13 +42,34 @@ T00 completed its provisional comparison in [`t00-evidence.md`](t00-evidence.md)
 independent exact-SHA PASS with zero blockers on
 [`9f11195ed186e214fade57884e66ca96f2498ebc`](https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385989877)
 after preserving and resolving its earlier exact-SHA FAIL, and PR #115 merged into
-`develop` as `8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6`. T02 exact SHA
+`develop` as `8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6`.
+
+T02's earlier exact SHA
 [`ab1b24d527f2d71649efb61cc1a8475535de282b`](https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386309046)
-received an independent **FAIL** with five blockers. That verdict remains historical
-and binding. The remediation now has local canonicalization, complete artifact,
-workerd, and reporting-fixture evidence, but a fresh exact-SHA independent review,
-hosted proof, and merge remain pending. This record does not claim independent PASS,
-hosted compatibility, or hosted reporting proof.
+received an independent **FAIL** with five blockers; that verdict remains historical
+and binding. The remediated T02 exact SHA
+[`e3a71a13eedfc8fef05b580280047e41f320de48`](https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386580099)
+received the formal independent **PASS** and merged through PR #116 as
+[`23da9da69bb27529994e70d4bf6e9a0a78ea26b6`](https://github.com/KARSIFT/vocanova-platform/pull/116).
+Its hosted evidence records final CI
+[`32645779837`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779837),
+Quality [`32645779813`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779813),
+Security [`32645779815`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779815),
+and Governance eligibility
+[`32646274114`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32646274114).
+Post-merge CI [`32646422581`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422581),
+Governance [`32646422624`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422624),
+and Security [`32646422584`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422584)
+also passed. A ten-commit repository-only rollback rehearsal to the exact T01
+revision `9f11195ed186e214fade57884e66ca96f2498ebc` passed. These records establish
+T02's complete AC-01–AC-04 evidence; they do not close T03 or claim any live effect.
+
+T03's candidate reconciliation inventories every declared affected surface and records
+that no additional runtime, configuration, dependency, or active-document edit was
+necessary because T02 reconciled those surfaces. T03 still requires its own exact-SHA
+specialist verdict, hosted proof, and ordinary repository rollback before AC-05 or
+package closure can be marked complete. This record does not pre-claim a T03 PR number,
+final SHA, review, hosted result, or live Sentry/Cloudflare outcome.
 
 The plan was prepared on `agent/voc-081-t04-f2-evidence` at
 `a8694932671ad9c44fd2a97c128b14e6089e5faf`; it deliberately has no dependency on

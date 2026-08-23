@@ -22,7 +22,7 @@ unchanged and discards/reverts every probe.
 - Tasks: `VOC-083-T01`, `VOC-083-T02`
 - Tests: `VOC-083-TEST-01`
 - Evidence: `VOC-083-EV-01`
-- Result: pending
+- Result: complete through T02 exact-SHA and hosted evidence
 
 In the same CI job, a fresh canonical OpenNext build and fresh local Wrangler dry run
 produce a deterministic complete manifest: required entry, every non-empty regular
@@ -40,7 +40,7 @@ fixtures for `compile`, `compileStreaming`, `instantiateStreaming`, and buffer-s
 - Tasks: `VOC-083-T01`, `VOC-083-T02`
 - Tests: `VOC-083-TEST-02`
 - Evidence: `VOC-083-EV-02`
-- Result: pending
+- Result: complete through T02 exact-SHA and hosted evidence
 
 With a synthetic non-secret DSN/test transport, a controlled Worker/server request
 error and global error reach the selected reporting boundary; the browser capture path
@@ -54,7 +54,7 @@ builds, and local service binding.
 - Tasks: `VOC-083-T02`
 - Tests: `VOC-083-TEST-03`
 - Evidence: `VOC-083-EV-03`
-- Result: pending
+- Result: complete through T02 exact-SHA and hosted evidence
 
 Both real smoke owners fail nonzero when their bounded Worker output contains an
 unexpected unhandled-rejection/error diagnostic, even if all HTTP response assertions
@@ -67,14 +67,15 @@ fixture-tested rationale and cannot include the affected Wasm/rejection forms.
 - Tasks: `VOC-083-T02`, `VOC-083-T03`
 - Tests: `VOC-083-TEST-04`, `VOC-083-TEST-05`
 - Evidence: `VOC-083-EV-04`, `VOC-083-EV-05`
-- Result: pending
+- Result: complete through T02 exact-SHA, hosted evidence, and T03 candidate inventory
 
 The four-workflow invariant, frozen install, audit, CI aggregate, no-live policy,
 documentation, lockfile, and exact affected-file inventory agree. `ci:web` builds
 before compatibility/dry-run/smoke and local-stack builds/scans its own fresh output;
-no check accepts stale or partial artifacts. No Sentry API or
-source-map upload, Cloudflare mutation/deploy, secret, production-data access, or
-hosted/independent PASS claim is introduced.
+no check accepts stale or partial artifacts. T02's exact review and hosted results are
+recorded in the package evidence; no unperformed Sentry API or source-map upload,
+Cloudflare mutation/deploy, secret, production-data access, or T03 review result is
+claimed.
 
 ## VOC-083-AC-05 — Exact-revision verification and rollback are complete
 
@@ -82,9 +83,12 @@ hosted/independent PASS claim is introduced.
 - Tasks: `VOC-083-T03`
 - Tests: `VOC-083-TEST-06`
 - Evidence: `VOC-083-EV-06`
-- Result: pending
+- Result: candidate; pending T03's own exact-final-SHA review, hosted proof, and ordinary rollback
 
-Every implementation revision has the required deterministic evidence and a different-
-role Cloudflare/Workers/Sentry specialist verdict bound to its exact final SHA. A
-revert restores the predecessor instrumentation and checks without touching live
-Cloudflare/Sentry state; any blocked reporting-equivalence finding is resolved first.
+Every implementation revision must have the required deterministic evidence and a
+different-role Cloudflare/Workers/Sentry specialist verdict bound to its exact final
+SHA. T02 satisfies its own review and hosted gates, but T03's final candidate SHA and
+review record are intentionally not pre-claimed here. T03 must still show an ordinary
+repository rollback that restores the predecessor instrumentation and checks without
+touching live Cloudflare/Sentry state; any blocked reporting-equivalence finding must
+be resolved first.

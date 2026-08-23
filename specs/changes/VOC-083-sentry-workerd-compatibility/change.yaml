@@ -59,6 +59,23 @@ approvals:
         detection, shared close-aware incremental diagnostics, distinct retry ports,
         and standalone Sentry environment stripping. Fresh exact-revision review is
         still required and no independent PASS is claimed here.
+    - candidate_sha: e3a71a13eedfc8fef05b580280047e41f320de48
+      verdict: pass-exact-revision
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386580099
+      merged_by_pr: 116
+      merge_sha: 23da9da69bb27529994e70d4bf6e9a0a78ea26b6
+      hosted_evidence:
+        final_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779837
+        quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779813
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779815
+        governance_eligibility: https://github.com/KARSIFT/vocanova-platform/actions/runs/32646274114
+        post_merge_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422581
+        post_merge_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422624
+        post_merge_security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422584
+      rollback:
+        status: pass-repository-only-ten-commit-rehearsal
+        predecessor_sha: 9f11195ed186e214fade57884e66ca96f2498ebc
+        live_effect: none
 approval_status: adopted
 implementation_authorized: true
 automatic_merge_allowed: true
@@ -78,6 +95,7 @@ artifacts:
   test_plan: test-plan.md
   release_plan: release-plan.md
   t00_evidence: t00-evidence.md
+  t03_evidence_candidate: t03-evidence.md
 dependencies:
   - id: VOC-083-DEP-00
     status: >-
@@ -134,7 +152,7 @@ affected_areas:
 implementation:
   authorized: true
   required: true
-  status: T00-complete; T01-complete-merged-PR-115; T02-remediation-local-validation-complete-pending-fresh-independent-exact-SHA-review-and-hosted-proof; T03-gated
+  status: T00-complete; T01-complete-merged-PR-115; T02-complete-exact-SHA-e3a71a13eedfc8fef05b580280047e41f320de48-merged-PR-116; T03-candidate-pending-own-exact-SHA-review-hosted-proof-and-ordinary-rollback
   target_branch: develop
   pull_request: null
   authority_issue: 105
@@ -161,5 +179,7 @@ post_adoption_task_gates:
   - T00-complete-provisional-workers-native-selection-recorded-in-VOC-083-EV-00
   - T01-complete-exact-SHA-9f11195ed186e214fade57884e66ca96f2498ebc-merged-through-PR-115
   - T02-pr-116-exact-SHA-ab1b24d527f2d71649efb61cc1a8475535de282b-independent-review-fail-preserved
-  - T02-remediation-local-validation-complete-pending-fresh-independent-exact-SHA-review-and-hosted-proof
+  - T02-complete-exact-SHA-e3a71a13eedfc8fef05b580280047e41f320de48-independent-pass-comment-5386580099-merged-23da9da69bb27529994e70d4bf6e9a0a78ea26b6-hosted-and-post-merge-evidence-recorded
+  - T02-rollback-pass-ten-commits-to-exact-T01-9f11195ed186e214fade57884e66ca96f2498ebc-no-live-effects
+  - T03-candidate-pending-own-exact-final-SHA-specialist-review-hosted-proof-and-ordinary-rollback
   - T02-failure-requires-updated-T00-decision-T01-revision-and-fresh-exact-SHA-review
