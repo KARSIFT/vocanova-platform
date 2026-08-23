@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
@@ -22,10 +22,22 @@ const LOCAL_ORCHESTRATOR_LAUNCH_PATTERN =
   /(?:\b(?:ruflo|claude-flow)\b|@claude-flow\/|(?:^|[\s/])agentic-flow\b)/i;
 
 const GENERATED_INSTRUCTION_MARKERS = [
+  "<!-- BEGIN:nextjs-agent-rules -->",
+  "<!-- NEXT-AGENTS-MD-START -->",
   "## Ruflo + Codex Automated Workflow",
   "> Multi-agent orchestration framework for agentic coding",
   "Ruflo is the coordination ledger and policy decision point",
 ];
+
+const INSTRUCTION_SCAN_EXCLUDED_DIRECTORIES = new Set([
+  ".git",
+  ".next",
+  ".open-next",
+  ".wrangler",
+  "coverage",
+  "dist",
+  "node_modules",
+]);
 
 const AUTONOMOUS_WRITE_PATTERNS = [
   new RegExp(["gh", "\\s+", "pr", "\\s+", "merge", "\\b"].join("")),
@@ -85,6 +97,19 @@ function filesBelow(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = resolve(directory, entry.name);
     return entry.isDirectory() ? filesBelow(path) : [path];
+  });
+}
+
+function instructionFilesBelow(directory) {
+  if (!existsSync(directory)) return [];
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = resolve(directory, entry.name);
+    if (entry.isDirectory()) {
+      return INSTRUCTION_SCAN_EXCLUDED_DIRECTORIES.has(entry.name)
+        ? []
+        : instructionFilesBelow(path);
+    }
+    return /^(?:AGENTS|CLAUDE)\.md$/.test(entry.name) ? [path] : [];
   });
 }
 
@@ -184,9 +209,8 @@ export function validateAgentAuthority(repositoryRoot) {
     }
   }
 
-  for (const filename of ["AGENTS.md", "CLAUDE.md"]) {
-    const path = resolve(repositoryRoot, filename);
-    if (!existsSync(path)) continue;
+  for (const path of instructionFilesBelow(repositoryRoot)) {
+    const filename = relative(repositoryRoot, path).replaceAll("\\", "/");
     const source = readFileSync(path, "utf8");
     for (const marker of GENERATED_INSTRUCTION_MARKERS) {
       if (source.includes(marker)) {
@@ -195,6 +219,11 @@ export function validateAgentAuthority(repositoryRoot) {
         );
         break;
       }
+    }
+    if (filename.includes("/") && source.trim() === "@AGENTS.md") {
+      errors.push(
+        `${filename}: generated nested instruction import cannot replace repository authority`,
+      );
     }
   }
 
@@ -229,6 +258,7 @@ export function validateAgentAuthority(repositoryRoot) {
       !/\.test\.[cm]?[jt]s$/.test(path) &&
       !path.endsWith("agent-authority-policy.mjs") &&
       !path.endsWith("cloudflare-delivery-policy.mjs") &&
+      !path.endsWith("local-development-policy.mjs") &&
       !path.endsWith("workflow-policy.mjs"),
   );
 

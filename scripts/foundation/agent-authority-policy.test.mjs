@@ -20,6 +20,8 @@ test("local orchestration, authority replacement, and external effects fail clos
     mkdirSync(resolve(temporary, ".claude-flow"), { recursive: true });
     mkdirSync(resolve(temporary, ".swarm"), { recursive: true });
     mkdirSync(resolve(temporary, ".github/workflows"), { recursive: true });
+    mkdirSync(resolve(temporary, "apps/web"), { recursive: true });
+    mkdirSync(resolve(temporary, "packages/example"), { recursive: true });
     mkdirSync(resolve(temporary, "scripts"), { recursive: true });
     writeFileSync(
       resolve(temporary, "package.json"),
@@ -34,6 +36,14 @@ test("local orchestration, authority replacement, and external effects fail clos
     writeFileSync(
       resolve(temporary, "AGENTS.md"),
       "# Project\n\n## Ruflo + Codex Automated Workflow\n",
+    );
+    writeFileSync(
+      resolve(temporary, "apps/web/AGENTS.md"),
+      "<!-- BEGIN:nextjs-agent-rules -->\nGenerated instructions\n",
+    );
+    writeFileSync(
+      resolve(temporary, "packages/example/CLAUDE.md"),
+      "@AGENTS.md\n",
     );
     writeFileSync(
       resolve(temporary, ".github/workflows/agent.yml"),
@@ -124,6 +134,10 @@ test("local orchestration, authority replacement, and external effects fail clos
     );
     assert.ok(errors.some((error) => error.includes("package script")));
     assert.ok(errors.some((error) => error.includes("AGENTS.md")));
+    assert.ok(errors.some((error) => error.includes("apps/web/AGENTS.md")));
+    assert.ok(
+      errors.some((error) => error.includes("packages/example/CLAUDE.md")),
+    );
     assert.equal(
       errors.filter((error) => error.includes("issue/comment trigger")).length,
       6,

@@ -14,9 +14,9 @@ import { D1PlatformRepository } from "../src/repositories/d1-platform-repository
 const now = new Date("2026-08-22T12:00:00.000Z");
 const config: IdentityConfig = {
   environment: "local",
-  baseUrl: "http://localhost:3000",
-  oauthRedirectUri: "http://localhost:8787/api/v1/auth/oauth/google/callback",
-  oauthReturnAllowlist: ["http://localhost:3000/home"],
+  baseUrl: "http://127.0.0.1:3000",
+  oauthRedirectUri: "http://127.0.0.1:8080/api/v1/auth/oauth/google/callback",
+  oauthReturnAllowlist: ["http://127.0.0.1:3000/home"],
   magicLinkEnabled: true,
   oauthEnabled: true,
   newSignupsEnabled: true,
@@ -233,7 +233,7 @@ describe("identity and account parity", () => {
     const app = identityApp();
     const started = await app.request(
       "http://worker.test/api/v1/auth/oauth/google/start",
-      json({ redirectUri: "http://localhost:3000/home" }),
+      json({ redirectUri: "http://127.0.0.1:3000/home" }),
       env,
     );
     expect(started.status).toBe(200);
@@ -255,7 +255,7 @@ describe("identity and account parity", () => {
       env,
     );
     expect(callback.status).toBe(302);
-    expect(callback.headers.get("location")).toBe("http://localhost:3000/home");
+    expect(callback.headers.get("location")).toBe("http://127.0.0.1:3000/home");
 
     const replay = await app.request(
       `http://worker.test/api/v1/auth/oauth/google/callback?code=valid-code&state=${encodeURIComponent(state)}`,
@@ -272,7 +272,7 @@ describe("identity and account parity", () => {
     const app = identityApp();
     const started = await app.request(
       "http://worker.test/api/v1/auth/oauth/google/start",
-      json({ redirectUri: "http://localhost:3000/home" }),
+      json({ redirectUri: "http://127.0.0.1:3000/home" }),
       env,
     );
     const stateCookie = namedCookie(
@@ -607,13 +607,13 @@ describe("identity and account parity", () => {
   it("distinguishes disabled OAuth from an unconfigured provider", async () => {
     await expect(
       identityService({ ...config, oauthEnabled: false }).startOAuth(
-        "http://localhost:3000/home",
+        "http://127.0.0.1:3000/home",
         "oauth-disabled",
       ),
     ).rejects.toMatchObject({ code: "oauth_disabled" });
     await expect(
       identityService(config, null).startOAuth(
-        "http://localhost:3000/home",
+        "http://127.0.0.1:3000/home",
         "oauth-missing",
       ),
     ).rejects.toMatchObject({ code: "oauth_not_configured" });
