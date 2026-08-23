@@ -401,6 +401,38 @@ test("task and package closure fields reject valid-looking structured drift", ()
   );
 });
 
+test("duplicate structured closure maps fail even when both values look valid", () => {
+  const duplicateTaskMap = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "        evidence: https://github.com/KARSIFT/vocanova-platform/pull/87#issuecomment-5379567727,\n      }\n    hosted:",
+        "        evidence: https://github.com/KARSIFT/vocanova-platform/pull/87#issuecomment-5379567727,\n      }\n    review:\n      {verdict: pass, evidence: https://github.com/KARSIFT/vocanova-platform/pull/88#issuecomment-5379667367}\n    hosted:",
+      ),
+    );
+  });
+  assert.ok(
+    duplicateTaskMap.some((message) =>
+      /VOC-080-T00 review map section must occur exactly once/.test(message),
+    ),
+  );
+
+  const duplicatePackageMap = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "        evidence: https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747\n    final_merge:",
+        "        evidence: https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747\n      final_review:\n        verdict: pass\n        evidence: https://github.com/KARSIFT/vocanova-platform/pull/102#issuecomment-5383027287\n    final_merge:",
+      ),
+    );
+  });
+  assert.ok(
+    duplicatePackageMap.some((message) =>
+      /VOC-080 package final review map section must occur exactly once/.test(
+        message,
+      ),
+    ),
+  );
+});
+
 test("file classifications fail independently on omission, duplicate, invalid, and contradiction", () => {
   const omitted = errorsFor((root) => {
     mutate(root, inventoryRelative, (text) =>

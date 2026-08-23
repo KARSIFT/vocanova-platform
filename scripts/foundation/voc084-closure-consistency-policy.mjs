@@ -519,6 +519,11 @@ function expectedRecord(values, keys) {
 function compareExactMap(errors, label, actual, expected) {
   const actualKeys = Object.keys(actual.values).sort();
   const expectedKeys = Object.keys(expected).sort();
+  if (expectedKeys.length > 0 && actual.count !== 1)
+    error(
+      errors,
+      `${label} map section must occur exactly once (found ${actual.count})`,
+    );
   if (
     actual.duplicates.length ||
     actualKeys.length !== expectedKeys.length ||
