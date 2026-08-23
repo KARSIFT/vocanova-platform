@@ -86,8 +86,9 @@ data.
 ## Consequences
 
 - The web can move with a supported adapter, but `next build` alone is insufficient;
-  OpenNext build, Wrangler dry run, size/startup evidence, and representative workerd
-  requests are required.
+  OpenNext build, a complete generated-artifact manifest and runtime-reachable
+  compatibility graph, Wrangler dry run, size/startup evidence, and representative
+  fail-closed workerd requests are required.
 - The API becomes a controlled TypeScript port rather than an unsupported Go/Wasm
   packaging exercise. Domain parity fixtures protect behavior during coexistence.
 - PostgreSQL-to-D1 migration is a deterministic conversion and reconciliation

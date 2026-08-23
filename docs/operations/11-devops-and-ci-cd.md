@@ -18,6 +18,13 @@ related_decisions:
   - ADR-0003
 adoption_change: VOC-008
 amendments:
+  - id: VOC-083-workerd-compatibility-amendment
+    title: "Generated Worker inventory and fail-closed workerd diagnostics"
+    adopted_in: VOC-083
+    adopted_at: 2026-08-23
+    approving_owner: approved-voc-083-package
+    resolution_recorded_in: specs/changes/VOC-083-sentry-workerd-compatibility/change.yaml
+    notes: "T02 makes fresh generated-artifact inventory, runtime-reachable Wasm checks, and post-shutdown workerd diagnostics mandatory before either web smoke can pass."
   - id: VOC-081-local-stack-amendment
     title: "Required disposable local Workers stack evidence"
     adopted_in: VOC-081
@@ -118,19 +125,29 @@ aggregate explicitly needs its result; synthetic policy proves a failed local-st
 result cannot pass `CI / ci required`. The job has read-only permissions and receives
 no Cloudflare credential, remote binding, environment, or deploy capability.
 
+VOC-083-T02 makes both web smoke owners fail closed on generated and runtime evidence.
+`ci:web` now builds OpenNext before compatibility analysis; that analysis performs a
+fresh credential-free Wrangler dry run, hashes and classifies every generated artifact,
+proves the runtime-reachable JavaScript graph is closed, and rejects unsupported
+runtime Wasm construction. The disposable local-stack path independently builds and
+scans fresh output before startup. Both paths retain bounded output plus sticky hard
+diagnostics and classify again after child shutdown, so an HTTP 200 cannot hide an
+unhandled rejection, compile/runtime error, or unsupported WebAssembly API diagnostic.
+
 The subsystem `pnpm ci:*` commands are local entry points, not CI-only behavior;
 `pnpm validate` remains the full pre-review gate. This design follows the applicable
 parts of mature Workers/Hono/OpenNext repositories—pinned dependencies, focused checks,
 non-short-circuiting evidence, and workerd-oriented separation—without importing their
 release bots, write permissions, vendor services, or repository scale.
 
-VOC-080-T03 makes `pnpm ci:web` the credential-free Worker gate. It verifies committed
-Wrangler types, scans the runtime boundary, transforms the Next.js build through
-OpenNext, performs a Wrangler dry run, enforces the 3 MiB compressed target and records
-the local startup profile, then sends representative static/SSR/RSC/middleware/auth/API
-requests through two Workers in local workerd. A plain `next build` remains useful for
-UI checks but is not Cloudflare compatibility evidence. No T03 command uploads a
-version, queries an account, provisions a resource, or deploys.
+VOC-080-T03 makes `pnpm ci:web` the credential-free Worker gate. It transforms the
+Next.js build through OpenNext, then verifies the complete generated-artifact manifest
+and runtime-reachable compatibility graph, committed Wrangler types, a Wrangler dry
+run, the 3 MiB compressed target, and the local startup profile before sending
+representative static/SSR/RSC/middleware/auth/API requests through two Workers in local
+workerd. A plain `next build` remains useful for UI checks but is not Cloudflare
+compatibility evidence. No T03 command uploads a version, queries an account,
+provisions a resource, or deploys.
 
 VOC-080-T04 adds the separate `worker api` CI job without adding a workflow file. It
 verifies generated D1 bindings, Hono operational OpenAPI, the frozen 25-operation

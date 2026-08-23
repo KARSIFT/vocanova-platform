@@ -20,7 +20,7 @@ pnpm install --frozen-lockfile
 | `pnpm dev:init`                 | Apply all forward D1 migrations to the explicit ignored developer-local state.                             |
 | `pnpm dev`                      | Initialize D1, then supervise the API Worker on 8080 and Next hot reload on 3000.                          |
 | `pnpm dev:workers`              | Build OpenNext, initialize D1, then supervise the API and web Workers with their service binding.          |
-| `pnpm test:local-stack`         | Prove the disposable two-Worker/D1 stack, persistence, binding, failure, cleanup, and clean-tree contract. |
+| `pnpm test:local-stack`         | Fresh-build and scan the web Worker, then prove the disposable two-Worker/D1 lifecycle and clean logs.     |
 | `pnpm validate`                 | Run workspace, format, lint, type, test, and build validation.                                             |
 | `pnpm lint`                     | Lint web, packages, and Worker API.                                                                        |
 | `pnpm typecheck`                | Type-check the web, Worker API, and shared packages.                                                       |
@@ -39,9 +39,9 @@ surface while preserving the same underlying scripts:
 | --------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `pnpm ci:foundation`  | Workspace shape, formatting, shared-package prerequisite build, repository evidence, and foundation tests      |
 | `pnpm ci:packages`    | Shared-package lint, typecheck, build, and API-client tests                                                    |
-| `pnpm ci:web`         | Web lint/type/unit plus OpenNext build, typed config, dry-run/limits, and workerd proof                        |
+| `pnpm ci:web`         | Web lint/type/reporting fixtures, fresh OpenNext manifest scan, dry-run/limits, and fail-closed workerd proof  |
 | `pnpm ci:worker-api`  | API-client compatibility plus Hono/Worker/D1 lint, types, safety, workerd, contract, build, and dry-run        |
-| `pnpm ci:local-stack` | Lifecycle negatives plus the real disposable two-Worker/D1 integration smoke                                   |
+| `pnpm ci:local-stack` | Lifecycle/log negatives plus a fresh-build, fresh-scan disposable two-Worker/D1 integration smoke              |
 | `pnpm ci:retirement`  | Prove the active Go/server runtime, host assets, dependencies, and stale execution instructions remain retired |
 | `pnpm ci:f2-evidence` | Fail closed if the VOC-081 F2 record, task chain, command contract, limitations, or held gates drift           |
 
@@ -95,22 +95,24 @@ root page is a technical framework-validation placeholder and contains no produc
 
 The credential-free Cloudflare path is:
 
-| Command                                                | Purpose                                                                                                                                          |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm --filter @vocanova/web cloudflare:typegen`       | Regenerate `worker-configuration.d.ts` from `wrangler.jsonc`.                                                                                    |
-| `pnpm --filter @vocanova/web cloudflare:typecheck`     | Fail if committed binding/runtime types are stale.                                                                                               |
-| `pnpm --filter @vocanova/web cloudflare:build`         | Run `next build` and transform its standalone intermediate into `.open-next/worker.js`.                                                          |
-| `pnpm --filter @vocanova/web cloudflare:preview`       | Serve an existing OpenNext build locally in workerd for manual inspection.                                                                       |
-| `pnpm --filter @vocanova/web cloudflare:preview:test`  | Run representative static, SSR, RSC, middleware, auth, service-binding, and disabled-Sentry requests in local workerd.                           |
-| `pnpm --filter @vocanova/web cloudflare:dry-run`       | Bundle with Wrangler using `--dry-run`; it performs no upload or resource mutation.                                                              |
-| `pnpm --filter @vocanova/web cloudflare:limits`        | Enforce the 3 MiB compressed target and record the local startup profile against the 1,000 ms platform limit.                                    |
-| `pnpm --filter @vocanova/web cloudflare:compatibility` | Scan the request runtime for unsupported globals, unbounded body buffering, floating Promises, remote bindings, and missing service-binding use. |
+| Command                                                | Purpose                                                                                                                                                                                                                |
+| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm --filter @vocanova/web cloudflare:typegen`       | Regenerate `worker-configuration.d.ts` from `wrangler.jsonc`.                                                                                                                                                          |
+| `pnpm --filter @vocanova/web cloudflare:typecheck`     | Fail if committed binding/runtime types are stale.                                                                                                                                                                     |
+| `pnpm --filter @vocanova/web cloudflare:build`         | Run `next build` and transform its standalone intermediate into `.open-next/worker.js`.                                                                                                                                |
+| `pnpm --filter @vocanova/web cloudflare:preview`       | Serve an existing OpenNext build locally in workerd for manual inspection.                                                                                                                                             |
+| `pnpm --filter @vocanova/web cloudflare:preview:test`  | Run representative static, SSR, RSC, middleware, auth, service-binding, and disabled-Sentry requests in local workerd.                                                                                                 |
+| `pnpm --filter @vocanova/web cloudflare:dry-run`       | Bundle with Wrangler using `--dry-run`; it performs no upload or resource mutation.                                                                                                                                    |
+| `pnpm --filter @vocanova/web cloudflare:limits`        | Enforce the 3 MiB compressed target and record the local startup profile against the 1,000 ms platform limit.                                                                                                          |
+| `pnpm --filter @vocanova/web cloudflare:compatibility` | Run a fresh local Wrangler dry run, inventory and hash every generated artifact, prove the runtime-reachable module graph is closed, and reject unsupported runtime Wasm plus the existing source-boundary violations. |
 
-Run `cloudflare:build` before `cloudflare:typegen` or `cloudflare:typecheck`.
-Wrangler includes the configured OpenNext main-module declaration in its generated
-hash only after `.open-next/worker.js` exists; enforcing this order keeps clean and
-incremental checkouts byte-consistent. The stable `pnpm ci:web` command owns that
-ordering.
+Run `cloudflare:build` before `cloudflare:compatibility`, `cloudflare:typegen`, or
+`cloudflare:typecheck`. The compatibility command creates a credential-free local
+Wrangler dry-run bundle, writes its manifest outside the scanned roots, and fails on a
+missing/empty/unknown artifact, an escaping link, a broken reachable reference, or a
+runtime-reachable unsupported Wasm construction path. Copied but unreachable modules
+remain inventoried instead of being silently excluded. The stable `pnpm ci:web`
+command owns this build → manifest/compatibility → type/dry-run/limits → workerd order.
 
 `wrangler.jsonc` defines local, staging, and production names but contains no resource
 ID, credential, route, or deploy authority. Local preview uses only simulation. The

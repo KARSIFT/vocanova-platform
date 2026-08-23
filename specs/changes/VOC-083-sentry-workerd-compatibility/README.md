@@ -36,9 +36,13 @@ Before adoption, package-level blockers concern only review/adoption.
 
 T00 completed its provisional comparison in [`t00-evidence.md`](t00-evidence.md) on
 2026-08-23. It selected exact `@sentry/cloudflare@10.69.0` plus
-`@sentry/react@10.69.0` with complete removal of `@sentry/nextjs`; T01 is unblocked
-and implementation-prepared, pending independent exact-SHA review. This is not T02's
-final canonical compatibility or reporting PASS.
+`@sentry/react@10.69.0` with complete removal of `@sentry/nextjs`. T01 received an
+independent exact-SHA PASS with zero blockers on
+[`9f11195ed186e214fade57884e66ca96f2498ebc`](https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385989877)
+after preserving and resolving its earlier exact-SHA FAIL, and PR #115 merged into
+`develop` as `8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6`. T02 is implementation-prepared;
+its local validation, exact-SHA independent review, hosted proof, and merge remain
+pending, so this record does not claim final canonical compatibility or reporting PASS.
 
 The plan was prepared on `agent/voc-081-t04-f2-evidence` at
 `a8694932671ad9c44fd2a97c128b14e6089e5faf`; it deliberately has no dependency on

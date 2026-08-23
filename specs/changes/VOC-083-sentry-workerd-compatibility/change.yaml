@@ -124,7 +124,7 @@ affected_areas:
 implementation:
   authorized: true
   required: true
-  status: T00-provisional-selection-recorded; T01-implementation-prepared-pending-independent-exact-SHA-review; T02-plus-remain-gated
+  status: T00-complete; T01-complete-merged-PR-115; T02-implementation-prepared-pending-validation-and-independent-exact-SHA-review; T03-gated
   target_branch: develop
   pull_request: null
   authority_issue: 105
@@ -149,6 +149,6 @@ ehr: not-triggered
 blocking_reasons: []
 post_adoption_task_gates:
   - T00-complete-provisional-workers-native-selection-recorded-in-VOC-083-EV-00
-  - T01-unblocked-must-apply-only-the-recorded-exact-shape
-  - T02-owns-final-canonical-bundle-workerd-and-reporting-acceptance
+  - T01-complete-exact-SHA-9f11195ed186e214fade57884e66ca96f2498ebc-merged-through-PR-115
+  - T02-implementation-prepared-pending-validation-and-independent-exact-SHA-review
   - T02-failure-requires-updated-T00-decision-T01-revision-and-fresh-exact-SHA-review

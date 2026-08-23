@@ -25,7 +25,7 @@ T00 does not claim final canonical acceptance.
 - Acceptance: `VOC-083-AC-01`, `VOC-083-AC-02`
 - Tests: `VOC-083-TEST-01`, `VOC-083-TEST-02`
 - Evidence: `VOC-083-EV-01`, `VOC-083-EV-02`
-- Status: implementation-prepared; pending-independent-exact-SHA-review
+- Status: complete-merged-through-PR-115
 
 Apply the T00 provisional choice canonically, regenerate/review any lockfile change,
 and preserve server/Worker/browser capture/privacy controls. Prepare deterministic
@@ -38,7 +38,7 @@ equivalence acceptance to T02. Do not turn off Sentry or source-map controls.
 - Acceptance: `VOC-083-AC-01`, `VOC-083-AC-02`, `VOC-083-AC-03`, `VOC-083-AC-04`
 - Tests: `VOC-083-TEST-01`, `VOC-083-TEST-02`, `VOC-083-TEST-03`, `VOC-083-TEST-04`
 - Evidence: `VOC-083-EV-01`, `VOC-083-EV-02`, `VOC-083-EV-03`, `VOC-083-EV-04`
-- Status: blocked-by-T01
+- Status: implementation-prepared; pending-local-validation-and-independent-exact-SHA-review
 
 Own final qualification of T00/T01: add a complete fresh-artifact manifest/invariant and
 fixture-backed log classification
