@@ -8,7 +8,7 @@
     "ci": "pnpm run lint && pnpm run types:check && pnpm run typecheck && pnpm run safety:check && pnpm run data-conversion:inventory && pnpm run test && pnpm run openapi:check && pnpm run contract:check && pnpm run dry-run",
     "contract:check": "node scripts/check-contract-drift.mjs",
     "data-conversion:inventory": "pnpm run build && node scripts/check-data-conversion-inventory.mjs",
-    "dev": "wrangler dev --local",
+    "dev": "wrangler dev --local --config wrangler.jsonc --ip 127.0.0.1 --port 8080 --persist-to ../../.wrangler/state/vocanova-local --local-protocol http --latest=false --inspector-port 0 --show-interactive-dev-session=false",
     "dry-run": "pnpm run dry-run:local && pnpm run dry-run:staging && pnpm run dry-run:production",
     "dry-run:local": "wrangler deploy --dry-run --experimental-provision=false --experimental-auto-create=false --env='' --outdir .wrangler/dry-run/local",
     "dry-run:production": "wrangler deploy --dry-run --experimental-provision=false --experimental-auto-create=false --env production --outdir .wrangler/dry-run/production",
