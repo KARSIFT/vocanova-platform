@@ -2,11 +2,12 @@
 
 Status: draft; unapproved and not implementation authority.
 
-The independent exact-SHA plan review of
-`682b33ec1a126e8924395f7d7f7eb26191f2a57a` recorded **FAIL** at
-[PR #111 comment 5385262973](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973).
-This remediation revision preserves that finding and requires a fresh exact-SHA review;
-it does not reinterpret the prior FAIL as approval.
+The independent exact-SHA plan reviews of
+[`682b33ec1a126e8924395f7d7f7eb26191f2a57a`](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973)
+and
+[`07772a00f753e614d3fd7a51539cabe4f0da1393`](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385292757)
+both recorded **FAIL**. This remediation revision preserves both findings and requires
+a fresh exact-SHA review; it does not reinterpret either FAIL as approval.
 
 Issue [#105](https://github.com/KARSIFT/vocanova-platform/issues/105) records two
 `WebAssembly.compile()` unhandled rejections from the generated OpenNext Worker on its
@@ -20,11 +21,12 @@ Sentry adapter against the same Workers-safe bundle, reporting, privacy, and smo
 evidence. It must preserve error reporting rather than turning it off to make the
 rejection disappear.
 
-After adoption, T00 alone is authorized as an evidence-only candidate-selection gate.
-T01 and all runtime/configuration/dependency changes remain blocked until T00 records a
-qualified selection decision. Before adoption, the package-level blockers concern only
-review/adoption; unselected candidates are deliberately a post-adoption task gate, not
-a claim that adoption cannot complete.
+After adoption, T00 alone may record upstream evidence and conduct bounded, disposable
+candidate probes in isolated worktrees; no probe changes the canonical task branch.
+T00 records a provisional selection, T01 applies it, and T02 owns final canonical
+bundle/workerd/reporting acceptance. If T02 disproves the choice, work fails closed and
+returns through an updated T00 decision and T01 revision with fresh exact-SHA review.
+Before adoption, package-level blockers concern only review/adoption.
 
 The plan is stacked on `agent/voc-081-t04-f2-evidence` at
 `a8694932671ad9c44fd2a97c128b14e6089e5faf`; it deliberately has no dependency on

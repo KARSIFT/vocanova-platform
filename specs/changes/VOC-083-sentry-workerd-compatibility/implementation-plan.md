@@ -6,8 +6,9 @@ Do not begin until this remediation revision receives a fresh independent exact-
 review, the applicable decision owner adopts it, and `implementation_authorized` becomes
 true. The prior SHA `682b33ec1a126e8924395f7d7f7eb26191f2a57a` received FAIL at PR
 #111 comment 5385262973; it remains historical evidence, not a passed review. After
-adoption, T00 alone is authorized as evidence-only work. T01+ remain blocked until T00
-records a qualified candidate decision. The builder must start from the adopted
+adoption, T00 alone is authorized for upstream evidence plus bounded disposable isolated
+candidate probes; T01+ remain blocked until T00 records a provisional candidate decision.
+The builder must start from the adopted
 revision, re-check locked versions/current primary Cloudflare/Sentry documentation, and
 remain within the declared surfaces. No Sentry/Cloudflare credentials, API calls,
 source-map upload, deployment, account query, billing action, or inherited-hold action
@@ -15,19 +16,23 @@ is authorized.
 
 ## File reconciliation and implementation sequence
 
-1. **T00 — Reproduce and select from evidence (post-adoption, evidence-only).**
+1. **T00 — Provisional selection (post-adoption, non-landing evidence/probes).**
    Reproduce #105 on the locked base;
    capture sanitized generated-bundle locations and workerd output. Compare the three
    candidates in `VOC-083-R00`; verify exact version exports, upstream status, and the
    supported reporting surface. Record a selection decision only when all required
-   evidence is present. Record the decision and rejected candidates without editing
-   runtime/configuration/dependencies/lockfile/docs. Stop/escalate if none qualifies.
+   evidence is present. If upstream evidence alone is insufficient, make bounded local
+   candidate probes only in fresh isolated worktrees, with synthetic non-secret values,
+   no remote action, and a recorded cleanup/discard result. Record the provisional
+   decision/rejected candidates without changing the canonical task branch. Stop if
+   none qualifies; T00 does not require final canonical acceptance.
 2. **T01 — Implement the selected narrow repair.** Modify only the selected
    configuration/import/adapter and necessary lockfile. Keep client/server behavior
    explicitly separated, preserve capture hooks, and make test transport injection
    impossible in normal runtime configuration. Do not remove error reporting as an
    alternative to compatibility.
-3. **T02 — Make bundle and log safety executable.** Add a generated OpenNext bundle
+3. **T02 — Canonically qualify the selection and make bundle/log safety executable.**
+   Add a generated OpenNext bundle
    scanner with a complete deterministic fresh-artifact manifest, unsafe and supported
    precompiled-module Wasm fixtures, and fail-closed missing/partial inventory cases.
    Reorder `ci:web` so the canonical build precedes compatibility, dry run, and smoke;
@@ -35,7 +40,9 @@ is authorized.
    `test-workerd.mjs` and the two-Worker local-stack owner to classify bounded output
    and fail on unexpected rejection/error diagnostics despite HTTP success. Add this
    evidence to existing web/local-stack CI paths and required aggregate without adding
-   a workflow.
+   a workflow. Run the fresh canonical implementation build/workerd and reporting-
+   equivalence acceptance here. If it disproves T00's provisional selection, fail
+   closed, update T00's decision, revise T01, and repeat T02 under fresh exact-SHA review.
 4. **T03 — Reconcile and verify.** Review every affected runtime/config/test/doc/
    lockfile file, update only documentation made inaccurate, run deterministic checks,
    obtain a different-role exact-SHA Cloudflare/Workers/Sentry specialist verdict, and

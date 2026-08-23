@@ -8,15 +8,18 @@
 - Evidence: `VOC-083-EV-00`
 - Result: pending
 
-The final decision compares configuration, package-update, and Workers-native-adapter
-candidates using exact versions and current primary evidence. It selects one only when
-it preserves required reporting and passes generated-bundle/workerd proof; otherwise
-it stops for a new decision. It does not claim that any candidate is preselected here.
+T00 compares configuration, package-update, and Workers-native-adapter candidates using
+exact versions/current primary evidence and, if needed, bounded disposable isolated-
+worktree probes. It records a provisional candidate that has no known incompatibility
+and preserves the required reporting design, or stops for a new decision. T00 does not
+require/claim final canonical generated-bundle, workerd, or reporting acceptance; T02
+qualifies that selection after T01 applies it. T00 leaves the canonical task branch
+unchanged and discards/reverts every probe.
 
 ## VOC-083-AC-01 — Generated Worker forbids unsupported runtime Wasm compilation
 
 - Requirements: `VOC-083-R01`
-- Tasks: `VOC-083-T01`
+- Tasks: `VOC-083-T01`, `VOC-083-T02`
 - Tests: `VOC-083-TEST-01`
 - Evidence: `VOC-083-EV-01`
 - Result: pending
@@ -34,7 +37,7 @@ fixtures for `compile`, `compileStreaming`, `instantiateStreaming`, and buffer-s
 ## VOC-083-AC-02 — Error reporting survives the compatibility repair
 
 - Requirements: `VOC-083-R02`
-- Tasks: `VOC-083-T01`
+- Tasks: `VOC-083-T01`, `VOC-083-T02`
 - Tests: `VOC-083-TEST-02`
 - Evidence: `VOC-083-EV-02`
 - Result: pending

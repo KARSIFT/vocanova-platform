@@ -73,8 +73,10 @@ pull-request behavior remain invariant.
   Mitigation: minimal lockfile diff, frozen install, audit, license/provenance review,
   generated-bundle diff, and rollback.
 - `VOC-083-DEP-00`: selection evidence is deliberately unresolved at drafting time.
-  After adoption it authorizes T00 evidence-only selection; it blocks T01+ runtime
-  changes, not package adoption itself.
+  After adoption it authorizes T00's bounded disposable probes and provisional decision;
+  it blocks T01 runtime changes, not package adoption itself. T02 owns final canonical
+  qualification. A T02 failure fails closed into an updated T00/T01 revision and fresh
+  exact-SHA review, never a silent replacement candidate.
 - `VOC-083-EV-00` through `EV-06`: candidate matrix, bundle scan, capture contract,
   smoke-log fixtures, CI/docs inventory, and exact-SHA review/rollback evidence.
 

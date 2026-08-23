@@ -35,8 +35,15 @@ approvals:
     evidence: https://github.com/KARSIFT/vocanova-platform/issues/105
   package_independent_verification:
     status: fail-exact-revision-remediation-pending
-    candidate_sha: 682b33ec1a126e8924395f7d7f7eb26191f2a57a
-    evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973
+    candidate_sha: 07772a00f753e614d3fd7a51539cabe4f0da1393
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385292757
+  package_independent_verification_history:
+    - candidate_sha: 682b33ec1a126e8924395f7d7f7eb26191f2a57a
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973
+    - candidate_sha: 07772a00f753e614d3fd7a51539cabe4f0da1393
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385292757
 approval_status: not-approved
 implementation_authorized: false
 automatic_merge_allowed: true
@@ -58,12 +65,12 @@ artifacts:
 dependencies:
   - id: VOC-083-DEP-00
     status: >-
-      Post-adoption T00 gate. Adoption authorizes the evidence-only candidate matrix,
-      not runtime/configuration/dependency changes. T01 and later remain blocked until
-      T00 records a qualified selection decision (or an explicit stop/escalation).
-      The matrix uses locked Sentry/OpenNext/Wrangler versions and then-current primary
-      Cloudflare/Sentry sources; this package does not preselect configuration, update,
-      or adapter.
+      Post-adoption T00 gate. Adoption authorizes the evidence/decision matrix plus
+      bounded disposable candidate probes in isolated worktrees; no probe change may
+      land on the canonical task branch. T00 records a provisional selection or stop.
+      T01 applies that selection; T02, not T00, owns final canonical bundle/workerd/
+      reporting acceptance and may send a disproved selection through fresh T00/T01
+      revision and review. This package does not preselect configuration, update, or adapter.
   - id: VOC-083-DEP-01
     status: >-
       VOC-081 T02 supplied the discovery reproduction and T04 evidence base at
@@ -109,7 +116,7 @@ affected_areas:
 implementation:
   authorized: false
   required: true
-  status: prohibited-until-plan-adoption; T00-evidence-only-after-adoption; T01-plus-blocked-by-T00
+  status: prohibited-until-plan-adoption; T00-isolated-probes-and-decision-after-adoption; T01-plus-blocked-by-T00
   target_branch: develop
   pull_request: null
   authority_issue: 105
@@ -125,7 +132,7 @@ repository_adoption_status: draft-not-adopted
 adoption_pr: null
 adoption_evidence: null
 implementation_authority_before_adoption: false
-implementation_authority_status: prohibited-pending-adoption-then-T00-evidence-only
+implementation_authority_status: prohibited-pending-adoption-then-T00-isolated-probes-and-decision-only
 production_deployment: held-by-VOC-080-HOLD-01
 staging_deployment: held-by-VOC-080-HOLD-00
 production_data_access: held-by-VOC-080-HOLD-02
@@ -135,5 +142,7 @@ blocking_reasons:
   - plan-not-independently-reviewed-or-adopted
   - exact-revision-plan-review-fail-remediation-pending
 post_adoption_task_gates:
-  - T00-authorized-evidence-only-candidate-selection
-  - T01-plus-blocked-until-T00-qualified-decision-recorded
+  - T00-authorized-upstream-evidence-disposable-isolated-probes-and-provisional-decision-only
+  - T01-blocked-until-T00-provisional-decision-recorded
+  - T02-owns-final-canonical-bundle-workerd-and-reporting-acceptance
+  - T02-failure-requires-updated-T00-decision-T01-revision-and-fresh-exact-SHA-review

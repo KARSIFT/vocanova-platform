@@ -43,11 +43,12 @@ Out of scope:
 
 ### VOC-083-R00 — Evidence-based candidate selection
 
-Before changing runtime code, the builder must record a version-pinned comparison of
-all three candidates below, including direct imports/exports, generated-bundle reach-
-ability, supported reporting semantics, dependency/license/audit effects, maintenance
-status, rollback, and test evidence. Primary Cloudflare and Sentry documentation and
-the relevant Sentry upstream defect/release evidence must be captured with access date.
+T00 must record a version-pinned comparison of all three candidates below, including
+direct imports/exports, current bundle-reachability diagnosis, supported reporting
+semantics, dependency/license/audit effects, maintenance status, rollback, and primary
+Cloudflare/Sentry/upstream evidence with access date. T00 chooses a **provisional**
+candidate or records a stop; it does not require the final canonical bundle/workerd/
+reporting-acceptance evidence that T02 owns.
 
 1. A **configuration fix**: an OpenNext/Next/Sentry build configuration or alias that
    excludes only a verified build-time transformer path from the Worker runtime.
@@ -59,12 +60,15 @@ the relevant Sentry upstream defect/release evidence must be captured with acces
    an appropriate browser SDK and every required Next integration only where it is
    demonstrably Worker-safe.
 
-The comparison must reject any option that relies on unsupported runtime Wasm, removes
+T00 may support its decision with disposable local candidate probes in a fresh isolated
+worktree. Each probe is bounded to the candidate surfaces, uses only local simulation/
+synthetic non-secret values, records a sanitized result, is fully reverted or discarded,
+and never commits, merges, deploys, queries Sentry, uploads source maps, or changes the
+canonical task branch. Probe evidence is directional only, not T02 acceptance. The
+comparison must reject any option that relies on unsupported runtime Wasm, removes
 required capture merely to pass, adds an unreviewed broad alias, or requires a secret,
-Sentry API/live query, or Cloudflare action. The selected option must be recorded as a
-bounded implementation decision with its rejected alternatives and exact versions; if
-no option preserves required capture, stop and open a new decision rather than degrade
-observability.
+Sentry API/live query, or Cloudflare action. The provisional selection records rejected
+alternatives/exact versions; if none qualifies, T00 stops and routes a new decision.
 
 ### VOC-083-R01 — Workers-safe generated bundle
 
@@ -113,6 +117,10 @@ evidence that source-map upload remains explicitly disabled, no `org`/`project`/
 browser debug/spotlight output remains disabled. Existing local-loop environment
 allowlists must continue to blank Sentry DSNs/tokens and reject their inheritance.
 
+T01 may add the selected implementation and test seams, but T02 owns the final
+canonical reporting-equivalence acceptance alongside its fresh build/workerd evidence.
+No T00 probe or T01-only result can close this requirement.
+
 ### VOC-083-R03 — Workerd logs are first-class smoke evidence
 
 The canonical workerd test and the two-Worker local-stack smoke must collect bounded
@@ -147,12 +155,15 @@ made acceptable by changing the log parser or suppressing reporting.
 
 ## Post-adoption selection gate
 
-Plan adoption authorizes only `VOC-083-T00` as a read-only/evidence-only selection
-gate. T00 may reproduce against local generated artifacts, inspect versions and primary
-sources, and record the candidate matrix/decision; it may not edit runtime,
-configuration, dependencies, lockfiles, or active documentation. T01+ are blocked
-until T00 records a qualified decision. If no candidate qualifies, T00 stops and routes
-a new decision; it does not authorize an observability-reducing workaround.
+Plan adoption authorizes only `VOC-083-T00` as a non-landing evidence/decision gate
+with disposable candidate probes in isolated worktrees. T00 may inspect versions/
+primary sources and modify only a disposable probe copy of declared candidate surfaces;
+it records a provisional matrix/decision, restores or discards the probe, and changes
+nothing on the canonical task branch. T01 is blocked until this decision exists and
+applies it canonically. T02 owns final canonical generated-bundle, workerd, and
+reporting-equivalence acceptance. If T02 disproves the provisional decision, it fails
+closed: update T00's decision, revise T01, rerun T02, and obtain fresh exact-SHA review;
+never silently select or ship another candidate.
 
 ## External research references
 

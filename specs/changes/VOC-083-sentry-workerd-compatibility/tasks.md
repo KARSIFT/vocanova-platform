@@ -6,16 +6,18 @@
 - Acceptance: `VOC-083-AC-00`
 - Tests: `VOC-083-TEST-00`
 - Evidence: `VOC-083-EV-00`
-- Status: authorized-evidence-only-after-adoption
+- Status: authorized-disposable-probes-and-provisional-decision-after-adoption
 
-After adoption, reproduce the locked failure locally, inventory direct/transitive Sentry imports and
+After adoption, inventory direct/transitive Sentry imports and
 generated bundle locations, retrieve current primary-source compatibility evidence,
 and compare configuration fix, package update, and Workers-native adapter. Document an
 exact selected version/configuration and rejected alternatives only after reporting-
-equivalence and safety evidence; otherwise stop and route a new decision. T00 must not
-change runtime code, build/Wrangler config, dependency manifest/lockfile, tests, CI, or
-active documentation; it only records the required matrix/decision. T01+ remain blocked
-until that record is complete.
+compatibility evidence. If needed, test candidates only in fresh isolated worktrees with
+local simulation/synthetic non-secret values; record sanitized results and fully discard
+or revert each probe. T00 commits only its matrix/provisional decision, not probe code,
+and does not change the canonical task branch's runtime/config, dependency manifest/
+lockfile, tests, CI, or active docs. T01 remains blocked until this record is complete;
+T00 does not claim final canonical acceptance.
 
 ## VOC-083-T01 — Preserve reporting with the selected Workers-safe repair
 
@@ -25,23 +27,28 @@ until that record is complete.
 - Evidence: `VOC-083-EV-01`, `VOC-083-EV-02`
 - Status: blocked-by-T00
 
-Implement the selected smallest repair; regenerate and review any lockfile change;
-preserve server/Worker/browser capture and privacy controls; and add deterministic,
-non-network reporting-equivalence tests. Do not turn off Sentry or source-map controls.
+Apply the T00 provisional choice canonically, regenerate/review any lockfile change,
+and preserve server/Worker/browser capture/privacy controls. Prepare deterministic
+non-network reporting seams but leave final generated-bundle/workerd/reporting-
+equivalence acceptance to T02. Do not turn off Sentry or source-map controls.
 
 ## VOC-083-T02 — Generated-bundle and workerd-log fail-closed evidence
 
-- Requirements: `VOC-083-R01`, `VOC-083-R03`, `VOC-083-R04`
-- Acceptance: `VOC-083-AC-01`, `VOC-083-AC-03`, `VOC-083-AC-04`
-- Tests: `VOC-083-TEST-01`, `VOC-083-TEST-03`, `VOC-083-TEST-04`
-- Evidence: `VOC-083-EV-01`, `VOC-083-EV-03`, `VOC-083-EV-04`
+- Requirements: `VOC-083-R01`, `VOC-083-R02`, `VOC-083-R03`, `VOC-083-R04`
+- Acceptance: `VOC-083-AC-01`, `VOC-083-AC-02`, `VOC-083-AC-03`, `VOC-083-AC-04`
+- Tests: `VOC-083-TEST-01`, `VOC-083-TEST-02`, `VOC-083-TEST-03`, `VOC-083-TEST-04`
+- Evidence: `VOC-083-EV-01`, `VOC-083-EV-02`, `VOC-083-EV-03`, `VOC-083-EV-04`
 - Status: blocked-by-T01
 
-Add a complete fresh-artifact manifest/invariant and fixture-backed log classification
+Own final qualification of T00/T01: add a complete fresh-artifact manifest/invariant and
+fixture-backed log classification
 to both local workerd smoke owners. Include failing unsupported-Wasm, missing/zero/
 partial-inventory, and passing imported-precompiled-module fixtures; reorder `ci:web`
 to build before compatibility/dry-run/smoke and make local-stack build/scan fresh output
-before its own smoke. Preserve the service-binding and disabled-DSN no-network contract.
+before its own smoke. Run final canonical build/workerd/reporting-equivalence acceptance.
+If it fails, stop, update T00's decision and T01 revision, then repeat with fresh exact-
+SHA review; never silently select/ship a replacement. Preserve the service-binding and
+disabled-DSN no-network contract.
 
 ## VOC-083-T03 — Documentation, exact-SHA review, and rollback evidence
 

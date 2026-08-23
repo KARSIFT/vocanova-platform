@@ -4,13 +4,14 @@
 
 - Covers: `VOC-083-AC-00`
 - Preconditions: adopted package; T00 is the only authorized task; frozen locked base.
-- Procedure: reproduce the generated-bundle/workerd failure; inspect dependency/export
-  paths; retrieve current primary Cloudflare and Sentry evidence; compare all three
-  candidates for Worker safety, reporting features, package graph, maintenance,
-  privacy, rollback, and no-live feasibility.
-- Expected result: one qualified candidate decision with exact evidence, or an explicit
-  stop/escalation; no candidate is assumed valid because it merely suppresses the log.
-  No runtime/configuration/dependency/lockfile/doc change occurs in this evidence-only task.
+- Procedure: inspect the known generated-bundle/workerd failure, dependency/export
+  paths, current primary Cloudflare/Sentry evidence, and all candidates' Worker safety,
+  reporting, package graph, maintenance, privacy, rollback, and no-live feasibility. If
+  decisive evidence needs a probe, use a fresh isolated worktree with only synthetic
+  non-secret/local simulation values, record sanitized results, then discard/revert it.
+- Expected result: a provisional candidate decision or explicit stop/escalation; no
+  candidate is assumed valid because it merely suppresses the log. No probe change lands
+  on the canonical branch, and T00 does not claim final acceptance that belongs to T02.
 - Evidence: `VOC-083-EV-00`.
 
 ## VOC-083-TEST-01 — Generated OpenNext bundle invariant
@@ -32,16 +33,18 @@
   fixture passes. Source scan and real workerd smoke remain complementary evidence.
 - Evidence: `VOC-083-EV-01`.
 
-## VOC-083-TEST-02 — Reporting-equivalence and privacy contract
+## VOC-083-TEST-02 — Canonical reporting-equivalence and privacy contract
 
 - Covers: `VOC-083-AC-02`
-- Preconditions: selected SDK/config exposes a test-only transport or equivalent
-  injected boundary that cannot enable normal outbound use.
+- Preconditions: T01 canonical selected SDK/config plus T02's fresh implementation
+  build/workerd lineage; a test-only transport/equivalent boundary cannot enable
+  normal outbound use.
 - Procedure: exercise enabled synthetic configuration for request/global/browser error
   capture, disabled local DSN behavior, event redaction, source-map/upload options,
   telemetry/debug/spotlight settings, and local supervisor DSN/token stripping.
-- Expected result: required captures reach a non-network test boundary; local runs send
-  nothing; forbidden data/configuration is absent.
+- Expected result: T02 accepts only when required captures reach a non-network test
+  boundary, local runs send nothing, and forbidden data/configuration is absent. Failure
+  returns to updated T00/T01 with fresh exact-SHA review.
 - Evidence: `VOC-083-EV-02`.
 
 ## VOC-083-TEST-03 — Workerd HTTP-success/log-failure regression
