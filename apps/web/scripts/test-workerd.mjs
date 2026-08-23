@@ -1,6 +1,7 @@
-/* global URL, console, fetch, process, setTimeout */
+/* global URL, clearTimeout, console, fetch, process, setTimeout */
 
 import assert from "node:assert/strict";
+import { Buffer } from "node:buffer";
 import { spawn } from "node:child_process";
 import { readdir } from "node:fs/promises";
 import { createServer } from "node:net";
@@ -24,12 +25,9 @@ export async function runWorkerdSmoke() {
       failureOutput = error.output;
     }
   } finally {
-    if (activeAttempt) await stopProcess(activeAttempt.wrangler);
+    if (activeAttempt)
+      await stopProcess(activeAttempt.wrangler, activeAttempt.closed);
   }
-  // The process must be stopped before classifying: shutdown can flush a
-  // rejection after the final HTTP assertion.  The sticky chunk diagnostics
-  // also prevent a long healthy tail from evicting an earlier failure.
-  await new Promise((resolve) => setTimeout(resolve, 0));
   const output = activeAttempt?.output ?? failureOutput;
   if (failure) {
     process.stderr.write(`${redactAndBound(output.join(""))}\n`);
@@ -39,7 +37,7 @@ export async function runWorkerdSmoke() {
     assertCleanWorkerdOutput(
       "canonical workerd smoke",
       output.join(""),
-      activeAttempt.stickyDiagnostics,
+      activeAttempt.outputCollector.result().diagnostics,
     );
   } catch (error) {
     process.stderr.write(`${redactAndBound(output.join(""))}\n`);
@@ -106,6 +104,7 @@ async function exerciseWorkerd(origin) {
 
 export async function startWorkerdWithRetry({
   maximumAttempts = MAX_START_ATTEMPTS,
+  maximumPortSelections = maximumAttempts * 4,
   selectPort = reservePort,
   startAttempt = startWorkerdAttempt,
 } = {}) {
@@ -113,13 +112,39 @@ export async function startWorkerdWithRetry({
     Number.isSafeInteger(maximumAttempts) && maximumAttempts > 0,
     "maximumAttempts must be a positive integer",
   );
+  assert.ok(
+    Number.isSafeInteger(maximumPortSelections) &&
+      maximumPortSelections >= maximumAttempts,
+    "maximumPortSelections must be an integer at least as large as maximumAttempts",
+  );
+
+  const attemptedPorts = new Set();
+  let portSelections = 0;
 
   for (
     let attemptNumber = 1;
     attemptNumber <= maximumAttempts;
     attemptNumber += 1
   ) {
-    const port = await selectPort();
+    let port;
+    while (portSelections < maximumPortSelections) {
+      portSelections += 1;
+      const candidate = await selectPort();
+      assert.ok(
+        Number.isSafeInteger(candidate) && candidate > 0 && candidate <= 65_535,
+        "selected workerd port must be an integer between 1 and 65535",
+      );
+      if (!attemptedPorts.has(candidate)) {
+        port = candidate;
+        attemptedPorts.add(candidate);
+        break;
+      }
+    }
+    if (port === undefined) {
+      throw new Error(
+        `Unable to select a fresh workerd port after ${String(maximumPortSelections)} bounded selections`,
+      );
+    }
     try {
       return await startAttempt(port);
     } catch (error) {
@@ -138,7 +163,6 @@ export async function startWorkerdWithRetry({
 async function startWorkerdAttempt(port) {
   const origin = `http://${HOST}:${port}`;
   const output = [];
-  const stickyDiagnostics = [];
   const wrangler = spawn(
     "pnpm",
     [
@@ -157,24 +181,18 @@ async function startWorkerdAttempt(port) {
     ],
     {
       cwd: process.cwd(),
-      env: {
-        ...process.env,
-        API_BASE_URL: "",
-        NEXT_PUBLIC_API_BASE_URL: "",
-        NEXT_PUBLIC_SENTRY_DSN: "",
-        SENTRY_DSN: "",
-      },
+      env: buildStandaloneWorkerdEnvironment(),
       stdio: ["ignore", "pipe", "pipe"],
     },
   );
 
-  wrangler.stdout.on("data", recordOutput);
-  wrangler.stderr.on("data", recordOutput);
+  const { closed, collector: outputCollector } = collectChildWorkerdOutput(
+    wrangler,
+    { onChunk: recordOutput },
+  );
 
   function recordOutput(chunk) {
     const text = String(chunk);
-    const chunkClassification = classifyWorkerdOutput(text);
-    stickyDiagnostics.push(...chunkClassification.diagnostics);
     output.push(text);
     if (output.length > 400) output.shift();
   }
@@ -182,16 +200,37 @@ async function startWorkerdAttempt(port) {
   try {
     await waitForReady(wrangler, origin, output, port);
   } catch (error) {
-    await stopProcess(wrangler);
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await stopProcess(wrangler, closed);
     throw new WorkerdStartupAttemptError(error, {
       output,
       port,
-      stickyDiagnostics,
+      stickyDiagnostics: outputCollector.result().diagnostics,
     });
   }
 
-  return { origin, output, stickyDiagnostics, wrangler };
+  return {
+    closed,
+    origin,
+    output,
+    outputCollector,
+    stickyDiagnostics: outputCollector.result().diagnostics,
+    wrangler,
+  };
+}
+
+export function buildStandaloneWorkerdEnvironment(source = process.env) {
+  const environment = { ...source };
+  for (const key of Object.keys(environment)) {
+    if (/^(?:NEXT_PUBLIC_)?SENTRY(?:_|$)/i.test(key)) delete environment[key];
+  }
+  return {
+    ...environment,
+    API_BASE_URL: "",
+    NEXT_PUBLIC_API_BASE_URL: "",
+    NEXT_PUBLIC_SENTRY_DSN: "",
+    SENTRY_DSN: "",
+    WRANGLER_SEND_METRICS: "false",
+  };
 }
 
 export class WorkerdStartupAttemptError extends Error {
@@ -277,29 +316,181 @@ const ANSI_ESCAPE_PATTERN = new RegExp(
   `${String.fromCodePoint(0x1b)}\\[[0-?]*[ -/]*[@-~]`,
   "g",
 );
+const MAXIMUM_DIAGNOSTIC_BYTES = 16_384;
+const MAXIMUM_LINE_BYTES = 16_384;
+const SPLIT_TOKEN_OVERLAP_BYTES = 128;
+
+function diagnosticForLine(value, maximumBytes = MAXIMUM_DIAGNOSTIC_BYTES) {
+  const line = stripAnsi(String(value ?? "")).trim();
+  if (
+    line.length === 0 ||
+    (!WORKERD_HARD_DIAGNOSTIC.test(line) &&
+      (!WORKERD_DIAGNOSTIC.test(line) || ALLOWED_DIAGNOSTIC.test(line)))
+  ) {
+    return null;
+  }
+  return redactAndBound(line, maximumBytes);
+}
+
+export class WorkerdOutputCollector {
+  constructor({
+    maximumDiagnosticBytes = MAXIMUM_DIAGNOSTIC_BYTES,
+    maximumLineBytes = MAXIMUM_LINE_BYTES,
+    maximumOutputBytes = 65_536,
+  } = {}) {
+    for (const [name, value] of [
+      ["maximumDiagnosticBytes", maximumDiagnosticBytes],
+      ["maximumLineBytes", maximumLineBytes],
+      ["maximumOutputBytes", maximumOutputBytes],
+    ]) {
+      assert.ok(
+        Number.isSafeInteger(value) && value > 0,
+        `${name} must be a positive integer`,
+      );
+    }
+    this.maximumDiagnosticBytes = maximumDiagnosticBytes;
+    this.maximumLineBytes = maximumLineBytes;
+    this.maximumOutputBytes = maximumOutputBytes;
+    this.channels = new Map();
+    this.diagnostics = [];
+    this.diagnosticSet = new Set();
+    this.diagnosticBytes = 0;
+    this.output = "";
+  }
+
+  write(channel, chunk) {
+    const key = String(channel);
+    const state = this.channels.get(key) ?? {
+      closed: false,
+      pending: "",
+      truncated: false,
+    };
+    assert.equal(
+      state.closed,
+      false,
+      `workerd output channel ${key} is closed`,
+    );
+    state.pending += String(chunk);
+    this.channels.set(key, state);
+
+    for (let newline = state.pending.indexOf("\n"); newline !== -1;) {
+      const line = state.pending.slice(0, newline).replace(/\r$/, "");
+      state.pending = state.pending.slice(newline + 1);
+      this.#recordLine(line, state.truncated, true);
+      state.truncated = false;
+      newline = state.pending.indexOf("\n");
+    }
+
+    if (Buffer.byteLength(state.pending) > this.maximumLineBytes) {
+      this.#recordDiagnostic(state.pending);
+      this.#appendOutput("[oversized workerd log line redacted]\n");
+      state.pending = boundUtf8Tail(
+        state.pending,
+        Math.min(SPLIT_TOKEN_OVERLAP_BYTES, this.maximumLineBytes),
+      );
+      state.truncated = true;
+    }
+  }
+
+  close(channel) {
+    const key = String(channel);
+    const state = this.channels.get(key) ?? {
+      closed: false,
+      pending: "",
+      truncated: false,
+    };
+    if (state.closed) return;
+    if (state.pending !== "" || state.truncated) {
+      this.#recordLine(state.pending, state.truncated, false);
+    }
+    state.closed = true;
+    state.pending = "";
+    state.truncated = false;
+    this.channels.set(key, state);
+  }
+
+  flush() {
+    for (const channel of this.channels.keys()) this.close(channel);
+  }
+
+  result() {
+    let pending = "";
+    for (const state of this.channels.values()) {
+      if (!state.closed && state.pending !== "") {
+        pending += state.truncated
+          ? "[oversized workerd log line redacted]"
+          : redactAndBound(state.pending, this.maximumLineBytes);
+      }
+    }
+    const output = boundUtf8Tail(
+      `${this.output}${pending}`,
+      this.maximumOutputBytes,
+    );
+    return Object.freeze({
+      diagnostics: Object.freeze([...this.diagnostics]),
+      output,
+      pass: this.diagnostics.length === 0,
+    });
+  }
+
+  #recordLine(line, truncated, newline) {
+    this.#recordDiagnostic(line);
+    this.#appendOutput(
+      `${truncated ? "[oversized workerd log line redacted]" : redactAndBound(line, this.maximumLineBytes)}${newline ? "\n" : ""}`,
+    );
+  }
+
+  #recordDiagnostic(line) {
+    if (this.diagnosticBytes >= this.maximumDiagnosticBytes) return;
+    const diagnostic = diagnosticForLine(
+      line,
+      this.maximumDiagnosticBytes - this.diagnosticBytes,
+    );
+    if (!diagnostic || this.diagnosticSet.has(diagnostic)) return;
+    this.diagnosticSet.add(diagnostic);
+    this.diagnostics.push(diagnostic);
+    this.diagnosticBytes += Buffer.byteLength(diagnostic);
+  }
+
+  #appendOutput(value) {
+    this.output = boundUtf8Tail(
+      `${this.output}${value}`,
+      this.maximumOutputBytes,
+    );
+  }
+}
+
+export function collectChildWorkerdOutput(
+  child,
+  { collector = new WorkerdOutputCollector(), onChunk = () => {} } = {},
+) {
+  for (const [channel, stream] of [
+    ["stdout", child.stdout],
+    ["stderr", child.stderr],
+  ]) {
+    stream?.on("data", (chunk) => {
+      collector.write(channel, chunk);
+      onChunk(chunk, channel);
+    });
+    stream?.once("close", () => collector.close(channel));
+  }
+  const closed = new Promise((resolve) => {
+    child.once("close", (code, signal) => {
+      collector.flush();
+      resolve({ code, signal });
+    });
+  });
+  return Object.freeze({ closed, collector });
+}
 
 export function classifyWorkerdOutput(value, maximumBytes = 16_384) {
-  // Inspect the complete already-bounded record before truncating the returned
-  // context.  A long healthy tail must not evict an earlier rejection.
-  const raw = stripAnsi(String(value ?? ""));
-  const diagnosticLines = raw
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(
-      (line) =>
-        line.length > 0 &&
-        (WORKERD_HARD_DIAGNOSTIC.test(line) ||
-          (WORKERD_DIAGNOSTIC.test(line) && !ALLOWED_DIAGNOSTIC.test(line))),
-    );
-  const output = redactAndBound(raw, maximumBytes);
-  const diagnostics = diagnosticLines.map((line) =>
-    redactAndBound(line, maximumBytes),
-  );
-  return Object.freeze({
-    diagnostics: Object.freeze(diagnostics),
-    output,
-    pass: diagnostics.length === 0,
+  const collector = new WorkerdOutputCollector({
+    maximumDiagnosticBytes: maximumBytes,
+    maximumOutputBytes: maximumBytes,
   });
+  collector.write("complete", value);
+  collector.close("complete");
+  return collector.result();
 }
 
 export function assertCleanWorkerdOutput(label, value, stickyDiagnostics = []) {
@@ -316,13 +507,22 @@ export function assertCleanWorkerdOutput(label, value, stickyDiagnostics = []) {
 }
 
 function redactAndBound(value, maximumBytes = 16_384) {
-  return stripAnsi(String(value ?? ""))
-    .replaceAll(/https?:\/\/[^@\s]+@/g, "https://[REDACTED]@")
-    .replaceAll(
-      /(\b(?:dsn|token|authorization|cookie|password|secret|learner|provider|request[_-]?body))\s*[:=]\s*(?:"[^"]*"|'[^']*'|[^,;\n}]*?(?=\s+(?:unhandled(?:promise)?rejection|compileerror|runtimeerror|error|exception)\b|\s+WebAssembly\.|[,;\n}]|$))/gi,
-      (_match, key) => `${key}=[REDACTED]`,
-    )
-    .slice(-maximumBytes);
+  return boundUtf8Tail(
+    stripAnsi(String(value ?? ""))
+      .replaceAll(/https?:\/\/[^@\s]+@/g, "https://[REDACTED]@")
+      .replaceAll(
+        /(\b(?:dsn|token|authorization|cookie|password|secret|learner|provider|request[_-]?body))\s*[:=]\s*(?:"[^"]*"|'[^']*'|[^,;\n}]*?(?=\s+(?:unhandled(?:promise)?rejection|compileerror|runtimeerror|error|exception)\b|\s+WebAssembly\.|[,;\n}]|$))/gi,
+        (_match, key) => `${key}=[REDACTED]`,
+      ),
+    maximumBytes,
+  );
+}
+
+function boundUtf8Tail(value, maximumBytes) {
+  const bytes = Buffer.from(String(value ?? ""));
+  return bytes.length <= maximumBytes
+    ? bytes.toString()
+    : bytes.subarray(bytes.length - maximumBytes).toString();
 }
 
 function stripAnsi(value) {
@@ -361,16 +561,29 @@ function assertHeader(response, name) {
   return value;
 }
 
-async function stopProcess(child) {
-  if (child.exitCode !== null) return;
-  child.kill("SIGTERM");
-  const exited = new Promise((resolve) => child.once("exit", resolve));
-  const timeout = new Promise((resolve) =>
-    setTimeout(resolve, 5_000, "timeout"),
-  );
-  if ((await Promise.race([exited, timeout])) === "timeout") {
+async function stopProcess(child, closed) {
+  if (child.exitCode === null && child.signalCode === null) {
+    child.kill("SIGTERM");
+  }
+  if (!(await waitBounded(closed, 5_000))) {
     child.kill("SIGKILL");
-    await exited;
+    if (!(await waitBounded(closed, 2_000))) {
+      throw new Error("Wrangler stdio did not close after SIGKILL");
+    }
+  }
+}
+
+async function waitBounded(promise, timeoutMs) {
+  let timer;
+  try {
+    return await Promise.race([
+      promise.then(() => true),
+      new Promise((resolve) => {
+        timer = setTimeout(resolve, timeoutMs, false);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
   }
 }
 

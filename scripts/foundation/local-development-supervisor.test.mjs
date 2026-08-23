@@ -1,6 +1,7 @@
 /* global Response, setTimeout */
 
 import assert from "node:assert/strict";
+import { EventEmitter } from "node:events";
 import { createServer as createHttpServer } from "node:http";
 import { createServer as createNetServer } from "node:net";
 import { tmpdir } from "node:os";
@@ -68,7 +69,7 @@ test("fast and Workers plans use locked local-only tools and shared state", () =
     { label: "api", port: 8080 },
   ]);
 
-  assert.equal(workers.preparation.length, 3);
+  assert.equal(workers.preparation.length, 4);
   assert.equal(workers.preparation[1].command, process.execPath);
   assert.equal(
     workers.preparation[1].args[0],
@@ -78,6 +79,14 @@ test("fast and Workers plans use locked local-only tools and shared state", () =
   assert.equal(workers.preparation[2].command, process.execPath);
   assert.equal(
     workers.preparation[2].args[0],
+    LOCAL_DEVELOPMENT_PATHS.workerCompatibilityScript,
+  );
+  assert.deepEqual(workers.preparation[2].args.slice(1), [
+    "--canonicalize-opennext",
+  ]);
+  assert.equal(workers.preparation[3].command, process.execPath);
+  assert.equal(
+    workers.preparation[3].args[0],
     LOCAL_DEVELOPMENT_PATHS.workerCompatibilityScript,
   );
   assert.equal(workers.web.args[0], LOCAL_DEVELOPMENT_PATHS.wranglerBin);
@@ -316,6 +325,35 @@ test("shutdown escalates after the bounded grace period", async () => {
   await child.exit;
   assert.equal(forced, true);
   assert.equal(child.outcome.signal, "SIGKILL");
+});
+
+test("supervised child waits for close and collects split diagnostics after exit", async () => {
+  const fixtureChild = new EventEmitter();
+  fixtureChild.stdout = new EventEmitter();
+  fixtureChild.stderr = new EventEmitter();
+  fixtureChild.exitCode = null;
+  fixtureChild.signalCode = null;
+  fixtureChild.kill = () => true;
+  const children = new SupervisedChildren({
+    spawnImpl: () => fixtureChild,
+    stdout: quietStream,
+    stderr: quietStream,
+  });
+  const record = children.start(fixtureSpecification("late fixture", ""));
+
+  fixtureChild.emit("exit", 0, null);
+  await record.exit;
+  assert.equal(record.exited, true);
+  assert.equal(record.settled, false);
+  fixtureChild.stderr.emit("data", "UnhandledPromise");
+  fixtureChild.stderr.emit("data", "Rejection: emitted after exit\n");
+  fixtureChild.stdout.emit("close");
+  fixtureChild.stderr.emit("close");
+  fixtureChild.emit("close", 0, null);
+  await record.close;
+
+  assert.equal(record.settled, true);
+  assert.match(record.diagnostics.join("\n"), /emitted after exit/);
 });
 
 test("an exited web child propagates failure and stops its API sibling", async () => {

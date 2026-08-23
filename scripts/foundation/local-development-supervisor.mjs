@@ -15,7 +15,7 @@ import {
   LOCAL_D1_PATHS,
   runLocalD1Migrations,
 } from "../../apps/api-worker/scripts/local-d1-init.mjs";
-import { classifyWorkerdOutput } from "../../apps/web/scripts/test-workerd.mjs";
+import { WorkerdOutputCollector } from "../../apps/web/scripts/test-workerd.mjs";
 import { LOCAL_DEVELOPMENT_CONTRACT } from "./local-development-policy.mjs";
 
 export const READINESS_TIMEOUT_MS = 60_000;
@@ -267,6 +267,16 @@ export function buildLocalDevelopmentPlan(
               env: environment,
             }),
             Object.freeze({
+              label: "OpenNext runtime-artifact canonicalization",
+              command: process.execPath,
+              args: Object.freeze([
+                workerCompatibilityScript,
+                "--canonicalize-opennext",
+              ]),
+              cwd: webRoot,
+              env: environment,
+            }),
+            Object.freeze({
               label: "fresh Worker artifact compatibility scan",
               command: process.execPath,
               args: Object.freeze([workerCompatibilityScript]),
@@ -362,7 +372,7 @@ export async function waitForReadiness(
   const deadline = Date.now() + readinessTimeoutMs;
   let lastFailure = "not ready";
   while (Date.now() < deadline) {
-    if (childRecord?.settled) {
+    if (childRecord?.exited) {
       throw new Error(
         `${childRecord.label} exited before readiness: ${formatOutcome(childRecord.outcome)}`,
       );
@@ -426,10 +436,6 @@ export async function assertPortsAvailable(
   }
 }
 
-function boundedOutput(record, chunk) {
-  record.output = `${record.output}${String(chunk)}`.slice(-65_536);
-}
-
 function formatOutcome(outcome) {
   if (!outcome) return "unknown outcome";
   if (outcome.error) return outcome.error.message;
@@ -467,8 +473,11 @@ export class SupervisedChildren {
     );
     const record = {
       child,
+      close: null,
+      exited: false,
       label: specification.label,
       output: "",
+      outputCollector: new WorkerdOutputCollector(),
       diagnostics: [],
       outcome: null,
       settled: false,
@@ -480,7 +489,7 @@ export class SupervisedChildren {
         if (resolved) return;
         resolved = true;
         record.outcome = outcome;
-        record.settled = true;
+        record.exited = true;
         resolveExit(record);
       };
       child.once("error", (error) =>
@@ -490,20 +499,32 @@ export class SupervisedChildren {
         finish({ code, error: null, signal }),
       );
     });
+    record.close = new Promise((resolveClose) => {
+      child.once("close", (code, signal) => {
+        if (!record.outcome) {
+          record.outcome = { code, error: null, signal };
+          record.exited = true;
+        }
+        record.outputCollector.flush();
+        const result = record.outputCollector.result();
+        record.output = result.output;
+        record.diagnostics = [...result.diagnostics];
+        record.settled = true;
+        resolveClose(record);
+      });
+    });
     child.stdout?.on("data", (chunk) => {
-      boundedOutput(record, chunk);
-      record.diagnostics.push(
-        ...classifyWorkerdOutput(String(chunk)).diagnostics,
-      );
+      record.outputCollector.write("stdout", chunk);
+      record.output = record.outputCollector.result().output;
       this.stdout.write(`[${record.label}] ${String(chunk)}`);
     });
+    child.stdout?.once("close", () => record.outputCollector.close("stdout"));
     child.stderr?.on("data", (chunk) => {
-      boundedOutput(record, chunk);
-      record.diagnostics.push(
-        ...classifyWorkerdOutput(String(chunk)).diagnostics,
-      );
+      record.outputCollector.write("stderr", chunk);
+      record.output = record.outputCollector.result().output;
       this.stderr.write(`[${record.label}] ${String(chunk)}`);
     });
+    child.stderr?.once("close", () => record.outputCollector.close("stderr"));
     this.records.push(record);
     return record;
   }
@@ -522,11 +543,13 @@ export class SupervisedChildren {
 
   async #stopAll(signal) {
     const active = this.records.filter((record) => !record.settled);
-    for (const record of active) record.child.kill(signal);
+    for (const record of active) {
+      if (!record.exited) record.child.kill(signal);
+    }
     if (await this.#waitFor(active, this.shutdownGraceMs)) return false;
 
     for (const record of active) {
-      if (!record.settled) record.child.kill("SIGKILL");
+      if (!record.exited) record.child.kill("SIGKILL");
     }
     if (!(await this.#waitFor(active, this.forceKillWaitMs))) {
       throw new Error(
@@ -542,7 +565,7 @@ export class SupervisedChildren {
   async #waitFor(records, timeoutMs) {
     if (records.every((record) => record.settled)) return true;
     return Promise.race([
-      Promise.all(records.map((record) => record.exit)).then(() => true),
+      Promise.all(records.map((record) => record.close)).then(() => true),
       delay(timeoutMs).then(() => false),
     ]);
   }
