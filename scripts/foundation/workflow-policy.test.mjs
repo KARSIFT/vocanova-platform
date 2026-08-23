@@ -143,6 +143,12 @@ test("target contract rejects removal of deterministic CI commands", () => {
       error.includes("pnpm run ci:web"),
     ),
   );
+  assert.ok(
+    inspectTargetWorkflow(
+      "ci.yml",
+      source.replace("pnpm run ci:worker-api", "pnpm run lint:worker-api"),
+    ).some((error) => error.includes("pnpm run ci:worker-api")),
+  );
 });
 
 test("required-job aggregation blocks a synthetic subsystem failure", () => {

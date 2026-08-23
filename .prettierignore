@@ -15,3 +15,7 @@ apps/web/test-results/
 apps/web/playwright-report/
 apps/web/test-results-staging/
 apps/web/playwright-report-staging/
+
+# Canonical machine-generated artifacts with dedicated byte-for-byte checks.
+apps/api-worker/worker-configuration.d.ts
+apps/api-worker/openapi/worker-foundation.openapi.json

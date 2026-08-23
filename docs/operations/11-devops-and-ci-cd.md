@@ -69,8 +69,8 @@ Staging (from `develop`), Production (from `main`).
 | Capability   | Current repository state                                                                             | VOC-080 target                                                                                                 |
 | ------------ | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Web          | OpenNext build/config/workerd proof implemented; historical Docker assets remain; no deploy workflow | Next.js 16 through OpenNext on a Cloudflare Web Worker                                                         |
-| API          | Go/Huma/Ent/PostgreSQL parity reference                                                              | TypeScript Module Worker using Hono and generated bindings                                                     |
-| Data         | PostgreSQL source schema/reference; no repository deployment                                         | Separate local/staging/production Cloudflare D1 databases                                                      |
+| API          | Hono Module Worker foundation plus Go/Huma parity reference; no deployment                           | TypeScript Module Worker using Hono and generated bindings                                                     |
+| Data         | Local D1 forward migration/tests plus PostgreSQL source reference                                    | Separate local/staging/production Cloudflare D1 databases                                                      |
 | Web-to-API   | HTTPS server path                                                                                    | Cloudflare service binding where practical; HTTPS contract remains `/api/v1`                                   |
 | Assets/async | Docker/Nginx and synchronous server assumptions                                                      | Workers Static Assets; Queue/Workflow/DO/R2 only for a measured requirement                                    |
 | CI/CD        | Four deterministic workflows with stable subsystem/aggregate checks; no deployment                   | Credential-free Worker dry runs, then held environment-scoped version/migration/promotion jobs inside `ci.yml` |
@@ -115,6 +115,14 @@ the local startup profile, then sends representative static/SSR/RSC/middleware/a
 requests through two Workers in local workerd. A plain `next build` remains useful for
 UI checks but is not Cloudflare compatibility evidence. No T03 command uploads a
 version, queries an account, provisions a resource, or deploys.
+
+VOC-080-T04 adds the separate `worker api` CI job without adding a workflow file. It
+verifies generated D1 bindings, Hono operational OpenAPI, the canonical 24-operation
+Go `/api/v1` migration baseline, API-client path compatibility, privacy-safe
+problems/logs, explicit credentialed CORS, prepared statements, a forward STRICT D1
+migration applied from empty and replayed in workerd, static safety rules, build, and
+credential-free Wrangler dry-run. Its Wrangler configuration is local-only; T10 owns
+staging/production D1 IDs, secrets, routes, and held migration/deployment behavior.
 
 > **Amendment note (`VOC-032-§1-amendment`, adopted 2026-07-30 via VOC-032; founder as approving
 > owner).** The Frontend/Backend/Database rows of the target-infrastructure table below and the

@@ -24,10 +24,10 @@ official Go toolchain distribution and no repository secret.
 | ------------------- | ------------------------------------------------------------------------------- |
 | `pnpm dev`          | Run the Next.js development server with local Cloudflare binding simulation.    |
 | `pnpm validate`     | Run workspace, format, lint/vet, type, test, and build validation.              |
-| `pnpm lint`         | Run Next.js-aware web lint, package ESLint, and `go vet` for the API.           |
-| `pnpm typecheck`    | Generate Next.js route types and type-check the web and shared packages.        |
-| `pnpm test`         | Run workspace foundation tests and API tests.                                   |
-| `pnpm build`        | Build the Next.js UI check, TypeScript packages, and Go parity API.             |
+| `pnpm lint`         | Lint web, packages, Worker API, and run `go vet` on the reference API.          |
+| `pnpm typecheck`    | Type-check the web, Worker API, and shared packages.                            |
+| `pnpm test`         | Run foundation, client, web, Worker/D1, and Go-reference tests.                 |
+| `pnpm build`        | Build the web, Worker API, shared packages, and Go parity reference.            |
 | `pnpm format:check` | Check Prettier and `gofmt` formatting without writing.                          |
 | `pnpm format`       | Apply Prettier and `gofmt` formatting.                                          |
 | `pnpm audit`        | Fail when the pnpm production dependency graph has a high or critical advisory. |
@@ -36,12 +36,13 @@ The full `pnpm validate` command remains the pre-review local gate. GitHub Actio
 uses the following stable subsystem entry points so a failure names the affected
 surface while preserving the same underlying scripts:
 
-| Command              | Hosted check surface                                                                    |
-| -------------------- | --------------------------------------------------------------------------------------- |
-| `pnpm ci:foundation` | Workspace shape, formatting, shared-package prerequisite build, and foundation tests    |
-| `pnpm ci:packages`   | Shared-package lint, typecheck, build, and API-client tests                             |
-| `pnpm ci:web`        | Web lint/type/unit plus OpenNext build, typed config, dry-run/limits, and workerd proof |
-| `pnpm ci:api`        | Transitional Go API vet, tests, and build                                               |
+| Command              | Hosted check surface                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| `pnpm ci:foundation` | Workspace shape, formatting, shared-package prerequisite build, and foundation tests                    |
+| `pnpm ci:packages`   | Shared-package lint, typecheck, build, and API-client tests                                             |
+| `pnpm ci:web`        | Web lint/type/unit plus OpenNext build, typed config, dry-run/limits, and workerd proof                 |
+| `pnpm ci:worker-api` | API-client compatibility plus Hono/Worker/D1 lint, types, safety, workerd, contract, build, and dry-run |
+| `pnpm ci:api`        | Transitional Go API vet, tests, and build                                                               |
 
 The commands intentionally overlap where a subsystem must prove its own prerequisites.
 The `CI / ci required` job succeeds only when every named subsystem succeeds. Quality and
@@ -86,6 +87,26 @@ does not run `deploy`, `upload`, remote development, or any Cloudflare account q
 Wrangler's local startup profile is diagnostic because host CPUs differ; a future held
 version upload must supply the authoritative platform startup measurement.
 
+The TypeScript API target lives at `apps/api-worker`; `apps/api` remains the Go
+contract and behavior reference until full parity. Its credential-free commands are:
+
+| Command                                             | Purpose                                                                                          |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `pnpm --filter @vocanova/api-worker types:write`    | Regenerate D1/runtime binding types from the local Wrangler configuration.                       |
+| `pnpm --filter @vocanova/api-worker types:check`    | Fail when committed Wrangler types are stale.                                                    |
+| `pnpm --filter @vocanova/api-worker test`           | Run Hono, CORS, redaction, repository, migration, and D1 tests inside local workerd.             |
+| `pnpm --filter @vocanova/api-worker safety:check`   | Reject dynamic/unsafe SQL, destructive foundation migrations, sensitive logs, and remote config. |
+| `pnpm --filter @vocanova/api-worker openapi:check`  | Compare Hono's generated operational OpenAPI with the committed deterministic artifact.          |
+| `pnpm --filter @vocanova/api-worker contract:check` | Bind the Worker migration baseline to the canonical Go `/api/v1` OpenAPI and API client.         |
+| `pnpm --filter @vocanova/api-worker dry-run`        | Bundle the Worker without uploading, provisioning, or querying Cloudflare.                       |
+| `pnpm ci:worker-api`                                | Run the complete Worker API/local-D1 hosted command, including API-client compatibility.         |
+
+`wrangler.jsonc` contains one local D1 name and the non-remote sentinel ID
+`local`; it contains no Cloudflare account/resource identifier or credential.
+Vitest applies the forward migration to isolated local D1 storage twice, proving
+from-empty and replay behavior. T10 owns future staging/production D1 identifiers,
+environment secrets, routes, and held deployment/migration commands.
+
 Run API commands from `apps/api`:
 
 ```bash
@@ -121,5 +142,5 @@ go test ./...
   disabling module checksum verification, which it also does) - re-enabling it is
   required to fetch a missing `go1.26.5`, e.g. via `go install golang.org/dl/go1.26.5@latest`
   then `go1.26.5 download`.
-- No deployment, migration, integration, accessibility, staging, or production check
-  exists in this foundation.
+- Worker/D1 migration and integration checks are local-only. No command in the current
+  repository deploys, runs a remote migration, or accesses staging/production state.

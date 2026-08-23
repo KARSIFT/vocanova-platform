@@ -36,6 +36,7 @@
 
 # Protected technical areas, including anticipated monorepo paths
 /apps/**/auth/                             @m-e-h-r-d-a-a-d
+/apps/api-worker/                         @m-e-h-r-d-a-a-d
 /packages/auth/                            @m-e-h-r-d-a-a-d
 /packages/database/                        @m-e-h-r-d-a-a-d
 /packages/billing/                         @m-e-h-r-d-a-a-d
