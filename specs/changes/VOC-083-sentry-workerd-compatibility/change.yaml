@@ -50,6 +50,25 @@ approvals:
     candidate_sha: 8ec6b530b37972a3a9e8102905a4f1b429386941
     evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385610829
   implementation_independent_verification_history:
+    - task: VOC-083-T00
+      candidate_sha: 71db51d1dd2571d01e9ee3b3c13ebc2c00e43514
+      verdict: pass-exact-revision
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/113#issuecomment-5385791947
+      merged_by_pr: 113
+      merge_sha: e79f04402055d7ebbb1ccfbaf8e7a1dd1b85185c
+    - task: VOC-083-T01
+      candidate_sha: eb6b57fc30751b6269917b60bd3b35850f517bcf
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385971779
+      resolution: >-
+        Preserved as historical implementation review evidence; the subsequent T01
+        exact revision received an independent PASS and merged through PR #115.
+    - task: VOC-083-T01
+      candidate_sha: 9f11195ed186e214fade57884e66ca96f2498ebc
+      verdict: pass-exact-revision
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385989877
+      merged_by_pr: 115
+      merge_sha: 8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6
     - candidate_sha: ab1b24d527f2d71649efb61cc1a8475535de282b
       verdict: fail
       evidence: https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386309046
@@ -99,13 +118,15 @@ artifacts:
 dependencies:
   - id: VOC-083-DEP-00
     status: >-
-      Resolved provisionally by VOC-083-EV-00 on 2026-08-23. T00 selected exact
-      @sentry/cloudflare@10.69.0 plus @sentry/react@10.69.0 and complete removal of
-      @sentry/nextjs. Configuration-only and current-stable @sentry/nextjs@10.70.0
-      alternatives were rejected. All probes were credential-free, isolated, and
-      discarded. T01 may apply only the recorded shape; T02 still owns final canonical
-      bundle/workerd/reporting qualification and a failure returns through revised
-      T00/T01 evidence and fresh exact-revision review.
+      Resolved finally by the VOC-083-EV-00 selection and T02 exact SHA
+      e3a71a13eedfc8fef05b580280047e41f320de48, which received the formal independent
+      PASS and merged through PR #116 as 23da9da69bb27529994e70d4bf6e9a0a78ea26b6.
+      T00 selected exact @sentry/cloudflare@10.69.0 plus @sentry/react@10.69.0 and
+      complete removal of @sentry/nextjs. Configuration-only and current-stable
+      @sentry/nextjs@10.70.0 alternatives were rejected. All probes were credential-free,
+      isolated, and discarded. The earlier T02 exact-SHA FAIL remains historical and
+      binding; any future failure still returns through revised T00/T01 evidence and
+      fresh exact-revision review.
   - id: VOC-083-DEP-01
     status: >-
       Resolved for adoption. VOC-081 T02 supplied the discovery reproduction and T04

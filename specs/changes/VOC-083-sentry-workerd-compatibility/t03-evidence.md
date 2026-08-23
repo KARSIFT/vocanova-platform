@@ -20,9 +20,16 @@ The following FAILs remain historical evidence and are not reinterpreted as appr
   [formal review comment 5385262973](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973).
 - Plan candidate `07772a00f753e614d3fd7a51539cabe4f0da1393`: FAIL,
   [formal review comment 5385292757](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385292757).
-- T01's earlier exact-SHA implementation FAIL remains preserved by the package's
-  README and task history; its later PASS is recorded separately and no missing
-  historical identifier is invented here.
+- T00 implementation candidate `71db51d1dd2571d01e9ee3b3c13ebc2c00e43514`: PASS,
+  [formal review comment 5385791947](https://github.com/KARSIFT/vocanova-platform/pull/113#issuecomment-5385791947),
+  merged through PR #113 as `e79f04402055d7ebbb1ccfbaf8e7a1dd1b85185c`.
+- T01 implementation candidate `eb6b57fc30751b6269917b60bd3b35850f517bcf`: FAIL,
+  [formal review comment 5385971779](https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385971779).
+  The subsequent T01 exact revision
+  `9f11195ed186e214fade57884e66ca96f2498ebc` received PASS in
+  [formal review comment 5385989877](https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385989877)
+  and merged through PR #115 as
+  `8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6`.
 - T02 candidate `ab1b24d527f2d71649efb61cc1a8475535de282b`: FAIL with five blockers,
   [formal review comment 5386309046](https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386309046).
 

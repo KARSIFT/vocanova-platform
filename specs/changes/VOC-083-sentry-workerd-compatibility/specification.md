@@ -153,17 +153,19 @@ instrumentation intact until a replacement has passed its reporting-equivalence 
 workerd tests. Build or log-invariant failure blocks CI; an unexpected rejection is not
 made acceptable by changing the log parser or suppressing reporting.
 
-## Post-adoption selection gate
+## Post-adoption selection gate and completion state
 
-Plan adoption authorizes only `VOC-083-T00` as a non-landing evidence/decision gate
+At adoption, the plan authorized only `VOC-083-T00` as a non-landing evidence/decision gate
 with disposable candidate probes in isolated worktrees. T00 may inspect versions/
 primary sources and modify only a disposable probe copy of declared candidate surfaces;
 it records a provisional matrix/decision, restores or discards the probe, and changes
 nothing on the canonical task branch. T01 is blocked until this decision exists and
-applies it canonically. T02 owns final canonical generated-bundle, workerd, and
-reporting-equivalence acceptance. If T02 disproves the provisional decision, it fails
-closed: update T00's decision, revise T01, rerun T02, and obtain fresh exact-SHA review;
-never silently select or ship another candidate.
+applies it canonically. T02 then owned final canonical generated-bundle, workerd, and
+reporting-equivalence acceptance. If T02 had disproved the provisional decision, it
+would have failed closed: update T00's decision, revise T01, rerun T02, and obtain
+fresh exact-SHA review; never silently select or ship another candidate. The selected
+candidate was finally qualified by T02's remediated exact-SHA evidence; T03's own
+exact-revision closure gate remains separate and pending.
 
 ## External research references
 

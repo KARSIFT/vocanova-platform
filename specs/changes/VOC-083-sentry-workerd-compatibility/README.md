@@ -19,9 +19,10 @@ merge; neither historical FAIL is reinterpreted as approval.
 
 Issue [#105](https://github.com/KARSIFT/vocanova-platform/issues/105) records two
 `WebAssembly.compile()` unhandled rejections from the generated OpenNext Worker on its
-first local workerd request. The response itself is HTTP 200, so the current smoke can
-incorrectly pass. The locked dependency graph resolves `@sentry/nextjs@10.69.0` and the
-`@apm-js-collab/code-transformer@0.18.1` transformer path implicated by the bundle.
+first local workerd request. The response itself was HTTP 200, so the drafting smoke
+could incorrectly pass. The drafting locked dependency graph resolved
+`@sentry/nextjs@10.69.0` and the `@apm-js-collab/code-transformer@0.18.1` transformer
+path implicated by the bundle.
 
 This package chooses no remedy at drafting time. Its implementation must compare a
 configuration-only repair, a reviewed Sentry package update, and a Workers-native
@@ -29,12 +30,13 @@ Sentry adapter against the same Workers-safe bundle, reporting, privacy, and smo
 evidence. It must preserve error reporting rather than turning it off to make the
 rejection disappear.
 
-After adoption, T00 alone may record upstream evidence and conduct bounded, disposable
-candidate probes in isolated worktrees; no probe changes the canonical task branch.
-T00 records a provisional selection, T01 applies it, and T02 owns final canonical
-bundle/workerd/reporting acceptance. If T02 disproves the choice, work fails closed and
-returns through an updated T00 decision and T01 revision with fresh exact-SHA review.
-Before adoption, package-level blockers concern only review/adoption.
+After adoption, T00 alone recorded upstream evidence and bounded, disposable candidate
+probes in isolated worktrees; no probe changed the canonical task branch. T00 recorded
+the provisional selection, T01 applied it, and T02 finally qualified the canonical
+bundle/workerd/reporting result. If a future regression disproves the choice, work
+still fails closed and returns through an updated T00 decision and T01 revision with
+fresh exact-SHA review. Before adoption, package-level blockers concerned only
+review/adoption.
 
 T00 completed its provisional comparison in [`t00-evidence.md`](t00-evidence.md) on
 2026-08-23. It selected exact `@sentry/cloudflare@10.69.0` plus

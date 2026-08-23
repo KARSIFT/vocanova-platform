@@ -6,7 +6,7 @@
 - Acceptance: `VOC-083-AC-00`
 - Tests: `VOC-083-TEST-00`
 - Evidence: `VOC-083-EV-00`
-- Status: complete-provisional-workers-native-selection-recorded-in-VOC-083-EV-00
+- Status: complete-provisional-workers-native-selection-finally-qualified-by-T02
 
 After adoption, inventory direct/transitive Sentry imports and
 generated bundle locations, retrieve current primary-source compatibility evidence,
