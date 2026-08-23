@@ -16,6 +16,7 @@ folds_in:
   - A-004 (Orchestrator Independent-Verification Merge Authority; approved 2026-08-14, PR #54)
   - VOC-079 (R4 Approval-Neutral Governance; adopted 2026-08-19, PR #75)
   - VOC-080 (Cloudflare-native runtime and external Ruflo direction; adopted 2026-08-22, PR #86)
+  - VOC-082 (Provider-neutral distinct-agent role separation; adopted 2026-08-23, PR #110)
 revision_note: >
   This v3.2 revision clarifies provider-neutral distinct-actor role separation. Risk
   remains consequence-based, runtime provenance is not authority, external effects
@@ -393,9 +394,10 @@ layer.
 ## Amendment history
 
 This document previously worked alongside three separate amendments. Each former
-amendment's operative rules is folded directly into the sections above. The table
-also records the later VOC-079 authority transition. It preserves permanent evidence
-for the revision it governed without making any approval reusable.
+amendment's operative rules is folded directly into the sections above. The table also
+records the later VOC-079 authority transition, VOC-080 runtime/orchestration boundary,
+and VOC-082 role-separation clarification. It preserves permanent evidence for the
+revision it governed without making any approval, transition, or boundary reusable.
 
 | Date                 | Change (former amendment)                                                              | What it did                                                                                                                                                                                                                                 | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | -------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
