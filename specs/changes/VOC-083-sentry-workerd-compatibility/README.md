@@ -40,10 +40,13 @@ T00 completed its provisional comparison in [`t00-evidence.md`](t00-evidence.md)
 independent exact-SHA PASS with zero blockers on
 [`9f11195ed186e214fade57884e66ca96f2498ebc`](https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385989877)
 after preserving and resolving its earlier exact-SHA FAIL, and PR #115 merged into
-`develop` as `8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6`. T02 is implementation-prepared
-and its local validation is complete; exact-SHA independent review, fresh hosted proof
-after the bounded port-race remediation, and merge remain pending, so this record does
-not claim final canonical compatibility or reporting PASS.
+`develop` as `8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6`. T02 exact SHA
+[`ab1b24d527f2d71649efb61cc1a8475535de282b`](https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386309046)
+received an independent **FAIL** with five blockers. That verdict remains historical
+and binding. The remediation now has local canonicalization, complete artifact,
+workerd, and reporting-fixture evidence, but a fresh exact-SHA independent review,
+hosted proof, and merge remain pending. This record does not claim independent PASS,
+hosted compatibility, or hosted reporting proof.
 
 The plan was prepared on `agent/voc-081-t04-f2-evidence` at
 `a8694932671ad9c44fd2a97c128b14e6089e5faf`; it deliberately has no dependency on

@@ -24,7 +24,7 @@ amendments:
     adopted_at: 2026-08-23
     approving_owner: approved-voc-083-package
     resolution_recorded_in: specs/changes/VOC-083-sentry-workerd-compatibility/change.yaml
-    notes: "T02 makes fresh generated-artifact inventory, runtime-reachable Wasm checks, and post-shutdown workerd diagnostics mandatory before either web smoke can pass."
+    notes: "T02 makes deterministic OpenNext canonicalization, complete generated-module/reference/Wasm checks, and post-stdio-close workerd diagnostics mandatory before either web smoke can pass."
   - id: VOC-081-local-stack-amendment
     title: "Required disposable local Workers stack evidence"
     adopted_in: VOC-081
@@ -128,15 +128,19 @@ no Cloudflare credential, remote binding, environment, or deploy capability.
 VOC-083-T02 makes both web smoke owners fail closed on generated and runtime evidence.
 `ci:web` now builds OpenNext before compatibility analysis; that analysis performs a
 fresh credential-free Wrangler dry run, hashes and classifies every generated artifact,
-proves the runtime-reachable JavaScript graph is closed, and rejects unsupported
-runtime Wasm construction. The disposable local-stack path independently builds and
-scans fresh output before startup. Both paths retain bounded output plus sticky hard
-diagnostics and classify again after child shutdown, so an HTTP 200 cannot hide an
-unhandled rejection, compile/runtime error, or unsupported WebAssembly API diagnostic.
-The standalone web smoke may retry only a recognized loopback bind collision, for at
-most three fresh-port attempts; configuration, runtime, and unknown startup failures
-remain immediately terminal, and diagnostics from the accepted attempt remain subject
-to the same post-shutdown gate.
+verifies the explicit final-bundle canonicalization record, requires every executable
+reference in every remaining OpenNext and dry-run JavaScript module to resolve, and
+rejects every unsupported runtime Wasm construction. Superseded traced JavaScript is
+removed only after its digest, size, and reason are recorded; static/runtime assets are
+retained. The disposable local-stack path independently builds and scans fresh output
+before startup. Both paths use the same bounded, redacted, line-aware incremental
+collector, retain early hard diagnostics, join split chunks, and classify after child
+and stdio close, so an HTTP 200 or process exit cannot hide a late unhandled rejection,
+compile/runtime error, or unsupported WebAssembly API diagnostic. The standalone web
+smoke may retry only a recognized loopback bind collision, for at most three fresh,
+distinct port attempts with bounded selection; it strips inherited Sentry DSN, token,
+and credential variables. Configuration, runtime, and unknown startup failures remain
+immediately terminal.
 
 The subsystem `pnpm ci:*` commands are local entry points, not CI-only behavior;
 `pnpm validate` remains the full pre-review gate. This design follows the applicable
@@ -146,7 +150,7 @@ release bots, write permissions, vendor services, or repository scale.
 
 VOC-080-T03 makes `pnpm ci:web` the credential-free Worker gate. It transforms the
 Next.js build through OpenNext, then verifies the complete generated-artifact manifest
-and runtime-reachable compatibility graph, committed Wrangler types, a Wrangler dry
+and every remaining module/reference compatibility invariant, committed Wrangler types, a Wrangler dry
 run, the 3 MiB compressed target, and the local startup profile before sending
 representative static/SSR/RSC/middleware/auth/API requests through two Workers in local
 workerd. A plain `next build` remains useful for UI checks but is not Cloudflare

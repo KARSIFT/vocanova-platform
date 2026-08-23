@@ -49,6 +49,16 @@ approvals:
     status: approved-for-adoption
     candidate_sha: 8ec6b530b37972a3a9e8102905a4f1b429386941
     evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385610829
+  implementation_independent_verification_history:
+    - candidate_sha: ab1b24d527f2d71649efb61cc1a8475535de282b
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386309046
+      resolution: >-
+        Preserved as a blocking historical verdict. Remediation adds complete
+        post-canonicalization module/reference/Wasm checks, global-object Wasm alias
+        detection, shared close-aware incremental diagnostics, distinct retry ports,
+        and standalone Sentry environment stripping. Fresh exact-revision review is
+        still required and no independent PASS is claimed here.
 approval_status: adopted
 implementation_authorized: true
 automatic_merge_allowed: true
@@ -124,7 +134,7 @@ affected_areas:
 implementation:
   authorized: true
   required: true
-  status: T00-complete; T01-complete-merged-PR-115; T02-local-validation-complete-pending-independent-exact-SHA-review-and-hosted-proof; T03-gated
+  status: T00-complete; T01-complete-merged-PR-115; T02-remediation-local-validation-complete-pending-fresh-independent-exact-SHA-review-and-hosted-proof; T03-gated
   target_branch: develop
   pull_request: null
   authority_issue: 105
@@ -150,5 +160,6 @@ blocking_reasons: []
 post_adoption_task_gates:
   - T00-complete-provisional-workers-native-selection-recorded-in-VOC-083-EV-00
   - T01-complete-exact-SHA-9f11195ed186e214fade57884e66ca96f2498ebc-merged-through-PR-115
-  - T02-local-validation-complete-pending-independent-exact-SHA-review-and-hosted-proof
+  - T02-pr-116-exact-SHA-ab1b24d527f2d71649efb61cc1a8475535de282b-independent-review-fail-preserved
+  - T02-remediation-local-validation-complete-pending-fresh-independent-exact-SHA-review-and-hosted-proof
   - T02-failure-requires-updated-T00-decision-T01-revision-and-fresh-exact-SHA-review

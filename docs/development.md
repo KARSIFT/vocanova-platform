@@ -74,8 +74,9 @@ Wrangler, and then starts web Wrangler. Its committed `API` service binding conn
 URLs remain directly reachable.
 
 The supervisor owns its children, forwards `SIGINT`/`SIGTERM`, stops siblings when one
-fails, escalates after a bounded grace period, and exits nonzero on startup/readiness or
-child failure. These process semantics are validated on Linux CI and Unix-like hosts.
+fails, escalates after a bounded grace period, awaits child and stdio close, and exits
+nonzero on startup/readiness, child failure, or a retained hard diagnostic. These
+process semantics are validated on Linux CI and Unix-like hosts.
 Native Windows process behavior is not claimed; use WSL2 or another Linux environment.
 
 Developer D1 state lives only at `.wrangler/state/vocanova-local` and is ignored by
@@ -95,28 +96,33 @@ root page is a technical framework-validation placeholder and contains no produc
 
 The credential-free Cloudflare path is:
 
-| Command                                                | Purpose                                                                                                                                                                                                                |
-| ------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm --filter @vocanova/web cloudflare:typegen`       | Regenerate `worker-configuration.d.ts` from `wrangler.jsonc`.                                                                                                                                                          |
-| `pnpm --filter @vocanova/web cloudflare:typecheck`     | Fail if committed binding/runtime types are stale.                                                                                                                                                                     |
-| `pnpm --filter @vocanova/web cloudflare:build`         | Run `next build` and transform its standalone intermediate into `.open-next/worker.js`.                                                                                                                                |
-| `pnpm --filter @vocanova/web cloudflare:preview`       | Serve an existing OpenNext build locally in workerd for manual inspection.                                                                                                                                             |
-| `pnpm --filter @vocanova/web cloudflare:preview:test`  | Run representative static, SSR, RSC, middleware, auth, service-binding, and disabled-Sentry requests in local workerd.                                                                                                 |
-| `pnpm --filter @vocanova/web cloudflare:dry-run`       | Bundle with Wrangler using `--dry-run`; it performs no upload or resource mutation.                                                                                                                                    |
-| `pnpm --filter @vocanova/web cloudflare:limits`        | Enforce the 3 MiB compressed target and record the local startup profile against the 1,000 ms platform limit.                                                                                                          |
-| `pnpm --filter @vocanova/web cloudflare:compatibility` | Run a fresh local Wrangler dry run, inventory and hash every generated artifact, prove the runtime-reachable module graph is closed, and reject unsupported runtime Wasm plus the existing source-boundary violations. |
+| Command                                                | Purpose                                                                                                                                                                                                                  |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm --filter @vocanova/web cloudflare:typegen`       | Regenerate `worker-configuration.d.ts` from `wrangler.jsonc`.                                                                                                                                                            |
+| `pnpm --filter @vocanova/web cloudflare:typecheck`     | Fail if committed binding/runtime types are stale.                                                                                                                                                                       |
+| `pnpm --filter @vocanova/web cloudflare:build`         | Run `next build`, create `.open-next/worker.js`, and record/remove superseded JavaScript build intermediates after validating the self-contained final handler.                                                          |
+| `pnpm --filter @vocanova/web cloudflare:preview`       | Serve an existing OpenNext build locally in workerd for manual inspection.                                                                                                                                               |
+| `pnpm --filter @vocanova/web cloudflare:preview:test`  | Run representative static, SSR, RSC, middleware, auth, service-binding, and disabled-Sentry requests in local workerd.                                                                                                   |
+| `pnpm --filter @vocanova/web cloudflare:dry-run`       | Bundle with Wrangler using `--dry-run`; it performs no upload or resource mutation.                                                                                                                                      |
+| `pnpm --filter @vocanova/web cloudflare:limits`        | Enforce the 3 MiB compressed target and record the local startup profile against the 1,000 ms platform limit.                                                                                                            |
+| `pnpm --filter @vocanova/web cloudflare:compatibility` | Run a fresh local Wrangler dry run, verify the canonicalization record, inventory and hash every generated artifact, require every executable reference to resolve, and reject unsupported runtime Wasm in every module. |
 
 Run `cloudflare:build` before `cloudflare:compatibility`, `cloudflare:typegen`, or
 `cloudflare:typecheck`. The compatibility command creates a credential-free local
 Wrangler dry-run bundle, writes its manifest outside the scanned roots, and fails on a
-missing/empty/unknown artifact, an escaping link, a broken reachable reference, or a
-runtime-reachable unsupported Wasm construction path. Copied but unreachable modules
-remain inventoried instead of being silently excluded. The stable `pnpm ci:web`
+missing/empty/unknown artifact, an escaping link, any broken executable reference, or
+an unsupported Wasm construction path in any OpenNext or configured dry-run module.
+The build writes `.open-next/canonicalization-manifest.json` with digests and reasons
+for every removed JavaScript intermediate, retains the validated OpenNext runtime
+modules and static asset modules, and the compatibility scan proves that record matches
+the post-canonicalization tree. The stable `pnpm ci:web`
 command owns this build → manifest/compatibility → type/dry-run/limits → workerd order.
 The workerd smoke retries only an exact local bind-collision startup failure, at most
-three times with a newly selected loopback port. Every other startup diagnostic is
-terminal, and the accepted attempt still undergoes post-shutdown fail-closed log
-classification.
+three times with a fresh, distinct loopback port and bounded port selection. Every
+other startup diagnostic is terminal. Both smoke owners incrementally classify
+bounded, redacted, line-aware output, retain early hard diagnostics, join split chunks,
+and await stdio close so late diagnostics cannot escape the post-shutdown gate. The
+standalone owner also strips inherited Sentry DSN, token, and credential variables.
 
 `wrangler.jsonc` defines local, staging, and production names but contains no resource
 ID, credential, route, or deploy authority. Local preview uses only simulation. The

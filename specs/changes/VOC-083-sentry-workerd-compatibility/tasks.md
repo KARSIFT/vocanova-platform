@@ -38,7 +38,8 @@ equivalence acceptance to T02. Do not turn off Sentry or source-map controls.
 - Acceptance: `VOC-083-AC-01`, `VOC-083-AC-02`, `VOC-083-AC-03`, `VOC-083-AC-04`
 - Tests: `VOC-083-TEST-01`, `VOC-083-TEST-02`, `VOC-083-TEST-03`, `VOC-083-TEST-04`
 - Evidence: `VOC-083-EV-01`, `VOC-083-EV-02`, `VOC-083-EV-03`, `VOC-083-EV-04`
-- Status: local-validation-complete; pending-independent-exact-SHA-review-and-hosted-proof
+- Status: remediation-local-validation-complete; prior-exact-SHA-FAIL-preserved;
+  pending-fresh-independent-exact-SHA-review-and-hosted-proof
 
 Own final qualification of T00/T01: add a complete fresh-artifact manifest/invariant and
 fixture-backed log classification
@@ -50,13 +51,21 @@ If it fails, stop, update T00's decision and T01 revision, then repeat with fres
 SHA review; never silently select/ship a replacement. Preserve the service-binding and
 disabled-DSN no-network contract.
 
+The independent review of
+`ab1b24d527f2d71649efb61cc1a8475535de282b` recorded **FAIL** with five blockers.
+Remediation keeps that verdict intact while adding deterministic final-bundle
+canonicalization, complete every-module/reference/Wasm checks, global-object Wasm
+alias detection, close-aware incremental diagnostics in both owners, fresh distinct
+retry ports, and standalone Sentry environment stripping. Local evidence does not
+replace the required fresh exact-revision review or hosted proof.
+
 ## VOC-083-T03 — Documentation, exact-SHA review, and rollback evidence
 
 - Requirements: all
 - Acceptance: `VOC-083-AC-04`, `VOC-083-AC-05`
 - Tests: `VOC-083-TEST-05`, `VOC-083-TEST-06`
 - Evidence: `VOC-083-EV-05`, `VOC-083-EV-06`
-- Status: blocked-by-T02
+- Status: blocked-by-fresh-T02-exact-SHA-review-and-hosted-proof
 
 Reconcile affected active docs, run the proportionate final checks, independently
 review the exact final revision with Cloudflare/Workers/Sentry specialization, and
