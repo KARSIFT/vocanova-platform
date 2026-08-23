@@ -5,9 +5,9 @@ may refine them but may not weaken governance or security.
 
 ## Authority and scope
 
-- Follow DOC-15, DOC-16 (a single self-contained document as of its v3.1 revision,
-  which folds in the former A-002/A-003/A-004 amendments and the VOC-079 transition -
-  see DOC-16's "Amendment history"), accepted decisions, and approved implementation-
+- Follow DOC-15, DOC-16 (a single self-contained document as of its v3.2 revision,
+  which folds in the former A-002/A-003/A-004 amendments and the VOC-079, VOC-080,
+  and VOC-082 current boundaries - see DOC-16's "Amendment history"), accepted decisions, and approved implementation-
   ready change specifications in that order. R0-R4 are consequence classes: no class
   requires founder or standing technical-steward approval merely because of its label.
 - GitHub is the canonical repository record. Meaningful implementation requires an

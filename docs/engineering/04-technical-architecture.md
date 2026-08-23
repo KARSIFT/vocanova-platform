@@ -194,7 +194,7 @@ risk-based, not a flat percentage target.
 The repository uses `develop` and `main` as permanent branches with short-lived working
 branches and governed pull requests. Exact merge, approval, and release authority is defined only by
 [DOC-16](../governance/16-autonomous-development-operating-model.md) (a single,
-self-contained document as of its v3.1 revision) and the
+self-contained document as of its v3.2 revision) and the
 [approval matrix](../governance/approval-matrix.md). Governance permission does not imply that
 automatic merge or deployment is technically active.
 
