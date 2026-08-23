@@ -64,7 +64,8 @@
   foundation validation, formatting, audit as applicable, `git diff --check`, and a
   semantic scan for settings/runtime/live-action drift.
 - Expected: R3 or higher declared risk passes; exactly four workflows remain; no live,
-  settings, runtime, secret, deployment, or `main` mutation exists.
+  settings, runtime, secret, deployment, or `main` mutation exists; and the candidate
+  leaves issue #85 and issue #118 open for post-merge-only closure.
 - Evidence: `VOC-084-EV-04`, `VOC-084-EV-05`
 
 ## VOC-084-TEST-06 — Exact review, hosted proof, and reverse rollback
@@ -76,5 +77,6 @@
   exact-SHA semantic review without duplicating long suites, then run applicable hosted
   Actions and post-merge checks.
 - Expected: rollback and tree equality pass; reviewer returns PASS with zero unresolved
-  blockers; hosted required checks pass; no deployment job runs.
+  blockers; hosted required checks pass; no deployment job runs; and issue #85/#118
+  remain open until the merge plus post-merge checks are complete.
 - Evidence: `VOC-084-EV-05`

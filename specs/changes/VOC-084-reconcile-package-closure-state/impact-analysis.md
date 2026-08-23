@@ -6,7 +6,9 @@ VOC-084 changes active package truth for four completed programs and introduces 
 static consistency control. This is R3 because incorrect lifecycle evidence can cause
 later planning, issue closure, or action-readiness mistakes. It does not change the
 active authority model, risk classes, merge evaluator, workflow permissions, or
-action-specific authority.
+action-specific authority. T00-T03 are already repository-complete on `develop`; the
+remaining T04 candidate is evidence-only and still cannot close any issue before merge
+and passing post-merge checks.
 
 ## Security and privacy
 
@@ -73,6 +75,6 @@ filters and must be reported accurately rather than forced or fabricated.
 Rollback is repository-only and reverses T04 through T00. After each task revert,
 validate package parsing, governance, the closure contract where present, and diff
 cleanliness. Final reversal must reproduce base tree
-`d4078924ae6d0be52628973e84be51734d93a5a9`. Reopening an issue comment is a separate
+`d2cb2190d83dae863b0f2126f8853ddffd5ed678`. Reopening an issue comment is a separate
 GitHub record correction if a closure statement proves wrong; rollback never touches
 Cloudflare, Sentry, a server, DNS, settings, or data.

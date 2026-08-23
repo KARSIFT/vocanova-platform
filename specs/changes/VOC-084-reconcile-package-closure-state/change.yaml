@@ -63,6 +63,143 @@ approvals:
     governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32660710317
     security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32660710158
     quality: not-applicable-plan-only-path-filter
+  implementation_independent_verification_history:
+    - task: VOC-084-T00
+      candidate_sha: 080409ebc9beeb734f28123168803bfc28cbebfd
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/121#issuecomment-5388123368
+      resolution: >-
+        Preserved as historical implementation review evidence. The subsequent exact
+        revision c6c13ed43418ba6faae70ce8c5e93f9674260859 added the omitted VOC-082 T01
+        Governance fail-closed history, kept the explicit T02 superseded-wording
+        dependency, and then received the separately recorded PASS.
+    - task: VOC-084-T00
+      candidate_sha: c6c13ed43418ba6faae70ce8c5e93f9674260859
+      verdict: pass-exact-revision
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/121#issuecomment-5388129185
+      merged_by_pr: 121
+      merge_sha: 91365f35c078171d98dd204134f20f9fb8eebef5
+      hosted_evidence:
+        final_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32662641410
+        governance_eligibility: https://github.com/KARSIFT/vocanova-platform/actions/runs/32662641371
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32662641368
+        quality: not-applicable-package-yaml-only-path-filter
+        post_merge_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32663052676
+        post_merge_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32663052479
+        post_merge_security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32663052483
+    - task: VOC-084-T01
+      candidate_sha: a350d965792b4a35bf6240d8995436bb931e259c
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/122#issuecomment-5388262981
+      resolution: >-
+        Preserved as historical implementation review evidence. The subsequent exact
+        revision d83a94d20d4626613befde515619e60d2b954c18 corrected VOC-080's active
+        GitHub-settings history while keeping the no-Cloudflare/no-deployment boundary
+        explicit, then received the separately recorded PASS.
+    - task: VOC-084-T01
+      candidate_sha: d83a94d20d4626613befde515619e60d2b954c18
+      verdict: pass-exact-revision
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/122#issuecomment-5388274788
+      merged_by_pr: 122
+      merge_sha: 22563a40d033da2bc40a1ed18b2a09d326978ed7
+      hosted_evidence:
+        final_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664326663
+        governance_eligibility: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664326662
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664326660
+        quality: not-applicable-package-record-only-diff
+        integrated_base_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664639964
+        integrated_base_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664639941
+        integrated_base_security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664639953
+        post_merge_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664805370
+        post_merge_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664805374
+        post_merge_security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664805385
+    - task: VOC-084-T02
+      candidate_sha: 9066d1563533739991b4cddf31857a0c7a485bb4
+      verdict: pass-exact-revision
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/123#issuecomment-5388268060
+      merged_by_pr: 123
+      merge_sha: 644387bf423f57919100f7ebab3122011d234e8a
+      hosted_evidence:
+        final_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664329494
+        governance_eligibility: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664329493
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664329513
+        quality: not-applicable-package-record-only-diff
+        post_merge_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664518777
+        post_merge_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664518734
+        post_merge_security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32664518743
+    - task: VOC-084-T03
+      candidate_sha: 40cac438c4563baaf3510094ed81ab6efc162449
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/124#issuecomment-5388399909
+      resolution: >-
+        Preserved as historical implementation review evidence. Later revisions added
+        exact task/package PR-head-merge mappings, structured FAIL tuples, active
+        lifecycle checks, and the initially missing narrow negative fixtures.
+    - task: VOC-084-T03
+      candidate_sha: 228fd9a2e4bfda4afbf1358ecec574f1ef09aa20
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/124#issuecomment-5388455163
+      resolution: >-
+        Preserved as historical implementation review evidence. Later revisions added
+        exact package-summary uniqueness, bidirectional task↔AC↔test graph checks,
+        designated held/no-live field validation, and exact structured FAIL evidence
+        binding.
+    - task: VOC-084-T03
+      candidate_sha: 38b1fad18bc4d61b3c3a3a8cf557f0d54b3cf78e
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/124#issuecomment-5388532487
+      resolution: >-
+        Preserved as historical implementation review evidence. Later revisions pinned
+        every applicable exact task and package review/hosted/rollback/post-merge
+        value and added wrong-valid drift fixtures.
+    - task: VOC-084-T03
+      candidate_sha: 9ba2cdd5872dc287d7c7fb5bce63ca9ff053cf76
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/124#issuecomment-5388623210
+      resolution: >-
+        Preserved as historical implementation review evidence. The final exact
+        revision rejected duplicate structured evidence maps for both task and package
+        sections before receiving the separately recorded PASS.
+    - task: VOC-084-T03
+      candidate_sha: 5cb1196b4edc0658ba43c2f51ba88d8cbb872908
+      verdict: pass-exact-revision
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/124#issuecomment-5388671132
+      merged_by_pr: 124
+      merge_sha: a578d287f9ce263e8bb3d8aa16dd8ef216e3d38c
+      hosted_evidence:
+        final_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32668972138
+        governance_eligibility: https://github.com/KARSIFT/vocanova-platform/actions/runs/32668972150
+        quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32668972112
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32668972099
+        hosted_history:
+          - candidate_sha: 40cac438c4563baaf3510094ed81ab6efc162449
+            governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32665466744
+            ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32665466777
+            quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32665466745
+            security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32665466758
+            result: fail-closed-no-independent-pass-block-yet
+          - candidate_sha: 228fd9a2e4bfda4afbf1358ecec574f1ef09aa20
+            governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32666210068
+            ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32666210089
+            quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32666210036
+            security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32666210048
+            result: fail-closed-no-independent-pass-block-yet
+          - candidate_sha: 38b1fad18bc4d61b3c3a3a8cf557f0d54b3cf78e
+            governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32667004975
+            ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32666977407
+            quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32666977404
+            security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32666977411
+            result: fail-closed-no-independent-pass-block-yet
+          - candidate_sha: 9ba2cdd5872dc287d7c7fb5bce63ca9ff053cf76
+            governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32668200776
+            ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32668172304
+            quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32668172319
+            security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32668172349
+            result: fail-closed-no-independent-pass-block-yet
+        post_merge_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32669182100
+        post_merge_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32669182080
+        post_merge_security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32669182089
+        post_merge_quality: not-applicable-push-path-filter
 
 approval_status: adopted
 implementation_authorized: true
@@ -82,12 +219,16 @@ artifacts:
 
 dependencies:
   - id: VOC-084-DEP-00
-    status: satisfied-exact-candidate-review-and-adoption-decision
+    status: satisfied-exact-plan-review-adoption-decision-and-pr-120-merge
     description: >-
       A different-role reviewer must verify the complete plan candidate and the evidence
       sources before adoption. The package cannot approve its own reconciliation rules.
   - id: VOC-084-DEP-01
-    status: implementation-precondition
+    status: >-
+      Satisfied for T00-T03 by the merged exact heads, PRs, normal merges, independent
+      verdicts, hosted runs, and post-merge evidence now recorded on PRs #121 through
+      #124. T04 may claim closure only after its own exact merged revision and
+      post-merge evidence exist.
     description: >-
       Each completed task and criterion may be marked complete only from an exact merged
       head, merge commit, independent verdict, hosted result, rollback record, and relevant
@@ -101,7 +242,10 @@ dependencies:
       absorb that unrelated scope. Historical commit-message references carrying the
       same number do not supersede the canonical current API object.
   - id: VOC-084-DEP-03
-    status: implementation-precondition
+    status: >-
+      Satisfied by T00 exact SHA c6c13ed43418ba6faae70ce8c5e93f9674260859, which merged
+      through PR #121 as 91365f35c078171d98dd204134f20f9fb8eebef5 and records 39 exact
+      file classifications with no omissions, duplicates, or contradictions.
     description: >-
       The T00 inventory must enumerate every committed file in each VOC-080 through
       VOC-083 package directory and classify it exactly once as active-claim,
@@ -134,7 +278,21 @@ affected_areas:
 implementation:
   authorized: true
   required: true
-  status: authorized-after-pr-120-adoption; T00-pending
+  status: >-
+    T00 complete at exact SHA c6c13ed43418ba6faae70ce8c5e93f9674260859, merged by
+    PR #121 as 91365f35c078171d98dd204134f20f9fb8eebef5, with hosted and post-merge
+    CI/Governance/Security evidence. T01 complete at exact SHA
+    d83a94d20d4626613befde515619e60d2b954c18, merged by PR #122 as
+    22563a40d033da2bc40a1ed18b2a09d326978ed7, preserving the earlier FAIL and passing
+    exact-head, integrated-base, and post-merge hosted proof. T02 complete at exact
+    SHA 9066d1563533739991b4cddf31857a0c7a485bb4, merged by PR #123 as
+    644387bf423f57919100f7ebab3122011d234e8a, with hosted and post-merge evidence.
+    T03 complete at exact SHA 5cb1196b4edc0658ba43c2f51ba88d8cbb872908, merged by
+    PR #124 as a578d287f9ce263e8bb3d8aa16dd8ef216e3d38c, preserving four exact-SHA
+    FAILs plus fail-closed Governance histories and passing final hosted plus
+    post-merge proof. T04 remains candidate-only until different-role review, hosted
+    PR proof, normal merge, post-merge checks, and then repository-only issue #85/#118
+    closure.
   target_branch: develop
   pull_request: null
   authority_issue: 118
@@ -148,11 +306,15 @@ release:
   migration_required: false
   rollback_required: true
 
-repository_adoption_status: adopted-through-pr-120-bookkeeping-pending-merge
+repository_adoption_status: adopted-on-pr-120-merge
 adoption_pr: 120
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/120#issuecomment-5387989958
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/120
 implementation_authority_before_adoption: false
-implementation_authority_status: recorded-by-adoption-bookkeeping-effective-after-pr-120-merge
+implementation_authority_status: >-
+  T00-through-T03 completed after PR #120 merged. T04 is authorized on base
+  a578d287f9ce263e8bb3d8aa16dd8ef216e3d38c and remains pending exact review, hosted
+  proof, merge, post-merge checks, and repository-only issue closure.
 production_deployment: held-by-VOC-080-HOLD-01
 staging_deployment: held-by-VOC-080-HOLD-00
 production_data_access: held-by-VOC-080-HOLD-02
@@ -160,8 +322,8 @@ autonomous_production_release: disabled
 ehr: not-triggered
 blocking_reasons: []
 post_adoption_task_gates:
-  - T00-authorized-after-pr-120-merge-for-read-only-evidence-inventory-only
-  - T01-and-T02-blocked-until-T00-inventory-merges
-  - T03-blocked-until-T01-and-T02-merge
-  - T04-blocked-until-T03-merge
-  - every-task-requires-different-role-exact-SHA-review-hosted-proof-and-separate-merge
+  - T00-complete-merge-91365f35c078171d98dd204134f20f9fb8eebef5
+  - T02-complete-merge-644387bf423f57919100f7ebab3122011d234e8a
+  - T01-complete-merge-22563a40d033da2bc40a1ed18b2a09d326978ed7-after-sibling-integration-recheck
+  - T03-complete-merge-a578d287f9ce263e8bb3d8aa16dd8ef216e3d38c
+  - T04-authorized-on-a578d287f9ce263e8bb3d8aa16dd8ef216e3d38c-pending-exact-review-hosted-proof-merge-post-merge-and-issue-closure
