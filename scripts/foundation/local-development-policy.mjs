@@ -30,6 +30,8 @@ const LOCAL_SOURCE_FILES = Object.freeze({
   apiWrangler: "apps/api-worker/wrangler.jsonc",
   gitignore: ".gitignore",
   localSupervisor: "scripts/foundation/local-development-supervisor.mjs",
+  localStackRoute: "apps/web/src/app/api/local-stack/route.ts",
+  localStackSmoke: "scripts/foundation/local-stack-smoke.mjs",
   nextConfig: "apps/web/next.config.ts",
   rootPackage: "package.json",
   webEnvironment: "apps/web/src/lib/env.ts",
@@ -330,6 +332,20 @@ export function validateLocalDevelopmentSources(sources) {
   ) {
     errors.push("dev:workers must use the reviewed two-Worker supervisor mode");
   }
+  if (
+    rootScripts["test:local-stack"] !==
+    "node scripts/foundation/local-stack-smoke.mjs"
+  ) {
+    errors.push("test:local-stack must use the reviewed disposable smoke");
+  }
+  if (
+    rootScripts["ci:local-stack"] !==
+    "node --test scripts/foundation/local-stack-smoke.test.mjs && pnpm run test:local-stack"
+  ) {
+    errors.push(
+      "ci:local-stack must require lifecycle fixtures and real smoke",
+    );
+  }
   if (webScripts.dev !== "next dev --hostname 127.0.0.1 --port 3000") {
     errors.push("web dev must reserve canonical host 127.0.0.1 and port 3000");
   }
@@ -389,11 +405,56 @@ export function validateLocalDevelopmentSources(sources) {
       sources.localSupervisor,
     ),
   );
+  for (const marker of [
+    "LOCAL_STACK_TIMEOUT_MS = 12 * 60_000",
+    "LOCAL_STACK_PREPARATION_TIMEOUT_MS = 6 * 60_000",
+    "LOCAL_STACK_MIGRATION_TIMEOUT_MS = 2 * 60_000",
+    'LOCAL_STACK_MARKER = "voc081-local-stack-v1"',
+    'mkdtempSync(resolve(tmpdir(), "vocanova-local-stack-"))',
+    'purpose: "test"',
+    "runMigrations(stateDirectory, runMigration)",
+    "runLocalStackCycle",
+    "probeLocalStack",
+    "readDisposableD1Evidence",
+    "captureRepositoryTree",
+    "assertRepositoryTreeUnchanged",
+    "createLocalStackSignalController",
+    "await portCheck(plan.ports)",
+    "rmSync(workspace, { force: true, recursive: true })",
+  ]) {
+    requireLiteral(
+      errors,
+      sources.localStackSmoke,
+      marker,
+      "local-stack smoke",
+    );
+  }
+  errors.push(
+    ...validateBoundedLifecycleSource(
+      "local-stack smoke",
+      sources.localStackSmoke,
+    ),
+  );
+  for (const marker of [
+    'env.ENVIRONMENT !== "local"',
+    "env.API.fetch",
+    "https://vocanova-api.internal/configz",
+    '"x-vocanova-local-stack-marker"',
+    '"service-binding"',
+  ]) {
+    requireLiteral(
+      errors,
+      sources.localStackRoute,
+      marker,
+      "local-only service-binding marker route",
+    );
+  }
   for (const [name, command] of Object.entries({
     dev: rootScripts.dev,
     "dev:init": rootScripts["dev:init"],
     "dev:workers": rootScripts["dev:workers"],
     "test:local-stack": rootScripts["test:local-stack"],
+    "ci:local-stack": rootScripts["ci:local-stack"],
     "api-worker:dev": apiScripts.dev,
     "api-worker:migrate:local": apiScripts["migrate:local"],
   })) {

@@ -157,13 +157,24 @@ export function buildLocalD1MigrationInvocation({
   });
 }
 
-export function runLocalD1Migrations({ stdio = "inherit", ...options } = {}) {
+export function runLocalD1Migrations({
+  stdio = "inherit",
+  timeoutMs,
+  ...options
+} = {}) {
+  if (
+    timeoutMs !== undefined &&
+    (!Number.isInteger(timeoutMs) || timeoutMs <= 0)
+  ) {
+    throw new Error("Local D1 migration timeout must be a positive integer");
+  }
   const invocation = buildLocalD1MigrationInvocation(options);
   const result = spawnSync(invocation.command, invocation.args, {
     cwd: invocation.cwd,
     env: localOnlyEnvironment(),
     encoding: stdio === "pipe" ? "utf8" : undefined,
     stdio,
+    timeout: timeoutMs,
   });
   if (result.error) throw result.error;
   return result;
