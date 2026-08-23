@@ -13,6 +13,16 @@ with GitHub without fabricating, backdating, or erasing evidence.
 The exact planning base is
 `d4078924ae6d0be52628973e84be51734d93a5a9` on `develop`.
 
+The adopted implementation base for T00-T04 is merge commit
+`d2cb2190d83dae863b0f2126f8853ddffd5ed678`. T00, T01, T02, and T03 then merged
+through PRs #121, #122, #123, and #124 as
+`91365f35c078171d98dd204134f20f9fb8eebef5`,
+`22563a40d033da2bc40a1ed18b2a09d326978ed7`,
+`644387bf423f57919100f7ebab3122011d234e8a`, and
+`a578d287f9ce263e8bb3d8aa16dd8ef216e3d38c`. T04 must start from that integrated T03
+base and may not preclaim its own future review, hosted result, merge, post-merge
+check, or issue closure.
+
 ## Scope
 
 In scope:
@@ -152,6 +162,15 @@ The implementation must verify, not merely copy, at least these final boundaries
 
 The task-level inventory must include the intermediate implementation PRs named by
 issue #118, not only these final rows.
+
+The VOC-084 implementation chain itself is now:
+
+| Task | Final implementation PR | Final head                                 | Merge commit                               |
+| ---- | ----------------------- | ------------------------------------------ | ------------------------------------------ |
+| T00  | #121                    | `c6c13ed43418ba6faae70ce8c5e93f9674260859` | `91365f35c078171d98dd204134f20f9fb8eebef5` |
+| T01  | #122                    | `d83a94d20d4626613befde515619e60d2b954c18` | `22563a40d033da2bc40a1ed18b2a09d326978ed7` |
+| T02  | #123                    | `9066d1563533739991b4cddf31857a0c7a485bb4` | `644387bf423f57919100f7ebab3122011d234e8a` |
+| T03  | #124                    | `5cb1196b4edc0658ba43c2f51ba88d8cbb872908` | `a578d287f9ce263e8bb3d8aa16dd8ef216e3d38c` |
 
 ## Security, privacy, data, analytics, and accessibility
 

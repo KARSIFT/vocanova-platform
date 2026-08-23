@@ -7,6 +7,11 @@ adoption PR records its approved SHA, evidence, `status: adopted`, and
 `implementation.authorized: true`. Plan adoption grants repository-only implementation
 authority and no live or settings authority.
 
+Those preconditions were satisfied when PR #120 merged as
+`d2cb2190d83dae863b0f2126f8853ddffd5ed678`. T00-T03 then merged through PRs
+#121-#124, so the remaining T04 work starts from exact integrated base
+`a578d287f9ce263e8bb3d8aa16dd8ef216e3d38c`.
+
 ## Reconciliation method
 
 1. Start T00 from the adopted merge on `develop` in an isolated worktree.
@@ -19,6 +24,9 @@ authority and no live or settings authority.
    fields and isolated negative fixtures.
 6. Build T04 only after T00-T03 merge; record the full evidence range, rollback, review,
    hosted outcomes, and post-merge issue actions outside the candidate commit.
+
+Steps 1-5 are now complete on `develop`. Step 6 remains the only active task and may
+prepare issue-closure wording only for use after merge and passing post-merge checks.
 
 ## File reconciliation rules
 

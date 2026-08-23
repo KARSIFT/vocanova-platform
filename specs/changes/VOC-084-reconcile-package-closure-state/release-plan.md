@@ -17,7 +17,9 @@ Before each merge:
 - the PR repeats the no-live boundary and inherited holds.
 
 The final repository outcome is consistent active lifecycle evidence for VOC-080
-through VOC-083 plus a network-free fail-closed validator.
+through VOC-083 plus a network-free fail-closed validator. PRs #121, #122, #123, and
+#124 already supplied the merged T00-T03 record; the remaining T04 candidate may only
+prepare its exact review/hosted/rollback evidence and the post-merge issue comments.
 
 ## Issue closure
 
@@ -28,7 +30,8 @@ After T04 merges and post-merge checks pass, an accountable repository operator 
 - close issue #118 with the exact VOC-084 evidence chain.
 
 Issue #119 remains open. Issue closure does not deploy, activate, release, or satisfy a
-live-action hold.
+live-action hold. In the pre-merge T04 candidate state, issue #85 and issue #118 stay
+open and no closure comment is posted.
 
 ## Rollback
 
