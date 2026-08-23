@@ -117,12 +117,19 @@ UI checks but is not Cloudflare compatibility evidence. No T03 command uploads a
 version, queries an account, provisions a resource, or deploys.
 
 VOC-080-T04 adds the separate `worker api` CI job without adding a workflow file. It
-verifies generated D1 bindings, Hono operational OpenAPI, the canonical 24-operation
+verifies generated D1 bindings, Hono operational OpenAPI, the canonical 25-operation
 Go `/api/v1` migration baseline, API-client path compatibility, privacy-safe
 problems/logs, explicit credentialed CORS, prepared statements, a forward STRICT D1
 migration applied from empty and replayed in workerd, static safety rules, build, and
 credential-free Wrangler dry-run. Its Wrangler configuration is local-only; T10 owns
 staging/production D1 IDs, secrets, routes, and held migration/deployment behavior.
+
+VOC-080-T05 extends that existing job rather than adding a workflow. The second
+forward migration and workerd fixtures cover 13 identity/account operations, secure
+cookies, token hashing/expiry/replay, OAuth state, requester isolation, CSRF,
+settings/onboarding idempotency, email change, deactivation rollback, and rate/kill
+switches. Email and OAuth stay injected, credential-free boundaries; the task neither
+contacts providers nor provisions or migrates a remote D1 database.
 
 > **Amendment note (`VOC-032-§1-amendment`, adopted 2026-07-30 via VOC-032; founder as approving
 > owner).** The Frontend/Backend/Database rows of the target-infrastructure table below and the

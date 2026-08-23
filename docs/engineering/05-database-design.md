@@ -384,7 +384,8 @@ PostgreSQL-to-D1 parity/reconciliation. GitHub Actions and automated tests are d
 independent semantic review is separate. Use expand/migrate/contract for breaking changes.
 
 Migration order: extensions → users → external_identities → user_onboarding_profiles →
-user_settings → canonical_words → word_meanings → word_examples → usage_notes →
+user_settings → sessions → magic_links → oauth_states → email_change_links →
+account_deletion_requests → auth_rate_limits → canonical_words → word_meanings → word_examples → usage_notes →
 journey_situations → journey_words → user_words → review_attempts → daily_mission_snapshots →
 daily_activity_summaries → learner_sentences → ai_feedback_attempts → confidence_point_ledger →
 streak_states → grace_day_ledger → idempotency_keys → feature_audit_logs → indexes/constraints →

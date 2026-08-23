@@ -3,10 +3,12 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
+import { format } from "prettier";
 
 const canonicalPath = path.resolve("../api/openapi/vocanova.openapi.json");
 const baselinePath = path.resolve("openapi/public-contract-baseline.json");
 const clientPath = path.resolve("../../packages/api-client/src/index.ts");
+const workerPath = path.resolve("openapi/worker-foundation.openapi.json");
 const canonicalBytes = await readFile(canonicalPath);
 const canonical = JSON.parse(canonicalBytes.toString("utf8"));
 const operations = Object.entries(canonical.paths)
@@ -26,13 +28,63 @@ const clientExceptions = {
   "/api/v1/auth/oauth/google/callback":
     "OAuth provider redirect target; navigated by the browser/provider rather than VocanovaClient",
 };
+const identityOperationIds = new Set([
+  "GetCurrentUser",
+  "RequestMagicLink",
+  "ConsumeMagicLink",
+  "OAuthStart",
+  "OAuthCallback",
+  "Logout",
+  "GetOnboarding",
+  "CompleteOnboarding",
+  "GetSettings",
+  "UpdateSettings",
+  "RequestEmailChangeLink",
+  "ConsumeEmailChangeLink",
+  "CreateAccountDeletionRequest",
+]);
+const identitySuccessStatus = {
+  CompleteOnboarding: 200,
+  ConsumeEmailChangeLink: 200,
+  ConsumeMagicLink: 200,
+  CreateAccountDeletionRequest: 200,
+  GetCurrentUser: 200,
+  GetOnboarding: 200,
+  GetSettings: 200,
+  Logout: 204,
+  OAuthCallback: 302,
+  OAuthStart: 200,
+  RequestEmailChangeLink: 204,
+  RequestMagicLink: 204,
+  UpdateSettings: 200,
+};
+const worker = JSON.parse(await readFile(workerPath, "utf8"));
+const workerCandidates = Object.entries(worker.paths)
+  .flatMap(([route, methods]) =>
+    Object.entries(methods).map(([method, operation]) => ({
+      method: method.toUpperCase(),
+      operationId: operation.operationId,
+      path: route,
+    })),
+  )
+  .filter((operation) => identityOperationIds.has(operation.operationId))
+  .sort((left, right) => left.operationId.localeCompare(right.operationId));
+const canonicalIdentityCandidates = operations
+  .filter((operation) => identityOperationIds.has(operation.operationId))
+  .sort((left, right) => left.operationId.localeCompare(right.operationId));
+const workerOperations = identityManifest(worker, workerCandidates);
+const canonicalIdentityOperations = identityManifest(
+  canonical,
+  canonicalIdentityCandidates,
+);
 const expected = {
   canonical: "apps/api/openapi/vocanova.openapi.json",
   sha256: createHash("sha256").update(canonicalBytes).digest("hex"),
   clientExceptions,
+  workerIdentityOperations: workerOperations,
   operations,
 };
-const serialized = `${JSON.stringify(expected, null, 2)}\n`;
+const serialized = await format(JSON.stringify(expected), { parser: "json" });
 
 if (process.argv.includes("--write")) {
   await writeFile(baselinePath, serialized, "utf8");
@@ -58,6 +110,16 @@ for (const { path: route } of operations) {
 assert.equal(canonical.openapi, "3.1.0");
 assert.ok(operations.length > 0, "canonical API has no operations");
 assert.deepEqual(
+  workerOperations,
+  canonicalIdentityOperations,
+  "Worker identity/account method, path, or operationId drifted from the canonical Go contract",
+);
+assert.equal(
+  workerOperations.length,
+  identityOperationIds.size,
+  "Worker identity/account parity manifest is incomplete",
+);
+assert.deepEqual(
   Object.keys(clientExceptions),
   operations
     .map((operation) => operation.path)
@@ -65,5 +127,59 @@ assert.deepEqual(
   "client-path exceptions must be exact, documented, and minimal",
 );
 process.stdout.write(
-  `Public contract drift check: PASS (${operations.length} operations; API client path coverage present)\n`,
+  `Public contract drift check: PASS (${operations.length} canonical operations; ${workerOperations.length} Worker identity/account operations; API client coverage present)\n`,
 );
+
+function identityManifest(document, candidates) {
+  return candidates.map((candidate) => {
+    const operation =
+      document.paths[candidate.path][candidate.method.toLowerCase()];
+    const successStatus = identitySuccessStatus[candidate.operationId];
+    assert.ok(
+      operation.responses[String(successStatus)],
+      `${candidate.operationId} is missing successful response ${successStatus}`,
+    );
+    return {
+      ...candidate,
+      successStatus,
+      parameters: (operation.parameters ?? [])
+        .map((parameter) => ({
+          in: parameter.in,
+          name: parameter.name,
+          required: parameter.required ?? false,
+        }))
+        .sort((left, right) =>
+          `${left.in}:${left.name}`.localeCompare(`${right.in}:${right.name}`),
+        ),
+      request: schemaManifest(
+        document,
+        operation.requestBody?.content?.["application/json"]?.schema,
+      ),
+      response: schemaManifest(
+        document,
+        operation.responses[String(successStatus)]?.content?.[
+          "application/json"
+        ]?.schema,
+      ),
+    };
+  });
+}
+
+function schemaManifest(document, input) {
+  if (!input) return null;
+  const schema = resolveSchema(document, input);
+  return {
+    properties: Object.keys(schema.properties ?? {})
+      .filter((property) => property !== "$schema")
+      .sort(),
+    required: (schema.required ?? [])
+      .filter((property) => property !== "$schema")
+      .sort(),
+  };
+}
+
+function resolveSchema(document, input) {
+  if (!input.$ref) return input;
+  const parts = input.$ref.replace(/^#\//, "").split("/");
+  return parts.reduce((value, part) => value[part], document);
+}

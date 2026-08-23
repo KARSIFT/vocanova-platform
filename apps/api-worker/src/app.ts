@@ -1,8 +1,12 @@
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
 import { readRuntimeConfig } from "./config.js";
+import type { EmailSender } from "./domain/identity.js";
 import { D1PlatformRepository } from "./repositories/d1-platform-repository.js";
 import type { PlatformRepository } from "./domain/platform.js";
+import { D1IdentityRepository } from "./identity/repository.js";
+import { registerIdentityRoutes } from "./identity/routes.js";
+import { IdentityService, identityConfig } from "./identity/service.js";
 import {
   ProblemSchema,
   createProblem,
@@ -28,7 +32,7 @@ const ConfigSchema = z
     release: z.string(),
     runtime: z.literal("cloudflare-workers"),
     data: z.literal("d1"),
-    migrationStatus: z.literal("foundation"),
+    migrationStatus: z.literal("identity-account-parity"),
   })
   .openapi("RuntimeConfig");
 
@@ -69,15 +73,16 @@ const configRoute = createRoute({
 export const OPENAPI_DOCUMENT_CONFIG = {
   openapi: "3.1.0" as const,
   info: {
-    title: "VocaNova Worker API foundation",
+    title: "VocaNova Worker API migration target",
     version: "0.1.0",
     description:
-      "Operational Worker/D1 foundation. The Go OpenAPI document remains the canonical /api/v1 migration contract until endpoint parity is complete.",
+      "Operational Worker/D1 migration target. Identity and account endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
   },
 };
 
 export interface AppDependencies {
   createPlatformRepository(database: D1Database): PlatformRepository;
+  createIdentityService?(env: CloudflareEnv): IdentityService;
 }
 
 const defaultDependencies: AppDependencies = {
@@ -138,11 +143,22 @@ export function createApp(
         release: config.value.release,
         runtime: "cloudflare-workers" as const,
         data: "d1" as const,
-        migrationStatus: "foundation" as const,
+        migrationStatus: "identity-account-parity" as const,
       },
       200,
     );
   });
+
+  registerIdentityRoutes(app, (env) =>
+    dependencies.createIdentityService
+      ? dependencies.createIdentityService(env)
+      : new IdentityService(
+          new D1IdentityRepository(env.DB),
+          unavailableEmailSender,
+          null,
+          identityConfig(env),
+        ),
+  );
 
   app.doc31("/openapi.json", OPENAPI_DOCUMENT_CONFIG);
 
@@ -171,6 +187,10 @@ export function createApp(
 }
 
 export const app = createApp();
+
+const unavailableEmailSender: EmailSender = {
+  send: () => Promise.reject(new Error("email provider is not configured")),
+};
 
 export function createOpenApiDocument(): object {
   return app.getOpenAPI31Document(OPENAPI_DOCUMENT_CONFIG);
