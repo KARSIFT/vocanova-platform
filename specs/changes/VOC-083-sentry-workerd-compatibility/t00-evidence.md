@@ -15,6 +15,10 @@ selected_versions:
 
 # VOC-083-T00 — Sentry/workerd candidate evidence and provisional decision
 
+This document is the historical T00 selection record. Its provisional labels describe
+the state at T00 completion; T02 later qualified this selected shape on the remediated
+canonical revision, as recorded in `t03-evidence.md`.
+
 ## Outcome and boundary
 
 **Provisional selection:** replace `@sentry/nextjs` with the official, exact-version
@@ -23,12 +27,12 @@ platform adapters `@sentry/cloudflare@10.69.0` (Worker/server) and
 `sentry.edge.config.ts` affected surface a custom Worker entry which wraps the
 generated OpenNext handler with `withSentry`.
 
-This is a T00 direction, not a canonical runtime change or final compatibility
-claim. T01 must implement the direction and deterministic reporting seams. T02 still
-owns the complete fresh-artifact manifest, prohibited-form classifier, local workerd
-log classifier, and Worker/server/browser reporting-equivalence acceptance. If those
-checks disprove this choice, implementation must stop and revise T00/T01 before a
-replacement can ship.
+At T00 completion this was a direction, not a canonical runtime change or final
+compatibility claim. T01 subsequently implemented the direction and deterministic
+reporting seams; T02 later qualified the complete fresh-artifact manifest,
+prohibited-form classifier, local workerd log classifier, and Worker/server/browser
+reporting-equivalence acceptance. If a future check disproves this choice,
+implementation must stop and revise T00/T01 before a replacement can ship.
 
 The canonical T00 branch contains only this record and package status bookkeeping.
 All runtime/config/dependency changes described below existed only in a detached,
@@ -36,7 +40,7 @@ disposable worktree and were deleted after the probes. No credential, hosted req
 Sentry event/API query, source-map upload, Cloudflare API call, deployment, or settings
 mutation occurred.
 
-## Current import, dependency, and generated-artifact inventory
+## T00 baseline import, dependency, and generated-artifact inventory
 
 Inventory was taken from exact base
 `20647e8e1eb4e5bc49e00e5fb186cfd85f98688b` before changing a candidate.
@@ -237,12 +241,12 @@ No new custom-worker path, OpenNext dangerous validation flag, source-map upload
 telemetry, Sentry/Cloudflare credential, live request, deployment, or settings change
 is selected.
 
-## Remaining gate
+## Historical remaining gate at T00 completion
 
-T00 provisionally satisfies AC-00 and unblocks T01. It does **not** satisfy AC-01
-through AC-05. Before the native choice can be accepted canonically, T01 must implement
-the exact shape and reporting seams, then T02 must prove on one fresh canonical
-revision that:
+T00 provisionally satisfied AC-00 and unblocked T01. It did **not** satisfy AC-01
+through AC-05. Before the native choice could be accepted canonically, T01 had to
+implement the exact shape and reporting seams, then T02 had to prove on one fresh
+canonical revision that:
 
 - every required generated and Wrangler-main JavaScript artifact is inventoried and
   free of every prohibited Wasm form;
@@ -252,5 +256,6 @@ revision that:
 - all dependency, privacy, source-map, telemetry, service-binding, and no-live
   invariants pass.
 
-Failure of any item returns the package to a revised T00 decision; it does not authorize
-an unrecorded fallback.
+Failure of any item would have returned the package to a revised T00 decision; it did
+not authorize an unrecorded fallback. T02's remediated revision supplied the required
+qualification and hosted evidence; T03's own AC-05 review and rollback remain pending.

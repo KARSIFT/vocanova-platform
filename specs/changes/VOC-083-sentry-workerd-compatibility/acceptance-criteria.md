@@ -6,15 +6,14 @@
 - Tasks: `VOC-083-T00`
 - Tests: `VOC-083-TEST-00`
 - Evidence: `VOC-083-EV-00`
-- Result: satisfied-for-T00-provisional-selection; final-canonical-qualification-owned-by-T02
+- Result: complete; T00 selection finally qualified by T02 exact-SHA evidence
 
-T00 compares configuration, package-update, and Workers-native-adapter candidates using
-exact versions/current primary evidence and, if needed, bounded disposable isolated-
-worktree probes. It records a provisional candidate that has no known incompatibility
-and preserves the required reporting design, or stops for a new decision. T00 does not
-require/claim final canonical generated-bundle, workerd, or reporting acceptance; T02
-qualifies that selection after T01 applies it. T00 leaves the canonical task branch
-unchanged and discards/reverts every probe.
+T00 compared configuration, package-update, and Workers-native-adapter candidates using
+exact versions/current primary evidence and bounded disposable isolated-worktree probes.
+It recorded the Workers-native adapter as the provisional candidate, with the required
+reporting design and no known incompatibility. T02 finally qualified that selection on
+the remediated exact SHA and its fresh bundle, workerd, and reporting evidence. T00
+left the canonical task branch unchanged and discarded/reverted every probe.
 
 ## VOC-083-AC-01 — Generated Worker forbids unsupported runtime Wasm compilation
 
@@ -22,7 +21,7 @@ unchanged and discards/reverts every probe.
 - Tasks: `VOC-083-T01`, `VOC-083-T02`
 - Tests: `VOC-083-TEST-01`
 - Evidence: `VOC-083-EV-01`
-- Result: pending
+- Result: complete through T02 exact-SHA and hosted evidence
 
 In the same CI job, a fresh canonical OpenNext build and fresh local Wrangler dry run
 produce a deterministic complete manifest: required entry, every non-empty regular
@@ -40,7 +39,7 @@ fixtures for `compile`, `compileStreaming`, `instantiateStreaming`, and buffer-s
 - Tasks: `VOC-083-T01`, `VOC-083-T02`
 - Tests: `VOC-083-TEST-02`
 - Evidence: `VOC-083-EV-02`
-- Result: pending
+- Result: complete through T02 exact-SHA and hosted evidence
 
 With a synthetic non-secret DSN/test transport, a controlled Worker/server request
 error and global error reach the selected reporting boundary; the browser capture path
@@ -54,7 +53,7 @@ builds, and local service binding.
 - Tasks: `VOC-083-T02`
 - Tests: `VOC-083-TEST-03`
 - Evidence: `VOC-083-EV-03`
-- Result: pending
+- Result: complete through T02 exact-SHA and hosted evidence
 
 Both real smoke owners fail nonzero when their bounded Worker output contains an
 unexpected unhandled-rejection/error diagnostic, even if all HTTP response assertions
@@ -67,14 +66,17 @@ fixture-tested rationale and cannot include the affected Wasm/rejection forms.
 - Tasks: `VOC-083-T02`, `VOC-083-T03`
 - Tests: `VOC-083-TEST-04`, `VOC-083-TEST-05`
 - Evidence: `VOC-083-EV-04`, `VOC-083-EV-05`
-- Result: pending
+- Result: candidate-satisfied through T02; pending T03 exact-SHA review and hosted proof
 
 The four-workflow invariant, frozen install, audit, CI aggregate, no-live policy,
 documentation, lockfile, and exact affected-file inventory agree. `ci:web` builds
 before compatibility/dry-run/smoke and local-stack builds/scans its own fresh output;
-no check accepts stale or partial artifacts. No Sentry API or
-source-map upload, Cloudflare mutation/deploy, secret, production-data access, or
-hosted/independent PASS claim is introduced.
+no check accepts stale or partial artifacts. T02's exact review and hosted results are
+recorded in the package evidence. The T03 candidate inventory reconciles the package
+documentation and corrects DOC-11's stale active `@sentry/nextjs` runtime statement,
+but T03's own exact review and hosted proof remain pending; no unperformed Sentry API
+or source-map upload, Cloudflare mutation/deploy, secret, or production-data access is
+claimed.
 
 ## VOC-083-AC-05 — Exact-revision verification and rollback are complete
 
@@ -82,9 +84,12 @@ hosted/independent PASS claim is introduced.
 - Tasks: `VOC-083-T03`
 - Tests: `VOC-083-TEST-06`
 - Evidence: `VOC-083-EV-06`
-- Result: pending
+- Result: candidate; pending T03's own exact-final-SHA review, hosted proof, and ordinary rollback
 
-Every implementation revision has the required deterministic evidence and a different-
-role Cloudflare/Workers/Sentry specialist verdict bound to its exact final SHA. A
-revert restores the predecessor instrumentation and checks without touching live
-Cloudflare/Sentry state; any blocked reporting-equivalence finding is resolved first.
+Every implementation revision must have the required deterministic evidence and a
+different-role Cloudflare/Workers/Sentry specialist verdict bound to its exact final
+SHA. T02 satisfies its own review and hosted gates, but T03's final candidate SHA and
+review record are intentionally not pre-claimed here. T03 must still show an ordinary
+repository rollback that restores the predecessor instrumentation and checks without
+touching live Cloudflare/Sentry state; any blocked reporting-equivalence finding must
+be resolved first.

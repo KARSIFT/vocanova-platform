@@ -6,7 +6,7 @@
 - Acceptance: `VOC-083-AC-00`
 - Tests: `VOC-083-TEST-00`
 - Evidence: `VOC-083-EV-00`
-- Status: complete-provisional-workers-native-selection-recorded-in-VOC-083-EV-00
+- Status: complete-provisional-workers-native-selection-finally-qualified-by-T02
 
 After adoption, inventory direct/transitive Sentry imports and
 generated bundle locations, retrieve current primary-source compatibility evidence,
@@ -38,8 +38,9 @@ equivalence acceptance to T02. Do not turn off Sentry or source-map controls.
 - Acceptance: `VOC-083-AC-01`, `VOC-083-AC-02`, `VOC-083-AC-03`, `VOC-083-AC-04`
 - Tests: `VOC-083-TEST-01`, `VOC-083-TEST-02`, `VOC-083-TEST-03`, `VOC-083-TEST-04`
 - Evidence: `VOC-083-EV-01`, `VOC-083-EV-02`, `VOC-083-EV-03`, `VOC-083-EV-04`
-- Status: remediation-local-validation-complete; prior-exact-SHA-FAIL-preserved;
-  pending-fresh-independent-exact-SHA-review-and-hosted-proof
+- Status: complete; prior-exact-SHA-FAIL-preserved; exact-SHA e3a71a13eedfc8fef05b580280047e41f320de48
+  passed formal review and merged through PR #116 as 23da9da69bb27529994e70d4bf6e9a0a78ea26b6;
+  hosted and post-merge evidence recorded in t03-evidence.md
 
 Own final qualification of T00/T01: add a complete fresh-artifact manifest/invariant and
 fixture-backed log classification
@@ -57,7 +58,9 @@ Remediation keeps that verdict intact while adding deterministic final-bundle
 canonicalization, complete every-module/reference/Wasm checks, global-object Wasm
 alias detection, close-aware incremental diagnostics in both owners, fresh distinct
 retry ports, and standalone Sentry environment stripping. Local evidence does not
-replace the required fresh exact-revision review or hosted proof.
+replace the required fresh exact-revision review or hosted proof; the remediated T02
+revision subsequently supplied both, and its repository-only ten-commit rollback to
+the exact T01 revision `9f11195ed186e214fade57884e66ca96f2498ebc` passed.
 
 ## VOC-083-T03 — Documentation, exact-SHA review, and rollback evidence
 
@@ -65,10 +68,14 @@ replace the required fresh exact-revision review or hosted proof.
 - Acceptance: `VOC-083-AC-04`, `VOC-083-AC-05`
 - Tests: `VOC-083-TEST-05`, `VOC-083-TEST-06`
 - Evidence: `VOC-083-EV-05`, `VOC-083-EV-06`
-- Status: blocked-by-fresh-T02-exact-SHA-review-and-hosted-proof
+- Status: candidate-reconciliation-recorded; pending T03's own exact-final-SHA
+  specialist review, hosted proof, and ordinary repository rollback
 
 Reconcile affected active docs, run the proportionate final checks, independently
 review the exact final revision with Cloudflare/Workers/Sentry specialization, and
-rehearse repository-only rollback, and request a fresh exact-SHA review after the
-preserved prior FAIL. Do not claim hosted proof, independent PASS before it exists, or
-any live Sentry/Cloudflare outcome.
+rehearse repository-only rollback. The candidate inventory records that T02
+reconciled the runtime/configuration/dependency/CI/test surfaces and that T03 corrected
+DOC-11's stale active `@sentry/nextjs` runtime statement. T03 must request and record
+its own exact-SHA review after the preserved prior FAIL, plus hosted proof and an
+ordinary rollback, before closure. Do not claim a T03 PR number, final SHA, review,
+hosted result, or any live Sentry/Cloudflare outcome in advance.

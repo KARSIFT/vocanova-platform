@@ -10,23 +10,31 @@ or execute a held external action.
 
 ## Runtime, dependency, and bundle impact
 
-`apps/web/next.config.ts` imports `withSentryConfig`; `apps/web/open-next.config.ts`,
+The following was the historical drafting baseline, not the final implementation:
+`apps/web/next.config.ts` imported `withSentryConfig`; `apps/web/open-next.config.ts`,
 `apps/web/wrangler.jsonc`, generated `worker-configuration.d.ts`, and `.env.example`
-are candidate/configuration review surfaces. Server/edge instrumentation, Next request-
-error capture, and `global-error.tsx` import `@sentry/nextjs`.
-`pnpm-lock.yaml` resolves `@sentry/nextjs@10.69.0` and the
-`@apm-js-collab/code-transformer@0.18.1` path. The bundle boundary is therefore
-affected even where source code has no explicit `WebAssembly` reference. The selected
-candidate must prove the generated Worker, not infer safety from source-level imports.
+were candidate/configuration review surfaces. Server/edge instrumentation, Next
+request-error capture, and `global-error.tsx` imported `@sentry/nextjs`.
+`pnpm-lock.yaml` resolved `@sentry/nextjs@10.69.0` and the
+`@apm-js-collab/code-transformer@0.18.1` path. The bundle boundary was therefore
+affected even where source code had no explicit `WebAssembly` reference.
 
-`apps/web/scripts/test-workerd.mjs` currently accumulates Wrangler output only for a
-request assertion failure. `scripts/foundation/local-stack-smoke.mjs` owns the
-two-Worker evidence. Both must be reviewed for bounded capture, process cleanup, and
-redaction so a successful response cannot conceal a runtime failure. The local
-development supervisor/policy and their tests are protected review surfaces because
-they strip DSNs/tokens; modify them only if the selected candidate requires a proven,
-bounded adjustment. Any candidate requiring a file outside `affected_areas` must stop
-for a separately reviewed scope change rather than edit it opportunistically.
+The implemented T01/T02 final state uses `@sentry/cloudflare@10.69.0` for the Worker,
+`@sentry/react@10.69.0` for browser capture, and no `@sentry/nextjs` import or locked
+dependency. T01's selected adapter preserves the Worker/server/browser reporting
+paths; T02's final scanner inventories the fresh generated and dry-run artifacts and
+its workerd/local-stack collectors reject unexpected runtime rejection/error diagnostics.
+T02's exact-SHA and hosted evidence are recorded in `t03-evidence.md`; this remains a
+repository-only result with no live Sentry or Cloudflare effect.
+
+At drafting, `apps/web/scripts/test-workerd.mjs` accumulated Wrangler output only for a
+request assertion failure and `scripts/foundation/local-stack-smoke.mjs` owned the
+two-Worker evidence. T02 now gives both owners bounded capture, process cleanup,
+redaction, and close-aware diagnostic classification so a successful response cannot
+conceal a runtime failure. The local development supervisor/policy and their tests
+remain protected surfaces because they strip DSNs/tokens. Any future candidate
+requiring a file outside `affected_areas` must stop for a separately reviewed scope
+change rather than edit it opportunistically.
 
 ## Security and privacy
 
@@ -58,6 +66,12 @@ current truthful claims; historical Sentry packages remain historical evidence. 
 change commands/jobs only inside `ci.yml`; all four workflows and credential-free
 pull-request behavior remain invariant.
 
+T03 found that DOC-11's active VOC-051 amendment still described `@sentry/nextjs` as
+the current web implementation. T03 preserves that history while superseding its SDK
+and runtime detail with the implemented `@sentry/cloudflare` Worker/request adapter and
+`@sentry/react` browser adapter. The development guide and ADR already describe the
+current implementation and require no further change.
+
 ## Risks, dependencies, and evidence
 
 - `VOC-083-RISK-00`: a broad alias/update hides runtime Wasm by removing required
@@ -72,11 +86,11 @@ pull-request behavior remain invariant.
 - `VOC-083-RISK-03`: an Sentry update alters transitive packages or build behavior.
   Mitigation: minimal lockfile diff, frozen install, audit, license/provenance review,
   generated-bundle diff, and rollback.
-- `VOC-083-DEP-00`: selection evidence is deliberately unresolved at drafting time.
-  After adoption it authorizes T00's bounded disposable probes and provisional decision;
-  it blocks T01 runtime changes, not package adoption itself. T02 owns final canonical
-  qualification. A T02 failure fails closed into an updated T00/T01 revision and fresh
-  exact-SHA review, never a silent replacement candidate.
+- `VOC-083-DEP-00`: resolved finally by T00's selected Workers-native adapters and
+  T02's exact-SHA qualification. The earlier provisional/dependency decision and the
+  T02 candidate FAIL remain historical evidence; any future failure still fails closed
+  into an updated T00/T01 revision and fresh exact-SHA review, never a silent
+  replacement candidate.
 - `VOC-083-EV-00` through `EV-06`: candidate matrix, bundle scan, capture contract,
   smoke-log fixtures, CI/docs inventory, and exact-SHA review/rollback evidence.
 
