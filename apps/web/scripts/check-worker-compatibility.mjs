@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import {
   existsSync,
   lstatSync,
+  mkdtempSync,
   mkdirSync,
   readdirSync,
   readFileSync,
@@ -14,13 +15,28 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
+import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 import ts from "typescript";
 
 const root = process.cwd();
+const moduleRequire = createRequire(import.meta.url);
+const wranglerBin = moduleRequire.resolve("wrangler");
 const executableExtensions = new Set([".cjs", ".js", ".mjs"]);
+const sourceCodeExtensions = new Set([
+  ".astro",
+  ".coffee",
+  ".cts",
+  ".jsx",
+  ".mts",
+  ".svelte",
+  ".ts",
+  ".tsx",
+  ".vue",
+]);
 const knownAssetExtensions = new Set([
   ".avif",
   ".cache",
@@ -70,6 +86,23 @@ const requiredOpenNextRuntimeModules = [
   "server-functions/default/handler.mjs",
   "worker.js",
 ];
+const compatibilityEnvironmentPassthroughKeys = Object.freeze([
+  "COLORTERM",
+  "COMSPEC",
+  "FORCE_COLOR",
+  "LANG",
+  "LC_ALL",
+  "NO_COLOR",
+  "PATH",
+  "PATHEXT",
+  "SYSTEMROOT",
+  "TEMP",
+  "TERM",
+  "TMP",
+  "TMPDIR",
+  "TZ",
+  "WINDIR",
+]);
 
 export function validateSourceCompatibility(repositoryRoot = root) {
   const middleware = read(path.join(repositoryRoot, "src/middleware.ts"));
@@ -637,40 +670,83 @@ export function runFreshWranglerDryRun({
 } = {}) {
   rmSync(outputDirectory, { force: true, recursive: true });
   mkdirSync(path.dirname(outputDirectory), { recursive: true });
-  const result = spawnSync(
-    "pnpm",
-    [
-      "exec",
-      "wrangler",
-      "deploy",
-      "--dry-run",
-      "--experimental-provision=false",
-      "--experimental-auto-create=false",
-      "--env=",
-      "--outdir",
-      outputDirectory,
-    ],
-    {
-      cwd: repositoryRoot,
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        NEXT_PUBLIC_SENTRY_DSN: "",
-        SENTRY_AUTH_TOKEN: "",
-        SENTRY_DSN: "",
-        WRANGLER_SEND_METRICS: "false",
-      },
-      maxBuffer: 16 * 1_048_576,
-      shell: false,
-      stdio: ["ignore", "pipe", "pipe"],
-    },
+  const runtimeDirectory = mkdtempSync(
+    path.join(tmpdir(), "vocanova-wrangler-compatibility-"),
   );
-  if (result.error) throw result.error;
-  if (result.status !== 0) {
-    throw new Error(
-      `Wrangler compatibility dry run failed with exit code ${String(result.status)}\n${redactAndBound(result.stdout)}\n${redactAndBound(result.stderr)}`,
+  try {
+    const environment = buildCompatibilityDryRunEnvironment({
+      runtimeDirectory,
+    });
+    for (const directory of [
+      environment.HOME,
+      environment.XDG_CACHE_HOME,
+      environment.XDG_CONFIG_HOME,
+    ]) {
+      mkdirSync(directory, { recursive: true });
+    }
+    const result = spawnSync(
+      process.execPath,
+      [
+        wranglerBin,
+        "deploy",
+        "--dry-run",
+        "--experimental-provision=false",
+        "--experimental-auto-create=false",
+        "--env=",
+        "--outdir",
+        outputDirectory,
+      ],
+      {
+        cwd: repositoryRoot,
+        encoding: "utf8",
+        env: environment,
+        maxBuffer: 16 * 1_048_576,
+        shell: false,
+        stdio: ["ignore", "pipe", "pipe"],
+      },
     );
+    if (result.error) throw result.error;
+    if (result.status !== 0) {
+      throw new Error(
+        `Wrangler compatibility dry run failed with exit code ${String(result.status)}\n${redactAndBound(result.stdout)}\n${redactAndBound(result.stderr)}`,
+      );
+    }
+  } finally {
+    rmSync(runtimeDirectory, { force: true, recursive: true });
   }
+}
+
+export function buildCompatibilityDryRunEnvironment({
+  runtimeDirectory,
+  source = process.env,
+} = {}) {
+  assert.equal(
+    typeof runtimeDirectory,
+    "string",
+    "compatibility runtimeDirectory is required",
+  );
+  assert.notEqual(
+    runtimeDirectory,
+    "",
+    "compatibility runtimeDirectory is required",
+  );
+  const environment = {};
+  for (const key of compatibilityEnvironmentPassthroughKeys) {
+    if (typeof source[key] === "string" && source[key] !== "") {
+      environment[key] = source[key];
+    }
+  }
+  const controlledHome = path.join(runtimeDirectory, "home");
+  return Object.freeze({
+    ...environment,
+    CI: "true",
+    HOME: controlledHome,
+    NEXT_TELEMETRY_DISABLED: "1",
+    USERPROFILE: controlledHome,
+    WRANGLER_SEND_METRICS: "false",
+    XDG_CACHE_HOME: path.join(runtimeDirectory, "cache"),
+    XDG_CONFIG_HOME: path.join(runtimeDirectory, "config"),
+  });
 }
 
 function isPromiseLike(checker, node) {
@@ -803,6 +879,7 @@ function collectWasmModuleBindings(sourceFile) {
   // every `instantiate` as unsafe rejects the supported imported Module form.
   const bindings = new Map();
   const wasmModuleBindings = new Set();
+  const reassignedWasmModuleBindings = new Set();
   bindings.set("WebAssembly", { kind: "namespace" });
   for (const globalObject of ["globalThis", "self", "global"]) {
     bindings.set(globalObject, { kind: "global-object" });
@@ -888,12 +965,111 @@ function collectWasmModuleBindings(sourceFile) {
   }
 
   collect(sourceFile);
-  return { bindings, reference: wasmReference, wasmModuleBindings };
+  collectWrites(sourceFile);
+  return {
+    bindings,
+    isStableModule(identifier) {
+      return (
+        ts.isIdentifier(identifier) &&
+        wasmModuleBindings.has(identifier.text) &&
+        !reassignedWasmModuleBindings.has(identifier.text) &&
+        !isLexicallyShadowed(identifier, identifier.text)
+      );
+    },
+    reference: wasmReference,
+  };
+
+  function collectWrites(node) {
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      node.operatorToken.kind <= ts.SyntaxKind.LastAssignment
+    ) {
+      recordWrittenBindings(node.left);
+    } else if (
+      (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+      [ts.SyntaxKind.PlusPlusToken, ts.SyntaxKind.MinusMinusToken].includes(
+        node.operator,
+      )
+    ) {
+      recordWrittenBindings(node.operand);
+    } else if (
+      (ts.isForInStatement(node) || ts.isForOfStatement(node)) &&
+      !ts.isVariableDeclarationList(node.initializer)
+    ) {
+      recordWrittenBindings(node.initializer);
+    }
+    ts.forEachChild(node, collectWrites);
+  }
+
+  function recordWrittenBindings(node) {
+    if (ts.isIdentifier(node)) {
+      if (
+        wasmModuleBindings.has(node.text) &&
+        !isLexicallyShadowed(node, node.text)
+      ) {
+        reassignedWasmModuleBindings.add(node.text);
+      }
+      return;
+    }
+    if (
+      ts.isArrayLiteralExpression(node) ||
+      ts.isObjectLiteralExpression(node)
+    ) {
+      for (const element of node.elements ?? node.properties) {
+        if (ts.isSpreadElement(element))
+          recordWrittenBindings(element.expression);
+        else if (ts.isShorthandPropertyAssignment(element)) {
+          recordWrittenBindings(element.name);
+        } else if (ts.isPropertyAssignment(element)) {
+          recordWrittenBindings(element.initializer);
+        } else if (ts.isIdentifier(element)) {
+          recordWrittenBindings(element);
+        }
+      }
+    }
+  }
+
+  function isLexicallyShadowed(identifier, name) {
+    for (
+      let ancestor = identifier.parent;
+      ancestor && !ts.isSourceFile(ancestor);
+      ancestor = ancestor.parent
+    ) {
+      if (functionLikeBindsName(ancestor, name)) return true;
+      if (
+        (ts.isBlock(ancestor) || ts.isModuleBlock(ancestor)) &&
+        ancestor.statements.some((statement) =>
+          statementBindsName(statement, name),
+        )
+      ) {
+        return true;
+      }
+      if (
+        ts.isCatchClause(ancestor) &&
+        ancestor.variableDeclaration &&
+        bindingNameContains(ancestor.variableDeclaration.name, name)
+      ) {
+        return true;
+      }
+      if (
+        (ts.isForStatement(ancestor) ||
+          ts.isForInStatement(ancestor) ||
+          ts.isForOfStatement(ancestor)) &&
+        ancestor.initializer &&
+        ts.isVariableDeclarationList(ancestor.initializer) &&
+        ancestor.initializer.declarations.some((declaration) =>
+          bindingNameContains(declaration.name, name),
+        )
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 function classifyWasmCall(node, wasmModuleBindings) {
-  const aliases = wasmModuleBindings.bindings;
-  const modules = wasmModuleBindings.wasmModuleBindings;
   const methodReference = wasmModuleBindings.reference(node.expression);
   const method =
     methodReference?.kind === "method" ? methodReference.method : undefined;
@@ -907,15 +1083,50 @@ function classifyWasmCall(node, wasmModuleBindings) {
   if (method !== "instantiate") return null;
 
   const [firstArgument] = node.arguments;
-  if (
-    firstArgument &&
-    ts.isIdentifier(firstArgument) &&
-    (modules.has(firstArgument.text) ||
-      aliases.get(firstArgument.text)?.kind === "module")
-  ) {
+  if (firstArgument && wasmModuleBindings.isStableModule(firstArgument)) {
     return null;
   }
   return "prohibited-wasm-instantiate-buffer-source-or-unknown";
+}
+
+function functionLikeBindsName(node, name) {
+  if (!(
+    ts.isFunctionDeclaration(node) ||
+    ts.isFunctionExpression(node) ||
+    ts.isArrowFunction(node) ||
+    ts.isMethodDeclaration(node) ||
+    ts.isConstructorDeclaration(node) ||
+    ts.isGetAccessorDeclaration(node) ||
+    ts.isSetAccessorDeclaration(node)
+  )) {
+    return false;
+  }
+  return node.parameters.some((parameter) =>
+    bindingNameContains(parameter.name, name),
+  );
+}
+
+function statementBindsName(statement, name) {
+  if (ts.isVariableStatement(statement)) {
+    return statement.declarationList.declarations.some((declaration) =>
+      bindingNameContains(declaration.name, name),
+    );
+  }
+  if (
+    (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement)) &&
+    statement.name?.text === name
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function bindingNameContains(bindingName, name) {
+  if (ts.isIdentifier(bindingName)) return bindingName.text === name;
+  return bindingName.elements.some(
+    (element) =>
+      ts.isBindingElement(element) && bindingNameContains(element.name, name),
+  );
 }
 
 function propertyName(node) {
@@ -947,6 +1158,7 @@ function resolveReference(module, reference, modules, assets) {
     const key = hasManifestRecord(module, candidate, modules);
     return key ? { key, kind: "module" } : { kind: "missing" };
   }
+  if (sourceCodeExtensions.has(extension)) return { kind: "unknown" };
   if (extension === "") {
     for (const executableExtension of executableExtensions) {
       const key = hasManifestRecord(

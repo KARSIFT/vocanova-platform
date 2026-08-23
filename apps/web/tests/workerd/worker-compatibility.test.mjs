@@ -11,6 +11,7 @@ import { join } from "node:path";
 import test from "node:test";
 
 import {
+  buildCompatibilityDryRunEnvironment,
   inspectGeneratedArtifacts,
   scanProhibitedWasmForms,
 } from "../../scripts/check-worker-compatibility.mjs";
@@ -84,6 +85,64 @@ test("an imported precompiled Module is the supported instantiate form", () => {
   assert.deepEqual(findings, []);
 });
 
+test("reassigned, unknown, and lexically shadowed Wasm inputs fail closed", () => {
+  for (const source of [
+    'import compiledModule from "./fixture.wasm"; compiledModule=bytes; WebAssembly.instantiate(compiledModule,imports);',
+    'import compiledModule from "./fixture.wasm"; function run(compiledModule){ WebAssembly.instantiate(compiledModule,imports); }',
+    'import compiledModule from "./fixture.wasm"; { const compiledModule=bytes; WebAssembly.instantiate(compiledModule,imports); }',
+    'import compiledModule from "./fixture.wasm"; function run(){ const compiledModule=bytes; WebAssembly.instantiate(compiledModule,imports); }',
+    "WebAssembly.instantiate(unknownModule,imports);",
+  ]) {
+    assertRule(
+      source,
+      "prohibited-wasm-instantiate-buffer-source-or-unknown",
+    );
+  }
+});
+
+test("compatibility dry run receives only local execution environment", () => {
+  const environment = buildCompatibilityDryRunEnvironment({
+    runtimeDirectory: "/synthetic/compatibility-runtime",
+    source: {
+      AWS_SECRET_ACCESS_KEY: "aws-secret",
+      CF_API_TOKEN: "cf-token",
+      CLOUDFLARE_ACCOUNT_ID: "account-id",
+      CLOUDFLARE_API_TOKEN: "cloudflare-token",
+      FORCE_COLOR: "1",
+      GH_TOKEN: "github-token",
+      HOME: "/credentialed/home",
+      LANG: "C.UTF-8",
+      NEXT_PUBLIC_SENTRY_DSN: "https://public@sentry.invalid/1",
+      NPM_TOKEN: "npm-token",
+      PATH: "/synthetic/bin",
+      SENTRY_AUTH_TOKEN: "sentry-token",
+      SENTRY_CREDENTIAL: "sentry-credential",
+      SENTRY_DSN: "https://server@sentry.invalid/2",
+      TEMP: "/synthetic/temp",
+      UNRELATED_DATABASE_PASSWORD: "database-password",
+      XDG_CONFIG_HOME: "/credentialed/config",
+    },
+  });
+
+  assert.deepEqual(environment, {
+    CI: "true",
+    FORCE_COLOR: "1",
+    HOME: "/synthetic/compatibility-runtime/home",
+    LANG: "C.UTF-8",
+    NEXT_TELEMETRY_DISABLED: "1",
+    PATH: "/synthetic/bin",
+    TEMP: "/synthetic/temp",
+    USERPROFILE: "/synthetic/compatibility-runtime/home",
+    WRANGLER_SEND_METRICS: "false",
+    XDG_CACHE_HOME: "/synthetic/compatibility-runtime/cache",
+    XDG_CONFIG_HOME: "/synthetic/compatibility-runtime/config",
+  });
+  assert.doesNotMatch(
+    JSON.stringify(environment),
+    /aws-secret|token|account-id|sentry\.invalid|credential|database-password/,
+  );
+});
+
 function artifactFixture(t, workerSource) {
   const root = mkdtempSync(join(tmpdir(), "voc083-artifacts-"));
   t.after(() => rmSync(root, { force: true, recursive: true }));
@@ -136,6 +195,21 @@ test("inventory rejects broken executable references in unreachable modules", (t
         dryRunRoot: fixture.dryRun,
       }),
     /dangerous\.js: missing referenced artifact \.\/missing-unreachable\.js/,
+  );
+});
+
+test("inventory rejects relative source-code references as executable unknowns", (t) => {
+  const fixture = artifactFixture(t, 'import "./source.ts";');
+  writeFileSync(join(fixture.openNext, "dangerous.js"), "export default 1;");
+  writeFileSync(join(fixture.openNext, "source.ts"), "export default 1;");
+  assert.throws(
+    () =>
+      inspectGeneratedArtifacts({
+        repositoryRoot: fixture.root,
+        openNextRoot: fixture.openNext,
+        dryRunRoot: fixture.dryRun,
+      }),
+    /worker\.js: unknown referenced artifact \.\/source\.ts/,
   );
 });
 
