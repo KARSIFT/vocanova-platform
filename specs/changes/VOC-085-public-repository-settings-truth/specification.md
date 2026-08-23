@@ -48,9 +48,12 @@ globally ban words that are valid in labelled historical evidence.
 ### VOC-085-D04 — Public visibility does not equal enforcement
 
 Public-repository availability of a GitHub feature is not evidence that the feature is
-configured. Rulesets, protected branches, security scanning, Dependabot security
+configured. Rulesets, protected branches, secret scanning, Dependabot security
 updates, environment protection, and release gates remain absent/disabled or held
-unless separately observed and recorded.
+unless separately observed and recorded. Dependency/vulnerability alerts are a
+separate observed repository setting; if the read-only vulnerability-alerts endpoint
+returns enabled, active guidance must record that state rather than treating alerts as
+only prospective.
 
 ### VOC-085-D05 — Settings and live actions remain out of scope
 
@@ -100,7 +103,9 @@ source_endpoints:
   - GET /repos/KARSIFT/vocanova-platform/rulesets
   - GET /repos/KARSIFT/vocanova-platform/branches/develop/protection
   - GET /repos/KARSIFT/vocanova-platform/branches/main/protection
-  - GitHub repository security-settings API fields for Dependabot and secret scanning
+  - GET /repos/KARSIFT/vocanova-platform/vulnerability-alerts
+  - GET /repos/KARSIFT/vocanova-platform/automated-security-fixes
+  - GitHub repository security-settings API fields for secret scanning
 freshness:
   semantics: point-in-time-observation-not-live-state
   live_freshness_proven: false
@@ -125,6 +130,9 @@ rulesets: []
 branch_protection:
   develop: http-404-not-protected
   main: http-404-not-protected
+dependency_vulnerability_alerts:
+  enabled: true
+  endpoint_status: 204
 dependabot_security_updates: disabled
 secret_scanning:
   enabled: false
@@ -165,7 +173,9 @@ The reconciled language must say exactly what is configured today, what is absen
 disabled, and what remains prospective. It must not imply branch protection, ruleset
 enforcement, Dependabot security updates, GitHub-hosted secret scanning, push
 protection, environment protection, deployment, or release authority that is not
-observed. Existing active Actions hardening may be described as configured.
+observed. It also must not group enabled dependency/vulnerability alerts with disabled
+Dependabot security updates or held scanning controls. Existing active Actions
+hardening and observed dependency/vulnerability alerts may be described as configured.
 
 ## Desired controls, explicitly held by VOC-085-HOLD-00
 
@@ -177,12 +187,15 @@ target includes:
   checks, review/conversation controls, code-owner routing, no force pushes, and no
   unaudited bypass;
 - release-pull-request-only promotion into `main` with appropriate evidence;
-- Dependabot alerts/security updates and public-repository secret scanning/push
-  protection when separately authorized and verified; and
+- Dependabot security updates and public-repository secret scanning/push protection
+  when separately authorized and verified; and
 - any environment protection or Cloudflare delivery activation only under the named
   VOC-080 holds and a separately adopted activation package.
 
-No target control is enabled by this package.
+No target control is enabled by this package. Future mutation of the already-observed
+dependency/vulnerability alert state remains a settings action under
+`VOC-085-HOLD-00`, but the enabled alert state itself is current evidence, not a
+prospective target.
 
 The formal hold does not block repository-only merge. It blocks only the future
 external settings action and requires the exact action authority and evidence contract

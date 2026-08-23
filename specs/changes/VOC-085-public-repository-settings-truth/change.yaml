@@ -48,6 +48,13 @@ approvals:
         Preserved as immutable review history. This revision adds an explicit
         point-in-time freshness contract, corrects branch-mutation wording, formalizes
         VOC-085-HOLD-00, and adds bounded R4 settings-specialist evidence requirements.
+    - candidate_sha: 23421df02bb028530c1baa6d9d7c35d9ce7cc0fe
+      verdict: fail-specialist
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5388969389
+      resolution: >-
+        Preserved as immutable specialist review history. The next revision separates
+        currently enabled dependency/vulnerability alerts from disabled Dependabot
+        security updates, secret-scanning controls, and future held settings targets.
   adoption_decision:
     status: pending
     candidate_sha: null
@@ -76,7 +83,8 @@ required_r4_evidence:
     role: repository-governance-and-GitHub-settings specialist
     evidence_contract: >-
       Exact source/API schema and endpoint interpretation, availability-versus-enabled
-      distinction, point-in-time and staleness semantics, no-mutation boundary, and
+      distinction, dependency/vulnerability-alert versus Dependabot-security-update
+      interpretation, point-in-time and staleness semantics, no-mutation boundary, and
       exact-SHA final specialist review. This evidence is pending until a non-author
       specialist reviews the final exact revision.
 action_specific_holds:
@@ -165,3 +173,10 @@ dependencies:
       Issue #119 may close only after the final implementation revision merges into
       develop and applicable post-merge checks pass; drafting or plan adoption does
       not close the issue.
+  - id: VOC-085-DEP-04
+    status: required
+    description: >-
+      Dependency/vulnerability alerts must be recorded separately from Dependabot
+      security updates and secret-scanning controls. If the read-only vulnerability-
+      alerts endpoint reports enabled at implementation time, active guidance must
+      treat that as observed current state, not as a prospective held target.

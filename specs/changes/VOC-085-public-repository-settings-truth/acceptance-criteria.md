@@ -9,14 +9,16 @@
 
 A machine-readable `docs/governance/repository-settings-current.yaml` record contains
 the exact read-only public-repository,
-merge, Actions, ruleset, branch-protection, Dependabot, and secret-scanning observations
-listed in the specification, with `observed_at`, `as_of`, source, and explicit
-freshness/staleness semantics. The record is labelled current as observed at
-2026-08-24, not live-current. The network-free guard proves internal consistency only
-and cannot prove live freshness. VOC-080's private snapshot remains unchanged and
-explicitly historical. No secret, token, environment value, or live-system claim is
-present. A distinct R4 settings specialist must verify the source/API schema and
-availability-versus-enabled interpretation on the exact final revision.
+merge, Actions, ruleset, branch-protection, dependency/vulnerability-alert, Dependabot
+security-update, and secret-scanning observations listed in the specification, with
+`observed_at`, `as_of`, source, and explicit freshness/staleness semantics. The record
+is labelled current as observed at 2026-08-24, not live-current. The network-free guard
+proves internal consistency only and cannot prove live freshness. VOC-080's private
+snapshot remains unchanged and explicitly historical. No secret, token, environment
+value, or live-system claim is present. A distinct R4 settings specialist must verify
+the source/API schema and availability-versus-enabled interpretation on the exact
+final revision, including the dependency-alert versus Dependabot-security-update
+distinction.
 
 ## VOC-085-AC-01 — Living guidance describes the public posture current as observed
 
@@ -29,7 +31,8 @@ README, `.github/README.md`, repository-settings guidance, Cloudflare delivery g
 and DOC-16 no longer describe private-plan limitations as the current repository state.
 They link facts current as observed at 2026-08-24 to the point-in-time record and label
 the VOC-080 snapshot as historical. They distinguish enabled Actions hardening from
-absent/disabled controls.
+enabled dependency/vulnerability alerts, absent/disabled controls, and prospective
+settings targets.
 
 ## VOC-085-AC-02 — Desired mature protections remain future and held
 
@@ -38,11 +41,13 @@ absent/disabled controls.
 - Tests: `VOC-085-TEST-01`, `VOC-085-TEST-02`
 - Evidence: `VOC-085-EV-02`
 
-Rulesets, protected branches, security-feature enablement, environment protections,
-and delivery activation are described as prospective and held by VOC-085-HOLD-00 (or
-the distinct VOC-080 Cloudflare holds) only. No document claims they were enabled by
-this package or that public visibility itself proves them. The formal hold does not
-block repository-only package merge.
+Rulesets, protected branches, Dependabot security updates, secret scanning/push
+protection, environment protections, and delivery activation are described as
+prospective and held by VOC-085-HOLD-00 (or the distinct VOC-080 Cloudflare holds)
+only. No document claims they were enabled by this package or that public visibility
+itself proves them. No document treats the currently enabled dependency/vulnerability
+alert state as merely prospective. The formal hold does not block repository-only
+package merge.
 
 ## VOC-085-AC-03 — Truthfulness guard fails closed
 

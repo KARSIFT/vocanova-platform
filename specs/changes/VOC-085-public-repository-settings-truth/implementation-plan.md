@@ -13,10 +13,12 @@ boundary, VOC-085-HOLD-00, and all distinct VOC-080 live-action holds.
 ## Ordered implementation
 
 1. T00 adds the point-in-time current-as-observed-at-2026-08-24 record and verifies
-   source/API fields against the read-only issue evidence.
+   source/API fields against the read-only issue evidence and fresh dependency-alert
+   versus Dependabot-security-update endpoint reads.
 2. T01 updates only active guidance and, if needed, DOC-16 metadata/history; it
    preserves historical snapshot files and labels future controls held by
-   VOC-085-HOLD-00 or the distinct VOC-080 holds.
+   VOC-085-HOLD-00 or the distinct VOC-080 holds while recording enabled
+   dependency/vulnerability alerts as observed current state.
 3. T02 adds the smallest useful network-free truthfulness guard and negative fixtures,
    with no workflow, GitHub, or external side effects.
 4. T03 performs inventory, validation, exact general and specialist review, hosted
@@ -48,7 +50,8 @@ Each task requires a different non-author general reviewer bound to the exact fi
 SHA, concrete blocker resolution, and an explicit no-settings/no-live verdict. The R4
 plan and final implementation also require a distinct non-author repository-governance/
 settings specialist covering source/API schema, availability versus enabled,
-point-in-time freshness/staleness, no-mutation boundary, and exact-SHA conclusions.
+dependency-alert versus Dependabot-security-update interpretation, point-in-time
+freshness/staleness, no-mutation boundary, and exact-SHA conclusions.
 The PR body records builder/reviewer/specialist provenance and exact evidence; pending
 metadata must say specialist evidence is false until that review occurs. Applicable
 CI, Governance, Quality, and Security workflows are monitored; path-filtered non-runs

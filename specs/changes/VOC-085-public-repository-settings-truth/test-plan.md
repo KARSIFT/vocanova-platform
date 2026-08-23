@@ -5,10 +5,12 @@
 - Covers: `VOC-085-AC-00`
 - Preconditions: adopted package and read-only issue evidence
 - Procedure: parse the current-as-observed-at-2026-08-24 record; require repository identity, exact
-  `observed_at`/`as_of` date, the six read-only REST endpoints and security-settings
-  schema surface, source/API endpoint interpretation, all specified fields,
+  `observed_at`/`as_of` date, the read-only REST endpoints and security-settings
+  schema surface, source/API endpoint interpretation, dependency/vulnerability-alert
+  status separate from Dependabot security-update status, all specified fields,
   point-in-time freshness/staleness semantics, and the no-mutation boundary; compare
-  it with issue #119 and confirm VOC-080 historical files are unchanged.
+  it with issue #119 plus any fresh read-only dependency-alert evidence and confirm
+  VOC-080 historical files are unchanged.
 - Expected result: the public snapshot passes as current as observed at 2026-08-24;
   secrets, placeholders, omissions, history rewrites, unqualified live-current
   claims, and missing staleness semantics fail. The validator's result explicitly
@@ -20,10 +22,12 @@
 - Covers: `VOC-085-AC-01`, `VOC-085-AC-02`
 - Preconditions: T00 record
 - Procedure: inventory active references to private plan, branch protection, rulesets,
-  Dependabot, and secret scanning; inspect each affected document for “current as
-  observed at 2026-08-24”, historical, prospective, and hold markers and links.
+  dependency/vulnerability alerts, Dependabot security updates, and secret scanning;
+  inspect each affected document for “current as observed at 2026-08-24”, historical,
+  prospective, and hold markers and links.
 - Expected result: no stale private-current claim remains; configured, absent/disabled,
-  historical, and held states are distinguishable. A future mutation requires an
+  historical, and held states are distinguishable. Enabled dependency/vulnerability
+  alerts are not described as merely future or held. A future mutation requires an
   immediate governed doc-only follow-up.
 - Evidence: `VOC-085-EV-01`, `VOC-085-EV-02`
 
@@ -32,9 +36,11 @@
 - Covers: `VOC-085-AC-02`
 - Preconditions: reconciled active documents
 - Procedure: semantic scan for claims that this package enabled rulesets, protected
-  branches, security settings, environment approvals, deployment, or release gates;
-  verify VOC-085-HOLD-00's action, accountable operator, separate authority, evidence,
-  completion, expiry, and non-blocking repository-merge semantics.
+  branches, Dependabot security updates, secret scanning, environment approvals,
+  deployment, or release gates; verify it does not group enabled dependency/
+  vulnerability alerts with held disabled controls; verify VOC-085-HOLD-00's action,
+  accountable operator, separate authority, evidence, completion, expiry, and
+  non-blocking repository-merge semantics.
 - Expected result: only prospective/held descriptions remain for unconfigured controls;
   the settings hold is formal and distinct from VOC-080 Cloudflare holds.
 - Evidence: `VOC-085-EV-02`
@@ -54,8 +60,9 @@
 - Covers: `VOC-085-AC-03`
 - Preconditions: isolated temporary fixture copies
 - Procedure: remove current/as-of/freshness fields, reintroduce a private-current
-  claim, mark a held control active, conflate historical VOC-080 state with current
-  state, and add a settings-mutation/live-action claim.
+  claim, mark a held control active, mark enabled dependency/vulnerability alerts as
+  merely prospective, conflate historical VOC-080 state with current state, and add a
+  settings-mutation/live-action claim.
 - Expected result: each fixture fails with a concrete reason; explicitly labelled
   historical/prospective text remains accepted; no fixture treats the guard as a live
   freshness check.
@@ -69,10 +76,11 @@
   unit checks, `pnpm validate` as applicable, audit as applicable, and `git diff --check`;
   inspect changed paths and repository settings API activity.
 - Expected result: R4 floor is declared, specialist evidence is required but remains
-  pending until exact review, docs are internally consistent, and no settings,
-  environment, live, secret, deployment, branch-protection/ruleset, `main`, or branch
-  deletion action exists. Normal isolated branches and governed PR merges remain
-  permitted.
+  pending until exact review, dependency/vulnerability alerts are separated from
+  Dependabot security updates and secret scanning, docs are internally consistent, and
+  no settings, environment, live, secret, deployment, branch-protection/ruleset, `main`,
+  or branch deletion action exists. Normal isolated branches and governed PR merges
+  remain permitted.
 - Evidence: `VOC-085-EV-04`
 
 ## VOC-085-TEST-06 — Exact review, hosted proof, rollback, and closure gate

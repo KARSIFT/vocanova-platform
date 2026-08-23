@@ -16,7 +16,10 @@ The current-as-observed-at-2026-08-24 record contains only public repository met
 and booleans. No token,
 secret, environment value, personal data, learner data, provider payload, or live
 telemetry is read or committed. Public visibility does not authorize security-setting
-mutation or imply that disabled protections are active.
+mutation or imply that disabled protections are active. Dependency/vulnerability
+alerts are recorded separately from Dependabot security updates because the read-only
+endpoint reports them as currently enabled while automated security fixes remain
+disabled.
 
 ## Runtime, data, and deployment
 
@@ -29,9 +32,11 @@ changes. VOC-080-HOLD-00, HOLD-01, and HOLD-02 remain held.
 Active guidance is reconciled to the public state current as observed at 2026-08-24.
 The committed record is point-in-time only; its network-free guard proves internal
 consistency and cannot prove live freshness. VOC-080's private snapshot is immutable
-history. Desired rulesets, protected branches, Dependabot/scanning features,
-environment protection, and delivery activation are future controls held by
-VOC-085-HOLD-00 or the distinct VOC-080 holds, not current claims.
+history. Desired rulesets, protected branches, Dependabot security updates, secret
+scanning/push protection, environment protection, and delivery activation are future
+controls held by VOC-085-HOLD-00 or the distinct VOC-080 holds, not current claims.
+The observed dependency/vulnerability alert state is current evidence, not a held
+future target.
 
 ## Risks and mitigations
 
@@ -40,6 +45,9 @@ VOC-085-HOLD-00 or the distinct VOC-080 holds, not current claims.
 - `VOC-085-R01`: public visibility is mistaken for hosted enforcement. Mitigation:
   explicit current-as-observed-at-2026-08-24 fields, absent/disabled values, and scoped
   validator.
+- `VOC-085-R01a`: enabled dependency/vulnerability alerts are conflated with disabled
+  Dependabot security updates or held secret-scanning controls. Mitigation: separate
+  endpoint reads, explicit record fields, and exact specialist review.
 - `VOC-085-R02`: a desired control is documented as configured. Mitigation: separate
   current/prospective sections and fail-closed fixtures.
 - `VOC-085-R03`: stale private wording remains in a living document. Mitigation:

@@ -12,9 +12,11 @@ launch, environment, or `main` promotion authority.
 Before each task merge, require local validation, different-role exact-SHA PASS,
 resolved blockers, applicable hosted checks, and a separate non-author merge actor.
 The final outcome is truthful settings guidance current as observed at 2026-08-24 plus
-preserved VOC-080 history and a fail-closed static guard, with all future protections
-held by VOC-085-HOLD-00 or the distinct VOC-080 holds. The guard proves internal
-consistency only, not live freshness.
+preserved VOC-080 history and a fail-closed static guard. Observed dependency/
+vulnerability alerts are recorded separately from disabled Dependabot security updates
+and secret-scanning controls, with all future protections held by VOC-085-HOLD-00 or
+the distinct VOC-080 holds. The guard proves internal consistency only, not live
+freshness.
 
 ## Issue closure
 

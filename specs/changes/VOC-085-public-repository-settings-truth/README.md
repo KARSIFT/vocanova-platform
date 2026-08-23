@@ -24,13 +24,16 @@ The read-only state is current as observed at 2026-08-24:
   workflow token permissions, and pull-request review approval disabled;
 - no repository rulesets; `develop` and `main` branch-protection reads returned HTTP
   404 (unprotected);
-- Dependabot security updates disabled; secret scanning, push protection, and
-  validity checks disabled.
+- dependency/vulnerability alerts enabled by the read-only vulnerability-alerts
+  endpoint; Dependabot security updates disabled; secret scanning, push protection,
+  and validity checks disabled.
 
 These are point-in-time observations, not authorization to change settings. Desired
-mature controls—branch rulesets, protected `develop`/`main`, security alerts/scanning,
-and any future release protections—remain explicitly prospective and held by
-`VOC-085-HOLD-00`. GitHub's public-repository availability does not mean a control is
+mature controls—branch rulesets, protected `develop`/`main`, Dependabot security
+updates, secret scanning/push protection, and any future release protections—remain
+explicitly prospective and held by `VOC-085-HOLD-00`. The currently enabled
+dependency/vulnerability alert state is recorded as observed evidence, not as a future
+held target. GitHub's public-repository availability does not mean a control is
 configured.
 
 VOC-080's private-repository snapshot remains immutable historical evidence in
