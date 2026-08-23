@@ -1,5 +1,13 @@
 # VOC-080 — Test Plan
 
+## Reconciled evidence outcome
+
+The complete T00-T12 deterministic, hosted, exact-revision review, rollback, and
+post-merge evidence is recorded in the VOC-084 closure inventory. These procedures
+remain the package's reproducible evidence contract; their completion establishes
+repository parity only and does not establish staging, production, data, or live
+activation.
+
 ## VOC-080-TEST-00 — Plan, ADR, document, and source-inventory consistency
 
 - Covers: `VOC-080-AC-00`, `VOC-080-AC-09`

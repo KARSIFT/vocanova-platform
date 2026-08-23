@@ -1,19 +1,27 @@
 # VOC-081 Implementation Plan
 
+## Reconciled implementation outcome
+
+VOC-081-T00 through VOC-081-T04 and AC-00 through AC-07 are complete for repository/local
+F2 at exact head `a8694932671ad9c44fd2a97c128b14e6089e5faf`, merged through PR #108 as
+`36d526bdec83e28b17aa30a6814d42b92f058ec1`. The VOC-084 closure inventory records exact
+task reviews, hosted results, preserved failures, rollback, and post-merge evidence.
+F3, A1/product acceptance, Windows-native support, staging, production, and live activation
+remain outside this result; all inherited VOC-080 holds remain held.
+
 ## Sequence
 
-1. **T00 — Contract and fail-closed policy.** Reconcile canonical ports/origins/state,
-   disable generated Next agent rules, and add pure validation/negative fixtures before
-   adding launch capability.
-2. **T01 — Local D1 initialization.** Add the explicit local migration command and
-   prove empty/repeat/failure behavior against disposable and persistent roots.
-3. **T02 — Supervised development loops.** Add a small provider-neutral Node supervisor
+1. **T00 — Contract and fail-closed policy.** Reconciled canonical ports/origins/state,
+   disabled generated Next agent rules, and added pure validation/negative fixtures.
+2. **T01 — Local D1 initialization.** Added the explicit local migration command and
+   proved empty/repeat/failure behavior against disposable and persistent roots.
+3. **T02 — Supervised development loops.** Added the provider-neutral Node supervisor
    for `dev` and `dev:workers`, readiness, signals, child failure, and port preflight.
-4. **T03 — Local-stack smoke and CI.** Add disposable two-Worker integration evidence,
+4. **T03 — Local-stack smoke and CI.** Added disposable two-Worker integration evidence,
    required CI coverage inside `ci.yml`, and aggregate failure fixtures.
-5. **T04 — F2 record and final verification.** Reconcile docs, inventory every
-   requirement, run full suites/rollback, obtain exact-SHA specialist review, and record
-   hosted evidence without activating F3.
+5. **T04 — F2 record and final verification.** Reconciled docs, inventoried requirements,
+   ran suites/rollback, obtained exact-SHA review, and recorded hosted evidence without
+   activating F3.
 
 ## Selected technical approach
 

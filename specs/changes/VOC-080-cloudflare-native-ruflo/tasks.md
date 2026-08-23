@@ -6,7 +6,7 @@
 - Acceptance: `VOC-080-AC-00`
 - Tests: `VOC-080-TEST-00`
 - Evidence: `VOC-080-EV-00`
-- Status: pending-adoption
+- Status: complete; merged through PR #87 as `c376d9f71d217c5a0736be4b54f2b784a8f54414`.
 
 Add two accepted ADRs (Cloudflare runtime/data/deployment and external Ruflo orchestration), reconcile
 the ADR/doc indexes, and update DOC-04/05/06/07/08/09/10/11/12/15/16 plus contributor/governance
@@ -19,7 +19,7 @@ inventory and rejected alternatives.
 - Acceptance: `VOC-080-AC-01`, `VOC-080-AC-02`
 - Tests: `VOC-080-TEST-01`, `VOC-080-TEST-02`
 - Evidence: `VOC-080-EV-01`, `VOC-080-EV-02`
-- Status: blocked-by-T00
+- Status: complete; merged through PR #88 as `e3b9f502fee91f15cb0dc0c163b52ebcc396f2fc`.
 
 Keep exactly four workflows while introducing stable subsystem checks, local setup reuse, caches that
 do not affect correctness, strict shells, immutable pins, `persist-credentials: false`, least
@@ -33,7 +33,7 @@ or live Cloudflare calls.
 - Acceptance: `VOC-080-AC-09`
 - Tests: `VOC-080-TEST-00`, `VOC-080-TEST-11`
 - Evidence: `VOC-080-EV-00`, `VOC-080-EV-11`
-- Status: blocked-by-T00
+- Status: complete; merged through PR #89 as `b7c20e87a688b4ed8164c38ea73258761699069f`.
 
 Audit and pin Ruflo's exact release/integrity; document/install it outside the repository without
 running a force initializer; define hierarchical roles, worktree ownership, evidence handoff,
@@ -47,7 +47,7 @@ credentials, or deployment calls fail closed. Rehearse with a synthetic reposito
 - Acceptance: `VOC-080-AC-03`
 - Tests: `VOC-080-TEST-03`
 - Evidence: `VOC-080-EV-03`
-- Status: blocked-by-T02
+- Status: complete; merged through PR #90 as `ae9f2a899d8b40858c7706f5a2992a4cecfb1a55`.
 
 Add the OpenNext adapter, locked Wrangler config and generated types, build/preview/dry-run commands,
 representative workerd tests, and size/startup measurement. Reconcile environment handling, server
@@ -60,7 +60,7 @@ deploy.
 - Acceptance: `VOC-080-AC-04`
 - Tests: `VOC-080-TEST-04`
 - Evidence: `VOC-080-EV-04`
-- Status: blocked-by-T02
+- Status: complete; merged through PR #91 as `93733aeafa725621736767d67a47a6b6c06fa650`.
 
 Create the Worker API workspace with Hono, schema validation/OpenAPI generation, generated bindings,
 typed domain/repository boundaries, local D1, initial migrations, structured errors/logging, health
@@ -72,7 +72,7 @@ and config behavior, Vitest pool/workerd tests, and contract drift checks. Keep 
 - Acceptance: `VOC-080-AC-05`
 - Tests: `VOC-080-TEST-05`
 - Evidence: `VOC-080-EV-05`
-- Status: blocked-by-T04
+- Status: complete; merged through PR #92 as `1881b00bac4b7656a68c8dff335cc0f67e951c4a`.
 
 Port Google OAuth state, magic links, sessions, auth middleware, account lifecycle, email-change,
 deletion, onboarding, and settings. Prove secure cookie, token hashing/expiry, replay prevention,
@@ -85,7 +85,7 @@ fixtures. External email remains mocked.
 - Acceptance: `VOC-080-AC-05`
 - Tests: `VOC-080-TEST-06`
 - Evidence: `VOC-080-EV-06`
-- Status: blocked-by-T05
+- Status: complete; merged through PR #93 as `deda0a6deabf1dfcb785fda4a3445084e640230f`.
 
 Port canonical vocabulary, journeys, save/unsave, learner words, cursors, review queues/attempts,
 scheduling, and idempotency. Validate ordering, due-time semantics, duplicate protection, and
@@ -97,7 +97,7 @@ cross-user isolation under D1.
 - Acceptance: `VOC-080-AC-05`
 - Tests: `VOC-080-TEST-07`
 - Evidence: `VOC-080-EV-07`
-- Status: blocked-by-T06
+- Status: complete; merged through PR #94 as `a160454c84f0972df0b4934cf6001c2ab2beeab9`.
 
 Port daily snapshots, local-date/timezone rules, confidence ledger, rewards, streaks, grace days,
 progress, and cross-capability atomic updates. Prove idempotency, concurrency, partial-failure, and
@@ -109,7 +109,7 @@ deterministic domain parity.
 - Acceptance: `VOC-080-AC-06`
 - Tests: `VOC-080-TEST-08`
 - Evidence: `VOC-080-EV-08`
-- Status: blocked-by-T07
+- Status: complete; merged through PR #95 as `366534d0bd68c716a280f6413a0bbed7fd7f05cb`.
 
 Port sentence/feedback persistence, validation, safety/moderation, provider adapters, bounded retries,
 cost/rate gates, evaluation fixtures, email HTTP boundary, feature kill switches, and privacy-safe
@@ -121,7 +121,7 @@ Workers observability. Use mocks in CI and no paid-provider secret.
 - Acceptance: `VOC-080-AC-07`
 - Tests: `VOC-080-TEST-09`
 - Evidence: `VOC-080-EV-09`
-- Status: blocked-by-T08
+- Status: complete; merged through PR #96 as `315e590d888badfaf24c09698a072d131f5d4640`.
 
 Implement deterministic export-shape validation, type conversion, D1 import chunks, resumability,
 idempotency, foreign-key ordering, redaction, counts/checksums/domain reconciliation, and failure
@@ -133,7 +133,7 @@ recovery. Rehearse only with synthetic/non-production fixtures. Production-data 
 - Acceptance: `VOC-080-AC-08`
 - Tests: `VOC-080-TEST-10`
 - Evidence: `VOC-080-EV-10`
-- Status: blocked-by-T03-and-T09
+- Status: complete; merged through PR #97 as `6fa48164d974fe347d8c7c408b4374af5254f336`.
 
 Within `ci.yml`, add credential-free PR dry runs and environment-scoped staging/production jobs for
 D1 migration, immutable version upload, smoke/parity/E2E evidence, explicit promotion, outcome, and
@@ -146,7 +146,7 @@ after migration start. Do not activate live environments until the named holds c
 - Acceptance: `VOC-080-AC-00`, `VOC-080-AC-10`
 - Tests: `VOC-080-TEST-11`
 - Evidence: `VOC-080-EV-11`
-- Status: blocked-by-AC-03-through-AC-09
+- Status: complete; merged through PR #99 as `fa467159cfc5089c1355691c43df208a312d6801`.
 
 After a complete parity inventory, remove the active Go/PostgreSQL runtime, Dockerfiles, Compose,
 Nginx, host scripts, and server-specific tests/instructions; reconcile validators, package scripts,
@@ -159,9 +159,12 @@ server was inspected or stopped.
 - Acceptance: `VOC-080-AC-11`
 - Tests: `VOC-080-TEST-12`
 - Evidence: `VOC-080-EV-12`
-- Status: blocked-by-T11
+- Status: complete; final head `3d6699c5eb378b9a00679d61a5c28b6b7e27c32c` merged through PR #100
+  as `a05ab5c60534f36d1b89d9b9d32296469e9942bf`; post-merge evidence is recorded in the
+  VOC-084 closure inventory.
 
 Run the full repository/Worker/D1/web/security/governance suites, hosted Actions, semantic inventory,
 synthetic migration and deployment rehearsals, reverse-order task rollback, and exact-SHA independent
-specialist review. Record current hosted settings and whether live staging/production remains held or
-was separately activated. Produce a self-contained visual architecture and close only evidenced work.
+specialist review. The exact final head, hosted and post-merge results, reverse-order repository
+rollback, and closure boundary are recorded in the VOC-084 inventory. Live staging/production
+activation was not performed: HOLD-00, HOLD-01, and HOLD-02 remain held.

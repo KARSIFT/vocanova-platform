@@ -6,7 +6,7 @@
 - Tasks: T00, T01
 - Tests: TEST-00, TEST-01
 - Evidence: EV-00, EV-01
-- Result: pending
+- Result: complete; exact task and post-merge evidence is recorded in the VOC-084 closure inventory.
 
 From a frozen install, `pnpm dev:init` creates only ignored local state, applies all
 committed migrations to `DB`, succeeds again without destructive reset, and is rejected
@@ -18,7 +18,7 @@ if any remote/staging/production/provisioning capability is introduced.
 - Tasks: T00, T02
 - Tests: TEST-00, TEST-02
 - Evidence: EV-00, EV-02
-- Result: pending
+- Result: complete; exact task and post-merge evidence is recorded in the VOC-084 closure inventory.
 
 Web is fixed to 3000 and API to 8080; CORS/auth/callback/return/public/server origins
 match. Direct browser API requests and web server requests through `API` reach the same
@@ -30,7 +30,7 @@ local API revision. Port conflicts fail rather than silently rebinding.
 - Tasks: T02
 - Tests: TEST-02
 - Evidence: EV-02
-- Result: pending
+- Result: complete; exact task and post-merge evidence is recorded in the VOC-084 closure inventory.
 
 `pnpm dev` owns Next hot reload plus the local API Worker. `pnpm dev:workers` owns both
 workerd Workers. Readiness is bounded; child failure propagates; SIGINT/SIGTERM stops
@@ -42,7 +42,7 @@ every child; no daemon or orphan remains.
 - Tasks: T03
 - Tests: TEST-03
 - Evidence: EV-03
-- Result: pending
+- Result: complete; exact task and post-merge evidence is recorded in the VOC-084 closure inventory.
 
 The disposable smoke proves empty/repeat migrations, health/config, direct API,
 web static/SSR/middleware, observable service binding, one controlled D1 persistence
@@ -54,7 +54,7 @@ restart, negative lifecycle cases, and clean termination without external access
 - Tasks: T00, T03
 - Tests: TEST-00, TEST-03
 - Evidence: EV-00, EV-03
-- Result: pending
+- Result: complete; exact task and post-merge evidence is recorded in the VOC-084 closure inventory.
 
 Starting/stopping either loop creates no nested generated `AGENTS.md`, `CLAUDE.md`,
 or orchestrator state and leaves the tracked tree clean apart from documented ignored
@@ -66,7 +66,7 @@ build/local-state output. Existing authority guards remain at least as strong.
 - Tasks: T03
 - Tests: TEST-04
 - Evidence: EV-04
-- Result: pending
+- Result: complete; exact task and post-merge evidence is recorded in the VOC-084 closure inventory.
 
 The exact four workflows remain. `ci.yml` requires local-stack evidence where
 applicable; PR jobs cannot receive deployment credentials or make remote calls; a
@@ -78,11 +78,14 @@ synthetic local-stack failure prevents `ci required` from passing.
 - Tasks: T04
 - Tests: TEST-05
 - Evidence: EV-05
-- Result: pending
+- Result: complete; exact task and post-merge evidence is recorded in the VOC-084 closure inventory.
 
 Docs and the final record agree with executable commands. They disclose platform
-limitations and say F2 repository/local acceptance becomes effective only after merge;
-F3 staging, A1 product acceptance, production, and all VOC-080 holds remain held.
+limitations and record that F2 repository/local acceptance became effective after the
+implementation merge;
+F3 staging, A1 product acceptance, Windows-native support, production, and all VOC-080
+holds remain held. The merged repository/local F2 result is complete; no live activation
+is claimed.
 
 ## VOC-081-AC-07 — Final evidence is exact, independent, hosted, and rollback-tested
 
@@ -90,8 +93,12 @@ F3 staging, A1 product acceptance, production, and all VOC-080 holds remain held
 - Tasks: T04
 - Tests: TEST-06
 - Evidence: EV-06
-- Result: pending
+- Result: complete; exact task and post-merge evidence is recorded in the VOC-084 closure inventory.
 
 Every task has proportional local validation, hosted path-applicable proof, different-
 role exact-SHA review, resolved findings, and repository rollback. The final revision
 passes full validation and reverse-order rollback without live-system mutation.
+
+The final repository/local F2 outcome is complete at the merged T04 revision. It does not
+claim F3, A1/product acceptance, Windows-native support, staging, production, deployment,
+activation, release, or live verification.

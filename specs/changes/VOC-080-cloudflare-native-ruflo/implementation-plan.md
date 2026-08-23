@@ -1,11 +1,20 @@
 # VOC-080 — Implementation Plan
 
+## Reconciled implementation outcome
+
+The plan was implemented after adoption. VOC-080-T00 through VOC-080-T12 and AC-00
+through AC-11 are complete for the repository at final head
+`3d6699c5eb378b9a00679d61a5c28b6b7e27c32c`, merged through PR #100 as
+`a05ab5c60534f36d1b89d9b9d32296469e9942bf`. Exact task evidence, hosted results,
+preserved failures, and rollback records are in the VOC-084 closure inventory.
+This is repository completion only; all three VOC-080 action holds remain held.
+
 ## Preconditions and protected areas
 
-No implementation begins until the exact package candidate has independent architecture,
-Cloudflare, security, data, CI/CD, and governance review; the adoption metadata is complete; and the
-plan PR is merged by a role other than the planner. Every task then uses a short-lived branch/worktree
-from the previous stacked task and a different-role exact-SHA review.
+Implementation began only after the exact package candidate received independent architecture,
+Cloudflare, security, data, CI/CD, and governance review, adoption metadata was complete, and the
+plan PR was merged by a role other than the planner. Each completed task used a short-lived
+branch/worktree from the previous stacked task and a different-role exact-SHA review.
 
 Repository-only tasks may proceed without Cloudflare credentials. `VOC-080-HOLD-00` gates live
 staging resource mutation, `HOLD-01` gates production deployment/routes/migrations, and `HOLD-02`
@@ -28,18 +37,21 @@ or exceptional uncertainty appears.
 
 ## Ordered implementation sequence
 
-1. T00 adopts the ADRs and reconciles canonical documents before incompatible code is written.
-2. T01 refactors CI and supported repository settings, retaining all current evidence.
-3. T02 defines the pinned external Ruflo adapter/runbook and strengthens authority guards.
-4. T03 adapts the web to OpenNext and workerd without live deployment.
-5. T04 adds the Worker API/D1/contract foundation.
-6. T05-T08 migrate bounded domains in dependency order, each with Go/Worker parity fixtures.
-7. T09 builds and rehearses synthetic PostgreSQL-to-D1 conversion and reconciliation.
-8. T10 adds fail-closed staging/production version, migration, smoke, promotion, and rollback jobs;
-   live activation remains held unless its named authority exists.
-9. T11 removes old active runtime/infra only after all parity evidence is complete.
-10. T12 performs full validation, hosted proof, rollback rehearsal, exact-SHA review, inventory, and
-    closure. Production activation may remain separately held while repository migration completes.
+1. T00 adopted the ADRs and reconciled canonical documents before incompatible code was written.
+2. T01 refactored CI and applied the separately authorized bounded GitHub-settings
+   hardening recorded in `docs/governance/repository-settings.md`, retaining its readback
+   evidence. That historical repository-settings action did not deploy or mutate
+   Cloudflare, DNS, a server, or a production environment.
+3. T02 defined the pinned external Ruflo adapter/runbook and strengthened authority guards.
+4. T03 adapted the web to OpenNext and workerd without live deployment.
+5. T04 added the Worker API/D1/contract foundation.
+6. T05-T08 migrated bounded domains in dependency order with Go/Worker parity fixtures.
+7. T09 built and rehearsed synthetic PostgreSQL-to-D1 conversion and reconciliation.
+8. T10 added fail-closed staging/production version, migration, smoke, promotion, and rollback
+   controls; live activation remained held.
+9. T11 removed old active runtime/infra after parity evidence was complete.
+10. T12 completed validation, hosted proof, rollback rehearsal, exact-SHA review, inventory, and
+    closure. Production activation remains separately held.
 
 Each task is independently revertible. No later task rewrites an earlier proven SHA unless fixing a
 real defect, in which case fresh exact-SHA review and hosted checks are mandatory.

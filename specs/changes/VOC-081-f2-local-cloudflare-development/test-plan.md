@@ -1,5 +1,13 @@
 # VOC-081 Test Plan
 
+## Reconciled evidence outcome
+
+The complete T00-T04 deterministic, hosted, exact-revision review, rollback, and
+post-merge evidence is recorded in the VOC-084 closure inventory. These procedures
+remain the reproducible repository/local F2 evidence contract; completion does not
+establish F3, A1/product acceptance, Windows-native support, staging, production, or
+live activation.
+
 ## VOC-081-TEST-00 — Contract and authority negatives
 
 - Covers: AC-01, AC-04

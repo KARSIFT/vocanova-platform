@@ -152,9 +152,12 @@ affected_areas:
 implementation:
   authorized: true
   required: true
-  status: authorized-after-pr-86-adoption
+  status: complete-repository-implementation-through-VOC-080-T12
   target_branch: develop
-  pull_request: null
+  pull_request: 100
+  final_task: VOC-080-T12
+  final_head: 3d6699c5eb378b9a00679d61a5c28b6b7e27c32c
+  final_merge_commit: a05ab5c60534f36d1b89d9b9d32296469e9942bf
   authority_issue: 85
 release:
   required: true
@@ -169,10 +172,21 @@ adoption_pr: 86
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747
 repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/86
 implementation_authority_before_adoption: false
-implementation_authority_status: authorized-after-adoption
+implementation_authority_status: authorized-and-complete-repository-only
 production_deployment: held-by-VOC-080-HOLD-01
 staging_deployment: held-by-VOC-080-HOLD-00
 production_data_access: held-by-VOC-080-HOLD-02
 autonomous_production_release: disabled
 ehr: not-triggered
 blocking_reasons: []
+closure:
+  status: complete-repository-only
+  final_task: VOC-080-T12
+  final_head: 3d6699c5eb378b9a00679d61a5c28b6b7e27c32c
+  final_merge_commit: a05ab5c60534f36d1b89d9b9d32296469e9942bf
+  acceptance: VOC-080-AC-00-through-AC-11-complete
+  activation: not-claimed
+  holds:
+    VOC-080-HOLD-00: held
+    VOC-080-HOLD-01: held
+    VOC-080-HOLD-02: held
