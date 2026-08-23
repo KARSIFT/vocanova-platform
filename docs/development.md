@@ -113,6 +113,10 @@ missing/empty/unknown artifact, an escaping link, a broken reachable reference, 
 runtime-reachable unsupported Wasm construction path. Copied but unreachable modules
 remain inventoried instead of being silently excluded. The stable `pnpm ci:web`
 command owns this build → manifest/compatibility → type/dry-run/limits → workerd order.
+The workerd smoke retries only an exact local bind-collision startup failure, at most
+three times with a newly selected loopback port. Every other startup diagnostic is
+terminal, and the accepted attempt still undergoes post-shutdown fail-closed log
+classification.
 
 `wrangler.jsonc` defines local, staging, and production names but contains no resource
 ID, credential, route, or deploy authority. Local preview uses only simulation. The

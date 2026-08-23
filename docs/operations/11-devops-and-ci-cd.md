@@ -133,6 +133,10 @@ runtime Wasm construction. The disposable local-stack path independently builds 
 scans fresh output before startup. Both paths retain bounded output plus sticky hard
 diagnostics and classify again after child shutdown, so an HTTP 200 cannot hide an
 unhandled rejection, compile/runtime error, or unsupported WebAssembly API diagnostic.
+The standalone web smoke may retry only a recognized loopback bind collision, for at
+most three fresh-port attempts; configuration, runtime, and unknown startup failures
+remain immediately terminal, and diagnostics from the accepted attempt remain subject
+to the same post-shutdown gate.
 
 The subsystem `pnpm ci:*` commands are local entry points, not CI-only behavior;
 `pnpm validate` remains the full pre-review gate. This design follows the applicable
