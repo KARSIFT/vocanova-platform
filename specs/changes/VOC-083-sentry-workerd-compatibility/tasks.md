@@ -6,7 +6,7 @@
 - Acceptance: `VOC-083-AC-00`
 - Tests: `VOC-083-TEST-00`
 - Evidence: `VOC-083-EV-00`
-- Status: authorized-disposable-probes-and-provisional-decision-after-adoption
+- Status: authorized-after-pr-111-adoption-for-disposable-probes-and-provisional-decision
 
 After adoption, inventory direct/transitive Sentry imports and
 generated bundle locations, retrieve current primary-source compatibility evidence,

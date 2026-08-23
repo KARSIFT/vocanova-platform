@@ -1,13 +1,19 @@
 # VOC-083 — Workers-safe Sentry instrumentation and workerd rejection detection
 
-Status: draft; unapproved and not implementation authority.
+Status: adopted through PR #111. Repository-only implementation and the bounded,
+credential-free isolated probes defined by T00 are authorized after adoption. All
+inherited VOC-080 holds and action-specific authority boundaries remain in force.
 
 The independent exact-SHA plan reviews of
 [`682b33ec1a126e8924395f7d7f7eb26191f2a57a`](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973)
 and
 [`07772a00f753e614d3fd7a51539cabe4f0da1393`](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385292757)
-both recorded **FAIL**. This remediation revision preserves both findings and requires
-a fresh exact-SHA review; it does not reinterpret either FAIL as approval.
+both recorded **FAIL**. Exact SHA
+[`8ec6b530b37972a3a9e8102905a4f1b429386941`](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385313120)
+then received a different-role specialist **PASS** with zero blockers, and the
+accountable technical decision owner approved that exact candidate for adoption. The
+adoption-bookkeeping revision requires its own exact-SHA review before PR #111 may
+merge; neither historical FAIL is reinterpreted as approval.
 
 Issue [#105](https://github.com/KARSIFT/vocanova-platform/issues/105) records two
 `WebAssembly.compile()` unhandled rejections from the generated OpenNext Worker on its
