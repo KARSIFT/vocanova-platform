@@ -6,7 +6,7 @@
 - Acceptance: `VOC-084-AC-00`
 - Tests: `VOC-084-TEST-00`
 - Evidence: `VOC-084-EV-00`
-- Status: blocked-by-plan-adoption
+- Status: authorized-after-PR-120-adoption-merge; pending implementation
 
 Create the package-local machine-readable inventory for every VOC-080 through VOC-083
 task. Verify existing GitHub/repository evidence read-only. Record exact heads, PRs,

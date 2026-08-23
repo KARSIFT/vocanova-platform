@@ -5,7 +5,7 @@ slug: reconcile-package-closure-state
 title: Reconcile completed change-package closure state
 
 type: governance-evidence-reconciliation
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because the package changes canonical lifecycle and acceptance evidence for four
@@ -17,16 +17,17 @@ canonical_path: specs/changes/VOC-084-reconcile-package-closure-state
 base_branch: develop
 base_sha: d4078924ae6d0be52628973e84be51734d93a5a9
 target_branch: develop
+approved_candidate_sha: 644996f3657032f948734e280bed1e1c52d2a0c5
 requirement_source: >-
   Current GitHub issue https://github.com/KARSIFT/vocanova-platform/issues/118,
   created 2026-08-23 with no pull_request field, reporting that active VOC-080 through
   VOC-083 package records contradict their merged exact-revision review, hosted,
   rollback, and post-merge evidence. Historical commit-message references carrying
   the same number do not supersede the canonical current API object.
-requirement_approval_status: reported-defect-plan-candidate-not-yet-independently-reviewed
+requirement_approval_status: exact-plan-review-pass-and-decision-owner-approved
 
 owners:
-  decision: repository-governance-decision-owner-after-independent-plan-review
+  decision: accountable-decision-owner-after-independent-plan-review
   package_preparation: Codex planner role
   implementation: separate role-selected builders after adoption
   independent_verification: different non-author reviewer bound to each exact revision
@@ -36,12 +37,35 @@ approvals:
     status: recorded-for-planning
     evidence: https://github.com/KARSIFT/vocanova-platform/issues/118
   package_independent_verification:
-    status: pending
-    candidate_sha: null
-    evidence: null
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 644996f3657032f948734e280bed1e1c52d2a0c5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/120#issuecomment-5387961204
+  package_independent_verification_history:
+    - candidate_sha: b4abe9746ecbdb039ffdb8b4fec15d23fe169ba0
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/120#issuecomment-5387933108
+      resolution: >-
+        Canonical current GitHub API evidence established #118 and #119 as open issues,
+        and the amended candidate made exhaustive per-file classification explicit.
+    - candidate_sha: 805317324ac46aac7649adef16c4e472c3f584ca
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/120#issuecomment-5387952512
+      resolution: >-
+        DEP-03 was made the consistent per-file classification dependency and distinct
+        DEP-04 was added for current GitHub API issue-object identity precedence.
+  adoption_decision:
+    status: approved-for-adoption
+    candidate_sha: 644996f3657032f948734e280bed1e1c52d2a0c5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/120#issuecomment-5387989958
+  candidate_hosted_evidence:
+    candidate_sha: 644996f3657032f948734e280bed1e1c52d2a0c5
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32660710147
+    governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32660710317
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32660710158
+    quality: not-applicable-plan-only-path-filter
 
-approval_status: not-approved
-implementation_authorized: false
+approval_status: adopted
+implementation_authorized: true
 automatic_merge_allowed: true
 production_impact: none-repository-evidence-only
 rollback_required: true
@@ -58,7 +82,7 @@ artifacts:
 
 dependencies:
   - id: VOC-084-DEP-00
-    status: open-until-plan-review
+    status: satisfied-exact-candidate-review-and-adoption-decision
     description: >-
       A different-role reviewer must verify the complete plan candidate and the evidence
       sources before adoption. The package cannot approve its own reconciliation rules.
@@ -108,9 +132,9 @@ affected_areas:
   - GitHub issue #118 (post-merge defect closure record)
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: pending-plan-review-and-adoption
+  status: authorized-after-pr-120-adoption; T00-pending
   target_branch: develop
   pull_request: null
   authority_issue: 118
@@ -124,16 +148,20 @@ release:
   migration_required: false
   rollback_required: true
 
-repository_adoption_status: not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted-through-pr-120-bookkeeping-pending-merge
+adoption_pr: 120
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/120#issuecomment-5387989958
 implementation_authority_before_adoption: false
-implementation_authority_status: unavailable-before-adoption
+implementation_authority_status: recorded-by-adoption-bookkeeping-effective-after-pr-120-merge
 production_deployment: held-by-VOC-080-HOLD-01
 staging_deployment: held-by-VOC-080-HOLD-00
 production_data_access: held-by-VOC-080-HOLD-02
 autonomous_production_release: disabled
 ehr: not-triggered
-blocking_reasons:
-  - pending-independent-exact-plan-review
-  - pending-plan-adoption
+blocking_reasons: []
+post_adoption_task_gates:
+  - T00-authorized-after-pr-120-merge-for-read-only-evidence-inventory-only
+  - T01-and-T02-blocked-until-T00-inventory-merges
+  - T03-blocked-until-T01-and-T02-merge
+  - T04-blocked-until-T03-merge
+  - every-task-requires-different-role-exact-SHA-review-hosted-proof-and-separate-merge

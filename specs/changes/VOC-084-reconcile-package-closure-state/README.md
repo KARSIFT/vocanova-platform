@@ -1,6 +1,14 @@
 # VOC-084 — Reconcile completed change-package closure state
 
-Status: **draft; not adopted; implementation not authorized**.
+Status: **adopted through PR #120 bookkeeping; implementation authority becomes
+effective when the adoption PR merges**.
+
+The independently reviewed plan candidate is
+`644996f3657032f948734e280bed1e1c52d2a0c5`. Its exact-SHA PASS with zero blockers is
+[recorded on PR #120](https://github.com/KARSIFT/vocanova-platform/pull/120#issuecomment-5387961204),
+and the separate accountable adoption decision is
+[recorded here](https://github.com/KARSIFT/vocanova-platform/pull/120#issuecomment-5387989958).
+The bookkeeping revision does not preclaim the future merge or implementation results.
 
 This package responds to [GitHub issue #118](https://github.com/KARSIFT/vocanova-platform/issues/118).
 It reconciles the active VOC-080 through VOC-083 package records with their already
@@ -20,7 +28,9 @@ DNS change, branch deletion, or `develop` to `main` promotion.
 
 The plan uses five small tasks:
 
-1. record and validate the immutable closure evidence inventory;
+1. record and validate the immutable closure evidence inventory, including exactly one
+   active-claim, historical, or prospective classification for every target-package
+   file;
 2. reconcile VOC-080 and VOC-081 active package state;
 3. reconcile VOC-082 and VOC-083 active package state;
 4. add a static fail-closed closure-consistency validator and negative fixtures; and
