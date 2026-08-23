@@ -20,8 +20,8 @@ requirement_source: >-
   GitHub issue https://github.com/KARSIFT/vocanova-platform/issues/119, created
   2026-08-23, which reports that the repository became public while active guidance
   still described private GitHub Free limitations and the VOC-080 settings snapshot
-  was being treated as current. The current read-only state was verified through the
-  GitHub REST API before this package was drafted.
+  was being treated as current. The point-in-time read-only state was reverified
+  through the GitHub REST API on 2026-08-24 before this revision was drafted.
 requirement_approval_status: not-approved-plan-only
 
 authority_model: voc-079-approval-neutral-active
@@ -40,6 +40,14 @@ approvals:
     status: pending
     candidate_sha: null
     evidence: null
+  package_independent_verification_history:
+    - candidate_sha: c11b99ea11992050ca0b2719221d34e4e0c7041f
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5388913896
+      resolution: >-
+        Preserved as immutable review history. This revision adds an explicit
+        point-in-time freshness contract, corrects branch-mutation wording, formalizes
+        VOC-085-HOLD-00, and adds bounded R4 settings-specialist evidence requirements.
   adoption_decision:
     status: pending
     candidate_sha: null
@@ -50,7 +58,54 @@ implementation_authorized: false
 automatic_merge_allowed: true
 production_impact: none-repository-documentation-and-evidence-only
 rollback_required: true
-action_specific_holds: []
+required_r4_evidence:
+  decision_record:
+    required: true
+    evidence: package specification decisions and issue #119 traceability
+  impact_assessment:
+    required: true
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    evidence: implementation-plan.md and release-plan.md
+  deterministic_evidence:
+    required: true
+    evidence: test-plan.md and final validation outputs
+  specialist_evidence:
+    required: true
+    role: repository-governance-and-GitHub-settings specialist
+    evidence_contract: >-
+      Exact source/API schema and endpoint interpretation, availability-versus-enabled
+      distinction, point-in-time and staleness semantics, no-mutation boundary, and
+      exact-SHA final specialist review. This evidence is pending until a non-author
+      specialist reviews the final exact revision.
+action_specific_holds:
+  - id: VOC-085-HOLD-00
+    status: held
+    scope: >-
+      Future mutation of GitHub repository settings, including rulesets, branch
+      protection, merge-method policy, security toggles, or related hosted enforcement.
+    accountable_role: explicitly assigned GitHub repository-settings operator
+    required_authority: >-
+      Separate explicit authority for the exact settings action from the accountable
+      settings decision owner; risk class, public visibility, package adoption, and
+      independent review do not satisfy it.
+    required_evidence:
+      - exact pre-state read-only snapshot and observation time
+      - exact intended settings payload and API/UI operation
+      - reversible rollback procedure and accountable rollback owner
+      - immediate governed documentation follow-up plan
+      - post-state read-back and exact evidence record
+    completion_condition: >-
+      The specifically authorized settings mutation is completed, post-state read-back
+      matches the approved payload, rollback evidence is retained, and the immediate
+      governed documentation follow-up is merged.
+    expiry_condition: >-
+      Expires without action when the explicit authorization expires or is withdrawn;
+      any later settings action requires a new exact hold/evidence record.
+    merge_effect: >-
+      Does not block repository-only VOC-085 planning, implementation, review, or merge;
+      it blocks only the external settings mutation described above.
 inherited_holds:
   - id: VOC-080-HOLD-00
     status: held
@@ -96,7 +151,8 @@ dependencies:
     description: >-
       VOC-080's private-repository snapshot in
       docs/operations/voc-080-transition-record.{json,md} remains immutable history;
-      current public state must be recorded separately and never overwrite it.
+      state current as observed at 2026-08-24 must be recorded separately and never
+      overwrite it.
   - id: VOC-085-DEP-02
     status: required
     description: >-
