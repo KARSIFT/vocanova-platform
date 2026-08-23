@@ -317,6 +317,18 @@
     },
     {
       "method": "POST",
+      "operationId": "ReportSentenceFeedback",
+      "path": "/api/v1/sentence-feedback/{attemptId}/reports",
+      "successStatus": 204,
+      "parameters": [{ "in": "path", "name": "attemptId", "required": true }],
+      "request": {
+        "properties": ["classification", "reason"],
+        "required": ["reason"]
+      },
+      "response": null
+    },
+    {
+      "method": "POST",
       "operationId": "RequestEmailChangeLink",
       "path": "/api/v1/settings/email-change-links",
       "successStatus": 204,
@@ -444,6 +456,42 @@
           "source",
           "userWordId",
           "wasHintUsed"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "SubmitSentenceFeedback",
+      "path": "/api/v1/sentence-feedback",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "header", "name": "Idempotency-Key", "required": true }
+      ],
+      "request": {
+        "properties": ["attemptId", "sentenceText", "source"],
+        "required": ["attemptId", "sentenceText", "source"]
+      },
+      "response": {
+        "properties": [
+          "attemptId",
+          "canRetry",
+          "correctedSentence",
+          "crisisResourceMessage",
+          "errorCode",
+          "errorMessage",
+          "explanation",
+          "improvementTip",
+          "missionCompleted",
+          "originalSentence",
+          "reported",
+          "sentenceId",
+          "status"
+        ],
+        "required": [
+          "canRetry",
+          "missionCompleted",
+          "originalSentence",
+          "reported"
         ]
       }
     },

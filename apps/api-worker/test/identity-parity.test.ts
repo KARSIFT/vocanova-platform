@@ -49,6 +49,12 @@ const oauth: OAuthProvider = {
 beforeEach(async () => {
   messages = [];
   for (const table of [
+    "ai_feedback_reports",
+    "ai_feedback_attempts",
+    "learner_sentences",
+    "ai_generation_leases",
+    "ai_generation_events",
+    "ai_usage_counters",
     "account_deletion_requests",
     "email_change_links",
     "user_onboarding_profiles",

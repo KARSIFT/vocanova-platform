@@ -27,7 +27,7 @@ describe("Worker API migration target", () => {
       release: "local",
       runtime: "cloudflare-workers",
       data: "d1",
-      migrationStatus: "missions-progress-parity",
+      migrationStatus: "full-api-parity",
     });
     expect(text.toLowerCase()).not.toMatch(/token|secret|password|database_id/);
   });
@@ -96,6 +96,8 @@ describe("Worker API migration target", () => {
       "/api/v1/progress",
       "/api/v1/reviews/due",
       "/api/v1/reviews/submissions",
+      "/api/v1/sentence-feedback",
+      "/api/v1/sentence-feedback/{attemptId}/reports",
       "/api/v1/settings",
       "/api/v1/settings/email-change-links",
       "/api/v1/settings/email-change-links/consume",

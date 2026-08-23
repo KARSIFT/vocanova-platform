@@ -347,6 +347,12 @@ async function insertUserWord(): Promise<void> {
 
 async function clearTables(): Promise<void> {
   for (const table of [
+    "ai_feedback_reports",
+    "ai_feedback_attempts",
+    "learner_sentences",
+    "ai_generation_leases",
+    "ai_generation_events",
+    "ai_usage_counters",
     "grace_day_ledger",
     "streak_states",
     "confidence_point_ledger",

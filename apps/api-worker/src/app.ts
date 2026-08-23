@@ -11,6 +11,12 @@ import { D1ContentLearningRepository } from "./content/repository.js";
 import { registerContentLearningRoutes } from "./content/routes.js";
 import { D1MissionsRepository } from "./missions/repository.js";
 import { registerMissionsRoutes } from "./missions/routes.js";
+import { D1AIFeedbackRepository } from "./ai-feedback/repository.js";
+import { registerAIFeedbackRoutes } from "./ai-feedback/routes.js";
+import {
+  AIFeedbackService,
+  runtimeAIFeedbackConfig,
+} from "./ai-feedback/service.js";
 import {
   ProblemSchema,
   createProblem,
@@ -36,7 +42,7 @@ const ConfigSchema = z
     release: z.string(),
     runtime: z.literal("cloudflare-workers"),
     data: z.literal("d1"),
-    migrationStatus: z.literal("missions-progress-parity"),
+    migrationStatus: z.literal("full-api-parity"),
   })
   .openapi("RuntimeConfig");
 
@@ -80,13 +86,14 @@ export const OPENAPI_DOCUMENT_CONFIG = {
     title: "VocaNova Worker API migration target",
     version: "0.1.0",
     description:
-      "Operational Worker/D1 migration target. Identity, learner data, missions, gamification, and progress endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
+      "Operational Worker/D1 migration target. Every public API operation now has Worker parity evidence; the Go OpenAPI document remains the behavioral oracle until final runtime retirement.",
   },
 };
 
 export interface AppDependencies {
   createPlatformRepository(database: D1Database): PlatformRepository;
   createIdentityService?(env: CloudflareEnv): IdentityService;
+  createAIFeedbackService?(env: CloudflareEnv): AIFeedbackService;
 }
 
 const defaultDependencies: AppDependencies = {
@@ -147,7 +154,7 @@ export function createApp(
         release: config.value.release,
         runtime: "cloudflare-workers" as const,
         data: "d1" as const,
-        migrationStatus: "missions-progress-parity" as const,
+        migrationStatus: "full-api-parity" as const,
       },
       200,
     );
@@ -173,6 +180,18 @@ export function createApp(
     identityFactory,
     (env) => new D1MissionsRepository(env.DB),
   );
+  registerAIFeedbackRoutes(app, identityFactory, (env) => {
+    if (dependencies.createAIFeedbackService)
+      return dependencies.createAIFeedbackService(env);
+    const config = runtimeAIFeedbackConfig(env);
+    return new AIFeedbackService(
+      new D1AIFeedbackRepository(env.DB),
+      undefined,
+      undefined,
+      undefined,
+      config,
+    );
+  });
 
   app.doc31("/openapi.json", OPENAPI_DOCUMENT_CONFIG);
 

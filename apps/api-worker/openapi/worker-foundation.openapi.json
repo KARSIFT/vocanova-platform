@@ -79,7 +79,7 @@
           },
           "migrationStatus": {
             "enum": [
-              "missions-progress-parity"
+              "full-api-parity"
             ],
             "type": "string"
           },
@@ -105,7 +105,7 @@
     }
   },
   "info": {
-    "description": "Operational Worker/D1 migration target. Identity, learner data, missions, gamification, and progress endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
+    "description": "Operational Worker/D1 migration target. Every public API operation now has Worker parity evidence; the Go OpenAPI document remains the behavioral oracle until final runtime retirement.",
     "title": "VocaNova Worker API migration target",
     "version": "0.1.0"
   },
@@ -1501,6 +1501,172 @@
         },
         "tags": [
           "Content and learning"
+        ]
+      }
+    },
+    "/api/v1/sentence-feedback": {
+      "post": {
+        "operationId": "SubmitSentenceFeedback",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "attemptId": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "sentenceText": {
+                    "maxLength": 300,
+                    "type": "string"
+                  },
+                  "source": {
+                    "enum": [
+                      "word_detail",
+                      "review",
+                      "daily_mission",
+                      "free_practice"
+                    ],
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "sentenceText",
+                  "source",
+                  "attemptId"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "attemptId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "canRetry": {
+                      "type": "boolean"
+                    },
+                    "correctedSentence": {
+                      "type": "string"
+                    },
+                    "crisisResourceMessage": {
+                      "type": "string"
+                    },
+                    "errorCode": {
+                      "type": "string"
+                    },
+                    "errorMessage": {
+                      "type": "string"
+                    },
+                    "explanation": {
+                      "type": "string"
+                    },
+                    "improvementTip": {
+                      "type": "string"
+                    },
+                    "missionCompleted": {
+                      "type": "boolean"
+                    },
+                    "originalSentence": {
+                      "type": "string"
+                    },
+                    "reported": {
+                      "type": "boolean"
+                    },
+                    "sentenceId": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "correct",
+                        "needs_improvement",
+                        "incorrect"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "originalSentence",
+                    "missionCompleted",
+                    "canRetry",
+                    "reported"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Feedback result, which may include a business-level error code"
+          },
+          "404": {
+            "description": "Owner or target resource not found"
+          }
+        },
+        "tags": [
+          "AI Feedback"
+        ]
+      }
+    },
+    "/api/v1/sentence-feedback/{attemptId}/reports": {
+      "post": {
+        "operationId": "ReportSentenceFeedback",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "attemptId",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "classification": {
+                    "maxLength": 100,
+                    "type": "string"
+                  },
+                  "reason": {
+                    "maxLength": 200,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "reason"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Report recorded"
+          }
+        },
+        "tags": [
+          "AI Feedback"
         ]
       }
     },

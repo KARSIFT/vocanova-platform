@@ -52,6 +52,8 @@ const workerOperationIds = new Set([
   "SubmitReview",
   "GetDailyMission",
   "GetProgress",
+  "SubmitSentenceFeedback",
+  "ReportSentenceFeedback",
 ]);
 const workerSuccessStatus = {
   CompleteOnboarding: 200,
@@ -77,6 +79,8 @@ const workerSuccessStatus = {
   UnsaveUserWord: 204,
   GetDailyMission: 200,
   GetProgress: 200,
+  SubmitSentenceFeedback: 200,
+  ReportSentenceFeedback: 204,
 };
 const worker = JSON.parse(await readFile(workerPath, "utf8"));
 const workerCandidates = Object.entries(worker.paths)
