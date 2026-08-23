@@ -1,8 +1,9 @@
 # VOC-081 Specification
 
-## 1. Problem statement
+## 1. Problem statement (resolved by the merged repository/local implementation)
 
-DOC-12 defines F2 as a contributor-verifiable application foundation. Current T12 has
+DOC-12 defines F2 as a contributor-verifiable application foundation. The pre-implementation
+F2 audit found that T12 had
 strong subsystem proof but no coherent contributor command:
 
 - root `pnpm dev` launches only `next dev`;
@@ -14,6 +15,11 @@ strong subsystem proof but no coherent contributor command:
 - Next 16 generates untracked nested `AGENTS.md`/`CLAUDE.md` unless disabled; and
 - no bounded test proves startup, readiness, persistence, service binding, and cleanup
   as one contract.
+
+VOC-081-T00 through T04 subsequently implemented and verified this repository/local
+contract. The final result is F2 only: it does not claim F3, A1/product acceptance,
+Windows-native support, staging, production, deployment, activation, release, or live
+verification, and all inherited VOC-080 holds remain held.
 
 ## 2. Functional requirements
 

@@ -1,5 +1,15 @@
 # VOC-081 Impact Analysis
 
+## Reconciled repository/local outcome
+
+The repository/local F2 implementation is complete through T04 at exact head
+`a8694932671ad9c44fd2a97c128b14e6089e5faf`, merged by PR #108 as
+`36d526bdec83e28b17aa30a6814d42b92f058ec1`. The closure inventory records exact
+task, hosted, review, rollback, and post-merge evidence and preserves prior failures.
+This does not claim F3, A1/product acceptance, Windows-native support, staging,
+production, deployment, activation, release, or live verification. VOC-080-HOLD-00,
+HOLD-01, and HOLD-02 remain held.
+
 ## Consequence classification
 
 R3 is the effective floor. The package changes local D1 migration execution, Worker
