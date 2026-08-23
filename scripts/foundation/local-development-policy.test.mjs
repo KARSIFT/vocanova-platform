@@ -22,10 +22,12 @@ function repositorySources() {
     apiTypes: "apps/api-worker/worker-configuration.d.ts",
     apiWrangler: "apps/api-worker/wrangler.jsonc",
     gitignore: ".gitignore",
+    localSupervisor: "scripts/foundation/local-development-supervisor.mjs",
     nextConfig: "apps/web/next.config.ts",
     rootPackage: "package.json",
     webEnvironment: "apps/web/src/lib/env.ts",
     webEnvironmentExample: "apps/web/.env.example",
+    webPackage: "apps/web/package.json",
     webWrangler: "apps/web/wrangler.jsonc",
   };
   return Object.fromEntries(
@@ -129,7 +131,9 @@ test("origin, callback, generated-type, service, remote, and agentRules drift fa
 test("unsafe local commands and incomplete D1 initialization fail closed", () => {
   const unsafe = [
     ["remote", "wrangler dev --remote"],
-    ["environment", "wrangler dev --env production"],
+    ["environment", "wrangler dev --env local"],
+    ["remote", "wrangler dev --preview"],
+    ["remote", "wrangler dev --tunnel"],
     ["deployment", "wrangler deploy"],
     ["provisioning", "wrangler dev --experimental-provision=true"],
     ["credential", "test -n $CLOUDFLARE_API_TOKEN"],
@@ -161,9 +165,7 @@ test("unsafe local commands and incomplete D1 initialization fail closed", () =>
     "dev:init",
     "wrangler d1 migrations apply DB --local --config wrangler.jsonc --persist-to .wrangler/state/vocanova-local --env staging",
   );
-  assert.ok(
-    wrongEnvironment.some((error) => error.includes("staging or production")),
-  );
+  assert.ok(wrongEnvironment.some((error) => error.includes("environment")));
 });
 
 test("local D1 scripts and policy markers cannot drift", () => {
@@ -192,6 +194,65 @@ test("local D1 scripts and policy markers cannot drift", () => {
       "validateLocalD1CliArguments(process.argv.slice(2))",
       "validateLocalD1CliArguments([])",
       "process.argv.slice(2)",
+    ],
+  ];
+
+  for (const [name, before, after, expected] of fixtures) {
+    const errors = validateLocalDevelopmentSources(
+      mutatedSources(name, before, after),
+    );
+    assert.ok(
+      errors.some((error) => error.includes(expected)),
+      `${name} mutation reports ${expected}: ${errors.join("; ")}`,
+    );
+  }
+});
+
+test("supervised loop entry points, lifecycle markers, and listeners cannot drift", () => {
+  const fixtures = [
+    [
+      "rootPackage",
+      '"dev": "node scripts/foundation/local-development-supervisor.mjs fast"',
+      '"dev": "pnpm --filter @vocanova/web dev"',
+      "fast-loop supervisor",
+    ],
+    [
+      "rootPackage",
+      '"dev:workers": "node scripts/foundation/local-development-supervisor.mjs workers"',
+      '"dev:workers": "wrangler dev --remote"',
+      "two-Worker supervisor",
+    ],
+    ["apiPackage", "--port 8080", "--port 8787", "port 8080"],
+    [
+      "webPackage",
+      "--hostname 127.0.0.1 --port 3000",
+      "--port 3001",
+      "canonical host 127.0.0.1 and port 3000",
+    ],
+    [
+      "localSupervisor",
+      "SHUTDOWN_GRACE_MS = 5_000",
+      "SHUTDOWN_GRACE_MS = Number.POSITIVE_INFINITY",
+      "SHUTDOWN_GRACE_MS",
+    ],
+    [
+      "localSupervisor",
+      'record.child.kill("SIGKILL")',
+      'record.child.kill("SIGTERM")',
+      "SIGKILL",
+    ],
+    ["localSupervisor", "shell: false", "shell: true", "shell: false"],
+    [
+      "localSupervisor",
+      "PNPM_CONFIG_STORE_DIR: installedModules.storeDir",
+      'PNPM_CONFIG_STORE_DIR: "/tmp/unlocked-store"',
+      "PNPM_CONFIG_STORE_DIR",
+    ],
+    [
+      "localSupervisor",
+      "PNPM_CONFIG_NPMRC_AUTH_FILE: runtimePnpmAuthFile",
+      'PNPM_CONFIG_NPMRC_AUTH_FILE: "/home/user/.npmrc"',
+      "PNPM_CONFIG_NPMRC_AUTH_FILE",
     ],
   ];
 

@@ -29,19 +29,21 @@ const LOCAL_SOURCE_FILES = Object.freeze({
   apiTypes: "apps/api-worker/worker-configuration.d.ts",
   apiWrangler: "apps/api-worker/wrangler.jsonc",
   gitignore: ".gitignore",
+  localSupervisor: "scripts/foundation/local-development-supervisor.mjs",
   nextConfig: "apps/web/next.config.ts",
   rootPackage: "package.json",
   webEnvironment: "apps/web/src/lib/env.ts",
   webEnvironmentExample: "apps/web/.env.example",
+  webPackage: "apps/web/package.json",
   webWrangler: "apps/web/wrangler.jsonc",
 });
 
 const FORBIDDEN_LOCAL_COMMAND_PATTERNS = Object.freeze([
-  [/(?:^|\s)--remote(?:\s|=|$)/i, "remote binding or resource selection"],
   [
-    /(?:^|\s)--env(?:=|\s+)(?:staging|production)(?:\s|$)/i,
-    "staging or production environment selection",
+    /(?:^|\s)--(?:remote|preview|tunnel)(?:\s|=|$)/i,
+    "remote binding or resource selection",
   ],
+  [/(?:^|\s)--env(?:=|\s+)/i, "non-canonical environment selection"],
   [
     /\bwrangler\s+(?:deploy|publish|delete|rollback|secret|tail|versions|deployments)\b/i,
     "Cloudflare deployment or live mutation command",
@@ -298,6 +300,17 @@ export function validateLocalDevelopmentSources(sources) {
     "apps/api-worker/package.json",
     errors,
   );
+  const webScripts = parseScripts(
+    sources.webPackage,
+    "apps/web/package.json",
+    errors,
+  );
+  if (
+    rootScripts.dev !==
+    "node scripts/foundation/local-development-supervisor.mjs fast"
+  ) {
+    errors.push("dev must use the reviewed fast-loop supervisor mode");
+  }
   if (
     rootScripts["dev:init"] !==
     "pnpm --filter @vocanova/api-worker run migrate:local"
@@ -310,6 +323,15 @@ export function validateLocalDevelopmentSources(sources) {
     errors.push(
       "api-worker:migrate:local must use the reviewed local D1 initializer",
     );
+  }
+  if (
+    rootScripts["dev:workers"] !==
+    "node scripts/foundation/local-development-supervisor.mjs workers"
+  ) {
+    errors.push("dev:workers must use the reviewed two-Worker supervisor mode");
+  }
+  if (webScripts.dev !== "next dev --hostname 127.0.0.1 --port 3000") {
+    errors.push("web dev must reserve canonical host 127.0.0.1 and port 3000");
   }
   for (const marker of [
     'EXPECTED_WRANGLER_VERSION = "4.125.0"',
@@ -330,6 +352,43 @@ export function validateLocalDevelopmentSources(sources) {
       "local D1 initializer",
     );
   }
+  for (const marker of [
+    "READINESS_TIMEOUT_MS = 60_000",
+    "SHUTDOWN_GRACE_MS = 5_000",
+    "FORCE_KILL_WAIT_MS = 2_000",
+    "PASSTHROUGH_ENVIRONMENT_KEYS",
+    'NEXT_TELEMETRY_DISABLED: "1"',
+    'WRANGLER_SEND_METRICS: "false"',
+    "PNPM_CONFIG_STORE_DIR: installedModules.storeDir",
+    "PNPM_CONFIG_NPMRC_AUTH_FILE: runtimePnpmAuthFile",
+    'repositoryRequire.resolve("typescript/bin/tsc")',
+    '"--local"',
+    '"--config"',
+    '"--ip"',
+    '"--port"',
+    '"--persist-to"',
+    '"--show-interactive-dev-session=false"',
+    "runLocalD1Migrations",
+    "assertPortsAvailable",
+    "waitForReadiness",
+    'process.once("SIGINT"',
+    'process.once("SIGTERM"',
+    'record.child.kill("SIGKILL")',
+    "shell: false",
+  ]) {
+    requireLiteral(
+      errors,
+      sources.localSupervisor,
+      marker,
+      "local development supervisor",
+    );
+  }
+  errors.push(
+    ...validateBoundedLifecycleSource(
+      "local development supervisor",
+      sources.localSupervisor,
+    ),
+  );
   for (const [name, command] of Object.entries({
     dev: rootScripts.dev,
     "dev:init": rootScripts["dev:init"],
@@ -342,6 +401,12 @@ export function validateLocalDevelopmentSources(sources) {
       errors.push(...validateLocalDevelopmentCommand(name, command));
     }
   }
+  errors.push(
+    ...validateLocalListenerCommand("api-worker:dev", apiScripts.dev, "api"),
+  );
+  errors.push(
+    ...validateLocalListenerCommand("web:dev", webScripts.dev, "web"),
+  );
 
   return errors;
 }
