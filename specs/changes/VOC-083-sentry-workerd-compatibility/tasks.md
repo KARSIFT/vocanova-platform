@@ -38,7 +38,7 @@ equivalence acceptance to T02. Do not turn off Sentry or source-map controls.
 - Acceptance: `VOC-083-AC-01`, `VOC-083-AC-02`, `VOC-083-AC-03`, `VOC-083-AC-04`
 - Tests: `VOC-083-TEST-01`, `VOC-083-TEST-02`, `VOC-083-TEST-03`, `VOC-083-TEST-04`
 - Evidence: `VOC-083-EV-01`, `VOC-083-EV-02`, `VOC-083-EV-03`, `VOC-083-EV-04`
-- Status: implementation-prepared; pending-local-validation-and-independent-exact-SHA-review
+- Status: local-validation-complete; pending-independent-exact-SHA-review-and-hosted-proof
 
 Own final qualification of T00/T01: add a complete fresh-artifact manifest/invariant and
 fixture-backed log classification
