@@ -54,7 +54,9 @@ test("Worker uncaught errors reach an in-memory transport and are redacted", asy
     }),
     {
       async fetch(): Promise<Response> {
-        throw new Error("worker failure token=synthetic-token cookie=synthetic-cookie");
+        throw new Error(
+          "worker failure token=synthetic-token cookie=synthetic-cookie learner=synthetic-learner provider:synthetic-provider request_body='synthetic-body'",
+        );
       },
     },
   );
@@ -68,7 +70,10 @@ test("Worker uncaught errors reach an in-memory transport and are redacted", asy
 
   assert.equal(events.length, 1);
   const serialized = JSON.stringify(events);
-  assert.doesNotMatch(serialized, /synthetic-token|synthetic-cookie/);
+  assert.doesNotMatch(
+    serialized,
+    /synthetic-token|synthetic-cookie|synthetic-learner|synthetic-provider|synthetic-body/,
+  );
   assert.match(serialized, /worker failure/);
 });
 
@@ -149,20 +154,34 @@ test("missing DSN is a no-op and makes no transport call", async () => {
 
 test("redaction removes request, user, provider payloads, and sensitive text", () => {
   const event = {
-    message: "token=synthetic-token",
+    message:
+      "token=synthetic-token learner=synthetic-learner provider:'synthetic-provider-text' request-body=synthetic-request-text",
+    exception: {
+      values: [
+        {
+          value:
+            'credential=synthetic-credential user="synthetic-user" request_body=synthetic-exception-body',
+        },
+      ],
+    },
     request: { url: "https://example.invalid", cookies: "synthetic-cookie" },
     user: { id: "synthetic-learner" },
     contexts: { provider: { body: "synthetic-provider-payload" } },
     extra: { requestBody: "synthetic-body" },
     breadcrumbs: [{ message: "cookie=synthetic-cookie" }],
-    tags: { token: "synthetic-token", environment: "test" },
+    tags: {
+      token: "synthetic-token",
+      learner: "synthetic-learner-tag",
+      provider: "synthetic-provider-tag",
+      environment: "test",
+    },
   };
 
   const redacted = redactSentryEvent(event);
   const serialized = JSON.stringify(redacted);
   assert.doesNotMatch(
     serialized,
-    /synthetic-token|synthetic-cookie|synthetic-learner|synthetic-provider|synthetic-body/,
+    /synthetic-token|synthetic-cookie|synthetic-learner|synthetic-provider|synthetic-body|synthetic-request|synthetic-credential|synthetic-user|synthetic-exception/,
   );
   assert.match(serialized, /\[REDACTED\]/);
   assert.match(serialized, /environment/);

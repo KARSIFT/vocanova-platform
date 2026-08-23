@@ -10,11 +10,11 @@ export type SentryRuntimeEnv = Partial<Pick<CloudflareEnv, "ENVIRONMENT">> & {
 };
 
 const SENSITIVE_TAG =
-  /(?:authorization|cookie|credential|dsn|learner|password|secret|token)/i;
+  /(?:authorization|cookie|credential|dsn|learner|password|provider|request|secret|token|user)/i;
 
 function redactText(value: string): string {
   return value.replace(
-    /(authorization|cookie|credential|dsn|password|secret|token)\s*[:=]\s*[^\s,;]+/gi,
+    /(authorization|cookie|credential|dsn|learner|password|provider|request(?:[-_\s]?body)?|secret|token|user)["']?\s*[:=]\s*(?:"[^"]*"|'[^']*'|[^\s,;}]+)/gi,
     "$1=[REDACTED]",
   );
 }
