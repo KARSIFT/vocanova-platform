@@ -56,6 +56,14 @@ approvals:
       evidence: https://github.com/KARSIFT/vocanova-platform/pull/113#issuecomment-5385791947
       merged_by_pr: 113
       merge_sha: e79f04402055d7ebbb1ccfbaf8e7a1dd1b85185c
+      hosted_evidence:
+        ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32636966330
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32636966285
+        governance_eligibility: https://github.com/KARSIFT/vocanova-platform/actions/runs/32637109556
+      rollback:
+        status: pass-disposable-single-commit-revert
+        predecessor_sha: 20647e8e1eb4e5bc49e00e5fb186cfd85f98688b
+        match: governance-diff-tree
     - task: VOC-083-T01
       candidate_sha: eb6b57fc30751b6269917b60bd3b35850f517bcf
       verdict: fail
@@ -69,6 +77,18 @@ approvals:
       evidence: https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385989877
       merged_by_pr: 115
       merge_sha: 8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6
+      hosted_evidence:
+        final_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327166
+        quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327202
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327168
+        governance_eligibility: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639444838
+        post_merge_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575308
+        post_merge_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575331
+        post_merge_security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575424
+      rollback:
+        status: preserved-five-commit-rehearsal
+        predecessor_sha: e79f04402055d7ebbb1ccfbaf8e7a1dd1b85185c
+        evidence_pr: 115
     - candidate_sha: ab1b24d527f2d71649efb61cc1a8475535de282b
       verdict: fail
       evidence: https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386309046
@@ -94,6 +114,7 @@ approvals:
       rollback:
         status: pass-repository-only-ten-commit-rehearsal
         predecessor_sha: 9f11195ed186e214fade57884e66ca96f2498ebc
+        evidence_pr: 116
         live_effect: none
 approval_status: adopted
 implementation_authorized: true

@@ -33,6 +33,38 @@ The following FAILs remain historical evidence and are not reinterpreted as appr
 - T02 candidate `ab1b24d527f2d71649efb61cc1a8475535de282b`: FAIL with five blockers,
   [formal review comment 5386309046](https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386309046).
 
+The exact hosted records for the completed implementation stages are:
+
+- T00 (`71db51d1dd2571d01e9ee3b3c13ebc2c00e43514`): CI
+  [32636966330](https://github.com/KARSIFT/vocanova-platform/actions/runs/32636966330),
+  Security [32636966285](https://github.com/KARSIFT/vocanova-platform/actions/runs/32636966285),
+  and final Governance eligibility
+  [32637109556](https://github.com/KARSIFT/vocanova-platform/actions/runs/32637109556).
+- T01 (`9f11195ed186e214fade57884e66ca96f2498ebc`): final CI
+  [32639327166](https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327166),
+  Quality [32639327202](https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327202),
+  Security [32639327168](https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327168),
+  and final Governance eligibility
+  [32639444838](https://github.com/KARSIFT/vocanova-platform/actions/runs/32639444838).
+  Its post-merge CI [32639575308](https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575308),
+  Governance [32639575331](https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575331),
+  and Security [32639575424](https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575424)
+  are also recorded.
+
+## Repository rollback chain
+
+- T00's single implementation commit `71db51d1dd2571d01e9ee3b3c13ebc2c00e43514`
+  was reverted in a disposable worktree to its prepared parent
+  `20647e8e1eb4e5bc49e00e5fb186cfd85f98688b`; governance, diff, and tree matching
+  all passed.
+- T01's five-commit rollback to the exact T00 merge
+  `e79f04402055d7ebbb1ccfbaf8e7a1dd1b85185c` is preserved in PR #115.
+- T02's ten-commit rollback to the exact T01 revision
+  `9f11195ed186e214fade57884e66ca96f2498ebc` is preserved in PR #116.
+- T03's documentation chain (the two prior package-doc commits and this amendment)
+  remains pending its own final ordinary repository rollback. No T03 rollback or
+  closure is claimed here.
+
 ## T02 completion evidence
 
 The remediated T02 exact SHA
