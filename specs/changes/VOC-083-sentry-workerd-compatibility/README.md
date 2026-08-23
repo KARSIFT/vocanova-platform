@@ -34,7 +34,7 @@ bundle/workerd/reporting acceptance. If T02 disproves the choice, work fails clo
 returns through an updated T00 decision and T01 revision with fresh exact-SHA review.
 Before adoption, package-level blockers concern only review/adoption.
 
-The plan is stacked on `agent/voc-081-t04-f2-evidence` at
+The plan was prepared on `agent/voc-081-t04-f2-evidence` at
 `a8694932671ad9c44fd2a97c128b14e6089e5faf`; it deliberately has no dependency on
-unadopted VOC-082. It authorizes no Sentry API call, source-map upload, account query,
+VOC-082. It authorizes no Sentry API call, source-map upload, account query,
 Cloudflare mutation, deployment, credential, or live-system action.
