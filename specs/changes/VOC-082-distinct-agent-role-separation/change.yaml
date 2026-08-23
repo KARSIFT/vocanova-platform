@@ -5,7 +5,7 @@ slug: distinct-agent-role-separation
 title: Provider-neutral distinct-agent role separation
 
 type: governance-clarification
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because the implementation updates DOC-15, DOC-16, protected governance and
@@ -18,11 +18,11 @@ requirement_source: >-
   GitHub issue #109 records an observed coordination ambiguity and requests the normal
   governed planning loop. The issue authorizes planning only; it is not adoption or
   implementation authority.
-requirement_approval_status: issue-recorded-plan-review-pending
+requirement_approval_status: exact-plan-review-pass-and-decision-owner-approved
 base_branch: agent/voc-081-t04-f2-evidence
 base_sha: a8694932671ad9c44fd2a97c128b14e6089e5faf
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: c1109466c1498aab48744d5b94457522a36535e4
 owners:
   decision: accountable repository-governance decision role under pre-VOC-082 rules
   package_preparation: separate planner actor
@@ -41,11 +41,15 @@ approvals:
     candidate_sha: f73ea9e27937584c3058ad39884b91854cb15d52
     evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385221023
   package_independent_verification:
-    status: pending-third-exact-sha-after-remediation
-    candidate_sha: null
-    evidence: null
-approval_status: not-approved
-implementation_authorized: false
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: c1109466c1498aab48744d5b94457522a36535e4
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385262977
+  adoption_decision:
+    status: approved-for-adoption
+    candidate_sha: c1109466c1498aab48744d5b94457522a36535e4
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385610129
+approval_status: adopted
+implementation_authorized: true
 automatic_merge_allowed: true
 production_impact: >-
   None. The package is limited to repository governance clarification, contributor
@@ -65,18 +69,20 @@ artifacts:
 dependencies:
   - id: VOC-082-DEP-00
     status: >-
-      Unresolved. A different-role, read-only, cross-model reviewer must verify the
-      exact plan candidate with no blocking finding before adoption metadata is written.
+      Resolved for adoption. Exact candidate
+      c1109466c1498aab48744d5b94457522a36535e4 received a different-role, read-only,
+      cross-model PASS with zero blocking findings, and the accountable decision owner
+      approved that exact candidate for adoption.
   - id: VOC-082-DEP-01
     status: >-
-      The plan is stacked on VOC-081-T04 exact SHA
-      a8694932671ad9c44fd2a97c128b14e6089e5faf. Adoption and implementation integration
-      must preserve the earlier VOC-080/VOC-081 stack and cannot bypass its merge order.
+      Resolved for adoption. The plan was prepared on VOC-081-T04 exact SHA
+      a8694932671ad9c44fd2a97c128b14e6089e5faf; that reviewed tree is integrated into
+      develop by merge commit 36d526bdec83e28b17aa30a6814d42b92f058ec1.
   - id: VOC-082-DEP-02
     status: >-
-      Implementation is prohibited until a separately reviewed adoption revision records
-      the approved candidate SHA, exact review evidence, adopted status, and
-      implementation_authorized true.
+      Resolved when the separately reviewed adoption revision records the approved
+      candidate SHA, exact review and decision evidence, adopted status, and
+      implementation_authorized true on PR #110.
 action_specific_holds: []
 inherited_holds:
   - VOC-080-HOLD-00
@@ -114,9 +120,9 @@ affected_areas:
   - tooling/governance/validate_repository_foundation.py
   - tooling/governance/tests/test_validate_repository_foundation.py
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: blocked-pending-plan-review-and-adoption
+  status: authorized-after-pr-110-adoption
   target_branch: develop
   pull_request: null
   authority_issue: 109
@@ -128,17 +134,15 @@ release:
   automatic_merge: policy-eligible-only-no-current-merge-executor
   migration_required: false
   rollback_required: true
-repository_adoption_status: candidate-pending-review
-adoption_pr: null
-adoption_evidence: null
-repository_adoption_evidence: null
+repository_adoption_status: adopted-on-pr-110-merge
+adoption_pr: 110
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385610129
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/110
 implementation_authority_before_adoption: false
-implementation_authority_status: blocked
+implementation_authority_status: authorized-after-adoption
 production_deployment: disabled
 staging_deployment: held-by-VOC-080-HOLD-00
 production_data_access: held-by-VOC-080-HOLD-02
 autonomous_production_release: disabled
 ehr: not-triggered
-blocking_reasons:
-  - remediated exact plan candidate has not received fresh independent review
-  - package has not been adopted
+blocking_reasons: []

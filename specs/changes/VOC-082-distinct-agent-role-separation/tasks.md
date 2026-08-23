@@ -6,7 +6,7 @@
 - Acceptance: AC-00, AC-01, AC-02, AC-03, AC-04, AC-08
 - Tests: TEST-00, TEST-01, TEST-02
 - Evidence: EV-00, EV-01, EV-02
-- Status: blocked-pending-plan-adoption
+- Status: authorized-after-pr-110-adoption
 
 Create ADR-0005; reconcile DOC-00 §6 and its root/product indexes; and update DOC-15,
 DOC-16, governance indexes/guidance, AGENTS.md, the post-merge activation checklist,

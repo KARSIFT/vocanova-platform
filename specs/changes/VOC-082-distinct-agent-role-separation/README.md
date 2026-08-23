@@ -1,6 +1,8 @@
 # VOC-082 — Provider-neutral distinct-agent role separation
 
-Status: draft and unadopted. This package is not implementation authority.
+Status: adopted through PR #110. Repository-only implementation is authorized within
+this package; inherited VOC-080 holds and all action-specific authority boundaries
+remain in force.
 
 Issue [#109](https://github.com/KARSIFT/vocanova-platform/issues/109) records a
 coordination failure: a builder interpreted the prohibition on self-review and
@@ -38,8 +40,12 @@ activation checklist was missing from the planned inventory. That FAIL remains
 historical evidence. The second review of exact SHA
 `f73ea9e27937584c3058ad39884b91854cb15d52` confirmed that correction but failed
 because DOC-00's active Product Bible still permanently assigned delivery roles to
-ChatGPT, Codex, and Claude Code. Both FAILs remain historical evidence. This amended
-draft is pending fresh exact-SHA review.
+ChatGPT, Codex, and Claude Code. Both FAILs remain historical evidence. Exact SHA
+`c1109466c1498aab48744d5b94457522a36535e4` subsequently received a different-role,
+read-only cross-model **PASS** with zero blocking findings, and the accountable
+repository-governance decision owner approved that exact candidate for adoption. The
+adoption-bookkeeping revision requires its own exact-SHA review before PR #110 may
+merge.
 
 ## Authority boundary
 
