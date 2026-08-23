@@ -56,6 +56,14 @@ approvals:
         Preserved as immutable specialist review history. The next revision separates
         currently enabled dependency/vulnerability alerts from disabled Dependabot
         security updates, secret-scanning controls, and future held settings targets.
+    - candidate_sha: 16b4e9abd8e7c0db6f7f9bb86406103340e2422f
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389109852
+      resolution: >-
+        Preserved as immutable bookkeeping review history. This remediation records
+        plan review and adoption-decision satisfaction while keeping PR #126 merge
+        pending, and reconciles package wording to make implementation authority
+        effective only after that merge.
   adoption_decision:
     status: approved-for-adoption
     candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
@@ -164,7 +172,7 @@ artifacts:
 
 dependencies:
   - id: VOC-085-DEP-00
-    status: satisfied-exact-plan-review-adoption-decision-and-pr-126-merge
+    status: satisfied-exact-plan-review-and-adoption-decision-pr-126-merge-pending
     description: >-
       The plan candidate must receive a different-actor exact-SHA independent PASS,
       and an accountable adoption decision must bind that PASS before implementation.
@@ -198,17 +206,17 @@ dependencies:
 implementation:
   authorized: true
   required: true
-  status: authorized-repository-only-after-plan-adoption
+  status: pre-merge-adoption-bookkeeping-effective-on-pr-126-merge
   target_branch: develop
   pull_request: null
   authority_issue: 119
 
-repository_adoption_status: adopted-on-pr-126-merge
+repository_adoption_status: adopted-pre-merge-bookkeeping-pr-126-merge-pending
 adoption_pr: 126
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389074358
 repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/126
 implementation_authority_before_adoption: false
-implementation_authority_status: authorized-repository-only-after-adoption
+implementation_authority_status: pre-merge-bookkeeping-effective-on-pr-126-merge
 production_deployment: prohibited
 staging_deployment: held-by-VOC-080-HOLD-00
 production_data_access: held-by-VOC-080-HOLD-02
