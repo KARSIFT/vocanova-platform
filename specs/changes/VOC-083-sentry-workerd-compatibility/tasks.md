@@ -25,7 +25,7 @@ T00 does not claim final canonical acceptance.
 - Acceptance: `VOC-083-AC-01`, `VOC-083-AC-02`
 - Tests: `VOC-083-TEST-01`, `VOC-083-TEST-02`
 - Evidence: `VOC-083-EV-01`, `VOC-083-EV-02`
-- Status: unblocked-by-T00; not-started
+- Status: implementation-prepared; pending-independent-exact-SHA-review
 
 Apply the T00 provisional choice canonically, regenerate/review any lockfile change,
 and preserve server/Worker/browser capture/privacy controls. Prepare deterministic
