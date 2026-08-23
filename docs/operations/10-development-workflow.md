@@ -1,13 +1,13 @@
 ---
 id: DOC-10
 title: VocaNova Development Workflow
-version: 1.0
+version: 1.1
 document_type: engineering-workflow
 status: approved
 owner: founder
 canonical_path: docs/operations/10-development-workflow.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+last_reviewed_at: 2026-08-22
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -15,13 +15,27 @@ related_documents:
   - DOC-15
   - DOC-16
   - DOC-19
-related_decisions: []
+related_decisions:
+  - ADR-0003
+  - ADR-0004
 adoption_change: VOC-008
 source_files:
   - path: 10-development-workflow.md
     sha256: 7fdd38cb7f877051907cc68e0930ece507fe3466dab3e008795c2827eeb21aaf
 ---
+
 # 10 — VocaNova Development Workflow
+
+## Active VOC-080 delivery amendment
+
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) establishes
+the Cloudflare Worker/D1 target, and
+[ADR-0004](../decisions/ADR-0004-external-ruflo-orchestration.md) establishes optional
+external Ruflo coordination. GitHub remains canonical. Ruflo may coordinate isolated
+provider-neutral roles but cannot approve, merge, deploy, access secrets or production
+data, or turn issues/comments into execution. The four Actions workflows remain
+deterministic evidence only. Repository migration proceeds through VOC-080's stacked,
+independently reviewed tasks; live Cloudflare and data actions remain separately held.
 
 ## 1. Principles
 
@@ -32,7 +46,7 @@ is the operational source of truth; GitHub Actions runs deterministic repository
 contextual review runs outside Actions and is bound to an exact revision; AI agents never hold
 unrestricted production secrets or merge their own work; database migrations are validated through
 automated tests; product and release authority follows the live R0–R4 and RL1–RL3 governance model. See
-[DOC-19](19-governance-reconciliation-notes.md) for orientation and the linked canonical sources.
+[DOC-19](../archive/19-governance-reconciliation-notes.md) for historical orientation and the linked canonical sources.
 
 ## 2. Repository
 
@@ -57,7 +71,9 @@ vocanova-platform/
 ```
 
 The canonical document corpus is split by category and indexed in [docs/README.md](../README.md).
-The Go backend remains a normal module at `apps/api`, not part of the pnpm workspace.
+The Go backend remains a parity-reference module at `apps/api` during VOC-080. The
+target TypeScript Worker API joins the pnpm workspace in T04 and replaces Go only
+after the T11 parity gate.
 
 ## 3. Branch strategy
 
@@ -69,15 +85,16 @@ automatic merge, and production deployment are not technically active as of 2026
 [the A-003 transition state](../governance/a003-transition-state.yaml) rather than inferring
 activation from this topology.
 
-**Current operational note (2026-08-19):** VOC-078-T03 removed repository deployment
-and server-monitoring workflows. `develop` and `main` remain integration/production
-history branches, but merging either branch does not deploy a server. A future hosting
-package must define replacement publication and verification.
+**Current operational note (2026-08-22):** VOC-078-T03 removed repository deployment
+and server-monitoring workflows. VOC-080 has now selected Cloudflare Workers and D1,
+but T00 does not provision or deploy them. `develop` and `main` remain integration and
+production-history branches; merging either branch has no live effect until T10's
+controls exist and the applicable VOC-080 action hold is separately completed.
 
 ```text
 feature/* ──PR──► develop ──release PR──► main
                     │                       │
-              Future staging         Production source
+          Future Cloudflare staging  Production-history source
 ```
 
 Task branches: `<type>/<issue-number>-<short-description>` (`feature/`, `fix/`, `hotfix/`,
@@ -111,8 +128,8 @@ remaining.
 contract/migration/e2e as applicable), security/authorization correct, migrations tested,
 OpenAPI/generated types synchronized, documentation updated, no secrets exposed, required review
 resolved, and merged through a PR. Staging/production deployment evidence is required only when an
-active, separately governed hosting package provides that capability; it is unavailable after
-VOC-078-T03.
+active, separately authorized Cloudflare delivery task provides that capability; it remains
+unavailable until VOC-080-T10 and the applicable hold are complete.
 
 ## 6. Pull-request standards
 
@@ -126,8 +143,9 @@ impact, documentation impact, known risks, and review status.
 ## 7. Testing strategy
 
 Layers: end-to-end → integration/contract → component/service → unit, with most tests below the
-end-to-end layer. Go: unit, service, repository, handler/API, PostgreSQL integration (never SQLite
-for anything DB-behavior-relevant), auth, transaction, AI-response-parsing tests. Frontend: utility,
+end-to-end layer. During migration, Go/PostgreSQL reference tests and Worker/D1 unit, repository,
+workerd, migration, auth, atomicity, consistency, contract-parity, and AI-response tests all run as
+applicable. Frontend: utility,
 component, form, feature-level, error/empty/loading/success states, accessibility, responsive,
 API-integration tests. End-to-end (Playwright) covers the full core loop: auth → discover → save →
 review session → sentence submission → deterministic AI feedback → progress update → settings change
@@ -139,15 +157,17 @@ Coverage direction (guides quality, not a target to game): backend ~70%, fronten
 boundaries, AI structured-output parsing, migrations) 90%+.
 
 CI levels: **Level 1** (fast PR checks — format, lint, typecheck, unit tests, generated/OpenAPI
-drift, build, basic security); **Level 2** (full PR checks — PostgreSQL integration, migration
-tests, contract tests, component tests, selected Playwright, Claude review); **Level 3**
-(post-merge staging checks); **Level 4** (production release checks).
+drift, build, basic security); **Level 2** (full PR checks — reference PostgreSQL and target D1
+integration/migration tests, contract parity, workerd, component tests, selected Playwright, and
+different-role review); **Level 3** (separately authorized Cloudflare staging checks); **Level 4**
+(separately authorized production release checks).
 
 ## 8. Database migrations
 
-`Ent schema → Atlas migration → PostgreSQL`. Standard flow: update Ent schema → generate Ent code →
-generate Atlas migration → categorize risk (low/medium/high) → migration tests → integration tests →
-commit together → Claude migration-risk review. High-risk migrations (drop table/column, populated type change, large-table rewrite,
+Target flow: `explicit SQLite schema → Wrangler D1 migration → local D1 rehearsal → parity and
+reconciliation`. During coexistence, PostgreSQL/Ent/Atlas remains the source-model test path.
+Categorize risk, run from-zero/upgrade/idempotency and integration tests, commit schema and code
+together, and obtain independent migration-risk review. High-risk migrations (drop table/column, populated type change, large-table rewrite,
 primary-key change, user-data deletion, or irreversible transformation) follow the live R0–R4
 classification, protected-area controls, approval matrix, and EHR rules. Required evidence includes
 migration lint, from-zero and upgrade-path tests, destructive-operation detection, recovery proof,
@@ -160,7 +180,7 @@ See the [canonical governance index](../governance/README.md).
 
 ## 9. Security workflow
 
-Mandatory Claude security review for changes touching authentication, sessions, cookies, OAuth,
+Mandatory independent security review for changes touching authentication, sessions, cookies, OAuth,
 magic links, identity, user-owned data, AI-provider integration, logging, secrets, environment
 variables, GitHub Actions, Cloudflare config, dependencies, or migrations. Severity: Critical (blocks
 merge+deploy), High (normally blocks merge), Medium (fixed or explicitly tracked), Low (fixed or

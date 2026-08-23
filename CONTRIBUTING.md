@@ -13,6 +13,12 @@ draft or adopt a package, implement code, post an AI verdict, remediate a failur
 merge a pull request, or promote a release. No repository-local orchestrator, agent
 launcher, or vendor-specific subagent configuration exists after VOC-078-T02.
 
+VOC-080 adopts Ruflo only as pinned external coordination. Do not run its force
+initializer in the repository. It may coordinate isolated provider-neutral roles and
+sanitized development context, but cannot authorize scope, review its builder's work,
+merge/close/dispatch on GitHub, access secrets or production data, mutate Cloudflare
+or DNS, deploy, spend, or launch. GitHub remains the canonical evidence record.
+
 Vocanova uses two permanent branches:
 
 - `main` contains production-ready history.
@@ -61,6 +67,13 @@ files can't drift apart.
 
 Use the exact checked-in tool versions and scripts with a frozen lockfile. Do not claim
 an unavailable tool or external deployment passed.
+
+The active technical target is defined by
+[ADR-0003](docs/decisions/ADR-0003-cloudflare-native-runtime-and-data.md): OpenNext on
+Workers, a Hono API Worker, and D1. The Go/PostgreSQL/Docker stack remains a parity
+reference until VOC-080 proves the replacement. Repository work uses local workerd/D1
+and credential-free dry runs; no contributor or pull-request job receives Cloudflare
+deployment credentials.
 
 Repository protections apply to contributors and automation actors alike; never
 bypass failed checks, required review, branch protection, or production gates. See

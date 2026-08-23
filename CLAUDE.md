@@ -5,7 +5,7 @@
 The section above is imported from this repo's `AGENTS.md` (authority model, change
 workflow, safety rules) - every Claude Code session in this repo loads it, not just
 the reviewer role below. This file's own content is specific to the independent
-*reviewer* role only; a session acting in another role should follow `AGENTS.md` above
+_reviewer_ role only; a session acting in another role should follow `AGENTS.md` above
 but does not inherit reviewer-only obligations (like "cannot grant approval") from
 the section below unless it is itself acting as reviewer.
 
@@ -64,3 +64,10 @@ Claude Code must not approve its own substantial correction. After such a correc
 all checks rerun and a separate independent reviewer verifies the affected revision.
 Claude Code has no repository-write, merge, deployment, secret, production-data,
 founder, or technical-steward authority.
+
+Under VOC-080, review Cloudflare/OpenNext/Hono/D1 changes against ADR-0003 and external
+Ruflo coordination against ADR-0004. A Ruflo assignment is task routing, not authority;
+it cannot relax scope, exact-SHA review, action holds, or GitHub evidence. Reviewers do
+not run a completed long suite or start a background process merely to duplicate
+builder evidence. Cloudflare staging, production, DNS, secret, and learner-data actions
+remain separately held even when repository implementation passes.

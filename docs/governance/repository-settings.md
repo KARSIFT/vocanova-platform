@@ -16,6 +16,14 @@ technical activation remains disabled. VOC-078-T03 removed push-triggered deploy
 and scheduled Sentry monitoring workflows. Removing repository automation did not
 inspect, stop, or mutate any existing server.
 
+VOC-080 selects Cloudflare Workers/D1 as the target and external Ruflo as optional
+coordination. T00 changes documentation only: it does not mutate GitHub settings,
+create Cloudflare resources, install Ruflo, configure secrets, or deploy. T01 will
+propose only supported GitHub hardening with an immediate settings-record update;
+T10 may add held Cloudflare delivery after parity. Ruflo never receives a GitHub write
+token, Cloudflare credential, production secret/data, DNS permission, or deployment
+authority.
+
 ## GitHub rulesets
 
 Configure `develop`:
@@ -111,14 +119,17 @@ bot identity as human authority.
   isolated environments.
 - Environment-scoped Cloudflare tokens; production credentials are unavailable to
   pull-request and implementation-agent contexts.
+- No GitHub write or Cloudflare credential in Ruflo, reviewer, or ordinary builder
+  configuration.
 
 No credential value belongs in the repository.
 
 ## Cloudflare and release configuration
 
-Before deployment automation is added, record and validate:
+Before VOC-080-T10 delivery automation is added, record and validate:
 
-- approved build and deploy commands from the future package scripts;
+- approved OpenNext, Worker API, D1 migration, dry-run, version, and deploy commands
+  from the implemented package scripts;
 - preview, staging, and production project identifiers and domains;
 - environment bindings, data stores, migration order, and secret isolation;
 - preview cleanup behavior and access restrictions;
@@ -164,7 +175,8 @@ successfully against real infrastructure beginning 2026-08-08, and the productio
 environment restricted those runs to `main`. VOC-078-T03 removed both workflows on
 2026-08-19 while deliberately leaving runtime infrastructure and repository settings
 unchanged. Deployment, health polling, and one-click rollback are now unavailable in
-GitHub Actions pending a future hosting package. Per-PR previews remain unbuilt.
+GitHub Actions. ADR-0003 selects the replacement, but implementation remains pending
+VOC-080-T03/T04/T10 and its action holds. Per-PR previews remain unbuilt.
 
 The initial governance bootstrap merged through PR #3 and its one-time exception has
 expired. The historical technical-steward appointment and completed dual-capacity

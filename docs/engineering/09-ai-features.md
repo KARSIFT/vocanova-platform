@@ -1,13 +1,13 @@
 ---
 id: DOC-09
 title: VocaNova AI Features
-version: 1.0
+version: 1.1
 document_type: ai-feature-design
 status: approved
 owner: founder
 canonical_path: docs/engineering/09-ai-features.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+last_reviewed_at: 2026-08-22
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -17,13 +17,25 @@ related_documents:
   - DOC-05
   - DOC-06
   - DOC-07
-related_decisions: []
+related_decisions:
+  - ADR-0003
 adoption_change: VOC-008
 source_files:
   - path: 09-ai-features.md
     sha256: 57e798e3f2d259b18a1710e6c5a67a3a1c2d790133501d6aa9bf785ed7f61f74
 ---
+
 # 09 — VocaNova AI Features
+
+## Active VOC-080 runtime amendment
+
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) moves the
+provider boundary, validation, persistence, mission updates, rate/cost controls, and
+privacy-safe telemetry into the Hono API Worker. The web Worker never calls an AI
+provider directly. D1 replaces PostgreSQL for target persistence after parity. The
+product, teaching, safety, evaluation, privacy, and failure requirements below remain
+unchanged; references to the Go backend or PostgreSQL identify the migration oracle.
+Normal CI remains deterministic and never calls a paid provider.
 
 ## 1. Purpose and product principle
 
@@ -135,10 +147,10 @@ type SentenceFeedbackResult = {
   targetWordId: string;
   status: SentenceFeedbackStatus;
   originalSentence: string;
-  correctedSentence: string | null;   // null for correct/natural; optional for needs_improvement; required for incorrect
-  headline: string;                    // ≤60 chars, encouraging but honest
-  explanation: string;                 // ≤240 chars
-  improvementTip: string | null;       // optional for correct; required for needs_improvement/incorrect, ≤160 chars
+  correctedSentence: string | null; // null for correct/natural; optional for needs_improvement; required for incorrect
+  headline: string; // ≤60 chars, encouraging but honest
+  explanation: string; // ≤240 chars
+  improvementTip: string | null; // optional for correct; required for needs_improvement/incorrect, ≤160 chars
   targetWordUsedCorrectly: boolean;
   grammarAcceptable: boolean;
   meaningClear: boolean;
@@ -238,13 +250,14 @@ quality-review record with states `open`/`reviewing`/`confirmed_issue`/`no_issue
 
 ## 17. Backend orchestration and processing model
 
-All AI orchestration lives in the Go backend; the frontend never knows the provider, holds
+All AI orchestration lives in the API Worker; the frontend never knows the provider, holds
 credentials, constructs prompts, calls moderation directly, interprets raw output, or determines
 mission completion. Request lifecycle: authenticate → authorize attempt ownership → load
 authoritative target/learner data → normalize → validate → rate-limit → idempotency/dedup check →
 safety checks → build provider-neutral task → call provider → validate/normalize output → persist
-+ update mission transactionally → emit privacy-safe telemetry → return backend-confirmed result.
-Synchronous request-response (no queue) — output is short and learners expect immediate feedback.
+
+- update mission transactionally → emit privacy-safe telemetry → return backend-confirmed result.
+  Synchronous request-response (no queue) — output is short and learners expect immediate feedback.
 
 Use a **narrow** feedback-provider interface and a separate moderation interface — not a vague
 generic `Generate(ctx, input any)` interface. Provider SDK types stay inside the adapter layer. One
@@ -374,9 +387,9 @@ performs poorly on it. Every material AI change records dataset/golden-set/promp
 provider, model, config, commit, scores, critical failures, latency, cost, reviewer approval. Normal
 CI never depends on a paid provider.
 
-## 24. Codex and Claude Code responsibilities
+## 24. Builder and independent-reviewer responsibilities
 
-**Codex** implements domain types/persistence/migrations, deterministic validation, target-form
+The **builder role** implements domain types/persistence/migrations, deterministic validation, target-form
 matching, feedback-provider and moderation interfaces, mock provider, one production adapter,
 prompt/versioning package, structured-output validator, orchestration service, transaction-safe
 mission completion, rate limiting, idempotency/dedup, stable REST behavior, frontend integration,
@@ -389,7 +402,8 @@ Coding begins only after this document is approved, API-contract alignment is ch
 support is confirmed, provider candidates are evaluated, provider privacy settings are verified,
 secrets/environments are defined, and initial evaluation fixtures exist.
 
-**Claude Code** reviews architecture (backend owns orchestration, frontend never calls providers,
+The **different-participant independent-reviewer role** reviews architecture (backend owns
+orchestration, frontend never calls providers,
 thin handlers, no SDK-type leakage, no generic AI platform), domain (processing vs. learning states
 separated, invariants enforced, failure states can't complete missions), security (session identity
 authoritative, ownership enforced, keys backend-only, injection handled, no cross-user access, rate
@@ -404,7 +418,8 @@ dedup works, output limits exist, usage measured, no accidental fallback provide
 (comprehensive mock failures, DB rollback tested, contracts prevent leakage, explicit privacy tests,
 evaluation tooling has cost limits, production bugs become regression fixtures). Outcome:
 `approve` / `approve_with_follow_up` / `request_changes`; critical privacy/security/safety/
-persistence/authorization issues require `request_changes`.
+persistence/authorization issues require a failing verdict. Humans or AI agents may fill either
+role; this document does not assign permanent authority to a vendor.
 
 ## 25. Rollout and rollback
 
