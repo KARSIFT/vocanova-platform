@@ -1,10 +1,12 @@
 # VOC-083 — Workers-safe Sentry instrumentation and workerd rejection detection
 
-Status: adopted through PR #111. T00, T01, and T02 are complete through the
-repository-only, credential-free evidence recorded below. T03 has a documentation
-and closure candidate in [`t03-evidence.md`](t03-evidence.md), but remains pending
-its own exact-final-SHA specialist review, hosted proof, and ordinary rollback.
-All inherited VOC-080 holds and action-specific authority boundaries remain in force.
+Status: adopted through PR #111 and repository-complete through T00-T03. Final T03
+exact SHA `bd7d98fc9bc2af9683b42d2fb1807794d27cda1a` received specialist PASS on PR
+#117 comment `5386743429`, merged as `d4078924ae6d0be52628973e84be51734d93a5a9`,
+passed the hosted qualification recorded on comment `5386754914`, passed a four-commit
+repository-only rollback rehearsal, and passed post-merge CI/Governance/Security
+checks. All inherited VOC-080 holds and action-specific authority boundaries remain
+in force.
 
 The independent exact-SHA plan reviews of
 [`682b33ec1a126e8924395f7d7f7eb26191f2a57a`](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973)
@@ -14,8 +16,8 @@ both recorded **FAIL**. Exact SHA
 [`8ec6b530b37972a3a9e8102905a4f1b429386941`](https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385313120)
 then received a different-role specialist **PASS** with zero blockers, and the
 accountable technical decision owner approved that exact candidate for adoption. The
-adoption-bookkeeping revision requires its own exact-SHA review before PR #111 may
-merge; neither historical FAIL is reinterpreted as approval.
+adoption-bookkeeping revision then received its own exact-SHA review before PR #111
+merged; neither historical FAIL is reinterpreted as approval.
 
 Issue [#105](https://github.com/KARSIFT/vocanova-platform/issues/105) records two
 `WebAssembly.compile()` unhandled rejections from the generated OpenNext Worker on its
@@ -66,12 +68,23 @@ also passed. A ten-commit repository-only rollback rehearsal to the exact T01
 revision `9f11195ed186e214fade57884e66ca96f2498ebc` passed. These records establish
 T02's complete AC-01–AC-04 evidence; they do not close T03 or claim any live effect.
 
-T03's candidate reconciliation inventories every declared affected surface and corrects
-DOC-11's stale active `@sentry/nextjs` runtime statement. T02 had already reconciled
-the runtime, configuration, dependency, CI, test, development-guide, and ADR surfaces.
-T03 still requires its own exact-SHA specialist verdict, hosted proof, and ordinary
-repository rollback before AC-05 or package closure can be marked complete. This
-record does not pre-claim a T03 PR number, final SHA, review, hosted result, or live
+T03 reconciled every declared affected surface and corrected DOC-11's stale active
+`@sentry/nextjs` runtime statement. The earlier T03 exact SHA
+[`987d38caf461eece780ba0421594305d759fa7c4`](https://github.com/KARSIFT/vocanova-platform/pull/117#issuecomment-5386710425)
+recorded **FAIL** and remains preserved historical evidence. The final T03 exact SHA
+[`bd7d98fc9bc2af9683b42d2fb1807794d27cda1a`](https://github.com/KARSIFT/vocanova-platform/pull/117#issuecomment-5386743429)
+then received independent **PASS**, merged through PR #117 as
+[`d4078924ae6d0be52628973e84be51734d93a5a9`](https://github.com/KARSIFT/vocanova-platform/pull/117),
+and recorded hosted qualification on
+[`5386754914`](https://github.com/KARSIFT/vocanova-platform/pull/117#issuecomment-5386754914)
+with CI [`32647980797`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32647980797),
+Governance [`32648203363`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32648203363),
+and Security [`32647980763`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32647980763).
+Its repository-only four-commit rollback rehearsal passed, and post-merge CI
+[`32648474703`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474703),
+Governance [`32648474747`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474747),
+and Security [`32648474756`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474756)
+also passed. These records close AC-04 and AC-05 without claiming any live
 Sentry/Cloudflare outcome.
 
 The plan was prepared on `agent/voc-081-t04-f2-evidence` at

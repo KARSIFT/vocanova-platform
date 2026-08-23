@@ -27,7 +27,7 @@ no executable workflow/evaluator change.
 - Acceptance: AC-03, AC-05, AC-06, AC-07
 - Tests: TEST-03, TEST-04, TEST-05
 - Evidence: EV-03, EV-04, EV-05
-- Status: implementation-reviewed-and-hosted-at-aa63cd6; closure-revision-review-pending-on-PR-114
+- Status: complete-final-exact-SHA-9b52963eba5b1dee30e0a63936de2c9ff0b82337-merged-through-PR-114-with-hosted-post-merge-and-rollback-evidence
 
 Add narrow foundation policy markers and negative unit fixtures, update synthetic
 eligible/blocked R4 participant labels to provider-neutral AI actors, and prove the
@@ -38,9 +38,10 @@ reverse-order repository rollback. Do not approve or merge the builder's own wor
 deploy, mutate settings, or release any inherited hold.
 
 Exact implementation SHA `aa63cd6811c42b1ac02327fe64b6fdd44bce1235`
-received a different-actor cross-model PASS with zero blockers. Its CI, Security,
-changed-path, structure, and foundation checks passed; the read-only eligibility job
-correctly blocked before normalized final-review evidence existed. The non-self-
-referential closure record is `final-evidence.md`. Because adding that record changes
-the tree, PR #114 must carry a fresh different-actor verdict and final hosted
-eligibility for its exact current SHA before merge.
+received a different-actor cross-model PASS with zero blockers, and that superseded
+PASS remains preserved historical evidence. The exact PR #114 closure revision
+`9b52963eba5b1dee30e0a63936de2c9ff0b82337` then preserved the exact-SHA FAIL on
+comment `5385846754`, received the final different-actor cross-model PASS on comment
+`5385850530`, passed CI/Governance/Security for the merged tree, and passed
+post-merge CI/Governance/Security on `develop`. The repository-only reverse-order
+rollback evidence remains recorded in `final-evidence.md`.

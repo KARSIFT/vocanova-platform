@@ -2,27 +2,33 @@
 
 ## Preconditions
 
-Do not begin implementation until the plan PR records an independently reviewed exact
-candidate SHA, complete R4 plan evidence, adopted status, and
-`implementation_authorized: true`. The planner cannot review or adopt its own plan.
-Implementation must use a different builder actor, and every final task revision must
-be verified by a different cross-model reviewer actor under the pre-VOC-082 governance
-self-modification rule.
+These preconditions governed the completed implementation and were satisfied before T00
+began: the plan PR recorded an independently reviewed exact candidate SHA, complete R4
+plan evidence, adopted status, and `implementation_authorized: true`. The planner did
+not review or adopt its own plan. Implementation used a different builder actor, and
+each final task revision received a different cross-model reviewer actor under the
+pre-VOC-082 governance self-modification rule.
 
-## Sequence
+## Completed Sequence
 
-1. **T00 — Canonical policy and operational guidance.** Create ADR-0005 and reconcile
+1. **T00 — Canonical policy and operational guidance.** Completed at exact SHA
+   `b1fa02e0b79e11d75e02194988826106aae2939c`, merged by PR #112 as
+   `26c16b7b07d55c1910c7fd9711dfb17662a75d8e`. The task created ADR-0005 and reconciled
    DOC-00's product-authority boundary and indexes plus active governance, post-merge
-   activation, contributor, reviewer, template, and Ruflo documentation. Replace
+   activation, contributor, reviewer, template, and Ruflo documentation. It replaced
    DOC-00's permanent ChatGPT/Codex/Claude assignments and the checklist's Codex/Claude
-   identity requirement with distinct provider-neutral actors. Add one valid AI-only
-   worked example and one invalid same-actor relabeling example. Update DOC-15/DOC-16
-   versions and DOC-16 amendment history without rewriting historical evidence or
-   changing product behavior.
-2. **T01 — Deterministic guard and final evidence.** Add narrow foundation-validation
-   invariants and negative fixtures, neutralize the synthetic merge-eligibility actor
-   labels, prove evaluator/workflow byte identity, run full governance checks, obtain
-   exact-SHA review and hosted proof, and rehearse reverse rollback.
+   identity requirement with distinct provider-neutral actors, added one valid AI-only
+   worked example and one invalid same-actor relabeling example, and updated
+   DOC-15/DOC-16 versions plus DOC-16 amendment history without rewriting historical
+   evidence or changing product behavior.
+2. **T01 — Deterministic guard and final evidence.** Completed at exact SHA
+   `9b52963eba5b1dee30e0a63936de2c9ff0b82337`, merged by PR #114 as
+   `eb13979a7ad59e5dd1eef0680116b84eeadb059a`. The task added the narrow
+   foundation-validation invariants and negative fixtures, neutralized the synthetic
+   merge-eligibility actor labels, proved evaluator/workflow byte identity, preserved
+   the superseded `aa63cd6811c42b1ac02327fe64b6fdd44bce1235` PASS and the exact-SHA
+   FAIL on comment `5385846754`, then received final exact-SHA PASS, hosted proof,
+   reverse-order rollback, and post-merge checks.
 
 ## File reconciliation
 
@@ -91,8 +97,8 @@ audits the exact eligibility result; no role may fabricate hosted enforcement.
 
 ## Deployment and rollback
 
-There is no release or deployment. Implementation PRs remain stacked, draft until
-evidence is complete, and repository-only. Reverse tasks in a disposable worktree,
-validate each predecessor, then remove only that exact disposable worktree. Do not
-delete open task branches or touch settings, Cloudflare, DNS, secrets, production data,
-billing, or live systems.
+There is no release or deployment. The completed implementation remained stacked,
+repository-only, and draft until evidence was complete. Reverse tasks in a disposable
+worktree, validate each predecessor, then remove only that exact disposable worktree.
+Do not delete open task branches or touch settings, Cloudflare, DNS, secrets,
+production data, billing, or live systems.

@@ -70,7 +70,9 @@ T03 found that DOC-11's active VOC-051 amendment still described `@sentry/nextjs
 the current web implementation. T03 preserves that history while superseding its SDK
 and runtime detail with the implemented `@sentry/cloudflare` Worker/request adapter and
 `@sentry/react` browser adapter. The development guide and ADR already describe the
-current implementation and require no further change.
+current implementation and required no further change. T03's exact-SHA review,
+hosted qualification, four-commit rollback, and post-merge proof are now recorded in
+`t03-evidence.md`.
 
 ## Risks, dependencies, and evidence
 

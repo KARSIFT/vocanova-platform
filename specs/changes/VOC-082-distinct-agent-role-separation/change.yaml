@@ -124,9 +124,12 @@ implementation:
   authorized: true
   required: true
   status: >-
-    T00 integrated by PR #112; T01 implementation aa63cd6811c42b1ac02327fe64b6fdd44bce1235
-    passed different-actor review and hosted deterministic checks; final evidence-only
-    closure revision requires its own exact-SHA review and hosted eligibility on PR #114
+    T00 complete at exact SHA b1fa02e0b79e11d75e02194988826106aae2939c, merged by
+    PR #112 as 26c16b7b07d55c1910c7fd9711dfb17662a75d8e. T01 complete at exact SHA
+    9b52963eba5b1dee30e0a63936de2c9ff0b82337, which preserved the historical
+    aa63cd6811c42b1ac02327fe64b6fdd44bce1235 PASS and the exact-SHA FAIL on comment
+    5385846754, then received final PASS on comment 5385850530, merged by PR #114 as
+    eb13979a7ad59e5dd1eef0680116b84eeadb059a, and passed hosted plus post-merge evidence
   target_branch: develop
   pull_request: 114
   authority_issue: 109
@@ -143,7 +146,7 @@ adoption_pr: 110
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385610129
 repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/110
 implementation_authority_before_adoption: false
-implementation_authority_status: authorized-after-adoption
+implementation_authority_status: completed-after-adoption
 production_deployment: disabled
 staging_deployment: held-by-VOC-080-HOLD-00
 production_data_access: held-by-VOC-080-HOLD-02

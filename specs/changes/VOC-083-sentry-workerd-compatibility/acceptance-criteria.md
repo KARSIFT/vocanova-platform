@@ -66,16 +66,17 @@ fixture-tested rationale and cannot include the affected Wasm/rejection forms.
 - Tasks: `VOC-083-T02`, `VOC-083-T03`
 - Tests: `VOC-083-TEST-04`, `VOC-083-TEST-05`
 - Evidence: `VOC-083-EV-04`, `VOC-083-EV-05`
-- Result: candidate-satisfied through T02; pending T03 exact-SHA review and hosted proof
+- Result: complete-through-final-T03-exact-SHA-bd7d98fc9bc2af9683b42d2fb1807794d27cda1a-review-hosted-and-post-merge-evidence
 
 The four-workflow invariant, frozen install, audit, CI aggregate, no-live policy,
 documentation, lockfile, and exact affected-file inventory agree. `ci:web` builds
 before compatibility/dry-run/smoke and local-stack builds/scans its own fresh output;
 no check accepts stale or partial artifacts. T02's exact review and hosted results are
-recorded in the package evidence. The T03 candidate inventory reconciles the package
-documentation and corrects DOC-11's stale active `@sentry/nextjs` runtime statement,
-but T03's own exact review and hosted proof remain pending; no unperformed Sentry API
-or source-map upload, Cloudflare mutation/deploy, secret, or production-data access is
+recorded in the package evidence. T03 then reconciled the package documentation,
+corrected DOC-11's stale active `@sentry/nextjs` runtime statement, received final
+specialist PASS on exact SHA `bd7d98fc9bc2af9683b42d2fb1807794d27cda1a`, and recorded
+hosted plus post-merge proof in `t03-evidence.md`; no unperformed Sentry API or
+source-map upload, Cloudflare mutation/deploy, secret, or production-data access is
 claimed.
 
 ## VOC-083-AC-05 — Exact-revision verification and rollback are complete
@@ -84,12 +85,12 @@ claimed.
 - Tasks: `VOC-083-T03`
 - Tests: `VOC-083-TEST-06`
 - Evidence: `VOC-083-EV-06`
-- Result: candidate; pending T03's own exact-final-SHA review, hosted proof, and ordinary rollback
+- Result: complete-through-final-T03-exact-SHA-bd7d98fc9bc2af9683b42d2fb1807794d27cda1a-review-hosted-four-commit-rollback-and-post-merge
 
 Every implementation revision must have the required deterministic evidence and a
 different-role Cloudflare/Workers/Sentry specialist verdict bound to its exact final
-SHA. T02 satisfies its own review and hosted gates, but T03's final candidate SHA and
-review record are intentionally not pre-claimed here. T03 must still show an ordinary
-repository rollback that restores the predecessor instrumentation and checks without
-touching live Cloudflare/Sentry state; any blocked reporting-equivalence finding must
-be resolved first.
+SHA. T02 satisfied its own review and hosted gates, and T03 preserved the prior FAIL on
+exact SHA `987d38caf461eece780ba0421594305d759fa7c4` before the final exact SHA
+`bd7d98fc9bc2af9683b42d2fb1807794d27cda1a` received specialist PASS, hosted proof,
+ordinary four-commit repository rollback, and post-merge CI/Governance/Security PASS.
+No live Cloudflare/Sentry state was touched.

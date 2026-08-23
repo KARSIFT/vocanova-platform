@@ -159,13 +159,18 @@ At adoption, the plan authorized only `VOC-083-T00` as a non-landing evidence/de
 with disposable candidate probes in isolated worktrees. T00 may inspect versions/
 primary sources and modify only a disposable probe copy of declared candidate surfaces;
 it records a provisional matrix/decision, restores or discards the probe, and changes
-nothing on the canonical task branch. T01 is blocked until this decision exists and
-applies it canonically. T02 then owned final canonical generated-bundle, workerd, and
+nothing on the canonical task branch. T01 was blocked until this decision existed and
+applied it canonically. T02 then owned final canonical generated-bundle, workerd, and
 reporting-equivalence acceptance. If T02 had disproved the provisional decision, it
 would have failed closed: update T00's decision, revise T01, rerun T02, and obtain
 fresh exact-SHA review; never silently select or ship another candidate. The selected
-candidate was finally qualified by T02's remediated exact-SHA evidence; T03's own
-exact-revision closure gate remains separate and pending.
+candidate was finally qualified by T02's remediated exact-SHA evidence. T03 then
+completed the exact-revision closure gate: it preserved the prior FAIL on exact SHA
+`987d38caf461eece780ba0421594305d759fa7c4`, received final PASS on exact SHA
+`bd7d98fc9bc2af9683b42d2fb1807794d27cda1a`, merged through PR #117 as
+`d4078924ae6d0be52628973e84be51734d93a5a9`, recorded hosted qualification on PR #117
+comment `5386754914`, completed a four-commit repository-only rollback rehearsal, and
+passed post-merge CI/Governance/Security without touching live Cloudflare or Sentry.
 
 ## External research references
 
