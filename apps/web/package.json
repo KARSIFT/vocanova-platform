@@ -18,7 +18,7 @@
     "cloudflare:dry-run:staging": "wrangler deploy --dry-run --experimental-provision=false --experimental-auto-create=false --env staging --outdir .wrangler/dry-run/staging",
     "cloudflare:limits": "node scripts/check-worker-limits.mjs",
     "cloudflare:compatibility": "node scripts/check-worker-compatibility.mjs",
-    "test:sentry": "node --experimental-strip-types --test tests/workerd/reporting-seams.test.ts tests/workerd/worker-compatibility.test.mjs",
+    "test:sentry": "node --experimental-strip-types --test tests/workerd/reporting-seams.test.ts tests/workerd/worker-compatibility.test.mjs tests/workerd/workerd-smoke.test.mjs",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit --pretty false",
     "typecheck:e2e": "tsc -p tests/tsconfig.json --noEmit --pretty false",
