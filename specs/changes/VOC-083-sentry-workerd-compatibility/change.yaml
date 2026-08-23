@@ -1,0 +1,127 @@
+schema_version: 1
+
+id: VOC-083
+slug: sentry-workerd-compatibility
+title: Workers-safe Sentry instrumentation and workerd rejection detection
+
+type: bugfix-runtime-observability-compatibility
+status: draft
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the change may alter the web Worker's runtime instrumentation, dependency
+  graph, generated bundle, local workerd smoke contract, and privacy-sensitive error
+  reporting. It changes no live resource, secret, monitoring account, deployment, or
+  product behavior. Escalate rather than implement if selection requires a material
+  architecture decision, new external authority, or a live Sentry/Cloudflare action.
+canonical_path: specs/changes/VOC-083-sentry-workerd-compatibility
+authority_model: voc-079-approval-neutral-active
+requirement_source: >-
+  GitHub issue #105, which records the reproducible OpenNext/workerd runtime failure,
+  Cloudflare's current Workers WebAssembly restrictions, and the requested governed
+  compatibility follow-up. This draft is planning authority only.
+requirement_approval_status: issue-recorded-plan-review-pending
+base_branch: agent/voc-081-t04-f2-evidence
+base_sha: a8694932671ad9c44fd2a97c128b14e6089e5faf
+target_branch: develop
+approved_candidate_sha: null
+owners:
+  decision: accountable-decision-owner-after-independent-plan-review
+  package_preparation: Codex (planner role only)
+  implementation: different builder role after adoption
+  independent_verification: different exact-revision Cloudflare/Workers/Sentry specialist reviewer
+approvals:
+  requirement_direction:
+    status: issue-recorded
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/105
+  package_independent_verification:
+    status: pending
+    candidate_sha: null
+    evidence: null
+approval_status: not-approved
+implementation_authorized: false
+automatic_merge_allowed: true
+production_impact: >-
+  None from plan adoption or repository implementation. The selected implementation
+  must remain credential-free and local/workerd-only; it may not query Sentry, upload
+  source maps, create or alter a Cloudflare/Sentry resource, deploy, inspect production
+  data, or change inherited VOC-080 activation holds.
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+  - id: VOC-083-DEP-00
+    status: >-
+      Open. Before implementation, the builder must produce an evidence matrix for the
+      locked Sentry/OpenNext/Wrangler versions and the then-current primary Cloudflare
+      and Sentry sources. It must select one candidate only after proving bundle and
+      reporting coverage; this package does not preselect configuration, update, or
+      adapter.
+  - id: VOC-083-DEP-01
+    status: >-
+      VOC-081 T02 supplied the discovery reproduction and T04 evidence base at
+      a8694932671ad9c44fd2a97c128b14e6089e5faf. This plan is stacked on that exact
+      revision and does not depend on unadopted VOC-082.
+  - id: VOC-083-DEP-02
+    status: >-
+      The inherited VOC-080-HOLD-00, HOLD-01, and HOLD-02 remain open. No local test
+      may substitute for a Sentry API/live-event query or a hosted deployment.
+action_specific_holds: []
+inherited_holds:
+  - VOC-080-HOLD-00
+  - VOC-080-HOLD-01
+  - VOC-080-HOLD-02
+affected_areas:
+  - apps/web/package.json
+  - apps/web/next.config.ts
+  - apps/web/sentry.server.config.ts
+  - apps/web/sentry.edge.config.ts
+  - apps/web/src/instrumentation.ts
+  - apps/web/src/instrumentation-client.ts
+  - apps/web/src/app/global-error.tsx
+  - apps/web/scripts/check-worker-compatibility.mjs
+  - apps/web/scripts/test-workerd.mjs
+  - apps/web/tests/workerd/
+  - package.json
+  - pnpm-lock.yaml
+  - scripts/foundation/local-stack-smoke.mjs
+  - scripts/foundation/local-stack-smoke.test.mjs
+  - .github/workflows/ci.yml
+  - docs/development.md
+  - docs/operations/11-devops-and-ci-cd.md
+  - docs/decisions/ADR-0003-cloudflare-native-runtime-and-data.md
+  - specs/changes/VOC-083-sentry-workerd-compatibility/
+implementation:
+  authorized: false
+  required: true
+  status: prohibited-until-plan-adoption
+  target_branch: develop
+  pull_request: null
+  authority_issue: 105
+release:
+  required: false
+  mode: repository-only-workerd-compatibility
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: policy-eligible-only-no-current-merge-executor
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: draft-not-adopted
+adoption_pr: null
+adoption_evidence: null
+implementation_authority_before_adoption: false
+implementation_authority_status: prohibited
+production_deployment: held-by-VOC-080-HOLD-01
+staging_deployment: held-by-VOC-080-HOLD-00
+production_data_access: held-by-VOC-080-HOLD-02
+autonomous_production_release: disabled
+ehr: not-triggered
+blocking_reasons:
+  - plan-not-independently-reviewed-or-adopted
+  - workers-safe-sentry-candidate-not-yet-selected-from-evidence
