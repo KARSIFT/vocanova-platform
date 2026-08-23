@@ -71,8 +71,9 @@ remain unresolved/held.
 
 ## Rollback status
 
-The initial evidence candidate is followed by reverse-order rehearsal in a disposable
-worktree. The machine record stays fail-closed as `pending-final-t04-candidate` until
-that rehearsal reproduces every predecessor and the exact pre-T00 tree. The final T04
-PR carries the exact transcript; the repository record is then changed to `pass` before
-exact-revision review.
+Reverse-order rehearsal passed in a disposable worktree: T04 reproduced T03, then T03
+through T00 each reproduced its exact predecessor, and the final T00 reversal
+reproduced `3d6699c5eb378b9a00679d61a5c28b6b7e27c32c`, the exact pre-VOC-081 tree. Every
+boundary passed governance, diff validation, and its own foundation aggregate. The
+worktree was removed after verification. The final T04 draft PR carries the exact
+command transcript; no rollback step queried or mutated a live system.

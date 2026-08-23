@@ -130,9 +130,7 @@ export function inspectF2Record(record) {
 
   if (
     record?.rollback?.mode !== "reverse-order-disposable-worktree" ||
-    !["pending-final-t04-candidate", "pass"].includes(
-      record?.rollback?.status,
-    ) ||
+    record?.rollback?.status !== "pass" ||
     record?.rollback?.expected_terminal_tree !==
       "3d6699c5eb378b9a00679d61a5c28b6b7e27c32c" ||
     record?.rollback?.live_system_effect !== false

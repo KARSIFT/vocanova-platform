@@ -95,7 +95,7 @@
   ],
   "rollback": {
     "mode": "reverse-order-disposable-worktree",
-    "status": "pending-final-t04-candidate",
+    "status": "pass",
     "expected_terminal_tree": "3d6699c5eb378b9a00679d61a5c28b6b7e27c32c",
     "live_system_effect": false
   },
