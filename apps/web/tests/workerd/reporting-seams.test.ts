@@ -5,7 +5,11 @@ import * as CloudflareSentry from "@sentry/cloudflare";
 import * as ReactSentry from "@sentry/react";
 
 import { onRequestError } from "../../src/instrumentation.ts";
-import { redactSentryEvent } from "../../sentry.server.config.ts";
+import {
+  redactSentryEvent,
+  sentryOptions,
+  type SentryRuntimeEnv,
+} from "../../sentry.server.config.ts";
 
 const TEST_DSN = "https://public@example.invalid/1";
 
@@ -30,11 +34,24 @@ async function flushCloudflare(): Promise<void> {
 
 test("Worker uncaught errors reach an in-memory transport and are redacted", async () => {
   const events: Envelope[] = [];
+  const options = sentryOptions({
+    SENTRY_DSN: TEST_DSN,
+    SENTRY_ENVIRONMENT: "synthetic-environment",
+    SENTRY_RELEASE: "synthetic-release",
+  } as SentryRuntimeEnv);
+
+  assert.ok(options);
+  assert.equal(options.dsn, TEST_DSN);
+  assert.equal(options.environment, "synthetic-environment");
+  assert.equal(options.release, "synthetic-release");
+  assert.equal(options.debug, false);
+  assert.equal(options.spotlight, false);
+  assert.equal(typeof options.beforeSend, "function");
+
   const worker = CloudflareSentry.withSentry(
     () => ({
-      dsn: TEST_DSN,
+      ...options,
       transport: memoryTransport(events),
-      beforeSend: redactSentryEvent,
     }),
     {
       async fetch(): Promise<Response> {
@@ -110,8 +127,11 @@ test("React/global capture reaches the same in-memory boundary", async () => {
 
 test("missing DSN is a no-op and makes no transport call", async () => {
   const events: Envelope[] = [];
+  const options = sentryOptions({} as SentryRuntimeEnv);
+  assert.equal(options, undefined);
+
   const worker = CloudflareSentry.withSentry(
-    () => undefined,
+    () => options,
     {
       async fetch(): Promise<Response> {
         throw new Error("disabled worker error");

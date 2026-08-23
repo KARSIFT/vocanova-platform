@@ -37,7 +37,8 @@ Before adoption, package-level blockers concern only review/adoption.
 T00 completed its provisional comparison in [`t00-evidence.md`](t00-evidence.md) on
 2026-08-23. It selected exact `@sentry/cloudflare@10.69.0` plus
 `@sentry/react@10.69.0` with complete removal of `@sentry/nextjs`; T01 is unblocked
-but not started. This is not T02's final canonical compatibility or reporting PASS.
+and implementation-prepared, pending independent exact-SHA review. This is not T02's
+final canonical compatibility or reporting PASS.
 
 The plan was prepared on `agent/voc-081-t04-f2-evidence` at
 `a8694932671ad9c44fd2a97c128b14e6089e5faf`; it deliberately has no dependency on

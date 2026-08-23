@@ -1,4 +1,13 @@
-import type { ErrorEvent } from "@sentry/cloudflare";
+import type { CloudflareOptions, ErrorEvent } from "@sentry/cloudflare";
+
+export type SentryRuntimeEnv = CloudflareEnv & {
+  SENTRY_DSN?: string;
+  NEXT_PUBLIC_SENTRY_DSN?: string;
+  SENTRY_ENVIRONMENT?: string;
+  NEXT_PUBLIC_SENTRY_ENVIRONMENT?: string;
+  SENTRY_RELEASE?: string;
+  NEXT_PUBLIC_SENTRY_RELEASE?: string;
+};
 
 const SENSITIVE_TAG =
   /(?:authorization|cookie|credential|dsn|learner|password|secret|token)/i;
@@ -34,6 +43,28 @@ export function redactSentryEvent(event: ErrorEvent): ErrorEvent {
     }
   }
   return event;
+}
+
+/** Build side-effect-free Worker options from the request environment. */
+export function sentryOptions(
+  env: SentryRuntimeEnv,
+): CloudflareOptions | undefined {
+  const dsn = env.SENTRY_DSN ?? env.NEXT_PUBLIC_SENTRY_DSN;
+  if (!dsn) {
+    return undefined;
+  }
+
+  return {
+    dsn,
+    environment:
+      env.SENTRY_ENVIRONMENT ??
+      env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ??
+      env.ENVIRONMENT,
+    release: env.SENTRY_RELEASE ?? env.NEXT_PUBLIC_SENTRY_RELEASE,
+    debug: false,
+    spotlight: false,
+    beforeSend: (event: ErrorEvent) => redactSentryEvent(event),
+  };
 }
 
 // The generated OpenNext Worker owns server initialization. Keeping this
