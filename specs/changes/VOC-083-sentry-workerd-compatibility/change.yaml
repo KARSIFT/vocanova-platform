@@ -67,15 +67,17 @@ artifacts:
   tasks: tasks.md
   test_plan: test-plan.md
   release_plan: release-plan.md
+  t00_evidence: t00-evidence.md
 dependencies:
   - id: VOC-083-DEP-00
     status: >-
-      Post-adoption T00 gate. Adoption authorizes the evidence/decision matrix plus
-      bounded disposable candidate probes in isolated worktrees; no probe change may
-      land on the canonical task branch. T00 records a provisional selection or stop.
-      T01 applies that selection; T02, not T00, owns final canonical bundle/workerd/
-      reporting acceptance and may send a disproved selection through fresh T00/T01
-      revision and review. This package does not preselect configuration, update, or adapter.
+      Resolved provisionally by VOC-083-EV-00 on 2026-08-23. T00 selected exact
+      @sentry/cloudflare@10.69.0 plus @sentry/react@10.69.0 and complete removal of
+      @sentry/nextjs. Configuration-only and current-stable @sentry/nextjs@10.70.0
+      alternatives were rejected. All probes were credential-free, isolated, and
+      discarded. T01 may apply only the recorded shape; T02 still owns final canonical
+      bundle/workerd/reporting qualification and a failure returns through revised
+      T00/T01 evidence and fresh exact-revision review.
   - id: VOC-083-DEP-01
     status: >-
       Resolved for adoption. VOC-081 T02 supplied the discovery reproduction and T04
@@ -122,7 +124,7 @@ affected_areas:
 implementation:
   authorized: true
   required: true
-  status: authorized-after-pr-111-adoption; T00-isolated-probes-and-decision-only; T01-plus-blocked-by-T00
+  status: T00-provisional-selection-recorded; T01-unblocked-not-started; T02-plus-remain-gated
   target_branch: develop
   pull_request: null
   authority_issue: 105
@@ -146,7 +148,7 @@ autonomous_production_release: disabled
 ehr: not-triggered
 blocking_reasons: []
 post_adoption_task_gates:
-  - T00-authorized-upstream-evidence-disposable-isolated-probes-and-provisional-decision-only
-  - T01-blocked-until-T00-provisional-decision-recorded
+  - T00-complete-provisional-workers-native-selection-recorded-in-VOC-083-EV-00
+  - T01-unblocked-must-apply-only-the-recorded-exact-shape
   - T02-owns-final-canonical-bundle-workerd-and-reporting-acceptance
   - T02-failure-requires-updated-T00-decision-T01-revision-and-fresh-exact-SHA-review
