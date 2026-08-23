@@ -92,7 +92,7 @@ test("historical FAILs and held action boundaries cannot be rewritten", () => {
   });
   assert.ok(
     failRewrite.some((message) =>
-      /historical FAIL was rewritten/.test(message),
+      /FAIL tuple is no longer labelled/.test(message),
     ),
   );
 
@@ -148,6 +148,49 @@ test("identifier drift, placeholders, and aggregate omission fail closed", () =>
     );
   });
   assert.ok(omitted.some((message) => /ci:foundation omits/.test(message)));
+});
+
+test("missing holds, placeholder URLs, and exact mapping drift fail independently", () => {
+  const missingHold = errorsFor((root) => {
+    mutate(
+      root,
+      "specs/changes/VOC-080-cloudflare-native-ruflo/change.yaml",
+      (text) => text.replace("    VOC-080-HOLD-00: held\n", ""),
+    );
+  });
+  assert.ok(
+    missingHold.some((message) =>
+      /VOC-080-HOLD-00 is missing or released/.test(message),
+    ),
+  );
+
+  const placeholderUrl = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "pull_request: https://github.com/KARSIFT/vocanova-platform/pull/87",
+        "pull_request: https://example.com/pull/87",
+      ),
+    );
+  });
+  assert.ok(
+    placeholderUrl.some((message) =>
+      /VOC-080-T00 pull request does not match/.test(message),
+    ),
+  );
+
+  const packageSummaryDrift = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "final_merge: a05ab5c60534f36d1b89d9b9d32296469e9942bf",
+        "final_merge: " + "1".repeat(40),
+      ),
+    );
+  });
+  assert.ok(
+    packageSummaryDrift.some((message) =>
+      /VOC-080 package summary final merge/.test(message),
+    ),
+  );
 });
 
 test("file classifications fail independently on omission, duplicate, invalid, and contradiction", () => {
