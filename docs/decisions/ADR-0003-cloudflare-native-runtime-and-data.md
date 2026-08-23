@@ -26,6 +26,15 @@ Cloudflare's documented Next.js adapter supports App Router, Server Components, 
 middleware, and static assets on Workers. D1 is managed SQLite, not PostgreSQL, so the
 current Go/Ent/libpq runtime and database schema cannot move mechanically.
 
+## Implementation outcome (VOC-080-T11)
+
+The T03-T10 exact-revision parity chain completed the web, API, domain, data-conversion,
+and held-delivery evidence required by this decision. T11 therefore removed the former
+Go/PostgreSQL/Docker/Nginx runtime from the active repository tree. Compact frozen API
+contract and PostgreSQL-schema fixtures remain only as deterministic migration oracles.
+This repository outcome did not inspect, mutate, or stop a live server and did not
+provision or activate Cloudflare, DNS, secrets, or production data.
+
 ## Decision
 
 VocaNova will migrate incrementally to this target:
@@ -86,8 +95,9 @@ data.
 - Delivery eventually uses immutable Worker versions, ordered compatible D1
   migrations, staging smoke/parity evidence, explicit promotion, and recorded
   rollback. No deployment is enabled by this ADR alone.
-- Existing Docker/PostgreSQL material remains clearly marked as transitional or
-  historical until the parity gate permits removal.
+- Existing Docker/PostgreSQL material remained transitional until the parity gate;
+  T11 removed the executable material while Git history and historical packages retain
+  the evidence.
 
 ## Alternatives considered
 

@@ -7,11 +7,11 @@ This directory contains repository contribution and governance controls:
 - `ISSUE_TEMPLATE/` provides governed change intake and private security routing.
 - `CODEOWNERS` uses the verified human repository identity for review routing. It is
   not approval evidence and does not create a standing post-A-003 authority.
-- `actions/setup-toolchain/action.yml` is the shared pinned Node/pnpm/optional-Go
+- `actions/setup-toolchain/action.yml` is the shared pinned Node/pnpm
   bootstrap. It installs the frozen dependency graph and caches only
   correctness-neutral download stores.
 - `workflows/ci.yml` runs stable foundation, shared-package, OpenNext/workerd web,
-  Worker API/local-D1, and transitional Go-reference checks plus the single
+  Worker API/local-D1, retirement-policy, and held delivery checks plus the single
   `CI / ci required` aggregate.
 - `workflows/governance.yml` validates repository structure, prevents a pull request
   from declaring a risk below its changed-path floor, and reports the read-only
@@ -84,12 +84,11 @@ representative local workerd requests through an API service binding. T04 and la
 tasks extend the Cloudflare migration with API and data checks.
 T04 adds a distinct credential-free `worker api` job for generated bindings,
 Hono/OpenAPI and canonical-contract drift, local D1 migrations, workerd tests,
-safety scans, build, and Wrangler dry-run. The Go job remains an independent
-parity-reference check until the final migration gate.
+safety scans, build, and Wrangler dry-run.
 T05 keeps that same job and workflow inventory while extending it with the second
 forward D1 migration and 13 identity/account operations. Contract evidence now binds
 method, path, operation ID, primary success status, parameters, and public field shape
-to the generated Go reference; workerd fixtures cover hashing, expiry, replay,
+to the migration contract snapshot; workerd fixtures cover hashing, expiry, replay,
 requester isolation, CSRF, rate/kill switches, idempotency, and injected D1 failures.
 T06-T08 complete Worker contract/domain parity, and T09 adds synthetic-only
 PostgreSQL-to-D1 conversion and exact reconciliation. T10 keeps the four-file
@@ -101,6 +100,13 @@ D1 sentinels and `.invalid` routes, and therefore blocks every live environment 
 No GitHub environment, secret, Cloudflare resource, migration, route, or deployment
 was created by T10. See the
 [delivery runbook](../docs/operations/cloudflare-delivery.md).
+
+T11 removes the active Go/PostgreSQL runtime, Dockerfiles, Compose/Nginx/host assets,
+the remote server E2E harness, and their CI/toolchain dependencies after the T03-T10
+parity chain. The foundation retirement policy prevents those executable surfaces or
+stale commands from returning. Historical change packages and archived evidence are
+unchanged; compact API-contract and PostgreSQL-schema snapshots remain only as
+deterministic Worker conversion fixtures. No live server was inspected or stopped.
 
 Ruflo runs outside the repository and GitHub Actions. It may coordinate separate
 participants, but no issue/comment trigger, tracked launcher, workflow, or Ruflo tool

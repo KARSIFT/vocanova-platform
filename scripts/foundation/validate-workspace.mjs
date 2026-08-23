@@ -12,22 +12,21 @@ const repositoryRoot = path.resolve(
 const requiredDirectories = [
   "apps/web",
   "apps/api-worker",
-  "apps/api/cmd",
-  "apps/api/app",
-  "apps/api/business",
-  "apps/api/foundation",
-  "apps/api/ent",
-  "apps/api/migrations",
   "packages/api-client",
   "packages/design-tokens",
   "packages/eslint-config",
   "packages/typescript-config",
   "docs",
-  "infra",
   "scripts",
 ];
 
-const prohibitedDirectories = ["services/api", "backend", "apps/mobile"];
+const prohibitedDirectories = [
+  "services/api",
+  "backend",
+  "apps/mobile",
+  "apps/api",
+  "infra",
+];
 
 export function validateWorkspace() {
   const errors = [];
@@ -57,9 +56,6 @@ export function validateWorkspace() {
       "pnpm workspace patterns do not include web, Worker API, and shared packages",
     );
   }
-  if (/^\s*-\s+apps\/api\s*$/m.test(workspace)) {
-    errors.push("apps/api must not be a pnpm workspace project");
-  }
 
   const projects = JSON.parse(
     execFileSync("pnpm", ["--recursive", "list", "--depth", "-1", "--json"], {
@@ -83,9 +79,6 @@ export function validateWorkspace() {
     if (!actual.has(relative)) {
       errors.push(`pnpm did not enumerate expected project: ${relative}`);
     }
-  }
-  if (actual.has("apps/api")) {
-    errors.push("pnpm incorrectly enumerated apps/api");
   }
 
   return errors;

@@ -65,7 +65,6 @@ const REQUIRED_MARKERS = {
     "pnpm run ci:packages",
     "pnpm run ci:web",
     "pnpm run ci:worker-api",
-    "pnpm run ci:api",
     "pnpm run ci:delivery",
     "name: cloudflare delivery policy",
     "name: cloudflare delivery gate",
@@ -105,7 +104,6 @@ const REQUIRED_MARKERS = {
 const SETUP_ACTION_MARKERS = [
   "uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10\n      with:\n        cache: true",
   "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
-  "actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e",
   "pnpm install --frozen-lockfile",
 ];
 

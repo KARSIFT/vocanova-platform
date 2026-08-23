@@ -22,7 +22,8 @@ hardening recorded below. T10 now adds held Cloudflare delivery code after parit
 does not mutate settings, create a GitHub environment or Cloudflare resource, configure
 a secret, or deploy. Its manifest blocks before credentialed jobs. Ruflo never receives
 a GitHub write token, Cloudflare credential, production secret/data, DNS permission,
-or deployment authority.
+or deployment authority. T11 removes the old runtime from the active repository tree
+only; it does not inspect, mutate, or stop a live server.
 
 ## Hosted state recorded by VOC-080-T01
 
@@ -192,7 +193,7 @@ manifest, pnpm lockfile, workspace, test/build scripts... only the dependency-fr
 governance policy check can run today; application CI, previews, staging, production,
 and rollback cannot truthfully be automated yet."
 
-**Current reality:** `apps/web` and `apps/api` are real, working applications;
+**Current reality:** `apps/web` and `apps/api-worker` are real, working applications;
 `package.json`/`pnpm-lock.yaml`/the pnpm workspace exist; deterministic CI (format,
 lint, typecheck, test, build) runs on every PR and has passed across 22+ shipped
 packages (VOC-010 through VOC-022 at minimum). VOC-078-T00 adds the repository-local
@@ -216,7 +217,9 @@ environment restricted those runs to `main`. VOC-078-T03 removed both workflows 
 unchanged. Server deployment and health polling remain unavailable. ADR-0003's
 replacement now has Worker/D1 parity and T10's held GitHub Actions state machine, but
 no live environment job is eligible until its manifest and action hold are separately
-activated. Per-PR previews remain unbuilt.
+activated. T11 retired the former server runtime from the active repository tree after
+that parity evidence; immutable Git history and compact migration fixtures preserve its
+evidence. Per-PR previews remain unbuilt.
 
 The initial governance bootstrap merged through PR #3 and its one-time exception has
 expired. The historical technical-steward appointment and completed dual-capacity

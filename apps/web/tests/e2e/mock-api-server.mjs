@@ -19,9 +19,9 @@
 // cookie is `vocanova_session`; the CSRF cookie is
 // `vocanova_csrf`. Mutations (POST/PATCH/DELETE) require the
 // `X-CSRF-Token` header to match the `vocanova_csrf` cookie
-// value, exactly as the real backend's `CSRFMiddleware` does
-// (apps/api/app/api/middleware.go). The /api/v1/auth/* routes
-// are exempt because they predate / establish the session.
+// value, matching the active API Worker's CSRF contract. The
+// /api/v1/auth/* routes are exempt because they predate /
+// establish the session.
 //
 // State (saved words, completed onboarding, per-session
 // settings, per-session progress) is tracked in memory keyed by
@@ -88,8 +88,8 @@
 //   POST   /api/v1/account-deletion-requests         -> 200 CreateAccountDeletionRequestResult
 //
 // Anything else returns 404. Mutations without a matching
-// X-CSRF-Token return 403 (matches the backend's
-// CSRFMiddleware). Mutations on /api/v1/auth/* are exempt.
+// X-CSRF-Token return 403 (matches the Worker API contract).
+// Mutations on /api/v1/auth/* are exempt.
 // The server logs each request to stderr so a CI failure's
 // log can be matched against the harness's expectations
 // without enabling extra debug output.
@@ -301,7 +301,7 @@ function buildSessionCookie(value) {
   // `HttpOnly` is intentionally omitted because the frontend's
   // `getCookieValue("vocanova_session")` is never called - the
   // frontend only reads the CSRF cookie. Session stays server-side
-  // only. The real backend's session cookie is HttpOnly; mirroring
+  // only. The active API Worker's session cookie is HttpOnly; mirroring
   // that here would force the mock to track an extra auth
   // relationship for the same security guarantee.
   return `${SESSION_COOKIE_NAME}=${value}; Path=/; SameSite=Lax`;
@@ -341,7 +341,7 @@ function createInitialState() {
     // session's "advance" refetch (which fires when the last
     // card is rated) returns an empty list and the page
     // transitions to the "all caught up" state, mirroring the
-    // real backend's review-step advance.
+    // API contract's review-step advance.
     reviewedMeaningIds: new Set(),
     settings: { ...DEFAULT_SETTINGS },
     progress: cloneProgress(DEFAULT_PROGRESS),
@@ -872,7 +872,7 @@ const server = createServer(async (req, res) => {
       rating: body.rating,
       answeredAt: new Date().toISOString(),
     });
-    // The real backend advances the word's review schedule but
+    // The API contract advances the word's review schedule but
     // keeps it in the saved set; the T08 "review -> sentence"
     // step relies on the word remaining in savedMeaningIds after
     // the review submission so the sentence-feedback widget on

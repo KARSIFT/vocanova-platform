@@ -15,7 +15,7 @@
       "foundation",
       "packages",
       "web",
-      "api",
+      "worker api",
       "ci required",
       "structure",
       "changed-path risk",
@@ -43,7 +43,7 @@
         "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
       },
       {
-        "name": "api",
+        "name": "worker api",
         "status": "completed",
         "conclusion": "success",
         "head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"

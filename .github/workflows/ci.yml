@@ -72,8 +72,6 @@ jobs:
 
       - name: Set up repository toolchain
         uses: ./.github/actions/setup-toolchain
-        with:
-          install-go: "true"
 
       - name: Validate foundation
         run: pnpm run ci:foundation
@@ -126,25 +124,6 @@ jobs:
       - name: Validate Worker API and local D1
         run: pnpm run ci:worker-api
 
-  api:
-    name: api
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    steps:
-      - name: Check out reviewed revision
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up repository toolchain
-        uses: ./.github/actions/setup-toolchain
-        with:
-          install-dependencies: "false"
-          install-go: "true"
-
-      - name: Validate API reference implementation
-        run: pnpm run ci:api
-
   cloudflare-delivery-policy:
     name: cloudflare delivery policy
     runs-on: ubuntu-24.04
@@ -166,8 +145,7 @@ jobs:
   required:
     name: ci required
     if: always()
-    needs:
-      [foundation, packages, web, worker-api, api, cloudflare-delivery-policy]
+    needs: [foundation, packages, web, worker-api, cloudflare-delivery-policy]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
@@ -178,7 +156,6 @@ jobs:
 
       - name: Require every subsystem
         env:
-          API_RESULT: ${{ needs.api.result }}
           FOUNDATION_RESULT: ${{ needs.foundation.result }}
           PACKAGES_RESULT: ${{ needs.packages.result }}
           WEB_RESULT: ${{ needs.web.result }}
@@ -186,7 +163,6 @@ jobs:
           DELIVERY_POLICY_RESULT: ${{ needs.cloudflare-delivery-policy.result }}
         run: >-
           bash scripts/foundation/require-successful-jobs.sh
-          "api=$API_RESULT"
           "cloudflare-delivery-policy=$DELIVERY_POLICY_RESULT"
           "foundation=$FOUNDATION_RESULT"
           "packages=$PACKAGES_RESULT"

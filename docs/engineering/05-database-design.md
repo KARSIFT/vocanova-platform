@@ -29,7 +29,8 @@ source_files:
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) replaces
 PostgreSQL/Ent/Atlas as the final runtime target with Cloudflare D1 and forward-only
-Wrangler migrations. The tables, ownership, product invariants, retention rules, and
+Wrangler migrations. T11 retired that former runtime after parity. The tables,
+ownership, product invariants, retention rules, and
 domain semantics in this document remain requirements. PostgreSQL-specific types and
 mechanics in the preserved v1.0 body describe the migration source, not the final D1
 encoding. Production data is not accessed until `VOC-080-HOLD-02` is satisfied.
@@ -40,7 +41,7 @@ Cloudflare D1 with an explicit SQLite schema, typed repository boundaries, and f
 migrations. UUID identifiers (UUIDv7 where practical) are canonical text; timestamps use one
 documented UTC representation; booleans are constrained integers; JSON is validated text; unsafe
 64-bit values never pass through JavaScript `number`. Production schema changes never run at Worker
-startup. The PostgreSQL/Ent/Atlas model remains the parity and conversion source until cutover.
+startup. The compact retired-source schema manifest remains the conversion oracle.
 
 ## 2. Core principles
 
@@ -373,7 +374,7 @@ Versioned SQL under the Worker API workspace defines D1 directly. Application-ge
 (prefer UUIDv7) are created before insert. Shared repository helpers may standardize IDs, timestamps,
 and soft-delete predicates, but each table keeps explicit status checks. SQLite indexes, expression
 indexes such as `lower(email)`, checks, foreign keys, JSON validation, and conditional uniqueness are
-written and tested explicitly. Ent remains the PostgreSQL source-model reference until T11.
+written and tested explicitly. T11 retired Ent and the PostgreSQL runtime from the active tree.
 
 ## 18. Migration strategy
 

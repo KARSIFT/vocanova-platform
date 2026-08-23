@@ -183,12 +183,12 @@ inside the workflow's 30-minute budget.
 ## Out of scope (recorded for the next implementer)
 
 - Lighthouse CI budgets → T09.
-- Replacing `mock-api-server.mjs` with a real
-  Postgres-backed API + auth fixture → deferred until F3
-  staging exists (`VOC-031-DEP-02`); the mock is a
-  scaffolding artifact and is explicitly not a substitute
-  for full staging evidence (the T11 staging evidence and
-  T43 staged cross-user/CSRF/idempotency validations).
+- Replacing `mock-api-server.mjs` with a live environment is
+  outside deterministic pull-request CI. The mock remains a
+  bounded browser-contract fixture; Worker/D1 behavior is
+  covered separately by local workerd integration tests.
+  Separately authorized Cloudflare staging evidence remains
+  held by VOC-080's delivery controls.
 - The T08 suite runs on one representative desktop width
   (mirroring T07a's scope). The mobile functional flow is
   *not* covered separately; the mobile accessibility scans
@@ -214,11 +214,9 @@ the DOC-10 §7 documented core loop. Approach:
   handoff (steps 9-10).
 - **CSRF.** Every mutation (POST/PATCH/DELETE except the
   auth routes) requires the `X-CSRF-Token` header to match
-  the `vocanova_csrf` cookie value, matching the real
-  backend's `CSRFMiddleware`
-  (`apps/api/app/api/middleware.go`). The mock enforces this
-  identically so a missing/mismatched CSRF in the e2e test
-  fails in CI just as it would in production.
+  the `vocanova_csrf` cookie value, matching the active API
+  Worker's CSRF contract. The mock enforces this identically
+  so a missing/mismatched CSRF in the e2e test fails in CI.
 - **State isolation.** The test uses a per-run unique
   session ID (a `randomUUID()`-suffixed value) so its
   in-memory mock state never collides with the T07a/T07b

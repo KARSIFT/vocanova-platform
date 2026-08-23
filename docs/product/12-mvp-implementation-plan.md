@@ -107,8 +107,8 @@ deployment. Ruflo may coordinate those roles externally but grants none of their
 
 **F2 — Application Foundation.** Objective: the smallest complete technical foundation (workspace,
 Next.js/OpenNext web, Hono Worker API, config/logging/health endpoints, D1 migrations, OpenAPI and
-generated TypeScript artifacts, workerd/local-D1 test harnesses). During migration the Go/PostgreSQL
-scaffold remains a parity oracle. **Gate:** a contributor can clone, install, create local D1 state,
+generated TypeScript artifacts, workerd/local-D1 test harnesses). T11 retired the
+former Go/PostgreSQL scaffold after parity. **Gate:** a contributor can clone, install, create local D1 state,
 apply migrations, run both Workers under workerd, generate API artifacts, and run all foundational
 and parity tests using documented commands.
 
@@ -211,8 +211,8 @@ done _and_ its acceptance gate (§5) passes — a successful merge alone never m
 ## 9. Testing strategy (cross-milestone)
 
 Static checks (format/lint/typecheck/generated-consistency/dependency/secret checks) → unit tests →
-component tests → integration tests (D1 atomicity/consistency/migrations plus PostgreSQL parity
-during VOC-080, auth, handlers) →
+component tests → integration tests (D1 atomicity/consistency/migrations, retired-source
+conversion snapshots, auth, handlers) →
 contract tests (OpenAPI, DTO validation, generated-type compatibility, stable error codes) →
 end-to-end (auth, discovery, save/unsave, review, sentence practice, mission completion, progress,
 recovery) → deployment tests (build reproducibility, environment validation, migration execution,
