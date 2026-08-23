@@ -17,9 +17,12 @@ export default defineConfig([
   },
   globalIgnores([
     ".next/**",
+    ".open-next/**",
+    ".wrangler/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "worker-configuration.d.ts",
     "playwright.config.ts",
     "tests/**",
     "test-results/**",

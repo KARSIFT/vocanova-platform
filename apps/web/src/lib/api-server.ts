@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ApiResponseError, VocanovaClient } from "@vocanova/api-client";
 
 import { getApiBaseURL } from "./env";
+import { fetchApiFromServer } from "./server-api-transport";
 
 export async function createServerApiClient(): Promise<VocanovaClient> {
   const incomingHeaders = await headers();
@@ -16,7 +17,7 @@ export async function createServerApiClient(): Promise<VocanovaClient> {
       if (cookieHeader) {
         headers.set("Cookie", cookieHeader);
       }
-      return fetch(input, { ...init, headers });
+      return fetchApiFromServer(input, { ...init, headers });
     },
   });
 }

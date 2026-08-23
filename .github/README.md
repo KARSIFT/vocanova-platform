@@ -10,8 +10,8 @@ This directory contains repository contribution and governance controls:
 - `actions/setup-toolchain/action.yml` is the shared pinned Node/pnpm/optional-Go
   bootstrap. It installs the frozen dependency graph and caches only
   correctness-neutral download stores.
-- `workflows/ci.yml` runs stable foundation, shared-package, web, and transitional
-  Go-API checks plus the single `CI / ci required` aggregate.
+- `workflows/ci.yml` runs stable foundation, shared-package, OpenNext/workerd web,
+  and transitional Go-API checks plus the single `CI / ci required` aggregate.
 - `workflows/governance.yml` validates repository structure, prevents a pull request
   from declaring a risk below its changed-path floor, and reports the read-only
   normalized merge-eligibility decision and concrete reasons.
@@ -76,8 +76,11 @@ unbuilt Control Plane remains superseded and archived under `docs/archive/`.
 
 The workflow inventory remains exactly four. T00 documents the Cloudflare target and
 external Ruflo boundary; it does not change workflow behavior or repository settings.
-T01 provides the refactored CI foundation; later tasks add credential-free
-OpenNext/Worker/D1 checks.
+T01 provides the refactored CI foundation. T03 extends its stable `web` entry point
+with an OpenNext transformation followed by generated Wrangler type verification,
+Worker compatibility scans, credential-free dry-run and size/startup checks, and
+representative local workerd requests through an API service binding. T04 and later
+tasks add Worker API/D1 checks.
 Only `ci.yml` may eventually contain held Cloudflare version/deployment jobs, keeping
 the four-file invariant. Pull-request jobs never receive deployment credentials.
 

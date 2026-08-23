@@ -1,9 +1,16 @@
 # Staging and production infrastructure
 
-This directory contains two environment layouts:
+This directory preserves two historical environment layouts:
 
 - the staging-tier infrastructure from **VOC-032**
 - the production-tier provisioning artifacts from **VOC-037-T06**
+
+> **Active VOC-080 transition (2026-08-22).** ADR-0003 supersedes these owned-server
+> layouts. VOC-080-T03 makes OpenNext/workerd the supported web runtime and removes
+> `output: 'standalone'` from the active Next.js configuration. The Docker web image
+> below is therefore retained only as migration/parity history and is not an active
+> build or deployment path. T11 removes the old assets only after full API/data parity.
+> No current repository workflow deploys either architecture.
 
 > **DOC-11 contradiction caveat — resolved 2026-07-30.** This layout used to
 > contradict the target-infrastructure baseline described in
@@ -76,8 +83,10 @@ apps/api/cmd/eval-live/main.go                       # T10 (one live AI eval)
 apps/api/business/aifeedback/                        # T08 (mock-eval gate) lives in CI
 apps/api/foundation/email/http.go                    # T14 (real Sender)
 apps/api/business/auth/google_oauth.go               # T15 (real OAuthProvider)
-apps/web/Dockerfile                                  # T03
-apps/web/next.config.ts                              # T03 (output: 'standalone')
+apps/web/Dockerfile                                  # historical standalone image; inactive after VOC-080-T03
+apps/web/next.config.ts                              # active OpenNext development integration
+apps/web/open-next.config.ts                         # active Worker transform
+apps/web/wrangler.jsonc                              # Worker shape; no credentials
 apps/web/.env.example                                # T01 (web env schema)
 .github/workflows/deploy-staging.yml                 # VOC-032-T07
 .github/workflows/deploy-production.yml              # VOC-037-T06
@@ -87,7 +96,7 @@ The actual docker-compose service definitions are in
 `infra/docker-compose.yml`; this README documents what they
 mean, not their full syntax.
 
-## Service architecture
+## Historical service architecture
 
 `docker compose -f infra/docker-compose.yml` brings up three application
 services on a single internal Docker network (`vocanova-net`). Public HTTPS

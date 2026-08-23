@@ -95,16 +95,6 @@ tests/e2e/
                                          representative desktop
                                          width; mobile projects
                                          self-skip)
-  middleware-runtime-regression.spec.ts
-                                      <- VOC-039-T01's Edge-vs-Node
-                                         middleware runtime regression
-                                         (issue #297); no browser or
-                                         app server involved
-  middleware-runtime-harness.ts       <- runs the real
-                                         src/middleware.ts source in
-                                         Next's own Edge sandbox and in
-                                         Node, against a stub API on an
-                                         ephemeral port
   mock-api-server.mjs                 <- dependency-free node:http
                                          server that stands in for
                                          the Go /api/v1 backend in
@@ -255,38 +245,21 @@ scans (no separate CI wiring). T08 self-skips on the
 mobile-360 / mobile-430 projects so it runs exactly once per
 PR.
 
-## VOC-039-T01 specifics (middleware runtime regression)
+## VOC-080-T03 middleware/runtime proof
 
-Issue #297: `src/middleware.ts` runs on the Edge runtime
-unless it exports `runtime = "nodejs"`, and an Edge bundle
-only sees environment values inlined at build time. This
-deployment passes `API_BASE_URL` to the running container, so
-under Edge `getApiBaseURL()` silently falls back to
-`http://localhost:8080`, the `/api/v1/me` auth check never
-reaches the deployed API, and authenticated learners are
-bounced back to `/signin`.
+VOC-080-T03 retired VOC-039's Node-middleware regression harness because the
+Cloudflare OpenNext adapter does not support Node.js middleware. The auth gate
+now remains Edge-compatible and obtains the API `Fetcher` from the OpenNext
+Cloudflare context. Its replacement proof is split by responsibility:
 
-`middleware-runtime-regression.spec.ts` reproduces that
-runtime gap rather than asserting on source text:
+- `tests/middleware/auth-check-logging.test.ts` covers each auth-gate response
+  and privacy-safe failure log without a browser.
+- the Playwright suite exercises the same redirects and authenticated behavior
+  through the ordinary Next.js UI harness;
+- `tests/workerd/` and `scripts/test-workerd.mjs` run the transformed OpenNext
+  bundle plus a mock API Worker in one local workerd process. The authenticated
+  shell can render only if its cookies and API requests cross the `API` service
+  binding, while the anonymous and synthetic API-error paths must redirect.
 
-- `middleware-runtime-harness.ts` loads the real
-  `src/middleware.ts` and `src/lib/env.ts` sources (TypeScript
-  annotations stripped, no statement rewritten) and evaluates
-  them in Next's own vendored Edge sandbox
-  (`next/dist/compiled/edge-runtime`) and in a Node `vm`
-  context. Only the runtime differs between the two runs.
-- The stub API listens on an **ephemeral** port, so its
-  address exists only at run time and is discoverable only
-  through `process.env.API_BASE_URL`. "Did the stub receive
-  `/api/v1/me`" is therefore an unfakeable signal that the
-  auth check resolved the runtime environment — and it stays
-  deterministic even though the mock API server occupies
-  `getApiBaseURL()`'s `localhost:8080` fallback during this
-  suite's own run.
-- The spec runs the auth check under whichever runtime
-  `middleware.ts` actually declares, so it fails against a
-  pre-VOC-039-T00 middleware and passes once the Node.js
-  runtime is declared.
-
-Like T08, it self-skips on the mobile projects (runtime
-behavior is viewport-independent).
+Run the Worker-specific proof after `cloudflare:build` with
+`pnpm --filter @vocanova/web cloudflare:preview:test`.
