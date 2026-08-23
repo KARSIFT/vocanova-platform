@@ -56,6 +56,20 @@ const manifestPath = path.join(
   root,
   ".wrangler/dry-run/compatibility-artifact-manifest.json",
 );
+const requiredOpenNextRuntimeModules = [
+  ".build/durable-objects/bucket-cache-purge.js",
+  ".build/durable-objects/queue.js",
+  ".build/durable-objects/sharded-tag-cache.js",
+  "cloudflare/images.js",
+  "cloudflare/init.js",
+  "cloudflare/next-env.mjs",
+  "cloudflare/skew-protection.js",
+  "middleware/handler.mjs",
+  "middleware/open-next.config.mjs",
+  "server-functions/default/apps/web/handler.mjs",
+  "server-functions/default/handler.mjs",
+  "worker.js",
+];
 
 export function validateSourceCompatibility(repositoryRoot = root) {
   const middleware = read(path.join(repositoryRoot, "src/middleware.ts"));
@@ -235,7 +249,6 @@ export function inspectGeneratedArtifacts({
 
   const findings = [];
   const references = [];
-  const unreachableWasm = [];
   for (const module of modules.values()) {
     const key = manifestKey(module.owner, module.root, module.absolutePath);
     const isReachable = reachable.has(key);
@@ -250,7 +263,6 @@ export function inspectGeneratedArtifacts({
         specifier: reference.specifier,
       });
       if (
-        isReachable &&
         ["escaping", "missing", "unknown"].includes(reference.resolved.kind)
       ) {
         findings.push(
@@ -262,8 +274,7 @@ export function inspectGeneratedArtifacts({
       module.relativePath,
       source,
     )) {
-      if (isReachable) findings.push(finding);
-      else unreachableWasm.push(`${module.relativePath}: ${finding}`);
+      findings.push(finding);
     }
   }
 
@@ -310,7 +321,6 @@ export function inspectGeneratedArtifacts({
       roots: roots.map((key) => moduleKeys.get(key)?.relativePath ?? key),
       reachable_modules: [...reachable].length,
       unreachable_modules: modules.size - reachable.size,
-      unreachable_wasm_findings: unreachableWasm,
     },
   };
   manifest.modules.sort(compareManifestRecords);
@@ -324,6 +334,271 @@ export function inspectGeneratedArtifacts({
       left.specifier.localeCompare(right.specifier),
   );
   return manifest;
+}
+
+export function canonicalizeOpenNextOutput({
+  repositoryRoot = root,
+  openNextRoot = path.join(repositoryRoot, ".open-next"),
+} = {}) {
+  const realOpenNextRoot = requireDirectory(openNextRoot, "OpenNext root");
+  const workerEntry = requireRegularNonEmptyFile(
+    path.join(realOpenNextRoot, "worker.js"),
+    "OpenNext Worker entry",
+  );
+  const serverFunctionRoot = requireDirectory(
+    path.join(realOpenNextRoot, "server-functions/default"),
+    "OpenNext default server-function root",
+  );
+  const forwardingHandler = requireRegularNonEmptyFile(
+    path.join(serverFunctionRoot, "handler.mjs"),
+    "OpenNext forwarding handler",
+  );
+  const bundledHandler = requireRegularNonEmptyFile(
+    path.join(serverFunctionRoot, "apps/web/handler.mjs"),
+    "OpenNext bundled handler",
+  );
+  const bundleMetadataPath = requireRegularNonEmptyFile(
+    `${bundledHandler}.meta.json`,
+    "OpenNext bundled-handler metadata",
+  );
+
+  const workerReferences = collectExecutableReferences(
+    relative(realOpenNextRoot, workerEntry),
+    read(workerEntry),
+  ).map((reference) => reference.specifier);
+  assert.ok(
+    workerReferences.includes("./server-functions/default/handler.mjs"),
+    "OpenNext Worker must import the canonical default forwarding handler",
+  );
+  assert.deepEqual(
+    collectExecutableReferences(
+      relative(realOpenNextRoot, forwardingHandler),
+      read(forwardingHandler),
+    ).map((reference) => reference.specifier),
+    ["./apps/web/handler.mjs"],
+    "OpenNext forwarding handler must point only to the final bundled handler",
+  );
+
+  const bundleMetadata = JSON.parse(read(bundleMetadataPath));
+  const outputRecords = Object.entries(bundleMetadata.outputs ?? {});
+  assert.equal(
+    outputRecords.length,
+    1,
+    "OpenNext bundled-handler metadata must describe exactly one output",
+  );
+  const [metadataOutputPath, metadataOutput] = outputRecords[0];
+  assert.equal(
+    realpathSync(path.resolve(repositoryRoot, metadataOutputPath)),
+    bundledHandler,
+    "OpenNext bundled-handler metadata output path drifted",
+  );
+  assert.ok(
+    Number.isSafeInteger(metadataOutput.bytes) && metadataOutput.bytes > 0,
+    "OpenNext bundled-handler metadata must record a non-empty output",
+  );
+  assert.ok(
+    Array.isArray(metadataOutput.imports) &&
+      metadataOutput.imports.every((record) => record.external === true),
+    "OpenNext final handler must be self-contained apart from declared platform externals",
+  );
+  assert.ok(
+    Object.keys(bundleMetadata.inputs ?? {}).length > 0,
+    "OpenNext bundled-handler metadata must identify its bundled inputs",
+  );
+
+  const retainedRuntimeModules = new Set(
+    requiredOpenNextRuntimeModules.map((relativePath) =>
+      requireRegularNonEmptyFile(
+        path.join(realOpenNextRoot, relativePath),
+        `OpenNext runtime module ${relativePath}`,
+      ),
+    ),
+  );
+  const assetRoot = requireDirectory(
+    path.join(realOpenNextRoot, "assets"),
+    "OpenNext static-asset root",
+  );
+  const modules = new Map();
+  const emptyModules = new Map();
+  collectArtifactInventory({
+    assets: new Map(),
+    emptyModules,
+    modules,
+    owner: "opennext",
+    root: realOpenNextRoot,
+    unknowns: new Map(),
+  });
+  const retainedAssetModules = new Set(
+    [...modules.values(), ...emptyModules.values()]
+      .filter((module) => isWithin(assetRoot, module.absolutePath))
+      .map((module) => module.absolutePath),
+  );
+  const retained = new Set([
+    ...retainedRuntimeModules,
+    ...retainedAssetModules,
+  ]);
+  const removed = [...modules.values(), ...emptyModules.values()]
+    .filter((module) => !retained.has(module.absolutePath))
+    .map((module) => ({
+      digest: module.digest,
+      path: module.relativePath,
+      size: module.size,
+    }))
+    .sort(compareManifestRecords);
+  assert.ok(
+    removed.length > 0,
+    "OpenNext canonicalization expected traced JavaScript intermediates",
+  );
+  for (const module of [...modules.values(), ...emptyModules.values()]) {
+    if (!retained.has(module.absolutePath)) rmSync(module.absolutePath);
+  }
+
+  const canonicalizationManifest = {
+    schema_version: 1,
+    generated_at: "deterministic-local-validation",
+    reason:
+      "OpenNext esbuild final-handler bundle supersedes copied standalone JavaScript inputs",
+    bundle: {
+      digest: digestFile(bundledHandler),
+      external_imports: metadataOutput.imports
+        .map((record) => record.path)
+        .sort(),
+      input_count: Object.keys(bundleMetadata.inputs).length,
+      metadata: relative(realOpenNextRoot, bundleMetadataPath),
+      pre_open_next_patch_size: metadataOutput.bytes,
+      path: relative(realOpenNextRoot, bundledHandler),
+      size: statSync(bundledHandler).size,
+    },
+    retained_runtime_modules: [...retainedRuntimeModules]
+      .map((file) => ({
+        digest: digestFile(file),
+        path: relative(realOpenNextRoot, file),
+        size: statSync(file).size,
+      }))
+      .sort(compareManifestRecords),
+    retained_static_asset_modules: [...retainedAssetModules]
+      .map((file) => ({
+        digest: digestFile(file),
+        path: relative(realOpenNextRoot, file),
+        size: statSync(file).size,
+      }))
+      .sort(compareManifestRecords),
+    removed_intermediate_modules: removed,
+  };
+  writeFileSync(
+    path.join(realOpenNextRoot, "canonicalization-manifest.json"),
+    `${JSON.stringify(canonicalizationManifest, null, 2)}\n`,
+  );
+  return canonicalizationManifest;
+}
+
+export function validateOpenNextCanonicalization({
+  artifactManifest,
+  repositoryRoot = root,
+  openNextRoot = path.join(repositoryRoot, ".open-next"),
+} = {}) {
+  assert.ok(artifactManifest, "generated artifact manifest is required");
+  const realOpenNextRoot = requireDirectory(openNextRoot, "OpenNext root");
+  const canonicalizationPath = requireRegularNonEmptyFile(
+    path.join(realOpenNextRoot, "canonicalization-manifest.json"),
+    "OpenNext canonicalization manifest",
+  );
+  const canonicalization = JSON.parse(read(canonicalizationPath));
+  assert.equal(canonicalization.schema_version, 1);
+  assert.equal(
+    canonicalization.reason,
+    "OpenNext esbuild final-handler bundle supersedes copied standalone JavaScript inputs",
+  );
+  assert.ok(
+    Number.isSafeInteger(canonicalization.bundle?.input_count) &&
+      canonicalization.bundle.input_count > 0,
+    "OpenNext canonicalization must record final-bundle inputs",
+  );
+
+  const retainedRuntime = validateCanonicalRecords(
+    canonicalization.retained_runtime_modules,
+    "retained runtime modules",
+  );
+  assert.deepEqual(
+    [...retainedRuntime.keys()].sort(),
+    [...requiredOpenNextRuntimeModules].sort(),
+    "OpenNext canonical runtime-module set drifted",
+  );
+  const retainedStatic = validateCanonicalRecords(
+    canonicalization.retained_static_asset_modules,
+    "retained static asset modules",
+  );
+  for (const relativePath of retainedStatic.keys()) {
+    assert.ok(
+      relativePath.startsWith("assets/"),
+      `canonical static module is outside assets/: ${relativePath}`,
+    );
+  }
+  const removed = validateCanonicalRecords(
+    canonicalization.removed_intermediate_modules,
+    "removed intermediate modules",
+  );
+  assert.ok(removed.size > 0, "canonicalization must record removed modules");
+
+  const actualOpenNextModules = new Map(
+    [...artifactManifest.modules, ...artifactManifest.empty_modules]
+      .filter((record) => record.owner === "opennext")
+      .map((record) => [record.path, record]),
+  );
+  const expectedRetained = new Map([...retainedRuntime, ...retainedStatic]);
+  assert.deepEqual(
+    [...actualOpenNextModules.keys()].sort(),
+    [...expectedRetained.keys()].sort(),
+    "post-canonicalization OpenNext module inventory does not match the retained record",
+  );
+  for (const [relativePath, recorded] of expectedRetained) {
+    const actual = actualOpenNextModules.get(relativePath);
+    assert.equal(
+      actual.digest,
+      recorded.digest,
+      `canonical retained-module digest drifted: ${relativePath}`,
+    );
+    assert.equal(
+      actual.size,
+      recorded.size,
+      `canonical retained-module size drifted: ${relativePath}`,
+    );
+  }
+  for (const relativePath of removed.keys()) {
+    assert.ok(
+      !existsSync(path.join(realOpenNextRoot, relativePath)),
+      `canonical removed module is still present: ${relativePath}`,
+    );
+  }
+  return canonicalization;
+}
+
+function validateCanonicalRecords(records, label) {
+  assert.ok(Array.isArray(records), `${label} must be an array`);
+  const byPath = new Map();
+  for (const record of records) {
+    assert.equal(typeof record?.path, "string", `${label} path is invalid`);
+    assert.match(
+      record.path,
+      /^(?!\/)(?!.*(?:^|\/)\.\.(?:\/|$)).+$/,
+      `${label} path escapes its artifact root`,
+    );
+    assert.match(
+      record.digest,
+      /^sha256:[a-f0-9]{64}$/,
+      `${label} digest is invalid: ${record.path}`,
+    );
+    assert.ok(
+      Number.isSafeInteger(record.size) && record.size >= 0,
+      `${label} size is invalid: ${record.path}`,
+    );
+    assert.ok(
+      !byPath.has(record.path),
+      `${label} has duplicate ${record.path}`,
+    );
+    byPath.set(record.path, record);
+  }
+  return byPath;
 }
 
 export function scanProhibitedWasmForms(filePath, source) {
@@ -529,6 +804,9 @@ function collectWasmModuleBindings(sourceFile) {
   const bindings = new Map();
   const wasmModuleBindings = new Set();
   bindings.set("WebAssembly", { kind: "namespace" });
+  for (const globalObject of ["globalThis", "self", "global"]) {
+    bindings.set(globalObject, { kind: "global-object" });
+  }
 
   function setBinding(name, value) {
     if (ts.isIdentifier(name) && value) bindings.set(name.text, value);
@@ -541,11 +819,13 @@ function collectWasmModuleBindings(sourceFile) {
     }
     if (!ts.isObjectBindingPattern(pattern) || !value) return;
     for (const element of pattern.elements) {
-      if (!ts.isBindingElement(element) || !element.propertyName) continue;
-      const property = propertyName(element.propertyName);
+      if (!ts.isBindingElement(element)) continue;
+      const property = propertyName(element.propertyName ?? element.name);
       if (property === undefined) continue;
       if (value.kind === "namespace") {
         setBinding(element.name, { kind: "method", method: property });
+      } else if (value.kind === "global-object" && property === "WebAssembly") {
+        setBinding(element.name, { kind: "namespace" });
       }
     }
   }
@@ -592,15 +872,14 @@ function collectWasmModuleBindings(sourceFile) {
     if (ts.isParenthesizedExpression(node))
       return wasmReference(node.expression);
     const property = propertyAccess(node);
-    if (
-      property &&
-      property.object &&
-      propertyName(property.object) === "WebAssembly"
-    ) {
-      return { kind: "method", method: property.property };
-    }
-    if (property && ts.isIdentifier(property.object)) {
-      const object = bindings.get(property.object.text);
+    if (property) {
+      const object = wasmReference(property.object);
+      if (
+        object?.kind === "global-object" &&
+        property.property === "WebAssembly"
+      ) {
+        return { kind: "namespace" };
+      }
       if (object?.kind === "namespace") {
         return { kind: "method", method: property.property };
       }
@@ -609,30 +888,15 @@ function collectWasmModuleBindings(sourceFile) {
   }
 
   collect(sourceFile);
-  return { bindings, wasmModuleBindings };
+  return { bindings, reference: wasmReference, wasmModuleBindings };
 }
 
 function classifyWasmCall(node, wasmModuleBindings) {
   const aliases = wasmModuleBindings.bindings;
   const modules = wasmModuleBindings.wasmModuleBindings;
-  const expression = node.expression;
-  let method;
-  if (ts.isIdentifier(expression)) {
-    method = aliases.get(expression.text)?.method;
-  } else {
-    const property = propertyAccess(expression);
-    if (!property) return null;
-    const object = property.object;
-    const objectName = ts.isIdentifier(object) ? object.text : undefined;
-    const objectBinding = objectName ? aliases.get(objectName) : undefined;
-    if (
-      propertyName(object) !== "WebAssembly" &&
-      objectBinding?.kind !== "namespace"
-    ) {
-      return null;
-    }
-    method = property.property;
-  }
+  const methodReference = wasmModuleBindings.reference(node.expression);
+  const method =
+    methodReference?.kind === "method" ? methodReference.method : undefined;
   if (method === "compile") return "prohibited-wasm-compile";
   if (method === "compileStreaming") {
     return "prohibited-wasm-compileStreaming";
@@ -780,11 +1044,19 @@ function read(file) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  validateSourceCompatibility();
-  runFreshWranglerDryRun();
-  const manifest = inspectGeneratedArtifacts();
-  writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
-  console.log(
-    `Worker compatibility scan: PASS (edge middleware, typed service binding, no remote bindings, unsupported globals, unbounded body buffering, floating Promises, generated manifest modules=${String(manifest.modules.length)}, assets=${String(manifest.assets.length)}, prohibited Worker Wasm forms absent)`,
-  );
+  if (process.argv[2] === "--canonicalize-opennext") {
+    const canonicalization = canonicalizeOpenNextOutput();
+    console.log(
+      `OpenNext canonicalization: PASS (retained runtime modules=${String(canonicalization.retained_runtime_modules.length)}, retained static asset modules=${String(canonicalization.retained_static_asset_modules.length)}, removed build intermediates=${String(canonicalization.removed_intermediate_modules.length)}, manifest=.open-next/canonicalization-manifest.json)`,
+    );
+  } else {
+    validateSourceCompatibility();
+    runFreshWranglerDryRun();
+    const manifest = inspectGeneratedArtifacts();
+    validateOpenNextCanonicalization({ artifactManifest: manifest });
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+    console.log(
+      `Worker compatibility scan: PASS (edge middleware, typed service binding, no remote bindings, unsupported globals, unbounded body buffering, floating Promises, generated manifest modules=${String(manifest.modules.length)}, assets=${String(manifest.assets.length)}, prohibited Worker Wasm forms absent)`,
+    );
+  }
 }

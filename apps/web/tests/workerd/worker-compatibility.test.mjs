@@ -54,6 +54,26 @@ test("computed and aliased Wasm methods are not missed by the detector", () => {
     "const {instantiate:i}=WebAssembly;i(bytes,imports)",
     "prohibited-wasm-instantiate-buffer-source-or-unknown",
   );
+  assertRule(
+    "globalThis.WebAssembly.compile(bytes)",
+    "prohibited-wasm-compile",
+  );
+  assertRule(
+    'self["WebAssembly"]["compileStreaming"](stream)',
+    "prohibited-wasm-compileStreaming",
+  );
+  assertRule(
+    "const root=global;const wasm=root.WebAssembly;wasm.instantiateStreaming(stream,imports)",
+    "prohibited-wasm-instantiateStreaming",
+  );
+  assertRule(
+    "const {WebAssembly:wasm}=globalThis;const instantiate=wasm['instantiate'];instantiate(bytes,imports)",
+    "prohibited-wasm-instantiate-buffer-source-or-unknown",
+  );
+  assertRule(
+    "const {WebAssembly}=self;const {compile}=WebAssembly;compile(bytes)",
+    "prohibited-wasm-compile",
+  );
 });
 
 test("an imported precompiled Module is the supported instantiate form", () => {
@@ -78,20 +98,17 @@ function artifactFixture(t, workerSource) {
   return { dryRun, openNext, root };
 }
 
-test("inventory records dangerous unreachable modules without masking reachable imports", (t) => {
+test("inventory rejects prohibited Wasm in every module, including unreachable modules", (t) => {
   const fixture = artifactFixture(t, 'import "./safe.js";');
-  const manifest = inspectGeneratedArtifacts({
-    repositoryRoot: fixture.root,
-    openNextRoot: fixture.openNext,
-    dryRunRoot: fixture.dryRun,
-  });
-  assert.ok(manifest.reachability.unreachable_modules >= 1);
-  assert.equal(
-    manifest.modules.find((module) => module.path === "dangerous.js")
-      ?.reachability,
-    "unreachable",
+  assert.throws(
+    () =>
+      inspectGeneratedArtifacts({
+        repositoryRoot: fixture.root,
+        openNextRoot: fixture.openNext,
+        dryRunRoot: fixture.dryRun,
+      }),
+    /dangerous\.js:1:1: prohibited-wasm-compile/,
   );
-  assert.ok(manifest.reachability.unreachable_wasm_findings.length > 0);
 
   const reachable = artifactFixture(t, 'import "./dangerous.js";');
   assert.throws(
@@ -102,6 +119,23 @@ test("inventory records dangerous unreachable modules without masking reachable 
         dryRunRoot: reachable.dryRun,
       }),
     /prohibited-wasm-compile/,
+  );
+});
+
+test("inventory rejects broken executable references in unreachable modules", (t) => {
+  const fixture = artifactFixture(t, 'import "./safe.js";');
+  writeFileSync(
+    join(fixture.openNext, "dangerous.js"),
+    'import "./missing-unreachable.js";',
+  );
+  assert.throws(
+    () =>
+      inspectGeneratedArtifacts({
+        repositoryRoot: fixture.root,
+        openNextRoot: fixture.openNext,
+        dryRunRoot: fixture.dryRun,
+      }),
+    /dangerous\.js: missing referenced artifact \.\/missing-unreachable\.js/,
   );
 });
 
