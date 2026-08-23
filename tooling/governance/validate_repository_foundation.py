@@ -142,6 +142,49 @@ PR_MARKERS = (
     "Lightweight R0",
 )
 
+# VOC-082 keeps the role-separation clarification fail-closed at the repository
+# foundation boundary. These are deliberately short, active-policy markers rather
+# than a second copy of the full operating model. Historical/vendor/tool records
+# are not scanned: they are preserved evidence or scoped permission boundaries.
+VOC082_POLICY_MARKERS = {
+    "AGENTS.md": (
+        ("distinct actor", "separately\n  instantiated AI participant"),
+        ("provider neutrality", "Model/provider provenance may"),
+        ("exact revision", "authorship of the reviewed exact revision"),
+        ("self-review/self-merge", "it cannot approve or merge its own work"),
+        ("action authority separation", "separately defined action-specific authority"),
+    ),
+    DOC16_PATH: (
+        ("distinct actor", "Any human or separately instantiated AI participant may occupy"),
+        ("provider neutrality", "optional runtime provenance or defense in depth, never authority"),
+        ("exact revision", "reviewer must not have\nauthored the reviewed exact revision"),
+        ("self-review/self-merge", "The builder cannot\nindependently review, approve, or merge its revision"),
+        ("action authority separation", "action-specific authority hold"),
+    ),
+    "docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md": (
+        ("distinct actor", "separately instantiated AI participant"),
+        ("provider neutrality", "Runtime provenance"),
+        ("exact revision", "did not author the reviewed exact\nrevision"),
+        ("self-review/self-merge", "implementation builder\ncannot review, approve, or merge that revision"),
+        ("action authority separation", "Technical review and merge eligibility never satisfy a separately\ndefined authority"),
+    ),
+    "docs/governance/approval-matrix.md": (
+        ("distinct actor", "separately\ninstantiated AI participant"),
+        ("provider neutrality", "Model/provider choice may"),
+        ("exact revision", "exact revision"),
+        ("self-review/self-merge", "Builders cannot verify, approve, or merge their own\nrevision"),
+        ("action authority separation", "action-specific authority"),
+    ),
+}
+
+VOC082_ACTIVE_POLICY_PATHS = tuple(VOC082_POLICY_MARKERS)
+VOC082_UNSAFE_POLICY_PATTERNS = (
+    ("human-only role requirement", re.compile(r"\bhuman is required solely\s+(?:for|to)\b", re.IGNORECASE)),
+    ("vendor-derived authority", re.compile(r"\b(?:model|provider|vendor) identity grants authority\b", re.IGNORECASE)),
+    ("same-actor relabeling", re.compile(r"\brelabel(?:ing|ed)?\s+(?:itself\s+)?(?:creates?|establishes?)\s+(?:independence|separation)\b", re.IGNORECASE)),
+    ("review-as-action authority", re.compile(r"\b(?:review verdict|reviewer verdict|reviewer evidence)\s+(?:satisf(?:y|ies)|supplies|replaces)\s+the?\s*action-specific authority\b", re.IGNORECASE)),
+)
+
 ID_TOKEN = re.compile(
     r"VOC-001-(?:D\d+|T\d+|R\d+|(?:AC|TEST|DEP|EV|CON|AM)-\d+)"
 )
@@ -1202,6 +1245,23 @@ def validate_governance_language(validation: Validation) -> None:
                 validation.error(relative, f"missing VOC-079 approval-neutral marker: {marker}")
 
 
+def validate_voc082_policy_markers(validation: Validation) -> None:
+    """Keep the active distinct-actor contract present and fail closed on regressions."""
+    active_text: dict[str, str] = {}
+    for relative, markers in VOC082_POLICY_MARKERS.items():
+        text = validation.read(relative)
+        active_text[relative] = text
+        for name, marker in markers:
+            if marker not in text:
+                validation.error(relative, f"missing VOC-082 {name} policy marker")
+
+    for relative in VOC082_ACTIVE_POLICY_PATHS:
+        text = active_text[relative]
+        for name, pattern in VOC082_UNSAFE_POLICY_PATTERNS:
+            if pattern.search(text):
+                validation.error(relative, f"prohibited VOC-082 {name} wording")
+
+
 def validate_false_activation(validation: Validation) -> None:
     # AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08: protected-paths.yaml is now
     # legitimately authorized to say automatic_merge_allowed: true and
@@ -1258,6 +1318,7 @@ def validate_repository(root: Path) -> list[str]:
     validate_workflow(validation)
     validate_merge_eligibility(validation)
     validate_governance_language(validation)
+    validate_voc082_policy_markers(validation)
     validate_false_activation(validation)
     return sorted(set(validation.errors))
 

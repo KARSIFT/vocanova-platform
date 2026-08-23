@@ -40,6 +40,13 @@ class MergeEligibilityEvaluatorTests(unittest.TestCase):
             evaluate(fixture()),
         )
 
+    def test_committed_r4_fixtures_use_provider_neutral_ai_actor_labels(self) -> None:
+        for path in (FIXTURE, BLOCKED_FIXTURE):
+            with self.subTest(path=path.name):
+                evidence = json.loads(path.read_text(encoding="utf-8"))
+                self.assertRegex(evidence["roles"]["builder"]["identity"], r"^builder-ai-\d+$")
+                self.assertRegex(evidence["roles"]["reviewer"]["identity"], r"^reviewer-ai-\d+$")
+
     def test_committed_r4_opt_out_fixture_is_blocked(self) -> None:
         evidence = json.loads(BLOCKED_FIXTURE.read_text(encoding="utf-8"))
         self.assert_blocked(evidence, "package.opt_out")
@@ -81,6 +88,8 @@ class MergeEligibilityEvaluatorTests(unittest.TestCase):
         for code, (key, value) in cases.items():
             with self.subTest(code=code):
                 evidence = fixture()
+                if code == "review.self_authored":
+                    value = evidence["roles"]["builder"]["identity"]
                 evidence["roles"]["reviewer"][key] = value
                 self.assert_blocked(evidence, code)
 
@@ -461,7 +470,7 @@ class GitHubAdapterTests(unittest.TestCase):
     def test_pr_text_is_data_not_shell_source(self) -> None:
         sentinel = self.root / "SHOULD_NOT_EXIST"
         self.event["pull_request"]["body"] = self.body.replace(
-            '"identity": "builder-agent"',
+            '"identity": "builder-ai-42"',
             f'"identity": "$(touch {sentinel})"',
         )
         evidence, _ = build_normalized_evidence(

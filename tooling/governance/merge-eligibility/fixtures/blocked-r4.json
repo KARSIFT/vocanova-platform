@@ -87,9 +87,9 @@
     ]
   },
   "roles": {
-    "builder": { "identity": "builder-agent", "role": "implementer" },
+    "builder": { "identity": "builder-ai-42", "role": "implementer" },
     "reviewer": {
-      "identity": "reviewer-human",
+      "identity": "reviewer-ai-08",
       "role": "independent-reviewer",
       "reviewed_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "verdict": "pass",

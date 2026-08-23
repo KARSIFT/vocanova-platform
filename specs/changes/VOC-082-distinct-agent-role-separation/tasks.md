@@ -27,7 +27,7 @@ no executable workflow/evaluator change.
 - Acceptance: AC-03, AC-05, AC-06, AC-07
 - Tests: TEST-03, TEST-04, TEST-05
 - Evidence: EV-03, EV-04, EV-05
-- Status: blocked-by-T00
+- Status: implemented-pending-independent-verification
 
 Add narrow foundation policy markers and negative unit fixtures, update synthetic
 eligible/blocked R4 participant labels to provider-neutral AI actors, and prove the
@@ -36,3 +36,7 @@ Run proportional local and hosted checks, obtain a different-actor cross-model e
 SHA review without duplicate long suites, resolve every blocking finding, and rehearse
 reverse-order repository rollback. Do not approve or merge the builder's own work,
 deploy, mutate settings, or release any inherited hold.
+
+Builder evidence status: local implementation and rollback evidence are recorded in the
+task handoff; AC-03/AC-05/AC-06/AC-07 remain pending until a different actor verifies
+the exact implementation revision and records the final hosted evidence.
