@@ -20,6 +20,10 @@ export default defineConfig({
     })),
   ],
   test: {
+    // Every file owns an isolated local D1 and applies the full forward migration
+    // ledger twice. Serial files keep that setup deterministic on small CI runners
+    // instead of racing several workerd instances against the hook timeout.
+    fileParallelism: false,
     setupFiles: ["./test/setup.ts"],
   },
 });

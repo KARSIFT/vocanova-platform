@@ -383,6 +383,16 @@ prepared-statement/constraint tests, atomicity and consistency failure injection
 PostgreSQL-to-D1 parity/reconciliation. GitHub Actions and automated tests are deterministic gates;
 independent semantic review is separate. Use expand/migrate/contract for breaking changes.
 
+VOC-080-T09 binds a versioned normalized export contract to all 25 active PostgreSQL tables and
+their D1 destination columns. Synthetic conversion lowercases UUID/bytea representations,
+canonicalizes UTC timestamps and JSON, converts booleans, rejects unsafe integers, orders foreign
+keys, and applies bounded local-D1 batches with checksum-bound atomic checkpoints. Reconciliation
+compares per-table counts/checksums, foreign keys, and exact domain aggregates without exposing
+learner content or authentication material. A plan-bound D1 write guard freezes converted tables
+across the bounded multi-invocation page chain and is explicitly released only after completed
+evidence is recorded. The active recovery and authority boundary is documented in
+the [PostgreSQL-to-D1 conversion runbook](../operations/postgresql-to-d1-conversion.md).
+
 Migration order: extensions → users → external_identities → user_onboarding_profiles →
 user_settings → sessions → magic_links → oauth_states → email_change_links →
 account_deletion_requests → auth_rate_limits → canonical_words → word_meanings → word_examples → usage_notes →

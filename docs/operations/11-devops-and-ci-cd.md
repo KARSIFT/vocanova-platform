@@ -140,6 +140,13 @@ concurrency gates, the provider-neutral email HTTP boundary, and redacted
 committed local runtime keeps `AI_GENERATION_ENABLED=false`; enabling or wiring a
 real provider remains separate from this credential-free parity proof.
 
+VOC-080-T09 extends the same job through seven forward D1 migrations. The sixth
+preserves the synthetic-account marker; the seventh installs fail-closed write guards
+for every converted table while exact multi-invocation reconciliation owns its
+plan-bound lock. The synthetic conversion, bounded import, interruption/retry,
+forward-correction, exact signed aggregates, and privacy-safe reconciliation suite is
+credential-free and never contacts a remote D1 database.
+
 > **Amendment note (`VOC-032-§1-amendment`, adopted 2026-07-30 via VOC-032; founder as approving
 > owner).** The Frontend/Backend/Database rows of the target-infrastructure table below and the
 > `vocanova.com` domain set in the next paragraph were the **original (v1.0) baseline** as of

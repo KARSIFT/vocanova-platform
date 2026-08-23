@@ -20,17 +20,18 @@ official Go toolchain distribution and no repository secret.
 
 ## Root commands
 
-| Command             | Purpose                                                                         |
-| ------------------- | ------------------------------------------------------------------------------- |
-| `pnpm dev`          | Run the Next.js development server with local Cloudflare binding simulation.    |
-| `pnpm validate`     | Run workspace, format, lint/vet, type, test, and build validation.              |
-| `pnpm lint`         | Lint web, packages, Worker API, and run `go vet` on the reference API.          |
-| `pnpm typecheck`    | Type-check the web, Worker API, and shared packages.                            |
-| `pnpm test`         | Run foundation, client, web, Worker/D1, and Go-reference tests.                 |
-| `pnpm build`        | Build the web, Worker API, shared packages, and Go parity reference.            |
-| `pnpm format:check` | Check Prettier and `gofmt` formatting without writing.                          |
-| `pnpm format`       | Apply Prettier and `gofmt` formatting.                                          |
-| `pnpm audit`        | Fail when the pnpm production dependency graph has a high or critical advisory. |
+| Command                         | Purpose                                                                                                    |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `pnpm dev`                      | Run the Next.js development server with local Cloudflare binding simulation.                               |
+| `pnpm validate`                 | Run workspace, format, lint/vet, type, test, and build validation.                                         |
+| `pnpm lint`                     | Lint web, packages, Worker API, and run `go vet` on the reference API.                                     |
+| `pnpm typecheck`                | Type-check the web, Worker API, and shared packages.                                                       |
+| `pnpm test`                     | Run foundation, client, web, Worker/D1, and Go-reference tests.                                            |
+| `pnpm build`                    | Build the web, Worker API, shared packages, and Go parity reference.                                       |
+| `pnpm format:check`             | Check Prettier and `gofmt` formatting without writing.                                                     |
+| `pnpm format`                   | Apply Prettier and `gofmt` formatting.                                                                     |
+| `pnpm audit`                    | Fail when the pnpm production dependency graph has a high or critical advisory.                            |
+| `pnpm run test:data-conversion` | Rehearse the versioned synthetic PostgreSQL-to-local-D1 conversion, recovery, and reconciliation contract. |
 
 The full `pnpm validate` command remains the pre-review local gate. GitHub Actions
 uses the following stable subsystem entry points so a failure names the affected
@@ -91,20 +92,22 @@ The TypeScript API target lives at `apps/api-worker`; `apps/api` remains the Go
 contract and behavior reference through final runtime retirement. Its credential-free
 commands are:
 
-| Command                                             | Purpose                                                                                                                        |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm --filter @vocanova/api-worker types:write`    | Regenerate D1/runtime binding types from the local Wrangler configuration.                                                     |
-| `pnpm --filter @vocanova/api-worker types:check`    | Fail when committed Wrangler types are stale.                                                                                  |
-| `pnpm --filter @vocanova/api-worker test`           | Run Hono, CORS, redaction, identity, content, reviews, missions, AI/email-boundary parity, migration, and D1 tests in workerd. |
-| `pnpm --filter @vocanova/api-worker safety:check`   | Reject dynamic/unsafe SQL, destructive foundation migrations, sensitive logs, and remote config.                               |
-| `pnpm --filter @vocanova/api-worker openapi:check`  | Compare Hono's generated operational OpenAPI with the committed deterministic artifact.                                        |
-| `pnpm --filter @vocanova/api-worker contract:check` | Bind the Worker migration baseline to the canonical Go `/api/v1` OpenAPI and API client.                                       |
-| `pnpm --filter @vocanova/api-worker dry-run`        | Bundle the Worker without uploading, provisioning, or querying Cloudflare.                                                     |
-| `pnpm ci:worker-api`                                | Run the complete Worker API/local-D1 hosted command, including API-client compatibility.                                       |
+| Command                                                        | Purpose                                                                                                                        |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm --filter @vocanova/api-worker types:write`               | Regenerate D1/runtime binding types from the local Wrangler configuration.                                                     |
+| `pnpm --filter @vocanova/api-worker types:check`               | Fail when committed Wrangler types are stale.                                                                                  |
+| `pnpm --filter @vocanova/api-worker test`                      | Run Hono, CORS, redaction, identity, content, reviews, missions, AI/email-boundary parity, migration, and D1 tests in workerd. |
+| `pnpm --filter @vocanova/api-worker safety:check`              | Reject dynamic/unsafe SQL, destructive foundation migrations, sensitive logs, and remote config.                               |
+| `pnpm --filter @vocanova/api-worker data-conversion:inventory` | Bind all 25 PostgreSQL source tables/columns to their D1 conversion schema and classify D1-only runtime tables.                |
+| `pnpm --filter @vocanova/api-worker test:data-conversion`      | Run the synthetic type conversion, local D1 chunk/import, resume, replay, correction, reconciliation, and privacy suite.       |
+| `pnpm --filter @vocanova/api-worker openapi:check`             | Compare Hono's generated operational OpenAPI with the committed deterministic artifact.                                        |
+| `pnpm --filter @vocanova/api-worker contract:check`            | Bind the Worker migration baseline to the canonical Go `/api/v1` OpenAPI and API client.                                       |
+| `pnpm --filter @vocanova/api-worker dry-run`                   | Bundle the Worker without uploading, provisioning, or querying Cloudflare.                                                     |
+| `pnpm ci:worker-api`                                           | Run the complete Worker API/local-D1 hosted command, including API-client compatibility.                                       |
 
 `wrangler.jsonc` contains one local D1 name and the non-remote sentinel ID
 `local`; it contains no Cloudflare account/resource identifier or credential.
-Vitest applies all five forward migrations to isolated local D1 storage twice,
+Vitest applies all seven forward migrations to isolated local D1 storage twice,
 proving from-empty and replay behavior. T05 adds requester-scoped identity, OAuth
 state, magic links, sessions, onboarding, settings, email change, and account
 deactivation. T06-T08 add content/review, mission/progress, and AI-feedback parity,
@@ -114,6 +117,14 @@ uses no paid provider or provider secret.
 Email and OAuth providers remain injected boundaries in tests; no local command sends
 email or contacts a provider. T10 owns future staging/production D1 identifiers,
 environment secrets, routes, and held deployment/migration commands.
+
+T09's data-conversion command accepts only the committed synthetic PostgreSQL-shaped
+fixture. It applies prepared, bounded D1 batches to local test storage, checkpoints
+each mutation, and reconciles through bounded resumable pages. It proves rerun,
+interrupted-resume, forward-correction, foreign-key, checksum, count, domain-aggregate,
+and privacy-safe evidence. It cannot use production data or a remote D1 binding. The
+complete contract and recovery rules are in the
+[conversion runbook](operations/postgresql-to-d1-conversion.md).
 
 Run API commands from `apps/api`:
 
