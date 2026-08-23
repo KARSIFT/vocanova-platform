@@ -193,6 +193,120 @@ test("missing holds, placeholder URLs, and exact mapping drift fail independentl
   );
 });
 
+test("package summaries, bidirectional graph links, and designated live boundaries fail closed", () => {
+  const duplicatePackage = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "  - id: VOC-081\n    path: specs/changes/VOC-081",
+        "  - id: VOC-080\n    path: specs/changes/VOC-081",
+      ),
+    );
+  });
+  assert.ok(
+    duplicatePackage.some((message) =>
+      /package summary VOC-080 must occur exactly once/.test(message),
+    ),
+  );
+
+  const unknownPackage = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "  - id: VOC-083\n    path: specs/changes/VOC-083",
+        "  - id: VOC-099\n    path: specs/changes/VOC-083",
+      ),
+    );
+  });
+  assert.ok(
+    unknownPackage.some((message) =>
+      /unknown package summary VOC-099/.test(message),
+    ),
+  );
+
+  const wrongValidLink = errorsFor((root) => {
+    mutate(
+      root,
+      "specs/changes/VOC-080-cloudflare-native-ruflo/tasks.md",
+      (text) =>
+        text.replace(
+          "- Acceptance: `VOC-080-AC-00`",
+          "- Acceptance: `VOC-080-AC-01`",
+        ),
+    );
+  });
+  assert.ok(
+    wrongValidLink.some((message) => /task↔AC link|AC↔task link/.test(message)),
+  );
+
+  const wrongValidTestLink = errorsFor((root) => {
+    mutate(
+      root,
+      "specs/changes/VOC-080-cloudflare-native-ruflo/test-plan.md",
+      (text) =>
+        text.replace(
+          "- Covers: `VOC-080-AC-00`, `VOC-080-AC-09`",
+          "- Covers: `VOC-080-AC-01`, `VOC-080-AC-09`",
+        ),
+    );
+  });
+  assert.ok(
+    wrongValidTestLink.some((message) =>
+      /AC↔test link|test↔AC link/.test(message),
+    ),
+  );
+
+  const falseLive = errorsFor((root) => {
+    mutate(
+      root,
+      "specs/changes/VOC-080-cloudflare-native-ruflo/change.yaml",
+      (text) =>
+        text.replace(
+          "production_deployment: held-by-VOC-080-HOLD-01",
+          "production_deployment: deployed",
+        ),
+    );
+  });
+  assert.ok(
+    falseLive.some((message) =>
+      /production_deployment must remain/.test(message),
+    ),
+  );
+
+  const conflatedHold = errorsFor((root) => {
+    mutate(
+      root,
+      "specs/changes/VOC-080-cloudflare-native-ruflo/change.yaml",
+      (text) =>
+        text.replace(
+          "staging_deployment: held-by-VOC-080-HOLD-00",
+          "staging_deployment: held-by-VOC-080-HOLD-01",
+        ),
+    );
+  });
+  assert.ok(
+    conflatedHold.some((message) =>
+      /staging_deployment must remain/.test(message),
+    ),
+  );
+});
+
+test("a historical FAIL URL moved out of evidence is rejected", () => {
+  const moved = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "evidence: https://github.com/KARSIFT/vocanova-platform/pull/99#issuecomment-5382605362,",
+        "reason: https://github.com/KARSIFT/vocanova-platform/pull/99#issuecomment-5382605362,\n            evidence: https://github.com/KARSIFT/vocanova-platform/actions/runs/32593748534,",
+      ),
+    );
+  });
+  assert.ok(
+    moved.some((message) =>
+      /must bind https:\/\/github.com\/KARSIFT\/vocanova-platform\/pull\/99#issuecomment-5382605362/.test(
+        message,
+      ),
+    ),
+  );
+});
+
 test("file classifications fail independently on omission, duplicate, invalid, and contradiction", () => {
   const omitted = errorsFor((root) => {
     mutate(root, inventoryRelative, (text) =>

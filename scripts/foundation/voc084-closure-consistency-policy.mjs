@@ -411,9 +411,17 @@ function historyEntries(block, marker) {
   if (!markerMatch) return [];
   const indent = markerMatch[1].length;
   const start = markerMatch.index + markerMatch[0].length;
+  // Inventory entries are nested under either a package/task field or the
+  // parent task field.  Stop at the next sibling at either boundary so an
+  // entry cannot accidentally absorb rollback/post-merge fields.
   const sibling = block
     .slice(start)
-    .search(new RegExp(`^ {${indent}}[A-Za-z_]+:`, "m"));
+    .search(
+      new RegExp(
+        `^(?: {${indent}}| {${Math.max(0, indent - 2)}})[A-Za-z_]+:`,
+        "m",
+      ),
+    );
   const section = block.slice(
     start,
     sibling < 0 ? block.length : start + sibling,
@@ -430,11 +438,19 @@ function historyEntries(block, marker) {
 
 function inspectHistoryTuple(ownerBlock, tuple, errors) {
   const entries = historyEntries(ownerBlock, tuple.marker);
-  const entry = entries.find((candidate) => candidate.includes(tuple.evidence));
+  const matchingEntries = entries.filter((candidate) =>
+    candidate.includes(tuple.evidence),
+  );
+  const entry = matchingEntries.find((candidate) => {
+    const evidenceFields = [
+      ...candidate.matchAll(/\bevidence:\s*([^,\s}]+)/g),
+    ].map((match) => match[1]);
+    return evidenceFields.length === 1 && evidenceFields[0] === tuple.evidence;
+  });
   if (!entry) {
     error(
       errors,
-      `${tuple.owner} ${tuple.marker} is missing FAIL tuple ${tuple.evidence}`,
+      `${tuple.owner} ${tuple.marker} must bind ${tuple.evidence} in exactly one evidence field`,
     );
     return;
   }
@@ -502,6 +518,22 @@ function inspectInventory(inventory) {
   }
 
   const packageBlocks = inventoryPackageBlocks(inventory);
+  const packageIds = packageBlocks.map(({ id }) => id);
+  const expectedPackageIds = PACKAGES.map(({ id }) => id);
+  if (
+    packageIds.length !== expectedPackageIds.length ||
+    new Set(packageIds).size !== packageIds.length
+  )
+    error(
+      errors,
+      "inventory package summaries must contain exactly four unique rows",
+    );
+  for (const id of packageIds)
+    if (!expectedPackageIds.includes(id))
+      error(errors, `inventory contains unknown package summary ${id}`);
+  for (const id of expectedPackageIds)
+    if (packageIds.filter((candidate) => candidate === id).length !== 1)
+      error(errors, `inventory package summary ${id} must occur exactly once`);
   for (const packageInfo of PACKAGES) {
     const block = packageBlocks.find(({ id }) => id === packageInfo.id)?.text;
     if (!block) {
@@ -684,6 +716,156 @@ function compareSets(errors, label, actual, expected) {
       errors,
       `${label} identifier set or mapping drifted (expected ${expected.join(", ")}, found ${actual.join(", ")})`,
     );
+}
+
+function references(body, kind, packageId) {
+  return normalizedRefs(body, kind, packageId);
+}
+
+function assertEdge(errors, left, right, graph, label) {
+  const actual = graph.get(left) ?? [];
+  if (!actual.includes(right))
+    error(errors, `${label} link ${left} -> ${right} is not bidirectional`);
+}
+
+// The adopted documents contain four deliberate umbrella edges where the
+// aggregate section names a broader task/test than the leaf declaration.  All
+// other task↔AC↔test edges must be present on both sides of the graph.
+const DOCUMENTED_UMBRELLA_EDGES = new Set([
+  "VOC-080-AC-00->VOC-080-T02",
+  "VOC-081-AC-00->VOC-081-T00",
+  "VOC-081-AC-00->VOC-081-TEST-00",
+  "VOC-082-TEST-05->VOC-082-AC-08",
+]);
+
+function isDocumentedUmbrellaEdge(left, right) {
+  return DOCUMENTED_UMBRELLA_EDGES.has(`${left}->${right}`);
+}
+
+function inspectTaskAcTestGraph(repositoryRoot, packageInfo, errors) {
+  const base = `specs/changes/${packageInfo.directory}`;
+  const tasks = read(repositoryRoot, `${base}/tasks.md`);
+  const acceptance = read(repositoryRoot, `${base}/acceptance-criteria.md`);
+  const tests = read(repositoryRoot, `${base}/test-plan.md`);
+  if (!tasks || !acceptance || !tests) return;
+  const taskSections = markdownSections(tasks).filter(({ id }) =>
+    id.startsWith(`${packageInfo.id}-T`),
+  );
+  const acceptanceSections = markdownSections(acceptance).filter(({ id }) =>
+    id.startsWith(`${packageInfo.id}-AC`),
+  );
+  const testSections = markdownSections(tests).filter(({ id }) =>
+    id.startsWith(`${packageInfo.id}-TEST`),
+  );
+  const taskToAc = new Map(
+    taskSections.map(({ id, body }) => [
+      id,
+      references(
+        body.match(/^- Acceptance:\s*(.+)$/m)?.[1] ?? "",
+        "AC",
+        packageInfo.id,
+      ),
+    ]),
+  );
+  const acToTask = new Map(
+    acceptanceSections.map(({ id, body }) => [
+      id,
+      references(
+        body.match(/^- Tasks:\s*(.+)$/m)?.[1] ?? "",
+        "T",
+        packageInfo.id,
+      ),
+    ]),
+  );
+  const taskToTest = new Map(
+    taskSections.map(({ id, body }) => [
+      id,
+      references(
+        body.match(/^- Tests:\s*(.+)$/m)?.[1] ?? "",
+        "TEST",
+        packageInfo.id,
+      ),
+    ]),
+  );
+  const acToTest = new Map(
+    acceptanceSections.map(({ id, body }) => [
+      id,
+      references(
+        body.match(/^- Tests:\s*(.+)$/m)?.[1] ?? "",
+        "TEST",
+        packageInfo.id,
+      ),
+    ]),
+  );
+  const testToAc = new Map(
+    testSections.map(({ id, body }) => [
+      id,
+      references(
+        body.match(/^- Covers:\s*(.+)$/m)?.[1] ?? "",
+        "AC",
+        packageInfo.id,
+      ),
+    ]),
+  );
+  for (const [task, acs] of taskToAc)
+    for (const ac of acs)
+      assertEdge(errors, ac, task, acToTask, `${packageInfo.id} task↔AC`);
+  for (const [ac, tasksForAc] of acToTask)
+    for (const task of tasksForAc)
+      if (!isDocumentedUmbrellaEdge(ac, task))
+        assertEdge(errors, task, ac, taskToAc, `${packageInfo.id} AC↔task`);
+  for (const [task, testIds] of taskToTest)
+    for (const test of testIds) {
+      const acs = taskToAc.get(task) ?? [];
+      const covered = testToAc.get(test) ?? [];
+      if (!acs.some((ac) => covered.includes(ac)))
+        error(
+          errors,
+          `${packageInfo.id} task↔test link ${task} -> ${test} has no matching AC coverage`,
+        );
+    }
+  for (const [ac, testIds] of acToTest)
+    for (const test of testIds) {
+      if (!testToAc.has(test))
+        error(
+          errors,
+          `${packageInfo.id} AC↔test link ${ac} -> ${test} names an unknown test`,
+        );
+      else if (
+        !testToAc.get(test).includes(ac) &&
+        !isDocumentedUmbrellaEdge(ac, test)
+      )
+        error(
+          errors,
+          `${packageInfo.id} AC↔test link ${ac} -> ${test} is not bidirectional`,
+        );
+    }
+  for (const [test, acs] of testToAc)
+    for (const ac of acs) {
+      if (!acToTest.has(ac))
+        error(
+          errors,
+          `${packageInfo.id} test↔AC link ${test} -> ${ac} names an unknown AC`,
+        );
+      const owned = [...taskToTest].some(
+        ([task, testIds]) =>
+          testIds.includes(test) && (taskToAc.get(task) ?? []).includes(ac),
+      );
+      if (!owned && !isDocumentedUmbrellaEdge(test, ac))
+        error(
+          errors,
+          `${packageInfo.id} test↔AC link ${test} -> ${ac} has no exact task edge`,
+        );
+      if (
+        acToTest.has(ac) &&
+        !acToTest.get(ac).includes(test) &&
+        !isDocumentedUmbrellaEdge(test, ac)
+      )
+        error(
+          errors,
+          `${packageInfo.id} test↔AC link ${test} -> ${ac} is not bidirectional`,
+        );
+    }
 }
 
 function inspectActiveCarriers(repositoryRoot, inventory) {
@@ -964,6 +1146,41 @@ function inspectActiveClaims(repositoryRoot) {
       if (!listedAsInherited && !explicitlyHeld)
         error(errors, `${packageInfo.id} ${hold} is missing or released`);
     }
+    const designatedFields = [
+      ["production_deployment", /^(?:held-by-VOC-080-HOLD-01|disabled)$/],
+      ["staging_deployment", /^held-by-VOC-080-HOLD-00$/],
+      ["production_data_access", /^held-by-VOC-080-HOLD-02$/],
+      ["autonomous_production_release", /^disabled$/],
+    ];
+    for (const [field, allowed] of designatedFields) {
+      const value = change
+        .match(new RegExp(`^${field}:\\s*([^\\n]+)$`, "m"))?.[1]
+        ?.trim();
+      if (!value || !allowed.test(value))
+        error(
+          errors,
+          `${packageInfo.id} ${field} must remain an explicit held/disabled value`,
+        );
+      if (
+        value &&
+        /^(?:deployed|activated|released|live-verified|production-migrated)$/i.test(
+          value,
+        )
+      )
+        error(
+          errors,
+          `${packageInfo.id} ${field} contains a forbidden live outcome`,
+        );
+    }
+    const deployment = change.match(/^  deployment:\s*([^\n]+)$/m)?.[1]?.trim();
+    if (
+      deployment !== "prohibited" &&
+      deployment !== "prohibited-until-action-specific-holds-complete"
+    )
+      error(
+        errors,
+        `${packageInfo.id} release deployment must remain prohibited`,
+      );
     if (
       /^\s*- Status:\s*(?:pending|blocked|candidate-only|integration-pending)\b/im.test(
         tasks,
@@ -1000,6 +1217,7 @@ function inspectActiveClaims(repositoryRoot) {
       );
     if (!directory)
       error(errors, `${packageInfo.id} package directory is invalid`);
+    inspectTaskAcTestGraph(repositoryRoot, packageInfo, errors);
   }
   return errors;
 }
