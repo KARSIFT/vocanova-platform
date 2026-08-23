@@ -2,15 +2,16 @@
 
 ## VOC-082-AC-00 — Active governance defines role, actor, identity, and provenance
 
-- Requirements: R00, R01
+- Requirements: R00, R01, R08
 - Tasks: T00
 - Tests: TEST-00, TEST-01
 - Evidence: EV-00, EV-01
 - Result: pending
 
-DOC-15, DOC-16, AGENTS.md, and the approval matrix use one compatible definition: a
-role is a responsibility, an actor is the attributable human or separately instantiated
-AI participant, and runtime/model/provider provenance does not grant authority.
+DOC-00, DOC-15, DOC-16, AGENTS.md, and the approval matrix use one compatible
+definition: a role is a responsibility, an actor is the attributable human or
+separately instantiated AI participant, and runtime/model/provider provenance does not
+grant authority.
 
 ## VOC-082-AC-01 — AI-only role separation has a valid worked example
 
@@ -27,7 +28,7 @@ merge.
 
 ## VOC-082-AC-02 — Model/provider choice is not authority
 
-- Requirements: R03
+- Requirements: R03, R08
 - Tasks: T00
 - Tests: TEST-01, TEST-02
 - Evidence: EV-01, EV-02
@@ -103,3 +104,17 @@ The final revision has complete R4 decision/impact/contingency/specialist/determ
 evidence, a different-actor cross-model exact-SHA verdict, no blocking findings, hosted
 proof, and reverse-order rollback. No PR is self-merged and no settings, deployment,
 Cloudflare, secret, production-data, billing, DNS, or live-system action occurs.
+
+## VOC-082-AC-08 — Product authority remains intact and provider-neutral
+
+- Requirements: R08
+- Tasks: T00
+- Tests: TEST-00, TEST-01, TEST-02
+- Evidence: EV-00, EV-01, EV-02
+- Result: pending
+
+DOC-00 §6 names accountable decision-owner, planner, builder, independent-reviewer, and
+non-author merge-audit roles without permanently assigning ChatGPT, Codex, Claude Code,
+a human, a model, or a provider. Product behavior and founder-controlled product
+decisions are unchanged. DOC-00 metadata, ADR-0005, `docs/README.md`, and
+`docs/product/README.md` agree on the relationship and current authority direction.

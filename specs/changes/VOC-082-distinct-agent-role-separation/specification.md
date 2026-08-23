@@ -8,6 +8,13 @@ vendor. That interpretation caused a coordinating builder to hand routine reposi
 evidence/merge work back to the user even though current governance already permits
 human or AI participants and rejects vendor-derived authority.
 
+The active Product Bible independently preserves the same ambiguity by naming ChatGPT
+as planner/advisor, Codex as implementation worker, and Claude Code as verifier. Unlike
+DOC-12's active provider-neutral amendment or DOC-09's narrowly scoped synthetic-data
+permission rule, DOC-00 has no current qualifier converting those names into optional
+participants. The product authority boundary and its indexes therefore require explicit
+reconciliation.
+
 The clarification must remove that ambiguity without weakening independent review,
 adding a vendor hierarchy, changing merge-eligibility semantics, or granting an
 external-effect permission.
@@ -121,6 +128,19 @@ self-review/self-merge, or action-authority separation markers. Negative fixture
 cover human-only wording, vendor-derived authority, same-actor relabeling, and a review
 verdict treated as external-effect authority.
 
+### VOC-082-R08 — Product Bible authority reconciliation
+
+DOC-00 §6 shall preserve the founder/product owner's product decision authority, GitHub
+as repository system of record, and GitHub Actions as deterministic automation while
+replacing permanent ChatGPT/Codex/Claude Code delivery assignments with accountable
+decision-owner, planner, builder, independent-reviewer, and non-author merge-audit
+roles. Human or separately instantiated AI actors may fill capable technical roles;
+model/provider identity remains optional provenance or scoped evidence hardening.
+
+DOC-00 metadata and the root/product document indexes shall be synchronized with
+ADR-0005 and the clarification without changing product behavior, learner scope, or
+material founder-controlled product decisions.
+
 ## 4. Out of scope
 
 - Changing merge-eligibility schema, evaluator, adapter, permissions, workflow, or
@@ -134,6 +154,8 @@ verdict treated as external-effect authority.
 - Merging any pull request, changing repository settings, deploying, or touching
   Cloudflare, DNS, secrets, billing, production data, or live services.
 - Rewriting immutable historical packages or evidence.
+- Changing DOC-00's product vision, learner behavior, feature scope, product-decision
+  ownership, or other sections beyond authority-link/metadata synchronization.
 
 ## 5. Security, privacy, and compatibility
 

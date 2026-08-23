@@ -21,6 +21,8 @@ Cloudflare, DNS, secret, production-data, spending, or launch action is authoriz
 
 - wording permits the same actor to relabel and self-review;
 - wording makes a human, model, provider, or orchestrator the source of authority;
+- DOC-00 retains permanent ChatGPT/Codex/Claude delivery roles or its product decision
+  authority changes;
 - an active or unchecked activation requirement hard-codes Codex, Claude Code, or
   another vendor as the required implementer/reviewer identity;
 - a scoped cross-model evidence control is removed or misrepresented;
@@ -35,13 +37,14 @@ Cloudflare, DNS, secret, production-data, spending, or launch action is authoriz
 
 Revert T01 then T00 in a disposable worktree and validate each predecessor. Rollback
 removes documentation, template, synthetic-label, and policy-test clarification only.
-It restores the prior named-vendor checklist wording along with the other documented
-ambiguity; it does not revoke historical evidence or touch settings, branches with open
+It restores DOC-00's prior participant wording/index relationship and the prior named-
+vendor checklist wording along with the other documented ambiguity; it does not change
+product behavior, revoke historical evidence, or touch settings, branches with open
 PRs, runtime, data, Cloudflare, or live systems.
 
 ## Closure evidence
 
-Closure requires AC-00 through AC-07 and EV-00 through EV-05, complete R4 evidence,
+Closure requires AC-00 through AC-08 and EV-00 through EV-05, complete R4 evidence,
 exact-SHA cross-model independent review, hosted deterministic proof, excluded-file
 identity proof, and reverse rollback. The final record must disclose that actor/runtime
 identity remains declared GitHub provenance, not cryptographic hosted enforcement, and

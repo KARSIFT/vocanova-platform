@@ -12,11 +12,13 @@ self-modification rule.
 ## Sequence
 
 1. **T00 — Canonical policy and operational guidance.** Create ADR-0005 and reconcile
-   active authority, post-merge activation, contributor, reviewer, template, and Ruflo
-   documentation. Replace the checklist's Codex/Claude identity requirement with
-   distinct least-privilege implementer/verifier actors. Add one valid AI-only worked
-   example and one invalid same-actor relabeling example. Update DOC-15/DOC-16 versions
-   and DOC-16 amendment history without rewriting historical evidence.
+   DOC-00's product-authority boundary and indexes plus active governance, post-merge
+   activation, contributor, reviewer, template, and Ruflo documentation. Replace
+   DOC-00's permanent ChatGPT/Codex/Claude assignments and the checklist's Codex/Claude
+   identity requirement with distinct provider-neutral actors. Add one valid AI-only
+   worked example and one invalid same-actor relabeling example. Update DOC-15/DOC-16
+   versions and DOC-16 amendment history without rewriting historical evidence or
+   changing product behavior.
 2. **T01 — Deterministic guard and final evidence.** Add narrow foundation-validation
    invariants and negative fixtures, neutralize the synthetic merge-eligibility actor
    labels, prove evaluator/workflow byte identity, run full governance checks, obtain
@@ -32,6 +34,13 @@ clarification, absent-approved-to-create, or historical-preserve:
 - The post-merge activation checklist's unchecked Codex/Claude identity requirement,
   DOC-10's Codex sizing example, and the change-specification template's Codex owner
   example are present-needs-reconciliation active guidance.
+- DOC-00 §6 is present-needs-reconciliation. Its product vision and founder-controlled
+  decisions are present-compatible. `docs/README.md` and `docs/product/README.md` need
+  relationship/current-direction synchronization with DOC-00 and ADR-0005; they do not
+  create a second authority definition.
+- DOC-12's provider-named change-control example is covered by its active v1.2 neutral
+  amendment; DOC-09's named Codex/Claude data rule is a restrictive synthetic-data
+  permission ceiling. Inspect both and preserve or add only a canonical cross-reference.
 - `CLAUDE.md` remains a tool-specific entry point with no exclusive reviewer authority;
   the AGENTS.md ChatGPT clause remains a scoped read-only permission boundary.
 - ADR-0004 may receive a non-semantic cross-reference/clarification; its accepted
@@ -39,6 +48,9 @@ clarification, absent-approved-to-create, or historical-preserve:
 - `docs/templates/technical-approval-request.md`, the technical-steward appointment,
   historical bootstrap/vendor markers, historical packages, archived docs, transition
   records, and evidence artifacts are inspect-and-preserve surfaces.
+- Inventory every DOC-15 named-provider occurrence. Its current amendment and §17 are
+  normative; its unreconciled v1.0 examples and decision register remain preserved
+  history rather than silently rewritten role authority.
 
 ## Canonical wording contract
 
