@@ -1,0 +1,152 @@
+schema_version: 1
+
+id: VOC-083
+slug: sentry-workerd-compatibility
+title: Workers-safe Sentry instrumentation and workerd rejection detection
+
+type: bugfix-runtime-observability-compatibility
+status: adopted
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the change may alter the web Worker's runtime instrumentation, dependency
+  graph, generated bundle, local workerd smoke contract, and privacy-sensitive error
+  reporting. It changes no live resource, secret, monitoring account, deployment, or
+  product behavior. Escalate rather than implement if selection requires a material
+  architecture decision, new external authority, or a live Sentry/Cloudflare action.
+canonical_path: specs/changes/VOC-083-sentry-workerd-compatibility
+authority_model: voc-079-approval-neutral-active
+requirement_source: >-
+  GitHub issue #105, which records the reproducible OpenNext/workerd runtime failure,
+  Cloudflare's current Workers WebAssembly restrictions, and the requested governed
+  compatibility follow-up. The issue granted planning authority only; repository
+  implementation authority begins only after this adopted package merges through PR #111.
+requirement_approval_status: exact-plan-review-pass-and-decision-owner-approved
+base_branch: agent/voc-081-t04-f2-evidence
+base_sha: a8694932671ad9c44fd2a97c128b14e6089e5faf
+target_branch: develop
+approved_candidate_sha: 8ec6b530b37972a3a9e8102905a4f1b429386941
+owners:
+  decision: accountable-decision-owner-after-independent-plan-review
+  package_preparation: Codex (planner role only)
+  implementation: different builder role after adoption
+  independent_verification: different exact-revision Cloudflare/Workers/Sentry specialist reviewer
+approvals:
+  requirement_direction:
+    status: issue-recorded
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/105
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 8ec6b530b37972a3a9e8102905a4f1b429386941
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385313120
+  package_independent_verification_history:
+    - candidate_sha: 682b33ec1a126e8924395f7d7f7eb26191f2a57a
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973
+    - candidate_sha: 07772a00f753e614d3fd7a51539cabe4f0da1393
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385292757
+  adoption_decision:
+    status: approved-for-adoption
+    candidate_sha: 8ec6b530b37972a3a9e8102905a4f1b429386941
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385610829
+approval_status: adopted
+implementation_authorized: true
+automatic_merge_allowed: true
+production_impact: >-
+  None from plan adoption or repository implementation. The selected implementation
+  must remain credential-free and local/workerd-only; it may not query Sentry, upload
+  source maps, create or alter a Cloudflare/Sentry resource, deploy, inspect production
+  data, or change inherited VOC-080 activation holds.
+rollback_required: true
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+dependencies:
+  - id: VOC-083-DEP-00
+    status: >-
+      Post-adoption T00 gate. Adoption authorizes the evidence/decision matrix plus
+      bounded disposable candidate probes in isolated worktrees; no probe change may
+      land on the canonical task branch. T00 records a provisional selection or stop.
+      T01 applies that selection; T02, not T00, owns final canonical bundle/workerd/
+      reporting acceptance and may send a disproved selection through fresh T00/T01
+      revision and review. This package does not preselect configuration, update, or adapter.
+  - id: VOC-083-DEP-01
+    status: >-
+      Resolved for adoption. VOC-081 T02 supplied the discovery reproduction and T04
+      evidence base at a8694932671ad9c44fd2a97c128b14e6089e5faf; that reviewed tree is
+      integrated into develop by merge commit
+      36d526bdec83e28b17aa30a6814d42b92f058ec1. This package does not depend on VOC-082.
+  - id: VOC-083-DEP-02
+    status: >-
+      The inherited VOC-080-HOLD-00, HOLD-01, and HOLD-02 remain open. No local test
+      may substitute for a Sentry API/live-event query or a hosted deployment.
+action_specific_holds: []
+inherited_holds:
+  - VOC-080-HOLD-00
+  - VOC-080-HOLD-01
+  - VOC-080-HOLD-02
+affected_areas:
+  - apps/web/package.json
+  - apps/web/next.config.ts
+  - apps/web/open-next.config.ts
+  - apps/web/wrangler.jsonc
+  - apps/web/worker-configuration.d.ts (generated binding review/regeneration surface)
+  - apps/web/.env.example (environment contract review surface)
+  - apps/web/sentry.server.config.ts
+  - apps/web/sentry.edge.config.ts
+  - apps/web/src/instrumentation.ts
+  - apps/web/src/instrumentation-client.ts
+  - apps/web/src/app/global-error.tsx
+  - apps/web/scripts/check-worker-compatibility.mjs
+  - apps/web/scripts/test-workerd.mjs
+  - apps/web/tests/workerd/
+  - package.json
+  - pnpm-lock.yaml
+  - scripts/foundation/local-stack-smoke.mjs
+  - scripts/foundation/local-stack-smoke.test.mjs
+  - scripts/foundation/local-development-supervisor.mjs (DSN/token stripping review surface)
+  - scripts/foundation/local-development-supervisor.test.mjs
+  - scripts/foundation/local-development-policy.mjs
+  - scripts/foundation/local-development-policy.test.mjs
+  - .github/workflows/ci.yml
+  - docs/development.md
+  - docs/operations/11-devops-and-ci-cd.md
+  - docs/decisions/ADR-0003-cloudflare-native-runtime-and-data.md
+  - specs/changes/VOC-083-sentry-workerd-compatibility/
+implementation:
+  authorized: true
+  required: true
+  status: authorized-after-pr-111-adoption; T00-isolated-probes-and-decision-only; T01-plus-blocked-by-T00
+  target_branch: develop
+  pull_request: null
+  authority_issue: 105
+release:
+  required: false
+  mode: repository-only-workerd-compatibility
+  production_impact: none
+  deployment: prohibited
+  automatic_merge: policy-eligible-only-no-current-merge-executor
+  migration_required: false
+  rollback_required: true
+repository_adoption_status: adopted-on-pr-111-merge
+adoption_pr: 111
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385610829
+implementation_authority_before_adoption: false
+implementation_authority_status: authorized-after-adoption-subject-to-task-gates
+production_deployment: held-by-VOC-080-HOLD-01
+staging_deployment: held-by-VOC-080-HOLD-00
+production_data_access: held-by-VOC-080-HOLD-02
+autonomous_production_release: disabled
+ehr: not-triggered
+blocking_reasons: []
+post_adoption_task_gates:
+  - T00-authorized-upstream-evidence-disposable-isolated-probes-and-provisional-decision-only
+  - T01-blocked-until-T00-provisional-decision-recorded
+  - T02-owns-final-canonical-bundle-workerd-and-reporting-acceptance
+  - T02-failure-requires-updated-T00-decision-T01-revision-and-fresh-exact-SHA-review
