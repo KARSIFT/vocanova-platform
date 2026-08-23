@@ -21,9 +21,15 @@ it stops for a new decision. It does not claim that any candidate is preselected
 - Evidence: `VOC-083-EV-01`
 - Result: pending
 
-The canonical OpenNext artifact scan passes only when every scanned generated runtime
-chunk is free of the prohibited Worker Wasm compilation forms. Deliberately injected
-positive fixtures for each form fail with a location and rule name.
+In the same CI job, a fresh canonical OpenNext build and fresh local Wrangler dry run
+produce a deterministic complete manifest: required entry, every non-empty regular
+JavaScript module below `.open-next`, all configured-main dry-run modules, executable
+references, and classified non-code assets. Missing/zero/unreadable/unclassified/
+escaping/broken artifacts fail before a compatibility PASS. Every manifest module is
+free of the prohibited Worker Wasm compilation forms. Deliberately injected positive
+fixtures for `compile`, `compileStreaming`, `instantiateStreaming`, and buffer-source
+`instantiate` fail with a location/rule name; the imported precompiled
+`WebAssembly.Module` `instantiate(module, imports)` fixture passes.
 
 ## VOC-083-AC-02 — Error reporting survives the compatibility repair
 
@@ -61,7 +67,9 @@ fixture-tested rationale and cannot include the affected Wasm/rejection forms.
 - Result: pending
 
 The four-workflow invariant, frozen install, audit, CI aggregate, no-live policy,
-documentation, lockfile, and exact affected-file inventory agree. No Sentry API or
+documentation, lockfile, and exact affected-file inventory agree. `ci:web` builds
+before compatibility/dry-run/smoke and local-stack builds/scans its own fresh output;
+no check accepts stale or partial artifacts. No Sentry API or
 source-map upload, Cloudflare mutation/deploy, secret, production-data access, or
 hosted/independent PASS claim is introduced.
 

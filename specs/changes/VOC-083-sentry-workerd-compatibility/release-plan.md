@@ -2,20 +2,23 @@
 
 ## Repository delivery and authority
 
-This draft grants no implementation authority. After independent plan review and
-adoption, implementation is delivered as reversible repository-only task commits and
-different-role exact-SHA review. Merging a revision does not deploy a Worker, contact
-Sentry, upload source maps, query an account, provision a resource, or complete any
-VOC-080 hold. The existing four workflows remain deterministic evidence only.
+This draft grants no implementation authority. The review of
+`682b33ec1a126e8924395f7d7f7eb26191f2a57a` failed at PR #111 comment 5385262973;
+this revision needs a fresh exact-SHA review before adoption. After adoption, T00 alone
+is a read-only/evidence-only selection gate; T01+ implementation is blocked until T00
+records its decision. Subsequent work is delivered as reversible repository-only task
+commits and different-role exact-SHA review. Merging a revision does not deploy a
+Worker, contact Sentry, upload source maps, query an account, provision a resource, or
+complete any VOC-080 hold. The existing four workflows remain deterministic evidence only.
 
 ## Preconditions, monitoring, and outcome
 
 Before implementation review passes, the final revision must show the candidate matrix,
-generated bundle scan, no unexpected workerd diagnostics, reporting-equivalence test,
-frozen dependency/lockfile evidence, audit where applicable, and docs inventory. The
-runtime keeps error reporting/privacy controls; local test transport and logs are not a
-claim that an event reached a hosted Sentry project. There is no staging, production,
-or live monitoring outcome to record.
+same-job fresh complete generated-artifact manifest/scan, no unexpected workerd
+diagnostics, reporting-equivalence test, frozen dependency/lockfile evidence, audit
+where applicable, and docs inventory. The runtime keeps error reporting/privacy
+controls; local test transport and logs are not a claim that an event reached a hosted
+Sentry project. There is no staging, production, or live monitoring outcome to record.
 
 ## Rollback
 

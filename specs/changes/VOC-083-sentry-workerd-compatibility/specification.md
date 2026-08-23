@@ -72,10 +72,30 @@ The generated OpenNext Worker and all runtime chunks reachable on its module-eva
 or request paths must not call `WebAssembly.compile`, `WebAssembly.compileStreaming`,
 `WebAssembly.instantiate` with a buffer/source, or `WebAssembly.instantiateStreaming`.
 The invariant must inspect actual generated output after the canonical OpenNext build,
-not merely TypeScript source or `next build` intermediates. It must include positive
-fixtures proving that the detector fails on each prohibited spelling/compiled path and
-must avoid false claims that the absence of the current base64 blob proves future
-compatibility.
+not merely TypeScript source or `next build` intermediates.
+
+For each fresh build, the canonical inventory is: the required `.open-next/worker.js`
+entry; every non-empty regular `*.js`, `*.mjs`, and `*.cjs` file recursively under the
+real `.open-next` root; and every JavaScript module emitted by the local Wrangler
+dry-run output/manifest that is loaded by the configured `main` entry. The scanner must
+write a deterministic relative-path-and-digest manifest, walk static and literal dynamic
+imports/requires from each entry, and scan the complete inventory rather than a guessed
+subset. It must fail closed on a missing/empty root or entry, zero JavaScript modules,
+unreadable/non-regular module, symlink escaping the generated root, missing referenced
+module, unknown referenced executable extension, incomplete Wrangler manifest/output,
+or a module outside the manifest. Generated assets that are not executable modules are
+classified in the manifest rather than silently omitted. The implementation must obtain
+this inventory from a same-job fresh canonical build and fresh local dry run; stale
+output from a preceding CI step/job is invalid.
+
+Fixtures must prove failures for every prohibited form, including buffer-source
+`instantiate` forms (`ArrayBuffer`, typed array, and DataView) as distinct from module
+instantiation. They must also prove that the Cloudflare-supported form
+`import compiledModule from "./fixture.wasm"; await WebAssembly.instantiate(compiledModule, imports)`
+passes when the imported value is classified as a precompiled `WebAssembly.Module`.
+The detector must distinguish that module form from BufferSource instead of rejecting
+all `instantiate` calls. No fixture may use runtime compilation to construct the
+passing module.
 
 ### VOC-083-R02 — Reporting and privacy are preserved
 
@@ -105,9 +125,14 @@ must be redacted, bounded, and emitted without secrets or personal data.
 
 ### VOC-083-R04 — Deterministic, credential-free integration
 
-The selected work must remain within the existing four workflow inventory. The named
-web/local-stack jobs and required aggregate must run the bundle invariant and real
-workerd negative fixture where applicable. Frozen installs, disabled source-map upload,
+The selected work must remain within the existing four workflow inventory. `ci:web`
+must run the fresh canonical OpenNext build before the generated-artifact compatibility
+scan, then run its dry run and real workerd smoke from that same build lineage;
+`cloudflare:compatibility` may no longer precede `cloudflare:build` in its aggregate.
+The local-stack owner must likewise build and scan its own fresh Worker before starting
+its smoke, rather than rely on another job's artifacts. The named web/local-stack jobs
+and required aggregate must run this bundle invariant and real workerd negative fixture
+where applicable. Frozen installs, disabled source-map upload,
 local service binding, local D1 state, disabled Sentry DSNs, no Sentry API/live query,
 and no remote Cloudflare operation remain mandatory. Any dependency change must be
 minimal, locked, audited at the documented threshold, and independently reviewed.
@@ -119,6 +144,15 @@ service-binding contract may change. A rejected candidate must leave the current
 instrumentation intact until a replacement has passed its reporting-equivalence and
 workerd tests. Build or log-invariant failure blocks CI; an unexpected rejection is not
 made acceptable by changing the log parser or suppressing reporting.
+
+## Post-adoption selection gate
+
+Plan adoption authorizes only `VOC-083-T00` as a read-only/evidence-only selection
+gate. T00 may reproduce against local generated artifacts, inspect versions and primary
+sources, and record the candidate matrix/decision; it may not edit runtime,
+configuration, dependencies, lockfiles, or active documentation. T01+ are blocked
+until T00 records a qualified decision. If no candidate qualifies, T00 stops and routes
+a new decision; it does not authorize an observability-reducing workaround.
 
 ## External research references
 

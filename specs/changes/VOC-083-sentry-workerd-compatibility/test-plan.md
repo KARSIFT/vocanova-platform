@@ -3,24 +3,33 @@
 ## VOC-083-TEST-00 — Candidate matrix and controlled reproduction
 
 - Covers: `VOC-083-AC-00`
-- Preconditions: adopted package and frozen locked base/selected revision.
+- Preconditions: adopted package; T00 is the only authorized task; frozen locked base.
 - Procedure: reproduce the generated-bundle/workerd failure; inspect dependency/export
   paths; retrieve current primary Cloudflare and Sentry evidence; compare all three
   candidates for Worker safety, reporting features, package graph, maintenance,
   privacy, rollback, and no-live feasibility.
-- Expected result: one qualified candidate with exact evidence, or an explicit blocked
-  result; no candidate is assumed valid because it merely suppresses the log.
+- Expected result: one qualified candidate decision with exact evidence, or an explicit
+  stop/escalation; no candidate is assumed valid because it merely suppresses the log.
+  No runtime/configuration/dependency/lockfile/doc change occurs in this evidence-only task.
 - Evidence: `VOC-083-EV-00`.
 
 ## VOC-083-TEST-01 — Generated OpenNext bundle invariant
 
 - Covers: `VOC-083-AC-01`
-- Preconditions: canonical OpenNext build output exists.
-- Procedure: inspect all relevant generated runtime chunks for the prohibited Workers
-  Wasm compilation forms; run positive/minified fixture cases for each form and a clean
-  fixture; keep source scan only as diagnostic context.
-- Expected result: selected generated bundle passes; every unsafe fixture fails with
-  path/rule output before workerd can be claimed compatible.
+- Preconditions: same-job/fresh canonical OpenNext build and local Wrangler dry run;
+  neither may reuse a prior job's generated root.
+- Procedure: require `.open-next/worker.js`; recursively enumerate every non-empty
+  regular `*.js`/`*.mjs`/`*.cjs` file under its real root; enumerate configured-main
+  dry-run modules; classify non-code assets; walk static/literal dynamic imports and
+  requires; write path/digest manifest; and fail on zero/missing/unreadable/escaping/
+  broken/unknown/unmanifested executable artifact. Scan every manifest module for the
+  prohibited forms. Run positive/minified fixtures for `compile`, `compileStreaming`,
+  `instantiateStreaming`, and buffer-source `instantiate` (`ArrayBuffer`, typed array,
+  `DataView`), plus a passing fixture importing a precompiled `.wasm` module and calling
+  `WebAssembly.instantiate(compiledModule, imports)`.
+- Expected result: only a complete fresh artifact inventory can pass; every unsafe or
+  incomplete fixture fails with path/rule output, while the supported precompiled-module
+  fixture passes. Source scan and real workerd smoke remain complementary evidence.
 - Evidence: `VOC-083-EV-01`.
 
 ## VOC-083-TEST-02 — Reporting-equivalence and privacy contract
@@ -52,10 +61,12 @@
 - Covers: `VOC-083-AC-04`
 - Preconditions: frozen install.
 - Procedure: run web/local-stack commands and inspect `ci.yml` aggregate/workflow count,
-  credentials, Sentry API/source-map/upload references, remote Wrangler flags, service
-  binding, and dependency audit when changed.
-- Expected result: required aggregates include the new evidence; exactly four workflows
-  remain and no credential, query, upload, deploy, or remote operation exists.
+  command ordering and same-job fresh lineage (`build -> compatibility -> dry-run ->
+smoke`), local-stack fresh build/scan, credentials, Sentry API/source-map/upload
+  references, remote Wrangler flags, service binding, and dependency audit when changed.
+- Expected result: required aggregates include the new evidence with no stale/partial
+  artifact bypass; exactly four workflows remain and no credential, query, upload,
+  deploy, or remote operation exists.
 - Evidence: `VOC-083-EV-04`.
 
 ## VOC-083-TEST-05 — Documentation and affected-file inventory

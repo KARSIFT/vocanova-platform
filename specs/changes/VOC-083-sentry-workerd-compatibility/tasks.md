@@ -6,13 +6,16 @@
 - Acceptance: `VOC-083-AC-00`
 - Tests: `VOC-083-TEST-00`
 - Evidence: `VOC-083-EV-00`
-- Status: blocked-until-plan-adoption
+- Status: authorized-evidence-only-after-adoption
 
-Reproduce the locked failure locally, inventory direct/transitive Sentry imports and
+After adoption, reproduce the locked failure locally, inventory direct/transitive Sentry imports and
 generated bundle locations, retrieve current primary-source compatibility evidence,
 and compare configuration fix, package update, and Workers-native adapter. Document an
 exact selected version/configuration and rejected alternatives only after reporting-
-equivalence and safety evidence; otherwise stop and route a new decision.
+equivalence and safety evidence; otherwise stop and route a new decision. T00 must not
+change runtime code, build/Wrangler config, dependency manifest/lockfile, tests, CI, or
+active documentation; it only records the required matrix/decision. T01+ remain blocked
+until that record is complete.
 
 ## VOC-083-T01 — Preserve reporting with the selected Workers-safe repair
 
@@ -34,9 +37,11 @@ non-network reporting-equivalence tests. Do not turn off Sentry or source-map co
 - Evidence: `VOC-083-EV-01`, `VOC-083-EV-03`, `VOC-083-EV-04`
 - Status: blocked-by-T01
 
-Add output-artifact invariants and fixture-backed log classification to both local
-workerd smoke owners; make CI require them through existing commands/jobs. Preserve the
-service-binding and disabled-DSN no-network contract.
+Add a complete fresh-artifact manifest/invariant and fixture-backed log classification
+to both local workerd smoke owners. Include failing unsupported-Wasm, missing/zero/
+partial-inventory, and passing imported-precompiled-module fixtures; reorder `ci:web`
+to build before compatibility/dry-run/smoke and make local-stack build/scan fresh output
+before its own smoke. Preserve the service-binding and disabled-DSN no-network contract.
 
 ## VOC-083-T03 — Documentation, exact-SHA review, and rollback evidence
 
@@ -48,5 +53,6 @@ service-binding and disabled-DSN no-network contract.
 
 Reconcile affected active docs, run the proportionate final checks, independently
 review the exact final revision with Cloudflare/Workers/Sentry specialization, and
-rehearse repository-only rollback. Do not claim hosted proof, independent PASS before
-it exists, or any live Sentry/Cloudflare outcome.
+rehearse repository-only rollback, and request a fresh exact-SHA review after the
+preserved prior FAIL. Do not claim hosted proof, independent PASS before it exists, or
+any live Sentry/Cloudflare outcome.

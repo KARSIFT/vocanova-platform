@@ -10,8 +10,10 @@ or execute a held external action.
 
 ## Runtime, dependency, and bundle impact
 
-`apps/web/next.config.ts` imports `withSentryConfig`; server/edge instrumentation,
-Next request-error capture, and `global-error.tsx` import `@sentry/nextjs`.
+`apps/web/next.config.ts` imports `withSentryConfig`; `apps/web/open-next.config.ts`,
+`apps/web/wrangler.jsonc`, generated `worker-configuration.d.ts`, and `.env.example`
+are candidate/configuration review surfaces. Server/edge instrumentation, Next request-
+error capture, and `global-error.tsx` import `@sentry/nextjs`.
 `pnpm-lock.yaml` resolves `@sentry/nextjs@10.69.0` and the
 `@apm-js-collab/code-transformer@0.18.1` path. The bundle boundary is therefore
 affected even where source code has no explicit `WebAssembly` reference. The selected
@@ -20,7 +22,11 @@ candidate must prove the generated Worker, not infer safety from source-level im
 `apps/web/scripts/test-workerd.mjs` currently accumulates Wrangler output only for a
 request assertion failure. `scripts/foundation/local-stack-smoke.mjs` owns the
 two-Worker evidence. Both must be reviewed for bounded capture, process cleanup, and
-redaction so a successful response cannot conceal a runtime failure.
+redaction so a successful response cannot conceal a runtime failure. The local
+development supervisor/policy and their tests are protected review surfaces because
+they strip DSNs/tokens; modify them only if the selected candidate requires a proven,
+bounded adjustment. Any candidate requiring a file outside `affected_areas` must stop
+for a separately reviewed scope change rather than edit it opportunistically.
 
 ## Security and privacy
 
@@ -56,16 +62,19 @@ pull-request behavior remain invariant.
 
 - `VOC-083-RISK-00`: a broad alias/update hides runtime Wasm by removing required
   capture. Mitigation: three-way evidence matrix plus capture-equivalence tests.
-- `VOC-083-RISK-01`: a source scan misses a generated/minified call. Mitigation: scan
-  canonical generated output with positive fixtures and a real workerd execution.
+- `VOC-083-RISK-01`: a source scan misses a generated/minified call or stale/subset
+  output makes a scan look clean. Mitigation: same-job fresh build/dry-run, deterministic
+  complete artifact manifest, missing/zero/partial-inventory failures, positive and
+  supported-module fixtures, and real workerd execution.
 - `VOC-083-RISK-02`: log matching is so broad that it creates false passes/failures or
   leaks data. Mitigation: narrow classified diagnostics, bounded redacted output, and
   positive/negative parser fixtures.
 - `VOC-083-RISK-03`: an Sentry update alters transitive packages or build behavior.
   Mitigation: minimal lockfile diff, frozen install, audit, license/provenance review,
   generated-bundle diff, and rollback.
-- `VOC-083-DEP-00`: selection evidence is unresolved at drafting time; it blocks
-  implementation until completed after plan adoption.
+- `VOC-083-DEP-00`: selection evidence is deliberately unresolved at drafting time.
+  After adoption it authorizes T00 evidence-only selection; it blocks T01+ runtime
+  changes, not package adoption itself.
 - `VOC-083-EV-00` through `EV-06`: candidate matrix, bundle scan, capture contract,
   smoke-log fixtures, CI/docs inventory, and exact-SHA review/rollback evidence.
 

@@ -2,31 +2,40 @@
 
 ## Preconditions and protected areas
 
-Do not begin until this draft receives independent exact-revision plan review, the
-applicable decision owner adopts it, and `implementation_authorized` becomes true.
-The builder must start from the adopted revision, re-check locked versions and current
-primary Cloudflare/Sentry documentation, and remain within `apps/web`, local smoke/CI,
-lockfile, and active documentation. No Sentry/Cloudflare credentials, API calls,
+Do not begin until this remediation revision receives a fresh independent exact-SHA plan
+review, the applicable decision owner adopts it, and `implementation_authorized` becomes
+true. The prior SHA `682b33ec1a126e8924395f7d7f7eb26191f2a57a` received FAIL at PR
+#111 comment 5385262973; it remains historical evidence, not a passed review. After
+adoption, T00 alone is authorized as evidence-only work. T01+ remain blocked until T00
+records a qualified candidate decision. The builder must start from the adopted
+revision, re-check locked versions/current primary Cloudflare/Sentry documentation, and
+remain within the declared surfaces. No Sentry/Cloudflare credentials, API calls,
 source-map upload, deployment, account query, billing action, or inherited-hold action
 is authorized.
 
 ## File reconciliation and implementation sequence
 
-1. **T00 — Reproduce and select from evidence.** Reproduce #105 on the locked base;
+1. **T00 — Reproduce and select from evidence (post-adoption, evidence-only).**
+   Reproduce #105 on the locked base;
    capture sanitized generated-bundle locations and workerd output. Compare the three
    candidates in `VOC-083-R00`; verify exact version exports, upstream status, and the
    supported reporting surface. Record a selection decision only when all required
-   evidence is present. Stop/escalate if none qualifies.
+   evidence is present. Record the decision and rejected candidates without editing
+   runtime/configuration/dependencies/lockfile/docs. Stop/escalate if none qualifies.
 2. **T01 — Implement the selected narrow repair.** Modify only the selected
    configuration/import/adapter and necessary lockfile. Keep client/server behavior
    explicitly separated, preserve capture hooks, and make test transport injection
    impossible in normal runtime configuration. Do not remove error reporting as an
    alternative to compatibility.
 3. **T02 — Make bundle and log safety executable.** Add a generated OpenNext bundle
-   scanner with fixtures for prohibited Wasm forms. Harden `test-workerd.mjs` and the
-   two-Worker local-stack owner to classify bounded output and fail on unexpected
-   rejection/error diagnostics despite HTTP success. Add this evidence to the existing
-   web/local-stack CI paths and required aggregate without adding a workflow.
+   scanner with a complete deterministic fresh-artifact manifest, unsafe and supported
+   precompiled-module Wasm fixtures, and fail-closed missing/partial inventory cases.
+   Reorder `ci:web` so the canonical build precedes compatibility, dry run, and smoke;
+   make local-stack build/scan its own fresh artifact before it starts. Harden
+   `test-workerd.mjs` and the two-Worker local-stack owner to classify bounded output
+   and fail on unexpected rejection/error diagnostics despite HTTP success. Add this
+   evidence to existing web/local-stack CI paths and required aggregate without adding
+   a workflow.
 4. **T03 — Reconcile and verify.** Review every affected runtime/config/test/doc/
    lockfile file, update only documentation made inaccurate, run deterministic checks,
    obtain a different-role exact-SHA Cloudflare/Workers/Sentry specialist verdict, and
@@ -43,6 +52,12 @@ errors, browser capture, trace/context behavior if retained, and non-network tes
 transport. Do not retain an obsolete `@sentry/nextjs` server import merely for API
 convenience if it reintroduces the unsafe graph.
 
+Before T01 modifies a selected candidate surface, reconcile it with the affected-area
+inventory: OpenNext config/wrapper, Wrangler config/generated binding and environment
+contract, instrumentation/capture paths, package/lockfile, compatibility and smoke
+owners, local supervisor/policy, CI, and active docs. A candidate requiring an omitted
+surface is a stop-and-scope-change condition, not permission to broaden this package.
+
 ## Validation and independent verification
 
 At minimum, run the commands that exist on the implementation revision:
@@ -50,8 +65,8 @@ At minimum, run the commands that exist on the implementation revision:
 ```bash
 pnpm install --frozen-lockfile
 pnpm --filter @vocanova/web cloudflare:build
-pnpm --filter @vocanova/web cloudflare:compatibility
-pnpm --filter @vocanova/web cloudflare:preview:test
+pnpm --filter @vocanova/web cloudflare:compatibility # consumes same-job fresh build/dry run manifest
+pnpm --filter @vocanova/web cloudflare:preview:test # consumes same-job fresh build lineage
 pnpm test:local-stack
 pnpm ci:web
 pnpm ci:local-stack
@@ -62,7 +77,10 @@ bash scripts/governance/classify-change-risk.sh
 git diff --check
 ```
 
-Run a narrower command only when the revision demonstrates that a listed command is
+`ci:web` must enforce the same build -> compatibility -> dry-run -> smoke lineage, and
+`test:local-stack` must create/build/scan a new local artifact lineage before its
+two-Worker smoke; neither may accept a previous job's `.open-next` output. Run a
+narrower command only when the revision demonstrates that a listed command is
 unavailable; record that fact rather than reporting it as passing. The independent
 Cloudflare/Workers/Sentry specialist receives the exact SHA, candidate matrix, bundle
 scan output, sanitized smoke logs, lockfile diff/audit, reporting-equivalence evidence,
