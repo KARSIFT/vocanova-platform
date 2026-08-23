@@ -1,18 +1,4 @@
-import * as Sentry from "@sentry/nextjs";
-
-const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
-
-if (sentryDsn) {
-  Sentry.init({
-    dsn: sentryDsn,
-    environment:
-      process.env.SENTRY_ENVIRONMENT ??
-      process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ??
-      process.env.ENVIRONMENT ??
-      process.env.NODE_ENV,
-    release:
-      process.env.SENTRY_RELEASE ?? process.env.NEXT_PUBLIC_SENTRY_RELEASE,
-    debug: false,
-    spotlight: false,
-  });
-}
+// The generated OpenNext Worker owns server initialization. Keeping this
+// module as an explicit no-op prevents Next's Node server barrel from being
+// pulled into the Worker graph.
+export function register(): void {}

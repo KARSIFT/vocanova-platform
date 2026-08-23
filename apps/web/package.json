@@ -18,6 +18,7 @@
     "cloudflare:dry-run:staging": "wrangler deploy --dry-run --experimental-provision=false --experimental-auto-create=false --env staging --outdir .wrangler/dry-run/staging",
     "cloudflare:limits": "node scripts/check-worker-limits.mjs",
     "cloudflare:compatibility": "node scripts/check-worker-compatibility.mjs",
+    "test:sentry": "node --experimental-strip-types --test tests/sentry/reporting-seams.test.ts",
     "lint": "eslint .",
     "typecheck": "next typegen && tsc --noEmit --pretty false",
     "typecheck:e2e": "tsc -p tests/tsconfig.json --noEmit --pretty false",
@@ -28,7 +29,8 @@
   },
   "dependencies": {
     "@opennextjs/cloudflare": "1.20.2",
-    "@sentry/nextjs": "^10.69.0",
+    "@sentry/cloudflare": "10.69.0",
+    "@sentry/react": "10.69.0",
     "@vocanova/api-client": "workspace:*",
     "next": "16.3.0",
     "react": "19.2.8",
