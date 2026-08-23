@@ -38,5 +38,15 @@ records, while validation applies the new drafting rule to VOC-080 and later pac
 The field remains policy metadata consumed by the Governance workflow's read-only
 eligibility report; no current workflow performs a merge.
 
+## Role and actor evidence
+
+For every plan and implementation, record the attributable builder and reviewer
+actors, their roles, the exact reviewed SHA, verdict, resolved blocking findings, and
+optionally runtime provenance. A role is a responsibility; an actor is a human or
+separately instantiated AI participant. The reviewer must be a different non-author
+actor for that SHA. A relabel, new session, model, or provider is not independence;
+model/provider provenance may harden evidence but never creates authority. Reviewer
+evidence and merge eligibility never satisfy a separately defined action-specific hold.
+
 The executable R0–R4 example matrix is
 [`examples/automatic-merge-drafting.json`](examples/automatic-merge-drafting.json).

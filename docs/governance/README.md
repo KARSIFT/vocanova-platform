@@ -9,9 +9,10 @@ used to work alongside three separate amendments (A-002, A-003, A-004), each
 scoped to "supersedes only this clause." DOC-16 v2.0 folded all three amendments'
 operative rules directly into itself; the amendment files are retired and removed.
 DOC-16 v3.0 added VOC-079's approval-neutral R4 transition. DOC-16 v3.1 records
-VOC-080's Cloudflare-native target and external Ruflo permission boundary without
-granting either platform authority. Historical approval evidence remains preserved
-and non-reusable in DOC-16's "Amendment history" section.
+VOC-080's Cloudflare-native target and external Ruflo permission boundary; v3.2
+clarifies that independent roles require distinct actors, while runtime provenance is
+not authority. Historical approval evidence remains preserved and non-reusable in
+DOC-16's "Amendment history" section.
 
 ## Current documents
 
@@ -25,6 +26,10 @@ and non-reusable in DOC-16's "Amendment history" section.
 | [Approval matrix](approval-matrix.md)                                 | Required decision, technical, verification, and release authorities                                                                                       |
 | [Repository settings](repository-settings.md)                         | Required GitHub and external configuration                                                                                                                |
 | [Post-merge activation checklist](post-merge-activation-checklist.md) | Tracked steps required before protected or autonomous releases                                                                                            |
+
+[ADR-0005](../decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md)
+is the companion decision record for the role/actor, exact-revision, and provenance
+contract. A reviewer verdict never replaces separately assigned action authority.
 
 Governance changes are protected changes. An author or implementation agent cannot
 be the independent reviewer or merger of its own revision. Risk class alone creates no

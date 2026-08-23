@@ -35,6 +35,16 @@ may refine them but may not weaken governance or security.
   separately defined action-specific authority. A human or AI agent may occupy either
   role, but the roles must be different and this document does not make a permanent
   vendor assignment. Resolve every blocking finding before merge.
+- A role is a responsibility and an actor is an attributable human or separately
+  instantiated AI participant. Independence requires a different actor with no
+  authorship of the reviewed exact revision; relabeling one actor, changing its prompt,
+  or starting another session does not create separation. Model/provider provenance may
+  harden evidence but never grants authority. A reviewer that materially edits a SHA is
+  the builder of the new SHA, which needs fresh checks and different-actor review.
+  Reviewer evidence and merge eligibility never satisfy separately assigned authority
+  for contracts, spending, sensitive-data disclosure, production access, irreversible
+  external mutation, or an initial public or predefined major launch. See DOC-16 and
+  ADR-0005.
 - Governance replacements are evaluated under the authority effective before them;
   they cannot authorize their own adoption.
 - Any change to workflow behavior, governance fields, or repository settings must

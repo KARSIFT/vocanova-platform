@@ -71,6 +71,12 @@ gates pass. Ruflo never substitutes for an action-specific hold or EHR.
   operator-side capability. A fresh clone does not silently start agents.
 - Provider or model changes do not change governance authority; participant identity,
   role separation, exact SHA, evidence, and verdict are what matter.
+- [ADR-0005](ADR-0005-provider-neutral-distinct-agent-role-separation.md) defines the
+  canonical role/actor rule: a separately instantiated AI actor is valid, but a
+  relabeled actor or provenance change is not independent review.
+- [ADR-0005](ADR-0005-provider-neutral-distinct-agent-role-separation.md) defines the
+  canonical role/actor rule: a separately instantiated AI actor is valid, but a
+  relabeled actor or provenance change is not independent review.
 - Ruflo downtime or removal cannot block deterministic CI or corrupt canonical state.
   Work continues through ordinary GitHub branches and pull requests.
 - Any request for GitHub writes, Cloudflare access, production data, deployment, DNS,

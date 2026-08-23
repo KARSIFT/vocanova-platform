@@ -133,8 +133,8 @@ implementation work → GitHub Issues; status → GitHub Projects; release scope
 production history → Releases/deployments.
 
 Priorities P0 (critical: outage, data loss, active security incident) through P3 (post-MVP
-polish); most planned work is P2. Sizes XS/S/M/L — Codex should never receive an `L` issue directly;
-split it first.
+polish); most planned work is P2. Sizes XS/S/M/L — a builder actor should never receive
+an `L` issue directly; split it first.
 
 ## 5. Definition of Ready / Definition of Done
 

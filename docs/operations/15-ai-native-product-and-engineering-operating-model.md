@@ -1,12 +1,12 @@
 ---
 id: DOC-15
 title: Vocanova AI-Native Product and Engineering Operating Model
-version: 1.2
+version: 1.3
 status: approved
 owner: founder
 canonical_path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
 approved_at: 2026-07-13
-last_reviewed_at: 2026-08-22
+last_reviewed_at: 2026-08-23
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -29,13 +29,14 @@ related_decisions:
   - ADR-0002
   - ADR-0003
   - ADR-0004
+  - ADR-0005
 revision_note: >
-  VOC-080 selects the Cloudflare-native runtime and external Ruflo coordination
-  model. Provider names remain historical examples, not permanent role authority;
+  VOC-082 clarifies provider-neutral distinct-actor role separation. Provider names
+  remain historical examples or scoped tool boundaries, not permanent role authority;
   owned-server and automatic-staging clauses remain history, not current behavior.
 ---
 
-# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.2
+# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.3
 
 ## Document status
 
@@ -65,6 +66,18 @@ contract, evidence handoff, memory limits, and synthetic rehearsal live in the
 [Ruflo operator runbook](ruflo-external-orchestration.md). Ruflo's generated strict
 permissions are advisory and cannot substitute for repository guards, credential
 absence, exact-revision review, action authority, or OS-level isolation.
+
+**VOC-082 amendment (2026-08-23):** For current authority, a role is a responsibility
+and an actor is an attributable human or separately instantiated AI participant. A
+different role name, prompt, session, model, or provider does not make an actor
+independent. The plan author and implementation builder cannot independently review,
+approve, adopt, or merge their own exact revision; a material reviewer edit creates a
+new builder-authored SHA requiring fresh checks and a different reviewer. Model/provider
+provenance may harden evidence, and an expressly applicable cross-model rule remains
+mandatory for its stated scope, but neither creates authority. A technical verdict or
+merge eligibility does not satisfy separately assigned external-effect authority. See
+[DOC-16](../governance/16-autonomous-development-operating-model.md) and
+[ADR-0005](../decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md).
 
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 
@@ -1612,7 +1625,7 @@ GitHub Actions runs deterministic CI, governance, quality, and security checks
     ↓
 different reviewer posts an exact-revision PASS / PASS WITH NON-BLOCKING FINDINGS / FAIL
     ↓
-an authorized actor, different from the implementer, verifies the gates and merges
+non-author merge actor audits the gates and performs any separately authorized merge
 ```
 
 Issue creation, labels, and comments trigger no planning or implementation. GitHub
@@ -1632,9 +1645,13 @@ new implementation revision followed by complete checks and fresh independent re
 | Promote `develop` to `main`                          | Separately reviewed pull request; no current promotion workflow                                                           |
 | Deploy                                               | T10 held manual Cloudflare state machine exists; current manifest blocks before environment jobs/secrets                  |
 
-Roles are responsibilities, not permanent vendors. The builder never approves or
-merges its own work, and a reviewer that authors a material correction becomes a
-builder whose revision needs fresh independent review.
+Roles are responsibilities, not permanent vendors. Actors are attributable humans or
+separately instantiated AI participants. The builder never approves or merges its own
+work, and a reviewer that authors a material correction becomes a builder whose
+revision needs fresh checks and different-actor review. A role relabel, new session,
+model, or provider is not independence or authority. Model/provider choice may harden
+evidence; an expressly applicable cross-model rule remains scoped evidence, not an
+approval source.
 
 R0-R4 are consequence classes, not personal-approval classes. R4 requires an explicit
 decision record, impact and contingency evidence, applicable specialist and

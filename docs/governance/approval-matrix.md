@@ -17,20 +17,25 @@ technical-steward approval merely because of its label. R4 still requires the st
 decision, impact, contingency, specialist, deterministic, and exact-revision review
 evidence. EHR applies only when an actual exceptional trigger exists.
 
-Every meaningful plan and implementation has a builder and a different reviewer.
-Builders cannot verify, approve, or merge their own revision. Independent verification
-must name the exact revision and all blocking findings must be resolved. Humans and AI
-agents may fill either role; vendor identity does not create authority.
+Every meaningful plan and implementation has a builder and a different reviewer actor.
+A role is a responsibility; an actor is an attributable human or separately
+instantiated AI participant. Builders cannot verify, approve, or merge their own
+revision. Independent verification must name the exact revision and all blocking
+findings must be resolved. A reviewer that materially edits the revision becomes its
+builder and needs a different reviewer for the new SHA. Model/provider choice may
+harden evidence but does not create authority; an explicit cross-model rule remains a
+scoped evidence control. Verification and merge eligibility cannot satisfy separately
+assigned action-specific authority.
 
-| Change/action | Independent verification and controls | Additional action-specific authority | Automation permission |
-|---|---|---|---|
-| Routine R0-R2 | Proportionate deterministic checks and exact-revision independent verification | None from risk class | Only where separately implemented and proven |
-| Routine R3 protected technical work | Strengthened risk-specific controls, specialist evidence, and exact-revision independent verification | None from risk class | Only where every applicable technical gate is implemented and proven |
-| R4 consequential decision/change | R3 controls too when technically protected; explicit decision and impact records; contingency/rollback evidence; exact-revision independent verification | None from risk class; separately named external-effect authority still applies | Eligible only when the complete R4 evidence contract and every explicit hold pass |
-| Initial public or predefined major launch | Complete R4 and independent release evidence plus every applicable technical gate | Recorded go/no-go from the role explicitly assigned launch authority | Publish only after that authority and technical activation are evidenced |
-| Emergency protective rollback using approved runbook | Post-action verification and permanent evidence | Pre-authorized runbook/incident authority; any new external effect uses its separately defined authority | Only a predefined safer-than-waiting action may execute automatically |
-| Change to CI/CD, ownership, approval, agent authority, or this matrix | Independent governance/security review, privilege analysis, contingency evidence, and fail-closed validation | None from risk class; the pre-change rules govern the transition | Cannot self-modify into effect |
-| EHR escalation | Operation stops and qualified expertise is recorded | Exceptional qualified human review for the triggered matter only | Not a routine approval layer |
+| Change/action                                                         | Independent verification and controls                                                                                                                    | Additional action-specific authority                                                                     | Automation permission                                                             |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Routine R0-R2                                                         | Proportionate deterministic checks and exact-revision independent verification                                                                           | None from risk class                                                                                     | Only where separately implemented and proven                                      |
+| Routine R3 protected technical work                                   | Strengthened risk-specific controls, specialist evidence, and exact-revision independent verification                                                    | None from risk class                                                                                     | Only where every applicable technical gate is implemented and proven              |
+| R4 consequential decision/change                                      | R3 controls too when technically protected; explicit decision and impact records; contingency/rollback evidence; exact-revision independent verification | None from risk class; separately named external-effect authority still applies                           | Eligible only when the complete R4 evidence contract and every explicit hold pass |
+| Initial public or predefined major launch                             | Complete R4 and independent release evidence plus every applicable technical gate                                                                        | Recorded go/no-go from the role explicitly assigned launch authority                                     | Publish only after that authority and technical activation are evidenced          |
+| Emergency protective rollback using approved runbook                  | Post-action verification and permanent evidence                                                                                                          | Pre-authorized runbook/incident authority; any new external effect uses its separately defined authority | Only a predefined safer-than-waiting action may execute automatically             |
+| Change to CI/CD, ownership, approval, agent authority, or this matrix | Independent governance/security review, privilege analysis, contingency evidence, and fail-closed validation                                             | None from risk class; the pre-change rules govern the transition                                         | Cannot self-modify into effect                                                    |
+| EHR escalation                                                        | Operation stops and qualified expertise is recorded                                                                                                      | Exceptional qualified human review for the triggered matter only                                         | Not a routine approval layer                                                      |
 
 The one-time VOC-002 migration approval and the pre-transition VOC-079 founder approval
 are exhausted and must never be reused. CODEOWNERS remains review routing and is not

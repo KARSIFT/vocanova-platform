@@ -38,8 +38,8 @@ approvals are exhausted and must never be reused.
 5. Check migrations, rollout, monitoring, rollback, documentation, complete risk
    evidence, and any separately required action-specific authority.
 6. Re-review the exact revision after material remediation.
-7. Bind the report to the exact reviewed commit SHA and explicitly verify that Codex
-   did not approve or merge its implementation, identify the active authority model,
+7. Bind the report to the exact reviewed commit SHA and explicitly verify that the
+   implementation builder did not approve or merge it, identify the active authority model,
    and report every still-required R3/R4 evidence, action-specific authority, EHR,
    adoption, and activation gate.
 
@@ -61,7 +61,8 @@ FINDINGS`, or `FAIL`, with exact file/line evidence, commands inspected, limitat
 and approvals still required.
 
 Claude Code must not approve its own substantial correction. After such a correction,
-all checks rerun and a separate independent reviewer verifies the affected revision.
+it is the builder of the affected SHA, all checks rerun, and a separate actor verifies
+that revision. A new session, model, or provider does not itself establish separation.
 Claude Code has no repository-write, merge, deployment, secret, production-data,
 founder, or technical-steward authority.
 

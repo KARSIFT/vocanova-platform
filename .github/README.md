@@ -56,6 +56,13 @@ the verdict bound to the exact revision and blocking findings resolved. R4 requi
 strongest risk evidence but no founder approval solely because of its label. Explicit
 action-specific authority and genuinely triggered EHR remain separate gates.
 
+A role is a responsibility and an actor is an attributable human or separately
+instantiated AI participant. A different actor that did not author the exact revision
+is required for review; relabeling, another session, or model/provider provenance does
+not create separation or authority. A reviewer who materially edits a SHA is its
+builder and requires fresh checks and a different reviewer. The read-only eligibility
+decision cannot satisfy an action-specific authority hold.
+
 For new change packages, `automatic_merge_allowed` defaults to `true` across R0–R4;
 any `false` requires a non-placeholder package-local `automatic_merge_hold_reason`.
 VOC-079 retains its explicit pre-transition exception.
