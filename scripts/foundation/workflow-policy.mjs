@@ -65,12 +65,16 @@ const REQUIRED_MARKERS = {
     "pnpm run ci:packages",
     "pnpm run ci:web",
     "pnpm run ci:worker-api",
+    "pnpm run ci:local-stack",
     "pnpm run ci:delivery",
     "name: cloudflare delivery policy",
     "name: cloudflare delivery gate",
     "name: cloudflare staging",
     "name: cloudflare production",
     "name: ci required",
+    "name: local stack",
+    "LOCAL_STACK_RESULT: ${{ needs.local-stack.result }}",
+    '"local-stack=$LOCAL_STACK_RESULT"',
     "scripts/foundation/require-successful-jobs.sh",
   ],
   "governance.yml": [
@@ -228,6 +232,21 @@ export function inspectTargetWorkflow(filename, source) {
   }
   if (filename === "ci.yml") {
     errors.push(...inspectDeliveryWorkflow(source));
+    const requiredStart = source.indexOf("  required:\n");
+    const deliveryGateStart = source.indexOf("\n  delivery-gate:\n");
+    const requiredJob = source.slice(requiredStart, deliveryGateStart);
+    const needsStart = requiredJob.indexOf("    needs:");
+    const runnerStart = requiredJob.indexOf("\n    runs-on:", needsStart);
+    const needs = requiredJob.slice(needsStart, runnerStart);
+    if (
+      requiredStart === -1 ||
+      deliveryGateStart === -1 ||
+      needsStart === -1 ||
+      runnerStart === -1 ||
+      !needs.includes("local-stack")
+    ) {
+      errors.push("ci.yml: ci required must need local-stack");
+    }
   }
   return errors;
 }

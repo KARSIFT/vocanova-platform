@@ -149,6 +149,18 @@ test("target contract rejects removal of deterministic CI commands", () => {
       source.replace("pnpm run ci:worker-api", "pnpm run lint:worker-api"),
     ).some((error) => error.includes("pnpm run ci:worker-api")),
   );
+  assert.ok(
+    inspectTargetWorkflow(
+      "ci.yml",
+      source.replace("pnpm run ci:local-stack", "pnpm run test:local-stack"),
+    ).some((error) => error.includes("pnpm run ci:local-stack")),
+  );
+  assert.ok(
+    inspectTargetWorkflow(
+      "ci.yml",
+      source.replace("        local-stack,\n", ""),
+    ).some((error) => error.includes("must need local-stack")),
+  );
 });
 
 test("required-job aggregation blocks a synthetic subsystem failure", () => {
@@ -158,14 +170,14 @@ test("required-job aggregation blocks a synthetic subsystem failure", () => {
   );
   const passing = spawnSync(
     "bash",
-    [script, "foundation=success", "web=success"],
+    [script, "foundation=success", "local-stack=success", "web=success"],
     { encoding: "utf8" },
   );
   assert.equal(passing.status, 0, passing.stderr);
 
   const blocked = spawnSync(
     "bash",
-    [script, "foundation=success", "web=failure"],
+    [script, "foundation=success", "local-stack=failure", "web=success"],
     { encoding: "utf8" },
   );
   assert.equal(blocked.status, 1);

@@ -23,6 +23,8 @@ function repositorySources() {
     apiWrangler: "apps/api-worker/wrangler.jsonc",
     gitignore: ".gitignore",
     localSupervisor: "scripts/foundation/local-development-supervisor.mjs",
+    localStackRoute: "apps/web/src/app/api/local-stack/route.ts",
+    localStackSmoke: "scripts/foundation/local-stack-smoke.mjs",
     nextConfig: "apps/web/next.config.ts",
     rootPackage: "package.json",
     webEnvironment: "apps/web/src/lib/env.ts",
@@ -253,6 +255,52 @@ test("supervised loop entry points, lifecycle markers, and listeners cannot drif
       "PNPM_CONFIG_NPMRC_AUTH_FILE: runtimePnpmAuthFile",
       'PNPM_CONFIG_NPMRC_AUTH_FILE: "/home/user/.npmrc"',
       "PNPM_CONFIG_NPMRC_AUTH_FILE",
+    ],
+  ];
+
+  for (const [name, before, after, expected] of fixtures) {
+    const errors = validateLocalDevelopmentSources(
+      mutatedSources(name, before, after),
+    );
+    assert.ok(
+      errors.some((error) => error.includes(expected)),
+      `${name} mutation reports ${expected}: ${errors.join("; ")}`,
+    );
+  }
+});
+
+test("disposable local-stack entry points, evidence, and binding marker cannot drift", () => {
+  const fixtures = [
+    [
+      "rootPackage",
+      '"test:local-stack": "node scripts/foundation/local-stack-smoke.mjs"',
+      '"test:local-stack": "wrangler dev --remote"',
+      "reviewed disposable smoke",
+    ],
+    [
+      "rootPackage",
+      '"ci:local-stack": "node --test scripts/foundation/local-stack-smoke.test.mjs && pnpm run test:local-stack"',
+      '"ci:local-stack": "pnpm run test:local-stack"',
+      "lifecycle fixtures and real smoke",
+    ],
+    [
+      "localStackSmoke",
+      'purpose: "test"',
+      'purpose: "developer"',
+      'purpose: "test"',
+    ],
+    [
+      "localStackSmoke",
+      "assertRepositoryTreeUnchanged",
+      "acceptRepositoryTreeChanges",
+      "assertRepositoryTreeUnchanged",
+    ],
+    ["localStackRoute", "env.API.fetch", "fetch", "env.API.fetch"],
+    [
+      "localStackRoute",
+      'env.ENVIRONMENT !== "local"',
+      'env.ENVIRONMENT !== "production"',
+      'env.ENVIRONMENT !== "local"',
     ],
   ];
 
