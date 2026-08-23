@@ -5,7 +5,7 @@ import * as CloudflareSentry from "@sentry/cloudflare";
 import * as ReactSentry from "@sentry/react";
 
 import { onRequestError } from "../../src/instrumentation.ts";
-import { redactSentryEvent } from "../../src/sentry/redaction.ts";
+import { redactSentryEvent } from "../../sentry.server.config.ts";
 
 const TEST_DSN = "https://public@example.invalid/1";
 
@@ -141,7 +141,10 @@ test("redaction removes request, user, provider payloads, and sensitive text", (
 
   const redacted = redactSentryEvent(event);
   const serialized = JSON.stringify(redacted);
-  assert.doesNotMatch(serialized, /synthetic-token|synthetic-cookie|synthetic-learner|synthetic-provider|synthetic-body/);
+  assert.doesNotMatch(
+    serialized,
+    /synthetic-token|synthetic-cookie|synthetic-learner|synthetic-provider|synthetic-body/,
+  );
   assert.match(serialized, /\[REDACTED\]/);
   assert.match(serialized, /environment/);
 });

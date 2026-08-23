@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/react";
 
-import { redactSentryEvent } from "./sentry/redaction";
+import { redactSentryEvent } from "../sentry.server.config";
 
 const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 
