@@ -5,7 +5,7 @@ slug: public-repository-settings-truth
 title: Reconcile public repository settings and active guidance
 
 type: governance-evidence-reconciliation
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because the implementation updates DOC-16 and protected repository-governance
@@ -16,13 +16,14 @@ canonical_path: specs/changes/VOC-085-public-repository-settings-truth
 base_branch: develop
 base_sha: e629693669e7c5f56c2a9d6719b66532df0f95f2
 target_branch: develop
+approved_candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
 requirement_source: >-
   GitHub issue https://github.com/KARSIFT/vocanova-platform/issues/119, created
   2026-08-23, which reports that the repository became public while active guidance
   still described private GitHub Free limitations and the VOC-080 settings snapshot
   was being treated as current. The point-in-time read-only state was reverified
   through the GitHub REST API on 2026-08-24 before this revision was drafted.
-requirement_approval_status: not-approved-plan-only
+requirement_approval_status: exact-plan-review-pass-and-decision-owner-approved
 
 authority_model: voc-079-approval-neutral-active
 owners:
@@ -37,9 +38,9 @@ approvals:
     status: recorded-for-planning
     evidence: https://github.com/KARSIFT/vocanova-platform/issues/119
   package_independent_verification:
-    status: pending
-    candidate_sha: null
-    evidence: null
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389018437
   package_independent_verification_history:
     - candidate_sha: c11b99ea11992050ca0b2719221d34e4e0c7041f
       verdict: fail
@@ -56,12 +57,22 @@ approvals:
         currently enabled dependency/vulnerability alerts from disabled Dependabot
         security updates, secret-scanning controls, and future held settings targets.
   adoption_decision:
-    status: pending
-    candidate_sha: null
-    evidence: null
+    status: approved-for-adoption
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389074358
+  package_settings_specialist_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389072261
+  candidate_hosted_evidence:
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32672756263
+    governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32672756281
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32672756316
+    quality: not-applicable-plan-only-path-filter
 
-approval_status: draft
-implementation_authorized: false
+approval_status: adopted
+implementation_authorized: true
 automatic_merge_allowed: true
 production_impact: none-repository-documentation-and-evidence-only
 rollback_required: true
@@ -81,12 +92,15 @@ required_r4_evidence:
   specialist_evidence:
     required: true
     role: repository-governance-and-GitHub-settings specialist
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389072261
     evidence_contract: >-
       Exact source/API schema and endpoint interpretation, availability-versus-enabled
       distinction, dependency/vulnerability-alert versus Dependabot-security-update
       interpretation, point-in-time and staleness semantics, no-mutation boundary, and
-      exact-SHA final specialist review. This evidence is pending until a non-author
-      specialist reviews the final exact revision.
+      exact-SHA final specialist review. The final exact revision received a distinct
+      non-author specialist PASS with zero blocking findings.
 action_specific_holds:
   - id: VOC-085-HOLD-00
     status: held
@@ -180,3 +194,23 @@ dependencies:
       security updates and secret-scanning controls. If the read-only vulnerability-
       alerts endpoint reports enabled at implementation time, active guidance must
       treat that as observed current state, not as a prospective held target.
+
+implementation:
+  authorized: true
+  required: true
+  status: authorized-repository-only-after-plan-adoption
+  target_branch: develop
+  pull_request: null
+  authority_issue: 119
+
+repository_adoption_status: adopted-on-pr-126-merge
+adoption_pr: 126
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389074358
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/126
+implementation_authority_before_adoption: false
+implementation_authority_status: authorized-repository-only-after-adoption
+production_deployment: prohibited
+staging_deployment: held-by-VOC-080-HOLD-00
+production_data_access: held-by-VOC-080-HOLD-02
+autonomous_production_release: disabled
+ehr: not-triggered
