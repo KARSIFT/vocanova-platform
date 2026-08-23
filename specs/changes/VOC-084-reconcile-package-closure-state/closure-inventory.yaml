@@ -1,0 +1,1048 @@
+schema_version: 1
+inventory_id: VOC-084-EV-00
+task_id: VOC-084-T00
+recorded_date: 2026-08-23
+canonical_issue: https://github.com/KARSIFT/vocanova-platform/issues/118
+adopted_base:
+  pull_request: https://github.com/KARSIFT/vocanova-platform/pull/120
+  merge_commit: d2cb2190d83dae863b0f2126f8853ddffd5ed678
+  post_merge:
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32661292416
+    governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32661292419
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32661292415
+    quality: not-applicable-plan-only-path-filter
+
+effect_boundary:
+  repository_completion_is_activation: false
+  inherited_holds:
+    VOC-080-HOLD-00: held-cloudflare-staging-resources-and-secrets
+    VOC-080-HOLD-01: held-production-deployment-routing-and-d1-migration
+    VOC-080-HOLD-02: held-production-learner-data-access-or-migration
+  prohibited_claims:
+    - deployed
+    - activated
+    - released
+    - production-migrated
+    - live-verified
+  settings_issue: https://github.com/KARSIFT/vocanova-platform/issues/119
+
+packages:
+  - id: VOC-080
+    path: specs/changes/VOC-080-cloudflare-native-ruflo
+    plan:
+      pull_request: https://github.com/KARSIFT/vocanova-platform/pull/86
+      approved_candidate: 6fb00a0b64e6f2d4adceb24a9caeffd9af98c779
+      final_review:
+        verdict: pass
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747
+    final_merge: a05ab5c60534f36d1b89d9b9d32296469e9942bf
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725637
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725627
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725648
+      quality: not-applicable-push-path-filter
+  - id: VOC-081
+    path: specs/changes/VOC-081-f2-local-cloudflare-development
+    plan:
+      pull_request: https://github.com/KARSIFT/vocanova-platform/pull/102
+      approved_candidate: 111323e5275b3ed2a2e86440ef087a44f0d00bde
+      final_review:
+        verdict: pass
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/102#issuecomment-5383027287
+    final_merge: 36d526bdec83e28b17aa30a6814d42b92f058ec1
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654242
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654225
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654343
+      quality: not-applicable-push-path-filter
+  - id: VOC-082
+    path: specs/changes/VOC-082-distinct-agent-role-separation
+    plan:
+      pull_request: https://github.com/KARSIFT/vocanova-platform/pull/110
+      approved_candidate: c1109466c1498aab48744d5b94457522a36535e4
+      review_history:
+        - revision: 5db667afb47987d9343f78975e3d5cacb03dd3dc
+          verdict: fail
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385195955
+        - revision: f73ea9e27937584c3058ad39884b91854cb15d52
+          verdict: fail
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385221023
+      final_review:
+        revision: c1109466c1498aab48744d5b94457522a36535e4
+        verdict: pass
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385262977
+      adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385610129
+    final_merge: eb13979a7ad59e5dd1eef0680116b84eeadb059a
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218480
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218499
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218488
+      quality: not-applicable-push-path-filter
+  - id: VOC-083
+    path: specs/changes/VOC-083-sentry-workerd-compatibility
+    plan:
+      pull_request: https://github.com/KARSIFT/vocanova-platform/pull/111
+      approved_candidate: 8ec6b530b37972a3a9e8102905a4f1b429386941
+      review_history:
+        - revision: 682b33ec1a126e8924395f7d7f7eb26191f2a57a
+          verdict: fail
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973
+        - revision: 07772a00f753e614d3fd7a51539cabe4f0da1393
+          verdict: fail
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385292757
+      final_review:
+        revision: 8ec6b530b37972a3a9e8102905a4f1b429386941
+        verdict: pass
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385313120
+      adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385610829
+    final_merge: d4078924ae6d0be52628973e84be51734d93a5a9
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474703
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474747
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474756
+      quality: not-applicable-push-path-filter
+
+tasks:
+  - id: VOC-080-T00
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/87
+    implementation_head: 5b857fe4b8aa5a427165545aebfbb1f562771886
+    merge_commit: c376d9f71d217c5a0736be4b54f2b784a8f54414
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/87#issuecomment-5379567727,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32565260157
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32565293113
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32565260168
+      quality: not-applicable-path-filter
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/87,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T01
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/88
+    implementation_head: b582b95e264e0c5c55ece02ad9aee0172347ef84
+    merge_commit: e3b9f502fee91f15cb0dc0c163b52ebcc396f2fc
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/88#issuecomment-5379667367,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533063
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533205
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533090
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533094
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/88#issuecomment-5379686863
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/88,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T02
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/89
+    implementation_head: d70f2308a3c03907c3ad2d8eb8797939a5e9ae59
+    merge_commit: b7c20e87a688b4ed8164c38ea73258761699069f
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/89#issuecomment-5379769841,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32567799906
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32567799992
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32567799926
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32567799914
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/89#issuecomment-5379786329
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/89,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T03
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/90
+    implementation_head: a82714639eeae6458ad3c3d027778c369e90ff5b
+    merge_commit: ae9f2a899d8b40858c7706f5a2992a4cecfb1a55
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/90#issuecomment-5379942626,
+      }
+    review_history:
+      - {
+          verdict: pass-superseded-by-fresh-head-review,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/90#issuecomment-5379913400,
+        }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32569966076
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32569982024
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32569966062
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32569966214
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/90#issuecomment-5379956316
+      failure_history:
+        - {
+            result: fail,
+            reason: clean-checkout-generated-type-ordering-defect,
+            evidence: https://github.com/KARSIFT/vocanova-platform/actions/runs/32569643923,
+          }
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/90,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T04
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/91
+    implementation_head: 6d68e20d4a1b5bb5a97fe5eb469dd6cd5ab5ee22
+    merge_commit: 93733aeafa725621736767d67a47a6b6c06fa650
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/91#issuecomment-5380240167,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32571710443
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32571827841
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32571710460
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32571710482
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/91#issuecomment-5380296331
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/91,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T05
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/92
+    implementation_head: f18c4dfb8bd95e675d58b22472a2fdbb4ebd7e42
+    merge_commit: 1881b00bac4b7656a68c8dff335cc0f67e951c4a
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/92#issuecomment-5380473755,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32573729254
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32573815632
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32573729290
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32573729313
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/92#issuecomment-5380512689
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/92,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T06
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/93
+    implementation_head: e44424a727aa9b548c561147188a220f6cfc7c67
+    merge_commit: deda0a6deabf1dfcb785fda4a3445084e640230f
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/93#issuecomment-5380635312,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32575597832
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32624717831
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32575597905
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32575597831
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/93#issuecomment-5380652465
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/93,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T07
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/94
+    implementation_head: de2b3d0f4bf0105cb74d5abaa9a5ab826ee75dd1
+    merge_commit: a160454c84f0972df0b4934cf6001c2ab2beeab9
+    review:
+      {
+        verdict: pass-corrected-final-verdict,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/94#issuecomment-5380774121,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32577282325
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32577283623
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32577282392
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32577282346
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/94#issuecomment-5380792873
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/94,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T08
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/95
+    implementation_head: 2bce45c1d22ce53eedcdabb457d9849a254a8069
+    merge_commit: 366534d0bd68c716a280f6413a0bbed7fd7f05cb
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/95#issuecomment-5381194861,
+      }
+    review_history:
+      - revision: b6ee09cc9536061c7f67abec52e877dc61d8e9b2
+        verdict: fail
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/95#issuecomment-5381138504
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32582211632
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32582211845
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32582211654
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32582211680
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/95#issuecomment-5381214999
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/95,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T09
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/96
+    implementation_head: 631899874d27839969895db0590a52524b9507ca
+    merge_commit: 315e590d888badfaf24c09698a072d131f5d4640
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5382015703,
+      }
+    review_history:
+      - {
+          revision: 3ad219a9b81a0aa9fb036329c71791e1415146bf,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5381703445,
+        }
+      - {
+          revision: ad47ca20e3425c9b29aeb0f6f496e46988ed9a4e,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5381866725,
+        }
+      - {
+          revision: 568d2739745555d8f19fd6a71e61c6aeabb0a9e8,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5381917214,
+        }
+      - {
+          revision: 1e75846674612637c1fde9af3d7643042946188e,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5381964117,
+        }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32591866810
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32591868598
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32591866814
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32591866833
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5382040303
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/96,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T10
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/97
+    implementation_head: 203ac878d7a054de0826188924446e5d24a6dd43
+    merge_commit: 6fa48164d974fe347d8c7c408b4374af5254f336
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/97#issuecomment-5382184853,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32594082506
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32594082509
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32594082493
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32594082522
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/97#issuecomment-5382243768
+      failure_history:
+        - {
+            result: fail,
+            reason: missing-pr-evidence-block,
+            evidence: https://github.com/KARSIFT/vocanova-platform/actions/runs/32593748534,
+          }
+    rollback:
+      {
+        status: pass-repository-only-held-delivery-contract,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/97,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T11
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/99
+    implementation_head: 697bb1360c4df706ef05ff50d07e4b11b1b6b13b
+    merge_commit: fa467159cfc5089c1355691c43df208a312d6801
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/99#issuecomment-5382584622,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32598468368
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32598468919
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32598468338
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32598468318
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/99#issuecomment-5382605362
+      failure_history:
+        - {
+            result: fail,
+            reason: obsolete-candidate-hosted-defect,
+            evidence: https://github.com/KARSIFT/vocanova-platform/pull/99#issuecomment-5382605362,
+          }
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/99,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-080-T12
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/100
+    implementation_head: 3d6699c5eb378b9a00679d61a5c28b6b7e27c32c
+    merge_commit: a05ab5c60534f36d1b89d9b9d32296469e9942bf
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/100#issuecomment-5385125627,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32628903766
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32629131979
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32628903669
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32628903667
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/100#issuecomment-5385506061
+      failure_history:
+        - {
+            result: blocked-external,
+            reason: github-billing,
+            evidence: https://github.com/KARSIFT/vocanova-platform/pull/100#issuecomment-5385133623,
+          }
+    rollback:
+      {
+        status: pass-full-reverse-order-rehearsal,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/100#issuecomment-5382775324,
+      }
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725637
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725627
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725648
+      quality: not-applicable-push-path-filter
+  - id: VOC-081-T00
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/103
+    implementation_head: 9b0e90fcd89469763c9874a5b0ef951e4d76149d
+    merge_commit: 45480d66fef0247d1d411b9141aebf239eea9142
+    review:
+      {
+        verdict: pass-with-nonblocking-findings,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/103#issuecomment-5383253641,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32607217190
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32607217223
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32607217210
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32607217184
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/103#issuecomment-5383324809
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/103,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-081-T01
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/104
+    implementation_head: aae4473d1072517b40e42bbb0dc4e992c37c16b5
+    merge_commit: 7d508361c7f9b63430f859e92a7512e960426d7a
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/104#issuecomment-5383393667,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32608215023
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32608560564
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32608214994
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32608214951
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/104#issuecomment-5383430480
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/104,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-081-T02
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/106
+    implementation_head: 38d8c27b64557e8e8bc58bb05ea3c2cd858e1136
+    merge_commit: e33fe3050e00cf4c64894a8392bda9cfd1f68337
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/106#issuecomment-5383568439,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32610283723
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32610390391
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32610283712
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32610283742
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/106#issuecomment-5383587649
+      failure_history:
+        - {
+            result: fail,
+            reason: temporary-cumulative-risk-declaration-too-low,
+            evidence: https://github.com/KARSIFT/vocanova-platform/actions/runs/32610283718,
+          }
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/106,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-081-T03
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/107
+    implementation_head: ca7596cb72128e5fa47483a65678773a6968dd79
+    merge_commit: eb32cadf1f58941094d8359d1e82ea43af2306cd
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/107#issuecomment-5383668456,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32611471639
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32611471615
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32611471621
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32611471622
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/107#issuecomment-5383684056
+    rollback:
+      {
+        status: pass-repository-only,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/107,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-081-T04
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/108
+    implementation_head: a8694932671ad9c44fd2a97c128b14e6089e5faf
+    merge_commit: 36d526bdec83e28b17aa30a6814d42b92f058ec1
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5383790286,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32612887965
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32634344456
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32612888017
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32612888012
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5385582178
+      failure_history:
+        - {
+            result: fail,
+            reason: runner-contention-timeout,
+            evidence: https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5383822937,
+          }
+    rollback:
+      {
+        status: pass-full-reverse-order-rehearsal,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5383822937,
+      }
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654242
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654225
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654343
+      quality: not-applicable-push-path-filter
+  - id: VOC-082-T00
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/112
+    implementation_head: b1fa02e0b79e11d75e02194988826106aae2939c
+    merge_commit: 26c16b7b07d55c1910c7fd9711dfb17662a75d8e
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/112#issuecomment-5385758020,
+      }
+    review_history:
+      - {
+          revision: 6c6d566125bdd78514aabad3894776d8494fa467,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/112#issuecomment-5385743353,
+        }
+      - {
+          revision: b1fa02e0b79e11d75e02194988826106aae2939c,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/112#issuecomment-5385753681,
+        }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32636535318
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32636669149
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32636535351
+      quality: not-applicable-path-filter
+    rollback:
+      {
+        status: pass-three-commit-reverse-rehearsal,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/112#issuecomment-5385758020,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: package-final-post-merge-record-is-authoritative,
+      }
+  - id: VOC-082-T01
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/114
+    implementation_head: 9b52963eba5b1dee30e0a63936de2c9ff0b82337
+    merge_commit: eb13979a7ad59e5dd1eef0680116b84eeadb059a
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/114#issuecomment-5385850530,
+      }
+    review_history:
+      - {
+          revision: aa63cd6811c42b1ac02327fe64b6fdd44bce1235,
+          verdict: pass-superseded-by-bookkeeping-revision,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/114#issuecomment-5385819397,
+        }
+      - {
+          revision: 9b52963eba5b1dee30e0a63936de2c9ff0b82337,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/114#issuecomment-5385846754,
+        }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32637819883
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32637959237
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32637819859
+      quality: not-applicable-path-filter
+      failure_history:
+        - revision: aa63cd6811c42b1ac02327fe64b6fdd44bce1235
+          result: fail
+          reason: normalized-exact-review-evidence-not-yet-attached-read-only-eligibility-failed-closed
+          evidence: https://github.com/KARSIFT/vocanova-platform/actions/runs/32637325844
+        - {
+            result: fail,
+            reason: missing-exact-risk-declaration,
+            evidence: https://github.com/KARSIFT/vocanova-platform/actions/runs/32637631138,
+          }
+    rollback:
+      {
+        status: pass-two-task-reverse-order-rehearsal,
+        repository_evidence: specs/changes/VOC-082-distinct-agent-role-separation/final-evidence.md,
+      }
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218480
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218499
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218488
+      quality: not-applicable-push-path-filter
+  - id: VOC-083-T00
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/113
+    implementation_head: 71db51d1dd2571d01e9ee3b3c13ebc2c00e43514
+    merge_commit: e79f04402055d7ebbb1ccfbaf8e7a1dd1b85185c
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/113#issuecomment-5385791947,
+      }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32636966330
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32637109556
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32636966285
+      quality: not-applicable-path-filter
+    rollback:
+      {
+        status: pass-single-commit-revert-and-tree-match,
+        repository_evidence: specs/changes/VOC-083-sentry-workerd-compatibility/t03-evidence.md,
+      }
+    post_merge:
+      {
+        status: not-required-intermediate-stacked-task,
+        reason: later-package-post-merge-record-is-authoritative,
+      }
+  - id: VOC-083-T01
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/115
+    implementation_head: 9f11195ed186e214fade57884e66ca96f2498ebc
+    merge_commit: 8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385989877,
+      }
+    review_history:
+      - {
+          revision: eb6b57fc30751b6269917b60bd3b35850f517bcf,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385971779,
+        }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327166
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639444838
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327202
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327168
+    rollback:
+      {
+        status: pass-five-commit-rehearsal,
+        repository_evidence: specs/changes/VOC-083-sentry-workerd-compatibility/t03-evidence.md,
+      }
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575308
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575331
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575424
+      quality: not-applicable-push-path-filter
+  - id: VOC-083-T02
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/116
+    implementation_head: e3a71a13eedfc8fef05b580280047e41f320de48
+    merge_commit: 23da9da69bb27529994e70d4bf6e9a0a78ea26b6
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386580099,
+      }
+    review_history:
+      - {
+          revision: ab1b24d527f2d71649efb61cc1a8475535de282b,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386309046,
+        }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779837
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32646274114
+      quality: https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779813
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779815
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386587257
+    rollback:
+      {
+        status: pass-ten-commit-rehearsal,
+        repository_evidence: specs/changes/VOC-083-sentry-workerd-compatibility/t03-evidence.md,
+      }
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422581
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422624
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422584
+      quality: not-applicable-push-path-filter
+  - id: VOC-083-T03
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/117
+    implementation_head: bd7d98fc9bc2af9683b42d2fb1807794d27cda1a
+    merge_commit: d4078924ae6d0be52628973e84be51734d93a5a9
+    review:
+      {
+        verdict: pass,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/117#issuecomment-5386743429,
+      }
+    review_history:
+      - {
+          revision: 987d38caf461eece780ba0421594305d759fa7c4,
+          verdict: fail,
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/117#issuecomment-5386710425,
+        }
+    hosted:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32647980797
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32648203363
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32647980763
+      quality: not-applicable-path-filter
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/117#issuecomment-5386754914
+    rollback:
+      {
+        status: pass-four-commit-rehearsal,
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/117,
+      }
+    post_merge:
+      status: pass
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474703
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474747
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474756
+      quality: not-applicable-push-path-filter
+
+file_classifications:
+  - {
+      path: specs/changes/VOC-080-cloudflare-native-ruflo/README.md,
+      classification: active-claim,
+      basis: current-package-summary-and-limitations,
+    }
+  - {
+      path: specs/changes/VOC-080-cloudflare-native-ruflo/acceptance-criteria.md,
+      classification: active-claim,
+      basis: current-criterion-results,
+    }
+  - {
+      path: specs/changes/VOC-080-cloudflare-native-ruflo/change.yaml,
+      classification: active-claim,
+      basis: canonical-lifecycle-and-holds,
+    }
+  - {
+      path: specs/changes/VOC-080-cloudflare-native-ruflo/impact-analysis.md,
+      classification: active-claim,
+      basis: current-impact-and-effect-boundaries,
+    }
+  - {
+      path: specs/changes/VOC-080-cloudflare-native-ruflo/implementation-plan.md,
+      classification: active-claim,
+      basis: current-implementation-and-gating-contract,
+    }
+  - {
+      path: specs/changes/VOC-080-cloudflare-native-ruflo/release-plan.md,
+      classification: prospective,
+      basis: held-future-activation-and-release,
+    }
+  - {
+      path: specs/changes/VOC-080-cloudflare-native-ruflo/specification.md,
+      classification: active-claim,
+      basis: current-decisions-and-requirements,
+    }
+  - {
+      path: specs/changes/VOC-080-cloudflare-native-ruflo/tasks.md,
+      classification: active-claim,
+      basis: current-task-results,
+    }
+  - {
+      path: specs/changes/VOC-080-cloudflare-native-ruflo/test-plan.md,
+      classification: active-claim,
+      basis: current-deterministic-evidence-contract,
+    }
+  - {
+      path: specs/changes/VOC-081-f2-local-cloudflare-development/README.md,
+      classification: active-claim,
+      basis: current-package-summary-and-limitations,
+    }
+  - {
+      path: specs/changes/VOC-081-f2-local-cloudflare-development/acceptance-criteria.md,
+      classification: active-claim,
+      basis: current-criterion-results,
+    }
+  - {
+      path: specs/changes/VOC-081-f2-local-cloudflare-development/change.yaml,
+      classification: active-claim,
+      basis: canonical-lifecycle-and-holds,
+    }
+  - {
+      path: specs/changes/VOC-081-f2-local-cloudflare-development/impact-analysis.md,
+      classification: active-claim,
+      basis: current-impact-and-effect-boundaries,
+    }
+  - {
+      path: specs/changes/VOC-081-f2-local-cloudflare-development/implementation-plan.md,
+      classification: active-claim,
+      basis: current-implementation-and-gating-contract,
+    }
+  - {
+      path: specs/changes/VOC-081-f2-local-cloudflare-development/release-plan.md,
+      classification: prospective,
+      basis: later-f3-a1-and-live-activation,
+    }
+  - {
+      path: specs/changes/VOC-081-f2-local-cloudflare-development/specification.md,
+      classification: active-claim,
+      basis: current-decisions-and-requirements,
+    }
+  - {
+      path: specs/changes/VOC-081-f2-local-cloudflare-development/tasks.md,
+      classification: active-claim,
+      basis: current-task-results,
+    }
+  - {
+      path: specs/changes/VOC-081-f2-local-cloudflare-development/test-plan.md,
+      classification: active-claim,
+      basis: current-deterministic-evidence-contract,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/README.md,
+      classification: active-claim,
+      basis: current-package-summary-and-limitations,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/acceptance-criteria.md,
+      classification: active-claim,
+      basis: current-criterion-results,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/change.yaml,
+      classification: active-claim,
+      basis: canonical-lifecycle-and-role-contract,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/final-evidence.md,
+      classification: historical,
+      basis: immutable-candidate-and-integration-evidence,
+      reconciliation_required: VOC-084-T02-explicitly-label-superseded-integration-pending-wording,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/impact-analysis.md,
+      classification: active-claim,
+      basis: current-impact-and-effect-boundaries,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/implementation-plan.md,
+      classification: active-claim,
+      basis: current-implementation-and-gating-contract,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/release-plan.md,
+      classification: prospective,
+      basis: future-repository-closure-and-no-live-release,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/specification.md,
+      classification: active-claim,
+      basis: current-role-separation-requirements,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/tasks.md,
+      classification: active-claim,
+      basis: current-task-results,
+    }
+  - {
+      path: specs/changes/VOC-082-distinct-agent-role-separation/test-plan.md,
+      classification: active-claim,
+      basis: current-deterministic-evidence-contract,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/README.md,
+      classification: active-claim,
+      basis: current-package-summary-and-limitations,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/acceptance-criteria.md,
+      classification: active-claim,
+      basis: current-criterion-results,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/change.yaml,
+      classification: active-claim,
+      basis: canonical-lifecycle-and-holds,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/impact-analysis.md,
+      classification: active-claim,
+      basis: current-impact-privacy-and-effect-boundaries,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/implementation-plan.md,
+      classification: active-claim,
+      basis: current-selection-implementation-and-gating-contract,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/release-plan.md,
+      classification: prospective,
+      basis: prohibited-live-release-and-future-activation,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/specification.md,
+      classification: active-claim,
+      basis: current-runtime-compatibility-requirements,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/t00-evidence.md,
+      classification: historical,
+      basis: immutable-candidate-selection-evidence,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/t03-evidence.md,
+      classification: historical,
+      basis: immutable-closure-candidate-and-failure-history,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/tasks.md,
+      classification: active-claim,
+      basis: current-task-results,
+    }
+  - {
+      path: specs/changes/VOC-083-sentry-workerd-compatibility/test-plan.md,
+      classification: active-claim,
+      basis: current-deterministic-evidence-contract,
+    }
