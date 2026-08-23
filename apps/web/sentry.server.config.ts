@@ -1,6 +1,6 @@
 import type { CloudflareOptions, ErrorEvent } from "@sentry/cloudflare";
 
-export type SentryRuntimeEnv = CloudflareEnv & {
+export type SentryRuntimeEnv = Partial<Pick<CloudflareEnv, "ENVIRONMENT">> & {
   SENTRY_DSN?: string;
   NEXT_PUBLIC_SENTRY_DSN?: string;
   SENTRY_ENVIRONMENT?: string;

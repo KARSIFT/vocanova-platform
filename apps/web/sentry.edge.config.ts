@@ -1,7 +1,9 @@
 import { withSentry } from "@sentry/cloudflare";
 
-// @ts-expect-error -- OpenNext generates this module after ordinary typecheck;
-// Wrangler resolves it while bundling the configured custom main.
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment -- Generated module existence varies by build state.
+// @ts-ignore -- This import is absent before OpenNext builds and present afterward,
+// so `@ts-expect-error` would make typechecking depend on generated local state.
+// Wrangler resolves the generated module while bundling this custom main.
 import openNextWorker from "./.open-next/worker.js";
 import { sentryOptions } from "./sentry.server.config";
 

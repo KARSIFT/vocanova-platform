@@ -8,7 +8,6 @@ import { onRequestError } from "../../src/instrumentation.ts";
 import {
   redactSentryEvent,
   sentryOptions,
-  type SentryRuntimeEnv,
 } from "../../sentry.server.config.ts";
 
 const TEST_DSN = "https://public@example.invalid/1";
@@ -38,7 +37,7 @@ test("Worker uncaught errors reach an in-memory transport and are redacted", asy
     SENTRY_DSN: TEST_DSN,
     SENTRY_ENVIRONMENT: "synthetic-environment",
     SENTRY_RELEASE: "synthetic-release",
-  } as SentryRuntimeEnv);
+  });
 
   assert.ok(options);
   assert.equal(options.dsn, TEST_DSN);
@@ -127,7 +126,7 @@ test("React/global capture reaches the same in-memory boundary", async () => {
 
 test("missing DSN is a no-op and makes no transport call", async () => {
   const events: Envelope[] = [];
-  const options = sentryOptions({} as SentryRuntimeEnv);
+  const options = sentryOptions({});
   assert.equal(options, undefined);
 
   const worker = CloudflareSentry.withSentry(
