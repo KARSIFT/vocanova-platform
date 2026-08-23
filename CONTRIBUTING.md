@@ -17,7 +17,10 @@ VOC-080 adopts Ruflo only as pinned external coordination. Do not run its force
 initializer in the repository. It may coordinate isolated provider-neutral roles and
 sanitized development context, but cannot authorize scope, review its builder's work,
 merge/close/dispatch on GitHub, access secrets or production data, mutate Cloudflare
-or DNS, deploy, spend, or launch. GitHub remains the canonical evidence record.
+or DNS, deploy, spend, or launch. GitHub remains the canonical evidence record. Follow
+the [external Ruflo runbook](docs/operations/ruflo-external-orchestration.md) for the
+exact audited install, frozen graph, worktree ownership, evidence handoff, and rollback;
+upstream permission presets are not hosted enforcement.
 
 Vocanova uses two permanent branches:
 

@@ -83,6 +83,13 @@ state, or vendor-specific authority path. Ruflo receipts and memory are supporti
 provenance only; GitHub issues, adopted packages, commits, checks, reviews, and pull
 requests remain canonical.
 
+VOC-080-T02's exact external installation, patched frozen dependency graph, security
+audit, role/worktree contract, reviewer handoff, memory policy, synthetic rehearsal,
+and rollback procedure are recorded in
+[`docs/operations/ruflo-external-orchestration.md`](docs/operations/ruflo-external-orchestration.md).
+Ruflo's `strict` preset is advisory rather than syscall enforcement; do not treat its
+state labels, permission receipts, or consensus as proof of execution or authority.
+
 Ruflo and every other orchestrator are denied GitHub approve/merge/close/dispatch,
 Cloudflare, DNS, deployment, secret, production-data, spending, and public-launch
 authority. They may not store sensitive context. Builders and reviewers use separate

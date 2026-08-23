@@ -85,3 +85,7 @@ Ruflo runs outside the repository and GitHub Actions. It may coordinate separate
 participants, but no issue/comment trigger, tracked launcher, workflow, or Ruflo tool
 may approve, merge, close, dispatch, deploy, access Cloudflare credentials, or consume
 production data. GitHub evidence and the read-only eligibility result remain canonical.
+VOC-080-T02's [external runbook](../docs/operations/ruflo-external-orchestration.md)
+records the exact locked installation and rehearsal. Repository guards reject local
+Ruflo/Claude Flow state or dependencies, generated instruction replacement, launchers,
+autonomous GitHub writes, and held external-effect commands.

@@ -107,6 +107,14 @@ synthetic repository-only task. Rollback removes the external MCP/plugin/user
 configuration and non-sensitive Ruflo memory. GitHub evidence and repository history
 remain unchanged.
 
+T02's 2026-08-22 audit found vulnerable upstream transitive resolutions and an npm
+clean-install failure caused by unpublished optional native packages. The external
+installation therefore uses a frozen pnpm lock, disabled lifecycle scripts, exact CLI
+pinning, and reviewed patched transitive overrides. The final audit has zero critical,
+zero high, and one optional moderate advisory. The exact hashes, limitations, and
+synthetic rehearsal are recorded in the
+[external orchestration runbook](../operations/ruflo-external-orchestration.md).
+
 ## Affected documents and system areas
 
 AGENTS.md, CONTRIBUTING.md, `.github` guidance, DOC-10, DOC-12, DOC-15, DOC-16,

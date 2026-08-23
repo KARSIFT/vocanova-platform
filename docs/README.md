@@ -27,9 +27,12 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
 - [ADR-0004](decisions/ADR-0004-external-ruflo-orchestration.md) permits pinned Ruflo
   outside the repository for provider-neutral role coordination. GitHub stays
   canonical and Ruflo receives no merge, deployment, secret, production-data,
-  Cloudflare, DNS, spending, or launch authority.
-- No live Cloudflare deployment or Ruflo installation exists merely because the
-  decisions are accepted. VOC-080's ordered tasks and action-specific holds govern
+  Cloudflare, DNS, spending, or launch authority. The exact external installation,
+  audit, role envelope, and synthetic rehearsal are recorded in the
+  [operator runbook](operations/ruflo-external-orchestration.md).
+- The T02 operator-side Ruflo installation is not a repository dependency and starts
+  nothing in a fresh clone. No live Cloudflare deployment exists merely because the
+  decisions are accepted; VOC-080's ordered tasks and action-specific holds govern
   implementation and external effects.
 
 ## Canonical document index

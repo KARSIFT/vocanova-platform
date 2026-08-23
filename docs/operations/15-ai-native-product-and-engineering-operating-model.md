@@ -59,6 +59,11 @@ role to ChatGPT, Codex, or Claude instead maps to the provider-neutral role name
 Every clause that states `develop` automatically deploys, or that an owned server is the final target,
 is historical. Repository implementation, Cloudflare provisioning, staging, production, DNS,
 spending, and production-data access remain separate events governed by VOC-080's explicit holds.
+The exact T02 external installation, frozen patched graph, audit, role/worktree
+contract, evidence handoff, memory limits, and synthetic rehearsal live in the
+[Ruflo operator runbook](ruflo-external-orchestration.md). Ruflo's generated strict
+permissions are advisory and cannot substitute for repository guards, credential
+absence, exact-revision review, action authority, or OS-level isolation.
 
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 

@@ -36,6 +36,10 @@ provider-neutral roles but cannot approve, merge, deploy, access secrets or prod
 data, or turn issues/comments into execution. The four Actions workflows remain
 deterministic evidence only. Repository migration proceeds through VOC-080's stacked,
 independently reviewed tasks; live Cloudflare and data actions remain separately held.
+The [external Ruflo runbook](ruflo-external-orchestration.md) is the operational source
+for the exact installation, supply-chain overrides, worktree ownership, sanitized
+memory, reviewer non-duplication, and synthetic rehearsal. Its upstream permission
+manifest is advisory, not an enforcement or approval layer.
 
 ## 1. Principles
 
