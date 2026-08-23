@@ -164,7 +164,7 @@ artifacts:
 
 dependencies:
   - id: VOC-085-DEP-00
-    status: required-before-adoption
+    status: satisfied-exact-plan-review-adoption-decision-and-pr-126-merge
     description: >-
       The plan candidate must receive a different-actor exact-SHA independent PASS,
       and an accountable adoption decision must bind that PASS before implementation.
