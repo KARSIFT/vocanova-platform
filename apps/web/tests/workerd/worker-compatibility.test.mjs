@@ -100,6 +100,20 @@ test("reassigned, unknown, and lexically shadowed Wasm inputs fail closed", () =
   }
 });
 
+test("named function and class scopes cannot masquerade as imported Wasm Modules", () => {
+  for (const source of [
+    'import compiledModule from "./fixture.wasm"; const f=function compiledModule(){ WebAssembly.instantiate(compiledModule,imports); };',
+    'import compiledModule from "./fixture.wasm"; { function compiledModule(){ WebAssembly.instantiate(compiledModule,imports); } }',
+    'import compiledModule from "./fixture.wasm"; const C=class compiledModule{ static { WebAssembly.instantiate(compiledModule,imports); } };',
+    'import compiledModule from "./fixture.wasm"; { class compiledModule{ static { WebAssembly.instantiate(compiledModule,imports); } } }',
+  ]) {
+    assertRule(
+      source,
+      "prohibited-wasm-instantiate-buffer-source-or-unknown",
+    );
+  }
+});
+
 test("compatibility dry run receives only local execution environment", () => {
   const environment = buildCompatibilityDryRunEnvironment({
     runtimeDirectory: "/synthetic/compatibility-runtime",

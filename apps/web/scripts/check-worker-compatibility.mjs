@@ -1036,7 +1036,12 @@ function collectWasmModuleBindings(sourceFile) {
       ancestor && !ts.isSourceFile(ancestor);
       ancestor = ancestor.parent
     ) {
-      if (functionLikeBindsName(ancestor, name)) return true;
+      if (
+        functionLikeBindsName(ancestor, name) ||
+        classScopeBindsName(ancestor, name)
+      ) {
+        return true;
+      }
       if (
         (ts.isBlock(ancestor) || ts.isModuleBlock(ancestor)) &&
         ancestor.statements.some((statement) =>
@@ -1101,8 +1106,21 @@ function functionLikeBindsName(node, name) {
   )) {
     return false;
   }
+  if (
+    (ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node)) &&
+    node.name?.text === name
+  ) {
+    return true;
+  }
   return node.parameters.some((parameter) =>
     bindingNameContains(parameter.name, name),
+  );
+}
+
+function classScopeBindsName(node, name) {
+  return (
+    (ts.isClassDeclaration(node) || ts.isClassExpression(node)) &&
+    node.name?.text === name
   );
 }
 
