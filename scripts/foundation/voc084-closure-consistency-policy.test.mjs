@@ -76,7 +76,7 @@ test("stale active status and missing evidence fail independently", () => {
   });
   assert.ok(
     missingEvidence.some((message) =>
-      /independent review evidence is missing/.test(message),
+      /review evidence|independent review evidence is missing/.test(message),
     ),
   );
 });
@@ -303,6 +303,100 @@ test("a historical FAIL URL moved out of evidence is rejected", () => {
       /must bind https:\/\/github.com\/KARSIFT\/vocanova-platform\/pull\/99#issuecomment-5382605362/.test(
         message,
       ),
+    ),
+  );
+});
+
+test("task and package closure fields reject valid-looking structured drift", () => {
+  const taskReview = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "verdict: pass,\n        evidence: https://github.com/KARSIFT/vocanova-platform/pull/87#issuecomment-5379567727",
+        "verdict: pass-corrected-final-verdict,\n        evidence: https://github.com/KARSIFT/vocanova-platform/pull/87#issuecomment-5379567727",
+      ),
+    );
+  });
+  assert.ok(
+    taskReview.some((message) => /VOC-080-T00 review verdict/.test(message)),
+  );
+
+  const taskHosted = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533205",
+        "governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533090",
+      ),
+    );
+  });
+  assert.ok(
+    taskHosted.some((message) => /VOC-080-T01 hosted governance/.test(message)),
+  );
+
+  const taskRollback = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "status: pass-repository-only,\n        evidence: https://github.com/KARSIFT/vocanova-platform/pull/87",
+        "status: pass-repository-only-held-delivery-contract,\n        evidence: https://github.com/KARSIFT/vocanova-platform/pull/87",
+      ),
+    );
+  });
+  assert.ok(
+    taskRollback.some((message) => /VOC-080-T00 rollback status/.test(message)),
+  );
+
+  const taskPostMerge = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "reason: package-final-post-merge-record-is-authoritative",
+        "reason: later-package-post-merge-record-is-authoritative",
+      ),
+    );
+  });
+  assert.ok(
+    taskPostMerge.some((message) =>
+      /VOC-080-T00 post-merge reason/.test(message),
+    ),
+  );
+
+  const packageReview = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747",
+        "https://github.com/KARSIFT/vocanova-platform/pull/102#issuecomment-5383027287",
+      ),
+    );
+  });
+  assert.ok(
+    packageReview.some((message) =>
+      /VOC-080 package final review evidence/.test(message),
+    ),
+  );
+
+  const packageAdoption = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385610129",
+        "https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385610829",
+      ),
+    );
+  });
+  assert.ok(
+    packageAdoption.some((message) =>
+      /VOC-082 package plan adoption_evidence/.test(message),
+    ),
+  );
+
+  const packagePostMerge = errorsFor((root) => {
+    mutate(root, inventoryRelative, (text) =>
+      text.replace(
+        "quality: not-applicable-push-path-filter",
+        "quality: not-applicable-path-filter",
+      ),
+    );
+  });
+  assert.ok(
+    packagePostMerge.some((message) =>
+      /package post-merge quality/.test(message),
     ),
   );
 });

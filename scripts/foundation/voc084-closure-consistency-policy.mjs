@@ -181,6 +181,14 @@ const EXPECTED_TASKS = {
   },
 };
 
+const EXPECTED_TASK_CLOSURE = JSON.parse(
+  String.raw`{"VOC-080-T00":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32565260157","https://github.com/KARSIFT/vocanova-platform/actions/runs/32565293113","not-applicable-path-filter","https://github.com/KARSIFT/vocanova-platform/actions/runs/32565260168",null],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/87#issuecomment-5379567727"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/87"]},"VOC-080-T01":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533063","https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533205","https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533090","https://github.com/KARSIFT/vocanova-platform/actions/runs/32566533094","https://github.com/KARSIFT/vocanova-platform/pull/88#issuecomment-5379686863"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/88#issuecomment-5379667367"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/88"]},"VOC-080-T02":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32567799906","https://github.com/KARSIFT/vocanova-platform/actions/runs/32567799992","https://github.com/KARSIFT/vocanova-platform/actions/runs/32567799926","https://github.com/KARSIFT/vocanova-platform/actions/runs/32567799914","https://github.com/KARSIFT/vocanova-platform/pull/89#issuecomment-5379786329"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/89#issuecomment-5379769841"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/89"]},"VOC-080-T03":{"failureHistory":[[null,"fail","clean-checkout-generated-type-ordering-defect","https://github.com/KARSIFT/vocanova-platform/actions/runs/32569643923"]],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32569966076","https://github.com/KARSIFT/vocanova-platform/actions/runs/32569982024","https://github.com/KARSIFT/vocanova-platform/actions/runs/32569966062","https://github.com/KARSIFT/vocanova-platform/actions/runs/32569966214","https://github.com/KARSIFT/vocanova-platform/pull/90#issuecomment-5379956316"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/90#issuecomment-5379942626"],"reviewHistory":[[null,"pass-superseded-by-fresh-head-review","https://github.com/KARSIFT/vocanova-platform/pull/90#issuecomment-5379913400"]],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/90"]},"VOC-080-T04":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32571710443","https://github.com/KARSIFT/vocanova-platform/actions/runs/32571827841","https://github.com/KARSIFT/vocanova-platform/actions/runs/32571710460","https://github.com/KARSIFT/vocanova-platform/actions/runs/32571710482","https://github.com/KARSIFT/vocanova-platform/pull/91#issuecomment-5380296331"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/91#issuecomment-5380240167"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/91"]},"VOC-080-T05":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32573729254","https://github.com/KARSIFT/vocanova-platform/actions/runs/32573815632","https://github.com/KARSIFT/vocanova-platform/actions/runs/32573729290","https://github.com/KARSIFT/vocanova-platform/actions/runs/32573729313","https://github.com/KARSIFT/vocanova-platform/pull/92#issuecomment-5380512689"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/92#issuecomment-5380473755"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/92"]},"VOC-080-T06":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32575597832","https://github.com/KARSIFT/vocanova-platform/actions/runs/32624717831","https://github.com/KARSIFT/vocanova-platform/actions/runs/32575597905","https://github.com/KARSIFT/vocanova-platform/actions/runs/32575597831","https://github.com/KARSIFT/vocanova-platform/pull/93#issuecomment-5380652465"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/93#issuecomment-5380635312"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/93"]},"VOC-080-T07":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32577282325","https://github.com/KARSIFT/vocanova-platform/actions/runs/32577283623","https://github.com/KARSIFT/vocanova-platform/actions/runs/32577282392","https://github.com/KARSIFT/vocanova-platform/actions/runs/32577282346","https://github.com/KARSIFT/vocanova-platform/pull/94#issuecomment-5380792873"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass-corrected-final-verdict","https://github.com/KARSIFT/vocanova-platform/pull/94#issuecomment-5380774121"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/94"]},"VOC-080-T08":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32582211632","https://github.com/KARSIFT/vocanova-platform/actions/runs/32582211845","https://github.com/KARSIFT/vocanova-platform/actions/runs/32582211654","https://github.com/KARSIFT/vocanova-platform/actions/runs/32582211680","https://github.com/KARSIFT/vocanova-platform/pull/95#issuecomment-5381214999"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/95#issuecomment-5381194861"],"reviewHistory":[["b6ee09cc9536061c7f67abec52e877dc61d8e9b2","fail","https://github.com/KARSIFT/vocanova-platform/pull/95#issuecomment-5381138504"]],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/95"]},"VOC-080-T09":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32591866810","https://github.com/KARSIFT/vocanova-platform/actions/runs/32591868598","https://github.com/KARSIFT/vocanova-platform/actions/runs/32591866814","https://github.com/KARSIFT/vocanova-platform/actions/runs/32591866833","https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5382040303"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5382015703"],"reviewHistory":[["3ad219a9b81a0aa9fb036329c71791e1415146bf","fail","https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5381703445"],["ad47ca20e3425c9b29aeb0f6f496e46988ed9a4e","fail","https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5381866725"],["568d2739745555d8f19fd6a71e61c6aeabb0a9e8","fail","https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5381917214"],["1e75846674612637c1fde9af3d7643042946188e","fail","https://github.com/KARSIFT/vocanova-platform/pull/96#issuecomment-5381964117"]],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/96"]},"VOC-080-T10":{"failureHistory":[[null,"fail","missing-pr-evidence-block","https://github.com/KARSIFT/vocanova-platform/actions/runs/32593748534"]],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32594082506","https://github.com/KARSIFT/vocanova-platform/actions/runs/32594082509","https://github.com/KARSIFT/vocanova-platform/actions/runs/32594082493","https://github.com/KARSIFT/vocanova-platform/actions/runs/32594082522","https://github.com/KARSIFT/vocanova-platform/pull/97#issuecomment-5382243768"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/97#issuecomment-5382184853"],"reviewHistory":[],"rollback":["pass-repository-only-held-delivery-contract","evidence","https://github.com/KARSIFT/vocanova-platform/pull/97"]},"VOC-080-T11":{"failureHistory":[[null,"fail","obsolete-candidate-hosted-defect","https://github.com/KARSIFT/vocanova-platform/pull/99#issuecomment-5382605362"]],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32598468368","https://github.com/KARSIFT/vocanova-platform/actions/runs/32598468919","https://github.com/KARSIFT/vocanova-platform/actions/runs/32598468338","https://github.com/KARSIFT/vocanova-platform/actions/runs/32598468318","https://github.com/KARSIFT/vocanova-platform/pull/99#issuecomment-5382605362"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/99#issuecomment-5382584622"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/99"]},"VOC-080-T12":{"failureHistory":[[null,"blocked-external","github-billing","https://github.com/KARSIFT/vocanova-platform/pull/100#issuecomment-5385133623"]],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32628903766","https://github.com/KARSIFT/vocanova-platform/actions/runs/32629131979","https://github.com/KARSIFT/vocanova-platform/actions/runs/32628903669","https://github.com/KARSIFT/vocanova-platform/actions/runs/32628903667","https://github.com/KARSIFT/vocanova-platform/pull/100#issuecomment-5385506061"],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725637","https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725627","https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725648","not-applicable-push-path-filter",null],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/100#issuecomment-5385125627"],"reviewHistory":[],"rollback":["pass-full-reverse-order-rehearsal","evidence","https://github.com/KARSIFT/vocanova-platform/pull/100#issuecomment-5382775324"]},"VOC-081-T00":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32607217190","https://github.com/KARSIFT/vocanova-platform/actions/runs/32607217223","https://github.com/KARSIFT/vocanova-platform/actions/runs/32607217210","https://github.com/KARSIFT/vocanova-platform/actions/runs/32607217184","https://github.com/KARSIFT/vocanova-platform/pull/103#issuecomment-5383324809"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass-with-nonblocking-findings","https://github.com/KARSIFT/vocanova-platform/pull/103#issuecomment-5383253641"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/103"]},"VOC-081-T01":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32608215023","https://github.com/KARSIFT/vocanova-platform/actions/runs/32608560564","https://github.com/KARSIFT/vocanova-platform/actions/runs/32608214994","https://github.com/KARSIFT/vocanova-platform/actions/runs/32608214951","https://github.com/KARSIFT/vocanova-platform/pull/104#issuecomment-5383430480"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/104#issuecomment-5383393667"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/104"]},"VOC-081-T02":{"failureHistory":[[null,"fail","temporary-cumulative-risk-declaration-too-low","https://github.com/KARSIFT/vocanova-platform/actions/runs/32610283718"]],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32610283723","https://github.com/KARSIFT/vocanova-platform/actions/runs/32610390391","https://github.com/KARSIFT/vocanova-platform/actions/runs/32610283712","https://github.com/KARSIFT/vocanova-platform/actions/runs/32610283742","https://github.com/KARSIFT/vocanova-platform/pull/106#issuecomment-5383587649"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/106#issuecomment-5383568439"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/106"]},"VOC-081-T03":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32611471639","https://github.com/KARSIFT/vocanova-platform/actions/runs/32611471615","https://github.com/KARSIFT/vocanova-platform/actions/runs/32611471621","https://github.com/KARSIFT/vocanova-platform/actions/runs/32611471622","https://github.com/KARSIFT/vocanova-platform/pull/107#issuecomment-5383684056"],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/107#issuecomment-5383668456"],"reviewHistory":[],"rollback":["pass-repository-only","evidence","https://github.com/KARSIFT/vocanova-platform/pull/107"]},"VOC-081-T04":{"failureHistory":[[null,"fail","runner-contention-timeout","https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5383822937"]],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32612887965","https://github.com/KARSIFT/vocanova-platform/actions/runs/32634344456","https://github.com/KARSIFT/vocanova-platform/actions/runs/32612888017","https://github.com/KARSIFT/vocanova-platform/actions/runs/32612888012","https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5385582178"],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654242","https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654225","https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654343","not-applicable-push-path-filter",null],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5383790286"],"reviewHistory":[],"rollback":["pass-full-reverse-order-rehearsal","evidence","https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5383822937"]},"VOC-082-T00":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32636535318","https://github.com/KARSIFT/vocanova-platform/actions/runs/32636669149","not-applicable-path-filter","https://github.com/KARSIFT/vocanova-platform/actions/runs/32636535351",null],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"package-final-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/112#issuecomment-5385758020"],"reviewHistory":[["6c6d566125bdd78514aabad3894776d8494fa467","fail","https://github.com/KARSIFT/vocanova-platform/pull/112#issuecomment-5385743353"],["b1fa02e0b79e11d75e02194988826106aae2939c","fail","https://github.com/KARSIFT/vocanova-platform/pull/112#issuecomment-5385753681"]],"rollback":["pass-three-commit-reverse-rehearsal","evidence","https://github.com/KARSIFT/vocanova-platform/pull/112#issuecomment-5385758020"]},"VOC-082-T01":{"failureHistory":[["aa63cd6811c42b1ac02327fe64b6fdd44bce1235","fail","normalized-exact-review-evidence-not-yet-attached-read-only-eligibility-failed-closed","https://github.com/KARSIFT/vocanova-platform/actions/runs/32637325844"],[null,"fail","missing-exact-risk-declaration","https://github.com/KARSIFT/vocanova-platform/actions/runs/32637631138"]],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32637819883","https://github.com/KARSIFT/vocanova-platform/actions/runs/32637959237","not-applicable-path-filter","https://github.com/KARSIFT/vocanova-platform/actions/runs/32637819859",null],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218480","https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218499","https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218488","not-applicable-push-path-filter",null],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/114#issuecomment-5385850530"],"reviewHistory":[["aa63cd6811c42b1ac02327fe64b6fdd44bce1235","pass-superseded-by-bookkeeping-revision","https://github.com/KARSIFT/vocanova-platform/pull/114#issuecomment-5385819397"],["9b52963eba5b1dee30e0a63936de2c9ff0b82337","fail","https://github.com/KARSIFT/vocanova-platform/pull/114#issuecomment-5385846754"]],"rollback":["pass-two-task-reverse-order-rehearsal","repository_evidence","specs/changes/VOC-082-distinct-agent-role-separation/final-evidence.md"]},"VOC-083-T00":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32636966330","https://github.com/KARSIFT/vocanova-platform/actions/runs/32637109556","not-applicable-path-filter","https://github.com/KARSIFT/vocanova-platform/actions/runs/32636966285",null],"postMerge":["not-required-intermediate-stacked-task",null,null,null,null,"later-package-post-merge-record-is-authoritative"],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/113#issuecomment-5385791947"],"reviewHistory":[],"rollback":["pass-single-commit-revert-and-tree-match","repository_evidence","specs/changes/VOC-083-sentry-workerd-compatibility/t03-evidence.md"]},"VOC-083-T01":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327166","https://github.com/KARSIFT/vocanova-platform/actions/runs/32639444838","https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327202","https://github.com/KARSIFT/vocanova-platform/actions/runs/32639327168",null],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575308","https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575331","https://github.com/KARSIFT/vocanova-platform/actions/runs/32639575424","not-applicable-push-path-filter",null],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385989877"],"reviewHistory":[["eb6b57fc30751b6269917b60bd3b35850f517bcf","fail","https://github.com/KARSIFT/vocanova-platform/pull/115#issuecomment-5385971779"]],"rollback":["pass-five-commit-rehearsal","repository_evidence","specs/changes/VOC-083-sentry-workerd-compatibility/t03-evidence.md"]},"VOC-083-T02":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779837","https://github.com/KARSIFT/vocanova-platform/actions/runs/32646274114","https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779813","https://github.com/KARSIFT/vocanova-platform/actions/runs/32645779815","https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386587257"],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422581","https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422624","https://github.com/KARSIFT/vocanova-platform/actions/runs/32646422584","not-applicable-push-path-filter",null],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386580099"],"reviewHistory":[["ab1b24d527f2d71649efb61cc1a8475535de282b","fail","https://github.com/KARSIFT/vocanova-platform/pull/116#issuecomment-5386309046"]],"rollback":["pass-ten-commit-rehearsal","repository_evidence","specs/changes/VOC-083-sentry-workerd-compatibility/t03-evidence.md"]},"VOC-083-T03":{"failureHistory":[],"hosted":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32647980797","https://github.com/KARSIFT/vocanova-platform/actions/runs/32648203363","not-applicable-path-filter","https://github.com/KARSIFT/vocanova-platform/actions/runs/32647980763","https://github.com/KARSIFT/vocanova-platform/pull/117#issuecomment-5386754914"],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474703","https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474747","https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474756","not-applicable-push-path-filter",null],"review":["pass","https://github.com/KARSIFT/vocanova-platform/pull/117#issuecomment-5386743429"],"reviewHistory":[["987d38caf461eece780ba0421594305d759fa7c4","fail","https://github.com/KARSIFT/vocanova-platform/pull/117#issuecomment-5386710425"]],"rollback":["pass-four-commit-rehearsal","evidence","https://github.com/KARSIFT/vocanova-platform/pull/117"]}}`,
+);
+
+const EXPECTED_PACKAGE_CLOSURE = JSON.parse(
+  String.raw`{"VOC-080":{"adoptionEvidence":null,"finalReview":[null,"pass","https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747"],"planReviewHistory":[],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725637","https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725627","https://github.com/KARSIFT/vocanova-platform/actions/runs/32633725648","not-applicable-push-path-filter"]},"VOC-081":{"adoptionEvidence":null,"finalReview":[null,"pass","https://github.com/KARSIFT/vocanova-platform/pull/102#issuecomment-5383027287"],"planReviewHistory":[],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654242","https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654225","https://github.com/KARSIFT/vocanova-platform/actions/runs/32634654343","not-applicable-push-path-filter"]},"VOC-082":{"adoptionEvidence":"https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385610129","finalReview":["c1109466c1498aab48744d5b94457522a36535e4","pass","https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385262977"],"planReviewHistory":[["5db667afb47987d9343f78975e3d5cacb03dd3dc","fail","https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385195955"],["f73ea9e27937584c3058ad39884b91854cb15d52","fail","https://github.com/KARSIFT/vocanova-platform/pull/110#issuecomment-5385221023"]],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218480","https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218499","https://github.com/KARSIFT/vocanova-platform/actions/runs/32638218488","not-applicable-push-path-filter"]},"VOC-083":{"adoptionEvidence":"https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385610829","finalReview":["8ec6b530b37972a3a9e8102905a4f1b429386941","pass","https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385313120"],"planReviewHistory":[["682b33ec1a126e8924395f7d7f7eb26191f2a57a","fail","https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385262973"],["07772a00f753e614d3fd7a51539cabe4f0da1393","fail","https://github.com/KARSIFT/vocanova-platform/pull/111#issuecomment-5385292757"]],"postMerge":["pass","https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474703","https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474747","https://github.com/KARSIFT/vocanova-platform/actions/runs/32648474756","not-applicable-push-path-filter"]}}`,
+);
+
 const HOLDS = ["VOC-080-HOLD-00", "VOC-080-HOLD-01", "VOC-080-HOLD-02"];
 const CLASSIFICATIONS = new Set(["active-claim", "historical", "prospective"]);
 const SHA = /^[0-9a-f]{40}$/;
@@ -406,6 +414,151 @@ function inventoryPackageBlocks(inventory) {
   ].map((match) => ({ id: match[1], text: match[0] }));
 }
 
+function sectionText(block, field) {
+  const markers = [
+    ...block.matchAll(new RegExp(`^([ \\t]*)${field}:[ \\t]*(.*)$`, "gm")),
+  ];
+  const marker = markers[0];
+  if (!marker) return null;
+  const indent = marker[1].length;
+  const start = marker.index;
+  const sibling = block
+    .slice(start + marker[0].length)
+    .search(
+      new RegExp(
+        `^(?: {${indent}}| {${Math.max(0, indent - 2)}})[A-Za-z_]+:`,
+        "m",
+      ),
+    );
+  return {
+    count: markers.length,
+    indent,
+    text: block.slice(
+      start,
+      sibling < 0 ? block.length : start + marker[0].length + sibling,
+    ),
+  };
+}
+
+function parsePairs(text) {
+  const values = {};
+  const duplicates = [];
+  for (const match of text.matchAll(
+    /(?:^|[,\n{])\s*([A-Za-z_]+):\s*([^,}\n]+?)(?=,|}|$)/g,
+  )) {
+    const key = match[1];
+    if (Object.hasOwn(values, key)) duplicates.push(key);
+    values[key] = match[2].trim();
+  }
+  if (!text.includes("{"))
+    for (const match of text.matchAll(
+      /(?:^|\n)\s*(?:-\s*)?([A-Za-z_]+):[ \t]*([^,\n}]+)/g,
+    )) {
+      const key = match[1];
+      if (Object.hasOwn(values, key)) duplicates.push(key);
+      values[key] = match[2].trim();
+    }
+  return { values, duplicates };
+}
+
+function parseSectionMap(block, field) {
+  const section = sectionText(block, field);
+  if (!section) return { count: 0, values: {}, duplicates: [] };
+  const marker = section.text.match(/^[ \t]*[^:\n]+:[ \t]*(.*)$/);
+  const inline = marker?.[1]?.trim() ?? "";
+  const afterHeader = section.text
+    .slice(section.text.indexOf("\n") + 1)
+    .trimStart();
+  if (inline.startsWith("{") || afterHeader.startsWith("{")) {
+    const brace = section.text.indexOf("{");
+    const parsed = parsePairs(section.text.slice(brace));
+    return { count: section.count, ...parsed };
+  }
+  const values = {};
+  const duplicates = [];
+  const nestedIndent = section.indent + 2;
+  for (const match of section.text.matchAll(
+    new RegExp(`^ {${nestedIndent}}([A-Za-z_]+):[ \\t]*([^\\n]*)$`, "gm"),
+  )) {
+    const key = match[1];
+    if (Object.hasOwn(values, key)) duplicates.push(key);
+    const value = match[2].trim().replace(/,$/, "");
+    values[key] = value;
+  }
+  return { count: section.count, values, duplicates };
+}
+
+function parseListRecords(block, field) {
+  const section = sectionText(block, field);
+  if (!section) return { count: 0, records: [], duplicates: [] };
+  const itemIndent = section.indent + 2;
+  const records = [];
+  const duplicates = [];
+  const matches = section.text.matchAll(
+    new RegExp(
+      `^ {${itemIndent}}- ([\\s\\S]*?)(?=^ {${itemIndent}}- |(?![\\s\\S]))`,
+      "gm",
+    ),
+  );
+  for (const match of matches) {
+    const parsed = parsePairs(match[1]);
+    records.push(parsed.values);
+    duplicates.push(...parsed.duplicates);
+  }
+  return { count: section.count, records, duplicates };
+}
+
+function expectedRecord(values, keys) {
+  return Object.fromEntries(
+    keys.flatMap((key, index) =>
+      values[index] == null ? [] : [[key, values[index]]],
+    ),
+  );
+}
+
+function compareExactMap(errors, label, actual, expected) {
+  const actualKeys = Object.keys(actual.values).sort();
+  const expectedKeys = Object.keys(expected).sort();
+  if (
+    actual.duplicates.length ||
+    actualKeys.length !== expectedKeys.length ||
+    actualKeys.some((key, index) => key !== expectedKeys[index])
+  )
+    error(
+      errors,
+      `${label} fields are missing, extra, or duplicated (expected ${expectedKeys.join(", ")}, found ${actualKeys.join(", ")})`,
+    );
+  for (const [key, value] of Object.entries(expected))
+    if (actual.values[key] !== value)
+      error(errors, `${label} ${key} does not match its exact expected value`);
+}
+
+function compareExactRecords(errors, label, actual, expected) {
+  if (
+    actual.duplicates.length ||
+    (expected.length === 0 ? actual.count !== 0 : actual.count !== 1) ||
+    actual.records.length !== expected.length ||
+    actual.records.some(
+      (record, index) =>
+        JSON.stringify(record) !== JSON.stringify(expected[index]),
+    )
+  )
+    error(
+      errors,
+      `${label} records are missing, extra, duplicated, or drifted`,
+    );
+}
+
+function uniqueField(block, field, indent) {
+  const matches = [
+    ...block.matchAll(new RegExp(`^ {${indent}}${field}:\\s*([^\\n]+)$`, "gm")),
+  ];
+  return {
+    count: matches.length,
+    value: matches.length === 1 ? matches[0][1].trim().replace(/,$/, "") : null,
+  };
+}
+
 function historyEntries(block, marker) {
   const markerMatch = block.match(new RegExp(`^(\\s*)${marker}:`, "m"));
   if (!markerMatch) return [];
@@ -540,22 +693,62 @@ function inspectInventory(inventory) {
       error(errors, `${packageInfo.id} package summary is missing`);
       continue;
     }
-    const expectedFields = [
-      ["path", `path: specs/changes/${packageInfo.directory}`],
-      ["plan pull request", `pull_request: ${packageInfo.planPullRequest}`],
-      [
-        "approved candidate",
-        `approved_candidate: ${packageInfo.planCandidate}`,
-      ],
-      ["final merge", `final_merge: ${packageInfo.finalMerge}`],
-      ["post-merge status", "status: pass"],
-    ];
-    for (const [label, expected] of expectedFields)
-      if (!block.includes(expected))
-        error(
-          errors,
-          `${packageInfo.id} package summary ${label} is missing or drifted`,
-        );
+    const expected = EXPECTED_PACKAGE_CLOSURE[packageInfo.id];
+    const path = uniqueField(block, "path", 4);
+    if (
+      path.count !== 1 ||
+      path.value !== `specs/changes/${packageInfo.directory}`
+    )
+      error(
+        errors,
+        `${packageInfo.id} package summary path is missing or drifted`,
+      );
+    const finalMerge = uniqueField(block, "final_merge", 4);
+    if (finalMerge.count !== 1 || finalMerge.value !== packageInfo.finalMerge)
+      error(
+        errors,
+        `${packageInfo.id} package summary final merge is missing or drifted`,
+      );
+    const planExpected = {
+      pull_request: packageInfo.planPullRequest,
+      approved_candidate: packageInfo.planCandidate,
+      final_review: "",
+    };
+    if (expected.planReviewHistory.length) planExpected.review_history = "";
+    if (expected.adoptionEvidence)
+      planExpected.adoption_evidence = expected.adoptionEvidence;
+    compareExactMap(
+      errors,
+      `${packageInfo.id} package plan`,
+      parseSectionMap(block, "plan"),
+      planExpected,
+    );
+    compareExactRecords(
+      errors,
+      `${packageInfo.id} package review history`,
+      parseListRecords(block, "review_history"),
+      expected.planReviewHistory.map((values) =>
+        expectedRecord(values, ["revision", "verdict", "evidence"]),
+      ),
+    );
+    compareExactMap(
+      errors,
+      `${packageInfo.id} package final review`,
+      parseSectionMap(block, "final_review"),
+      expectedRecord(expected.finalReview, ["revision", "verdict", "evidence"]),
+    );
+    compareExactMap(
+      errors,
+      `${packageInfo.id} package post-merge`,
+      parseSectionMap(block, "post_merge"),
+      expectedRecord(expected.postMerge, [
+        "status",
+        "ci",
+        "governance",
+        "security",
+        "quality",
+      ]),
+    );
   }
 
   const taskBlocks = inventoryTaskBlocks(inventory);
@@ -580,44 +773,29 @@ function inspectInventory(inventory) {
       );
   }
   for (const { id, text } of taskBlocks) {
+    const expectedTask = EXPECTED_TASKS[id];
+    const expectedClosure = EXPECTED_TASK_CLOSURE[id];
+    if (!expectedTask || !expectedClosure) {
+      error(errors, `${id} has no exact expected evidence mapping`);
+      continue;
+    }
     const shaFields = ["implementation_head", "merge_commit"];
     for (const field of shaFields) {
-      const value = text.match(
-        new RegExp(`^    ${field}:\\s*([^\\s]+)`, "m"),
-      )?.[1];
+      const value = uniqueField(text, field, 4).value;
       if (!value || !SHA.test(value) || PLACEHOLDER.test(value))
         error(errors, `${id} ${field} is missing, non-exact, or a placeholder`);
     }
-    const pullRequest = text
-      .match(/^    pull_request:\s*(\S+)/m)?.[1]
-      ?.replace(/,$/, "");
-    const expectedTask = EXPECTED_TASKS[id];
-    if (!expectedTask) {
-      error(errors, `${id} has no exact expected evidence mapping`);
-    } else {
-      for (const [label, value] of [
-        ["pull request", pullRequest],
-        [
-          "implementation head",
-          text.match(/^    implementation_head:\s*(\S+)/m)?.[1],
-        ],
-        ["merge commit", text.match(/^    merge_commit:\s*(\S+)/m)?.[1]],
-      ]) {
-        const expected =
-          expectedTask[
-            label === "pull request"
-              ? "pullRequest"
-              : label === "implementation head"
-                ? "head"
-                : "merge"
-          ];
-        if (value !== expected)
-          error(
-            errors,
-            `${id} ${label} does not match its exact expected mapping`,
-          );
-      }
-    }
+    const pullRequest = uniqueField(text, "pull_request", 4).value;
+    for (const [label, field, expected] of [
+      ["pull request", "pull_request", expectedTask.pullRequest],
+      ["implementation head", "implementation_head", expectedTask.head],
+      ["merge commit", "merge_commit", expectedTask.merge],
+    ])
+      if (uniqueField(text, field, 4).value !== expected)
+        error(
+          errors,
+          `${id} ${label} does not match its exact expected mapping`,
+        );
     if (
       !pullRequest ||
       !/^https:\/\/github\.com\/KARSIFT\/vocanova-platform\/pull\/\d+$/.test(
@@ -626,36 +804,73 @@ function inspectInventory(inventory) {
       PLACEHOLDER.test(pullRequest)
     )
       error(errors, `${id} pull request evidence is missing or invalid`);
-    if (!/\bverdict:\s*pass(?:[-,\s]|$)/.test(text))
-      error(errors, `${id} independent review must contain a PASS verdict`);
-    const reviewBlock =
-      blocksBetween(text, "review:", "review_history:") ||
-      blocksBetween(text, "review:", "hosted:");
-    const reviewEvidence = reviewBlock.match(
-      /\bevidence:\s*(https:\/\/[^,\s}]+)/,
-    )?.[1];
+    compareExactMap(
+      errors,
+      `${id} review`,
+      parseSectionMap(text, "review"),
+      expectedRecord(expectedClosure.review, ["verdict", "evidence"]),
+    );
+    compareExactRecords(
+      errors,
+      `${id} review history`,
+      parseListRecords(text, "review_history"),
+      expectedClosure.reviewHistory.map((values) =>
+        expectedRecord(values, ["revision", "verdict", "evidence"]),
+      ),
+    );
+    const reviewEvidence = expectedClosure.review[1];
     if (
       !reviewEvidence ||
       !EVIDENCE_URL.test(reviewEvidence) ||
       PLACEHOLDER.test(reviewEvidence)
     )
       error(errors, `${id} independent review evidence is missing or invalid`);
-    if (
-      !/^    hosted:\n/m.test(text) ||
-      !/^      status:\s*pass\s*$/m.test(text)
-    )
-      error(errors, `${id} hosted result must be pass`);
-    if (
-      !/(?:^      (?:ci|governance|security|quality|evidence):\s*https:\/\/\S+|^      evidence:\s*specs\/)/m.test(
-        text,
-      )
-    )
-      error(errors, `${id} hosted evidence is missing`);
-    if (
-      !/^    rollback:/m.test(text) ||
-      !/(?:status:\s*pass|status: pass)/.test(text)
-    )
-      error(errors, `${id} rollback evidence is missing or not passing`);
+    const hostedExpected = expectedRecord(expectedClosure.hosted, [
+      "status",
+      "ci",
+      "governance",
+      "quality",
+      "security",
+      "evidence",
+    ]);
+    if (expectedClosure.failureHistory.length)
+      hostedExpected.failure_history = "";
+    compareExactMap(
+      errors,
+      `${id} hosted`,
+      parseSectionMap(text, "hosted"),
+      hostedExpected,
+    );
+    compareExactRecords(
+      errors,
+      `${id} hosted failure history`,
+      parseListRecords(text, "failure_history"),
+      expectedClosure.failureHistory.map((values) =>
+        expectedRecord(values, ["revision", "result", "reason", "evidence"]),
+      ),
+    );
+    compareExactMap(
+      errors,
+      `${id} rollback`,
+      parseSectionMap(text, "rollback"),
+      {
+        status: expectedClosure.rollback[0],
+        [expectedClosure.rollback[1]]: expectedClosure.rollback[2],
+      },
+    );
+    compareExactMap(
+      errors,
+      `${id} post-merge`,
+      parseSectionMap(text, "post_merge"),
+      expectedRecord(expectedClosure.postMerge, [
+        "status",
+        "ci",
+        "governance",
+        "security",
+        "quality",
+        "reason",
+      ]),
+    );
   }
 
   for (const tuple of REQUIRED_FAILURES) {
