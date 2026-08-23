@@ -1,0 +1,116 @@
+schema_version: 1
+repository: KARSIFT/vocanova-platform
+repository_identity:
+  owner: KARSIFT
+  name: vocanova-platform
+  full_name: KARSIFT/vocanova-platform
+observed_at: 2026-08-24
+as_of: 2026-08-24
+source: github-rest-api-read-only
+observation_evidence:
+  issue: 119
+  url: https://github.com/KARSIFT/vocanova-platform/issues/119
+  note: read-only observation traceability only; no settings mutation authority
+source_endpoints:
+  - GET /repos/KARSIFT/vocanova-platform
+  - GET /repos/KARSIFT/vocanova-platform/actions/permissions
+  - GET /repos/KARSIFT/vocanova-platform/actions/permissions/workflow
+  - GET /repos/KARSIFT/vocanova-platform/rulesets
+  - GET /repos/KARSIFT/vocanova-platform/branches/develop/protection
+  - GET /repos/KARSIFT/vocanova-platform/branches/main/protection
+  - GET /repos/KARSIFT/vocanova-platform/vulnerability-alerts
+  - GET /repos/KARSIFT/vocanova-platform/automated-security-fixes
+  - GitHub repository security-settings API fields for secret scanning
+source_schema_surface:
+  repository:
+    endpoint: GET /repos/KARSIFT/vocanova-platform
+    fields:
+      - visibility
+      - default_branch
+      - allow_merge_commit
+      - allow_squash_merge
+      - allow_rebase_merge
+      - delete_branch_on_merge
+  actions_permissions:
+    endpoint: GET /repos/KARSIFT/vocanova-platform/actions/permissions
+    fields:
+      - enabled
+      - allowed_actions
+      - sha_pinning_required
+  workflow_permissions:
+    endpoint: GET /repos/KARSIFT/vocanova-platform/actions/permissions/workflow
+    fields:
+      - default_workflow_permissions
+      - can_approve_pull_request_reviews
+  rulesets:
+    endpoint: GET /repos/KARSIFT/vocanova-platform/rulesets
+    fields:
+      - rulesets
+  branch_protection:
+    endpoints:
+      - GET /repos/KARSIFT/vocanova-platform/branches/develop/protection
+      - GET /repos/KARSIFT/vocanova-platform/branches/main/protection
+    fields:
+      - develop
+      - main
+      - http_status
+  dependency_vulnerability_alerts:
+    endpoint: GET /repos/KARSIFT/vocanova-platform/vulnerability-alerts
+    fields:
+      - enabled
+      - endpoint_status
+  dependabot_security_updates:
+    endpoint: GET /repos/KARSIFT/vocanova-platform/automated-security-fixes
+    fields:
+      - status
+  secret_scanning:
+    endpoint: GitHub repository security-settings API fields for secret scanning
+    fields:
+      - secret_scanning
+      - secret_scanning_push_protection
+      - secret_scanning_validity_checks
+freshness:
+  semantics: point-in-time-observation-not-live-state
+  network_free_guard_scope: internal-consistency-only-not-live-freshness
+  live_freshness_proven: false
+  stale_when:
+    - any later repository-settings mutation is authorized or observed
+    - the observation can no longer be independently reverified
+  required_follow_up: immediate-governed-doc-only-reconciliation-after-future-mutation
+settings_mutation: prohibited
+visibility: public
+default_branch: main
+allow_merge_commit: true
+allow_squash_merge: true
+allow_rebase_merge: false
+delete_branch_on_merge: false
+actions:
+  enabled: true
+  allowed_actions: selected
+  sha_pinning_required: true
+  default_workflow_permissions: read
+  can_approve_pull_request_reviews: false
+rulesets: []
+branch_protection:
+  develop: http-404-not-protected
+  main: http-404-not-protected
+dependency_vulnerability_alerts:
+  enabled: true
+  endpoint_status: 204
+dependabot_security_updates: disabled
+secret_scanning:
+  enabled: false
+  push_protection: false
+  validity_checks: false
+follow_up_boundary:
+  future_settings_mutation_requires_immediate_governed_doc_only_follow_up: true
+  this_record_does_not_authorize_or_perform_mutation: true
+specialist_review:
+  required: true
+  status: pending-exact-final-revision-review
+  scope:
+    - source-api-schema-and-endpoint-interpretation
+    - availability-versus-enabled-distinction
+    - point-in-time-freshness-and-staleness-semantics
+    - no-mutation-boundary
+  note: specialist exact-revision review remains pending for this implementation revision
