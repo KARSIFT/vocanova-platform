@@ -57,7 +57,9 @@ filters and must be reported accurately rather than forced or fabricated.
 - `VOC-084-DEP-00`: different-role exact plan review before adoption.
 - `VOC-084-DEP-01`: exact immutable existing task evidence before reconciliation.
 - `VOC-084-DEP-02`: issue #119 remains separate.
-- `VOC-084-DEP-03`: current GitHub API objects, not number-like references in
+- `VOC-084-DEP-03`: every target-package file receives exactly one explicit
+  active-claim, historical, or prospective classification.
+- `VOC-084-DEP-04`: current GitHub API objects, not number-like references in
   historical commit subjects, define the identities of issues #118 and #119.
 - `VOC-084-EV-00`: audited machine-readable closure inventory.
 - `VOC-084-EV-01`: reconciled VOC-080/VOC-081 active records.

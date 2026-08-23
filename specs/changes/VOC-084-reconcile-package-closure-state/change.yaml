@@ -83,6 +83,12 @@ dependencies:
       VOC-083 package directory and classify it exactly once as active-claim,
       historical, or prospective. Validation must fail on omissions, duplicate or
       invalid classifications, and classification/content contradictions.
+  - id: VOC-084-DEP-04
+    status: accepted-evidence-source
+    description: >-
+      Current GitHub API issue objects define the identities of issues #118 and #119.
+      Number-like references in historical imported or reconstructed commit subjects
+      do not supersede those canonical current objects.
 
 action_specific_holds: []
 inherited_holds:
