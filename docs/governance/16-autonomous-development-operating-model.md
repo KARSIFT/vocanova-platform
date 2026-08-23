@@ -1,13 +1,13 @@
 ---
 id: DOC-16
 title: Vocanova Autonomous Development Operating Model
-version: 3.1
+version: 3.2
 status: approved
 owner: founder
 canonical_path: docs/governance/16-autonomous-development-operating-model.md
 approved_at: 2026-07-13
 approval_evidence: PR-3-founder-approval-comment-4961029533-reviewed-commit-09f97341ff093fd20a70683d88b772e154979330
-last_reviewed_at: 2026-08-22
+last_reviewed_at: 2026-08-23
 review_cycle: quarterly
 supersedes: null
 folds_in:
@@ -16,11 +16,12 @@ folds_in:
   - A-004 (Orchestrator Independent-Verification Merge Authority; approved 2026-08-14, PR #54)
   - VOC-079 (R4 Approval-Neutral Governance; adopted 2026-08-19, PR #75)
   - VOC-080 (Cloudflare-native runtime and external Ruflo direction; adopted 2026-08-22, PR #86)
+  - VOC-082 (Provider-neutral distinct-agent role separation; adopted 2026-08-23, PR #110)
 revision_note: >
-  This v3.1 revision retains VOC-079's approval-neutral R4 authority model and records
-  VOC-080's Cloudflare-native target and external Ruflo permission boundary. Risk
-  remains consequence-based, external effects stay separately held, and neither a
-  hosting platform nor an orchestrator becomes repository authority.
+  This v3.2 revision clarifies provider-neutral distinct-actor role separation. Risk
+  remains consequence-based, runtime provenance is not authority, external effects
+  stay separately held, and neither a hosting platform nor an orchestrator becomes
+  repository authority.
 related_documents:
   - DOC-15
 related_decisions:
@@ -28,6 +29,7 @@ related_decisions:
   - ADR-0002
   - ADR-0003
   - ADR-0004
+  - ADR-0005
 ---
 
 # 16 — Vocanova Autonomous Development Operating Model
@@ -74,14 +76,26 @@ artifact categories or authority hierarchy.
 | Planner role                | Product analysis, specifications, architecture proposals, governance drafting, and decision routing           | Cannot adopt or independently verify its own meaningful plan                                                              |
 | Implementer role            | Implementation of approved, implementation-ready changes and applicable tests and documentation               | Cannot approve its own work, expand scope, or deploy directly to production                                               |
 | Independent reviewer role   | Independent specification, code, architecture, security, and CI/CD verification of the exact revision         | Cannot be the builder of the reviewed revision or assume separately assigned legal or organizational accountability       |
+| Non-author merge actor      | Audits the exact-SHA evidence and applicable eligibility result before an otherwise authorized merge          | Cannot merge its own authored revision or replace an action-specific authority hold                                       |
 | GitHub Actions              | Deterministic repository checks and traceability                                                              | Cannot make product or business decisions, merge, deploy, or monitor servers                                              |
 | Cloudflare                  | Selected managed runtime/data target under ADR-0003; live resources remain held                               | Cannot decide scope/release authority; credentials are unavailable to PRs and ordinary agents                             |
 | External Ruflo orchestrator | Optional pinned coordination of isolated provider-neutral roles under ADR-0004                                | Cannot approve/merge/close/dispatch, deploy, access secrets or production data, spend, launch, or replace GitHub evidence |
 
-Any human or AI system may occupy the planner, implementer, or independent-reviewer
-role when it has the necessary capability and access. The builder and reviewer roles
-must remain separate, their identities and exact revisions must be recorded, and no
-external vendor configuration is a source of repository authority.
+Any human or separately instantiated AI participant may occupy the planner,
+implementer, or independent-reviewer role when it has the necessary capability and
+access. A role is a responsibility; an actor is the attributable participant assigned
+to it. The builder and reviewer must be different actors, the reviewer must not have
+authored the reviewed exact revision, and their identities, assignments, exact SHA,
+verdict, and resolved blocking findings must be recorded. A model, provider, tool, or
+new session is optional runtime provenance or defense in depth, never authority.
+
+The author of a plan cannot independently review or adopt it. The builder cannot
+independently review, approve, or merge its revision. If a reviewer materially edits a
+revision, it is the builder of the new SHA; checks and a different reviewer are then
+required. A non-author merge actor audits the exact evidence and applicable eligibility
+result; no human is required solely because the participants are AI. An expressly
+applicable cross-model rule remains a scoped evidence requirement, not a provider
+assignment or approval source. See [ADR-0005](../decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md).
 
 A permanent qualified-human technical-steward role existed early in this
 repository's history and is now retired as a routine approval authority (see
@@ -380,9 +394,10 @@ layer.
 ## Amendment history
 
 This document previously worked alongside three separate amendments. Each former
-amendment's operative rules is folded directly into the sections above. The table
-also records the later VOC-079 authority transition. It preserves permanent evidence
-for the revision it governed without making any approval reusable.
+amendment's operative rules is folded directly into the sections above. The table also
+records the later VOC-079 authority transition, VOC-080 runtime/orchestration boundary,
+and VOC-082 role-separation clarification. It preserves permanent evidence for the
+revision it governed without making any approval, transition, or boundary reusable.
 
 | Date                 | Change (former amendment)                                                              | What it did                                                                                                                                                                                                                                 | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | -------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -392,6 +407,7 @@ for the revision it governed without making any approval reusable.
 | 2026-08-14           | This consolidation (v2.0 of this document)                                             | Folded the three amendments above directly into this document and removed the separate amendment files, so current governance reads as one document instead of a base plus three overlays; no underlying rule changed in the folding itself | See this revision's pull-request approval comment once recorded                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | 2026-08-19           | R4 Approval-Neutral Governance (VOC-079; v3.0 of this document)                        | Retained R4 as the highest consequence class while replacing its class-wide founder gate with the universal evidence contract and explicit action-specific authority                                                                        | Adopted package candidate `25a3e246b8f66dd4b92ea9726eb5367c16363018`; PR #75 founder approval [5341799779](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5341799779) and independent package review [5340623965](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5340623965). This one-time pre-transition authority is exhausted by VOC-079 and cannot authorize later work; exact implementation evidence is recorded on the implementation pull requests.                                                                                                     |
 | 2026-08-22           | Cloudflare-native runtime and external Ruflo boundary (VOC-080; v3.1 of this document) | Selected Workers/OpenNext/Hono/D1 as the parity-gated no-owned-server target and Ruflo as external coordination only; preserved the universal evidence contract and added no merge or live-system authority                                 | Adopted package candidate `6fb00a0b64e6f2d4adceb24a9caeffd9af98c779`; independent review [5379258747](https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747); final-head review [5379295472](https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379295472); adoption PR #86 merged as `399ccefa879545b43574c02fdc3babff223a1db0`. Live staging, production, and learner-data actions remain held.                                                                                                                                                               |
+| 2026-08-23           | Provider-neutral distinct-agent role separation (VOC-082; v3.2)                        | Clarified that independent roles require distinct actors and non-authorship of the exact revision; model/provider provenance is optional hardening, while action-specific authority remains separate                                        | Adopted package VOC-082, PR #110; implementation evidence is recorded on its independently reviewed task pull requests. Historical provider and bootstrap evidence remains preserved.                                                                                                                                                                                                                                                                                                                                                                                                                  |
 
 The one-time VOC-002 migration approval and VOC-079 pre-transition approval recorded
 above are exhausted and must never be reused to justify a later change. Automatic

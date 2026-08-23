@@ -37,8 +37,10 @@ The following are R4 by decision type even when no protected path is changed:
 required evidence or authority combination. No protected path or R0-R4 label creates
 standing technical-steward or founder approval. R4 paths require the complete R4
 evidence contract, including exact-revision independent review by a role different
-from the builder. A human or AI agent may fill either role; vendor identity is not
-authority. Separately defined external-effect authority remains mandatory.
+from the builder actor. A human or separately instantiated AI participant may fill
+either role; a relabel, new session, model, or vendor identity does not establish
+independence or authority. Separately defined external-effect authority remains
+mandatory.
 
 EHR may obtain qualified human expertise for an exceptional triggered matter. It
 must not become permanent ownership or a routine replacement approval layer.

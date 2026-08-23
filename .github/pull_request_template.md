@@ -67,8 +67,8 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - CI run:
 - Preview deployment URL/status or `N/A` with reason:
 - Independent-verifier report/result:
-- Implementer provenance:
-- Verifier provenance:
+- Implementer provenance: actor identity, role, and authorship provenance
+- Verifier provenance: actor identity, role, exact-SHA independence, and optional runtime provenance
 - External-orchestrator provenance/version or `N/A` (provenance only; never authority):
 
 Complete the machine-readable block after exact-revision independent review. Keep it
@@ -97,6 +97,12 @@ as JSON data; do not add shell expressions or credentials. Use an empty
   "action_authority": []
 }
 -->
+
+Actor identity is attributable provenance, not hosted cryptographic attestation.
+Model/provider/runtime metadata is optional and never authority. A reviewer who
+materially edits the revision becomes its builder; record a new SHA and a different
+reviewer. A passing verdict or eligibility result never clears a separately defined
+action-specific hold.
 
 ## Impact assessments
 

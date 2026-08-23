@@ -141,9 +141,11 @@ bot identity as human authority.
 
 ## Required identities and credentials
 
-- Distinct implementer-role and independent-reviewer-role identities, recorded per
-  pull request. Humans and AI agents may fill either role; no vendor is permanently
-  assigned by repository policy.
+- Distinct implementer and independent-reviewer actors, recorded per pull request with
+  role, exact SHA, verdict, authorship independence, resolved blocking findings, and
+  optional runtime provenance. An actor may be human or separately instantiated AI;
+  relabeling a session or changing a model/provider is not separation. No vendor is
+  permanently assigned by repository policy, and provenance grants no authority.
 - Any human identities explicitly assigned action-specific authority, plus the
   preserved historical founder and technical-steward evidence; no replacement standing
   steward team is required and no historical identity assignment is reusable approval.

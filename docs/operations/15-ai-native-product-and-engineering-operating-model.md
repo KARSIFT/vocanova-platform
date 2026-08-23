@@ -1,12 +1,12 @@
 ---
 id: DOC-15
 title: Vocanova AI-Native Product and Engineering Operating Model
-version: 1.2
+version: 1.3
 status: approved
 owner: founder
 canonical_path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
 approved_at: 2026-07-13
-last_reviewed_at: 2026-08-22
+last_reviewed_at: 2026-08-23
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -29,13 +29,14 @@ related_decisions:
   - ADR-0002
   - ADR-0003
   - ADR-0004
+  - ADR-0005
 revision_note: >
-  VOC-080 selects the Cloudflare-native runtime and external Ruflo coordination
-  model. Provider names remain historical examples, not permanent role authority;
+  VOC-082 clarifies provider-neutral distinct-actor role separation. Provider names
+  remain historical examples or scoped tool boundaries, not permanent role authority;
   owned-server and automatic-staging clauses remain history, not current behavior.
 ---
 
-# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.2
+# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.3
 
 ## Document status
 
@@ -66,6 +67,18 @@ contract, evidence handoff, memory limits, and synthetic rehearsal live in the
 permissions are advisory and cannot substitute for repository guards, credential
 absence, exact-revision review, action authority, or OS-level isolation.
 
+**VOC-082 amendment (2026-08-23):** For current authority, a role is a responsibility
+and an actor is an attributable human or separately instantiated AI participant. A
+different role name, prompt, session, model, or provider does not make an actor
+independent. The plan author and implementation builder cannot independently review,
+approve, adopt, or merge their own exact revision; a material reviewer edit creates a
+new builder-authored SHA requiring fresh checks and a different reviewer. Model/provider
+provenance may harden evidence, and an expressly applicable cross-model rule remains
+mandatory for its stated scope, but neither creates authority. A technical verdict or
+merge eligibility does not satisfy separately assigned external-effect authority. See
+[DOC-16](../governance/16-autonomous-development-operating-model.md) and
+[ADR-0005](../decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md).
+
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 
 **Correction (2026-07-24):** §17 (Amendment A-001) and Decision Register entries DG5-08/DG10-05
@@ -73,9 +86,10 @@ originally described an aspirational merge/staging model that was never the syst
 built. §17 has been rewritten to match the live pipeline; those two decision entries carry an
 inline correction note pointing to §17.0 rather than being rewritten in place, to preserve the
 decision register as a historical record. **DOC-16 (`docs/governance/16-autonomous-development-operating-model.md`,
-which folds in the former A-003 amendment, VOC-079, and VOC-080 boundaries as of its v3.1 revision) and the repository's
+which folds in the former A-003 amendment and the VOC-079, VOC-080, and VOC-082
+boundaries as of its v3.2 revision) and the repository's
 current deterministic workflows are the actual current authority for merge/review mechanics.
-DOC-16 v3.1 keeps R0-R4 approval-neutral by class while retaining stronger R4 evidence
+DOC-16 v3.2 keeps R0-R4 approval-neutral by class while retaining stronger R4 evidence
 and explicit action-specific authority. Where this document's remaining prose (outside
 §17) describes something narrower or different,
 treat it as historical design intent, not a live contradiction requiring further correction in
@@ -1449,7 +1463,7 @@ develop
 
 `main` represents the production-approved state.
 
-_Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.0
+_Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.2
 now governs merge/release authority through risk evidence and explicitly assigned
 action-specific authority; no R0-R4 label creates founder approval by itself._
 
@@ -1612,7 +1626,7 @@ GitHub Actions runs deterministic CI, governance, quality, and security checks
     ↓
 different reviewer posts an exact-revision PASS / PASS WITH NON-BLOCKING FINDINGS / FAIL
     ↓
-an authorized actor, different from the implementer, verifies the gates and merges
+non-author merge actor audits the gates and performs any separately authorized merge
 ```
 
 Issue creation, labels, and comments trigger no planning or implementation. GitHub
@@ -1632,9 +1646,13 @@ new implementation revision followed by complete checks and fresh independent re
 | Promote `develop` to `main`                          | Separately reviewed pull request; no current promotion workflow                                                           |
 | Deploy                                               | T10 held manual Cloudflare state machine exists; current manifest blocks before environment jobs/secrets                  |
 
-Roles are responsibilities, not permanent vendors. The builder never approves or
-merges its own work, and a reviewer that authors a material correction becomes a
-builder whose revision needs fresh independent review.
+Roles are responsibilities, not permanent vendors. Actors are attributable humans or
+separately instantiated AI participants. The builder never approves or merges its own
+work, and a reviewer that authors a material correction becomes a builder whose
+revision needs fresh checks and different-actor review. A role relabel, new session,
+model, or provider is not independence or authority. Model/provider choice may harden
+evidence; an expressly applicable cross-model rule remains scoped evidence, not an
+approval source.
 
 R0-R4 are consequence classes, not personal-approval classes. R4 requires an explicit
 decision record, impact and contingency evidence, applicable specialist and
@@ -2800,7 +2818,7 @@ The transition is complete when:
 - Manual copying between chat topics and repository files has ended.
 
 _Historical completion criteria: current release and production authority is defined
-by DOC-16 v3.1 and VOC-080's held Cloudflare program, not by the risk label or this
+by DOC-16 v3.2, including VOC-082's distinct-actor clarification, and VOC-080's held Cloudflare program, not by the risk label or this
 preserved v1.0 checklist._
 
 ## 25.12 Reversibility

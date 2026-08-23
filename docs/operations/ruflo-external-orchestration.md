@@ -73,8 +73,14 @@ adopted VOC package + GitHub issue
 
 The task-orchestrator coordinates handoffs but cannot adopt a plan, change scope,
 declare a check passing, approve a review, or complete an action-specific hold.
-Participants are provider-neutral. A builder and its exact-revision reviewer must be
-different participants with no shared authorship of the reviewed revision.
+Participants are provider-neutral. A role is a responsibility and an actor is the
+attributable human or separately instantiated AI participant assigned to it. A builder
+and its exact-revision reviewer must be different actors with no authorship of the
+reviewed revision; relabeling an actor, changing a prompt/session, or selecting a
+different model/provider is not separation. Runtime provenance may harden evidence but
+does not grant authority. A material reviewer edit makes that reviewer the builder of
+the new SHA and requires fresh checks and a different reviewer. The non-author merge
+actor audits exact evidence only; it cannot satisfy an action-specific hold.
 
 | Role                 | Workspace and output                                                                             | Permission ceiling                                                                                                              |
 | -------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
@@ -128,7 +134,9 @@ GitHub evidence is complete.
    `start`, `daemon`, `autopilot`, `deployment`, `issues`, or MCP setup in the clone.
 5. Start with no credentials and no sensitive environment. Add no tool merely because
    an upstream preset names it.
-6. Assign one worktree per writer and retain a provider-neutral participant receipt.
+6. Assign one worktree per writer and retain a provider-neutral actor receipt with
+   role, exact SHA, authorship independence, verdict/findings, and optional runtime
+   provenance.
 7. Give the reviewer the exact SHA and completed evidence. Explicitly prohibit
    duplicate long-running suites and background processes.
 8. Publish only sanitized exact-SHA evidence to the pull request. A Ruflo receipt is

@@ -79,35 +79,35 @@ And required side effects or protections hold
 Mark each `Affected`, `Not affected`, or `Unknown — blocks readiness`, and explain
 every affected or unknown entry.
 
-| Area | Status | Evidence or required work |
-|---|---|---|
-| Product scope and UX |  |  |
-| Living documents and decisions |  |  |
-| Frontend and accessibility |  |  |
-| Backend and API contracts |  |  |
-| Database and migrations |  |  |
-| Authentication and authorization |  |  |
-| Privacy, personal data, audio, or voice |  |  |
-| Security and secrets |  |  |
-| Analytics |  |  |
-| AI behavior/providers |  |  |
-| Infrastructure and deployment |  |  |
-| Testing |  |  |
-| Support and operations |  |  |
+| Area                                    | Status | Evidence or required work |
+| --------------------------------------- | ------ | ------------------------- |
+| Product scope and UX                    |        |                           |
+| Living documents and decisions          |        |                           |
+| Frontend and accessibility              |        |                           |
+| Backend and API contracts               |        |                           |
+| Database and migrations                 |        |                           |
+| Authentication and authorization        |        |                           |
+| Privacy, personal data, audio, or voice |        |                           |
+| Security and secrets                    |        |                           |
+| Analytics                               |        |                           |
+| AI behavior/providers                   |        |                           |
+| Infrastructure and deployment           |        |                           |
+| Testing                                 |        |                           |
+| Support and operations                  |        |                           |
 
 ## Implementation plan and tasks
 
-| Task ID | Description | Acceptance criteria | Dependencies | Owner |
-|---|---|---|---|---|
-| VOC-###-T01 | Bounded task | AC-01 | None | Codex |
+| Task ID     | Description  | Acceptance criteria | Dependencies | Owner         |
+| ----------- | ------------ | ------------------- | ------------ | ------------- |
+| VOC-###-T01 | Bounded task | AC-01               | None         | builder actor |
 
 Record the technical approach, components, sequence, compatibility, and known risks.
 
 ## Test plan
 
-| Acceptance criterion/risk | Test level or review | Command/evidence |
-|---|---|---|
-| AC-01 | Unit/integration/journey/manual | To be completed |
+| Acceptance criterion/risk | Test level or review            | Command/evidence |
+| ------------------------- | ------------------------------- | ---------------- |
+| AC-01                     | Unit/integration/journey/manual | To be completed  |
 
 Include relevant formatting, lint, types, unit, integration, build, security,
 accessibility, migration, preview, staging, and rollback validation. Do not list a
@@ -132,7 +132,7 @@ tool as required unless it exists or the implementation task includes installing
 - Protected areas:
 - Active governance model: VOC-079 approval-neutral / separately governed rollback reference
 - Independent verifier required: Yes
-- Builder/reviewer identities and exact reviewed revision:
+- Builder/reviewer actor identities, roles, authorship independence, exact reviewed revision, and optional runtime provenance:
 - EHR triggered: Yes/No and evidence
 - Action-specific authority required: Yes/No; name action and accountable role
 - Authority evidence or N/A:
@@ -142,6 +142,11 @@ merely because of its label. Record proportionate deterministic evidence and exa
 revision independent review. For R4, also record decision, impact, contingency, and
 applicable specialist evidence. Explicit action-specific authority and any triggered
 EHR remain independently applicable.
+
+A role is a responsibility; an actor is an attributable human or separately
+instantiated AI participant. The reviewer must be a different non-author actor for the
+exact SHA. A relabel, new session, model, or provider is not separation. Model/provider
+metadata may harden evidence but never supplies approval, merge, or action authority.
 
 ## Assumptions and open questions
 

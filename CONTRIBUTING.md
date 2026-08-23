@@ -8,6 +8,15 @@ different role, and a pull request into `develop`. Role separation is what matte
 the policy does not permanently bind planner, implementer, or reviewer duties to one
 vendor.
 
+A role is a responsibility, while an actor is the attributable human or separately
+instantiated AI participant assigned to it. A review requires a different actor with
+no authorship of the exact revision; a new role label, prompt, session, model, or
+provider does not establish independence. A material reviewer edit produces a new
+builder-authored SHA and needs fresh checks and a different reviewer. Runtime
+provenance may be recorded for defense in depth but creates no authority; review and
+merge evidence never replace an action-specific external-effect hold. See
+[ADR-0005](docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md).
+
 GitHub Actions performs deterministic validation only. It does not trigger an agent,
 draft or adopt a package, implement code, post an AI verdict, remediate a failure,
 merge a pull request, or promote a release. No repository-local orchestrator, agent

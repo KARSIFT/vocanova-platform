@@ -31,6 +31,9 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
   Cloudflare, DNS, spending, or launch authority. The exact external installation,
   audit, role envelope, and synthetic rehearsal are recorded in the
   [operator runbook](operations/ruflo-external-orchestration.md).
+- [ADR-0005](decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md)
+  defines distinct provider-neutral role/actor separation for delivery work. It does
+  not alter DOC-00's product-owner decisions or create action authority.
 - The T02 operator-side Ruflo installation is not a repository dependency and starts
   nothing in a fresh clone. No live Cloudflare deployment exists merely because the
   decisions are accepted; VOC-080's ordered tasks and action-specific holds govern
@@ -44,7 +47,7 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
 
 | ID     | Title                                                                                                                   | Status                   | Owner   | Canonical path                                                            | Related artifacts                                              |
 | ------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------ | ------- | ------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| DOC-00 | [VocaNova Product Bible](product/00-product-bible.md)                                                                   | approved                 | founder | `docs/product/00-product-bible.md`                                        | DOC-01, DOC-02, DOC-03, DOC-05, DOC-09, DOC-12                 |
+| DOC-00 | [VocaNova Product Bible](product/00-product-bible.md)                                                                   | approved                 | founder | `docs/product/00-product-bible.md`                                        | DOC-01, DOC-02, DOC-03, DOC-05, DOC-09, DOC-12, ADR-0005       |
 | DOC-01 | [VocaNova MVP PRD](product/01-mvp-prd.md)                                                                               | approved                 | founder | `docs/product/01-mvp-prd.md`                                              | DOC-00, DOC-03, DOC-08, DOC-09, DOC-12                         |
 | DOC-02 | [VocaNova Market Research](research/02-market-research.md)                                                              | approved                 | founder | `docs/research/02-market-research.md`                                     | DOC-00, DOC-01                                                 |
 | DOC-03 | [VocaNova UI/UX Design](design/03-ui-ux-design.md)                                                                      | approved                 | founder | `docs/design/03-ui-ux-design.md`                                          | DOC-00, DOC-01, DOC-08, DOC-09                                 |
