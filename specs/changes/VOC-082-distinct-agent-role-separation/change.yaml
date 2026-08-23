@@ -66,6 +66,7 @@ artifacts:
   tasks: tasks.md
   test_plan: test-plan.md
   release_plan: release-plan.md
+  final_evidence: final-evidence.md
 dependencies:
   - id: VOC-082-DEP-00
     status: >-
@@ -122,9 +123,12 @@ affected_areas:
 implementation:
   authorized: true
   required: true
-  status: authorized-after-pr-110-adoption
+  status: >-
+    T00 integrated by PR #112; T01 implementation aa63cd6811c42b1ac02327fe64b6fdd44bce1235
+    passed different-actor review and hosted deterministic checks; final evidence-only
+    closure revision requires its own exact-SHA review and hosted eligibility on PR #114
   target_branch: develop
-  pull_request: null
+  pull_request: 114
   authority_issue: 109
 release:
   required: false

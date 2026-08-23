@@ -6,7 +6,7 @@
 - Tasks: T00
 - Tests: TEST-00, TEST-01
 - Evidence: EV-00, EV-01
-- Result: pending
+- Result: satisfied-by-T00-exact-review-and-PR-112-integration
 
 DOC-00, DOC-15, DOC-16, AGENTS.md, and the approval matrix use one compatible
 definition: a role is a responsibility, an actor is the attributable human or
@@ -19,7 +19,7 @@ grant authority.
 - Tasks: T00
 - Tests: TEST-01
 - Evidence: EV-01
-- Result: pending
+- Result: satisfied-by-T00-exact-review-and-PR-112-integration
 
 At least one active canonical example shows separately instantiated AI planner,
 builder, exact-SHA reviewer, and non-author merge-audit actors. It explicitly rejects
@@ -32,7 +32,7 @@ merge.
 - Tasks: T00
 - Tests: TEST-01, TEST-02
 - Evidence: EV-01, EV-02
-- Result: pending
+- Result: satisfied-by-T00-exact-review-and-PR-112-integration
 
 All active guidance says different model/provider selection may harden independence
 but does not create authority. Any narrower explicit cross-model evidence rule remains
@@ -46,7 +46,7 @@ independent-verifier actors without requiring Codex or Claude Code identities.
 - Tasks: T00, T01
 - Tests: TEST-01, TEST-03
 - Evidence: EV-01, EV-03
-- Result: pending
+- Result: satisfied-at-T01-implementation-SHA-aa63cd6; closure-review-required-on-PR-114
 
 The plan author cannot review/adopt its own plan; the implementation builder cannot
 review, approve, or merge its own exact revision; and a reviewer that materially edits
@@ -59,7 +59,7 @@ reviewer.
 - Tasks: T00
 - Tests: TEST-02
 - Evidence: EV-02
-- Result: pending
+- Result: satisfied-by-T00-exact-review-and-PR-112-integration
 
 Contributor, activation-checklist, and evidence templates record actor/role, exact SHA,
 verdict, resolved findings, authorship independence, and optional runtime provenance.
@@ -72,7 +72,7 @@ specific hold.
 - Tasks: T01
 - Tests: TEST-03, TEST-04
 - Evidence: EV-03, EV-04
-- Result: pending
+- Result: satisfied-at-T01-implementation-SHA-aa63cd6; closure-review-required-on-PR-114
 
 The eligible/blocked fixtures demonstrate AI reviewer identities while producing the
 same decisions and reason codes. The evaluator, adapter, schema, `governance.yml`,
@@ -85,7 +85,7 @@ adopted base.
 - Tasks: T01
 - Tests: TEST-03
 - Evidence: EV-03
-- Result: pending
+- Result: satisfied-at-T01-implementation-SHA-aa63cd6; closure-review-required-on-PR-114
 
 Canonical state passes. Synthetic variants that require a human solely because a role
 is independent, derive authority from vendor/model identity, accept same-actor
@@ -98,7 +98,7 @@ evidence satisfy an external-effect hold fail with concrete reasons.
 - Tasks: T01
 - Tests: TEST-04, TEST-05
 - Evidence: EV-04, EV-05
-- Result: pending
+- Result: pending-current-closure-SHA-review-and-final-hosted-eligibility-on-PR-114
 
 The final revision has complete R4 decision/impact/contingency/specialist/deterministic
 evidence, a different-actor cross-model exact-SHA verdict, no blocking findings, hosted
@@ -111,7 +111,7 @@ Cloudflare, secret, production-data, billing, DNS, or live-system action occurs.
 - Tasks: T00
 - Tests: TEST-00, TEST-01, TEST-02
 - Evidence: EV-00, EV-01, EV-02
-- Result: pending
+- Result: satisfied-by-T00-exact-review-and-PR-112-integration
 
 DOC-00 §6 names accountable decision-owner, planner, builder, independent-reviewer, and
 non-author merge-audit roles without permanently assigning ChatGPT, Codex, Claude Code,

@@ -6,7 +6,7 @@
 - Acceptance: AC-00, AC-01, AC-02, AC-03, AC-04, AC-08
 - Tests: TEST-00, TEST-01, TEST-02
 - Evidence: EV-00, EV-01, EV-02
-- Status: implemented-pending-independent-verification
+- Status: integrated-by-PR-112-at-merge-commit-26c16b7b07d55c1910c7fd9711dfb17662a75d8e
 
 Create ADR-0005; reconcile DOC-00 §6 and its root/product indexes; and update DOC-15,
 DOC-16, governance indexes/guidance, AGENTS.md, the post-merge activation checklist,
@@ -27,7 +27,7 @@ no executable workflow/evaluator change.
 - Acceptance: AC-03, AC-05, AC-06, AC-07
 - Tests: TEST-03, TEST-04, TEST-05
 - Evidence: EV-03, EV-04, EV-05
-- Status: blocked-by-T00
+- Status: implementation-reviewed-and-hosted-at-aa63cd6; closure-revision-review-pending-on-PR-114
 
 Add narrow foundation policy markers and negative unit fixtures, update synthetic
 eligible/blocked R4 participant labels to provider-neutral AI actors, and prove the
@@ -36,3 +36,11 @@ Run proportional local and hosted checks, obtain a different-actor cross-model e
 SHA review without duplicate long suites, resolve every blocking finding, and rehearse
 reverse-order repository rollback. Do not approve or merge the builder's own work,
 deploy, mutate settings, or release any inherited hold.
+
+Exact implementation SHA `aa63cd6811c42b1ac02327fe64b6fdd44bce1235`
+received a different-actor cross-model PASS with zero blockers. Its CI, Security,
+changed-path, structure, and foundation checks passed; the read-only eligibility job
+correctly blocked before normalized final-review evidence existed. The non-self-
+referential closure record is `final-evidence.md`. Because adding that record changes
+the tree, PR #114 must carry a fresh different-actor verdict and final hosted
+eligibility for its exact current SHA before merge.
