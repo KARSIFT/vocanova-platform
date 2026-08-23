@@ -280,7 +280,7 @@ export function registerIdentityRoutes(
   registerIdentityOpenApi(app);
 }
 
-async function authenticated(
+export async function authenticated(
   request: Request,
   service: IdentityService,
 ): Promise<{ user: IdentityUser; token: string }> {
@@ -288,7 +288,7 @@ async function authenticated(
   return { user: await service.authenticate(token), token };
 }
 
-function requireCsrf(request: Request): void {
+export function requireCsrf(request: Request): void {
   if (
     !constantTimeEqual(
       readCookie(request, CSRF_COOKIE),
@@ -343,7 +343,7 @@ function clientKey(request: Request): string {
   );
 }
 
-function identityProblem(
+export function identityProblem(
   context: Parameters<typeof problemResponse>[0],
   error: unknown,
 ): Response {

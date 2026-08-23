@@ -7,6 +7,8 @@ import type { PlatformRepository } from "./domain/platform.js";
 import { D1IdentityRepository } from "./identity/repository.js";
 import { registerIdentityRoutes } from "./identity/routes.js";
 import { IdentityService, identityConfig } from "./identity/service.js";
+import { D1ContentLearningRepository } from "./content/repository.js";
+import { registerContentLearningRoutes } from "./content/routes.js";
 import {
   ProblemSchema,
   createProblem,
@@ -32,7 +34,7 @@ const ConfigSchema = z
     release: z.string(),
     runtime: z.literal("cloudflare-workers"),
     data: z.literal("d1"),
-    migrationStatus: z.literal("identity-account-parity"),
+    migrationStatus: z.literal("content-review-parity"),
   })
   .openapi("RuntimeConfig");
 
@@ -76,7 +78,7 @@ export const OPENAPI_DOCUMENT_CONFIG = {
     title: "VocaNova Worker API migration target",
     version: "0.1.0",
     description:
-      "Operational Worker/D1 migration target. Identity and account endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
+      "Operational Worker/D1 migration target. Identity, account, content, learning, and review endpoints have parity evidence; the Go OpenAPI document remains canonical until every domain passes.",
   },
 };
 
@@ -143,13 +145,13 @@ export function createApp(
         release: config.value.release,
         runtime: "cloudflare-workers" as const,
         data: "d1" as const,
-        migrationStatus: "identity-account-parity" as const,
+        migrationStatus: "content-review-parity" as const,
       },
       200,
     );
   });
 
-  registerIdentityRoutes(app, (env) =>
+  const identityFactory = (env: CloudflareEnv) =>
     dependencies.createIdentityService
       ? dependencies.createIdentityService(env)
       : new IdentityService(
@@ -157,7 +159,12 @@ export function createApp(
           unavailableEmailSender,
           null,
           identityConfig(env),
-        ),
+        );
+  registerIdentityRoutes(app, identityFactory);
+  registerContentLearningRoutes(
+    app,
+    identityFactory,
+    (env) => new D1ContentLearningRepository(env.DB),
   );
 
   app.doc31("/openapi.json", OPENAPI_DOCUMENT_CONFIG);

@@ -27,7 +27,7 @@ describe("Worker API migration target", () => {
       release: "local",
       runtime: "cloudflare-workers",
       data: "d1",
-      migrationStatus: "identity-account-parity",
+      migrationStatus: "content-review-parity",
     });
     expect(text.toLowerCase()).not.toMatch(/token|secret|password|database_id/);
   });
@@ -87,11 +87,18 @@ describe("Worker API migration target", () => {
       "/api/v1/auth/magic-links/consume",
       "/api/v1/auth/oauth/google/callback",
       "/api/v1/auth/oauth/google/start",
+      "/api/v1/canonical-words/{wordSlug}",
+      "/api/v1/journey-situations",
+      "/api/v1/journey-situations/{slug}",
       "/api/v1/me",
       "/api/v1/onboarding",
+      "/api/v1/reviews/due",
+      "/api/v1/reviews/submissions",
       "/api/v1/settings",
       "/api/v1/settings/email-change-links",
       "/api/v1/settings/email-change-links/consume",
+      "/api/v1/user-words",
+      "/api/v1/user-words/{meaningId}",
       "/configz",
       "/healthz",
     ]);

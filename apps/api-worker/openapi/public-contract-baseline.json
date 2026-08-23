@@ -4,7 +4,7 @@
   "clientExceptions": {
     "/api/v1/auth/oauth/google/callback": "OAuth provider redirect target; navigated by the browser/provider rather than VocanovaClient"
   },
-  "workerIdentityOperations": [
+  "workerMigratedOperations": [
     {
       "method": "POST",
       "operationId": "CompleteOnboarding",
@@ -103,6 +103,15 @@
     },
     {
       "method": "GET",
+      "operationId": "GetCanonicalWord",
+      "path": "/api/v1/canonical-words/{wordSlug}",
+      "successStatus": 200,
+      "parameters": [{ "in": "path", "name": "wordSlug", "required": true }],
+      "request": null,
+      "response": { "properties": ["word"], "required": ["word"] }
+    },
+    {
+      "method": "GET",
       "operationId": "GetCurrentUser",
       "path": "/api/v1/me",
       "successStatus": 200,
@@ -117,6 +126,18 @@
           "onboardingStatus"
         ],
         "required": ["onboardingStatus"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetJourneySituation",
+      "path": "/api/v1/journey-situations/{slug}",
+      "successStatus": 200,
+      "parameters": [{ "in": "path", "name": "slug", "required": true }],
+      "request": null,
+      "response": {
+        "properties": ["meanings", "situation"],
+        "required": ["meanings", "situation"]
       }
     },
     {
@@ -137,6 +158,21 @@
           "status"
         ],
         "required": ["status"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetReviewsDue",
+      "path": "/api/v1/reviews/due",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "query", "name": "after", "required": false },
+        { "in": "query", "name": "limit", "required": false }
+      ],
+      "request": null,
+      "response": {
+        "properties": ["items", "nextCursor", "totalCount"],
+        "required": ["items", "totalCount"]
       }
     },
     {
@@ -163,6 +199,36 @@
           "notificationsEnabled",
           "reviewIntervalPreset"
         ]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "ListJourneySituations",
+      "path": "/api/v1/journey-situations",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "query", "name": "after", "required": false },
+        { "in": "query", "name": "limit", "required": false }
+      ],
+      "request": null,
+      "response": {
+        "properties": ["items", "nextCursor"],
+        "required": ["items"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "ListSavedWords",
+      "path": "/api/v1/user-words",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "query", "name": "after", "required": false },
+        { "in": "query", "name": "limit", "required": false }
+      ],
+      "request": null,
+      "response": {
+        "properties": ["items", "nextCursor"],
+        "required": ["items"]
       }
     },
     {
@@ -214,6 +280,129 @@
       "successStatus": 204,
       "parameters": [],
       "request": { "properties": ["email"], "required": ["email"] },
+      "response": null
+    },
+    {
+      "method": "POST",
+      "operationId": "SaveUserWord",
+      "path": "/api/v1/user-words",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "header", "name": "Idempotency-Key", "required": true }
+      ],
+      "request": {
+        "properties": ["meaningId", "source"],
+        "required": ["meaningId", "source"]
+      },
+      "response": {
+        "properties": [
+          "addedAt",
+          "meaningId",
+          "partOfSpeech",
+          "saved",
+          "shortDefinition",
+          "source",
+          "status",
+          "userWordId",
+          "wordId",
+          "wordSlug",
+          "wordText"
+        ],
+        "required": [
+          "addedAt",
+          "meaningId",
+          "partOfSpeech",
+          "saved",
+          "shortDefinition",
+          "source",
+          "status",
+          "userWordId",
+          "wordId",
+          "wordSlug",
+          "wordText"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "SubmitReview",
+      "path": "/api/v1/reviews/submissions",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "header", "name": "Idempotency-Key", "required": true }
+      ],
+      "request": {
+        "properties": [
+          "answeredAt",
+          "attemptType",
+          "clientAttemptId",
+          "meaningId",
+          "metadata",
+          "promptType",
+          "rating",
+          "responseTimeMs",
+          "result",
+          "selectedOptionMeaningId",
+          "source",
+          "typedAnswer",
+          "userWordId",
+          "wasHintUsed"
+        ],
+        "required": [
+          "answeredAt",
+          "clientAttemptId",
+          "meaningId",
+          "promptType",
+          "result",
+          "userWordId"
+        ]
+      },
+      "response": {
+        "properties": [
+          "answeredAt",
+          "attemptId",
+          "attemptType",
+          "clientAttemptId",
+          "meaningId",
+          "nextReviewAt",
+          "promptType",
+          "rating",
+          "responseTimeMs",
+          "result",
+          "reviewStepAfter",
+          "reviewStepBefore",
+          "selectedOptionMeaningId",
+          "source",
+          "typedAnswer",
+          "userWordId",
+          "wasHintUsed"
+        ],
+        "required": [
+          "answeredAt",
+          "attemptId",
+          "attemptType",
+          "clientAttemptId",
+          "meaningId",
+          "nextReviewAt",
+          "promptType",
+          "rating",
+          "responseTimeMs",
+          "result",
+          "reviewStepAfter",
+          "reviewStepBefore",
+          "source",
+          "userWordId",
+          "wasHintUsed"
+        ]
+      }
+    },
+    {
+      "method": "DELETE",
+      "operationId": "UnsaveUserWord",
+      "path": "/api/v1/user-words/{meaningId}",
+      "successStatus": 204,
+      "parameters": [{ "in": "path", "name": "meaningId", "required": true }],
+      "request": null,
       "response": null
     },
     {
