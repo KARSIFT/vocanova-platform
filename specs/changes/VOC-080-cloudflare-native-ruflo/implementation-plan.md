@@ -38,8 +38,10 @@ or exceptional uncertainty appears.
 ## Ordered implementation sequence
 
 1. T00 adopted the ADRs and reconciled canonical documents before incompatible code was written.
-2. T01 refactored CI and documented supported repository settings, retaining current
-   evidence; it did not mutate hosted settings.
+2. T01 refactored CI and applied the separately authorized bounded GitHub-settings
+   hardening recorded in `docs/governance/repository-settings.md`, retaining its readback
+   evidence. That historical repository-settings action did not deploy or mutate
+   Cloudflare, DNS, a server, or a production environment.
 3. T02 defined the pinned external Ruflo adapter/runbook and strengthened authority guards.
 4. T03 adapted the web to OpenNext and workerd without live deployment.
 5. T04 added the Worker API/D1/contract foundation.
