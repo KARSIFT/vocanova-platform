@@ -111,6 +111,7 @@ specialist_review:
   scope:
     - source-api-schema-and-endpoint-interpretation
     - availability-versus-enabled-distinction
+    - dependency-vulnerability-alert-versus-dependabot-security-update-distinction
     - point-in-time-freshness-and-staleness-semantics
     - no-mutation-boundary
   note: specialist exact-revision review remains pending for this implementation revision
