@@ -1,8 +1,10 @@
 # VOC-082 — Provider-neutral distinct-agent role separation
 
-Status: adopted through PR #110. Repository-only implementation is authorized within
-this package; inherited VOC-080 holds and all action-specific authority boundaries
-remain in force.
+Status: adopted through PR #110 and repository-complete through T00/T01. Final T01
+exact SHA `9b52963eba5b1dee30e0a63936de2c9ff0b82337` received different-actor
+cross-model PASS on PR #114, merged as `eb13979a7ad59e5dd1eef0680116b84eeadb059a`,
+and passed post-merge CI/Governance/Security checks. Inherited VOC-080 holds and all
+action-specific authority boundaries remain in force.
 
 Issue [#109](https://github.com/KARSIFT/vocanova-platform/issues/109) records a
 coordination failure: a builder interpreted the prohibition on self-review and
@@ -43,9 +45,14 @@ because DOC-00's active Product Bible still permanently assigned delivery roles 
 ChatGPT, Codex, and Claude Code. Both FAILs remain historical evidence. Exact SHA
 `c1109466c1498aab48744d5b94457522a36535e4` subsequently received a different-role,
 read-only cross-model **PASS** with zero blocking findings, and the accountable
-repository-governance decision owner approved that exact candidate for adoption. The
-adoption-bookkeeping revision requires its own exact-SHA review before PR #110 may
-merge.
+repository-governance decision owner approved that exact candidate for adoption.
+Implementation then completed in two repository-only stages: T00 exact SHA
+`b1fa02e0b79e11d75e02194988826106aae2939c` received PASS on PR #112 after preserving
+two prior FAILs and merged as `26c16b7b07d55c1910c7fd9711dfb17662a75d8e`; T01 exact
+SHA `9b52963eba5b1dee30e0a63936de2c9ff0b82337` received the final PASS on PR #114
+after preserving the superseded `aa63cd6811c42b1ac02327fe64b6fdd44bce1235` PASS and
+the exact-SHA FAIL on comment `5385846754`, then merged as
+`eb13979a7ad59e5dd1eef0680116b84eeadb059a`.
 
 ## Authority boundary
 

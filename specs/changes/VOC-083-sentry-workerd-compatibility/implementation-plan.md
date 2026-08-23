@@ -2,51 +2,45 @@
 
 ## Preconditions and protected areas
 
-Do not begin until this remediation revision receives a fresh independent exact-SHA plan
-review, the applicable decision owner adopts it, and `implementation_authorized` becomes
-true. The prior SHA `682b33ec1a126e8924395f7d7f7eb26191f2a57a` received FAIL at PR
-#111 comment 5385262973; it remains historical evidence, not a passed review. After
-adoption, T00 alone is authorized for upstream evidence plus bounded disposable isolated
-candidate probes; T01+ remain blocked until T00 records a provisional candidate decision.
-The builder must start from the adopted
-revision, re-check locked versions/current primary Cloudflare/Sentry documentation, and
-remain within the declared surfaces. No Sentry/Cloudflare credentials, API calls,
-source-map upload, deployment, account query, billing action, or inherited-hold action
-is authorized.
+These preconditions governed the completed implementation and were satisfied before T00
+began: the remediation revision received a fresh independent exact-SHA plan review, the
+applicable decision owner adopted it, and `implementation_authorized` became true. The
+prior SHA `682b33ec1a126e8924395f7d7f7eb26191f2a57a` received FAIL at PR #111 comment
+5385262973; it remains historical evidence, not a passed review. After adoption, T00
+alone was authorized for upstream evidence plus bounded disposable isolated candidate
+probes, and T01+ remained blocked until T00 recorded a provisional candidate decision.
+The builder started from the adopted revision, re-checked locked versions/current
+primary Cloudflare/Sentry documentation, and remained within the declared surfaces. No
+Sentry/Cloudflare credentials, API calls, source-map upload, deployment, account query,
+billing action, or inherited-hold action was authorized.
 
-## File reconciliation and implementation sequence
+## Completed Sequence
 
 1. **T00 — Provisional selection (post-adoption, non-landing evidence/probes).**
-   Reproduce #105 on the locked base;
-   capture sanitized generated-bundle locations and workerd output. Compare the three
-   candidates in `VOC-083-R00`; verify exact version exports, upstream status, and the
-   supported reporting surface. Record a selection decision only when all required
-   evidence is present. If upstream evidence alone is insufficient, make bounded local
-   candidate probes only in fresh isolated worktrees, with synthetic non-secret values,
-   no remote action, and a recorded cleanup/discard result. Record the provisional
-   decision/rejected candidates without changing the canonical task branch. Stop if
-   none qualifies; T00 does not require final canonical acceptance.
-2. **T01 — Implement the selected narrow repair.** Modify only the selected
-   configuration/import/adapter and necessary lockfile. Keep client/server behavior
-   explicitly separated, preserve capture hooks, and make test transport injection
-   impossible in normal runtime configuration. Do not remove error reporting as an
-   alternative to compatibility.
+   Completed at exact SHA `71db51d1dd2571d01e9ee3b3c13ebc2c00e43514`, merged by PR
+   #113 as `e79f04402055d7ebbb1ccfbaf8e7a1dd1b85185c`. The task reproduced #105 on the
+   locked base, captured sanitized generated-bundle locations and workerd output,
+   compared the three candidates in `VOC-083-R00`, and recorded the provisional
+   Workers-native selection without changing the canonical task branch runtime.
+2. **T01 — Implement the selected narrow repair.** Completed at exact SHA
+   `9f11195ed186e214fade57884e66ca96f2498ebc`, merged by PR #115 as
+   `8b1f83a54ca72edebce0b7b5ed9f7d99e00a37d6`. The task applied only the selected
+   configuration/import/adapter and necessary lockfile changes while preserving the
+   separated client/server reporting paths and non-network test seams.
 3. **T02 — Canonically qualify the selection and make bundle/log safety executable.**
-   Add a generated OpenNext bundle
-   scanner with a complete deterministic fresh-artifact manifest, unsafe and supported
-   precompiled-module Wasm fixtures, and fail-closed missing/partial inventory cases.
-   Reorder `ci:web` so the canonical build precedes compatibility, dry run, and smoke;
-   make local-stack build/scan its own fresh artifact before it starts. Harden
-   `test-workerd.mjs` and the two-Worker local-stack owner to classify bounded output
-   and fail on unexpected rejection/error diagnostics despite HTTP success. Add this
-   evidence to existing web/local-stack CI paths and required aggregate without adding
-   a workflow. Run the fresh canonical implementation build/workerd and reporting-
-   equivalence acceptance here. If it disproves T00's provisional selection, fail
-   closed, update T00's decision, revise T01, and repeat T02 under fresh exact-SHA review.
-4. **T03 — Reconcile and verify.** Review every affected runtime/config/test/doc/
-   lockfile file, update only documentation made inaccurate, run deterministic checks,
-   obtain a different-role exact-SHA Cloudflare/Workers/Sentry specialist verdict, and
-   perform an ordinary repository rollback rehearsal in a disposable worktree.
+   Completed at exact SHA `e3a71a13eedfc8fef05b580280047e41f320de48`, merged by PR
+   #116 as `23da9da69bb27529994e70d4bf6e9a0a78ea26b6`. The task added the complete
+   generated-bundle scanner, Wasm fixtures, fail-closed manifest checks, CI ordering,
+   and bounded log classification after preserving the earlier FAIL on exact SHA
+   `ab1b24d527f2d71649efb61cc1a8475535de282b`.
+4. **T03 — Reconcile and verify.** Completed at exact SHA
+   `bd7d98fc9bc2af9683b42d2fb1807794d27cda1a`, merged by PR #117 as
+   `d4078924ae6d0be52628973e84be51734d93a5a9`. The task reviewed every affected
+   runtime/config/test/doc/lockfile file, updated only documentation made inaccurate,
+   received the different-role exact-SHA Cloudflare/Workers/Sentry specialist PASS
+   after preserving the earlier FAIL on exact SHA
+   `987d38caf461eece780ba0421594305d759fa7c4`, and completed the ordinary repository
+   rollback rehearsal in a disposable worktree.
 
 ## Selection constraints
 

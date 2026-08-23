@@ -46,7 +46,7 @@ independent-verifier actors without requiring Codex or Claude Code identities.
 - Tasks: T00, T01
 - Tests: TEST-01, TEST-03
 - Evidence: EV-01, EV-03
-- Result: satisfied-at-T01-implementation-SHA-aa63cd6; closure-review-required-on-PR-114
+- Result: complete-through-final-T01-exact-SHA-9b52963eba5b1dee30e0a63936de2c9ff0b82337-and-PR-114-merge
 
 The plan author cannot review/adopt its own plan; the implementation builder cannot
 review, approve, or merge its own exact revision; and a reviewer that materially edits
@@ -72,7 +72,7 @@ specific hold.
 - Tasks: T01
 - Tests: TEST-03, TEST-04
 - Evidence: EV-03, EV-04
-- Result: satisfied-at-T01-implementation-SHA-aa63cd6; closure-review-required-on-PR-114
+- Result: complete-through-final-T01-exact-SHA-9b52963eba5b1dee30e0a63936de2c9ff0b82337-and-PR-114-merge
 
 The eligible/blocked fixtures demonstrate AI reviewer identities while producing the
 same decisions and reason codes. The evaluator, adapter, schema, `governance.yml`,
@@ -85,7 +85,7 @@ adopted base.
 - Tasks: T01
 - Tests: TEST-03
 - Evidence: EV-03
-- Result: satisfied-at-T01-implementation-SHA-aa63cd6; closure-review-required-on-PR-114
+- Result: complete-through-final-T01-exact-SHA-9b52963eba5b1dee30e0a63936de2c9ff0b82337-and-PR-114-merge
 
 Canonical state passes. Synthetic variants that require a human solely because a role
 is independent, derive authority from vendor/model identity, accept same-actor
@@ -98,12 +98,13 @@ evidence satisfy an external-effect hold fail with concrete reasons.
 - Tasks: T01
 - Tests: TEST-04, TEST-05
 - Evidence: EV-04, EV-05
-- Result: pending-current-closure-SHA-review-and-final-hosted-eligibility-on-PR-114
+- Result: complete-through-final-T01-exact-SHA-9b52963eba5b1dee30e0a63936de2c9ff0b82337-review-hosted-post-merge-and-rollback
 
 The final revision has complete R4 decision/impact/contingency/specialist/deterministic
 evidence, a different-actor cross-model exact-SHA verdict, no blocking findings, hosted
-proof, and reverse-order rollback. No PR is self-merged and no settings, deployment,
-Cloudflare, secret, production-data, billing, DNS, or live-system action occurs.
+proof, reverse-order rollback, and post-merge CI/Governance/Security PASS. No PR is
+self-merged and no settings, deployment, Cloudflare, secret, production-data, billing,
+DNS, or live-system action occurs.
 
 ## VOC-082-AC-08 — Product authority remains intact and provider-neutral
 

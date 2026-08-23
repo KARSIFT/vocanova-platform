@@ -16,7 +16,7 @@ compatibility evidence. If needed, test candidates only in fresh isolated worktr
 local simulation/synthetic non-secret values; record sanitized results and fully discard
 or revert each probe. T00 commits only its matrix/provisional decision, not probe code,
 and does not change the canonical task branch's runtime/config, dependency manifest/
-lockfile, tests, CI, or active docs. T01 remains blocked until this record is complete;
+lockfile, tests, CI, or active docs. T01 remained blocked until this record was complete;
 T00 does not claim final canonical acceptance.
 
 ## VOC-083-T01 — Preserve reporting with the selected Workers-safe repair
@@ -68,14 +68,16 @@ the exact T01 revision `9f11195ed186e214fade57884e66ca96f2498ebc` passed.
 - Acceptance: `VOC-083-AC-04`, `VOC-083-AC-05`
 - Tests: `VOC-083-TEST-05`, `VOC-083-TEST-06`
 - Evidence: `VOC-083-EV-05`, `VOC-083-EV-06`
-- Status: candidate-reconciliation-recorded; pending T03's own exact-final-SHA
-  specialist review, hosted proof, and ordinary repository rollback
+- Status: complete-final-exact-SHA-bd7d98fc9bc2af9683b42d2fb1807794d27cda1a-merged-through-PR-117-with-hosted-post-merge-and-four-commit-rollback-evidence
 
 Reconcile affected active docs, run the proportionate final checks, independently
 review the exact final revision with Cloudflare/Workers/Sentry specialization, and
-rehearse repository-only rollback. The candidate inventory records that T02
-reconciled the runtime/configuration/dependency/CI/test surfaces and that T03 corrected
-DOC-11's stale active `@sentry/nextjs` runtime statement. T03 must request and record
-its own exact-SHA review after the preserved prior FAIL, plus hosted proof and an
-ordinary rollback, before closure. Do not claim a T03 PR number, final SHA, review,
-hosted result, or any live Sentry/Cloudflare outcome in advance.
+rehearse repository-only rollback. T02 reconciled the runtime/configuration/dependency/
+CI/test surfaces, and T03 corrected DOC-11's stale active `@sentry/nextjs` runtime
+statement. The earlier T03 exact SHA `987d38caf461eece780ba0421594305d759fa7c4`
+recorded FAIL and remains preserved historical evidence. The final T03 exact SHA
+`bd7d98fc9bc2af9683b42d2fb1807794d27cda1a` then received specialist PASS on comment
+`5386743429`, recorded hosted qualification on comment `5386754914`, merged through
+PR #117 as `d4078924ae6d0be52628973e84be51734d93a5a9`, passed a repository-only
+four-commit rollback rehearsal, and passed post-merge CI/Governance/Security on
+`develop`. No live Sentry/Cloudflare outcome is claimed.
