@@ -6,7 +6,7 @@
 - Acceptance: `VOC-083-AC-00`
 - Tests: `VOC-083-TEST-00`
 - Evidence: `VOC-083-EV-00`
-- Status: authorized-after-pr-111-adoption-for-disposable-probes-and-provisional-decision
+- Status: complete-provisional-workers-native-selection-recorded-in-VOC-083-EV-00
 
 After adoption, inventory direct/transitive Sentry imports and
 generated bundle locations, retrieve current primary-source compatibility evidence,
@@ -25,7 +25,7 @@ T00 does not claim final canonical acceptance.
 - Acceptance: `VOC-083-AC-01`, `VOC-083-AC-02`
 - Tests: `VOC-083-TEST-01`, `VOC-083-TEST-02`
 - Evidence: `VOC-083-EV-01`, `VOC-083-EV-02`
-- Status: blocked-by-T00
+- Status: unblocked-by-T00; not-started
 
 Apply the T00 provisional choice canonically, regenerate/review any lockfile change,
 and preserve server/Worker/browser capture/privacy controls. Prepare deterministic
