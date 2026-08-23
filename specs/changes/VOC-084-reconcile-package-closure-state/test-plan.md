@@ -6,18 +6,23 @@
 - Preconditions: adopted package and read-only access to existing public GitHub evidence
 - Procedure: validate YAML/JSON structure, unique package/task IDs, exact 40-character
   SHAs, PR/merge mappings, verdicts, hosted applicability, rollback, and required FAILs;
-  manually cross-check every URL before the exact-SHA review.
+  enumerate the current files in every target package; require exactly one
+  `active-claim`, `historical`, or `prospective` classification per file; manually
+  cross-check every URL and classification before the exact-SHA review.
 - Expected: every VOC-080 through VOC-083 task has complete non-placeholder evidence;
-  contradictory or missing evidence blocks.
+  every target-package file is classified exactly once; contradictory, missing, or
+  multiply classified evidence blocks.
 - Evidence: `VOC-084-EV-00`
 
 ## VOC-084-TEST-01 — VOC-080/VOC-081 active-claim reconciliation
 
 - Covers: `VOC-084-AC-01`
 - Preconditions: `VOC-084-T00` inventory
-- Procedure: parse designated active fields in `change.yaml`, `tasks.md`,
-  `acceptance-criteria.md`, README, and evidence records; compare task/criterion status
-  and limitations to the inventory and inherited holds.
+- Procedure: parse every file classified `active-claim`, including `change.yaml`,
+  `tasks.md`, `acceptance-criteria.md`, README, release plans, and closure-evidence
+  records; compare task/criterion status and limitations to the inventory and inherited
+  holds; verify files classified `historical` or `prospective` remain explicitly
+  labelled and do not supply current completion claims.
 - Expected: completed repository work is complete, historical text remains historical,
   and live/F3/A1/production claims remain absent or held.
 - Evidence: `VOC-084-EV-01`
@@ -45,7 +50,8 @@
 - Covers: `VOC-084-AC-03`
 - Preconditions: isolated temporary fixture copies
 - Procedure: independently mutate stale active status, evidence omission, FAIL verdict,
-  inherited hold, identifier mapping, placeholder SHA/URL, and aggregate hook.
+  inherited hold, identifier mapping, placeholder SHA/URL, per-file classification
+  omission/duplication/invalid value/content contradiction, and aggregate hook.
 - Expected: every mutation fails for its own concrete reason; no fixture relies on a
   prior mutation or long-running/background process.
 - Evidence: `VOC-084-EV-03`

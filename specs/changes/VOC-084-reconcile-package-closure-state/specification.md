@@ -2,7 +2,10 @@
 
 ## Objective and requirement source
 
-Issue #118 establishes a repository-governance truthfulness defect. VOC-080 through
+Current GitHub issue [#118](https://github.com/KARSIFT/vocanova-platform/issues/118)
+establishes a repository-governance truthfulness defect. The canonical API object was
+created on 2026-08-23 and has no `pull_request` field; historical commit-message uses
+of the same number are not the current issue identity. VOC-080 through
 VOC-083 have merged implementation chains and exact evidence, but active package files
 retain pre-integration lifecycle language. VOC-084 must make those active records agree
 with GitHub without fabricating, backdating, or erasing evidence.
@@ -70,6 +73,18 @@ For each package and task, the implementation inventory must record, as applicab
 - post-merge `develop` checks or a documented reason they are not part of the task's
   historical contract.
 
+The inventory must also enumerate every committed file in each target package and
+classify it as exactly one of:
+
+- `active-claim`: current lifecycle, task, acceptance, evidence, or limitation state
+  that must agree with the task inventory;
+- `historical`: explicitly labelled immutable drafting, failed-review, failed-run, or
+  superseded-candidate evidence; or
+- `prospective`: explicitly labelled future work, activation, release, or hold state
+  that must not be converted into a completed repository claim.
+
+No target-package file may be unclassified, multiply classified, or silently excluded.
+
 The inventory is committed data. Validation must not use network calls and must not
 turn a mutable GitHub response into a local build dependency.
 
@@ -104,6 +119,8 @@ fail with concrete package/task/criterion reasons when:
 - an inherited hold is absent, released, or conflated with repository completion;
 - a task/acceptance identifier is absent, duplicated, or mapped inconsistently;
 - an evidence URL, SHA, merge commit, or result is placeholder-shaped; or
+- a committed target-package file is missing from the file classification, has an
+  invalid or duplicate classification, or contradicts its classification; or
 - the foundation aggregate omits the validator.
 
 Historical drafting text may use words such as “pending” when explicitly labelled as
@@ -117,8 +134,10 @@ After the final VOC-084 implementation merges and post-merge checks pass:
 - issue #85 may close as repository-only VOC-080 completion, with all three live holds
   repeated and no live outcome claimed;
 - issue #118 may close with the exact reconciliation evidence; and
-- issue #119 remains open because settings truth and desired hosted enforcement are a
-  separate governed problem.
+- current GitHub issue
+  [#119](https://github.com/KARSIFT/vocanova-platform/issues/119) remains open because
+  settings truth and desired hosted enforcement are a separate governed problem. Its
+  canonical API object was created on 2026-08-23 and has no `pull_request` field.
 
 ## Evidence anchors to reconcile
 

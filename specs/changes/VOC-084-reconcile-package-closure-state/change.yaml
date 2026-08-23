@@ -18,8 +18,11 @@ base_branch: develop
 base_sha: d4078924ae6d0be52628973e84be51734d93a5a9
 target_branch: develop
 requirement_source: >-
-  GitHub issue #118, reporting that active VOC-080 through VOC-083 package records
-  contradict their merged exact-revision review, hosted, rollback, and post-merge evidence.
+  Current GitHub issue https://github.com/KARSIFT/vocanova-platform/issues/118,
+  created 2026-08-23 with no pull_request field, reporting that active VOC-080 through
+  VOC-083 package records contradict their merged exact-revision review, hosted,
+  rollback, and post-merge evidence. Historical commit-message references carrying
+  the same number do not supersede the canonical current API object.
 requirement_approval_status: reported-defect-plan-candidate-not-yet-independently-reviewed
 
 owners:
@@ -68,8 +71,18 @@ dependencies:
   - id: VOC-084-DEP-02
     status: accepted-boundary
     description: >-
-      GitHub issue #119 owns public-repository settings/documentation drift. VOC-084 must
-      not change repository settings or absorb that unrelated scope.
+      Current GitHub issue https://github.com/KARSIFT/vocanova-platform/issues/119,
+      created 2026-08-23 with no pull_request field, owns public-repository
+      settings/documentation drift. VOC-084 must not change repository settings or
+      absorb that unrelated scope. Historical commit-message references carrying the
+      same number do not supersede the canonical current API object.
+  - id: VOC-084-DEP-03
+    status: implementation-precondition
+    description: >-
+      The T00 inventory must enumerate every committed file in each VOC-080 through
+      VOC-083 package directory and classify it exactly once as active-claim,
+      historical, or prospective. Validation must fail on omissions, duplicate or
+      invalid classifications, and classification/content contradictions.
 
 action_specific_holds: []
 inherited_holds:

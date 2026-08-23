@@ -11,7 +11,9 @@
 A machine-readable inventory covers every implementation task in VOC-080 through
 VOC-083 and records the applicable exact heads, PRs, merge commits, review evidence,
 hosted evidence, rollback evidence, final results, and preserved failures. No
-placeholder, ambiguous revision, or self-authored review is accepted.
+placeholder, ambiguous revision, or self-authored review is accepted. Every committed
+file in the four target package directories is enumerated and classified exactly once
+as `active-claim`, `historical`, or `prospective`; none is implicitly excluded.
 
 ## VOC-084-AC-01 — VOC-080 and VOC-081 active package state matches evidence
 
@@ -48,7 +50,8 @@ Cloudflare, Sentry, production, launch, or broader orchestration outcome is clai
 The foundation aggregate runs a network-free validator. Positive repository state
 passes. Negative fixtures independently reject stale active status, missing evidence,
 rewritten FAIL history, released/missing holds, identifier drift, placeholders, and
-aggregate omission with concrete reasons.
+aggregate omission with concrete reasons. It also rejects missing, duplicate, invalid,
+or content-inconsistent per-file classifications.
 
 ## VOC-084-AC-04 — Issue outcomes and unrelated settings scope remain truthful
 

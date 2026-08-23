@@ -11,7 +11,10 @@
 Create the package-local machine-readable inventory for every VOC-080 through VOC-083
 task. Verify existing GitHub/repository evidence read-only. Record exact heads, PRs,
 merge commits, reviews, hosted runs/applicability, rollback, post-merge results, and
-historical FAILs. Add no validator or existing-package edits yet.
+historical FAILs. Enumerate every committed file in all four target packages and
+classify each exactly once as `active-claim`, `historical`, or `prospective`, including
+release plans and closure-evidence material. Add no validator or existing-package edits
+yet.
 
 ## VOC-084-T01 — Reconcile VOC-080 and VOC-081 active records
 

@@ -43,7 +43,9 @@ filters and must be reported accurately rather than forced or fabricated.
 - `VOC-084-R02`: repository completion is mistaken for live activation. Mitigation:
   repeated inherited holds and negative hold-release fixtures.
 - `VOC-084-R03`: a broad word scan rejects legitimate historical drafting language.
-  Mitigation: parse designated active fields and explicit historical sections.
+  Mitigation: enumerate every target-package file and parse its explicit
+  `active-claim`, `historical`, or `prospective` classification rather than globally
+  banning words.
 - `VOC-084-R04`: the validator becomes another autonomous state machine. Mitigation:
   static committed comparison only, no GitHub network, writes, dispatch, merge, close,
   release, or agent execution.
@@ -55,6 +57,8 @@ filters and must be reported accurately rather than forced or fabricated.
 - `VOC-084-DEP-00`: different-role exact plan review before adoption.
 - `VOC-084-DEP-01`: exact immutable existing task evidence before reconciliation.
 - `VOC-084-DEP-02`: issue #119 remains separate.
+- `VOC-084-DEP-03`: current GitHub API objects, not number-like references in
+  historical commit subjects, define the identities of issues #118 and #119.
 - `VOC-084-EV-00`: audited machine-readable closure inventory.
 - `VOC-084-EV-01`: reconciled VOC-080/VOC-081 active records.
 - `VOC-084-EV-02`: reconciled VOC-082/VOC-083 active records.
