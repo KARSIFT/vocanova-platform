@@ -68,13 +68,18 @@ test("fast and Workers plans use locked local-only tools and shared state", () =
     { label: "api", port: 8080 },
   ]);
 
-  assert.equal(workers.preparation.length, 2);
+  assert.equal(workers.preparation.length, 3);
   assert.equal(workers.preparation[1].command, process.execPath);
   assert.equal(
     workers.preparation[1].args[0],
     LOCAL_DEVELOPMENT_PATHS.openNextBin,
   );
   assert.deepEqual(workers.preparation[1].args.slice(1), ["build"]);
+  assert.equal(workers.preparation[2].command, process.execPath);
+  assert.equal(
+    workers.preparation[2].args[0],
+    LOCAL_DEVELOPMENT_PATHS.workerCompatibilityScript,
+  );
   assert.equal(workers.web.args[0], LOCAL_DEVELOPMENT_PATHS.wranglerBin);
 
   for (const specification of [fast.api, workers.api, workers.web]) {

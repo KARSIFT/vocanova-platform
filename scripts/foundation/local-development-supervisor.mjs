@@ -15,6 +15,7 @@ import {
   LOCAL_D1_PATHS,
   runLocalD1Migrations,
 } from "../../apps/api-worker/scripts/local-d1-init.mjs";
+import { classifyWorkerdOutput } from "../../apps/web/scripts/test-workerd.mjs";
 import { LOCAL_DEVELOPMENT_CONTRACT } from "./local-development-policy.mjs";
 
 export const READINESS_TIMEOUT_MS = 60_000;
@@ -61,6 +62,10 @@ const openNextPackage = JSON.parse(
   readFileSync(resolve(openNextRoot, "package.json"), "utf8"),
 );
 const openNextBin = resolve(openNextRoot, "dist/cli/index.js");
+const workerCompatibilityScript = resolve(
+  webRoot,
+  "scripts/check-worker-compatibility.mjs",
+);
 const wranglerPackage = JSON.parse(
   readFileSync(
     resolve(dirname(LOCAL_D1_PATHS.wranglerBin), "../package.json"),
@@ -99,6 +104,7 @@ export const LOCAL_DEVELOPMENT_PATHS = Object.freeze({
   apiRoot,
   nextBin,
   openNextBin,
+  workerCompatibilityScript,
   repositoryRoot,
   runtimeCache,
   runtimeConfig,
@@ -257,6 +263,13 @@ export function buildLocalDevelopmentPlan(
               label: "OpenNext local build",
               command: process.execPath,
               args: Object.freeze([openNextBin, "build"]),
+              cwd: webRoot,
+              env: environment,
+            }),
+            Object.freeze({
+              label: "fresh Worker artifact compatibility scan",
+              command: process.execPath,
+              args: Object.freeze([workerCompatibilityScript]),
               cwd: webRoot,
               env: environment,
             }),
@@ -456,6 +469,7 @@ export class SupervisedChildren {
       child,
       label: specification.label,
       output: "",
+      diagnostics: [],
       outcome: null,
       settled: false,
       exit: null,
@@ -478,10 +492,16 @@ export class SupervisedChildren {
     });
     child.stdout?.on("data", (chunk) => {
       boundedOutput(record, chunk);
+      record.diagnostics.push(
+        ...classifyWorkerdOutput(String(chunk)).diagnostics,
+      );
       this.stdout.write(`[${record.label}] ${String(chunk)}`);
     });
     child.stderr?.on("data", (chunk) => {
       boundedOutput(record, chunk);
+      record.diagnostics.push(
+        ...classifyWorkerdOutput(String(chunk)).diagnostics,
+      );
       this.stderr.write(`[${record.label}] ${String(chunk)}`);
     });
     this.records.push(record);
