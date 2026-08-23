@@ -34,4 +34,3 @@ and exact-candidate adoption evidence. Its R4 floor creates no founder or standi
 steward approval by itself. It authorizes no implementation before adoption and no
 GitHub setting, merge executor, deployment, Cloudflare, secret, production-data,
 spending, DNS, or launch action at any time.
-

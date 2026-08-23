@@ -100,4 +100,3 @@ The final revision has complete R4 decision/impact/contingency/specialist/determ
 evidence, a different-actor cross-model exact-SHA verdict, no blocking findings, hosted
 proof, and reverse-order rollback. No PR is self-merged and no settings, deployment,
 Cloudflare, secret, production-data, billing, DNS, or live-system action occurs.
-

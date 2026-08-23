@@ -77,4 +77,3 @@ evidence is complete, and repository-only. Reverse tasks in a disposable worktre
 validate each predecessor, then remove only that exact disposable worktree. Do not
 delete open task branches or touch settings, Cloudflare, DNS, secrets, production data,
 billing, or live systems.
-

@@ -93,4 +93,3 @@ revert, and confirm the exact adopted base tree. A rollback restores the prior a
 but does not affect GitHub settings, merged history, runtime, data, Cloudflare, or a
 live system. If semantic consensus cannot be reached, do not adopt or implement; keep
 issue #109 open and continue under the pre-VOC-082 text.
-

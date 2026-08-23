@@ -135,4 +135,3 @@ must use non-sensitive participant labels; raw prompts, provider account identif
 tokens, or personal data are prohibited. Existing PR evidence remains compatible
 because no machine-readable schema changes. Historical records remain truthful under
 their then-current terminology.
-

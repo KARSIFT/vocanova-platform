@@ -43,4 +43,3 @@ exact-SHA cross-model independent review, hosted deterministic proof, excluded-f
 identity proof, and reverse rollback. The final record must disclose that actor/runtime
 identity remains declared GitHub provenance, not cryptographic hosted enforcement, and
 that action-specific authority remains separate.
-

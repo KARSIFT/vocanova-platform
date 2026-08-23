@@ -130,4 +130,3 @@ ehr: not-triggered
 blocking_reasons:
   - exact plan candidate has not received independent review
   - package has not been adopted
-
