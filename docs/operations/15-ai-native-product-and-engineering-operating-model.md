@@ -38,7 +38,7 @@ revision_note: >
   remains active.
 ---
 
-# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.3
+# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.4
 
 ## Document status
 
