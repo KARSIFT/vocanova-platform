@@ -12,9 +12,10 @@ the plan PR, implementation PR, post-merge checks, and issue closure have comple
 Issue #140 granted planning authority only. Exact candidate
 `72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8` has since received different-actor
 independent PASS and the accountable adoption decision. Implementation authorization is
-recorded by the adopted package but becomes effective only after the bookkeeping
-revision receives its own exact-SHA review and hosted evidence, PR #141 normally
-merges into `develop`, and applicable post-merge checks pass.
+recorded by the adopted package, but PR #141 did not make that authorization effective:
+its final pre-merge Governance adapter decision was blocked before the later exact
+bookkeeping review was posted and before the evidence binder was populated. VOC-089
+implementation authority is inactive pending the prospective VOC-091 recovery boundary.
 
 ## Scope
 
@@ -36,8 +37,8 @@ Out of scope:
   promotion, branch deletion, or live-system mutation.
 - Creating new implementation authority for VOC-087 beyond recording that it already
   became effective and was used for the bounded PR #138 implementation.
-- Closing issue #140 before the VOC-089 implementation PR merges and applicable
-  post-merge checks pass.
+- Closing issue #140 before VOC-091 recovery completes and the later refreshed PR #147
+  implementation merges with its own applicable post-merge checks.
 
 ## Requirements and decisions
 
@@ -70,6 +71,49 @@ Out of scope:
   target outside the listed VOC-087 package files is needed, stop and return to
   planning.
 
+## VOC-091 authority-recovery overlay
+
+The requirements above remain the inactive future contract for `VOC-089-T00` and the
+eight-file PR #147 implementation. They are not deleted, broadened, or repurposed by
+the recovery overlay.
+
+PR [#141](https://github.com/KARSIFT/vocanova-platform/pull/141) merged as
+`925faf774ded5128c8aef2a298a8d6f506164ee0`, but the normal activation boundary failed.
+At `2026-08-24T11:33:44Z`, Governance run
+[`32722390643`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722390643)
+reported `decision: "blocked"`, `eligible: false`, and exactly these reason codes:
+`review.identity_missing`, `review.stale`, `review.not_passing`,
+`review.blocking_findings`, and `review.evidence_missing`. The later exact bookkeeping
+review
+[5394643309](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394643309)
+did not populate the PR body's single binder or produce a later pre-merge
+`eligible: true` / `reasons: []` adapter result. The merge-readiness comment
+[5394657645](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394657645)
+was inaccurate when it said run `32722390643` passed merge eligibility.
+
+Post-merge CI
+[`32722900390`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900390),
+Governance
+[`32722900352`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900352),
+and Security
+[`32722900426`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900426)
+passed on the merge SHA, but those valid post-merge facts are non-retroactive. The
+independent incident audit
+[5394825877](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394825877)
+therefore records the active conclusion: the adoption decision remains valid
+authorization evidence, `implementation_authorized: true` remains true, and
+implementation authority is not effective until VOC-091 recovery prospectively passes
+its own exact review, populated binder, literal pre-merge `eligible: true` /
+`reasons: []`, normal merge, and applicable post-merge checks.
+
+The preserved PR #137 precedent remains distinct. Its audit
+[5390981903](https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903)
+records that PR #137 had genuine pre-merge `eligible: true` / `reasons: []` evidence
+before its disclosed sequencing incident. PR #141 lacked that eligible gate. PR #147
+therefore remains draft and blocked under
+[5394841275](https://github.com/KARSIFT/vocanova-platform/pull/147#issuecomment-5394841275)
+until recovery completes; no current PR #147 SHA, check, review, or binder transfers.
+
 ## Evidence anchors
 
 | Event                                               | Evidence                                                                        |
@@ -97,7 +141,9 @@ state, historical review evidence, and issue-closure evidence.
 ## Review and authority
 
 VOC-089 needs different-actor exact-revision plan review before adoption. The later
-implementation needs a different non-author exact-SHA review, applicable hosted
-evidence, normal merge, and post-merge checks. No founder or standing technical-steward
-approval is required merely because this is R3. No action-specific external authority
-or EHR is triggered by this repository-record-only scope.
+implementation needs VOC-091 recovery first, then a refreshed PR #147 with different
+non-author exact-SHA review, applicable hosted evidence, genuine pre-merge
+`eligible: true` / `reasons: []`, normal merge, and post-merge checks. No founder or
+standing technical-steward approval is required merely because this is R3. No
+action-specific external authority or EHR is triggered by this repository-record-only
+scope.

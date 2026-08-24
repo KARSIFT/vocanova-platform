@@ -26,7 +26,9 @@ approved_candidate_sha: 72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8
 approval_status: adopted
 implementation_authorized: true
 implementation_authority_status: >-
-  authorized-by-adoption-decision-but-effective-only-after-pr-141-bookkeeping-revision-exact-review-hosted-evidence-normal-merge-and-applicable-post-merge-checks
+  authorized-by-adoption-decision-but-not-effective-through-pr-141-invalid-premerge-
+  eligibility; recovery-pending-through-voc-091-exact-review-populated-binder-genuine-
+  premerge-eligible-true-reasons-empty-normal-merge-and-applicable-postmerge-checks
 automatic_merge_allowed: true
 production_impact: none-repository-record-only
 rollback_required: true
@@ -119,6 +121,92 @@ dependencies:
       Issue #132 closed as completed on 2026-08-24T05:32:23Z after the VOC-087
       implementation merge and applicable post-merge checks. The closure comment
       records no deployment or live-system action.
+  - id: VOC-089-DEP-04
+    status: recovery-pending
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/148
+    description: >-
+      Issue #148 records that PR #141 merged while its final pre-merge Governance
+      adapter decision was blocked. The issue grants planning authority only and does
+      not itself authorize VOC-089 implementation, PR #147 resumption, issue closure,
+      deployment, or any external action.
+
+authority_recovery:
+  package: VOC-091
+  status: pending-voc-091-recovery-implementation
+  current_authority_effective: false
+  valid_adoption_authorization_preserved: true
+  implementation_authorized_remains_true: true
+  issue: https://github.com/KARSIFT/vocanova-platform/issues/148
+  recovery_plan_pr: https://github.com/KARSIFT/vocanova-platform/pull/149
+  recovery_plan_merge_sha: 9de8a3f9f63c044b60d3f1a32d56f1a5946a1155
+  recovery_affected_records:
+    - specs/changes/VOC-089-voc087-closure-record/change.yaml
+    - specs/changes/VOC-089-voc087-closure-record/README.md
+    - specs/changes/VOC-089-voc087-closure-record/specification.md
+    - specs/changes/VOC-089-voc087-closure-record/acceptance-criteria.md
+    - specs/changes/VOC-089-voc087-closure-record/impact-analysis.md
+    - specs/changes/VOC-089-voc087-closure-record/implementation-plan.md
+    - specs/changes/VOC-089-voc087-closure-record/tasks.md
+    - specs/changes/VOC-089-voc087-closure-record/test-plan.md
+    - specs/changes/VOC-089-voc087-closure-record/release-plan.md
+  prospective_activation_conditions:
+    - voc-091-recovery-implementation-final-exact-sha-independent-review-pass
+    - single-populated-merge-eligibility-evidence-v1-binder-bound-to-final-head
+    - literal-premerge-governance-adapter-eligible-true-reasons-empty
+    - normal-voc-091-recovery-implementation-merge
+    - applicable-postmerge-ci-governance-security-evidence
+  pr_141_incident:
+    url: https://github.com/KARSIFT/vocanova-platform/pull/141
+    bookkeeping_head: 09290d7f745e5b66e4611c47d4f1ee27861611d9
+    base_sha: 66c2cd20ab7197dd9af34dc2b78a4d03b2c5b48d
+    blocked_adapter_run: https://github.com/KARSIFT/vocanova-platform/actions/runs/32722390643
+    blocked_adapter_timestamp: 2026-08-24T11:33:44Z
+    blocked_adapter_json:
+      decision: blocked
+      eligible: false
+      reasons:
+        - code: review.identity_missing
+          message: reviewer identity and role are required
+        - code: review.stale
+          message: review verdict is not bound to the current head SHA
+        - code: review.not_passing
+          message: independent review verdict must be pass
+        - code: review.blocking_findings
+          message: blocking findings are unresolved
+        - code: review.evidence_missing
+          message: independent review evidence URL is required
+      schema_version: 1
+    later_bookkeeping_review: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394643309
+    inaccurate_merge_readiness_claim: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394657645
+    merge_sha: 925faf774ded5128c8aef2a298a8d6f506164ee0
+    post_merge:
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900390
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900352
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900426
+      applicability: >-
+        Passed on merge 925faf774ded5128c8aef2a298a8d6f506164ee0, but cannot
+        retroactively supply the missing pre-merge eligible-true reasons-empty
+        adapter decision.
+    independent_audit: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394825877
+    conclusion: >-
+      Historical merge preserved; normal activation boundary not satisfied; VOC-089
+      implementation authority remains ineffective pending VOC-091 recovery.
+  pr_137_distinction:
+    url: https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903
+    final_premerge_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32692067462
+    distinction: >-
+      PR #137 had genuine pre-merge eligible true reasons-empty evidence before its
+      disclosed sequencing incident. PR #141 did not, so the PR #137 validity finding
+      cannot be copied to PR #141.
+  pr_147_boundary:
+    url: https://github.com/KARSIFT/vocanova-platform/pull/147
+    status: open-draft-blocked
+    hold: https://github.com/KARSIFT/vocanova-platform/pull/147#issuecomment-5394841275
+    resumption: >-
+      After VOC-091 recovery merge and applicable post-merge checks only, PR #147 may
+      rebase or refresh onto the recovered develop branch and must obtain wholly fresh
+      checks, different-actor exact-SHA review, populated binder, genuine pre-merge
+      eligible true reasons-empty adapter output, normal merge, and post-merge evidence.
 
 immutable_evidence:
   issue_140:
@@ -201,8 +289,9 @@ protected_areas:
 implementation:
   authorized: true
   authority_effective: false
+  recovery_pending: true
   required: true
-  status: authorized-pending-bookkeeping-review-hosted-normal-merge-and-postmerge
+  status: authorized-adoption-evidence-preserved-but-pr-141-did-not-activate-pending-voc091-recovery
   target_branch: develop
   pull_request_count: 1
   task: VOC-089-T00
@@ -213,9 +302,10 @@ release:
   deployment: prohibited
   migration_required: false
   rollback_required: true
-  issue_140_closure: after-implementation-merge-and-applicable-post-merge-checks-only
+  issue_148_closure: after-voc-091-recovery-implementation-merge-and-applicable-postmerge-checks-only
+  issue_140_closure: after-voc-091-recovery-and-pr-147-refresh-implementation-merge-and-applicable-postmerge-checks-only
 
-repository_adoption_status: adopted-pending-pr-141-normal-merge-and-applicable-post-merge-checks
+repository_adoption_status: adopted-in-develop-by-pr-141-but-authority-ineffective-pending-voc091-recovery
 adoption_pr: 141
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394551210
 
@@ -255,11 +345,15 @@ required_r3_evidence:
     evidence: immutable_evidence and issue/PR records above
   independent_exact_revision_review:
     required: true
-    evidence: pending future PR review bound to the exact implementation SHA
+    evidence: pending future PR #147 review bound to its exact implementation SHA after VOC-091 recovery
 
 blocking_reasons:
-  - exact-adoption-bookkeeping-revision-review-pending
-  - final-hosted-checks-on-adoption-bookkeeping-revision-pending
-  - pr-141-normal-merge-pending
-  - applicable-post-merge-checks-pending
+  - pr-141-premerge-eligibility-blocked-review.identity_missing
+  - pr-141-premerge-eligibility-blocked-review.stale
+  - pr-141-premerge-eligibility-blocked-review.not_passing
+  - pr-141-premerge-eligibility-blocked-review.blocking_findings
+  - pr-141-premerge-eligibility-blocked-review.evidence_missing
+  - pr-141-invalid-premerge-eligibility-did-not-activate-voc-089
+  - voc-091-recovery-implementation-review-binder-eligible-normal-merge-postmerge-pending
+  - pr-147-must-remain-draft-blocked-until-recovery-postmerge-boundary
   - implementation-authority-not-effective
