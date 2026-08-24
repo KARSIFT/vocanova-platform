@@ -17,6 +17,8 @@ merge actor must still confirm normal eligibility.
 Before implementation merge, record on the same PR:
 
 - exact base and final head SHAs plus the bounded file inventory;
+- immutable plan-review history, including the initial FAIL for candidate
+  `cbede7d17e0883e0871d9921aaef781dee087f45` and the later exact-candidate verdict;
 - focused fixture/presentation/list/empty/accessibility results and full `pnpm validate`;
 - hosted CI, Governance, Security, and path-triggered Quality results;
 - different-actor exact-SHA PASS with all blockers resolved; and

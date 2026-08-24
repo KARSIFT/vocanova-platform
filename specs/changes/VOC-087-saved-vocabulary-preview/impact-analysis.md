@@ -27,8 +27,11 @@ useful, but the UI no longer under-reports learners who have more than 10 saved 
 - `VOC-087-R01` — The fix hides or reorders words. Mitigation: assert 10 distinct rows,
   definitions, exactly-once rendering, and response order.
 - `VOC-087-R02` — A test passes without proving truncation. Mitigation: the browser test
-  first reads the selected mock response directly and asserts 10 items plus a non-empty
-  cursor before checking the rendered page.
+  sets exact cookie `e2e_saved_words_fixture=truncated-page`, reads the selected mock
+  response through browser-context-associated `page.request`, asserts the full stable
+  10-row/cursor contract, then proves Next SSR received the same cookie by rendering the
+  same rows. Cookie scope and existing server-side forwarding are explicit; `page.route`
+  is not treated as evidence for a server-side fetch.
 - `VOC-087-R03` — Existing empty/accessibility/auth behavior regresses. Mitigation:
   explicit empty-state assertion, existing Progress accessibility checks, full Quality
   suite, and structural review that auth handling is unchanged.
@@ -45,6 +48,11 @@ useful, but the UI no longer under-reports learners who have more than 10 saved 
 - `VOC-087-EV-02`: empty-state, accessibility, auth-preservation, and Quality evidence.
 - `VOC-087-EV-03`: local validation, hosted CI/Governance/Security/Quality, exact-SHA
   review, rollback rehearsal, merge, post-merge checks, and issue-closure link.
+
+The initial exact plan candidate
+`cbede7d17e0883e0871d9921aaef781dee087f45` received a preserved independent FAIL at
+PR #137 comment `5390811909`. The amended candidate requires fresh exact-revision review;
+the prior FAIL is historical evidence, not approval.
 
 ## Rollback impact
 

@@ -2,21 +2,25 @@
 
 ## VOC-087-AC-00 — A truncated page is presented as a preview, not a total
 
-- Requirements: `VOC-087-D00`, `D01`, `D06`
+- Requirements: `VOC-087-D00`, `D01`, `D06`, `D08`
 - Task: `VOC-087-T00`
 - Tests: `VOC-087-TEST-00`, `TEST-01`
 - Evidence: `VOC-087-EV-00`
 - Result: pending
 
-Given the deterministic saved-word fixture returns exactly 10 items and a non-empty
-continuation cursor, when Progress renders that response, then the section is named
-`Recently saved vocabulary`, displays `A preview of up to 10 recently saved words.`,
-and does not display `10 words saved` or any other claim that the page length is the
-learner's total.
+Given `page.context().addCookies` sets
+`e2e_saved_words_fixture=truncated-page` for the configured `baseURL`, when the
+browser-context-associated `page.request.get` calls the exact mock URL from
+`VOC-087-D08`, then the response contains the 10 exact ordered rows from `D06` and
+`nextCursor: "e2e-saved-words-after-10"`. When `page.goto("/progress")` follows, the
+cookie reaches Next and is forwarded unchanged by existing `createServerApiClient` to
+select the same fixture during SSR. The section is named `Recently saved vocabulary`,
+displays `A preview of up to 10 recently saved words.`, and does not display
+`10 words saved` or any other claim that the page length is the learner's total.
 
 ## VOC-087-AC-01 — Preview rows and order are preserved
 
-- Requirements: `VOC-087-D02`, `D06`
+- Requirements: `VOC-087-D02`, `D06`, `D08`
 - Task: `VOC-087-T00`
 - Tests: `VOC-087-TEST-00`, `TEST-02`
 - Evidence: `VOC-087-EV-01`
@@ -41,14 +45,15 @@ handling still redirects through the unchanged `/progress` return path.
 
 ## VOC-087-AC-03 — The correction remains bounded and reversible
 
-- Requirements: `VOC-087-D01`, `D04`, `D07`
+- Requirements: `VOC-087-D01`, `D04`, `D07`, `D08`
 - Task: `VOC-087-T00`
 - Tests: `VOC-087-TEST-05`, `TEST-06`
 - Evidence: `VOC-087-EV-03`
 - Result: pending
 
 The final diff changes only the authorized Progress presentation and existing
-Playwright fixture/spec, introduces no API/schema/dependency/workflow/live effect,
-passes proportional local and hosted checks, receives different-actor exact-SHA review,
-and can be reverted to its pre-implementation tree. Issue #132 remains open until the
-implementation merges into `develop` and applicable post-merge checks pass.
+Playwright fixture/spec; `api-server.ts` and `playwright.config.ts` remain unchanged.
+It introduces no API/schema/dependency/workflow/live effect, passes proportional local
+and hosted checks, receives different-actor exact-SHA review, and can be reverted to its
+pre-implementation tree. Issue #132 remains open until the implementation merges into
+`develop` and applicable post-merge checks pass.

@@ -3,26 +3,53 @@
 ## VOC-087-TEST-00 — Truncated fixture contract
 
 - Covers: `VOC-087-AC-00`, `AC-01`
-- Procedure: select the saved-word preview fixture cookie, request
-  `/api/v1/user-words?limit=10` through the Playwright request context, and inspect the
-  synthetic JSON before visiting Progress.
-- Expected: exactly 10 distinct ordered items and a non-empty `nextCursor`.
+- Procedure: receive `{ page, baseURL }`, fail with a concrete fixture-configuration
+  error if `baseURL` is absent, and execute this sequence before navigation:
+
+  ```ts
+  await page.context().addCookies([
+    {
+      name: "e2e_saved_words_fixture",
+      value: "truncated-page",
+      url: baseURL,
+    },
+  ]);
+  const mockApiPort = Number(process.env.MOCK_API_PORT ?? 8080);
+  const fixtureResponse = await page.request.get(
+    `http://127.0.0.1:${mockApiPort}/api/v1/user-words?limit=10`,
+  );
+  ```
+
+  Assert success, parse JSON, and deep-assert the exact `VOC-087-D06` response before
+  visiting Progress. `page.request` is required because it is the API request context
+  associated with the browser context and shares that context's cookie jar.
+
+- Expected: the response has the exact 10 distinct ordered rows, stable fields, and
+  `nextCursor: "e2e-saved-words-after-10"` specified by `VOC-087-D06`. Because cookies
+  are scoped by host/path rather than port, the cookie set for configured web `baseURL`
+  on `127.0.0.1` is sent to the mock on its configured `127.0.0.1` port.
 - Evidence: `VOC-087-EV-00`, `VOC-087-EV-01`
 
 ## VOC-087-TEST-01 — No false total claim
 
 - Covers: `VOC-087-AC-00`
-- Procedure: render Progress with the truncated fixture and scope assertions to the
-  saved-vocabulary section.
+- Procedure: after `VOC-087-TEST-00` succeeds in the same test/browser context, call
+  `page.goto("/progress")` and scope assertions to the saved-vocabulary section. This
+  navigation sends the fixture cookie to Next. Existing `createServerApiClient` reads
+  the incoming `Cookie` header and copies it to the server-to-server mock API request,
+  so SSR must select the same fixture. Do not use `page.route` as proof: it cannot
+  intercept the server-side fetch.
 - Expected: the exact heading and preview sentence from `VOC-087-D00` are visible;
-  `10 words saved` and any length-derived total presentation are absent.
+  `10 words saved` and any length-derived total presentation are absent; rendering the
+  same exact `VOC-087-D06` rows proves cookie forwarding reached the SSR fetch rather
+  than falling back to the default empty state.
 - Evidence: `VOC-087-EV-00`
 
 ## VOC-087-TEST-02 — Rows, definitions, order, and request bound
 
 - Covers: `VOC-087-AC-01`
 - Procedure: scope to the saved-vocabulary section and assert 10 native list items,
-  each known word/definition exactly once and in fixture order. Inspect the exact
+  each exact `VOC-087-D06` word/definition exactly once and in fixture order. Inspect the exact
   production diff to confirm `listSavedWords({ limit: 10 })` is unchanged and no cursor
   traversal or additional saved-word request was added. This source review is required
   because the server-component fetch is not observable through browser request events.
@@ -45,7 +72,9 @@
   heading/list assertions at the configured 360 px, 430 px, and desktop viewports. Run
   the full Quality suite so existing unauthenticated/core-loop coverage also executes;
   inspect the production diff to confirm `requireAuthRedirect(error, "/progress")` and
-  the server API request path are unchanged.
+  the server API request path are unchanged. Confirm `apps/web/src/lib/api-server.ts`
+  and `apps/web/playwright.config.ts` are absent from the implementation diff: the test
+  relies on their existing cookie-forwarding and baseURL/webServer configuration.
 - Expected: zero critical/serious axe findings, valid semantics, no auth regression, and
   no changed auth/API code.
 - Evidence: `VOC-087-EV-02`
@@ -91,6 +120,10 @@ The existing stack already owns production-build Playwright coverage for Progres
 stateful mock API. Extending that harness proves the real server-rendered output,
 ordering, semantics, and responsive accessibility without adding a component/unit-test
 framework or exporting presentation logic solely for tests. The direct mock-response
-assertion prevents the regression case from silently ceasing to represent truncation.
+assertion prevents the regression case from silently ceasing to represent truncation;
+the subsequent SSR render of the same rows proves the browser → Next → mock cookie
+forwarding chain. `page.route` is deliberately excluded because it cannot observe the
+server-component fetch. Existing `baseURL`, webServer, and `createServerApiClient`
+behavior make the chain implementable within the three-file scope.
 `pnpm validate` supplies the workspace baseline, while the path-triggered Quality
 workflow supplies the full browser and Lighthouse qualification.

@@ -2,7 +2,7 @@
 
 ## VOC-087-T00 — Correct and prove the saved-vocabulary preview
 
-- Requirements: `VOC-087-D00` through `VOC-087-D07`
+- Requirements: `VOC-087-D00` through `VOC-087-D08`
 - Acceptance criteria: `VOC-087-AC-00` through `VOC-087-AC-03`
 - Tests: `VOC-087-TEST-00` through `VOC-087-TEST-06`
 - Evidence: `VOC-087-EV-00` through `VOC-087-EV-03`
@@ -11,9 +11,11 @@
 
 In one implementation PR, make the Progress saved-vocabulary section explicitly a
 recent, up-to-10 preview and remove its page-length-as-total claim. Add the deterministic
-10-item-plus-continuation-cursor fixture and focused browser assertions while preserving
-the list, response order, empty state, accessibility, auth path, API contract, and
-single-page request boundary.
+10-item-plus-continuation-cursor fixture selected only by
+`e2e_saved_words_fixture=truncated-page` on the saved-word GET. Prove both the direct
+`page.request` response and the identical browser → Next → mock SSR selection while
+preserving the list, response order, empty state, accessibility, auth path, API
+contract, and single-page request boundary.
 
 The same PR must carry exact local commands/results, rollback rehearsal, different-
 actor exact-SHA review, hosted CI/Governance/Security/Quality results, normal merge

@@ -61,13 +61,48 @@ Out of scope:
   axe, keyboard-reachability, and non-color-only assertions at all configured Quality
   viewports.
 - `VOC-087-D06` — The regression fixture must expose exactly 10 distinct ordered saved
-  items and a non-empty `nextCursor`. The test must assert that fixture contract, the
-  rendered preview copy, the absence of `10 words saved`, the 10 rendered rows in
-  order, and the default empty state.
+  items defined in the deterministic fixture contract below and the exact non-empty
+  `nextCursor` `e2e-saved-words-after-10`. The override is selected only when cookie
+  `e2e_saved_words_fixture=truncated-page` is present on
+  `GET /api/v1/user-words`; it must not affect POST, DELETE, another endpoint, or the
+  default stateful saved-word response. The test must assert the direct fixture
+  contract, rendered preview copy, absence of `10 words saved`, the same 10 rendered
+  rows in order, and the default empty state.
 - `VOC-087-D07` — One implementation PR owns code, tests, validation, exact-revision
   review, hosted evidence, rollback evidence, merge, and its final PR evidence comment.
   Issue #132 closes only after that merge and applicable post-merge checks pass; no
   ceremony-only follow-up code or package-evidence PR is required.
+- `VOC-087-D08` — The fixture test must establish the whole SSR selection chain without
+  changing `api-server.ts` or `playwright.config.ts`: use
+  `page.context().addCookies` with the exact cookie name/value and `url: baseURL` before
+  any fixture request; use browser-context-associated `page.request.get` against
+  `http://127.0.0.1:${Number(process.env.MOCK_API_PORT ?? 8080)}/api/v1/user-words?limit=10`;
+  then call `page.goto("/progress")`. Cookies are scoped by host and path, not port, so
+  the cookie established for configured web `baseURL` on `127.0.0.1` is also sent by
+  `page.request` to the mock on `127.0.0.1`. Navigation sends the same cookie to Next;
+  existing `createServerApiClient` reads the incoming `Cookie` header and copies it to
+  the server-to-server mock API fetch, selecting the identical fixture during SSR.
+  `page.route` and browser request events are not proof of that server-side fetch.
+
+## Deterministic truncated-page fixture contract
+
+The selected response is exactly `{ items, nextCursor: "e2e-saved-words-after-10" }`.
+Each row has `partOfSpeech: "noun"`, `status: "saved"`, `source: "journey"`, and
+`saved: true`. `wordSlug` equals `wordText`. Stable row-specific values, in required
+response/render order, are:
+
+| #   | `userWordId`               | `meaningId`              | `wordId`              | `wordText`    | `shortDefinition`                               | `addedAt`                  |
+| --- | -------------------------- | ------------------------ | --------------------- | ------------- | ----------------------------------------------- | -------------------------- |
+| 01  | `e2e-preview-user-word-01` | `e2e-preview-meaning-01` | `e2e-preview-word-01` | `arrival`     | `the act of reaching a place`                   | `2026-01-10T00:00:00.000Z` |
+| 02  | `e2e-preview-user-word-02` | `e2e-preview-meaning-02` | `e2e-preview-word-02` | `baggage`     | `bags carried while travelling`                 | `2026-01-09T00:00:00.000Z` |
+| 03  | `e2e-preview-user-word-03` | `e2e-preview-meaning-03` | `e2e-preview-word-03` | `counter`     | `a long flat surface for service`               | `2026-01-08T00:00:00.000Z` |
+| 04  | `e2e-preview-user-word-04` | `e2e-preview-meaning-04` | `e2e-preview-word-04` | `departure`   | `the act of leaving a place`                    | `2026-01-07T00:00:00.000Z` |
+| 05  | `e2e-preview-user-word-05` | `e2e-preview-meaning-05` | `e2e-preview-word-05` | `gate`        | `the place where passengers board`              | `2026-01-06T00:00:00.000Z` |
+| 06  | `e2e-preview-user-word-06` | `e2e-preview-meaning-06` | `e2e-preview-word-06` | `luggage`     | `bags used for travelling`                      | `2026-01-05T00:00:00.000Z` |
+| 07  | `e2e-preview-user-word-07` | `e2e-preview-meaning-07` | `e2e-preview-word-07` | `passport`    | `an official document for international travel` | `2026-01-04T00:00:00.000Z` |
+| 08  | `e2e-preview-user-word-08` | `e2e-preview-meaning-08` | `e2e-preview-word-08` | `queue`       | `a line of people waiting`                      | `2026-01-03T00:00:00.000Z` |
+| 09  | `e2e-preview-user-word-09` | `e2e-preview-meaning-09` | `e2e-preview-word-09` | `reservation` | `an arrangement to keep a place`                | `2026-01-02T00:00:00.000Z` |
+| 10  | `e2e-preview-user-word-10` | `e2e-preview-meaning-10` | `e2e-preview-word-10` | `terminal`    | `an airport building for passengers`            | `2026-01-01T00:00:00.000Z` |
 
 ## Risk and protected areas
 

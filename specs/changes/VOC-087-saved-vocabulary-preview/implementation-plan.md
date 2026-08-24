@@ -24,17 +24,27 @@ change stops implementation and returns to planning.
    heading/supporting copy in `VOC-087-D00`. Preserve the native list, keys, word and
    definition rows, empty-state text, and all unrelated Progress sections.
 3. In `apps/web/tests/e2e/mock-api-server.mjs`, add a narrowly named cookie-selected
-   synthetic fixture mode for saved words. Its response contains exactly 10 distinct,
-   ordered items plus a non-empty `nextCursor`; the default stateful mock behavior stays
-   unchanged for the rest of the suite.
+   synthetic fixture mode for saved words. Only the existing
+   `GET /api/v1/user-words` branch may return the exact `VOC-087-D06` response when
+   parsed cookies contain `e2e_saved_words_fixture: "truncated-page"`. Keep the default
+   `buildSavedWords(state)` behavior unchanged for every other cookie value and keep all
+   mutation/other-endpoint behavior unchanged.
 4. In `apps/web/tests/e2e/progress-accessibility.spec.ts`, add a bounded regression test
-   that selects the fixture, directly asserts its 10-item/cursor contract through the
-   Playwright request context, visits Progress, and asserts preview copy, absence of the
-   false total, and exact list count/order/content. Add an explicit assertion for the
-   existing default empty message while retaining the existing axe, keyboard, and
-   non-color-only coverage. Bind the unchanged one-page request boundary through exact-
-   diff review because the server-to-server fetch is not visible to browser request
-   events.
+   receiving `{ page, baseURL }`. Fail clearly if `baseURL` is absent. Before any fixture
+   request, call `page.context().addCookies` with
+   `{ name: "e2e_saved_words_fixture", value: "truncated-page", url: baseURL }`. Then
+   set `mockApiPort = Number(process.env.MOCK_API_PORT ?? 8080)` and call
+   ``page.request.get(`http://127.0.0.1:${mockApiPort}/api/v1/user-words?limit=10`)``.
+   Assert HTTP success, the exact `VOC-087-D06` rows/order, and exact cursor. Next call
+   `page.goto("/progress")` and assert preview copy, absence of the false total, and the
+   same exact list count/order/content. The request context associated with `page`
+   shares the browser cookie jar; cookies are scoped by host/path rather than port, so
+   the web-origin cookie is sent to the mock's `127.0.0.1` port. Navigation sends it to
+   Next, where unchanged `createServerApiClient` copies the incoming `Cookie` header to
+   the SSR mock fetch. Do not use `page.route` as proof of the server-side request. Add
+   an explicit assertion for the default empty message while retaining existing axe,
+   keyboard, and non-color-only coverage. Bind the unchanged one-page request boundary
+   through exact-diff review because browser request events cannot see the SSR fetch.
 5. Format and run the focused test, full `pnpm validate`, governance checks, and diff
    checks in `test-plan.md`. Record exact commands and honest results in the PR.
 6. Rehearse a repository-only revert in a disposable worktree and prove the authorized
@@ -52,3 +62,6 @@ The API contract, request count, request limit, ordering, server component bound
 auth redirect, and empty state remain compatible. The rollback target is the exact
 `develop` commit immediately preceding the implementation. Use a normal revert PR if
 rollback is required; never reset a protected branch or perform a live rollback.
+The fixture chain uses existing browser-context cookie sharing and existing
+`createServerApiClient` forwarding, so neither `apps/web/src/lib/api-server.ts` nor
+`apps/web/playwright.config.ts` may change.
