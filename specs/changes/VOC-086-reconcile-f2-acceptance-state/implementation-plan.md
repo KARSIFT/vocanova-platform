@@ -2,9 +2,11 @@
 
 PR #133 merged the independently reviewed and adopted plan as
 `b44c41256153cfefc40739b9e7eeb5dff6eb72ad`, so repository-only implementation is
-authorized. T00 is now a candidate pending fresh exact-revision general and R4
-specialist review, hosted proof, and normal merge; T01 and T02 remain blocked on their
-predecessors.
+authorized. T00's exact head `5f19974b44761e05a899f6ea50178eedd891d663` received distinct
+general and R4 specialist PASS reviews, hosted proof, and post-merge checks, then merged
+through PR #134 as `b0ce5b84c1530e97762c0235a094651028690d3f`. T01 is now a candidate
+pending fresh exact-revision general/specialist review, hosted proof, and normal merge;
+T02 remains blocked on T01.
 
 1. `VOC-086-T00`: from the adopted plan merge, atomically reconcile the six living F2
    surfaces and the existing VOC-081 evidence-validator baseline. Preserve candidate

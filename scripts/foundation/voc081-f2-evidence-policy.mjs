@@ -39,6 +39,183 @@ const EXPECTED_POST_MERGE_RUNS = {
   security: 32634654343,
 };
 
+const EXPECTED_FOUNDATION_CHAIN = [
+  "pnpm run validate:workspace",
+  "pnpm run format:check",
+  "pnpm run build:packages",
+  "pnpm run ci:retirement",
+  "pnpm run ci:final-evidence",
+  "pnpm run ci:f2-evidence",
+  "pnpm run ci:closure-consistency",
+  "pnpm run ci:settings-truth",
+  "node --test scripts/foundation/*.test.mjs",
+];
+
+export const PROHIBITED_ACTIVE_TEXT_CLAIMS = [
+  {
+    example: "F3 staging is complete.",
+    pattern:
+      /\b(?:F3(?:\s+staging)?|staging)\s+(?:is\s+)?(?:complete|completed|passed|accepted|active|released|enabled)\b/i,
+    reason: "active F3/staging claim is prohibited",
+  },
+  {
+    example: "A1/P1 product acceptance passed.",
+    pattern:
+      /\b(?:A1(?:\/P1\+?|\s+authenticated-product)?|P[1-5](?:-P5)?)\s+(?:product\s+)?acceptance\s+(?:is\s+)?(?:complete|completed|passed|accepted|active)\b/i,
+    reason: "active A1/P1+ acceptance claim is prohibited",
+  },
+  {
+    example: "production deployment completed.",
+    pattern:
+      /\b(?:production\s+)?deployment\s+(?:is\s+)?(?:complete|completed|passed|accepted|active|enabled|released)\b|\bproduction\s+(?:is\s+)?(?:complete|completed|passed|accepted|active|enabled|released)\b/i,
+    reason: "active production/deployment claim is prohibited",
+  },
+  {
+    example: "live activation enabled.",
+    pattern:
+      /\blive\s+(?:activation|verification|system|service)\s+(?:is\s+)?(?:complete|completed|passed|accepted|active|enabled|released|verified)\b/i,
+    reason: "active live-activation/verification claim is prohibited",
+  },
+  {
+    example: "VOC-080-HOLD-00 released.",
+    pattern:
+      /\b(?:all\s+)?VOC-080\s+holds?\s+(?:are|is)?\s*(?:released|cleared|lifted|complete|completed|passed|accepted|active|enabled)\b|\bVOC-080-HOLD-(?:00|01|02)\s+(?:is\s+)?(?:released|cleared|lifted|complete|completed|passed|accepted|active|enabled)\b/i,
+    reason: "VOC-080 hold release claim is prohibited",
+  },
+  {
+    example: "Repository/local F2 is still pending integration.",
+    pattern:
+      /\bRepository\/local\s+F2\s+(?:is|remains)\s+(?:still\s+)?(?:pending(?:\s+integration)?|incomplete|candidate)\b/i,
+    reason: "active repository/local F2 pending claim is prohibited",
+  },
+];
+
+export const DESIGNATED_F2_SURFACES = [
+  {
+    path: "docs/README.md",
+    required: [
+      "[VOC-081's F2 record](operations/voc-081-f2-evidence.md)",
+      "complete stack was integrated by PR #108 and passed post-merge revalidation",
+      "repository/local F2 is complete and effective",
+      "F3/staging, A1/P1+ acceptance",
+      "production, deployment, live activation",
+      "every inherited live-action hold\n  remain unresolved",
+    ],
+    stale: [
+      [
+        "Its candidate state becomes effective only after integration and revalidation",
+        "active index must not describe F2 as a candidate gate",
+      ],
+      [
+        "candidate state becomes effective only after integration",
+        "active index must not describe F2 as a candidate gate",
+      ],
+    ],
+    prohibited: PROHIBITED_ACTIVE_TEXT_CLAIMS,
+  },
+  {
+    path: "docs/operations/README.md",
+    required: [
+      "active (repository/local F2 complete)",
+      "complete stack was integrated by PR #108 and passed post-merge",
+      "repository/local F2 is complete and effective",
+      "earlier integration-pending candidate state as history",
+      "does not claim F3,",
+      "A1/P1+ acceptance, staging, production, deployment, or live activation",
+    ],
+    stale: [
+      [
+        "| candidate",
+        "operations index must not label the active F2 record candidate",
+      ],
+      [
+        "record is intentionally integration-pending",
+        "operations index must not describe F2 as integration-pending",
+      ],
+    ],
+    prohibited: PROHIBITED_ACTIVE_TEXT_CLAIMS,
+  },
+  {
+    path: F2_DOCUMENT_PATH,
+    required: [
+      "This is the machine-checked active record",
+      "Repository/local F2 is complete and effective",
+      "## Exact integration evidence",
+      "## Historical candidate state",
+      "## No-live and later-gate state",
+      "F3/staging, A1/P1+ acceptance, production, live",
+      "remain unresolved/held",
+    ],
+    stale: [
+      [
+        "This is the machine-checked, integration-pending record",
+        "F2 evidence document must not present the active record as pending",
+      ],
+    ],
+    prohibited: PROHIBITED_ACTIVE_TEXT_CLAIMS,
+  },
+  {
+    path: "docs/product/README.md",
+    required: [
+      "VOC-081 supplies the contributor-verifiable F2 foundation",
+      "integrated by PR #108 and passed post-merge revalidation",
+      "F2 complete and effective",
+      "preserving the earlier candidate state as history",
+      "F3, A1/P1+ acceptance, staging, production, deployment, and live activation remain",
+      "unresolved and are not implied",
+    ],
+    stale: [
+      [
+        "remains integration-pending",
+        "product index must not describe F2 as integration-pending",
+      ],
+      [
+        "candidate, whose",
+        "product index must not describe the active F2 record as a candidate",
+      ],
+    ],
+    prohibited: PROHIBITED_ACTIVE_TEXT_CLAIMS,
+  },
+  {
+    path: "docs/product/12-mvp-implementation-plan.md",
+    required: [
+      "PR #108 integrated the complete VOC-081 stack and final evidence",
+      "Repository/local\nF2 is therefore complete and effective",
+      "candidate-era state remains historical evidence",
+      "F3 staging, A1/P1+",
+      "product acceptance, production, deployment, live activation, and",
+      "remain unresolved/held",
+      "`VOC-080-HOLD-00` through `HOLD-02` remain unresolved/held",
+    ],
+    stale: [
+      [
+        "candidate becomes accepted only after",
+        "DOC-12 must not retain the pre-integration acceptance gate",
+      ],
+      [
+        "does not pass merely because those draft branches exist",
+        "DOC-12 must not describe active F2 as draft-branch dependent",
+      ],
+      [
+        "It becomes effective only after",
+        "DOC-12 must not retain the pre-integration effectiveness gate",
+      ],
+    ],
+    prohibited: PROHIBITED_ACTIVE_TEXT_CLAIMS,
+  },
+  {
+    path: F2_RECORD_PATH,
+    required: [
+      '"status": "repository-local-f2-complete-effective"',
+      '"current_acceptance"',
+      '"candidate_history"',
+      '"milestone_state"',
+      '"VOC-080-HOLD-00"',
+    ],
+    stale: [],
+  },
+];
+
 const EXPECTED_COMMANDS = [
   "pnpm validate",
   "pnpm run ci:local-stack",
@@ -239,6 +416,37 @@ export function inspectF2Record(record) {
   return errors;
 }
 
+export function inspectF2Surface(source, relativePath) {
+  const errors = [];
+  const contract = DESIGNATED_F2_SURFACES.find(
+    ({ path: surfacePath }) => surfacePath === relativePath,
+  );
+  if (!contract) return [`unknown designated F2 surface: ${relativePath}`];
+  if (typeof source !== "string")
+    return [`${relativePath}: designated F2 surface is not text`];
+  for (const marker of contract.required) {
+    if (!source.includes(marker))
+      errors.push(`${relativePath}: missing active F2 marker: ${marker}`);
+  }
+  for (const [marker, reason] of contract.stale) {
+    if (source.includes(marker)) errors.push(`${relativePath}: ${reason}`);
+  }
+  let activeSource = source;
+  if (relativePath === F2_DOCUMENT_PATH) {
+    const historyStart = source.indexOf("\n## Historical candidate state");
+    if (historyStart !== -1) {
+      const nextHeading = source.indexOf("\n## ", historyStart + 1);
+      activeSource =
+        source.slice(0, historyStart) +
+        (nextHeading === -1 ? "" : source.slice(nextHeading));
+    }
+  }
+  for (const { pattern, reason } of contract.prohibited ?? []) {
+    if (pattern.test(activeSource)) errors.push(`${relativePath}: ${reason}`);
+  }
+  return errors;
+}
+
 export function inspectF2Document(source, record) {
   const errors = [];
   for (const marker of [
@@ -292,10 +500,30 @@ export function inspectF2Scripts(source) {
       "package.json: ci:f2-evidence entry point is missing or drifted",
     );
   }
-  if (!scripts?.["ci:foundation"]?.includes("pnpm run ci:f2-evidence"))
-    errors.push(
-      "package.json: ci:foundation must include F2 evidence validation",
-    );
+  const foundationCommand = scripts?.["ci:foundation"];
+  const targetCommand = "pnpm run ci:f2-evidence";
+  if (typeof foundationCommand !== "string") {
+    errors.push("package.json: ci:foundation must be a command chain");
+  } else {
+    const segments = foundationCommand
+      .split("&&")
+      .map((segment) => segment.trim());
+    const targetCount = segments.filter(
+      (segment) => segment === targetCommand,
+    ).length;
+    if (foundationCommand.includes("||"))
+      errors.push(
+        "package.json: ci:foundation must not bypass F2 evidence with || fallback",
+      );
+    if (JSON.stringify(segments) !== JSON.stringify(EXPECTED_FOUNDATION_CHAIN))
+      errors.push(
+        "package.json: ci:foundation must exactly match the canonical ordered command chain",
+      );
+    if (targetCount !== 1)
+      errors.push(
+        "package.json: ci:foundation must contain exactly one executable F2 evidence command segment",
+      );
+  }
   return errors;
 }
 
@@ -317,15 +545,23 @@ export function validateF2Evidence(repositoryRoot) {
       "active workflow directory must contain exactly four workflows",
     );
   errors.push(...inspectF2Record(record));
-  if (!existsSync(path.join(repositoryRoot, F2_DOCUMENT_PATH))) {
-    errors.push(`${F2_DOCUMENT_PATH}: required F2 evidence is missing`);
-  } else {
-    errors.push(
-      ...inspectF2Document(
-        readFileSync(path.join(repositoryRoot, F2_DOCUMENT_PATH), "utf8"),
-        record,
-      ),
-    );
+  for (const { path: surfacePath } of DESIGNATED_F2_SURFACES) {
+    const absolutePath = path.join(repositoryRoot, surfacePath);
+    if (!existsSync(absolutePath)) {
+      errors.push(`${surfacePath}: designated F2 surface is missing`);
+      continue;
+    }
+    let source;
+    try {
+      source = readFileSync(absolutePath, "utf8");
+    } catch {
+      errors.push(`${surfacePath}: designated F2 surface cannot be read`);
+      continue;
+    }
+    errors.push(...inspectF2Surface(source, surfacePath));
+    if (surfacePath === F2_RECORD_PATH) continue;
+    if (surfacePath === F2_DOCUMENT_PATH)
+      errors.push(...inspectF2Document(source, record));
   }
   errors.push(
     ...inspectF2Scripts(

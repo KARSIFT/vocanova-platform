@@ -6,7 +6,7 @@
 - Tasks: `VOC-086-T00`
 - Tests: `VOC-086-TEST-00`, `TEST-01`
 - Evidence: `VOC-086-EV-00`
-- Result: candidate-implemented-pending-exact-review-hosted-proof-and-merge
+- Result: complete-exact-SHA-5f19974b44761e05a899f6ea50178eedd891d663-merged-through-PR-134
 
 All six living surfaces report repository/local F2 complete using PR #108 exact head,
 merge, and post-merge evidence. Candidate-era facts remain historical and no active
@@ -18,7 +18,7 @@ field calls the satisfied integration gate pending.
 - Tasks: `VOC-086-T00`, `T01`
 - Tests: `VOC-086-TEST-02`
 - Evidence: `VOC-086-EV-01`
-- Result: partially-satisfied-by-t00-candidate-pending-review-hosted-proof-and-merge-and-t01
+- Result: T00-complete-through-PR-134; T01-candidate-pending-exact-review-hosted-proof-and-merge
 
 F3, staging, A1/P1-P5 acceptance, production, deployment, and live verification remain
 unclaimed; VOC-080-HOLD-00/01/02 remain held.

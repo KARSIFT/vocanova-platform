@@ -134,14 +134,32 @@ implementation:
   authorized: true
   required: true
   status: >-
-    T00 candidate implemented from adopted base
-    b44c41256153cfefc40739b9e7eeb5dff6eb72ad, pending fresh exact-revision general
-    and R4 specialist review, hosted proof, and normal merge. T01 and T02 remain
-    blocked on their predecessors.
+    T00 complete at exact head 5f19974b44761e05a899f6ea50178eedd891d663, merged through
+    PR #134 as b0ce5b84c1530e97762c0235a094651028690d3f, with distinct general and R4
+    specialist review, hosted proof, and post-merge evidence. T01 is a candidate pending
+    fresh exact-revision general/specialist review, hosted proof, and normal merge; T02
+    remains blocked on T01.
   tasks:
     - VOC-086-T00
     - VOC-086-T01
     - VOC-086-T02
+  evidence:
+    - task: VOC-086-T00
+      implementation_head: 5f19974b44761e05a899f6ea50178eedd891d663
+      pull_request: https://github.com/KARSIFT/vocanova-platform/pull/134
+      merge_commit: b0ce5b84c1530e97762c0235a094651028690d3f
+      review:
+        general: https://github.com/KARSIFT/vocanova-platform/pull/134#issuecomment-5390234117
+        r4_specialist: https://github.com/KARSIFT/vocanova-platform/pull/134#issuecomment-5390232333
+      hosted:
+        ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685114495
+        governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685353755
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685114520
+      post_merge:
+        ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685549441
+        governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685549494
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685549466
+        quality: not-applicable-push-path-filter
 
 release:
   required: false
@@ -152,12 +170,12 @@ release:
 
 ehr: not-triggered
 blocking_reasons:
-  - T00-exact-review-r4-specialist-hosted-proof-and-merge-pending
+  - T01-exact-review-r4-specialist-hosted-proof-and-merge-pending
 repository_adoption_status: adopted-on-pr-133-merge
 adoption_pr: 133
 repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/133
 implementation_authority_status: active-after-pr-133-merge-b44c41256153cfefc40739b9e7eeb5dff6eb72ad
 post_adoption_task_gates:
-  - T00-candidate-on-b44c41256153cfefc40739b9e7eeb5dff6eb72ad-pending-exact-review-r4-specialist-hosted-proof-and-merge
-  - T01-blocked-on-T00-merge
+  - T00-complete-on-PR-134-merge-b0ce5b84c1530e97762c0235a094651028690d3f
+  - T01-candidate-on-b0ce5b84c1530e97762c0235a094651028690d3f-pending-exact-review-r4-specialist-hosted-proof-and-merge
   - T02-blocked-on-T01-merge

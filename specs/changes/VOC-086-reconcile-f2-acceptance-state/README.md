@@ -1,7 +1,7 @@
 # VOC-086 — Reconcile repository/local F2 acceptance state
 
-Status: **adopted through PR #133; T00 is an implementation candidate pending
-exact-revision general and R4 specialist review, hosted proof, and merge**.
+Status: **adopted through PR #133; T00 is complete through PR #134, and T01 is a
+candidate pending exact-revision review, hosted proof, and merge**.
 
 This package responds to [issue #131](https://github.com/KARSIFT/vocanova-platform/issues/131).
 VOC-081's canonical package and the VOC-084 closure inventory prove that repository/local
@@ -20,5 +20,8 @@ general and R4 documentation/governance-specialist PASS verdicts with zero block
 and the accountable adoption decision approved that exact candidate. The
 metadata-only bookkeeping revision was independently reviewed and PR #133 merged as
 `b44c41256153cfefc40739b9e7eeb5dff6eb72ad`, activating repository-only
-implementation authority. T00 changes remain candidate evidence until fresh exact-SHA
-general and R4 specialist review, hosted checks, and normal merge.
+implementation authority. T00's exact implementation head
+`5f19974b44761e05a899f6ea50178eedd891d663` received distinct general and R4 specialist
+PASS reviews, hosted proof, and post-merge checks, then merged through PR #134 as
+`b0ce5b84c1530e97762c0235a094651028690d3f`. T01 is now the candidate task; T02 remains
+blocked on T01.
