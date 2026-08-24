@@ -19,6 +19,8 @@
     "next-env.d.ts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
+    "open-next.config.ts",
+    "worker-configuration.d.ts",
     "src/**/*.ts",
     "src/**/*.tsx"
   ],

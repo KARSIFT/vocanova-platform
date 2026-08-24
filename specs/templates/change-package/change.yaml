@@ -11,6 +11,11 @@ canonical_path: specs/changes/VOC-000-replace-with-approved-slug
 
 approval_status: not-approved
 implementation_authorized: false
+# Planned implementation shape defaults to one coherent PR. If this package needs
+# more than one, replace the rationale with the concrete boundary, partial-state,
+# integration, rollback, and overhead explanation.
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
 # Per AGENTS.md "Drafting automatic_merge_allowed": examine this field before
 # plan review. R0–R4 all default to true; a risk label alone is never an opt-out.
 # To use false, add an adjacent top-level automatic_merge_hold_reason with the

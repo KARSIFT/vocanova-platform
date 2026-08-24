@@ -40,6 +40,13 @@ class MergeEligibilityEvaluatorTests(unittest.TestCase):
             evaluate(fixture()),
         )
 
+    def test_committed_r4_fixtures_use_provider_neutral_ai_actor_labels(self) -> None:
+        for path in (FIXTURE, BLOCKED_FIXTURE):
+            with self.subTest(path=path.name):
+                evidence = json.loads(path.read_text(encoding="utf-8"))
+                self.assertRegex(evidence["roles"]["builder"]["identity"], r"^builder-ai-\d+$")
+                self.assertRegex(evidence["roles"]["reviewer"]["identity"], r"^reviewer-ai-\d+$")
+
     def test_committed_r4_opt_out_fixture_is_blocked(self) -> None:
         evidence = json.loads(BLOCKED_FIXTURE.read_text(encoding="utf-8"))
         self.assert_blocked(evidence, "package.opt_out")
@@ -58,16 +65,16 @@ class MergeEligibilityEvaluatorTests(unittest.TestCase):
     def test_check_failures_fail_closed(self) -> None:
         missing = fixture()
         missing["checks"]["observed"] = missing["checks"]["observed"][1:]
-        self.assert_blocked(missing, "checks.missing_validate")
+        self.assert_blocked(missing, "checks.missing_foundation")
 
         failed = fixture()
         failed["checks"]["observed"][0]["conclusion"] = "failure"
-        self.assert_blocked(failed, "checks.failed_validate")
+        self.assert_blocked(failed, "checks.failed_foundation")
 
         incomplete = fixture()
         incomplete["checks"]["observed"][0]["status"] = "in_progress"
         incomplete["checks"]["observed"][0]["conclusion"] = None
-        self.assert_blocked(incomplete, "checks.incomplete_validate")
+        self.assert_blocked(incomplete, "checks.incomplete_foundation")
 
     def test_role_separation_and_exact_revision_fail_closed(self) -> None:
         cases = {
@@ -81,6 +88,8 @@ class MergeEligibilityEvaluatorTests(unittest.TestCase):
         for code, (key, value) in cases.items():
             with self.subTest(code=code):
                 evidence = fixture()
+                if code == "review.self_authored":
+                    value = evidence["roles"]["builder"]["identity"]
                 evidence["roles"]["reviewer"][key] = value
                 self.assert_blocked(evidence, code)
 
@@ -142,7 +151,7 @@ class MergeEligibilityEvaluatorTests(unittest.TestCase):
 
         stale_check = fixture()
         stale_check["checks"]["observed"][0]["head_sha"] = "b" * 40
-        cases.append(("stale check", stale_check, "checks.stale_validate"))
+        cases.append(("stale check", stale_check, "checks.stale_foundation"))
 
         missing_builder = fixture()
         missing_builder["roles"]["builder"] = None
@@ -158,12 +167,14 @@ class FakeReadClient:
         self,
         checks: list[dict[str, Any]],
         quality: bool = False,
+        changed_filename: str | None = None,
         comment_body: str | None = None,
         inline_comment: dict[str, Any] | None = None,
         formal_review: dict[str, Any] | None = None,
     ) -> None:
         self.checks = checks
         self.quality = quality
+        self.changed_filename = changed_filename
         self.comment_body = comment_body
         self.inline_comment = inline_comment
         self.formal_review = formal_review
@@ -172,7 +183,9 @@ class FakeReadClient:
     def get(self, endpoint: str) -> Any:
         self.calls.append(endpoint)
         if "/files?" in endpoint:
-            filename = "apps/web/src/example.ts" if self.quality else "docs/example.md"
+            filename = self.changed_filename or (
+                "apps/web/src/example.ts" if self.quality else "docs/example.md"
+            )
             return [{"filename": filename}]
         if "/reviews?" in endpoint:
             return [self.formal_review or {"id": 101, "state": "APPROVED"}]
@@ -245,6 +258,10 @@ class GitHubAdapterTests(unittest.TestCase):
             for index, name in enumerate(names, 1)
         ]
 
+    def test_base_checks_follow_the_active_worker_api_job(self) -> None:
+        self.assertIn("worker api", BASE_REQUIRED_CHECKS)
+        self.assertNotIn("api", BASE_REQUIRED_CHECKS)
+
     def test_adapter_normalizes_live_reads_to_same_eligible_decision(self) -> None:
         client = FakeReadClient(self.checks())
         evidence, review_count = build_normalized_evidence(
@@ -260,14 +277,23 @@ class GitHubAdapterTests(unittest.TestCase):
         self.assertIn(self.head, summary)
 
     def test_adapter_requires_quality_checks_for_quality_paths(self) -> None:
-        names = BASE_REQUIRED_CHECKS + ("accessibility", "lighthouse")
-        evidence, _ = build_normalized_evidence(
-            self.event,
-            self.root,
-            FakeReadClient(self.checks(names), quality=True),
-        )
-        self.assertEqual(list(names), evidence["checks"]["required"])
-        self.assertTrue(evaluate(evidence)["eligible"])
+        names = BASE_REQUIRED_CHECKS + ("accessibility", "lighthouse", "quality required")
+        for changed_filename in (
+            "apps/web/src/example.ts",
+            "packages/api-client/src/index.ts",
+            ".github/actions/setup-toolchain/action.yml",
+            "scripts/foundation/require-successful-jobs.sh",
+        ):
+            with self.subTest(changed_filename=changed_filename):
+                evidence, _ = build_normalized_evidence(
+                    self.event,
+                    self.root,
+                    FakeReadClient(
+                        self.checks(names), changed_filename=changed_filename
+                    ),
+                )
+                self.assertEqual(list(names), evidence["checks"]["required"])
+                self.assertTrue(evaluate(evidence)["eligible"])
 
     def test_missing_live_check_is_a_concrete_block(self) -> None:
         evidence, _ = build_normalized_evidence(
@@ -275,7 +301,7 @@ class GitHubAdapterTests(unittest.TestCase):
         )
         result = evaluate(evidence)
         self.assertFalse(result["eligible"])
-        self.assertIn("checks.missing_validate", {reason["code"] for reason in result["reasons"]})
+        self.assertIn("checks.missing_foundation", {reason["code"] for reason in result["reasons"]})
 
     def test_declared_review_must_bind_to_live_exact_sha_pass(self) -> None:
         evidence, _ = build_normalized_evidence(
@@ -444,7 +470,7 @@ class GitHubAdapterTests(unittest.TestCase):
     def test_pr_text_is_data_not_shell_source(self) -> None:
         sentinel = self.root / "SHOULD_NOT_EXIST"
         self.event["pull_request"]["body"] = self.body.replace(
-            '"identity": "builder-agent"',
+            '"identity": "builder-ai-42"',
             f'"identity": "$(touch {sentinel})"',
         )
         evidence, _ = build_normalized_evidence(

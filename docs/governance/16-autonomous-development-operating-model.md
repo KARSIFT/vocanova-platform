@@ -1,13 +1,13 @@
 ---
 id: DOC-16
 title: Vocanova Autonomous Development Operating Model
-version: 3.0
+version: 3.4
 status: approved
 owner: founder
 canonical_path: docs/governance/16-autonomous-development-operating-model.md
 approved_at: 2026-07-13
 approval_evidence: PR-3-founder-approval-comment-4961029533-reviewed-commit-09f97341ff093fd20a70683d88b772e154979330
-last_reviewed_at: 2026-08-19
+last_reviewed_at: 2026-08-24
 review_cycle: quarterly
 supersedes: null
 folds_in:
@@ -15,18 +15,22 @@ folds_in:
   - A-003 (Governed Autonomous Engineering Authority; effective 2026-07-17T16:44:34Z, PR #8)
   - A-004 (Orchestrator Independent-Verification Merge Authority; approved 2026-08-14, PR #54)
   - VOC-079 (R4 Approval-Neutral Governance; adopted 2026-08-19, PR #75)
+  - VOC-080 (Cloudflare-native runtime and external Ruflo direction; adopted 2026-08-22, PR #86)
+  - VOC-082 (Provider-neutral distinct-agent role separation; adopted 2026-08-23, PR #110)
+  - VOC-085 (Public repository settings truth and held activation boundary; adopted 2026-08-24, PR #126)
 revision_note: >
-  This v3.0 revision implements VOC-079's approval-neutral R4 authority model.
-  Risk remains consequence-based and R4 retains the strongest evidence contract,
-  but no risk label creates a personal approval requirement. Explicit authority for
-  external effects and genuinely triggered EHR remain independent gates. VOC-079
-  was adopted under the prior R4 founder rule and cannot use this revision to
-  authorize its own transition; that one-time evidence is preserved below.
+  This v3.4 revision adds the coherent-outcome delivery default: one approved
+  package, one implementation pull request, and one minimum-sufficient task are the
+  normal safe unit for one outcome, while multi-PR delivery remains an explicit,
+  overhead-aware exception.
 related_documents:
   - DOC-15
 related_decisions:
   - A-001
   - ADR-0002
+  - ADR-0003
+  - ADR-0004
+  - ADR-0005
 ---
 
 # 16 — Vocanova Autonomous Development Operating Model
@@ -67,19 +71,32 @@ artifact categories or authority hierarchy.
 
 ## Roles and separation of duties
 
-| Role | Responsibility | Prohibited authority |
-|---|---|---|
-| Accountable decision owner | Owns a specifically assigned product, business, legal, financial, external-effect, or organizational decision | Risk class alone does not make the founder or any other person the owner |
-| Planner role | Product analysis, specifications, architecture proposals, governance drafting, and decision routing | Cannot adopt or independently verify its own meaningful plan |
-| Implementer role | Implementation of approved, implementation-ready changes and applicable tests and documentation | Cannot approve its own work, expand scope, or deploy directly to production |
-| Independent reviewer role | Independent specification, code, architecture, security, and CI/CD verification of the exact revision | Cannot be the builder of the reviewed revision or assume separately assigned legal or organizational accountability |
-| GitHub Actions | Deterministic repository checks and traceability | Cannot make product or business decisions, merge, deploy, or monitor servers |
-| Cloudflare | Existing DNS/TLS/WAF/CDN runtime service; future hosting input | Must not be represented as repository deployment automation or decide whether a release is authorized |
+| Role                        | Responsibility                                                                                                | Prohibited authority                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Accountable decision owner  | Owns a specifically assigned product, business, legal, financial, external-effect, or organizational decision | Risk class alone does not make the founder or any other person the owner                                                  |
+| Planner role                | Product analysis, specifications, architecture proposals, governance drafting, and decision routing           | Cannot adopt or independently verify its own meaningful plan                                                              |
+| Implementer role            | Implementation of approved, implementation-ready changes and applicable tests and documentation               | Cannot approve its own work, expand scope, or deploy directly to production                                               |
+| Independent reviewer role   | Independent specification, code, architecture, security, and CI/CD verification of the exact revision         | Cannot be the builder of the reviewed revision or assume separately assigned legal or organizational accountability       |
+| Non-author merge actor      | Audits the exact-SHA evidence and applicable eligibility result before an otherwise authorized merge          | Cannot merge its own authored revision or replace an action-specific authority hold                                       |
+| GitHub Actions              | Deterministic repository checks and traceability                                                              | Cannot make product or business decisions, merge, deploy, or monitor servers                                              |
+| Cloudflare                  | Selected managed runtime/data target under ADR-0003; live resources remain held                               | Cannot decide scope/release authority; credentials are unavailable to PRs and ordinary agents                             |
+| External Ruflo orchestrator | Optional pinned coordination of isolated provider-neutral roles under ADR-0004                                | Cannot approve/merge/close/dispatch, deploy, access secrets or production data, spend, launch, or replace GitHub evidence |
 
-Any human or AI system may occupy the planner, implementer, or independent-reviewer
-role when it has the necessary capability and access. The builder and reviewer roles
-must remain separate, their identities and exact revisions must be recorded, and no
-external vendor configuration is a source of repository authority.
+Any human or separately instantiated AI participant may occupy the planner,
+implementer, or independent-reviewer role when it has the necessary capability and
+access. A role is a responsibility; an actor is the attributable participant assigned
+to it. The builder and reviewer must be different actors, the reviewer must not have
+authored the reviewed exact revision, and their identities, assignments, exact SHA,
+verdict, and resolved blocking findings must be recorded. A model, provider, tool, or
+new session is optional runtime provenance or defense in depth, never authority.
+
+The author of a plan cannot independently review or adopt it. The builder cannot
+independently review, approve, or merge its revision. If a reviewer materially edits a
+revision, it is the builder of the new SHA; checks and a different reviewer are then
+required. A non-author merge actor audits the exact evidence and applicable eligibility
+result; no human is required solely because the participants are AI. An expressly
+applicable cross-model rule remains a scoped evidence requirement, not a provider
+assignment or approval source. See [ADR-0005](../decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md).
 
 A permanent qualified-human technical-steward role existed early in this
 repository's history and is now retired as a routine approval authority (see
@@ -121,6 +138,28 @@ artifacts, issues, branches, pull requests, tests, releases, and outcome records
 Trivial R0 corrections may use a linked issue or a concise pull-request description
 instead of a full change package, but they must still identify objective, scope,
 evidence, and risk.
+
+## Delivery-shape default
+
+For one approved user or business outcome, the planner selects the largest safe
+coherent delivery unit across backend, frontend, contracts, tests, documentation,
+rollback, and evidence layers that share the same outcome and control boundary. The
+default delivery unit is one approved `VOC-###` package, one implementation pull
+request into `develop`, and one minimum-sufficient task.
+
+Task IDs are traceability and evidence groupings. They map requirements, acceptance
+criteria, dependencies, ownership, sequence, tests, and evidence, but they do not
+themselves imply separate branches, worktrees, pull requests, releases, or merges.
+
+Splitting is exceptional. More than one implementation pull request is justified only
+when the plan records an independently releasable and rollback-safe outcome boundary,
+a material risk or action-authority boundary, a hard dependency, incompatible
+reviewer/owner needs, or a demonstrated reviewability limit that clearer in-PR
+organization cannot solve. The rationale must explain partial-state coherence,
+integration order, rollback, and the tradeoff against coordination, elapsed-time,
+token/context, repeated-check, exact-review, and bookkeeping overhead. Component
+count, line count, test layers, documentation updates, and implementation convenience
+do not by themselves justify a split.
 
 ## Risk classification
 
@@ -171,8 +210,10 @@ be a disguised hold on all R4 work.
 - Direct pushes to `develop` and `main`, unverified merges, and local production
   deployments are prohibited.
 - Working branches are normally squash-merged into `develop`. Release pull requests
-  promote `develop` to `main` with an identifiable merge commit. A future production
-  mechanism may publish only from `main`; no such mechanism is currently installed.
+  promote `develop` to `main` with an identifiable merge commit. VOC-080-T10 installs
+  a held Cloudflare publication state machine, but its committed manifest blocks
+  before environment jobs and secrets; it creates no automatic branch-to-environment
+  effect.
 
 **A pull request is merge-eligible into `develop`** when: required deterministic
 checks pass; a different reviewer role records a passing verdict bound to the exact
@@ -191,19 +232,22 @@ approve, comment, merge, dispatch, or otherwise mutate GitHub. Until a separatel
 adopted repository-owned executor exists, an authorized actor performs the merge after
 verifying the same gates and the exact-SHA result.
 
-The former orchestrator-originated merge path is dormant. VOC-078-T02 superseded
+The former orchestrator-originated merge path remains retired. VOC-078-T02 superseded
 [ADR-0001](../decisions/ADR-0001-agent-orchestration-architecture.md) and removed the
 repository-local orchestrator and subagent assets, so no current pull request can
 qualify as orchestrator-originated under that path. Human- and agent-authored changes
-follow the general pull-request rule above. Reintroducing an orchestrator or a special
-merge executor requires a new accepted decision and adopted implementation package.
-Any future orchestrator uses the universal evidence contract above; no `not R4`
-exception or parallel vendor-specific authority path exists. The historical authority
-in the amendment record cannot activate absent machinery.
+follow the general pull-request rule above. ADR-0004 permits pinned Ruflo as an
+operator-side external coordinator, not as a repository-local executor or special
+merge path. Its participants use the universal evidence contract above; no `not R4`
+exception or parallel vendor-specific authority exists. Ruflo receipts and memory are
+supporting provenance only, and the historical authority in the amendment record
+cannot activate absent machinery.
 
-`develop` is the integrated repository state. After VOC-078-T03, merging to it does
-not deploy or poll any staging server. See
-[repository-settings.md](repository-settings.md) for the current automation state.
+`develop` is the integrated repository state. Merging to it does not deploy or poll
+any environment. T10's manual state machine is present but fail-closed in repository
+state; live staging remains held until `VOC-080-HOLD-00` is completed by a separate
+reviewed activation. See [repository-settings.md](repository-settings.md) and the
+[Cloudflare delivery runbook](../operations/cloudflare-delivery.md).
 
 ## Release classes and production release authority
 
@@ -230,14 +274,19 @@ permission, not an obligation - any gate may hold a release for investigation.
 
 VOC-078-T01 retired the workflow that previously promoted completed packages from
 `develop` to `main`. This section continues to define release eligibility, but no
-current GitHub workflow executes that promotion. During reconstruction, promotion is
-prohibited; a future hosting/release package must define the replacement.
+current GitHub workflow executes that promotion. Promotion uses a separately reviewed
+`develop`-to-`main` pull request. VOC-080-T10 defines held Cloudflare publication, but
+its manifest, placeholder resources, credential absence, and action holds prevent
+repository promotion from becoming live deployment.
 
-RL1/RL2 *technical* activation (as opposed to the governance permission described
+RL1/RL2 _technical_ activation (as opposed to the governance permission described
 above) remains a separate, currently disabled gate - see
 [repository-settings.md](repository-settings.md) and
-[a003-transition-state.yaml](a003-transition-state.yaml) for the live, current
-state of what's actually turned on.
+[a003-transition-state.yaml](a003-transition-state.yaml) for the governance
+transition state, and [repository-settings-current.yaml](repository-settings-current.yaml)
+for the hosted settings posture current as observed at 2026-08-24, including
+VOC-092's enabled automatic deletion of merged branches. Neither record is a live
+settings feed, and automatic branch deletion is not automatic merge or deployment.
 
 ## Release gate
 
@@ -322,19 +371,22 @@ authority.
 
 ## Verification model
 
-| Capability | Current state |
-|---|---|
-| Governance structure and protected-path classification | Live - enforced by `scripts/governance/` and the policy workflow on every PR |
-| pnpm frozen installation, formatting, lint, type checking, unit tests, integration tests, build | Live - real `apps/web`/`apps/api` applications, real CI on every PR |
-| Accessibility automation | Live - Lighthouse CI budgets (Performance 85+/Accessibility 95+/Best Practices 90+) |
-| Database migration validation | Live - Atlas-based migration tooling |
-| Dependency audit | Live - pnpm audit and Dependabot |
-| Secret scanning | Live - GitHub secret scanning and push protection |
-| Preview status | Not built - per-PR Cloudflare previews remain genuinely unbuilt |
-| Independent exact-revision verification | Live as a repository requirement; performed outside Actions and attached to the PR |
-| Staging deployment, health checks | Paused/unavailable in GitHub Actions after VOC-078-T03; no claim that an existing server was stopped |
-| Production deployment, health checks | Paused/unavailable in GitHub Actions after VOC-078-T03; no claim that an existing server was stopped |
-| Rollback | Manual, proven procedure (redeploy previous immutable image digest) - not one-click automation |
+| Capability                                                                                      | Current state                                                                                                                                                                                                                                                                                            |
+| ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Governance structure and protected-path classification                                          | Live - enforced by `scripts/governance/` and the policy workflow on every PR                                                                                                                                                                                                                             |
+| pnpm frozen installation, formatting, lint, type checking, unit tests, integration tests, build | Live - real `apps/web` and `apps/api-worker` applications, real CI on every PR                                                                                                                                                                                                                           |
+| Accessibility automation                                                                        | Live - Lighthouse CI budgets (Performance 85+/Accessibility 95+/Best Practices 90+)                                                                                                                                                                                                                      |
+| Database migration validation                                                                   | Live - forward D1 migrations, local workerd/D1 rehearsal, synthetic conversion, and reconciliation validation                                                                                                                                                                                            |
+| Dependency audit                                                                                | Live - pnpm audit and vulnerability alerts as observed; Dependabot security updates disabled                                                                                                                                                                                                             |
+| Secret scanning                                                                                 | Live in `security.yml` through pinned TruffleHog; GitHub-hosted secret scanning, push protection, and validity checks disabled as observed at 2026-08-24                                                                                                                                                 |
+| OpenNext/Worker/D1 compatibility                                                                | Live in the active tree after the T03-T10 parity chain and T11 server-runtime retirement; local workerd/D1 and credential-free dry runs only                                                                                                                                                             |
+| Preview status                                                                                  | Not built - per-PR Cloudflare previews remain genuinely unbuilt                                                                                                                                                                                                                                          |
+| Independent exact-revision verification                                                         | Live as a repository requirement; performed outside Actions and attached to the PR                                                                                                                                                                                                                       |
+| External Ruflo coordination                                                                     | Exact `3.38.16` operator-side installation and synthetic rehearsal recorded by VOC-080-T02; frozen patched graph, zero high/critical audit, advisory-permission limitation, and deny boundary are in the [runbook](../operations/ruflo-external-orchestration.md); never repository/production authority |
+| Staging deployment, health checks                                                               | Held T10 state machine and mocked smoke exist; no environment/resource/secret is configured and VOC-080-HOLD-00 blocks activation                                                                                                                                                                        |
+| Production deployment, health checks                                                            | Held T10 state machine and mocked smoke/rollback exist; no environment/resource/secret is configured and VOC-080-HOLD-01 blocks activation                                                                                                                                                               |
+| Production data migration                                                                       | Unavailable and prohibited without VOC-080-HOLD-02                                                                                                                                                                                                                                                       |
+| Rollback                                                                                        | Held exact prior-version rollback and forward-corrective D1 contract are installed and mocked; no live rehearsal or authority is claimed                                                                                                                                                                 |
 
 Absence of a tool is never represented by a passing placeholder check. See
 [repository-settings.md](repository-settings.md) for the fuller, continuously
@@ -346,8 +398,8 @@ This model has already passed its first five implementation pull requests and it
 first production release; it should continue to be reviewed after any serious
 incident and at least quarterly. GitHub Actions agent dispatch, autonomous merge,
 deployment, and scheduled server/error monitoring are disabled by removal under
-VOC-078. Future write automation must expose an independent kill switch for every
-capability.
+VOC-078. ADR-0004 does not restore them. Future write automation must expose an
+independent kill switch for every capability.
 
 ## Retirement of the standing technical-steward role
 
@@ -368,17 +420,21 @@ layer.
 ## Amendment history
 
 This document previously worked alongside three separate amendments. Each former
-amendment's operative rules is folded directly into the sections above. The table
-also records the later VOC-079 authority transition. It preserves permanent evidence
-for the revision it governed without making any approval reusable.
+amendment's operative rules is folded directly into the sections above. The table also
+records the later VOC-079 authority transition, VOC-080 runtime/orchestration boundary,
+and VOC-082 role-separation clarification. It preserves permanent evidence for the
+revision it governed without making any approval, transition, or boundary reusable.
 
-| Date | Change (former amendment) | What it did | Evidence |
-|---|---|---|---|
-| 2026-07-13 | Governed Autonomous Releases (formerly "A-002") | Ended the rule that every `develop`->`main` merge and every production publication needed founder approval; introduced risk-proportionate automatic release authority | PR #3, founder approval comment [4961029533](https://github.com/KARSIFT/vocanova-platform/pull/3#issuecomment-4961029533), reviewed commit `09f97341ff093fd20a70683d88b772e154979330` |
-| 2026-07-17T16:44:34Z | Governed Autonomous Engineering Authority (formerly "A-003") | Retired the standing qualified-human technical-steward approval requirement for routine R3 protected technical work; introduced EHR as an exceptional-only escalation mechanism | PR #8, approved PR head SHA `c858ebff3d97da88fea830bc32a74f69f59a9ad2`, adopted `develop` SHA `9d5b4bc1d4a72e313b013047601265ee837c34f2`: formal approval [5005389067](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067), independent verification [5005293621](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005293621), repository adoption [5005429197](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005429197), effective activation [5005456622](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622) |
-| 2026-08-14 | Orchestrator Independent-Verification Merge Authority (formerly "A-004") | Let an orchestrator-originated pull request that already satisfies real independent verification merge directly, without also repeating the separate `karsift-ai-infra` pipeline ceremony built for a different, less continuous system | PR #54, founder approval comment [5295002955](https://github.com/KARSIFT/vocanova-platform/pull/54#issuecomment-5295002955), reviewed commit `94f4d2196156c55b3264f955c4d03746ab2cd37a` |
-| 2026-08-14 | This consolidation (v2.0 of this document) | Folded the three amendments above directly into this document and removed the separate amendment files, so current governance reads as one document instead of a base plus three overlays; no underlying rule changed in the folding itself | See this revision's pull-request approval comment once recorded |
-| 2026-08-19 | R4 Approval-Neutral Governance (VOC-079; v3.0 of this document) | Retained R4 as the highest consequence class while replacing its class-wide founder gate with the universal evidence contract and explicit action-specific authority | Adopted package candidate `25a3e246b8f66dd4b92ea9726eb5367c16363018`; PR #75 founder approval [5341799779](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5341799779) and independent package review [5340623965](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5340623965). This one-time pre-transition authority is exhausted by VOC-079 and cannot authorize later work; exact implementation evidence is recorded on the implementation pull requests. |
+| Date                 | Change (former amendment)                                                              | What it did                                                                                                                                                                                                                                 | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-07-13           | Governed Autonomous Releases (formerly "A-002")                                        | Ended the rule that every `develop`->`main` merge and every production publication needed founder approval; introduced risk-proportionate automatic release authority                                                                       | PR #3, founder approval comment [4961029533](https://github.com/KARSIFT/vocanova-platform/pull/3#issuecomment-4961029533), reviewed commit `09f97341ff093fd20a70683d88b772e154979330`                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 2026-07-17T16:44:34Z | Governed Autonomous Engineering Authority (formerly "A-003")                           | Retired the standing qualified-human technical-steward approval requirement for routine R3 protected technical work; introduced EHR as an exceptional-only escalation mechanism                                                             | PR #8, approved PR head SHA `c858ebff3d97da88fea830bc32a74f69f59a9ad2`, adopted `develop` SHA `9d5b4bc1d4a72e313b013047601265ee837c34f2`: formal approval [5005389067](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005389067), independent verification [5005293621](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005293621), repository adoption [5005429197](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005429197), effective activation [5005456622](https://github.com/KARSIFT/vocanova-platform/pull/8#issuecomment-5005456622) |
+| 2026-08-14           | Orchestrator Independent-Verification Merge Authority (formerly "A-004")               | Let an orchestrator-originated pull request that already satisfies real independent verification merge directly, without also repeating the separate `karsift-ai-infra` pipeline ceremony built for a different, less continuous system     | PR #54, founder approval comment [5295002955](https://github.com/KARSIFT/vocanova-platform/pull/54#issuecomment-5295002955), reviewed commit `94f4d2196156c55b3264f955c4d03746ab2cd37a`                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 2026-08-14           | This consolidation (v2.0 of this document)                                             | Folded the three amendments above directly into this document and removed the separate amendment files, so current governance reads as one document instead of a base plus three overlays; no underlying rule changed in the folding itself | See this revision's pull-request approval comment once recorded                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 2026-08-19           | R4 Approval-Neutral Governance (VOC-079; v3.0 of this document)                        | Retained R4 as the highest consequence class while replacing its class-wide founder gate with the universal evidence contract and explicit action-specific authority                                                                        | Adopted package candidate `25a3e246b8f66dd4b92ea9726eb5367c16363018`; PR #75 founder approval [5341799779](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5341799779) and independent package review [5340623965](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5340623965). This one-time pre-transition authority is exhausted by VOC-079 and cannot authorize later work; exact implementation evidence is recorded on the implementation pull requests.                                                                                                     |
+| 2026-08-22           | Cloudflare-native runtime and external Ruflo boundary (VOC-080; v3.1 of this document) | Selected Workers/OpenNext/Hono/D1 as the parity-gated no-owned-server target and Ruflo as external coordination only; preserved the universal evidence contract and added no merge or live-system authority                                 | Adopted package candidate `6fb00a0b64e6f2d4adceb24a9caeffd9af98c779`; independent review [5379258747](https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747); final-head review [5379295472](https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379295472); adoption PR #86 merged as `399ccefa879545b43574c02fdc3babff223a1db0`. Live staging, production, and learner-data actions remain held.                                                                                                                                                               |
+| 2026-08-23           | Provider-neutral distinct-agent role separation (VOC-082; v3.2)                        | Clarified that independent roles require distinct actors and non-authorship of the exact revision; model/provider provenance is optional hardening, while action-specific authority remains separate                                        | Adopted package VOC-082, PR #110; implementation evidence is recorded on its independently reviewed task pull requests. Historical provider and bootstrap evidence remains preserved.                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 2026-08-24           | Public repository settings truth and held activation boundary (VOC-085; v3.3)          | Reconciled public settings posture and preserved held activation boundaries; no authority rules changed                                                                                                                                     | Adopted plan [PR #126](https://github.com/KARSIFT/vocanova-platform/pull/126); implementation [PR #128](https://github.com/KARSIFT/vocanova-platform/pull/128), with this final evidence-link revision bound to its exact SHA.                                                                                                                                                                                                                                                                                                                                                                         |
 
 The one-time VOC-002 migration approval and VOC-079 pre-transition approval recorded
 above are exhausted and must never be reused to justify a later change. Automatic

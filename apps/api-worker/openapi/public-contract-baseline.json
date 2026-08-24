@@ -1,0 +1,670 @@
+{
+  "schema_version": "vocanova-retired-api-contract-v1",
+  "retired_source_path": "apps/api/openapi/vocanova.openapi.json",
+  "retired_source_revision": "203ac878d7a054de0826188924446e5d24a6dd43",
+  "retired_source_sha256": "18905f12ffd371bf2eaa4da23af3531bf296cb62e8e223c9c7a2fcea022e0715",
+  "retired_at_task": "VOC-080-T11",
+  "clientExceptions": {
+    "/api/v1/auth/oauth/google/callback": "OAuth provider redirect target; navigated by the browser/provider rather than VocanovaClient"
+  },
+  "workerMigratedOperations": [
+    {
+      "method": "POST",
+      "operationId": "CompleteOnboarding",
+      "path": "/api/v1/onboarding",
+      "successStatus": 200,
+      "parameters": [],
+      "request": {
+        "properties": [
+          "dailyReviewTarget",
+          "englishLevel",
+          "learningGoal",
+          "mainUseCase",
+          "nativeLanguage"
+        ],
+        "required": [
+          "dailyReviewTarget",
+          "englishLevel",
+          "learningGoal",
+          "mainUseCase",
+          "nativeLanguage"
+        ]
+      },
+      "response": {
+        "properties": [
+          "completedAt",
+          "dailyReviewTarget",
+          "englishLevel",
+          "learningGoal",
+          "mainUseCase",
+          "nativeLanguage",
+          "status"
+        ],
+        "required": ["status"]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "ConsumeEmailChangeLink",
+      "path": "/api/v1/settings/email-change-links/consume",
+      "successStatus": 200,
+      "parameters": [],
+      "request": { "properties": ["token"], "required": ["token"] },
+      "response": {
+        "properties": ["changedAt", "email", "previousEmail"],
+        "required": ["changedAt", "email", "previousEmail"]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "ConsumeMagicLink",
+      "path": "/api/v1/auth/magic-links/consume",
+      "successStatus": 200,
+      "parameters": [],
+      "request": {
+        "properties": ["email", "token"],
+        "required": ["email", "token"]
+      },
+      "response": {
+        "properties": [
+          "avatarUrl",
+          "displayName",
+          "email",
+          "emailVerifiedAt",
+          "onboardingStatus"
+        ],
+        "required": ["onboardingStatus"]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "CreateAccountDeletionRequest",
+      "path": "/api/v1/account-deletion-requests",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "header", "name": "Idempotency-Key", "required": true }
+      ],
+      "request": null,
+      "response": {
+        "properties": [
+          "idempotencyKey",
+          "purgeAfter",
+          "replayed",
+          "requestedAt",
+          "status",
+          "userId"
+        ],
+        "required": [
+          "idempotencyKey",
+          "purgeAfter",
+          "replayed",
+          "requestedAt",
+          "status",
+          "userId"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetCanonicalWord",
+      "path": "/api/v1/canonical-words/{wordSlug}",
+      "successStatus": 200,
+      "parameters": [{ "in": "path", "name": "wordSlug", "required": true }],
+      "request": null,
+      "response": { "properties": ["word"], "required": ["word"] }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetCurrentUser",
+      "path": "/api/v1/me",
+      "successStatus": 200,
+      "parameters": [],
+      "request": null,
+      "response": {
+        "properties": [
+          "avatarUrl",
+          "displayName",
+          "email",
+          "emailVerifiedAt",
+          "onboardingStatus"
+        ],
+        "required": ["onboardingStatus"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetDailyMission",
+      "path": "/api/v1/daily-mission",
+      "successStatus": 200,
+      "parameters": [{ "in": "query", "name": "timezone", "required": false }],
+      "request": null,
+      "response": {
+        "properties": [
+          "completedAt",
+          "graceApplied",
+          "localDate",
+          "newWordTarget",
+          "newWordsCompleted",
+          "policyVersion",
+          "reviewTarget",
+          "reviewsCompleted",
+          "sentencePracticeTarget",
+          "sentencePracticesCompleted",
+          "status",
+          "streak",
+          "timezone"
+        ],
+        "required": [
+          "graceApplied",
+          "localDate",
+          "policyVersion",
+          "reviewTarget",
+          "reviewsCompleted",
+          "status",
+          "streak",
+          "timezone"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetJourneySituation",
+      "path": "/api/v1/journey-situations/{slug}",
+      "successStatus": 200,
+      "parameters": [{ "in": "path", "name": "slug", "required": true }],
+      "request": null,
+      "response": {
+        "properties": ["meanings", "situation"],
+        "required": ["meanings", "situation"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetOnboarding",
+      "path": "/api/v1/onboarding",
+      "successStatus": 200,
+      "parameters": [],
+      "request": null,
+      "response": {
+        "properties": [
+          "completedAt",
+          "dailyReviewTarget",
+          "englishLevel",
+          "learningGoal",
+          "mainUseCase",
+          "nativeLanguage",
+          "status"
+        ],
+        "required": ["status"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetProgress",
+      "path": "/api/v1/progress",
+      "successStatus": 200,
+      "parameters": [{ "in": "query", "name": "timezone", "required": false }],
+      "request": null,
+      "response": {
+        "properties": [
+          "completionHistory",
+          "confidencePointsBalance",
+          "streak"
+        ],
+        "required": ["completionHistory", "confidencePointsBalance", "streak"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetReviewsDue",
+      "path": "/api/v1/reviews/due",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "query", "name": "after", "required": false },
+        { "in": "query", "name": "limit", "required": false }
+      ],
+      "request": null,
+      "response": {
+        "properties": ["items", "nextCursor", "totalCount"],
+        "required": ["items", "totalCount"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "GetSettings",
+      "path": "/api/v1/settings",
+      "successStatus": 200,
+      "parameters": [],
+      "request": null,
+      "response": {
+        "properties": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ],
+        "required": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "ListJourneySituations",
+      "path": "/api/v1/journey-situations",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "query", "name": "after", "required": false },
+        { "in": "query", "name": "limit", "required": false }
+      ],
+      "request": null,
+      "response": {
+        "properties": ["items", "nextCursor"],
+        "required": ["items"]
+      }
+    },
+    {
+      "method": "GET",
+      "operationId": "ListSavedWords",
+      "path": "/api/v1/user-words",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "query", "name": "after", "required": false },
+        { "in": "query", "name": "limit", "required": false }
+      ],
+      "request": null,
+      "response": {
+        "properties": ["items", "nextCursor"],
+        "required": ["items"]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "Logout",
+      "path": "/api/v1/auth/logout",
+      "successStatus": 204,
+      "parameters": [
+        { "in": "header", "name": "X-CSRF-Token", "required": false }
+      ],
+      "request": null,
+      "response": null
+    },
+    {
+      "method": "GET",
+      "operationId": "OAuthCallback",
+      "path": "/api/v1/auth/oauth/google/callback",
+      "successStatus": 302,
+      "parameters": [
+        { "in": "query", "name": "code", "required": false },
+        { "in": "query", "name": "error", "required": false },
+        { "in": "query", "name": "state", "required": false }
+      ],
+      "request": null,
+      "response": null
+    },
+    {
+      "method": "POST",
+      "operationId": "OAuthStart",
+      "path": "/api/v1/auth/oauth/google/start",
+      "successStatus": 200,
+      "parameters": [],
+      "request": { "properties": ["redirectUri"], "required": ["redirectUri"] },
+      "response": { "properties": ["url"], "required": ["url"] }
+    },
+    {
+      "method": "POST",
+      "operationId": "ReportSentenceFeedback",
+      "path": "/api/v1/sentence-feedback/{attemptId}/reports",
+      "successStatus": 204,
+      "parameters": [{ "in": "path", "name": "attemptId", "required": true }],
+      "request": {
+        "properties": ["classification", "reason"],
+        "required": ["reason"]
+      },
+      "response": null
+    },
+    {
+      "method": "POST",
+      "operationId": "RequestEmailChangeLink",
+      "path": "/api/v1/settings/email-change-links",
+      "successStatus": 204,
+      "parameters": [],
+      "request": { "properties": ["newEmail"], "required": ["newEmail"] },
+      "response": null
+    },
+    {
+      "method": "POST",
+      "operationId": "RequestMagicLink",
+      "path": "/api/v1/auth/magic-links",
+      "successStatus": 204,
+      "parameters": [],
+      "request": { "properties": ["email"], "required": ["email"] },
+      "response": null
+    },
+    {
+      "method": "POST",
+      "operationId": "SaveUserWord",
+      "path": "/api/v1/user-words",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "header", "name": "Idempotency-Key", "required": true }
+      ],
+      "request": {
+        "properties": ["meaningId", "source"],
+        "required": ["meaningId", "source"]
+      },
+      "response": {
+        "properties": [
+          "addedAt",
+          "meaningId",
+          "partOfSpeech",
+          "saved",
+          "shortDefinition",
+          "source",
+          "status",
+          "userWordId",
+          "wordId",
+          "wordSlug",
+          "wordText"
+        ],
+        "required": [
+          "addedAt",
+          "meaningId",
+          "partOfSpeech",
+          "saved",
+          "shortDefinition",
+          "source",
+          "status",
+          "userWordId",
+          "wordId",
+          "wordSlug",
+          "wordText"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "SubmitReview",
+      "path": "/api/v1/reviews/submissions",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "header", "name": "Idempotency-Key", "required": true }
+      ],
+      "request": {
+        "properties": [
+          "answeredAt",
+          "attemptType",
+          "clientAttemptId",
+          "meaningId",
+          "metadata",
+          "promptType",
+          "rating",
+          "responseTimeMs",
+          "result",
+          "selectedOptionMeaningId",
+          "source",
+          "typedAnswer",
+          "userWordId",
+          "wasHintUsed"
+        ],
+        "required": [
+          "answeredAt",
+          "clientAttemptId",
+          "meaningId",
+          "promptType",
+          "result",
+          "userWordId"
+        ]
+      },
+      "response": {
+        "properties": [
+          "answeredAt",
+          "attemptId",
+          "attemptType",
+          "clientAttemptId",
+          "meaningId",
+          "nextReviewAt",
+          "promptType",
+          "rating",
+          "responseTimeMs",
+          "result",
+          "reviewStepAfter",
+          "reviewStepBefore",
+          "selectedOptionMeaningId",
+          "source",
+          "typedAnswer",
+          "userWordId",
+          "wasHintUsed"
+        ],
+        "required": [
+          "answeredAt",
+          "attemptId",
+          "attemptType",
+          "clientAttemptId",
+          "meaningId",
+          "nextReviewAt",
+          "promptType",
+          "rating",
+          "responseTimeMs",
+          "result",
+          "reviewStepAfter",
+          "reviewStepBefore",
+          "source",
+          "userWordId",
+          "wasHintUsed"
+        ]
+      }
+    },
+    {
+      "method": "POST",
+      "operationId": "SubmitSentenceFeedback",
+      "path": "/api/v1/sentence-feedback",
+      "successStatus": 200,
+      "parameters": [
+        { "in": "header", "name": "Idempotency-Key", "required": true }
+      ],
+      "request": {
+        "properties": ["attemptId", "sentenceText", "source"],
+        "required": ["attemptId", "sentenceText", "source"]
+      },
+      "response": {
+        "properties": [
+          "attemptId",
+          "canRetry",
+          "correctedSentence",
+          "crisisResourceMessage",
+          "errorCode",
+          "errorMessage",
+          "explanation",
+          "improvementTip",
+          "missionCompleted",
+          "originalSentence",
+          "reported",
+          "sentenceId",
+          "status"
+        ],
+        "required": [
+          "canRetry",
+          "missionCompleted",
+          "originalSentence",
+          "reported"
+        ]
+      }
+    },
+    {
+      "method": "DELETE",
+      "operationId": "UnsaveUserWord",
+      "path": "/api/v1/user-words/{meaningId}",
+      "successStatus": 204,
+      "parameters": [{ "in": "path", "name": "meaningId", "required": true }],
+      "request": null,
+      "response": null
+    },
+    {
+      "method": "PATCH",
+      "operationId": "UpdateSettings",
+      "path": "/api/v1/settings",
+      "successStatus": 200,
+      "parameters": [],
+      "request": {
+        "properties": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ],
+        "required": []
+      },
+      "response": {
+        "properties": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ],
+        "required": [
+          "appLanguage",
+          "dailyReviewTarget",
+          "displayName",
+          "marketingEmailsEnabled",
+          "notificationsEnabled",
+          "reviewIntervalPreset"
+        ]
+      }
+    }
+  ],
+  "operations": [
+    {
+      "method": "POST",
+      "operationId": "CreateAccountDeletionRequest",
+      "path": "/api/v1/account-deletion-requests"
+    },
+    {
+      "method": "POST",
+      "operationId": "Logout",
+      "path": "/api/v1/auth/logout"
+    },
+    {
+      "method": "POST",
+      "operationId": "RequestMagicLink",
+      "path": "/api/v1/auth/magic-links"
+    },
+    {
+      "method": "POST",
+      "operationId": "ConsumeMagicLink",
+      "path": "/api/v1/auth/magic-links/consume"
+    },
+    {
+      "method": "GET",
+      "operationId": "OAuthCallback",
+      "path": "/api/v1/auth/oauth/google/callback"
+    },
+    {
+      "method": "POST",
+      "operationId": "OAuthStart",
+      "path": "/api/v1/auth/oauth/google/start"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetCanonicalWord",
+      "path": "/api/v1/canonical-words/{wordSlug}"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetDailyMission",
+      "path": "/api/v1/daily-mission"
+    },
+    {
+      "method": "GET",
+      "operationId": "ListJourneySituations",
+      "path": "/api/v1/journey-situations"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetJourneySituation",
+      "path": "/api/v1/journey-situations/{slug}"
+    },
+    { "method": "GET", "operationId": "GetCurrentUser", "path": "/api/v1/me" },
+    {
+      "method": "GET",
+      "operationId": "GetOnboarding",
+      "path": "/api/v1/onboarding"
+    },
+    {
+      "method": "POST",
+      "operationId": "CompleteOnboarding",
+      "path": "/api/v1/onboarding"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetProgress",
+      "path": "/api/v1/progress"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetReviewsDue",
+      "path": "/api/v1/reviews/due"
+    },
+    {
+      "method": "POST",
+      "operationId": "SubmitReview",
+      "path": "/api/v1/reviews/submissions"
+    },
+    {
+      "method": "POST",
+      "operationId": "SubmitSentenceFeedback",
+      "path": "/api/v1/sentence-feedback"
+    },
+    {
+      "method": "POST",
+      "operationId": "ReportSentenceFeedback",
+      "path": "/api/v1/sentence-feedback/{attemptId}/reports"
+    },
+    {
+      "method": "GET",
+      "operationId": "GetSettings",
+      "path": "/api/v1/settings"
+    },
+    {
+      "method": "PATCH",
+      "operationId": "UpdateSettings",
+      "path": "/api/v1/settings"
+    },
+    {
+      "method": "POST",
+      "operationId": "RequestEmailChangeLink",
+      "path": "/api/v1/settings/email-change-links"
+    },
+    {
+      "method": "POST",
+      "operationId": "ConsumeEmailChangeLink",
+      "path": "/api/v1/settings/email-change-links/consume"
+    },
+    {
+      "method": "GET",
+      "operationId": "ListSavedWords",
+      "path": "/api/v1/user-words"
+    },
+    {
+      "method": "POST",
+      "operationId": "SaveUserWord",
+      "path": "/api/v1/user-words"
+    },
+    {
+      "method": "DELETE",
+      "operationId": "UnsaveUserWord",
+      "path": "/api/v1/user-words/{meaningId}"
+    }
+  ]
+}

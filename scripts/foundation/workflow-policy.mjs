@@ -2,6 +2,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { inspectDeliveryWorkflow } from "./cloudflare-delivery-policy.mjs";
+
 export const TARGET_WORKFLOWS = [
   "ci.yml",
   "governance.yml",
@@ -49,12 +51,31 @@ const SERVER_CAPABILITY_PATTERNS = [
   [/vocanova\.site/i, "remote vocanova endpoint"],
 ];
 
+const CI_HELD_DELIVERY_CAPABILITIES = new Set([
+  "scheduled/manual server trigger",
+  "staging/production service credential",
+  "deployment environment",
+  "Cloudflare mutation",
+]);
+
 const REQUIRED_MARKERS = {
   "ci.yml": [
-    "pnpm install --frozen-lockfile",
-    "pnpm validate",
-    "node-version-file: .nvmrc",
-    "go-version-file: apps/api/go.mod",
+    "./.github/actions/setup-toolchain",
+    "pnpm run ci:foundation",
+    "pnpm run ci:packages",
+    "pnpm run ci:web",
+    "pnpm run ci:worker-api",
+    "pnpm run ci:local-stack",
+    "pnpm run ci:delivery",
+    "name: cloudflare delivery policy",
+    "name: cloudflare delivery gate",
+    "name: cloudflare staging",
+    "name: cloudflare production",
+    "name: ci required",
+    "name: local stack",
+    "LOCAL_STACK_RESULT: ${{ needs.local-stack.result }}",
+    '"local-stack=$LOCAL_STACK_RESULT"',
+    "scripts/foundation/require-successful-jobs.sh",
   ],
   "governance.yml": [
     "scripts/governance/validate-governance.sh",
@@ -69,6 +90,9 @@ const REQUIRED_MARKERS = {
     "packages/**",
     "pnpm --filter @vocanova/web test:e2e",
     "pnpm --filter @vocanova/web test:lighthouse",
+    ".github/actions/setup-toolchain/**",
+    "scripts/foundation/require-successful-jobs.sh",
+    "name: quality required",
   ],
   "security.yml": [
     "pnpm audit --audit-level high",
@@ -76,11 +100,34 @@ const REQUIRED_MARKERS = {
     'version: "3.97.0"',
     "ghcr.io/trufflesecurity/trufflehog@sha256:ff4c95e9df7d645daf2140e3ca1039031c63106268d5fbb25feb43ceca1bcc33",
     'test "$status" -eq 183',
+    "name: security required",
+    "scripts/foundation/require-successful-jobs.sh",
   ],
 };
 
+const SETUP_ACTION_MARKERS = [
+  "uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10\n      with:\n        cache: true",
+  "actions/setup-node@820762786026740c76f36085b0efc47a31fe5020",
+  "pnpm install --frozen-lockfile",
+];
+
 function occurrences(source, pattern) {
   return [...source.matchAll(pattern)].length;
+}
+
+function inspectImmutableReferences(filename, source) {
+  const errors = [];
+  for (const match of source.matchAll(
+    /^\s*-\s+uses:\s*([^\s#]+)(?:\s+#.*)?\s*$/gm,
+  )) {
+    const reference = match[1];
+    if (!reference.startsWith("./") && !/@[0-9a-f]{40}$/.test(reference)) {
+      errors.push(
+        `${filename}: action is not pinned to an immutable SHA: ${reference}`,
+      );
+    }
+  }
+  return errors;
 }
 
 export function inspectCommonWorkflowPolicy(filename, source) {
@@ -101,14 +148,33 @@ export function inspectCommonWorkflowPolicy(filename, source) {
   if (source.includes("KARSIFT/karsift-ai-infra")) {
     errors.push(`${filename}: external control-plane reference is prohibited`);
   }
+  if (!/^defaults:\n  run:\n    shell: bash$/m.test(source)) {
+    errors.push(`${filename}: run steps must use the explicit bash shell`);
+  }
+  const expectedCancellation =
+    filename === "ci.yml"
+      ? "cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}"
+      : "cancel-in-progress: true";
+  if (!source.includes(expectedCancellation)) {
+    errors.push(
+      `${filename}: required concurrency cancellation policy is missing`,
+    );
+  }
 
-  for (const match of source.matchAll(/^\s*-\s+uses:\s*([^\s#]+)\s*$/gm)) {
-    const reference = match[1];
-    if (!reference.startsWith("./") && !/@[0-9a-f]{40}$/.test(reference)) {
-      errors.push(
-        `${filename}: action is not pinned to an immutable SHA: ${reference}`,
-      );
-    }
+  errors.push(...inspectImmutableReferences(filename, source));
+
+  const checkoutCount = occurrences(
+    source,
+    /^\s+uses:\s*actions\/checkout@[0-9a-f]{40}(?:\s+#.*)?$/gm,
+  );
+  const noCredentialCount = occurrences(
+    source,
+    /^\s+persist-credentials:\s*false$/gm,
+  );
+  if (checkoutCount === 0 || checkoutCount !== noCredentialCount) {
+    errors.push(
+      `${filename}: every checkout must disable persisted credentials`,
+    );
   }
 
   for (const match of source.matchAll(/\bghcr\.io\/[a-z0-9_./:@-]+/gi)) {
@@ -124,6 +190,36 @@ export function inspectCommonWorkflowPolicy(filename, source) {
   if (runnerCount === 0 || runnerCount !== timeoutCount) {
     errors.push(`${filename}: every runner job must declare a timeout`);
   }
+
+  const artifactCount = occurrences(
+    source,
+    /^\s+uses:\s*actions\/upload-artifact@[0-9a-f]{40}(?:\s+#.*)?$/gm,
+  );
+  const retentionValues = [
+    ...source.matchAll(/^\s+retention-days:\s*(\d+)$/gm),
+  ].map((match) => Number(match[1]));
+  if (
+    artifactCount !== retentionValues.length ||
+    retentionValues.some((days) => days < 1 || days > 7)
+  ) {
+    errors.push(
+      `${filename}: every artifact must have retention between 1 and 7 days`,
+    );
+  }
+  return errors;
+}
+
+export function inspectSetupAction(source) {
+  const filename = ".github/actions/setup-toolchain/action.yml";
+  const errors = inspectImmutableReferences(filename, source);
+  for (const marker of SETUP_ACTION_MARKERS) {
+    if (!source.includes(marker)) {
+      errors.push(`${filename}: missing required marker: ${marker}`);
+    }
+  }
+  if (/node_modules/i.test(source)) {
+    errors.push(`${filename}: node_modules must not be cached`);
+  }
   return errors;
 }
 
@@ -132,6 +228,24 @@ export function inspectTargetWorkflow(filename, source) {
   for (const marker of REQUIRED_MARKERS[filename] ?? []) {
     if (!source.includes(marker)) {
       errors.push(`${filename}: missing required marker: ${marker}`);
+    }
+  }
+  if (filename === "ci.yml") {
+    errors.push(...inspectDeliveryWorkflow(source));
+    const requiredStart = source.indexOf("  required:\n");
+    const deliveryGateStart = source.indexOf("\n  delivery-gate:\n");
+    const requiredJob = source.slice(requiredStart, deliveryGateStart);
+    const needsStart = requiredJob.indexOf("    needs:");
+    const runnerStart = requiredJob.indexOf("\n    runs-on:", needsStart);
+    const needs = requiredJob.slice(needsStart, runnerStart);
+    if (
+      requiredStart === -1 ||
+      deliveryGateStart === -1 ||
+      needsStart === -1 ||
+      runnerStart === -1 ||
+      !needs.includes("local-stack")
+    ) {
+      errors.push("ci.yml: ci required must need local-stack");
     }
   }
   return errors;
@@ -174,6 +288,12 @@ export function validateWorkflowDirectory(directory, phase = "additive") {
       );
     }
     for (const [pattern, capability] of SERVER_CAPABILITY_PATTERNS) {
+      if (
+        filename === "ci.yml" &&
+        CI_HELD_DELIVERY_CAPABILITIES.has(capability)
+      ) {
+        continue;
+      }
       if (pattern.test(source)) {
         errors.push(`${filename}: prohibited server capability: ${capability}`);
       }
@@ -198,6 +318,14 @@ function main(argv) {
   const errors = validateWorkflowDirectory(
     resolve(root, ".github/workflows"),
     phase,
+  );
+  errors.push(
+    ...inspectSetupAction(
+      readFileSync(
+        resolve(root, ".github/actions/setup-toolchain/action.yml"),
+        "utf8",
+      ),
+    ),
   );
   if (errors.length) {
     for (const error of errors) console.error(error);

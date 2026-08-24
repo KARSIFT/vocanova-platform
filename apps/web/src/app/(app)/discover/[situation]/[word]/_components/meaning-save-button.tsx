@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
@@ -21,6 +22,7 @@ export function MeaningSaveButton({
   wordText,
   shortDefinition,
 }: MeaningSaveButtonProps) {
+  const router = useRouter();
   const [saved, setSaved] = useState(initialSaved);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
@@ -51,6 +53,7 @@ export function MeaningSaveButton({
         setSaved(true);
       }
       setStatus("idle");
+      router.refresh();
     } catch (error) {
       setStatus("error");
       // handleApiError detects 401 and routes the learner to

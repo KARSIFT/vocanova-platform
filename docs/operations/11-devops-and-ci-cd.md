@@ -1,22 +1,51 @@
 ---
 id: DOC-11
 title: VocaNova DevOps and CI/CD Plan
-version: 1.1
+version: 1.4
 document_type: operations-plan
 status: approved
 owner: founder
 canonical_path: docs/operations/11-devops-and-ci-cd.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-08-08
+last_reviewed_at: 2026-08-23
 review_cycle: quarterly
 supersedes: null
 related_documents:
   - DOC-10
   - DOC-16
   - DOC-19
-related_decisions: []
+related_decisions:
+  - ADR-0003
 adoption_change: VOC-008
 amendments:
+  - id: VOC-083-workerd-compatibility-amendment
+    title: "Generated Worker inventory and fail-closed workerd diagnostics"
+    adopted_in: VOC-083
+    adopted_at: 2026-08-23
+    approving_owner: approved-voc-083-package
+    resolution_recorded_in: specs/changes/VOC-083-sentry-workerd-compatibility/change.yaml
+    notes: "T02 makes deterministic OpenNext canonicalization, complete generated-module/reference/Wasm checks, and post-stdio-close workerd diagnostics mandatory before either web smoke can pass."
+  - id: VOC-081-local-stack-amendment
+    title: "Required disposable local Workers stack evidence"
+    adopted_in: VOC-081
+    adopted_at: 2026-08-23
+    approving_owner: approved-voc-081-package
+    resolution_recorded_in: specs/changes/VOC-081-f2-local-cloudflare-development/change.yaml
+    notes: "T03 adds one credential-free local-stack job inside ci.yml and makes the stable CI aggregate require it; T04 records the integration-pending F2 evidence without releasing any live hold."
+  - id: VOC-080-ci-foundation-amendment
+    title: "Four-workflow deterministic CI foundation"
+    adopted_in: VOC-080
+    adopted_at: 2026-08-22
+    approving_owner: approved-voc-080-package
+    resolution_recorded_in: specs/changes/VOC-080-cloudflare-native-ruflo/change.yaml
+    notes: "T01 splits CI into stable subsystem checks and aggregates, adds reusable pinned setup and correctness-neutral caches, and records supported GitHub hardening without adding deployment authority."
+  - id: VOC-080-cloudflare-native-amendment
+    title: "Cloudflare Workers and D1 replace the active owned-server target"
+    adopted_in: VOC-080
+    adopted_at: 2026-08-22
+    approving_owner: founder-direction-with-independent-plan-review
+    resolution_recorded_in: specs/changes/VOC-080-cloudflare-native-ruflo/change.yaml
+    notes: "ADR-0003 is the current target. The prior Render and VOC-032 self-hosted rows remain historical evidence; no live Cloudflare resource or deployment is created by this documentation task."
   - id: VOC-032-§1-amendment
     title: "§1 target-infrastructure baseline amended to self-hosted Docker Compose + nginx on vocanova.site"
     adopted_in: VOC-032
@@ -35,12 +64,131 @@ source_files:
   - path: 10-development-workflow.md
     sha256: 5b815f2fa19b799726a83dffd46664037e6afa66df0655cab2261b3aed7e56fb
 ---
+
 # 11 — VocaNova DevOps and CI/CD Plan
 
 ## 1. Environments and infrastructure
 
 Canonical environments: Local, Preview (per-PR, temporary, isolated, no production data/secrets),
 Staging (from `develop`), Production (from `main`).
+
+> **Active amendment (`VOC-080-cloudflare-native-amendment`, adopted 2026-08-22).**
+> [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) supersedes
+> both the original Render split and VOC-032's later self-hosted Docker/Nginx stack as
+> the active target. The historical tables and runbooks below are preserved to explain
+> what existed; they do not authorize or describe the final architecture. T03-T10
+> completed the repository parity chain, and T11 removed the old runtime assets from
+> the active tree. None of those repository changes inspected, mutated, or stopped a
+> live server or created Cloudflare, DNS, secret, data, or deployment state.
+
+| Capability   | Current repository state                                                                            | Separately held live state                                                       |
+| ------------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Web          | Next.js 16 transformed by OpenNext and tested in local workerd as a Cloudflare Web Worker           | Cloudflare Worker version upload, route, and traffic activation                  |
+| API          | TypeScript/Hono Module Worker with generated bindings and complete local workerd contract parity    | Cloudflare Worker version upload, service binding, route, and traffic activation |
+| Data         | Forward-only D1 migrations, local D1 tests, and compact retired PostgreSQL conversion fixtures      | Separate staging/production D1 creation and any remote migration                 |
+| Web-to-API   | Local workerd service binding plus preserved HTTPS `/api/v1` contract                               | Environment-specific service binding and route activation                        |
+| Assets/async | Workers Static Assets; Queue/Workflow/DO/R2 remain absent until a measured requirement              | Any separately reviewed product binding or resource                              |
+| CI/CD        | Four deterministic workflows; credential-free three-environment dry runs and held T10 state machine | Environment-scoped version/migration/promotion activation inside `ci.yml`        |
+| Secrets      | No deployment secrets in PRs or agents                                                              | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo           |
+| Rollback     | Repository reverts plus mocked prior-Worker-version and forward-corrective D1 contracts             | Authorized version traffic restoration or separately authorized D1 recovery      |
+
+No current workflow run can deploy to Preview, Staging, or Production. T10's manual
+jobs exist after Worker/D1 parity, but the committed manifest, D1/route sentinels, and
+missing authority evidence block before secrets. Live staging requires
+`VOC-080-HOLD-00`, production traffic or D1 migration requires `HOLD-01`, and
+production learner data requires `HOLD-02`.
+
+### 1.1 Deterministic GitHub Actions foundation
+
+The workflow inventory is exactly four files and has one responsibility per file:
+
+| Workflow         | Stable evidence                                                                                                        | Trigger and authority                                                                    |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `ci.yml`         | foundation/retirement, packages, web, Worker API, disposable local stack, held delivery policy, and `CI / ci required` | PR/push validation plus a held manual gate; no eligible live deployment in current state |
+| `governance.yml` | `structure`, `changed-path risk`, and read-only `merge eligibility`                                                    | Pull-request evidence plus protected-branch structure checks; no GitHub write            |
+| `quality.yml`    | accessibility and Lighthouse, summarized by `Quality / quality required`                                               | Web/shared/lockfile changes on pull requests only                                        |
+| `security.yml`   | dependency audit and secret scan, summarized by `Security / security required`                                         | Pull requests and protected-branch pushes; no secret consumption                         |
+
+All runner jobs have explicit timeouts and Bash semantics. Every external action uses
+a reviewed full commit SHA, and every checkout disables persisted credentials. A local
+composite action reuses the pinned Node and pnpm setup. Its cache contains only pnpm's
+content-addressed store; `node_modules` is not
+cached, the lockfile remains frozen, and a cache hit never skips a check. Browser
+reports are uploaded only on failure and retained for three days. Fail-fast aggregation
+is explicit: the stable `required` result is blocked by any failed, cancelled, or
+skipped subsystem, and the same script has a synthetic negative contract test.
+
+VOC-081 adds `pnpm ci:local-stack` as a distinct required job inside `ci.yml`. It uses
+fresh OS-temporary D1 state, loopback-only Workers, a non-secret service-binding marker,
+one controlled restart, negative lifecycle fixtures, and bounded cleanup. The stable
+aggregate explicitly needs its result; synthetic policy proves a failed local-stack
+result cannot pass `CI / ci required`. The job has read-only permissions and receives
+no Cloudflare credential, remote binding, environment, or deploy capability.
+
+VOC-083-T02 makes both web smoke owners fail closed on generated and runtime evidence.
+`ci:web` now builds OpenNext before compatibility analysis; that analysis performs a
+fresh credential-free Wrangler dry run, hashes and classifies every generated artifact,
+verifies the explicit final-bundle canonicalization record, requires every executable
+reference in every remaining OpenNext and dry-run JavaScript module to resolve, and
+rejects every unsupported runtime Wasm construction. Superseded traced JavaScript is
+removed only after its digest, size, and reason are recorded; static/runtime assets are
+retained. The disposable local-stack path independently builds and scans fresh output
+before startup. Both paths use the same bounded, redacted, line-aware incremental
+collector, retain early hard diagnostics, join split chunks, and classify after child
+and stdio close, so an HTTP 200 or process exit cannot hide a late unhandled rejection,
+compile/runtime error, or unsupported WebAssembly API diagnostic. The standalone web
+smoke may retry only a recognized loopback bind collision, for at most three fresh,
+distinct port attempts with bounded selection; it strips inherited Sentry DSN, token,
+and credential variables. Configuration, runtime, and unknown startup failures remain
+immediately terminal.
+
+The subsystem `pnpm ci:*` commands are local entry points, not CI-only behavior;
+`pnpm validate` remains the full pre-review gate. This design follows the applicable
+parts of mature Workers/Hono/OpenNext repositories—pinned dependencies, focused checks,
+non-short-circuiting evidence, and workerd-oriented separation—without importing their
+release bots, write permissions, vendor services, or repository scale.
+
+VOC-080-T03 makes `pnpm ci:web` the credential-free Worker gate. It transforms the
+Next.js build through OpenNext, then verifies the complete generated-artifact manifest
+and every remaining module/reference compatibility invariant, committed Wrangler types, a Wrangler dry
+run, the 3 MiB compressed target, and the local startup profile before sending
+representative static/SSR/RSC/middleware/auth/API requests through two Workers in local
+workerd. A plain `next build` remains useful for UI checks but is not Cloudflare
+compatibility evidence. No T03 command uploads a version, queries an account,
+provisions a resource, or deploys.
+
+VOC-080-T04 adds the separate `worker api` CI job without adding a workflow file. It
+verifies generated D1 bindings, Hono operational OpenAPI, the frozen 25-operation
+`/api/v1` migration baseline, API-client path compatibility, privacy-safe
+problems/logs, explicit credentialed CORS, prepared statements, a forward STRICT D1
+migration applied from empty and replayed in workerd, static safety rules, build, and
+credential-free Wrangler dry-run. T10 adds distinct staging/production environments
+with non-resource D1/route sentinels, credential-free dry runs, and held
+migration/version/promotion/rollback behavior. Real IDs, routes, environment secrets,
+and activation evidence remain absent.
+
+VOC-080-T05 extends that existing job rather than adding a workflow. The second
+forward migration and workerd fixtures cover 13 identity/account operations, secure
+cookies, token hashing/expiry/replay, OAuth state, requester isolation, CSRF,
+settings/onboarding idempotency, email change, deactivation rollback, and rate/kill
+switches. Email and OAuth stay injected, credential-free boundaries; the task neither
+contacts providers nor provisions or migrates a remote D1 database.
+
+VOC-080-T06 through T08 complete the 25-operation Worker contract inventory and
+extend the same job through five forward D1 migrations. Workerd fixtures cover
+content/reviews, missions/progress, sentence-feedback persistence, deterministic
+validation and safety, bounded provider repair/timeouts, persistent rate/cost and
+concurrency gates, the provider-neutral email HTTP boundary, and redacted
+`waitUntil` telemetry. Normal CI uses mocks and no paid-provider secret. The
+committed local runtime keeps `AI_GENERATION_ENABLED=false`; enabling or wiring a
+real provider remains separate from this credential-free parity proof.
+
+VOC-080-T09 extends the same job through seven forward D1 migrations. The sixth
+preserves the synthetic-account marker; the seventh installs fail-closed write guards
+for every converted table while exact multi-invocation reconciliation owns its
+plan-bound lock. The synthetic conversion, bounded import, interruption/retry,
+forward-correction, exact signed aggregates, and privacy-safe reconciliation suite is
+credential-free and never contacts a remote D1 database.
 
 > **Amendment note (`VOC-032-§1-amendment`, adopted 2026-07-30 via VOC-032; founder as approving
 > owner).** The Frontend/Backend/Database rows of the target-infrastructure table below and the
@@ -51,54 +199,57 @@ Staging (from `develop`), Production (from `main`).
 > and CDN — not for compute. The new shape replaces Render Web Service, Cloudflare Workers via
 > OpenNext, and Render PostgreSQL with the founder's own server running the four-service stack
 > `postgres` + `api` (Go, Docker image) + `web` (Next.js, Docker image, `output: 'standalone'`)
-> + `nginx`, and replaces the `vocanova.com` apex with `vocanova.site` (with
-> `staging.vocanova.site` and `api-staging.vocanova.site` as the staging subdomains). The
-> superseded rows are retained in place and marked **~~strikethrough~~** below so this section
-> preserves the v1.0 historical record of what DOC-11 originally targeted, exactly as DOC-15 §17.0
-> retains the A-001 prose that A-003 actually supersedes and DOC-16 retains its A-003
-> active-authority notice. The amended (v1.1) baseline immediately follows.
+>
+> - `nginx`, and replaces the `vocanova.com` apex with `vocanova.site` (with
+>   `staging.vocanova.site` and `api-staging.vocanova.site` as the staging subdomains). The
+>   superseded rows are retained in place and marked **~~strikethrough~~** below so this section
+>   preserves the v1.0 historical record of what DOC-11 originally targeted, exactly as DOC-15 §17.0
+>   retains the A-001 prose that A-003 actually supersedes and DOC-16 retains its A-003
+>   active-authority notice. The amended (v1.1) baseline immediately follows.
 
 **Original (v1.0) target infrastructure baseline** (2026-07-21 — 2026-07-29, **superseded as of
 2026-07-30 by `VOC-032-§1-amendment`**; retained in place as historical record):
 
-| Area | Decision (v1.0) | Status |
-|---|---|---|
-| Frontend | ~~Next.js App Router on Cloudflare Workers via OpenNext~~ | **Superseded 2026-07-30 by `VOC-032-§1-amendment`** |
-| Backend | ~~Go modular monolith, Docker image, Render Web Service~~ | **Superseded 2026-07-30 by `VOC-032-§1-amendment`** |
-| Database | ~~Render PostgreSQL, Frankfurt region~~ | **Superseded 2026-07-30 by `VOC-032-§1-amendment`** |
-| CI/CD | GitHub Actions | Unchanged |
-| Container registry | GitHub Container Registry | Unchanged |
-| DNS/TLS/WAF/CDN | Cloudflare | **Narrowed 2026-07-30 by `VOC-032-§1-amendment`** to DNS/TLS/WAF/CDN only — Cloudflare no longer hosts compute (see amended baseline below) |
-| Error monitoring | Sentry | Unchanged |
-| Uptime monitoring | Better Stack / UptimeRobot | Unchanged |
-| Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP | Unchanged |
+| Area                                                                    | Decision (v1.0)                                           | Status                                                                                                                                      |
+| ----------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend                                                                | ~~Next.js App Router on Cloudflare Workers via OpenNext~~ | **Superseded 2026-07-30 by `VOC-032-§1-amendment`**                                                                                         |
+| Backend                                                                 | ~~Go modular monolith, Docker image, Render Web Service~~ | **Superseded 2026-07-30 by `VOC-032-§1-amendment`**                                                                                         |
+| Database                                                                | ~~Render PostgreSQL, Frankfurt region~~                   | **Superseded 2026-07-30 by `VOC-032-§1-amendment`**                                                                                         |
+| CI/CD                                                                   | GitHub Actions                                            | Unchanged                                                                                                                                   |
+| Container registry                                                      | GitHub Container Registry                                 | Unchanged                                                                                                                                   |
+| DNS/TLS/WAF/CDN                                                         | Cloudflare                                                | **Narrowed 2026-07-30 by `VOC-032-§1-amendment`** to DNS/TLS/WAF/CDN only — Cloudflare no longer hosts compute (see amended baseline below) |
+| Error monitoring                                                        | Sentry                                                    | Unchanged                                                                                                                                   |
+| Uptime monitoring                                                       | Better Stack / UptimeRobot                                | Unchanged                                                                                                                                   |
+| Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP                                         | Unchanged                                                                                                                                   |
 
-**Amended (v1.1) target infrastructure baseline** (2026-07-30, adopted via VOC-032; founder as
-approving owner). This is the shape `T00`–`T09` actually built and that the staging environment
-is currently deployed against — not a plan:
+**Historical amended (v1.1) infrastructure baseline** (2026-07-30, adopted via VOC-032;
+founder as approving owner; superseded in the repository on 2026-08-23 by
+VOC-080-T11). This is the shape `T00`–`T09` actually built. It is retained as a
+historical record, not as a claim about any live server that T11 did not inspect:
 
-| Area | Decision (v1.1, as actually built by VOC-032 `T00`–`T09`) |
-|---|---|
-| Frontend | Next.js App Router, Docker image (`apps/web/Dockerfile`), `output: 'standalone'` build, served from the `web` service on the founder's own server, reachable at `https://staging.vocanova.site` in staging |
-| Backend | Go modular monolith, Docker image (`apps/api/Dockerfile`), running as the `api` service on the founder's own server, reachable at `https://api-staging.vocanova.site` in staging; env-driven `LoadProductionConfig` refuses to start without a reachable database and the four DOC-11 §3 kill switches |
-| Database | PostgreSQL 16 (`postgres:16-alpine`), running as the `postgres` service in the same Docker Compose stack on the founder's own server, named volume for persistence, `pg_isready` healthcheck; reachable only on the internal `vocanova-net` Docker network, never on a host port |
-| CI/CD | GitHub Actions (unchanged) |
-| Container registry | GitHub Container Registry (unchanged) — `ghcr.io/karsift/vocanova-api:sha-<sha>` and `ghcr.io/karsift/vocanova-web:sha-<sha>` per DOC-11 §2's existing build-once / promote-by-digest model |
-| Orchestration | Docker Compose (`infra/docker-compose.yml`) — four services (`postgres` + `api` + `web` + `nginx`) on a single internal network (`vocanova-net`); only `nginx` publishes host ports `80`/`443` |
-| Reverse proxy / TLS termination | `nginx` service (the only host-published service) terminates TLS using a Cloudflare-issued origin certificate (`VOC-032-DEP-01`); real client IP restored from `CF-Connecting-IP` only when the connection genuinely originates from Cloudflare's published IP ranges (never `0.0.0.0/0`); `staging.vocanova.site` → `web`, `api-staging.vocanova.site` → `api`; plain-`80` redirects to `443`; standard security headers set on every response |
-| DNS/TLS/WAF/CDN (edge) | Cloudflare (narrowed role) — DNS, TLS, WAF, and CDN only; **no Cloudflare compute** (no Workers, no OpenNext, no Cloudflare D1/KV/Durable Objects/Queues/R2 at the edge) |
-| Atlas migration tooling | `apps/api/atlas.hcl` + `apps/api/scripts/migrate.sh` apply the existing `apps/api/migrations/*.sql` set; `.down.sql.example` files remain non-executable by Atlas per the existing `apps/api/migrations/README.md` rule |
-| Deploy automation | Paused/unavailable after VOC-078-T03. Historical workflows deployed by SSH; no repository workflow now builds/pushes deployment images, mutates Cloudflare, deploys, or polls server health. Runtime assets and servers were not changed by the removal. |
-| Error monitoring | Sentry remains embedded in application runtime code. VOC-078-T03 removed the scheduled Sentry-to-GitHub workflow, so GitHub no longer queries Sentry or files monitoring issues automatically. |
-| Uptime monitoring | Better Stack / UptimeRobot (unchanged) |
-| Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP (unchanged) |
+| Area                                                                    | Decision (v1.1, as actually built by VOC-032 `T00`–`T09`)                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend                                                                | Next.js App Router, Docker image (`apps/web/Dockerfile`), `output: 'standalone'` build, served from the `web` service on the founder's own server, reachable at `https://staging.vocanova.site` in staging                                                                                                                                                                                                                                      |
+| Backend                                                                 | Go modular monolith, Docker image (`apps/api/Dockerfile`), running as the `api` service on the founder's own server, reachable at `https://api-staging.vocanova.site` in staging; env-driven `LoadProductionConfig` refuses to start without a reachable database and the four DOC-11 §3 kill switches                                                                                                                                          |
+| Database                                                                | PostgreSQL 16 (`postgres:16-alpine`), running as the `postgres` service in the same Docker Compose stack on the founder's own server, named volume for persistence, `pg_isready` healthcheck; reachable only on the internal `vocanova-net` Docker network, never on a host port                                                                                                                                                                |
+| CI/CD                                                                   | GitHub Actions (unchanged)                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Container registry                                                      | GitHub Container Registry (unchanged) — `ghcr.io/karsift/vocanova-api:sha-<sha>` and `ghcr.io/karsift/vocanova-web:sha-<sha>` per DOC-11 §2's existing build-once / promote-by-digest model                                                                                                                                                                                                                                                     |
+| Orchestration                                                           | Docker Compose (`infra/docker-compose.yml`) — four services (`postgres` + `api` + `web` + `nginx`) on a single internal network (`vocanova-net`); only `nginx` publishes host ports `80`/`443`                                                                                                                                                                                                                                                  |
+| Reverse proxy / TLS termination                                         | `nginx` service (the only host-published service) terminates TLS using a Cloudflare-issued origin certificate (`VOC-032-DEP-01`); real client IP restored from `CF-Connecting-IP` only when the connection genuinely originates from Cloudflare's published IP ranges (never `0.0.0.0/0`); `staging.vocanova.site` → `web`, `api-staging.vocanova.site` → `api`; plain-`80` redirects to `443`; standard security headers set on every response |
+| DNS/TLS/WAF/CDN (edge)                                                  | Cloudflare (narrowed role) — DNS, TLS, WAF, and CDN only; **no Cloudflare compute** (no Workers, no OpenNext, no Cloudflare D1/KV/Durable Objects/Queues/R2 at the edge)                                                                                                                                                                                                                                                                        |
+| Atlas migration tooling                                                 | `apps/api/atlas.hcl` + `apps/api/scripts/migrate.sh` apply the existing `apps/api/migrations/*.sql` set; `.down.sql.example` files remain non-executable by Atlas per the existing `apps/api/migrations/README.md` rule                                                                                                                                                                                                                         |
+| Deploy automation                                                       | Paused after VOC-078-T03. Historical workflows deployed by SSH. T10 later added a held manual Cloudflare state machine, but its committed manifest blocks before environment jobs or secrets; it neither builds/pushes deployment images nor polls server health. T03 and T10 did not change runtime assets or servers; T11 later removed old assets from Git only and still made no live-server claim.                                         |
+| Error monitoring                                                        | Sentry remains embedded in application runtime code. VOC-078-T03 removed the scheduled Sentry-to-GitHub workflow, so GitHub no longer queries Sentry or files monitoring issues automatically.                                                                                                                                                                                                                                                  |
+| Uptime monitoring                                                       | Better Stack / UptimeRobot (unchanged)                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Harness, Terraform/OpenTofu, Cloudflare D1/KV/Durable Objects/Queues/R2 | Deferred post-MVP (unchanged)                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
-This table is an implementation target, not authority to procure vendors, incur spend, create
-infrastructure, deploy, or release. Each such action requires its own approved change package and
-the authority applicable at execution time. The v1.1 rows above describe the staging tier that
-already exists as a result of VOC-032 `T00`–`T09`; RL1/RL2 technical activation remains
-disabled per `docs/governance/a003-transition-state.yaml` and is not authorized by this
-amendment. **Updated 2026-08-08**: production-tier deployment and autonomous production
+This table is historical evidence, not an implementation target or authority to procure
+vendors, incur spend, create infrastructure, deploy, or release. Each such action requires its
+own approved change package and the authority applicable at execution time. The v1.1 rows above
+record the staging tier built by VOC-032 `T00`–`T09`; T11 removed its repository assets without
+inspecting or asserting its live state. RL1/RL2 technical activation remains disabled per
+`docs/governance/a003-transition-state.yaml` and is not authorized by this amendment.
+**Updated 2026-08-08**: production-tier deployment and autonomous production
 release, previously also listed here as disabled, are no longer disabled -
 `docs/governance/a003-transition-state.yaml` itself now records both as enabled,
 following the founder's explicit authorization (see `AGENTS.md`'s "Release and
@@ -121,12 +272,16 @@ production secrets ever reachable from preview/staging/CI (unchanged from v1.0).
 > unchanged choice, so the "Error monitoring" row no longer under-describes the mechanism actually
 > in place:
 >
-> - **`apps/web` now reports errors to Sentry** (`VOC-051-T01`), via `@sentry/nextjs` across the
->   browser, server, and edge runtimes. Previously only `apps/api` did. The SDK is a no-op when its
->   DSN is unset, matching `apps/api`'s existing behaviour, so an unconfigured environment reports
->   nothing rather than failing.
+> - **`apps/web` began reporting errors to Sentry in `VOC-051-T01`.** Its historical
+>   implementation used `@sentry/nextjs` across the browser, server, and edge runtimes;
+>   previously only `apps/api` reported errors. `VOC-083-T01/T02` superseded that SDK/runtime
+>   detail with exact `@sentry/cloudflare@10.69.0` Worker/request instrumentation and
+>   `@sentry/react@10.69.0` browser instrumentation, with no `@sentry/nextjs` dependency or
+>   source import. The current adapters remain no-ops when their DSNs are unset, matching
+>   `apps/api`'s existing behaviour, so an unconfigured environment reports nothing rather than
+>   failing.
 > - **The "separate Sentry environments per environment tier" requirement in the paragraph above is
->   satisfied by separate Sentry *projects*, not only by the `environment` event tag.** VOC-051
+>   satisfied by separate Sentry _projects_, not only by the `environment` event tag.** VOC-051
 >   adopted a four-project layout — `prod-api`, `prod-web`, `stage-api`, `stage-web` under the
 >   `vocanova` organization — one per application per tier, each with its own DSN held in its own
 >   GitHub Actions secret. The per-tier `SENTRY_ENVIRONMENT` / `NEXT_PUBLIC_SENTRY_ENVIRONMENT` tag
@@ -136,20 +291,21 @@ production secrets ever reachable from preview/staging/CI (unchanged from v1.0).
 > - **Historical Sentry automation is paused.** VOC-051 added a daily workflow that queried all
 >   four projects using a read-only Sentry integration token and opened deduplicated GitHub issues.
 >   VOC-078-T03 removed that workflow and its GitHub permission/secret consumption. Application
->   Sentry instrumentation and the four-project evidence remain unchanged; no current repository
->   automation queries Sentry or opens monitoring issues.
+>   Application Sentry instrumentation and the four-project evidence remained present when that
+>   automation was removed; `VOC-083` later adapted the web SDK/runtime boundary as recorded
+>   above. No current repository automation queries Sentry or opens monitoring issues.
 > - **Uptime/liveness monitoring is untouched** by this amendment — the "Uptime monitoring" row's
 >   Better Stack / UptimeRobot choice remains as stated and unimplemented here.
 
 ## 2. Release artifacts and deployment ordering
 
-Every deployable candidate produces three immutable artifacts: frontend OpenNext bundle, Go API OCI
-image (`ghcr.io/karsift/vocanova-api:sha-<sha>`), Atlas migration OCI image. Production deploys by
-digest, never by rebuilding from source: **build once → test in staging → promote exactly to
-production.** Deployment order: resolve release manifest → validate artifacts → acquire environment
-lock → confirm backup readiness → migration preflight → run migration → verify → deploy API by
-digest → wait for readiness → deploy frontend → verify → smoke tests → record → notify. Production
-deployments are never automatically cancelled once migration work has begun.
+The VOC-080 target produces exact-revision OpenNext web and Hono API Worker builds, D1 migration
+manifests, and immutable Cloudflare version identifiers. The intended sequence is **build once →
+test under workerd → verify in staging → promote the exact versions to production**. Deployment
+order: resolve release manifest → validate exact checks/review/holds → acquire environment lock →
+confirm D1 recovery readiness → migration preflight → apply compatible migration → upload/promote
+API and web versions → readiness/smoke/parity tests → record outcome. Production work is never
+automatically cancelled after migration begins.
 
 Release authority and technical activation are separate. R0–R4 and RL1–RL3 determine evidence,
 not personal approval by label. Required accountable authority depends on a specifically defined
@@ -157,22 +313,22 @@ production action, external effect, or launch event, plus any actual EHR trigger
 sequence may run only after the live governance
 and technically enabled gates permit it; failed migrations, health checks, or smoke tests stop the
 deployment and invoke the governed rollback path. See the
-[canonical governance index](../governance/README.md) and [DOC-19](19-governance-reconciliation-notes.md).
+[canonical governance index](../governance/README.md) and [DOC-19](../archive/19-governance-reconciliation-notes.md).
 
 ## 3. Rollback
 
 Roll forward first; rollback application code only when safe; never automatically reverse production
-migrations. Frontend/backend rollback = redeploy previous known-good artifact by digest. Database
-rollback is not automatic — prefer a corrective forward migration; restore from backup only when
-data integrity is at risk and roll-forward is unsafe. Required kill switches:
+migrations. Web/API rollback promotes previous known-good Worker versions. D1 rollback is not
+automatic — prefer a corrective forward migration; use Time Travel restore only with separate
+destructive-action authority when data integrity is at risk and roll-forward is unsafe. Required kill switches:
 `AI_FEATURES_ENABLED`, `EMAIL_MAGIC_LINK_ENABLED`, `GOOGLE_OAUTH_ENABLED`,
 `NEW_USER_SIGNUP_ENABLED`.
 
 ## 4. Backups, monitoring, incidents
 
-Paid managed PostgreSQL with automated backups and point-in-time recovery where available; restore
-tested before launch, then monthly for the first three months, then quarterly. RPO ≤24h, RTO same
-business day. Severity levels SEV1 (outage/data-integrity risk) through SEV4 (minor); every SEV1/2
+D1 recovery/Time Travel availability, export strategy, and a separately authorized restore rehearsal
+must be recorded before launch; the accepted RPO/RTO must fit the chosen Cloudflare plan and product
+risk. Severity levels SEV1 (outage/data-integrity risk) through SEV4 (minor); every SEV1/2
 records date, environment, impact, detection, root cause, actions, rollback/roll-forward decision,
 follow-up. Founder owns incident decision-making during MVP; GitHub issues track technical follow-up.
 

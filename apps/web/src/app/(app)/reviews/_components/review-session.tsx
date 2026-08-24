@@ -79,7 +79,7 @@ export function ReviewSession({
 
     setIsRefetching(true);
     const client = createApiClient();
-    client
+    void client
       .listDueWords({ limit: 50 })
       .then(({ data }) => {
         if (data.items.length > 0) {

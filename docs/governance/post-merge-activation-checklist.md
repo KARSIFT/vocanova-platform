@@ -56,11 +56,13 @@ Record an evidence link, accountable human, and completion date for every item.
       of the appointment pull request before merge.
 - [x] Preserve direct review routing without treating it as approval evidence. Do not
       create a replacement standing technical-steward team.
-- [ ] Verify that no founder, steward, Codex, Claude, or automation identity
-      placeholder remains in executable repository controls.
-- [ ] Configure distinct, least-privilege Codex implementation and Claude Code
-      independent-verifier identities. Neither may be represented as founder,
-      pre-A-003 steward, or EHR-qualified human authority.
+- [ ] Verify that executable repository controls do not treat a human, model, provider,
+      tool, or automation identity as the source of review or merge authority.
+- [ ] Configure distinct, least-privilege implementer and independent-verifier actors.
+      Record role, actor identity, exact SHA, verdict, authorship independence, and
+      resolved findings. A new role label, session, model, or provider is not actor
+      separation; provenance is optional hardening, never founder, pre-A-003 steward,
+      EHR-qualified-human, approval, or action-specific authority.
 
 ## Repository enforcement
 

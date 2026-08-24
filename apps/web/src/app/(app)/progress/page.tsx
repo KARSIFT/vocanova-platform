@@ -84,12 +84,12 @@ export default async function ProgressPage() {
           id="saved-vocabulary-heading"
           className="text-lg font-semibold text-neutral-900"
         >
-          Saved vocabulary
+          Recently saved vocabulary
         </h2>
         {savedWords.length > 0 ? (
           <>
             <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-              {savedWords.length} word{savedWords.length === 1 ? "" : "s"} saved
+              A preview of up to 10 recently saved words.
             </p>
             <ul className="mt-[var(--spacing-md)] space-y-[var(--spacing-xs)]">
               {savedWords.map((savedWord) => (

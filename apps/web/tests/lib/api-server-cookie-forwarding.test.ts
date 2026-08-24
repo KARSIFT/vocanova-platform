@@ -4,6 +4,7 @@ import { afterEach, it } from "node:test";
 import { createServerApiClient } from "../../src/lib/api-server";
 
 const COOKIE_HEADER_GLOBAL_KEY = "__voc_test_cookie_header";
+const CLOUDFLARE_CONTEXT_KEY = Symbol.for("__cloudflare-context__");
 const MULTI_COOKIE_HEADER =
   "vocanova_session=s3cr3t-session-token-value-used-only-in-this-test; csrf_token=fake-csrf-token-value-used-only-in-this-test";
 const originalApiBaseURL = process.env.API_BASE_URL;
@@ -17,6 +18,46 @@ afterEach(() => {
     process.env.API_BASE_URL = originalApiBaseURL;
   }
   delete (globalThis as Record<string, unknown>)[COOKIE_HEADER_GLOBAL_KEY];
+  delete (globalThis as Record<PropertyKey, unknown>)[CLOUDFLARE_CONTEXT_KEY];
+});
+
+it("uses the API service binding and preserves cookies under OpenNext", async () => {
+  process.env.API_BASE_URL = "https://public-api.example.test";
+  (globalThis as Record<string, unknown>)[COOKIE_HEADER_GLOBAL_KEY] =
+    MULTI_COOKIE_HEADER;
+
+  const receivedRequest: { current: Request | null } = { current: null };
+  (globalThis as Record<PropertyKey, unknown>)[CLOUDFLARE_CONTEXT_KEY] = {
+    env: {
+      API: {
+        fetch(request: Request): Promise<Response> {
+          receivedRequest.current = request;
+          return Promise.resolve(
+            Response.json(
+              { onboardingStatus: "completed" },
+              { status: 200 },
+            ),
+          );
+        },
+      },
+    },
+  };
+  globalThis.fetch = (() => {
+    throw new Error("public fetch fallback must not run");
+  }) as typeof globalThis.fetch;
+
+  const client = await createServerApiClient();
+  await client.getCurrentUser();
+
+  assert.ok(receivedRequest.current);
+  assert.equal(
+    receivedRequest.current.url,
+    "https://vocanova-api.internal/api/v1/me",
+  );
+  assert.equal(
+    receivedRequest.current.headers.get("Cookie"),
+    MULTI_COOKIE_HEADER,
+  );
 });
 
 it("forwards the raw incoming Cookie header byte-for-byte", async () => {

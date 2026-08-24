@@ -95,16 +95,6 @@ tests/e2e/
                                          representative desktop
                                          width; mobile projects
                                          self-skip)
-  middleware-runtime-regression.spec.ts
-                                      <- VOC-039-T01's Edge-vs-Node
-                                         middleware runtime regression
-                                         (issue #297); no browser or
-                                         app server involved
-  middleware-runtime-harness.ts       <- runs the real
-                                         src/middleware.ts source in
-                                         Next's own Edge sandbox and in
-                                         Node, against a stub API on an
-                                         ephemeral port
   mock-api-server.mjs                 <- dependency-free node:http
                                          server that stands in for
                                          the Go /api/v1 backend in
@@ -127,9 +117,8 @@ harness this repository has ever had (`VOC-031-D00` confirmed
 the absence of Playwright, axe-core, and Lighthouse CI in the
 adopted base). The CI integration now lives in the accessibility
 job of `.github/workflows/quality.yml`, separate from `ci.yml` -
-the CI job runs `pnpm
-validate` directly (workspace, format, lint/vet, type, test,
-build), none of which install or invoke Playwright. Wiring the
+the CI workflow runs the same deterministic validation contract through stable
+foundation, package, web, and API subsystem jobs, none of which install or invoke Playwright. Wiring the
 e2e suite into that job would couple the entire pnpm validation
 chain to a multi-minute Playwright browser install and
 production build, regressing PR feedback time for changes
@@ -138,7 +127,7 @@ workflow keeps the cost local to PRs that touch
 `apps/web/**` or `apps/web/tests/**` (the `paths` filter) and
 keeps the rest of the validation chain's contract intact.
 
-The dedicated workflow's job time budget is **30 minutes**
+Each browser job has a **30 minute** time budget
 (timeout-minutes), which covers:
 
 - pnpm install against the frozen lockfile: ~2 min
@@ -149,12 +138,11 @@ The dedicated workflow's job time budget is **30 minutes**
   ~1-3 min
 - teardown + report upload: ~30 s
 
-The first-time browser install is the largest unknown. It is
-**not** suppressed on cache miss: a CI run with a cached
-browser skips the install, but a clean-runner path always
-pays the full download cost. This is the same trade-off
-DOC-10 §7 "Level 2" already accepts for "selected Playwright"
-coverage.
+The first-time browser install is the largest unknown. The shared toolchain action
+caches only pnpm's content-addressed package store; it never caches `node_modules` or
+changes the frozen-install result. Playwright still verifies or downloads the browser
+revision selected by the lockfile on every clean runner. This is the same trade-off
+DOC-10 §7 "Level 2" already accepts for "selected Playwright" coverage.
 
 Browser version pinning: the replacement `quality.yml` workflow
 invokes `pnpm exec playwright install chromium` without specifying
@@ -195,12 +183,12 @@ inside the workflow's 30-minute budget.
 ## Out of scope (recorded for the next implementer)
 
 - Lighthouse CI budgets → T09.
-- Replacing `mock-api-server.mjs` with a real
-  Postgres-backed API + auth fixture → deferred until F3
-  staging exists (`VOC-031-DEP-02`); the mock is a
-  scaffolding artifact and is explicitly not a substitute
-  for full staging evidence (the T11 staging evidence and
-  T43 staged cross-user/CSRF/idempotency validations).
+- Replacing `mock-api-server.mjs` with a live environment is
+  outside deterministic pull-request CI. The mock remains a
+  bounded browser-contract fixture; Worker/D1 behavior is
+  covered separately by local workerd integration tests.
+  Separately authorized Cloudflare staging evidence remains
+  held by VOC-080's delivery controls.
 - The T08 suite runs on one representative desktop width
   (mirroring T07a's scope). The mobile functional flow is
   *not* covered separately; the mobile accessibility scans
@@ -226,11 +214,9 @@ the DOC-10 §7 documented core loop. Approach:
   handoff (steps 9-10).
 - **CSRF.** Every mutation (POST/PATCH/DELETE except the
   auth routes) requires the `X-CSRF-Token` header to match
-  the `vocanova_csrf` cookie value, matching the real
-  backend's `CSRFMiddleware`
-  (`apps/api/app/api/middleware.go`). The mock enforces this
-  identically so a missing/mismatched CSRF in the e2e test
-  fails in CI just as it would in production.
+  the `vocanova_csrf` cookie value, matching the active API
+  Worker's CSRF contract. The mock enforces this identically
+  so a missing/mismatched CSRF in the e2e test fails in CI.
 - **State isolation.** The test uses a per-run unique
   session ID (a `randomUUID()`-suffixed value) so its
   in-memory mock state never collides with the T07a/T07b
@@ -257,38 +243,21 @@ scans (no separate CI wiring). T08 self-skips on the
 mobile-360 / mobile-430 projects so it runs exactly once per
 PR.
 
-## VOC-039-T01 specifics (middleware runtime regression)
+## VOC-080-T03 middleware/runtime proof
 
-Issue #297: `src/middleware.ts` runs on the Edge runtime
-unless it exports `runtime = "nodejs"`, and an Edge bundle
-only sees environment values inlined at build time. This
-deployment passes `API_BASE_URL` to the running container, so
-under Edge `getApiBaseURL()` silently falls back to
-`http://localhost:8080`, the `/api/v1/me` auth check never
-reaches the deployed API, and authenticated learners are
-bounced back to `/signin`.
+VOC-080-T03 retired VOC-039's Node-middleware regression harness because the
+Cloudflare OpenNext adapter does not support Node.js middleware. The auth gate
+now remains Edge-compatible and obtains the API `Fetcher` from the OpenNext
+Cloudflare context. Its replacement proof is split by responsibility:
 
-`middleware-runtime-regression.spec.ts` reproduces that
-runtime gap rather than asserting on source text:
+- `tests/middleware/auth-check-logging.test.ts` covers each auth-gate response
+  and privacy-safe failure log without a browser.
+- the Playwright suite exercises the same redirects and authenticated behavior
+  through the ordinary Next.js UI harness;
+- `tests/workerd/` and `scripts/test-workerd.mjs` run the transformed OpenNext
+  bundle plus a mock API Worker in one local workerd process. The authenticated
+  shell can render only if its cookies and API requests cross the `API` service
+  binding, while the anonymous and synthetic API-error paths must redirect.
 
-- `middleware-runtime-harness.ts` loads the real
-  `src/middleware.ts` and `src/lib/env.ts` sources (TypeScript
-  annotations stripped, no statement rewritten) and evaluates
-  them in Next's own vendored Edge sandbox
-  (`next/dist/compiled/edge-runtime`) and in a Node `vm`
-  context. Only the runtime differs between the two runs.
-- The stub API listens on an **ephemeral** port, so its
-  address exists only at run time and is discoverable only
-  through `process.env.API_BASE_URL`. "Did the stub receive
-  `/api/v1/me`" is therefore an unfakeable signal that the
-  auth check resolved the runtime environment — and it stays
-  deterministic even though the mock API server occupies
-  `getApiBaseURL()`'s `localhost:8080` fallback during this
-  suite's own run.
-- The spec runs the auth check under whichever runtime
-  `middleware.ts` actually declares, so it fails against a
-  pre-VOC-039-T00 middleware and passes once the Node.js
-  runtime is declared.
-
-Like T08, it self-skips on the mobile projects (runtime
-behavior is viewport-independent).
+Run the Worker-specific proof after `cloudflare:build` with
+`pnpm --filter @vocanova/web cloudflare:preview:test`.

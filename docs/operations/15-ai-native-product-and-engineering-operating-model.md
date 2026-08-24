@@ -1,12 +1,12 @@
 ---
 id: DOC-15
 title: Vocanova AI-Native Product and Engineering Operating Model
-version: 1.1
+version: 1.4
 status: approved
 owner: founder
 canonical_path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
 approved_at: 2026-07-13
-last_reviewed_at: 2026-08-19
+last_reviewed_at: 2026-08-24
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -27,13 +27,59 @@ related_documents:
 related_decisions:
   - A-001
   - ADR-0002
+  - ADR-0003
+  - ADR-0004
+  - ADR-0005
+revision_note: >
+  VOC-090 clarifies coherent-outcome delivery. One approved package, one
+  implementation pull request, and one minimum-sufficient task are the default safe
+  unit for one outcome; future P3/AI six-step work remains ordered components rather
+  than pre-authorized PR stacks. VOC-082's provider-neutral distinct-actor boundary
+  remains active.
 ---
 
-# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.1
+# 15 — Vocanova AI-Native Product and Engineering Operating Model v1.4
 
 ## Document status
 
-This document is approved and defines the operating model for product decisions, specifications, implementation, review, repository governance, and release for Vocanova. VOC-078-T03 removed repository deployment and server-monitoring workflows on 2026-08-19 pending a future hosting decision. Historical deployments remain evidence, but GitHub Actions currently provides no staging or production publication mechanism and removing the workflows did not stop any server. See §17 and [DOC-16](../governance/16-autonomous-development-operating-model.md) for current authority.
+This document is approved and defines the operating model for product decisions, specifications,
+implementation, review, repository governance, and release for Vocanova. VOC-078-T03 removed
+repository deployment and server-monitoring workflows on 2026-08-19. VOC-080 now selects the
+Cloudflare-native target in [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md)
+and external Ruflo boundary in
+[ADR-0004](../decisions/ADR-0004-external-ruflo-orchestration.md). Historical deployments remain
+evidence, but GitHub Actions currently provides no staging or production publication mechanism;
+T00 neither deploys Cloudflare nor inspects/stops a server. See §17 and
+[DOC-16](../governance/16-autonomous-development-operating-model.md) for current authority.
+
+**VOC-080 amendment (2026-08-22):** The current runtime/data implementation is OpenNext on a Cloudflare
+Web Worker, a TypeScript/Hono API Worker, and D1. T03-T10 established contract, domain, data, web, and
+held-delivery parity; T11 then retired the Go/PostgreSQL/server assets from the active repository tree
+without inspecting, mutating, or stopping a live server. Ruflo may coordinate planner, builder, tester,
+specialist, reviewer, and task-orchestrator roles only from an external, pinned, deny-by-default
+installation. GitHub stays canonical; Ruflo cannot approve, merge, close, dispatch, deploy, access
+secrets/production data, spend, or launch. Every unreconciled body clause that permanently assigns a
+role to ChatGPT, Codex, or Claude instead maps to the provider-neutral role named by its function.
+Every clause that states `develop` automatically deploys, or that an owned server is the final target,
+is historical. Repository implementation, Cloudflare provisioning, staging, production, DNS,
+spending, and production-data access remain separate events governed by VOC-080's explicit holds.
+The exact T02 external installation, frozen patched graph, audit, role/worktree
+contract, evidence handoff, memory limits, and synthetic rehearsal live in the
+[Ruflo operator runbook](ruflo-external-orchestration.md). Ruflo's generated strict
+permissions are advisory and cannot substitute for repository guards, credential
+absence, exact-revision review, action authority, or OS-level isolation.
+
+**VOC-082 amendment (2026-08-23):** For current authority, a role is a responsibility
+and an actor is an attributable human or separately instantiated AI participant. A
+different role name, prompt, session, model, or provider does not make an actor
+independent. The plan author and implementation builder cannot independently review,
+approve, adopt, or merge their own exact revision; a material reviewer edit creates a
+new builder-authored SHA requiring fresh checks and a different reviewer. Model/provider
+provenance may harden evidence, and an expressly applicable cross-model rule remains
+mandatory for its stated scope, but neither creates authority. A technical verdict or
+merge eligibility does not satisfy separately assigned external-effect authority. See
+[DOC-16](../governance/16-autonomous-development-operating-model.md) and
+[ADR-0005](../decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md).
 
 It consolidates all approved decisions from Decision Groups 1–10 and incorporates **Amendment A-001 — Development Merge Authority**.
 
@@ -42,9 +88,10 @@ originally described an aspirational merge/staging model that was never the syst
 built. §17 has been rewritten to match the live pipeline; those two decision entries carry an
 inline correction note pointing to §17.0 rather than being rewritten in place, to preserve the
 decision register as a historical record. **DOC-16 (`docs/governance/16-autonomous-development-operating-model.md`,
-which folds in the former A-003 amendment and VOC-079 as of its v3.0 revision) and the repository's
+which folds in the former A-003 amendment and the VOC-079, VOC-080, VOC-082, and
+VOC-085 boundaries as of its v3.3 revision) and the repository's
 current deterministic workflows are the actual current authority for merge/review mechanics.
-DOC-16 v3.0 makes R0-R4 approval-neutral by class while retaining stronger R4 evidence
+DOC-16 v3.3 keeps R0-R4 approval-neutral by class while retaining stronger R4 evidence
 and explicit action-specific authority. Where this document's remaining prose (outside
 §17) describes something narrower or different,
 treat it as historical design intent, not a live contradiction requiring further correction in
@@ -77,7 +124,7 @@ Different reviewer role independently verifies the exact revision
         ↓
 Separate authorized actor verifies the evidence and merges into develop
         ↓
-No package promotion or production release runs during VOC-078 reconstruction
+No live Cloudflare action runs until the applicable VOC-080 task and action hold pass
 ```
 
 The key principles are:
@@ -813,21 +860,37 @@ Required sections:
 # Specification
 
 ## Problem
+
 ## Desired outcome
+
 ## Users affected
+
 ## In scope
+
 ## Out of scope
+
 ## Functional requirements
+
 ## User experience requirements
+
 ## Business rules
+
 ## Data requirements
+
 ## API requirements
+
 ## Security and privacy requirements
+
 ## Accessibility requirements
+
 ## Performance expectations
+
 ## Error and edge-case behavior
+
 ## Compatibility requirements
+
 ## Assumptions
+
 ## Open questions
 ```
 
@@ -914,15 +977,25 @@ Required sections:
 
 ```markdown
 ## Technical approach
+
 ## Components affected
+
 ## Data-model changes
+
 ## API changes
+
 ## Migration approach
+
 ## Security controls
+
 ## Testing approach
+
 ## Deployment approach
+
 ## Rollback approach
+
 ## Implementation sequence
+
 ## Known technical risks
 ```
 
@@ -930,19 +1003,19 @@ Codex may refine internal details only within approved product and architecture 
 
 ## 10.10 Tasks
 
-Tasks are small, ordered, verifiable, and stable.
+Tasks are minimum-sufficient, ordered, verifiable, and stable traceability units.
+They group requirements, acceptance criteria, tests, ownership, sequence, and
+evidence; they do not imply separate branches or pull requests.
 
 Example:
 
 ```markdown
-- [ ] VOC-023-T01 Add the approved authentication schema.
-- [ ] VOC-023-T02 Implement the authentication service.
-- [ ] VOC-023-T03 Implement sign-in API behavior.
-- [ ] VOC-023-T04 Build the sign-in interface.
-- [ ] VOC-023-T05 Add unit and integration tests.
-- [ ] VOC-023-T06 Update affected documentation.
-- [ ] VOC-023-T07 Provide acceptance-criteria evidence.
+- [ ] VOC-023-T00 Deliver the approved sign-in outcome across schema, service, API, UI, tests, documentation, rollback, and evidence.
 ```
+
+Ordered implementation-plan notes may still sequence schema, service, API, UI, test,
+documentation, and evidence work inside `VOC-023-T00`. Add more task IDs only when
+they create a real traceability, dependency, owner, or evidence boundary.
 
 ## 10.11 Test plan
 
@@ -1392,9 +1465,9 @@ develop
 
 `main` represents the production-approved state.
 
-*Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.0
+_Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.3
 now governs merge/release authority through risk evidence and explicitly assigned
-action-specific authority; no R0-R4 label creates founder approval by itself.*
+action-specific authority; no R0-R4 label creates founder approval by itself._
 
 Rules:
 
@@ -1496,10 +1569,23 @@ Rules:
 
 - One primary change.
 - One linked package where applicable.
+- The pull request should be the largest safe coherent delivery unit that keeps
+  backend, frontend, contract, test, documentation, rollback, and evidence work for
+  that outcome together.
+- The default is one implementation pull request and one minimum-sufficient task.
+- Split only with a written rationale naming the independently releasable or
+  rollback-safe boundary, hard dependency, material risk or action-authority
+  boundary, incompatible reviewer/owner need, or demonstrated reviewability limit,
+  plus partial-state coherence, integration order, rollback, and the coordination,
+  elapsed-time, token/context, repeated-check, exact-review, and bookkeeping
+  overhead tradeoff.
 - Reviewable diff.
 - No unrelated cleanup.
 - Tests and documentation included.
 - Unrelated improvements become separate work.
+
+Component count, line count, test layers, documentation updates, and implementation
+convenience are review signals, not automatic split triggers.
 
 ## 16.5 Merge strategy
 
@@ -1555,7 +1641,7 @@ GitHub Actions runs deterministic CI, governance, quality, and security checks
     ↓
 different reviewer posts an exact-revision PASS / PASS WITH NON-BLOCKING FINDINGS / FAIL
     ↓
-an authorized actor, different from the implementer, verifies the gates and merges
+non-author merge actor audits the gates and performs any separately authorized merge
 ```
 
 Issue creation, labels, and comments trigger no planning or implementation. GitHub
@@ -1564,20 +1650,24 @@ new implementation revision followed by complete checks and fresh independent re
 
 ## 17.2 Current authority matrix
 
-| Action | Required authority |
-|---|---|
-| Approve product vision, scope, and material behavior | DOC-16's applicable decision owner |
-| Draft a change package | Planner role; human or AI, no adoption authority |
-| Adopt a package | Applicable DOC-16 authority, recorded against the exact reviewed candidate |
-| Implement an adopted task | Implementer role, different from its reviewer |
-| Independently verify a plan or implementation | Reviewer role with no write access to the reviewed revision |
-| Merge into `develop` | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
-| Promote `develop` to `main` | No current workflow; prohibited during VOC-078 reconstruction |
-| Deploy | No current repository workflow; a future hosting package must separately authorize and define publication |
+| Action                                               | Required authority                                                                                                        |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Approve product vision, scope, and material behavior | DOC-16's applicable decision owner                                                                                        |
+| Draft a change package                               | Planner role; human or AI, no adoption authority                                                                          |
+| Adopt a package                                      | Applicable DOC-16 authority, recorded against the exact reviewed candidate                                                |
+| Implement an adopted task                            | Implementer role, different from its reviewer                                                                             |
+| Independently verify a plan or implementation        | Reviewer role with no write access to the reviewed revision                                                               |
+| Merge into `develop`                                 | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
+| Promote `develop` to `main`                          | Separately reviewed pull request; no current promotion workflow                                                           |
+| Deploy                                               | T10 held manual Cloudflare state machine exists; current manifest blocks before environment jobs/secrets                  |
 
-Roles are responsibilities, not permanent vendors. The builder never approves or
-merges its own work, and a reviewer that authors a material correction becomes a
-builder whose revision needs fresh independent review.
+Roles are responsibilities, not permanent vendors. Actors are attributable humans or
+separately instantiated AI participants. The builder never approves or merges its own
+work, and a reviewer that authors a material correction becomes a builder whose
+revision needs fresh checks and different-actor review. A role relabel, new session,
+model, or provider is not independence or authority. Model/provider choice may harden
+evidence; an expressly applicable cross-model rule remains scoped evidence, not an
+approval source.
 
 R0-R4 are consequence classes, not personal-approval classes. R4 requires an explicit
 decision record, impact and contingency evidence, applicable specialist and
@@ -1634,16 +1724,16 @@ Claude review
 
 Examples:
 
-| Affected area | Additional checks |
-|---|---|
-| Database | Migration validation, rollback review, integrity checks |
-| API | Contract and integration tests |
-| Authentication | Security tests, authorization review, session checks |
-| User interface | Component tests, journey tests, accessibility checks |
-| Infrastructure | Deployment validation and permission review |
-| Dependencies | Vulnerability, license, provenance, install-script review |
-| AI behavior | Prompt and evaluation regression checks |
-| Governance | Independent review of authority and policy impact |
+| Affected area  | Additional checks                                         |
+| -------------- | --------------------------------------------------------- |
+| Database       | Migration validation, rollback review, integrity checks   |
+| API            | Contract and integration tests                            |
+| Authentication | Security tests, authorization review, session checks      |
+| User interface | Component tests, journey tests, accessibility checks      |
+| Infrastructure | Deployment validation and permission review               |
+| Dependencies   | Vulnerability, license, provenance, install-script review |
+| AI behavior    | Prompt and evaluation regression checks                   |
+| Governance     | Independent review of authority and policy impact         |
 
 ## 18.3 Main and release checks
 
@@ -1668,17 +1758,19 @@ Claude release review supplements but does not replace founder approval.
 
 ## 19.1 Staging deployment
 
-No repository workflow currently deploys to staging. A merge into `develop` changes
-repository history only. VOC-078-T03 removed image publication, SSH deployment,
-migration execution, smoke testing, and remote health polling from GitHub Actions
-without changing runtime assets or inspecting/stopping a server. A future hosting
-package must define the replacement mechanism and evidence.
+No repository workflow run is currently eligible to deploy to staging. A merge into
+`develop` changes repository history only. VOC-078-T03 removed image publication, SSH
+deployment, migration execution, smoke testing, and remote health polling without
+changing runtime assets or inspecting/stopping a server. T10 defines the held Cloudflare
+replacement after parity: credential-free dry runs and mocked policy/smoke evidence pass,
+while its manifest blocks before environment jobs or secrets. T11 subsequently removed
+the old runtime from the active repository tree only; it made no claim about live state.
 
 ## 19.2 Production publication
 
-There is no current repository production-publication mechanism. `main` remains the
-production-history branch, but a push to it does not deploy. Any future publication
-flow requires a separate hosting package and must include at least:
+There is no currently eligible production publication. `main` remains the
+production-history branch, and a push to it does not deploy. T10's manual flow requires
+a separate activation change, the applicable action hold, and at least:
 
 ```text
 Release PR prepared
@@ -2016,8 +2108,8 @@ Critical security findings cannot be waived merely to meet a deadline.
 
 High-risk waivers require founder approval before production.
 
-*Current authority note: a production or external-effect waiver follows its explicitly
-assigned action authority under DOC-16; risk class alone does not assign the founder.*
+_Current authority note: a production or external-effect waiver follows its explicitly
+assigned action authority under DOC-16; risk class alone does not assign the founder._
 
 ## 22.4 Kill switches
 
@@ -2242,15 +2334,15 @@ Claude may perform semantic consistency review.
 
 Recommended:
 
-| Document category | Cadence |
-|---|---:|
-| Product Bible | Every six months or major strategy change |
-| MVP PRD | Monthly during active MVP development |
-| Architecture | Quarterly or at major change |
-| Database and APIs | Before affected implementation |
-| Security and operations | Quarterly and before production milestones |
-| Market research | When a material product decision depends on it |
-| Operating model | Quarterly and after major incidents |
+| Document category       |                                        Cadence |
+| ----------------------- | ---------------------------------------------: |
+| Product Bible           |      Every six months or major strategy change |
+| MVP PRD                 |          Monthly during active MVP development |
+| Architecture            |                   Quarterly or at major change |
+| Database and APIs       |                 Before affected implementation |
+| Security and operations |     Quarterly and before production milestones |
+| Market research         | When a material product decision depends on it |
+| Operating model         |            Quarterly and after major incidents |
 
 Review schedules may create issues, but do not automatically change content.
 
@@ -2396,7 +2488,8 @@ Use:
 - Daily and monthly alerts.
 - Separate implementation and review budgets.
 - Automatic stop on abnormal use.
-- Manual approval for unusually large tasks.
+- Delivery-shape decisions that account for coordination, elapsed time,
+  token/context, repeated checks, exact-review cycles, and bookkeeping overhead.
 - Smaller models where sufficient.
 - Bounded repository context.
 
@@ -2482,19 +2575,19 @@ Automation Level 1 — Assisted execution with Claude-approved develop merges
 
 This means:
 
-| Activity | Authority |
-|---|---|
-| Product decision | Founder |
-| Specification drafting | ChatGPT-assisted |
-| Repository updates | Codex-assisted |
-| Implementation | Codex |
-| Deterministic validation | GitHub Actions |
-| Technical review | Claude |
-| Merge into `develop` | CI + Claude |
-| Staging deployment | Automatic |
-| Release PR | Automation-assisted |
-| Merge into `main` | Founder |
-| Production publication | Founder |
+| Activity                 | Authority           |
+| ------------------------ | ------------------- |
+| Product decision         | Founder             |
+| Specification drafting   | ChatGPT-assisted    |
+| Repository updates       | Codex-assisted      |
+| Implementation           | Codex               |
+| Deterministic validation | GitHub Actions      |
+| Technical review         | Claude              |
+| Merge into `develop`     | CI + Claude         |
+| Staging deployment       | Automatic           |
+| Release PR               | Automation-assisted |
+| Merge into `main`        | Founder             |
+| Production publication   | Founder             |
 
 Future automation may expand only with evidence.
 
@@ -2540,7 +2633,7 @@ Important releases and incidents should produce concise retrospectives with owne
 
 Agents must not improve metrics by:
 
-- Artificially splitting work.
+- Artificially splitting one coherent outcome into extra tasks, branches, or pull requests.
 - Suppressing findings.
 - Weakening tests.
 - Misclassifying risk.
@@ -2740,9 +2833,10 @@ The transition is complete when:
 - Production remains founder-controlled.
 - Manual copying between chat topics and repository files has ended.
 
-*Historical completion criteria: current release and production authority is defined
-by DOC-16 v3.0 and a future hosting package, not by the risk label or this preserved
-v1.0 checklist.*
+_Historical completion criteria: current release and production authority is defined
+by DOC-16 v3.3, including VOC-082's distinct-actor clarification, VOC-085's held
+settings boundary, and VOC-080's held Cloudflare program, not by the risk label or this
+preserved v1.0 checklist._
 
 ## 25.12 Reversibility
 
@@ -2942,7 +3036,8 @@ The workflow distinguishes decision, implementation, release, and emergency pull
 
 ### DG5-05 — Coherent pull requests
 
-Each pull request contains one coherent change and avoids unrelated scope.
+Each pull request contains one coherent change, maximizes the safe coherent delivery
+unit, and avoids unrelated scope.
 
 ### DG5-06 — Squash implementation merges
 
@@ -2956,18 +3051,20 @@ Promotions from `develop` to `main` use an identifiable release merge commit.
 
 Every implementation PR may merge into `develop` after required CI, specialist checks, and Claude approval. Founder approval is not required.
 
-*Correction 2026-08-19: superseded by DOC-16's "Branch and merge behavior"
+_Correction 2026-08-19: superseded by DOC-16's "Branch and merge behavior"
 section and §17. Verification is not vendor-locked, and VOC-078-T01 retired the
 workflow that automatically merged PRs. Preserved as historical record, not current
-rule.*
+rule._
 
 ### DG5-09 — Automatic staging
 
 Successful merges into `develop` automatically deploy to staging.
 
-*Correction 2026-08-19: staging deployment was built and historically proven, then
-VOC-078-T03 removed its GitHub workflow pending a future hosting decision. A merge to
-`develop` no longer deploys. See §17. Preserved as historical record.*
+_Correction 2026-08-19: staging deployment was built and historically proven, then
+VOC-078-T03 removed its GitHub workflow. ADR-0003 now selects Cloudflare, but a merge to
+`develop` still does not deploy; T10's held replacement exists, while `HOLD-00` and
+live activation remain pending. See §17.
+Preserved as historical record._
 
 ### DG5-10 — Protected production
 
@@ -3279,16 +3376,16 @@ Migration uses complete verified document sources and does not reconstruct canon
 
 Codex implementation PRs targeting `develop` may merge automatically after required deterministic CI, specialist checks, and Claude approval.
 
-*Correction 2026-08-19: see DG5-08's correction and §17. The current model is
+_Correction 2026-08-19: see DG5-08's correction and §17. The current model is
 role-based and the automatic merge workflow was retired by VOC-078-T01. Preserved as
-historical record.*
+historical record._
 
 ### DG10-06 — Automatic staging
 
 Every approved merge into `develop` deploys automatically to staging and runs required verification.
 
-*Correction 2026-08-19: see DG5-09's correction. Staging deployment was built and is
-scheduled for removal in VOC-078-T03. Preserved as historical record.*
+_Correction 2026-08-19: see DG5-09's correction. Staging deployment was built and is
+scheduled for removal in VOC-078-T03. Preserved as historical record._
 
 ### DG10-07 — Founder-controlled main and production
 

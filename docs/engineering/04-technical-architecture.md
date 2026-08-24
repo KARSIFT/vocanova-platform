@@ -1,13 +1,13 @@
 ---
 id: DOC-04
 title: VocaNova Technical Architecture
-version: 1.0
+version: 1.1
 document_type: technical-architecture
 status: approved
 owner: founder
 canonical_path: docs/engineering/04-technical-architecture.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+last_reviewed_at: 2026-08-22
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -19,13 +19,26 @@ related_documents:
   - DOC-10
   - DOC-11
   - DOC-17
-related_decisions: []
+related_decisions:
+  - ADR-0003
 adoption_change: VOC-008
 source_files:
   - path: 04-technical-architecture.md
     sha256: 50ba0901ee5e877e98e7071c6930f809b0ebc6074858fd20e1ac7deae12403dc
 ---
+
 # 04 — VocaNova Technical Architecture
+
+## Active VOC-080 architecture amendment
+
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) is the current
+runtime and data direction. VocaNova targets Next.js through OpenNext on a Cloudflare
+Web Worker, a TypeScript/Hono Cloudflare API Worker, and Cloudflare D1. The existing
+Go/PostgreSQL/Docker implementation served as the staged parity reference through
+T10; T11 removed it from the active tree after contract, domain, data, workerd, and
+rollback gates passed. Where the preserved v1.0 body names Go, Ent, PostgreSQL, Docker,
+Render, or an owned server as the final target, ADR-0003 supersedes that runtime choice
+without changing the product behavior or domain boundaries documented here.
 
 ## 1. Purpose and goals
 
@@ -40,29 +53,29 @@ habit.
 
 ## 3. Architecture principles
 
-Modular monolith first; frontend/backend separated; business logic lives in the Go backend;
-PostgreSQL is the source of truth; prefer simple stable technologies; avoid premature microservices;
-design for future mobile clients; explicit domain boundaries; testable behavior; ADRs for important
-decisions.
+Modular monolith first; frontend/backend separated; business logic stays transport- and
+storage-independent behind the `/api/v1` contract; D1 becomes the relational source of truth after
+parity and separately authorized cutover. Prefer simple stable technologies, avoid premature
+microservices, design for future mobile clients, keep explicit domain boundaries and testable
+behavior, and record important choices as ADRs.
 
 ## 4. High-level architecture
 
 ```text
 Browser
    |
-Next.js Web Application
-   |  HTTPS REST API
+Cloudflare Web Worker (Next.js + OpenNext)
+   |  service binding / HTTPS /api/v1
    v
-Go Backend API
+Cloudflare API Worker (TypeScript + Hono)
    |
-   +-- PostgreSQL
-   +-- Google OAuth + email magic-link delivery, with PostgreSQL-backed sessions
-   +-- AI Provider
-   +-- Feature flags
-   +-- Observability
+   +-- Cloudflare D1
+   +-- Google OAuth + email delivery boundary
+   +-- AI provider abstraction
+   +-- feature bindings and privacy-safe observability
 ```
 
-Future mobile: Next.js Web + Expo Mobile both call the same Go API / PostgreSQL.
+Future mobile: Next.js Web + Expo Mobile both call the same `/api/v1` Worker contract.
 
 ## 5. Repository architecture
 
@@ -73,8 +86,8 @@ name, not `vocanova`):
 ```text
 vocanova-platform/
 apps/
-  web/          # Next.js
-  api/          # Go backend
+  web/          # Next.js/OpenNext Worker target
+  api-worker/   # TypeScript/Hono/D1 API runtime
   mobile/       # Future Expo app
 packages/
   api-client/
@@ -82,7 +95,7 @@ packages/
   eslint-config/
   typescript-config/
 docs/
-infra/
+infrastructure/ # held Cloudflare delivery/retirement manifests
 scripts/
 .github/
 ```
@@ -90,22 +103,24 @@ scripts/
 ## 6. Frontend architecture
 
 Next.js (App Router) + React + TypeScript + Tailwind + shadcn/ui + TanStack Query + React Hook Form
-+ Zod + Vitest + React Testing Library + Playwright + pnpm. Next.js never accesses PostgreSQL
-directly; the Go backend remains the business authority; server state via TanStack Query.
+
+- Zod + Vitest + React Testing Library + Playwright + pnpm. OpenNext adapts the app to Workers.
+  The web Worker never accesses D1 directly; the `/api/v1` API Worker remains the business authority;
+  server state uses TanStack Query.
 
 ## 7. Backend architecture
 
-Go + chi + Huma v2 + Uber Fx + Ent ORM + PostgreSQL + `log/slog` + OpenTelemetry. Modular monolith
-with business modules: `auth`, `user`, `settings`, `vocabulary`, `journey`, `review`, `sentence`,
-`aifeedback`, `mission`, `progress`, `streak`. Business logic must not depend on HTTP, Huma, chi,
-auth SDKs, or AI SDKs directly.
+TypeScript Module Worker + Hono + schema-driven validation/OpenAPI + typed D1 repositories and
+generated Cloudflare binding types. The modular-monolith business modules remain `auth`, `user`,
+`settings`, `vocabulary`, `journey`, `review`, `sentence`, `aifeedback`, `mission`, `progress`, and
+`streak`. Business logic must not depend directly on Hono, D1, auth SDKs, or AI SDKs.
 
 ## 8. API architecture
 
-REST, JSON, versioned under `/api/v1`. Huma generates OpenAPI 3.1. The generated artifact is
-committed at `apps/api/openapi/vocanova.openapi.json` for TypeScript code generation and drift
-detection; [06](06-backend-design.md) §5 and [07](07-api-contract-and-dto-design.md) define the
-contract workflow. chi handles routing and middleware.
+REST, JSON, versioned under `/api/v1`. The committed OpenAPI 3.1 artifact and generated API client
+are the migration seam. The Worker API generates and compares its contract deterministically against
+the committed reference; [06](06-backend-design.md) and [07](07-api-contract-and-dto-design.md)
+define stability rules. Hono handles Worker routing and middleware.
 
 ## 9. Authentication
 
@@ -115,8 +130,10 @@ provider — business tables reference Vocanova user IDs, never provider IDs dir
 
 ## 10. Database architecture
 
-PostgreSQL + Ent ORM. One database, clear domain ownership, reviewed migrations, UTC timestamps in
-storage, IANA timezone strings for user-facing daily logic. Full schema in [05](05-database-design.md).
+Cloudflare D1 with explicit SQLite schema and forward-only Wrangler migrations. Separate local,
+staging, and production databases retain clear domain ownership, canonical UTC timestamp encoding,
+and IANA timezone strings for daily logic. [05](05-database-design.md) defines the target mapping;
+the retired PostgreSQL schema snapshot remains only a synthetic conversion oracle.
 
 ## 11. Spaced repetition
 
@@ -166,26 +183,29 @@ errors, database health, AI usage, job failures.
 
 ## 18. Testing strategy
 
-Backend: unit, PostgreSQL integration, migration, API tests. Frontend: Vitest, React Testing
-Library, Playwright. AI: fake-provider tests, evaluation dataset, controlled live tests (never a
-paid provider in normal CI — see [09](09-ai-features.md) §23 Phase 1). Coverage is risk-based, not a flat
-percentage target.
+API: unit, workerd, local D1 migration/repository, contract-snapshot, authorization, atomicity, and
+consistency tests. Frontend: Vitest, React
+Testing Library, Playwright, accessibility, Lighthouse, OpenNext build/dry-run, and workerd requests.
+AI: fake-provider tests and evaluation fixtures; never a paid provider in normal CI. Coverage is
+risk-based, not a flat percentage target.
 
 ## 19. GitHub workflow
 
 The repository uses `develop` and `main` as permanent branches with short-lived working
 branches and governed pull requests. Exact merge, approval, and release authority is defined only by
 [DOC-16](../governance/16-autonomous-development-operating-model.md) (a single,
-self-contained document as of its v2.0 revision) and the
+self-contained document as of its v3.3 revision) and the
 [approval matrix](../governance/approval-matrix.md). Governance permission does not imply that
 automatic merge or deployment is technically active.
 
 ## 20. CI/CD
 
-Backend/frontend tests, type checks, security checks, generated-code checks in CI. Deploy to
-development/staging/production. See [10](../operations/10-development-workflow.md) for the full pipeline and
+Backend/frontend tests, type checks, security checks, generated-code checks, Worker dry runs, and
+D1 migration/parity checks belong in CI. T10 adds a held manual Cloudflare state machine after
+parity, but live deployment remains blocked by its committed manifest and the applicable action
+hold. See [10](../operations/10-development-workflow.md) for the full pipeline and
 the [canonical governance index](../governance/README.md) for merge/deploy authority, with
-[DOC-19](../operations/19-governance-reconciliation-notes.md) available as orientation.
+[DOC-19](../archive/19-governance-reconciliation-notes.md) available as historical orientation.
 
 ## 21. Scalability strategy
 
@@ -199,8 +219,7 @@ postponed until then.
 
 ## Final technology stack
 
-Frontend: Next.js, TypeScript, Tailwind, shadcn/ui. Backend: Go, chi, Huma, Uber Fx, Ent, PostgreSQL.
-Auth: Google OAuth + email magic link. AI: provider abstraction, one provider operated at a time.
-Infrastructure: see [10](../operations/10-development-workflow.md) (Cloudflare + Render, not a generic "managed
-containers" placeholder — that document has the concrete, later infrastructure decision). Future:
-Expo, Temporal.
+Frontend: Next.js, TypeScript, Tailwind, shadcn/ui, OpenNext, Cloudflare Workers. Backend:
+TypeScript, Hono, generated bindings, D1. Auth: Google OAuth + email magic link. AI: provider abstraction, one provider operated at
+a time. Infrastructure: managed Cloudflare Workers/D1 with no owned server. Future: Expo; async
+Cloudflare capabilities only after a measured requirement.

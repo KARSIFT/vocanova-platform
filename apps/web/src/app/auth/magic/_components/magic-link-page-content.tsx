@@ -30,7 +30,7 @@ export function MagicLinkPageContent() {
     }
 
     const client = createApiClient();
-    client
+    void client
       .consumeMagicLink({ token, email })
       .then(() => {
         window.location.href = "/home";

@@ -16,6 +16,9 @@ TBD. Record the builder assessment and protected technical or governance effects
 
 Define `VOC-000-D00` only after approval. Record contradictions without silently
 resolving them. Include authorization, secrets, personal-data, and abuse impacts.
+For reviewable work, record distinct builder/reviewer actor identities, exact-SHA
+authorship independence, verdict/findings, optional runtime provenance, and any
+separate action-specific authority. A provider or model is never authority.
 
 ## Data, migrations, analytics, and accessibility
 

@@ -12,6 +12,8 @@
 // assertion specifically targets the "Saved" badge and the
 // meaning-by-meaning card structure on the situation page.
 
+import { randomUUID } from "node:crypto";
+
 import { expect, test } from "@playwright/test";
 
 import {
@@ -122,5 +124,230 @@ test.describe("Discover accessibility (VOC-031-T07b)", () => {
         "text=Could you pour me a cup of coffee?",
       ],
     });
+  });
+
+  test("Word Detail renders every backend review-state fixture with an exact direct contract and accessible SSR copy", async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(90_000);
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) {
+      throw new Error(
+        "Expected the Playwright project to configure use.baseURL so the Word Detail fixture cookie can be scoped to it.",
+      );
+    }
+    const fixtures = [
+      { cookie: "unsaved", state: null, label: null },
+      { cookie: "due", state: "due", label: "Due now" },
+      { cookie: "new", state: "new", label: "New" },
+      { cookie: "learning", state: "learning", label: "Learning" },
+      { cookie: "reviewing", state: "reviewing", label: "Reviewing" },
+      { cookie: "mastered", state: "mastered", label: "Mastered" },
+      {
+        cookie: "not-reviewing",
+        state: "not_reviewing",
+        label: "Not in review",
+      },
+    ] as const;
+    const mockApiPort = Number(process.env.MOCK_API_PORT ?? 8080);
+
+    for (const fixture of fixtures) {
+      await page.context().addCookies([
+        {
+          name: "e2e_word_detail_review_state",
+          value: fixture.cookie,
+          url: baseURL,
+        },
+      ]);
+      const fixtureResponse = await page.request.get(
+        `http://127.0.0.1:${mockApiPort}/api/v1/canonical-words/pour`,
+      );
+      await expect(fixtureResponse).toBeOK();
+      const fixtureBody = await fixtureResponse.json();
+      const expectedMeaning = {
+        id: "mean-pour",
+        partOfSpeech: "verb",
+        shortDefinition: "to make liquid flow into a container",
+        saved: fixture.state !== null,
+        ...(fixture.state !== null && { userWordId: "uw-mean-pour" }),
+        reviewState: fixture.state,
+        examples: [
+          {
+            id: "ex-pour-1",
+            exampleText: "Could you pour me a cup of coffee?",
+          },
+        ],
+        usageNotes: [
+          {
+            id: "note-pour-1",
+            noteType: "register",
+            noteText: "Common in everyday service contexts.",
+          },
+        ],
+      };
+      expect(fixtureBody).toEqual({
+        word: {
+          id: "word-pour",
+          text: "pour",
+          slug: "pour",
+          wordType: "verb",
+          difficultyLevel: "A2",
+          meanings: [expectedMeaning],
+        },
+      });
+      expect(fixtureBody.word.meanings[0]).not.toHaveProperty("reviewStep");
+      expect(fixtureBody.word.meanings[0]).not.toHaveProperty("nextReviewAt");
+      expect(fixtureBody.word.meanings[0]).not.toHaveProperty("status");
+
+      await page.goto("/discover/ordering-at-a-cafe/pour");
+      await expect(
+        page.getByRole("heading", { name: "pour", level: 1 }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("to make liquid flow into a container", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Could you pour me a cup of coffee?"),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Common in everyday service contexts."),
+      ).toBeVisible();
+
+      if (fixture.label === null) {
+        await expect(page.getByText(/^Review state:/)).toHaveCount(0);
+        await expect(
+          page.getByRole("button", {
+            name: /^Save pour: to make liquid flow into a container$/,
+          }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("heading", { name: "Practice with pour" }),
+        ).toHaveCount(0);
+      } else {
+        await expect(
+          page.getByText(`Review state: ${fixture.label}`, { exact: true }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("button", {
+            name: "Remove pour from saved words",
+          }),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("heading", { name: "Practice with pour" }),
+        ).toBeVisible();
+      }
+      await expect(page.getByText("not_reviewing", { exact: true })).toHaveCount(
+        0,
+      );
+
+      const { criticalOrSerious } = await scanForAxeViolations(page);
+      expect(
+        criticalOrSerious,
+        `Expected zero critical or serious axe-core violations for Word Detail fixture ${fixture.cookie}; found:\n${formatViolations(
+          criticalOrSerious,
+        ).join("\n")}`,
+      ).toEqual([]);
+      await assertKeyboardReachable(page, { minFocusable: 2 });
+      await assertNonColorOnlyFeedback(page, {
+        contextLabel: `Word Detail fixture ${fixture.cookie}`,
+        requireText: [
+          fixture.label === null
+            ? "text=Meanings"
+            : `text=Review state: ${fixture.label}`,
+        ],
+      });
+    }
+
+    await page.context().clearCookies({
+      name: "e2e_word_detail_review_state",
+    });
+    const defaultResponse = await page.request.get(
+      `http://127.0.0.1:${mockApiPort}/api/v1/canonical-words/pour`,
+    );
+    await expect(defaultResponse).toBeOK();
+    expect((await defaultResponse.json()).word.meanings[0]).toMatchObject({
+      saved: false,
+      reviewState: null,
+    });
+  });
+
+  test("Word Detail refreshes backend state after save and unsave but preserves state on failure", async ({
+    page,
+  }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) {
+      throw new Error(
+        "Expected the Playwright project to configure use.baseURL so the stateful Word Detail session can be scoped to it.",
+      );
+    }
+    const sessionValue = `voc088-session-${randomUUID()}`;
+    const csrfValue = `voc088-csrf-${randomUUID()}`;
+    await page.context().addCookies([
+      { name: "vocanova_session", value: sessionValue, url: baseURL },
+      { name: "vocanova_csrf", value: csrfValue, url: baseURL },
+    ]);
+    await page.goto("/discover/ordering-at-a-cafe/pour");
+    await expect(page.getByText(/^Review state:/)).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: "Practice with pour" }),
+    ).toHaveCount(0);
+
+    await page
+      .getByRole("button", {
+        name: /^Save pour: to make liquid flow into a container$/,
+      })
+      .click();
+    await expect(page.getByText("Review state: Due now", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Practice with pour" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Remove pour from saved words" }),
+    ).toBeVisible();
+
+    await page
+      .getByRole("button", { name: "Remove pour from saved words" })
+      .click();
+    await expect(page.getByText(/^Review state:/)).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: "Practice with pour" }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", {
+        name: /^Save pour: to make liquid flow into a container$/,
+      }),
+    ).toBeVisible();
+
+    const failingSession = `voc088-failure-${randomUUID()}`;
+    await page.context().addCookies([
+      { name: "vocanova_session", value: failingSession, url: baseURL },
+      { name: "vocanova_csrf", value: csrfValue, url: baseURL },
+      {
+        name: "e2e_word_detail_save_failure",
+        value: "1",
+        url: baseURL,
+      },
+    ]);
+    await page.goto("/discover/ordering-at-a-cafe/pour");
+    await page
+      .getByRole("button", {
+        name: /^Save pour: to make liquid flow into a container$/,
+      })
+      .click();
+    await expect(
+      page.getByRole("alert").getByText(
+        "Unable to update saved state. Please try again.",
+        { exact: true },
+      ),
+    ).toBeVisible();
+    await expect(page.getByText(/^Review state:/)).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: "Practice with pour" }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", {
+        name: /^Save pour: to make liquid flow into a container$/,
+      }),
+    ).toBeVisible();
   });
 });

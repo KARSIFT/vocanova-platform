@@ -1,0 +1,159 @@
+{
+  "schema_version": "vocanova-voc081-f2-v2",
+  "recorded_at_utc": "2026-08-23T02:05:53Z",
+  "acceptance_reconciled_on": "2026-08-24",
+  "task": "VOC-081-T04",
+  "status": "repository-local-f2-complete-effective",
+  "package": {
+    "path": "specs/changes/VOC-081-f2-local-cloudflare-development",
+    "adoption_pr": 102,
+    "adopted_candidate_sha": "111323e5275b3ed2a2e86440ef087a44f0d00bde",
+    "adopted": true,
+    "implementation_authorized": true
+  },
+  "repository_stack": {
+    "integration_branch": "develop",
+    "production_history_branch": "main",
+    "stack_base_sha": "3d6699c5eb378b9a00679d61a5c28b6b7e27c32c",
+    "exact_implementation_sha": "ca7596cb72128e5fa47483a65678773a6968dd79",
+    "final_evidence_sha": "a8694932671ad9c44fd2a97c128b14e6089e5faf",
+    "verified_through_task": "VOC-081-T04",
+    "integrated_by_pull_request": 108,
+    "merge_sha": "36d526bdec83e28b17aa30a6814d42b92f058ec1",
+    "integrated_into_develop": true,
+    "merged_by_implementer": false,
+    "production_promotion_performed": false
+  },
+  "current_acceptance": {
+    "scope": "repository-local-f2-only",
+    "effective": true,
+    "pull_request": "https://github.com/KARSIFT/vocanova-platform/pull/108",
+    "final_head_sha": "a8694932671ad9c44fd2a97c128b14e6089e5faf",
+    "merge_sha": "36d526bdec83e28b17aa30a6814d42b92f058ec1",
+    "review_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5383790286",
+    "hosted_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5385582178",
+    "hosted_runs": {
+      "ci": 32612887965,
+      "governance": 32634344456,
+      "quality": 32612888017,
+      "security": 32612888012
+    },
+    "rollback_failure_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/108#issuecomment-5383822937",
+    "post_merge_runs": {
+      "ci": 32634654242,
+      "governance": 32634654225,
+      "quality": "not-applicable-push-path-filter",
+      "security": 32634654343
+    }
+  },
+  "local_contract": {
+    "supported_process_platform": "linux-and-unix-semantics",
+    "native_windows_verified": false,
+    "web_origin": "http://127.0.0.1:3000",
+    "api_origin": "http://127.0.0.1:8080",
+    "developer_state": ".wrangler/state/vocanova-local",
+    "test_state": "fresh-os-temporary-directory-per-run",
+    "remote_access": false,
+    "credentials_required": false
+  },
+  "validated_commands": [
+    { "command": "pnpm validate", "result": "pass" },
+    { "command": "pnpm run ci:local-stack", "result": "pass" },
+    { "command": "pnpm run ci:web", "result": "pass" },
+    { "command": "pnpm run ci:worker-api", "result": "pass" },
+    { "command": "pnpm run ci:delivery", "result": "pass-held-no-live-action" },
+    {
+      "command": "pnpm audit --audit-level high",
+      "result": "pass-zero-high-zero-critical"
+    },
+    {
+      "command": "bash scripts/governance/validate-governance.sh",
+      "result": "pass"
+    },
+    {
+      "command": "bash scripts/governance/classify-change-risk.sh",
+      "result": "pass-r3"
+    },
+    {
+      "command": "python3 -m unittest discover -s tooling/governance/tests -p 'test_*.py'",
+      "result": "pass-98-of-98"
+    },
+    { "command": "git diff --check", "result": "pass" }
+  ],
+  "workflow_inventory": [
+    "ci.yml",
+    "governance.yml",
+    "quality.yml",
+    "security.yml"
+  ],
+  "tasks": [
+    {
+      "id": "VOC-081-T00",
+      "exact_sha": "9b0e90fcd89469763c9874a5b0ef951e4d76149d",
+      "pull_request": "https://github.com/KARSIFT/vocanova-platform/pull/103",
+      "review_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/103#issuecomment-5383253641",
+      "hosted_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/103#issuecomment-5383324809",
+      "result": "pass-exact-sha-zero-blockers"
+    },
+    {
+      "id": "VOC-081-T01",
+      "exact_sha": "aae4473d1072517b40e42bbb0dc4e992c37c16b5",
+      "pull_request": "https://github.com/KARSIFT/vocanova-platform/pull/104",
+      "review_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/104#issuecomment-5383393667",
+      "hosted_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/104#issuecomment-5383430480",
+      "result": "pass-exact-sha-zero-blockers"
+    },
+    {
+      "id": "VOC-081-T02",
+      "exact_sha": "38d8c27b64557e8e8bc58bb05ea3c2cd858e1136",
+      "pull_request": "https://github.com/KARSIFT/vocanova-platform/pull/106",
+      "review_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/106#issuecomment-5383568439",
+      "hosted_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/106#issuecomment-5383587649",
+      "result": "pass-exact-sha-zero-blockers"
+    },
+    {
+      "id": "VOC-081-T03",
+      "exact_sha": "ca7596cb72128e5fa47483a65678773a6968dd79",
+      "pull_request": "https://github.com/KARSIFT/vocanova-platform/pull/107",
+      "review_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/107#issuecomment-5383668456",
+      "hosted_evidence": "https://github.com/KARSIFT/vocanova-platform/pull/107#issuecomment-5383684056",
+      "result": "pass-exact-sha-zero-blockers"
+    }
+  ],
+  "rollback": {
+    "mode": "reverse-order-disposable-worktree",
+    "status": "pass",
+    "expected_terminal_tree": "3d6699c5eb378b9a00679d61a5c28b6b7e27c32c",
+    "live_system_effect": false
+  },
+  "milestone_state": {
+    "f2_repository_local": "complete-effective",
+    "f3_staging": "unresolved-held",
+    "a1_authenticated_product_acceptance": "unresolved",
+    "p1_plus_product_acceptance": "unresolved",
+    "production": "held",
+    "live_activation": "unresolved-held",
+    "voc080_holds": ["VOC-080-HOLD-00", "VOC-080-HOLD-01", "VOC-080-HOLD-02"]
+  },
+  "external_effects": {
+    "cloudflare_queried_or_mutated": false,
+    "dns_queried_or_mutated": false,
+    "server_queried_or_mutated": false,
+    "sentry_queried": false,
+    "repository_settings_mutated": false,
+    "secret_or_production_data_used": false,
+    "deployment_performed": false,
+    "deployment_url_expected": false
+  },
+  "candidate_history": {
+    "status": "repository-local-f2-candidate-integration-pending",
+    "effective_condition": "The complete VOC-081 stack and final evidence revision must be integrated into develop and revalidated there.",
+    "t04_closure_evidence_in_candidate_revision": {
+      "exact_sha": null,
+      "pull_request": null,
+      "review_evidence": null,
+      "hosted_evidence": null,
+      "reason": "T04 exact-SHA, review, hosted, and final rollback links were recorded on its pull request to avoid a self-referential commit hash."
+    }
+  }
+}

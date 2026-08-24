@@ -1,13 +1,43 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-export const RETIRED_AGENT_PATHS = [
+import { inspectDeliveryWorkflow } from "./cloudflare-delivery-policy.mjs";
+
+export const PROHIBITED_AGENT_PATHS = [
   ".claude/agents",
   ".karsift",
   "orchestrator",
+  ".agents",
+  ".claude-flow",
+  ".ruflo",
+  ".swarm",
 ];
+
+const LOCAL_ORCHESTRATOR_DEPENDENCY_PATTERN =
+  /^(?:ruflo|agentic-flow|@claude-flow\/)/;
+
+const LOCAL_ORCHESTRATOR_LAUNCH_PATTERN =
+  /(?:\b(?:ruflo|claude-flow)\b|@claude-flow\/|(?:^|[\s/])agentic-flow\b)/i;
+
+const GENERATED_INSTRUCTION_MARKERS = [
+  "<!-- BEGIN:nextjs-agent-rules -->",
+  "<!-- NEXT-AGENTS-MD-START -->",
+  "## Ruflo + Codex Automated Workflow",
+  "> Multi-agent orchestration framework for agentic coding",
+  "Ruflo is the coordination ledger and policy decision point",
+];
+
+const INSTRUCTION_SCAN_EXCLUDED_DIRECTORIES = new Set([
+  ".git",
+  ".next",
+  ".open-next",
+  ".wrangler",
+  "coverage",
+  "dist",
+  "node_modules",
+]);
 
 const AUTONOMOUS_WRITE_PATTERNS = [
   new RegExp(["gh", "\\s+", "pr", "\\s+", "merge", "\\b"].join("")),
@@ -22,6 +52,44 @@ const AUTONOMOUS_WRITE_PATTERNS = [
   /\bmutation\b[\s\S]{0,500}\bupdateIssue\b[\s\S]{0,300}\bstate\s*:\s*CLOSED\b/,
   new RegExp(["merge", "Pull", "Request", "\\s*\\("].join("")),
   new RegExp(["close", "Issue", "\\s*\\("].join("")),
+  /\bgh\s+pr\s+review\b[^\n]*\s--approve\b/,
+  /\bgh\s+(?:pr|issue)\s+comment\b/,
+  /\bgh\s+workflow\s+run\b/,
+  /\bgh\s+api\b[^\n]*(?:\/dispatches|\/reviews|\/comments)\b/,
+  /\bpulls\s*\.\s*createReview\s*\([^)]*\bevent\s*:\s*["']APPROVE["']/s,
+  /\bissues\s*\.\s*createComment\s*\(/,
+  /\bactions\s*\.\s*createWorkflowDispatch\s*\(/,
+  /\brepos\s*\.\s*createDispatchEvent\s*\(/,
+  /\bmutation\b[\s\S]{0,500}\b(addPullRequestReview|addComment|createRepositoryDispatch)\b/,
+];
+
+const PROHIBITED_EXTERNAL_EFFECT_PATTERNS = [
+  [
+    /\b(?:CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID|CF_API_TOKEN|CF_ACCOUNT_ID)\b/,
+    "Cloudflare credential",
+  ],
+  [/api\.cloudflare\.com\/client\/v4/i, "Cloudflare API access"],
+  [
+    /\bwrangler\s+(?:publish|delete|secret|versions\s+(?:upload|deploy)|deployments)\b/i,
+    "Cloudflare mutation command",
+  ],
+  [
+    /\bwrangler\s+deploy\b(?![^\n]*--dry-run)/i,
+    "Cloudflare deployment command",
+  ],
+  [
+    /\bwrangler\s+d1\s+(?:execute|migrations\s+apply)\b[^\n]*(?:--remote|--env\s+(?:staging|production))\b/i,
+    "remote D1 mutation command",
+  ],
+  [
+    /\b(?:PRODUCTION_DATABASE_URL|PRODUCTION_LEARNER_DATA|LEARNER_DATA_EXPORT)\b/,
+    "production learner-data access",
+  ],
+  [
+    /\b(?:PRODUCTION_[A-Z0-9_]*(?:SECRET|TOKEN|KEY)|ANTHROPIC_API_KEY|OPENAI_API_KEY)\b/,
+    "production or paid-provider secret",
+  ],
+  [/\b(?:RUFLO_)?SPENDING_AUTHORITY\b/, "spending authority"],
 ];
 
 function filesBelow(directory) {
@@ -29,6 +97,19 @@ function filesBelow(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = resolve(directory, entry.name);
     return entry.isDirectory() ? filesBelow(path) : [path];
+  });
+}
+
+function instructionFilesBelow(directory) {
+  if (!existsSync(directory)) return [];
+  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const path = resolve(directory, entry.name);
+    if (entry.isDirectory()) {
+      return INSTRUCTION_SCAN_EXCLUDED_DIRECTORIES.has(entry.name)
+        ? []
+        : instructionFilesBelow(path);
+    }
+    return /^(?:AGENTS|CLAUDE)\.md$/.test(entry.name) ? [path] : [];
   });
 }
 
@@ -94,26 +175,73 @@ function hasIssueTrigger(source) {
 export function validateAgentAuthority(repositoryRoot) {
   const errors = [];
 
-  for (const path of RETIRED_AGENT_PATHS) {
+  for (const path of PROHIBITED_AGENT_PATHS) {
     if (existsSync(resolve(repositoryRoot, path))) {
-      errors.push(`retired agent path is present: ${path}`);
+      errors.push(`repository-local agent state is prohibited: ${path}`);
     }
   }
 
   const packagePath = resolve(repositoryRoot, "package.json");
   const packageJson = JSON.parse(readFileSync(packagePath, "utf8"));
+  for (const field of [
+    "dependencies",
+    "devDependencies",
+    "optionalDependencies",
+    "peerDependencies",
+  ]) {
+    for (const name of Object.keys(packageJson[field] ?? {})) {
+      if (LOCAL_ORCHESTRATOR_DEPENDENCY_PATTERN.test(name)) {
+        errors.push(
+          `repository-local orchestrator dependency is prohibited: ${field}.${name}`,
+        );
+      }
+    }
+  }
   for (const [name, command] of Object.entries(packageJson.scripts ?? {})) {
     if (
       name.startsWith("orchestrator") ||
-      /orchestrator\/run\.mjs/.test(command)
+      /orchestrator\/run\.mjs/.test(command) ||
+      LOCAL_ORCHESTRATOR_LAUNCH_PATTERN.test(command)
     ) {
       errors.push(
-        `package script can launch the retired orchestrator: ${name}`,
+        `package script can launch a repository-local orchestrator: ${name}`,
+      );
+    }
+  }
+
+  for (const path of instructionFilesBelow(repositoryRoot)) {
+    const filename = relative(repositoryRoot, path).replaceAll("\\", "/");
+    const source = readFileSync(path, "utf8");
+    for (const marker of GENERATED_INSTRUCTION_MARKERS) {
+      if (source.includes(marker)) {
+        errors.push(
+          `${filename}: generated orchestrator instructions cannot replace repository authority`,
+        );
+        break;
+      }
+    }
+    if (filename.includes("/") && source.trim() === "@AGENTS.md") {
+      errors.push(
+        `${filename}: generated nested instruction import cannot replace repository authority`,
       );
     }
   }
 
   const workflowDirectory = resolve(repositoryRoot, ".github/workflows");
+  const heldDeliveryWorkflow = resolve(workflowDirectory, "ci.yml");
+  let heldDeliveryWorkflowValid = false;
+  if (existsSync(heldDeliveryWorkflow)) {
+    const deliveryErrors = inspectDeliveryWorkflow(
+      readFileSync(heldDeliveryWorkflow, "utf8"),
+    );
+    heldDeliveryWorkflowValid = deliveryErrors.length === 0;
+    errors.push(
+      ...deliveryErrors.map(
+        (error) =>
+          `${heldDeliveryWorkflow}: unsafe held delivery policy: ${error}`,
+      ),
+    );
+  }
   for (const path of filesBelow(workflowDirectory)) {
     if (!/\.ya?ml$/.test(path)) continue;
     const source = readFileSync(path, "utf8");
@@ -128,16 +256,31 @@ export function validateAgentAuthority(repositoryRoot) {
   ].filter(
     (path) =>
       !/\.test\.[cm]?[jt]s$/.test(path) &&
-      !path.endsWith("agent-authority-policy.mjs"),
+      !path.endsWith("agent-authority-policy.mjs") &&
+      !path.endsWith("cloudflare-delivery-policy.mjs") &&
+      !path.endsWith("local-development-policy.mjs") &&
+      !path.endsWith("workflow-policy.mjs"),
   );
 
   for (const path of executableFiles) {
     const source = readFileSync(path, "utf8");
+    if (LOCAL_ORCHESTRATOR_LAUNCH_PATTERN.test(source)) {
+      errors.push(
+        `${path}: tracked external-orchestrator launcher is prohibited`,
+      );
+    }
     for (const pattern of AUTONOMOUS_WRITE_PATTERNS) {
       if (pattern.test(source)) {
         errors.push(
-          `${path}: autonomous PR/issue completion command is prohibited`,
+          `${path}: autonomous GitHub write/completion command is prohibited`,
         );
+        break;
+      }
+    }
+    for (const [pattern, capability] of PROHIBITED_EXTERNAL_EFFECT_PATTERNS) {
+      if (path === heldDeliveryWorkflow && heldDeliveryWorkflowValid) continue;
+      if (pattern.test(source)) {
+        errors.push(`${path}: prohibited external effect: ${capability}`);
         break;
       }
     }
@@ -155,7 +298,7 @@ function main() {
     for (const error of errors) console.error(error);
     return 1;
   }
-  console.log("Agent authority retirement validation passed.");
+  console.log("Agent authority boundary validation passed.");
   return 0;
 }
 

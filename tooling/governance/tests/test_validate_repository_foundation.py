@@ -99,6 +99,10 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         self.assertIn(old, text)
         path.write_text(text.replace(old, new, 1), encoding="utf-8")
 
+    def append(self, relative: str, extra: str) -> None:
+        path = self.root / relative
+        path.write_text(path.read_text(encoding="utf-8") + extra, encoding="utf-8")
+
     def test_valid_repository_passes(self) -> None:
         result = self.run_validator()
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
@@ -201,6 +205,144 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
             "Only lower risk classes default to",
         )
         self.assert_failure("missing automatic-merge drafting rule marker")
+
+    def test_voc082_distinct_actor_marker_is_required(self) -> None:
+        self.replace(
+            "docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md",
+            "separately instantiated AI participant",
+            "participant",
+        )
+        self.assert_failure("missing VOC-082 distinct actor policy marker")
+
+    def test_voc082_provider_neutrality_marker_is_required(self) -> None:
+        self.replace(
+            "AGENTS.md",
+            "Model/provider provenance may",
+            "Runtime provenance may",
+        )
+        self.assert_failure("missing VOC-082 provider neutrality policy marker")
+
+    def test_voc082_exact_revision_marker_is_required(self) -> None:
+        self.replace(
+            "AGENTS.md",
+            "authorship of the reviewed exact revision",
+            "authorship marker removed",
+        )
+        self.assert_failure("missing VOC-082 exact revision policy marker")
+
+    def test_voc082_self_review_marker_is_required(self) -> None:
+        self.replace(
+            "AGENTS.md",
+            "it cannot approve or merge its own work",
+            "it may approve or merge its own work",
+        )
+        self.assert_failure("missing VOC-082 self-review/self-merge policy marker")
+
+    def test_voc082_action_authority_marker_is_required(self) -> None:
+        self.replace(
+            "docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md",
+            "Technical review and merge eligibility never satisfy a separately\n"
+            "defined authority",
+            "Technical review is sufficient",
+        )
+        self.assert_failure("missing VOC-082 action authority separation policy marker")
+
+    def test_voc082_human_only_wording_fails_closed(self) -> None:
+        path = self.root / "docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\nA human is required solely for review.\n", encoding="utf-8")
+        self.assert_failure("prohibited VOC-082 human-only role requirement wording")
+
+    def test_voc082_vendor_authority_wording_fails_closed(self) -> None:
+        path = self.root / "docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\nProvider identity grants authority.\n", encoding="utf-8")
+        self.assert_failure("prohibited VOC-082 vendor-derived authority wording")
+
+    def test_voc082_same_actor_relabeling_fails_closed(self) -> None:
+        path = self.root / "docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md"
+        path.write_text(path.read_text(encoding="utf-8") + "\nRelabeling creates independence.\n", encoding="utf-8")
+        self.assert_failure("prohibited VOC-082 same-actor relabeling wording")
+
+    def test_voc082_review_verdict_cannot_supply_action_authority(self) -> None:
+        path = self.root / "docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md"
+        path.write_text(
+            path.read_text(encoding="utf-8")
+            + "\nThe review verdict satisfies the action-specific authority hold.\n",
+            encoding="utf-8",
+        )
+        self.assert_failure("prohibited VOC-082 review-as-action authority wording")
+
+    def test_voc090_doc16_delivery_shape_marker_is_required(self) -> None:
+        self.replace(
+            "docs/governance/16-autonomous-development-operating-model.md",
+            "default delivery unit is one approved `VOC-###` package, one implementation pull\n"
+            "request into `develop`, and one minimum-sufficient task",
+            "default delivery unit marker removed",
+        )
+        self.assert_failure("missing VOC-090 policy marker")
+
+    def test_voc090_fixed_line_threshold_regression_fails(self) -> None:
+        self.append(
+            "docs/operations/10-development-workflow.md",
+            "\nPreferred size 100–500 meaningful changed lines (under 200 for fixes; over 800 normally split).\n",
+        )
+        self.assert_failure("prohibited VOC-090 fixed preferred line threshold wording")
+
+    def test_voc090_task_id_per_pr_wording_fails(self) -> None:
+        self.append(
+            ".github/pull_request_template.md",
+            "\nEach task ID requires its own pull request.\n",
+        )
+        self.assert_failure("prohibited VOC-090 task-id-per-PR wording")
+
+    def test_voc090_missing_multi_pr_rationale_marker_fails(self) -> None:
+        self.replace(
+            ".github/pull_request_template.md",
+            "Multi-PR rationale or `N/A — one coherent PR default`:",
+            "Split note:",
+        )
+        self.assert_failure("missing VOC-090 policy marker")
+
+    def test_voc090_active_mandatory_sequence_wording_fails(self) -> None:
+        self.append(
+            "docs/product/12-mvp-implementation-plan.md",
+            "\nMandatory six-PR order.\n",
+        )
+        self.assert_failure("prohibited VOC-090 active mandatory six-PR wording")
+
+    def test_voc090_active_recommended_sequence_wording_fails(self) -> None:
+        self.append(
+            "docs/engineering/09-ai-features.md",
+            "\nRecommended PR sequence.\n",
+        )
+        self.assert_failure("prohibited VOC-090 active recommended PR sequence wording")
+
+    def test_voc090_doc09_sequence_drift_fails(self) -> None:
+        self.replace(
+            "docs/engineering/09-ai-features.md",
+            "evaluation and observability",
+            "evaluation only",
+        )
+        self.assert_failure("missing VOC-090 ordered P3/AI implementation-component sequence")
+
+    def test_voc090_historical_sequence_example_remains_allowed(self) -> None:
+        self.append(
+            "docs/product/12-mvp-implementation-plan.md",
+            "\nHistorical example only: Mandatory six-PR order.\n",
+        )
+        self.append(
+            "docs/engineering/09-ai-features.md",
+            "\nHistorical example only: Recommended PR sequence.\n",
+        )
+        result = self.run_validator()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_voc090_template_default_pr_count_is_required(self) -> None:
+        self.replace(
+            "specs/templates/change-package/change.yaml",
+            "implementation_pull_request_count: 1",
+            "implementation_pull_request_count: 2",
+        )
+        self.assert_failure("implementation_pull_request_count: 1")
 
     def test_classifier_accepts_r4_for_protected_policy(self) -> None:
         result = self.run_classifier("R4")
@@ -639,7 +781,7 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
     def test_unpinned_external_action_fails(self) -> None:
         self.replace(
             ".github/workflows/governance.yml",
-            "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683",
+            "actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
             "actions/checkout@v4",
         )
         self.assert_failure("not pinned")

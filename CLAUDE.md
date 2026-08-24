@@ -5,7 +5,7 @@
 The section above is imported from this repo's `AGENTS.md` (authority model, change
 workflow, safety rules) - every Claude Code session in this repo loads it, not just
 the reviewer role below. This file's own content is specific to the independent
-*reviewer* role only; a session acting in another role should follow `AGENTS.md` above
+_reviewer_ role only; a session acting in another role should follow `AGENTS.md` above
 but does not inherit reviewer-only obligations (like "cannot grant approval") from
 the section below unless it is itself acting as reviewer.
 
@@ -29,17 +29,21 @@ approvals are exhausted and must never be reused.
    floor, protected areas, and diff.
 2. Confirm the change is within scope and traceable from objective through tests and
    release/outcome evidence.
-3. Inspect completed evidence for every installed relevant deterministic check. Do not
+3. Verify that the builder selected the largest safe coherent delivery unit, that
+   task IDs are minimum-sufficient traceability/evidence groupings rather than PR
+   quotas, and that any multi-PR plan records its boundary, partial-state
+   coherence, integration, rollback, and overhead rationale.
+4. Inspect completed evidence for every installed relevant deterministic check. Do not
    duplicate a completed long-running suite unless the review assignment explicitly
    requires it. Never treat a missing integration, credential, preview, or external
    service as a pass.
-4. Review semantic risk; raise the class when path rules miss a protected or R4
+5. Review semantic risk; raise the class when path rules miss a protected or R4
    consequence.
-5. Check migrations, rollout, monitoring, rollback, documentation, complete risk
+6. Check migrations, rollout, monitoring, rollback, documentation, complete risk
    evidence, and any separately required action-specific authority.
-6. Re-review the exact revision after material remediation.
-7. Bind the report to the exact reviewed commit SHA and explicitly verify that Codex
-   did not approve or merge its implementation, identify the active authority model,
+7. Re-review the exact revision after material remediation.
+8. Bind the report to the exact reviewed commit SHA and explicitly verify that the
+   implementation builder did not approve or merge it, identify the active authority model,
    and report every still-required R3/R4 evidence, action-specific authority, EHR,
    adoption, and activation gate.
 
@@ -61,6 +65,16 @@ FINDINGS`, or `FAIL`, with exact file/line evidence, commands inspected, limitat
 and approvals still required.
 
 Claude Code must not approve its own substantial correction. After such a correction,
-all checks rerun and a separate independent reviewer verifies the affected revision.
+it is the builder of the affected SHA, all checks rerun, and a separate actor verifies
+that revision. A new session, model, or provider does not itself establish separation.
 Claude Code has no repository-write, merge, deployment, secret, production-data,
 founder, or technical-steward authority.
+
+Under VOC-080, review Cloudflare/OpenNext/Hono/D1 changes against ADR-0003 and external
+Ruflo coordination against ADR-0004 and the
+[external operator runbook](docs/operations/ruflo-external-orchestration.md). A Ruflo
+assignment is task routing, not authority;
+it cannot relax scope, exact-SHA review, action holds, or GitHub evidence. Reviewers do
+not run a completed long suite or start a background process merely to duplicate
+builder evidence. Cloudflare staging, production, DNS, secret, and learner-data actions
+remain separately held even when repository implementation passes.

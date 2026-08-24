@@ -1,0 +1,187 @@
+schema_version: 1
+repository: KARSIFT/vocanova-platform
+repository_identity:
+  owner: KARSIFT
+  name: vocanova-platform
+  full_name: KARSIFT/vocanova-platform
+observed_at: 2026-08-24
+observed_at_utc: 2026-08-24T22:06:57Z
+as_of: 2026-08-24
+source: github-rest-api-read-only-after-authorized-voc092-setting-mutation
+observation_evidence:
+  issue: 151
+  url: https://github.com/KARSIFT/vocanova-platform/issues/151
+  comment: 5402043002
+  note: post-mutation read-back of all previously recorded settings surfaces
+source_endpoints:
+  - GET /repos/KARSIFT/vocanova-platform
+  - GET /repos/KARSIFT/vocanova-platform/actions/permissions
+  - GET /repos/KARSIFT/vocanova-platform/actions/permissions/workflow
+  - GET /repos/KARSIFT/vocanova-platform/rulesets
+  - GET /repos/KARSIFT/vocanova-platform/branches/develop/protection
+  - GET /repos/KARSIFT/vocanova-platform/branches/main/protection
+  - GET /repos/KARSIFT/vocanova-platform/vulnerability-alerts
+  - GET /repos/KARSIFT/vocanova-platform/automated-security-fixes
+  - GitHub repository security-settings API fields for secret scanning
+source_schema_surface:
+  repository:
+    endpoint: GET /repos/KARSIFT/vocanova-platform
+    raw_response_fields:
+      - visibility
+      - default_branch
+      - allow_merge_commit
+      - allow_squash_merge
+      - allow_rebase_merge
+      - delete_branch_on_merge
+      - security_and_analysis.dependabot_security_updates.status
+      - security_and_analysis.secret_scanning.status
+      - security_and_analysis.secret_scanning_push_protection.status
+      - security_and_analysis.secret_scanning_validity_checks.status
+    normalized_record_fields:
+      - visibility
+      - default_branch
+      - allow_merge_commit
+      - allow_squash_merge
+      - allow_rebase_merge
+      - delete_branch_on_merge
+      - dependabot_security_updates
+      - secret_scanning.enabled
+      - secret_scanning.push_protection
+      - secret_scanning.validity_checks
+  actions_permissions:
+    endpoint: GET /repos/KARSIFT/vocanova-platform/actions/permissions
+    raw_response_fields:
+      - enabled
+      - allowed_actions
+      - sha_pinning_required
+    normalized_record_fields:
+      - actions.enabled
+      - actions.allowed_actions
+      - actions.sha_pinning_required
+  workflow_permissions:
+    endpoint: GET /repos/KARSIFT/vocanova-platform/actions/permissions/workflow
+    raw_response_fields:
+      - default_workflow_permissions
+      - can_approve_pull_request_reviews
+    normalized_record_fields:
+      - actions.default_workflow_permissions
+      - actions.can_approve_pull_request_reviews
+  rulesets:
+    endpoint: GET /repos/KARSIFT/vocanova-platform/rulesets
+    raw_response_semantics:
+      http_status: 200
+      response_shape: top-level-array
+    normalized_record_fields:
+      - rulesets
+  branch_protection:
+    develop:
+      endpoint: GET /repos/KARSIFT/vocanova-platform/branches/develop/protection
+      raw_response_semantics:
+        http_status: 404
+        message: Branch not protected
+      normalized_record_fields:
+        - branch_protection.develop
+    main:
+      endpoint: GET /repos/KARSIFT/vocanova-platform/branches/main/protection
+      raw_response_semantics:
+        http_status: 404
+        message: Branch not protected
+      normalized_record_fields:
+        - branch_protection.main
+  dependency_vulnerability_alerts:
+    endpoint: GET /repos/KARSIFT/vocanova-platform/vulnerability-alerts
+    raw_response_semantics:
+      http_status: 204
+      response_body: no-content
+    normalized_record_fields:
+      - dependency_vulnerability_alerts.enabled
+      - dependency_vulnerability_alerts.endpoint_status
+  dependabot_security_updates:
+    raw_sources:
+      automated_security_fixes:
+        endpoint: GET /repos/KARSIFT/vocanova-platform/automated-security-fixes
+        http_status: 200
+        body_fields:
+          - enabled
+          - paused
+      repository_security_and_analysis:
+        endpoint: GET /repos/KARSIFT/vocanova-platform
+        field_paths:
+          - security_and_analysis.dependabot_security_updates.status
+    normalized_record_fields:
+      - dependabot_security_updates
+  secret_scanning:
+    raw_sources:
+      repository_security_and_analysis:
+        endpoint: GET /repos/KARSIFT/vocanova-platform
+        field_paths:
+          - security_and_analysis.secret_scanning.status
+          - security_and_analysis.secret_scanning_push_protection.status
+          - security_and_analysis.secret_scanning_validity_checks.status
+    normalized_record_fields:
+      - secret_scanning.enabled
+      - secret_scanning.push_protection
+      - secret_scanning.validity_checks
+freshness:
+  semantics: point-in-time-observation-not-live-state
+  network_free_guard_scope: internal-consistency-only-not-live-freshness
+  live_freshness_proven: false
+  stale_when:
+    - any later repository-settings mutation is authorized or observed
+    - the observation can no longer be independently reverified
+  required_follow_up: immediate-governed-doc-only-reconciliation-after-future-mutation
+settings_mutation:
+  status: completed
+  field: delete_branch_on_merge
+  prior_value: false
+  current_value: true
+  pre_state_utc: 2026-08-24T22:06:14Z
+  post_state_utc: 2026-08-24T22:06:18Z
+  exact_payload: delete_branch_on_merge-true
+  rollback_payload: delete_branch_on_merge-false
+  authority: https://github.com/KARSIFT/vocanova-platform/pull/152
+  authority_comment: 5401902952
+  pre_state_evidence: https://github.com/KARSIFT/vocanova-platform/issues/151
+  pre_state_comment: 5402030322
+  post_state_evidence: https://github.com/KARSIFT/vocanova-platform/issues/151
+  post_state_comment: 5402032905
+visibility: public
+default_branch: main
+allow_merge_commit: true
+allow_squash_merge: true
+allow_rebase_merge: false
+delete_branch_on_merge: true
+actions:
+  enabled: true
+  allowed_actions: selected
+  sha_pinning_required: true
+  default_workflow_permissions: read
+  can_approve_pull_request_reviews: false
+rulesets: []
+branch_protection:
+  develop: http-404-not-protected
+  main: http-404-not-protected
+dependency_vulnerability_alerts:
+  enabled: true
+  endpoint_status: 204
+dependabot_security_updates: disabled
+secret_scanning:
+  enabled: false
+  push_protection: false
+  validity_checks: false
+follow_up_boundary:
+  future_settings_mutation_requires_immediate_governed_doc_only_follow_up: true
+  this_record_does_not_authorize_or_perform_mutation: true
+specialist_review:
+  required: true
+  status: pass-exact-revision-zero-blockers
+  candidate_sha: 0660dddbc070d54333aa4e1bb74b244d41878262
+  evidence: https://github.com/KARSIFT/vocanova-platform/pull/153
+  evidence_review: 5013084998
+  scope:
+    - source-api-schema-and-endpoint-interpretation
+    - availability-versus-enabled-distinction
+    - dependency-vulnerability-alert-versus-dependabot-security-update-distinction
+    - point-in-time-freshness-and-staleness-semantics
+    - exact-authorized-mutation-and-rollback-evidence
+  note: distinct non-author settings specialist verified the exact semantic candidate

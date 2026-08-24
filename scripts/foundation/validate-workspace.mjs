@@ -4,6 +4,8 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+import { validateLocalDevelopmentRepository } from "./local-development-policy.mjs";
+
 const repositoryRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../..",
@@ -11,25 +13,27 @@ const repositoryRoot = path.resolve(
 
 const requiredDirectories = [
   "apps/web",
-  "apps/api/cmd",
-  "apps/api/app",
-  "apps/api/business",
-  "apps/api/foundation",
-  "apps/api/ent",
-  "apps/api/migrations",
+  "apps/api-worker",
   "packages/api-client",
   "packages/design-tokens",
   "packages/eslint-config",
   "packages/typescript-config",
   "docs",
-  "infra",
   "scripts",
 ];
 
-const prohibitedDirectories = ["services/api", "backend", "apps/mobile"];
+const prohibitedDirectories = [
+  "services/api",
+  "backend",
+  "apps/mobile",
+  "apps/api",
+  "infra",
+];
 
 export function validateWorkspace() {
   const errors = [];
+
+  errors.push(...validateLocalDevelopmentRepository(repositoryRoot));
 
   for (const relative of requiredDirectories) {
     if (!existsSync(path.join(repositoryRoot, relative))) {
@@ -49,14 +53,12 @@ export function validateWorkspace() {
   );
   if (
     !workspace.includes("- apps/web") ||
+    !workspace.includes("- apps/api-worker") ||
     !workspace.includes("- packages/*")
   ) {
     errors.push(
-      "pnpm workspace patterns do not include web and shared packages",
+      "pnpm workspace patterns do not include web, Worker API, and shared packages",
     );
-  }
-  if (workspace.includes("apps/api")) {
-    errors.push("apps/api must not be a pnpm workspace project");
   }
 
   const projects = JSON.parse(
@@ -70,6 +72,7 @@ export function validateWorkspace() {
   );
   const expected = new Set([
     "apps/web",
+    "apps/api-worker",
     "packages/api-client",
     "packages/design-tokens",
     "packages/eslint-config",
@@ -80,9 +83,6 @@ export function validateWorkspace() {
     if (!actual.has(relative)) {
       errors.push(`pnpm did not enumerate expected project: ${relative}`);
     }
-  }
-  if (actual.has("apps/api")) {
-    errors.push("pnpm incorrectly enumerated apps/api");
   }
 
   return errors;

@@ -1,14 +1,15 @@
 # Repository and External Settings
 
 Files in this repository describe policy but cannot enable GitHub organization
-settings, create Cloudflare projects, or provision credentials. A repository
-administrator must configure and record the following before autonomous merge or
-release is enabled.
+settings, create Cloudflare projects, or provision credentials. The current hosted
+posture is recorded separately in the [repository settings record](repository-settings-current.yaml),
+which is current as observed at 2026-08-24 and is point-in-time evidence, not a live
+settings feed.
 
 VOC-079 approval-neutral governance authority is active. That authority must not be
-represented as hosted or technical activation. VOC-078-T01 retired the workflows that executed
-automatic merge into `develop` and package-driven promotion into `main`; both are
-currently disabled even though historical runs proved the earlier mechanism.
+represented as hosted or technical activation. VOC-078-T01 retired the workflows that
+executed automatic merge into `develop` and package-driven promotion into `main`; both
+remain disabled even though historical runs proved the earlier mechanism.
 VOC-079-T01 restores only the repository-owned, read-only policy decision: the
 Governance workflow reports eligibility and concrete reasons but has no GitHub write or
 merge authority. RL1/RL2
@@ -16,15 +17,84 @@ technical activation remains disabled. VOC-078-T03 removed push-triggered deploy
 and scheduled Sentry monitoring workflows. Removing repository automation did not
 inspect, stop, or mutate any existing server.
 
-## GitHub rulesets
+VOC-080 selects Cloudflare Workers/D1 as the target and external Ruflo as optional
+coordination. T10 adds held Cloudflare delivery code after parity, but does not mutate
+settings, create a GitHub environment or Cloudflare resource, configure a secret, or
+deploy. Its manifest blocks before credentialed jobs. Ruflo never receives a GitHub
+write token, Cloudflare credential, production secret/data, DNS permission, or
+deployment authority. T11 removes the old runtime from the active repository tree
+only; it does not inspect, mutate, or stop a live server.
+
+## Current hosted posture (observed 2026-08-24)
+
+The [machine-readable current record](repository-settings-current.yaml) is the source
+for this point-in-time observation. It records a public repository with `main` as the
+default branch; merge commits and squash merges enabled; rebase merges and automatic
+branch deletion enabled; and Actions enabled with selected actions, required SHA
+pinning, read-only default workflow-token permissions, and pull-request review
+approval disabled.
+
+VOC-092 changed only `delete_branch_on_merge` from `false` to `true` at
+`2026-08-24T22:06:14Z`–`22:06:18Z` UTC after its exact action authority and adopted
+plan became effective. The [pre-state and payload](https://github.com/KARSIFT/vocanova-platform/issues/151#issuecomment-5402030322),
+[post-state read-back](https://github.com/KARSIFT/vocanova-platform/issues/151#issuecomment-5402032905),
+and [full fresh observation](https://github.com/KARSIFT/vocanova-platform/issues/151#issuecomment-5402043002)
+are canonical evidence. The inverse one-field payload restores `false`. Enabling this
+setting deletes the source branch after a future merged pull request; it does not merge
+a pull request, protect a branch, delete existing branches, or deploy anything.
+
+The same read-only observation records dependency/vulnerability alerts enabled. This
+is distinct from the disabled Dependabot security-update automation. GitHub-hosted
+secret scanning, push protection, and validity checks are disabled as observed.
+The `rulesets` record is empty, and protection reads for both `develop` and `main`
+returned HTTP 404 (not protected). Public availability does not mean that a feature is
+configured or enforced.
+
+The record is point-in-time only. Its network-free guard proves internal consistency
+with the committed observation; it cannot prove live freshness. It becomes stale if
+a later repository-settings mutation is authorized or observed, or if the observation
+cannot be independently reverified. Any future settings mutation requires an immediate
+governed documentation-only follow-up. This guide records but does not itself perform
+VOC-092's completed one-field settings mutation.
+
+## VOC-080 historical transition snapshot
+
+[`voc-080-transition-record.md`](../operations/voc-080-transition-record.md) and its
+JSON source are immutable historical evidence of the private-repository snapshot read
+on 2026-08-22. They are not the current hosted state and are not rewritten to resemble
+the public observation above. The current record is the only source for the
+current-as-observed-at-2026-08-24 repository settings.
+
+## Prospective settings held by VOC-085-HOLD-00
+
+The following are desired mature controls, not configured current state: rulesets and
+protected `develop`/`main` branches; pull-request-only changes and required checks;
+conversation, code-owner, bypass, and release protections; Dependabot security
+updates; secret scanning and push protection; and any future hosted enforcement or
+environment approval settings. `VOC-085-HOLD-00` applies only to a future external
+GitHub repository-settings mutation. It names an accountable settings operator,
+requires separate exact-action authority, and requires a pre-state, intended payload,
+rollback, immediate documentation follow-up, post-state read-back, and exact evidence
+record. It does not block repository-only planning, implementation, review, or merge.
+VOC-092 completed one narrow instance of this hold for automatic merged-branch
+deletion; every later settings action remains separately held and needs fresh exact
+authority and evidence.
+
+The currently enabled dependency/vulnerability alerts are observed evidence, not a
+prospective held target. The distinct `VOC-080-HOLD-00`, `VOC-080-HOLD-01`, and
+`VOC-080-HOLD-02` continue to govern Cloudflare staging resources/secrets, production
+traffic or D1 migrations, and production learner data respectively.
+
+## Desired rulesets and branch protections (prospective)
 
 Configure `develop`:
 
 - require pull requests and block direct pushes, force pushes, and branch deletion;
-- require `Governance / structure`, `Governance / changed-path risk`, and every
-  applicable deterministic CI, Quality, and Security check;
-- require deterministic CI/governance/quality/security checks when the GitHub plan
-  supports private-repository rulesets;
+- require `CI / ci required`, `Security / security required`, `Governance / structure`,
+  `Governance / changed-path risk`, `Governance / merge eligibility`, and the
+  path-applicable `Quality / quality required` check;
+- require deterministic CI/governance/quality/security checks when a future settings
+  mutation is separately authorized and the repository settings support rulesets;
 - require conversation resolution and dismiss stale approvals;
 - require code-owner review for protected paths;
 - allow squash merge; and
@@ -69,12 +139,11 @@ Configure `main`:
 - prevent an AI or release-bot identity from bypassing required approvals.
 
 GitHub cannot natively express every conditional R0-R4 evidence and action-authority
-combination using CODEOWNERS alone. Use separate protected teams/environments and a
-reviewed gate that validates the effective risk class, exact-revision independent
-verdict, blocking-findings resolution, and any attributable action-specific authority. Keep autonomous merge
-disabled until a repository-owned gate is tested. On the current GitHub Free private-
-repository plan these settings are desired controls, not enforceable hosted reality;
-the pull request must record the evidence explicitly.
+combination using CODEOWNERS alone. If these prospective controls are activated, use
+separate protected teams/environments and a reviewed gate that validates the effective
+risk class, exact-revision independent verdict, blocking-findings resolution, and any
+attributable action-specific authority. Keep autonomous merge disabled until a
+repository-owned gate is tested; the pull request must record the evidence explicitly.
 
 Multiple owners on one CODEOWNERS pattern are alternatives: one matching owner can
 satisfy GitHub's native code-owner review requirement. They do not mean that every
@@ -82,13 +151,19 @@ listed owner must approve. Under active VOC-079 governance, CODEOWNERS never pro
 R4 evidence or action-specific authority; do not recreate a standing founder-and-
 steward requirement from ownership routing or risk class.
 
-Enable repository security settings when available:
+Future settings activation may consider:
 
-- secret scanning and push protection;
-- Dependabot alerts and security updates after a dependency manifest exists;
-- private vulnerability reporting;
-- Actions restricted to reviewed, immutable action SHAs; and
-- minimal default workflow token permissions.
+- Dependabot security-update automation;
+- GitHub-hosted secret scanning, push protection, and validity checks;
+- private vulnerability reporting, which remains outside this observation and prospective; and
+- other prospective hosted enforcement or environment-approval controls.
+
+The current observation has enabled dependency/vulnerability alerts, full-SHA Actions
+enforcement, a selected-action allowlist, minimal default workflow-token permissions,
+and automatic deletion of merged branches. Dependabot security updates, secret
+scanning/push protection, and validity checks are disabled. None of the other
+prospective controls is enabled by this documentation package; any later activation
+remains under `VOC-085-HOLD-00`.
 
 The verified human repository identity `@m-e-h-r-d-a-a-d` is formally recorded as
 founder and as the historical pre-A-003 qualified human technical steward in
@@ -100,9 +175,11 @@ bot identity as human authority.
 
 ## Required identities and credentials
 
-- Distinct implementer-role and independent-reviewer-role identities, recorded per
-  pull request. Humans and AI agents may fill either role; no vendor is permanently
-  assigned by repository policy.
+- Distinct implementer and independent-reviewer actors, recorded per pull request with
+  role, exact SHA, verdict, authorship independence, resolved blocking findings, and
+  optional runtime provenance. An actor may be human or separately instantiated AI;
+  relabeling a session or changing a model/provider is not separation. No vendor is
+  permanently assigned by repository policy, and provenance grants no authority.
 - Any human identities explicitly assigned action-specific authority, plus the
   preserved historical founder and technical-steward evidence; no replacement standing
   steward team is required and no historical identity assignment is reusable approval.
@@ -111,14 +188,24 @@ bot identity as human authority.
   isolated environments.
 - Environment-scoped Cloudflare tokens; production credentials are unavailable to
   pull-request and implementation-agent contexts.
+- No GitHub write or Cloudflare credential in Ruflo, reviewer, or ordinary builder
+  configuration.
 
 No credential value belongs in the repository.
 
 ## Cloudflare and release configuration
 
-Before deployment automation is added, record and validate:
+T10 records and validates the repository-owned portion in
+[`cloudflare-delivery.md`](../operations/cloudflare-delivery.md): locked Wrangler
+commands, distinct logical Worker/D1/environment names, credential-free dry runs,
+ordered version/migration/promotion/smoke/rollback behavior, cost ceilings, exact-SHA
+gating, and evidence format. The committed D1 IDs/routes are non-resource sentinels and
+activation remains held.
 
-- approved build and deploy commands from the future package scripts;
+Before a future activation change can authorize either environment, record and validate:
+
+- approved OpenNext, Worker API, D1 migration, dry-run, version, and deploy commands
+  from the implemented package scripts;
 - preview, staging, and production project identifiers and domains;
 - environment bindings, data stores, migration order, and secret isolation;
 - preview cleanup behavior and access restrictions;
@@ -142,7 +229,7 @@ manifest, pnpm lockfile, workspace, test/build scripts... only the dependency-fr
 governance policy check can run today; application CI, previews, staging, production,
 and rollback cannot truthfully be automated yet."
 
-**Current reality:** `apps/web` and `apps/api` are real, working applications;
+**Current reality:** `apps/web` and `apps/api-worker` are real, working applications;
 `package.json`/`pnpm-lock.yaml`/the pnpm workspace exist; deterministic CI (format,
 lint, typecheck, test, build) runs on every PR and has passed across 22+ shipped
 packages (VOC-010 through VOC-022 at minimum). VOC-078-T00 adds the repository-local
@@ -163,8 +250,12 @@ DOC-14 was deliberately reconciled but not adopted (see `docs/README.md`'s index
 successfully against real infrastructure beginning 2026-08-08, and the production
 environment restricted those runs to `main`. VOC-078-T03 removed both workflows on
 2026-08-19 while deliberately leaving runtime infrastructure and repository settings
-unchanged. Deployment, health polling, and one-click rollback are now unavailable in
-GitHub Actions pending a future hosting package. Per-PR previews remain unbuilt.
+unchanged. Server deployment and health polling remain unavailable. ADR-0003's
+replacement now has Worker/D1 parity and T10's held GitHub Actions state machine, but
+no live environment job is eligible until its manifest and action hold are separately
+activated. T11 retired the former server runtime from the active repository tree after
+that parity evidence; immutable Git history and compact migration fixtures preserve its
+evidence. Per-PR previews remain unbuilt.
 
 The initial governance bootstrap merged through PR #3 and its one-time exception has
 expired. The historical technical-steward appointment and completed dual-capacity

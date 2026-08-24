@@ -39,8 +39,13 @@ The PR body block has this form:
 ```
 
 The role identities describe the actual builder and independent reviewer, whether human
-or agent. They are not permanent vendor assignments. PR prose is parsed as data and is
-never interpolated into a shell command.
+or separately instantiated AI agent. They are declared actor provenance, not permanent
+vendor assignments or cryptographic hosted identity proof. A role relabel, new session,
+or different model/provider does not establish independent review; a material reviewer
+edit creates a new builder-authored SHA requiring fresh evidence. Model/provider
+metadata may be defense in depth, never authority. The evaluator's read-only decision
+does not satisfy a separately defined action-specific hold. PR prose is parsed as data
+and is never interpolated into a shell command.
 
 `schema-v1.json` defines the structural contract. The evaluator additionally applies
 cross-field semantics that JSON Schema alone does not express, including different
@@ -57,5 +62,7 @@ missing package metadata.
 
 The package risk is the adopted planning floor. The PR declaration may equal or raise
 that floor when changed paths or independent review identify higher consequences, but
-it may never lower it. The hosted adapter waits up to the CI workflow's 30-minute
-validation contract before reporting missing or incomplete check evidence.
+it may never lower it. The hosted adapter requires every stable CI and Security
+subsystem plus their uniquely named aggregate checks, adds the three Quality checks
+for web-facing paths, and waits up to 30 minutes before reporting missing or incomplete
+check evidence.

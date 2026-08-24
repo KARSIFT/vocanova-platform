@@ -1,13 +1,13 @@
 ---
 id: DOC-07
 title: VocaNova API Contract and DTO Design
-version: 1.0
+version: 1.1
 document_type: api-contract
 status: approved
 owner: founder
 canonical_path: docs/engineering/07-api-contract-and-dto-design.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+last_reviewed_at: 2026-08-22
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -16,17 +16,29 @@ related_documents:
   - DOC-06
   - DOC-08
   - DOC-09
-related_decisions: []
+related_decisions:
+  - ADR-0003
 adoption_change: VOC-008
 source_files:
   - path: 07-api-contract-and-dto-design.md
     sha256: c1b44de8d2edd02a98098b03b6839f553c594a8225e7371952751a8e19f6883e
 ---
+
 # 07 — VocaNova API Contract and DTO Design
+
+## Active VOC-080 contract amendment
+
+The public `/api/v1` OpenAPI contract and observable behavior are the migration seam
+defined by [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md).
+Hono and schema-driven TypeScript DTOs are the runtime implementation. T11 replaced
+the former Go/Huma oracle with the frozen parity snapshot after deterministic drift
+and parity tests passed. No
+endpoint may silently change because its storage moves from PostgreSQL to D1.
 
 ## Core API decisions
 
-REST base path `/api/v1`. Go + Huma v2 + chi. PostgreSQL + Ent. Server-managed PostgreSQL sessions.
+REST base path `/api/v1`. TypeScript Module Worker + Hono + generated OpenAPI. D1-backed typed
+repositories and server-managed D1 sessions.
 Google OAuth + email magic link. Secure HttpOnly session cookie. CSRF via double-submit cookie
 (`X-CSRF-Token`). UUIDv7-preferred IDs. RFC3339 UTC timestamps. IANA timezone names.
 
@@ -121,23 +133,24 @@ unlinkable aggregates may remain, subject to legal review.
 
 ## OpenAPI rules
 
-The generated OpenAPI 3.1 artifact is committed at
-`apps/api/openapi/vocanova.openapi.json` and is the input to client generation and CI drift checks.
+The generated operational OpenAPI 3.1 artifact is committed at
+`apps/api-worker/openapi/worker-foundation.openapi.json`; CI compares it with the
+frozen retired-source contract snapshot and API client.
 Operation IDs: `<Verb><Resource>` (e.g. `GetCurrentUser`, `SubmitReview`,
 `CreateLearnerSentence`). Must include examples, validation metadata, error responses, stable
 operation IDs.
 
 ## Testing requirements
 
-Unit, handler, service, contract tests, OpenAPI golden-file checks, PostgreSQL integration, auth
-tests, CSRF tests, idempotency tests.
+Unit, handler, service, workerd, contract-snapshot, OpenAPI golden-file, local D1 integration/migration,
+auth, CSRF, cross-user, atomicity, consistency, and idempotency tests.
 
-## Codex handoff
+## Builder handoff
 
 Implement DTOs first → never expose Ent models → add auth/CSRF/idempotency middleware → implement
 routes per the approved contract → tests before acceptance → export OpenAPI artifacts.
 
-## Claude Code review
+## Independent review
 
 DTO correctness, contract compliance, security middleware, OpenAPI changes, test coverage, no leaked
-internal data.
+internal data. The reviewer must be a different participant from the builder; no vendor is permanent.

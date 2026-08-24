@@ -1,0 +1,51 @@
+# VOC-086 — Acceptance Criteria
+
+## VOC-086-AC-00 — Active F2 truth is exact
+
+- Requirements: `VOC-086-D00`, `D01`, `D02`
+- Tasks: `VOC-086-T00`
+- Tests: `VOC-086-TEST-00`, `TEST-01`
+- Evidence: `VOC-086-EV-00`
+- Result: complete-exact-SHA-5f19974b44761e05a899f6ea50178eedd891d663-merged-through-PR-134
+
+All six living surfaces report repository/local F2 complete using PR #108 exact head,
+merge, and post-merge evidence. Candidate-era facts remain historical and no active
+field calls the satisfied integration gate pending.
+
+## VOC-086-AC-01 — Later gates remain held
+
+- Requirements: `VOC-086-D04`, `D05`
+- Tasks: `VOC-086-T00`, `T01`
+- Tests: `VOC-086-TEST-02`
+- Evidence: `VOC-086-EV-01`
+- Result: T00-complete-through-PR-134; T01-complete-through-PR-135; T02-final-candidate-pending-own-review-hosted-merge-postmerge-and-issue-closure
+
+F3, staging, A1/P1-P5 acceptance, production, deployment, and live verification remain
+unclaimed; VOC-080-HOLD-00/01/02 remain held.
+
+## VOC-086-AC-02 — Drift fails closed
+
+- Requirements: `VOC-086-D03`
+- Tasks: `VOC-086-T01`
+- Tests: `VOC-086-TEST-03`, `TEST-04`
+- Evidence: `VOC-086-EV-02`
+- Result: complete-exact-SHA-4920ac170ca1c527b00dc6e2061b86ef236dc95d-merged-through-PR-135
+
+Deterministic, network-free fixtures independently reject a stale status, missing exact
+evidence, history/current conflation, later-gate promotion, hold release, and aggregate
+omission on every designated active surface.
+
+## VOC-086-AC-03 — Final evidence is independently bound
+
+- Requirements: `VOC-086-D06`, `D07`
+- Tasks: `VOC-086-T02`
+- Tests: `VOC-086-TEST-05`, `TEST-06`
+- Evidence: `VOC-086-EV-03`
+- Result: final-candidate-pending-T02-own-exact-review-hosted-proof-normal-merge-postmerge-checks-and-issue-131-closure
+
+Each exact task revision has different-actor review, applicable R4 specialist evidence,
+hosted checks, reversible rollback proof, normal merge evidence, and passing final
+post-merge checks before issue #131 closes. The T02 candidate may record immutable
+plan/T00/T01 evidence and its closure contract, but it cannot contain its own final SHA,
+review URLs, hosted workflow URLs, merge SHA, post-merge runs, or issue-closure URL; that
+evidence belongs to expected PR #136, or the final T02 PR if its number differs.

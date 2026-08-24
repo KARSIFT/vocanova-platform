@@ -1,13 +1,13 @@
 ---
 id: DOC-06
 title: VocaNova Backend Design
-version: 1.0
+version: 1.1
 document_type: backend-design
 status: approved
 owner: founder
 canonical_path: docs/engineering/06-backend-design.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+last_reviewed_at: 2026-08-22
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -16,23 +16,36 @@ related_documents:
   - DOC-07
   - DOC-09
   - DOC-10
-related_decisions: []
+related_decisions:
+  - ADR-0003
 adoption_change: VOC-008
 source_files:
   - path: 06-backend-design.md
     sha256: f2f5dd0159cbefc96df37d9a1fd78adb34e22680fa18fe356973ec76a69d2578
 ---
+
 # 06 — VocaNova Backend Design
+
+## Active VOC-080 backend amendment
+
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) makes a
+TypeScript Module Worker using Hono, generated bindings, typed repositories, and D1
+the target backend. T11 removed the former Go/Huma/Ent/PostgreSQL behavioral oracle
+from the active tree after parity; compact contract/schema snapshots retain the
+migration evidence. The feature boundaries, workflows,
+authorization rules, idempotency, and observable `/api/v1` behavior below remain
+requirements; Go- or PostgreSQL-specific implementation directions are transitional.
 
 ## 1. Overview
 
-Go modular monolith backend: Go, PostgreSQL, Ent ORM, Atlas migrations, Huma v2, chi router, Uber Fx
-DI, REST-first API, server-managed sessions, UTC timestamps, IANA timezone handling.
+Cloudflare TypeScript modular-monolith API Worker: Hono routing, schema-driven validation/OpenAPI,
+generated binding types, typed domain/repository boundaries, D1 persistence, REST-first `/api/v1`,
+server-managed sessions, canonical UTC timestamps, and IANA timezone handling.
 
 ## 2. Architecture principles
 
-Modular monolith, feature-oriented business modules, strong transaction boundaries, idempotent
-important writes, secure-by-default, avoid premature microservices/queues.
+Modular monolith, feature-oriented business modules, explicit D1 atomicity and consistency
+boundaries, idempotent important writes, secure-by-default, and no premature services or queues.
 
 ## 3. Backend modules
 
@@ -44,27 +57,26 @@ coordination happens through services, not direct cross-module table access.
 ## 4. Project structure
 
 ```text
-apps/api/
-  cmd/api/
-  app/{bootstrap,api}/
-  business/{identity,users,content,learning,reviews,missions,gamification,writingai,accounts}/
-  foundation/{database,auth,web,idempotency,audit,clock,timezone,config,log}/
-  ent/schema/
+apps/worker-api/
+  src/{app,foundation,business}/
+  src/business/{identity,users,content,learning,reviews,missions,gamification,writingai,accounts}/
+  src/foundation/{database,auth,web,idempotency,audit,clock,timezone,config,log}/
   migrations/
-  openapi/vocanova.openapi.json
+  test/{unit,workerd,parity}/
+
+apps/api-worker/ # Hono/D1 runtime
 ```
 
 ## 5. API design
 
-Huma v2 + chi, `/api/v1` prefix, dynamic OpenAPI generation from Huma. The generated contract is
-committed at `apps/api/openapi/vocanova.openapi.json` for TypeScript code generation and drift
-detection; [07](07-api-contract-and-dto-design.md) defines its stability rules. Main groups: auth,
-current user, discovery, user words, reviews, daily missions,
-gamification, learner sentences, account lifecycle.
+Hono, `/api/v1`, schema-driven OpenAPI, and a deterministic drift check against the committed
+contract and API client. [07](07-api-contract-and-dto-design.md) defines stability rules. Main
+groups remain auth, current user, discovery, user words, reviews, daily missions, gamification,
+learner sentences, and account lifecycle.
 
 ## 6. Authentication
 
-Google OAuth + email magic link, no password login in MVP. Sessions: PostgreSQL-stored, secure
+Google OAuth + email magic link, no password login in MVP. Sessions: D1-stored, secure
 HttpOnly cookies, hashed session tokens, 30-day lifetime, no sliding renewal initially. Magic links:
 15-minute expiry, single use, stored hashed.
 
@@ -75,12 +87,12 @@ requester; deleted users can't authenticate. DTO validation (required fields, fo
 enums) is separate from domain validation (learning rules, review rules, mission rules, reward
 rules).
 
-## 8. Transactions and Ent usage
+## 8. Atomicity and D1 repository usage
 
-Ent used directly in services/query files. Repository interfaces are reserved for true external
-boundaries (AI provider, email provider, clock) — not used as a blanket abstraction over Ent.
-Top-level use-case services own transactions for: review submission, word addition, account
-deletion, reward creation.
+Prepared statements are mandatory for dynamic values. Typed repository interfaces isolate D1 from
+domain logic. Top-level use-case services own atomic D1 `batch()` operations and session-consistency
+requirements for review submission, word addition, account deletion, and reward creation. A Durable
+Object requires a measured invariant that an atomic batch cannot safely represent.
 
 ## 9. Idempotency
 
@@ -155,15 +167,15 @@ HTTPS, CSRF protection, CORS allowlist, secure cookies, hashed tokens, input val
 
 ## 17. Testing
 
-Required: unit, service, HTTP, PostgreSQL integration, migration, security tests. CI: `gofmt`,
-`go vet`, `go test`, build, PostgreSQL integration tests. Later additions: `staticcheck`,
-`govulncheck`, Ent consistency checks, Atlas validation.
+Required target evidence: unit, service, HTTP, workerd, local D1 repository/migration, contract
+parity, authorization, atomicity/consistency, security, contract-snapshot, and
+retired-source conversion tests.
 
-## 18. Codex implementation order
+## 18. VOC-080 implementation order
 
-Backend foundation → database foundation → authentication → user profile/settings →
+Worker/backend foundation → D1 foundation → authentication → user profile/settings →
 content/discovery → user words → daily missions → review engine → gamification → AI feedback →
-account lifecycle → production hardening. Phase-based, with GitHub PRs and Claude Code review for
-important changes. Exact review and merge authority per risk class comes from the
-[canonical governance index](../governance/README.md), not this backend design; [DOC-19](../operations/19-governance-reconciliation-notes.md)
+account lifecycle → held production hardening. Phase-based, with GitHub PRs and different-role
+exact-revision review. Exact review and merge authority per risk class comes from the
+[canonical governance index](../governance/README.md), not this backend design; [DOC-19](../archive/19-governance-reconciliation-notes.md)
 provides non-authoritative orientation.

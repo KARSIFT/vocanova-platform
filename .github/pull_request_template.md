@@ -7,6 +7,10 @@
 - Requirement source:
 - Stable acceptance-criteria mapping:
 - Implementation tasks/commits:
+- Planned delivery shape (`1 package / 1 implementation PR / 1 minimum-sufficient task` by default):
+- Planned implementation pull-request count:
+- Task-to-PR mapping:
+- Multi-PR rationale or `N/A — one coherent PR default`:
 
 Change mode: <!-- Standard | Lightweight R0 -->
 Risk classification: <!-- Replace with exactly R0, R1, R2, R3, or R4 -->
@@ -20,12 +24,13 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - What changed:
 - In scope:
 - Out of scope:
+- Largest-safe-coherent-unit evidence (backend/frontend/contracts/tests/docs/rollback/evidence sharing one outcome):
 
 ## Existing-file reconciliation
 
-| Path | Classification | Preserved content | Reconciliation |
-|---|---|---|---|
-| path | present-compatible / present-needs-reconciliation / absent-approved-to-create / material-conflict |  |  |
+| Path | Classification                                                                                    | Preserved content | Reconciliation |
+| ---- | ------------------------------------------------------------------------------------------------- | ----------------- | -------------- |
+| path | present-compatible / present-needs-reconciliation / absent-approved-to-create / material-conflict |                   |                |
 
 - Previous governance control:
 - Proposed governance control:
@@ -58,8 +63,8 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 ## Acceptance-criteria evidence
 
 | Criterion | Test or observable evidence | Result |
-|---|---|---|
-| AC-## |  |  |
+| --------- | --------------------------- | ------ |
+| AC-##     |                             |        |
 
 ## Validation evidence
 
@@ -67,8 +72,9 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - CI run:
 - Preview deployment URL/status or `N/A` with reason:
 - Independent-verifier report/result:
-- Implementer provenance:
-- Verifier provenance:
+- Implementer provenance: actor identity, role, and authorship provenance
+- Verifier provenance: actor identity, role, exact-SHA independence, and optional runtime provenance
+- External-orchestrator provenance/version or `N/A` (provenance only; never authority):
 
 Complete the machine-readable block after exact-revision independent review. Keep it
 as JSON data; do not add shell expressions or credentials. Use an empty
@@ -97,6 +103,12 @@ as JSON data; do not add shell expressions or credentials. Use an empty
 }
 -->
 
+Actor identity is attributable provenance, not hosted cryptographic attestation.
+Model/provider/runtime metadata is optional and never authority. A reviewer who
+materially edits the revision becomes its builder; record a new SHA and a different
+reviewer. A passing verdict or eligibility result never clears a separately defined
+action-specific hold.
+
 ## Impact assessments
 
 - Security and privacy:
@@ -106,6 +118,7 @@ as JSON data; do not add shell expressions or credentials. Use an empty
 - Accessibility:
 - Documentation:
 - Cloudflare/deployment/operations:
+- Ruflo/orchestrator permission impact or `N/A`:
 
 ## Release and outcome
 
@@ -124,9 +137,14 @@ as JSON data; do not add shell expressions or credentials. Use an empty
 - [ ] The package's `automatic_merge_allowed` value was examined; R0–R4 default to
       `true`, and any `false` includes a package-local `automatic_merge_hold_reason`
       (except VOC-079's documented transition value).
+- [ ] The planned delivery shape is the largest safe coherent unit for the approved
+      outcome; task IDs are not being used as extra PRs without a recorded boundary
+      and overhead rationale.
 - [ ] The change stays within the approved scope and contains no unrelated cleanup.
 - [ ] All installed checks relevant to this change pass; unavailable checks are
       disclosed rather than represented as passing.
 - [ ] No secrets, credentials, or unnecessary personal data are included.
 - [ ] Material changes after review will dismiss or renew approvals and verification.
 - [ ] AI implementation/review provenance is disclosed above.
+- [ ] No external orchestrator received GitHub write/merge, Cloudflare, secret,
+      production-data, deployment, spending, DNS, or launch authority.

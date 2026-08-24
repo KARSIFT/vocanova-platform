@@ -1,0 +1,170 @@
+# VOC-080 — Tasks
+
+## VOC-080-T00 — Adopt Cloudflare and Ruflo architecture decisions
+
+- Requirements: `VOC-080-D00` through `VOC-080-D10`
+- Acceptance: `VOC-080-AC-00`
+- Tests: `VOC-080-TEST-00`
+- Evidence: `VOC-080-EV-00`
+- Status: complete; merged through PR #87 as `c376d9f71d217c5a0736be4b54f2b784a8f54414`.
+
+Add two accepted ADRs (Cloudflare runtime/data/deployment and external Ruflo orchestration), reconcile
+the ADR/doc indexes, and update DOC-04/05/06/07/08/09/10/11/12/15/16 plus contributor/governance
+guidance. Preserve product requirements and historical records. Record the current compatibility
+inventory and rejected alternatives.
+
+## VOC-080-T01 — Refactor the four-workflow CI/CD foundation
+
+- Requirements: `VOC-080-D00`, `VOC-080-D01`, `VOC-080-D07`
+- Acceptance: `VOC-080-AC-01`, `VOC-080-AC-02`
+- Tests: `VOC-080-TEST-01`, `VOC-080-TEST-02`
+- Evidence: `VOC-080-EV-01`, `VOC-080-EV-02`
+- Status: complete; merged through PR #88 as `e3b9f502fee91f15cb0dc0c163b52ebcc396f2fc`.
+
+Keep exactly four workflows while introducing stable subsystem checks, local setup reuse, caches that
+do not affect correctness, strict shells, immutable pins, `persist-credentials: false`, least
+permissions, bounded artifacts, and deterministic path classification if beneficial. Harden supported
+repository settings and immediately reconcile the settings guide. Do not add deployment credentials
+or live Cloudflare calls.
+
+## VOC-080-T02 — Establish pinned external Ruflo orchestration
+
+- Requirements: `VOC-080-D08`
+- Acceptance: `VOC-080-AC-09`
+- Tests: `VOC-080-TEST-00`, `VOC-080-TEST-11`
+- Evidence: `VOC-080-EV-00`, `VOC-080-EV-11`
+- Status: complete; merged through PR #89 as `b7c20e87a688b4ed8164c38ea73258761699069f`.
+
+Audit and pin Ruflo's exact release/integrity; document/install it outside the repository without
+running a force initializer; define hierarchical roles, worktree ownership, evidence handoff,
+reviewer non-duplication, memory privacy, and deny-by-default permissions. Extend guards so tracked
+Ruflo launchers, authority overrides, issue triggers, autonomous GitHub completion, Cloudflare
+credentials, or deployment calls fail closed. Rehearse with a synthetic repository-only task.
+
+## VOC-080-T03 — Adapt Next.js web to OpenNext/workerd
+
+- Requirements: `VOC-080-D03`, `VOC-080-D10`
+- Acceptance: `VOC-080-AC-03`
+- Tests: `VOC-080-TEST-03`
+- Evidence: `VOC-080-EV-03`
+- Status: complete; merged through PR #90 as `ae9f2a899d8b40858c7706f5a2992a4cecfb1a55`.
+
+Add the OpenNext adapter, locked Wrangler config and generated types, build/preview/dry-run commands,
+representative workerd tests, and size/startup measurement. Reconcile environment handling, server
+headers/cookies, middleware, Sentry, and API service binding. Preserve current UI behavior; do not
+deploy.
+
+## VOC-080-T04 — Build Worker API and D1 contract foundation
+
+- Requirements: `VOC-080-D04`, `VOC-080-D05`
+- Acceptance: `VOC-080-AC-04`
+- Tests: `VOC-080-TEST-04`
+- Evidence: `VOC-080-EV-04`
+- Status: complete; merged through PR #91 as `93733aeafa725621736767d67a47a6b6c06fa650`.
+
+Create the Worker API workspace with Hono, schema validation/OpenAPI generation, generated bindings,
+typed domain/repository boundaries, local D1, initial migrations, structured errors/logging, health
+and config behavior, Vitest pool/workerd tests, and contract drift checks. Keep Go as reference.
+
+## VOC-080-T05 — Port identity, sessions, accounts, and settings
+
+- Requirements: `VOC-080-D04` through `VOC-080-D06`
+- Acceptance: `VOC-080-AC-05`
+- Tests: `VOC-080-TEST-05`
+- Evidence: `VOC-080-EV-05`
+- Status: complete; merged through PR #92 as `1881b00bac4b7656a68c8dff335cc0f67e951c4a`.
+
+Port Google OAuth state, magic links, sessions, auth middleware, account lifecycle, email-change,
+deletion, onboarding, and settings. Prove secure cookie, token hashing/expiry, replay prevention,
+rate limits, kill switches, unauthorized and cross-user behavior, and D1 atomicity against parity
+fixtures. External email remains mocked.
+
+## VOC-080-T06 — Port content, discovery, save, and review scheduling
+
+- Requirements: `VOC-080-D04` through `VOC-080-D06`
+- Acceptance: `VOC-080-AC-05`
+- Tests: `VOC-080-TEST-06`
+- Evidence: `VOC-080-EV-06`
+- Status: complete; merged through PR #93 as `deda0a6deabf1dfcb785fda4a3445084e640230f`.
+
+Port canonical vocabulary, journeys, save/unsave, learner words, cursors, review queues/attempts,
+scheduling, and idempotency. Validate ordering, due-time semantics, duplicate protection, and
+cross-user isolation under D1.
+
+## VOC-080-T07 — Port missions, gamification, streaks, and progress
+
+- Requirements: `VOC-080-D04` through `VOC-080-D06`
+- Acceptance: `VOC-080-AC-05`
+- Tests: `VOC-080-TEST-07`
+- Evidence: `VOC-080-EV-07`
+- Status: complete; merged through PR #94 as `a160454c84f0972df0b4934cf6001c2ab2beeab9`.
+
+Port daily snapshots, local-date/timezone rules, confidence ledger, rewards, streaks, grace days,
+progress, and cross-capability atomic updates. Prove idempotency, concurrency, partial-failure, and
+deterministic domain parity.
+
+## VOC-080-T08 — Port AI feedback, email boundary, and observability
+
+- Requirements: `VOC-080-D02`, `VOC-080-D04`, `VOC-080-D10`
+- Acceptance: `VOC-080-AC-06`
+- Tests: `VOC-080-TEST-08`
+- Evidence: `VOC-080-EV-08`
+- Status: complete; merged through PR #95 as `366534d0bd68c716a280f6413a0bbed7fd7f05cb`.
+
+Port sentence/feedback persistence, validation, safety/moderation, provider adapters, bounded retries,
+cost/rate gates, evaluation fixtures, email HTTP boundary, feature kill switches, and privacy-safe
+Workers observability. Use mocks in CI and no paid-provider secret.
+
+## VOC-080-T09 — Build and rehearse PostgreSQL-to-D1 conversion
+
+- Requirements: `VOC-080-D05`, `VOC-080-D06`
+- Acceptance: `VOC-080-AC-07`
+- Tests: `VOC-080-TEST-09`
+- Evidence: `VOC-080-EV-09`
+- Status: complete; merged through PR #96 as `315e590d888badfaf24c09698a072d131f5d4640`.
+
+Implement deterministic export-shape validation, type conversion, D1 import chunks, resumability,
+idempotency, foreign-key ordering, redaction, counts/checksums/domain reconciliation, and failure
+recovery. Rehearse only with synthetic/non-production fixtures. Production-data access stays held.
+
+## VOC-080-T10 — Add staged Cloudflare deployment and rollback controls
+
+- Requirements: `VOC-080-D00`, `VOC-080-D07`, `VOC-080-D10`
+- Acceptance: `VOC-080-AC-08`
+- Tests: `VOC-080-TEST-10`
+- Evidence: `VOC-080-EV-10`
+- Status: complete; merged through PR #97 as `6fa48164d974fe347d8c7c408b4374af5254f336`.
+
+Within `ci.yml`, add credential-free PR dry runs and environment-scoped staging/production jobs for
+D1 migration, immutable version upload, smoke/parity/E2E evidence, explicit promotion, outcome, and
+rollback. Prove fork/PR secret denial, SHA binding, staging/production isolation, and non-cancellation
+after migration start. Do not activate live environments until the named holds complete.
+
+## VOC-080-T11 — Retire active server runtime and stale infrastructure
+
+- Requirements: `VOC-080-D09`
+- Acceptance: `VOC-080-AC-00`, `VOC-080-AC-10`
+- Tests: `VOC-080-TEST-11`
+- Evidence: `VOC-080-EV-11`
+- Status: complete; merged through PR #99 as `fa467159cfc5089c1355691c43df208a312d6801`.
+
+After a complete parity inventory, remove the active Go/PostgreSQL runtime, Dockerfiles, Compose,
+Nginx, host scripts, and server-specific tests/instructions; reconcile validators, package scripts,
+docs, examples, and protected paths. Preserve historical packages and explicitly state that no live
+server was inspected or stopped.
+
+## VOC-080-T12 — Final verification, rollback, and transition record
+
+- Requirements: all
+- Acceptance: `VOC-080-AC-11`
+- Tests: `VOC-080-TEST-12`
+- Evidence: `VOC-080-EV-12`
+- Status: complete; final head `3d6699c5eb378b9a00679d61a5c28b6b7e27c32c` merged through PR #100
+  as `a05ab5c60534f36d1b89d9b9d32296469e9942bf`; post-merge evidence is recorded in the
+  VOC-084 closure inventory.
+
+Run the full repository/Worker/D1/web/security/governance suites, hosted Actions, semantic inventory,
+synthetic migration and deployment rehearsals, reverse-order task rollback, and exact-SHA independent
+specialist review. The exact final head, hosted and post-merge results, reverse-order repository
+rollback, and closure boundary are recorded in the VOC-084 inventory. Live staging/production
+activation was not performed: HOLD-00, HOLD-01, and HOLD-02 remain held.

@@ -1,0 +1,287 @@
+schema_version: 1
+
+id: VOC-085
+slug: public-repository-settings-truth
+title: Reconcile public repository settings and active guidance
+
+type: governance-evidence-reconciliation
+status: adopted
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because the implementation updates DOC-16 and protected repository-governance
+  guidance while reconciling a hosted settings boundary. It changes no setting or
+  external system, but a false hosted-enforcement claim could misroute review,
+  security, or release decisions.
+canonical_path: specs/changes/VOC-085-public-repository-settings-truth
+base_branch: develop
+base_sha: e629693669e7c5f56c2a9d6719b66532df0f95f2
+target_branch: develop
+approved_candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+requirement_source: >-
+  GitHub issue https://github.com/KARSIFT/vocanova-platform/issues/119, created
+  2026-08-23, which reports that the repository became public while active guidance
+  still described private GitHub Free limitations and the VOC-080 settings snapshot
+  was being treated as current. The point-in-time read-only state was reverified
+  through the GitHub REST API on 2026-08-24 before this revision was drafted.
+requirement_approval_status: exact-plan-review-pass-and-decision-owner-approved
+
+authority_model: voc-079-approval-neutral-active
+owners:
+  decision: accountable-decision-owner-after-independent-plan-review
+  package_preparation: separate planner role
+  implementation: separate builders after adoption
+  independent_verification: different non-author reviewer for each exact revision
+  merge: separate non-author merge actor
+
+approvals:
+  requirement_direction:
+    status: recorded-for-planning
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/119
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389018437
+  package_independent_verification_history:
+    - candidate_sha: c11b99ea11992050ca0b2719221d34e4e0c7041f
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5388913896
+      resolution: >-
+        Preserved as immutable review history. This revision adds an explicit
+        point-in-time freshness contract, corrects branch-mutation wording, formalizes
+        VOC-085-HOLD-00, and adds bounded R4 settings-specialist evidence requirements.
+    - candidate_sha: 23421df02bb028530c1baa6d9d7c35d9ce7cc0fe
+      verdict: fail-specialist
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5388969389
+      resolution: >-
+        Preserved as immutable specialist review history. The next revision separates
+        currently enabled dependency/vulnerability alerts from disabled Dependabot
+        security updates, secret-scanning controls, and future held settings targets.
+    - candidate_sha: 16b4e9abd8e7c0db6f7f9bb86406103340e2422f
+      verdict: fail
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389109852
+      resolution: >-
+        Preserved as immutable bookkeeping review history. This remediation records
+        plan review and adoption-decision satisfaction while keeping PR #126 merge
+        pending, and reconciles package wording to make implementation authority
+        effective only after that merge.
+  adoption_decision:
+    status: approved-for-adoption
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389074358
+  package_settings_specialist_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389072261
+  candidate_hosted_evidence:
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32672756263
+    governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32672756281
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32672756316
+    quality: not-applicable-plan-only-path-filter
+  adoption_completion:
+    status: merged-and-post-merge-bookkeeping-complete
+    final_bookkeeping_head: 72aaef493450b10d64e602ef4d2d1f2f87b817c1
+    final_bookkeeping_evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389124074
+    merge_commit: b3834b7cbf67679811666b00db7ec6525b69c39a
+    post_merge_evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389165393
+  implementation_evidence:
+    - task: VOC-085-T00
+      candidate_sha: 429aee4c5b833c3f0ae2e870f11077fbd1e06cad
+      merge_sha: c2a351158026b2b6b3a352cb7e4b58c9d9a061ba
+      review_history:
+        - verdict: fail-specialist
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389208601
+        - verdict: pass-general
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389226018
+        - verdict: pass-specialist
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389229391
+      hosted: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389270043
+      post_merge: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389304520
+    - task: VOC-085-T01
+      candidate_sha: efeb1d0b7f7e61138a2b705719a3d8e2389be342
+      merge_sha: d223002d0e232eff7bc13f35e5d66e625d751afb
+      review_history:
+        - verdict: fail-general
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389389522
+        - verdict: fail-specialist
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389399132
+        - verdict: pass-general
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389417287
+        - verdict: pass-specialist
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389420360
+      hosted: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389455062
+      post_merge: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389475734
+    - task: VOC-085-T02
+      candidate_sha: 47293d416a7a85ecbbbee0c8f0b03608ae4d17c2
+      merge_sha: 8dd45f50b3a8be120aee29485349bdedd5a6d3ca
+      review_history:
+        - verdict: fail-general-superseded
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389557239
+        - verdict: fail-specialist
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389568782
+        - verdict: pass-general
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389644430
+        - verdict: pass-specialist
+          evidence: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389654353
+      hosted: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389678799
+      post_merge: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389697695
+  t03_candidate_evidence: t03-evidence.yaml
+
+approval_status: adopted
+implementation_authorized: true
+automatic_merge_allowed: true
+production_impact: none-repository-documentation-and-evidence-only
+rollback_required: true
+required_r4_evidence:
+  decision_record:
+    required: true
+    evidence: package specification decisions and issue #119 traceability
+  impact_assessment:
+    required: true
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    evidence: implementation-plan.md and release-plan.md
+  deterministic_evidence:
+    required: true
+    evidence: test-plan.md and final validation outputs
+  specialist_evidence:
+    required: true
+    role: repository-governance-and-GitHub-settings specialist
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389072261
+    evidence_contract: >-
+      Exact source/API schema and endpoint interpretation, availability-versus-enabled
+      distinction, dependency/vulnerability-alert versus Dependabot-security-update
+      interpretation, point-in-time and staleness semantics, no-mutation boundary, and
+      exact-SHA final specialist review. The final exact revision received a distinct
+      non-author specialist PASS with zero blocking findings.
+action_specific_holds:
+  - id: VOC-085-HOLD-00
+    status: held
+    scope: >-
+      Future mutation of GitHub repository settings, including rulesets, branch
+      protection, merge-method policy, security toggles, or related hosted enforcement.
+    accountable_role: explicitly assigned GitHub repository-settings operator
+    required_authority: >-
+      Separate explicit authority for the exact settings action from the accountable
+      settings decision owner; risk class, public visibility, package adoption, and
+      independent review do not satisfy it.
+    required_evidence:
+      - exact pre-state read-only snapshot and observation time
+      - exact intended settings payload and API/UI operation
+      - reversible rollback procedure and accountable rollback owner
+      - immediate governed documentation follow-up plan
+      - post-state read-back and exact evidence record
+    completion_condition: >-
+      The specifically authorized settings mutation is completed, post-state read-back
+      matches the approved payload, rollback evidence is retained, and the immediate
+      governed documentation follow-up is merged.
+    expiry_condition: >-
+      Expires without action when the explicit authorization expires or is withdrawn;
+      any later settings action requires a new exact hold/evidence record.
+    merge_effect: >-
+      Does not block repository-only VOC-085 planning, implementation, review, or merge;
+      it blocks only the external settings mutation described above.
+inherited_holds:
+  - id: VOC-080-HOLD-00
+    status: held
+    action: create-or-mutate-cloudflare-staging-resources-and-secrets
+  - id: VOC-080-HOLD-01
+    status: held
+    action: deploy-or-route-production-traffic-or-apply-production-d1-migrations
+  - id: VOC-080-HOLD-02
+    status: held
+    action: access-export-transform-or-delete-production-learner-data
+
+scope_boundary:
+  settings_mutation: prohibited
+  environment_mutation: prohibited
+  deployment: prohibited
+  cloudflare: prohibited
+  sentry: prohibited
+  dns: prohibited
+  server_or_ssh: prohibited
+  secrets_or_production_data: prohibited
+  main_promotion: prohibited
+  branch_deletion: prohibited
+  issue_119_closure: post-merge-only
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+  final_evidence: t03-evidence.yaml
+
+dependencies:
+  - id: VOC-085-DEP-00
+    status: satisfied-exact-plan-review-adoption-decision-and-pr-126-merge
+    description: >-
+      The plan candidate must receive a different-actor exact-SHA independent PASS,
+      and an accountable adoption decision must bind that PASS before implementation.
+  - id: VOC-085-DEP-01
+    status: satisfied-by-t00-exact-record-and-preserved-voc-080-history
+    description: >-
+      VOC-080's private-repository snapshot in
+      docs/operations/voc-080-transition-record.{json,md} remains immutable history;
+      state current as observed at 2026-08-24 must be recorded separately and never
+      overwrite it.
+  - id: VOC-085-DEP-02
+    status: satisfied-by-t01-guidance-and-held-control-boundary
+    description: >-
+      Future rulesets, security features, and other mature protections are desired
+      and held only. This package and its implementation must not mutate GitHub or
+      any environment setting.
+  - id: VOC-085-DEP-03
+    status: candidate-closure-gate-pending-t03-merge-and-post-merge-checks
+    description: >-
+      Issue #119 may close only after the final implementation revision merges into
+      develop and applicable post-merge checks pass; drafting or plan adoption does
+      not close the issue.
+  - id: VOC-085-DEP-04
+    status: satisfied-by-t00-record-and-t01-guidance
+    description: >-
+      Dependency/vulnerability alerts must be recorded separately from Dependabot
+      security updates and secret-scanning controls. If the read-only vulnerability-
+      alerts endpoint reports enabled at implementation time, active guidance must
+      treat that as observed current state, not as a prospective held target.
+
+implementation:
+  authorized: true
+  required: true
+  status: >-
+    T00 complete at exact SHA 429aee4c5b833c3f0ae2e870f11077fbd1e06cad, merged by
+    PR #127 as c2a351158026b2b6b3a352cb7e4b58c9d9a061ba; T01 complete at exact SHA
+    efeb1d0b7f7e61138a2b705719a3d8e2389be342, merged by PR #128 as
+    d223002d0e232eff7bc13f35e5d66e625d751afb; T02 complete at exact SHA
+    47293d416a7a85ecbbbee0c8f0b03608ae4d17c2, merged by PR #129 as
+    8dd45f50b3a8be120aee29485349bdedd5a6d3ca. Their preserved FAILs, final reviews,
+    hosted records, and post-merge records are in t03-evidence.yaml. T03 remains
+    candidate-only pending fresh exact review, hosted proof, merge, post-merge checks,
+    and issue #119 closure gate.
+  target_branch: develop
+  pull_request: null
+  authority_issue: 119
+
+repository_adoption_status: adopted-on-pr-126-merge
+adoption_pr: 126
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389074358
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/126
+implementation_authority_before_adoption: false
+implementation_authority_status: active-after-pr-126-merge
+production_deployment: prohibited
+staging_deployment: held-by-VOC-080-HOLD-00
+production_data_access: held-by-VOC-080-HOLD-02
+autonomous_production_release: disabled
+ehr: not-triggered
+post_adoption_task_gates:
+  - T00-complete-merge-c2a351158026b2b6b3a352cb7e4b58c9d9a061ba
+  - T01-complete-merge-d223002d0e232eff7bc13f35e5d66e625d751afb
+  - T02-complete-merge-8dd45f50b3a8be120aee29485349bdedd5a6d3ca
+  - T03-candidate-on-8dd45f50b3a8be120aee29485349bdedd5a6d3ca-pending-exact-review-hosted-proof-merge-post-merge-and-issue-closure

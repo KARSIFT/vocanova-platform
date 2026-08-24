@@ -7,7 +7,7 @@ status: approved
 owner: founder
 canonical_path: docs/product/00-product-bible.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+last_reviewed_at: 2026-08-23
 review_cycle: semiannual
 supersedes: null
 related_documents:
@@ -17,12 +17,14 @@ related_documents:
   - DOC-05
   - DOC-09
   - DOC-12
-related_decisions: []
+related_decisions:
+  - ADR-0005
 adoption_change: VOC-008
 source_files:
   - path: 01-product-bible-and-prd.md
     sha256: ffafedf6bb6e1ff6c7e04f8ce67c23478592dd099a543a648d970bf5733f8009
 ---
+
 # 00 — VocaNova Product Bible
 
 ## 1. What Vocanova is
@@ -89,9 +91,14 @@ user-selectable models. Full non-goal list in [09](../engineering/09-ai-features
 
 ## 6. Product authority boundary
 
-The delivery participants are the founder/product owner, ChatGPT as planning and architecture
-advisor, Codex as implementation worker, Claude Code as independent verifier, GitHub as repository
-system of record, and GitHub Actions as deterministic automation.
+The founder/product owner retains accountable product-decision authority. Delivery uses
+an accountable decision owner, planner, builder, independent reviewer, and non-author
+merge-audit roles; each capable technical role may be filled by an attributable human
+or separately instantiated AI actor. GitHub is the repository system of record and
+GitHub Actions provides deterministic automation. A model, provider, tool, or runtime
+is optional provenance or evidence hardening, never permanent delivery assignment or
+authority. See [DOC-16](../governance/16-autonomous-development-operating-model.md) and
+[ADR-0005](../decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md).
 
 Product vision and material scope require the authority defined by the
 [canonical governance index](../governance/README.md). [DOC-19](../operations/19-governance-reconciliation-notes.md)

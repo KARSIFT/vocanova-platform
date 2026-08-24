@@ -1,13 +1,13 @@
 ---
 id: DOC-05
 title: VocaNova Database Design
-version: 1.0
+version: 1.1
 document_type: database-design
 status: approved
 owner: founder
 canonical_path: docs/engineering/05-database-design.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
+last_reviewed_at: 2026-08-22
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -15,24 +15,37 @@ related_documents:
   - DOC-06
   - DOC-07
   - DOC-09
-related_decisions: []
+related_decisions:
+  - ADR-0003
 adoption_change: VOC-008
 source_files:
   - path: 05-database-design.md
     sha256: cc2efd5b6356f41bfc9075bd58297b301e6274a708943c16369600e6f0d5d1c9
 ---
+
 # 05 — VocaNova Database Design
+
+## Active VOC-080 data-platform amendment
+
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) replaces
+PostgreSQL/Ent/Atlas as the final runtime target with Cloudflare D1 and forward-only
+Wrangler migrations. T11 retired that former runtime after parity. The tables,
+ownership, product invariants, retention rules, and
+domain semantics in this document remain requirements. PostgreSQL-specific types and
+mechanics in the preserved v1.0 body describe the migration source, not the final D1
+encoding. Production data is not accessed until `VOC-080-HOLD-02` is satisfied.
 
 ## 1. Direction
 
-PostgreSQL + Ent ORM + Atlas migrations, one database, one modular-monolith Go backend. UUID
-identifiers (UUIDv7 where practical), UTC timestamps in storage, IANA timezones for daily learning
-logic. Ent schemas define the persistence model; Atlas handles migrations. Production schema changes
-never run automatically at API startup.
+Cloudflare D1 with an explicit SQLite schema, typed repository boundaries, and forward-only Wrangler
+migrations. UUID identifiers (UUIDv7 where practical) are canonical text; timestamps use one
+documented UTC representation; booleans are constrained integers; JSON is validated text; unsafe
+64-bit values never pass through JavaScript `number`. Production schema changes never run at Worker
+startup. The compact retired-source schema manifest remains the conversion oracle.
 
 ## 2. Core principles
 
-- **Normalized core, JSONB only where genuinely flexible** (AI feedback content, audit metadata,
+- **Normalized core, validated JSON text only where genuinely flexible** (AI feedback content, audit metadata,
   idempotency response bodies, optional operational metadata).
 - **Canonical content vs. user state are separate tables.** Canonical: `canonical_words`,
   `word_meanings`, `word_examples`, `usage_notes`. User state: `user_words`, `review_attempts`,
@@ -42,25 +55,25 @@ never run automatically at API startup.
   `confidence_point_ledger` history).
 - **The database enforces integrity as the final layer**: PKs, FKs, unique constraints (including
   partial unique indexes), check constraints, not-null.
-- **Transactions protect multi-step flows**: review submission, word addition, daily mission
+- **Atomic D1 batches or a justified stronger coordinator protect multi-step flows**: review submission, word addition, daily mission
   completion, point award, streak update, grace-day application, account anonymization.
 - **No premature event sourcing** — pragmatic history tables and audit logs, not a full event store.
 
 ## 3. Naming conventions
 
-Plural snake_case tables, snake_case columns. Every main table: `id uuid primary key` (backend-
-generated, prefer UUIDv7). Most tables: `created_at timestamptz not null`, `updated_at timestamptz
-not null`, all UTC. Soft deletion (`deleted_at timestamptz null`) only where useful, not everywhere.
-Enums are plain `text` columns with `check` constraints, not native PostgreSQL enum types (easier to
-evolve during early iteration, still strongly validated).
+Plural snake_case tables and columns. Every main table uses `id text primary key` with a canonical
+backend-generated UUID/UUIDv7 value. Timestamps use canonical UTC text (or another single ADR-backed
+encoding proven before the first migration). Soft deletion is used only where useful. Enums remain
+`text` columns with `check` constraints. D1 foreign keys are enabled and every integrity invariant
+is covered by migration and repository tests.
 
 ## 4. Timezone strategy
 
 Current timezone lives in `user_settings.timezone` (IANA string). Historical daily records
-(`daily_mission_snapshots.timezone`, `daily_activity_summaries.timezone`) copy the *effective*
+(`daily_mission_snapshots.timezone`, `daily_activity_summaries.timezone`) copy the _effective_
 timezone at creation time, so a later timezone change doesn't rewrite what timezone was actually used
-on a past day. All timestamps stay `timestamptz`/UTC; daily logic uses a separate `local_date date` +
-`timezone text` pair.
+on a past day. All timestamps use the canonical UTC representation; daily logic uses a separate
+`local_date text` (ISO date) + `timezone text` pair.
 
 ## 5. Table overview
 
@@ -78,6 +91,7 @@ idempotency_keys, feature_audit_logs
 ## 6. Identity and account tables
 
 ### `users`
+
 `id uuid pk`, `email text null`, `display_name text null`, `avatar_url text null`,
 `status text not null` (`active`/`disabled`/`deleted`), `onboarding_status text not null`
 (`not_started`/`in_progress`/`completed`), `email_verified_at`, `last_login_at`, `deleted_at`,
@@ -86,6 +100,7 @@ deleted_at is null`. `email` is nullable because the external identity provider 
 identity signal.
 
 ### `external_identities`
+
 Links a user to `google` or `email` provider. `id`, `user_id → users`, `provider text not null check
 in ('google','email')`, `provider_subject text not null`, `provider_email`,
 `provider_email_verified boolean default false`, `deleted_at`, timestamps. Unique on
@@ -93,12 +108,14 @@ in ('google','email')`, `provider_subject text not null`, `provider_email`,
 deletion.
 
 ### `user_onboarding_profiles`
+
 One row per user. `english_level` (`a1`/`a2`/`b1`/`b2`/`unknown`), `native_language`,
 `learning_goal` (`general`/`work`/`travel`/`study`/`conversation`/`exam`), `main_use_case`
 (`daily_life`/`work`/`travel`/`study`/`social`), `daily_review_target integer` (check 5–100),
 `completed_at`.
 
 ### `user_settings`
+
 One row per user. `timezone text default 'UTC'`, `daily_review_target integer default 20` (check
 5–100), `review_interval_preset text default 'vocanova_default'` (`vocanova_default`/`wordup_like`/
 `custom`), `notifications_enabled`, `marketing_emails_enabled`, `app_language default 'en'`. No
@@ -110,11 +127,13 @@ it.
 Platform-owned, not user-specific.
 
 ### `canonical_words`
+
 `text`, `normalized_text`, `word_type` (`word`/`phrase`/`phrasal_verb`/`idiom`/`collocation`),
 `language_code default 'en'`, `status` (`draft`/`active`/`archived`), `difficulty_level`
 (`a1`..`c1`/`unknown`, nullable), `frequency_rank`. Unique on `(language_code, normalized_text)`.
 
 ### `word_meanings`
+
 The core learning unit is a **meaning**, not just a word spelling (e.g. "book" noun vs. "book" verb
 are different meanings). `word_id → canonical_words`, `part_of_speech` (14 values: noun, verb,
 adjective, adverb, preposition, conjunction, interjection, pronoun, determiner, phrase, idiom,
@@ -122,11 +141,13 @@ phrasal_verb, collocation, other), `short_definition`, `learner_definition`, `me
 `status`, `difficulty_level`. Unique on `(word_id, meaning_order)`.
 
 ### `word_examples`
+
 Per-meaning example sentences. `meaning_id → word_meanings`, `example_text`, `example_order`,
 `difficulty_level`, `situation_label`, `status`. Unique on `(meaning_id, example_order)`. No
 translation tables in MVP.
 
 ### `usage_notes`
+
 Per-meaning usage/grammar/collocation/mistake/register/pronunciation notes. `note_type` (6 values
 above), `note_text`, `note_order`, `status`. Unique on `(meaning_id, note_order)`.
 
@@ -136,10 +157,12 @@ Discovery is organized around real-life situations (Airport, Restaurant, Job Int
 containing many word meanings; a meaning can appear in many situations (many-to-many).
 
 ### `journey_situations`
+
 `slug` (unique), `title`, `short_description`, `level_band` (`a1_a2`/`a2_b1`/`b1_b2`/`mixed`,
 nullable), `category` (`daily_life`/`travel`/`work`/`study`/`social`), `status`, `display_order`.
 
 ### `journey_words`
+
 Join table. `journey_situation_id`, `meaning_id`, `relevance_score integer default 50` (1–100),
 `display_order` (nullable), `is_core boolean default false`. Unique on
 `(journey_situation_id, meaning_id)`.
@@ -150,6 +173,7 @@ learner's `user_words`, ordered by `is_core desc, display_order, relevance_score
 ## 9. User learning state
 
 ### `user_words`
+
 One row per user × saved meaning. `status` (`new`/`learning`/`reviewing`/`mastered`/`ignored`/
 `archived`), `source` (`journey`/`search`/`ai_suggestion`/`manual`/`seed`), `review_step integer
 default 0` **(check between 0 and 7)**, `next_review_at`, `last_reviewed_at`, `last_result`
@@ -173,6 +197,7 @@ A word is "due" when `status in ('new','learning','reviewing') and deleted_at is
 (next_review_at is null or next_review_at <= now())`.
 
 ### `review_attempts`
+
 Immutable review history, one row per submitted answer. `user_id`, `user_word_id`, `meaning_id`,
 `attempt_type` (`review`/`practice`/`placement`/`mission`), `prompt_type`
 (`multiple_choice`/`self_check`/`typing`/`sentence_usage` — MVP implements `multiple_choice` and
@@ -196,6 +221,7 @@ Deliberately two tables: `daily_mission_snapshots` (goal + completion state) vs.
 merged.
 
 ### `daily_mission_snapshots`
+
 One row per user per local date. `local_date date`, `timezone text` (copied from settings at
 creation), `review_target integer` (5–100), `reviews_completed integer` (`<=` `review_target`),
 optional `new_word_target`/`new_words_completed`, optional
@@ -206,6 +232,7 @@ Optional goals are bonus goals and do not block core mission or streak completio
 versioned policy explicitly changes that rule.
 
 ### `daily_activity_summaries`
+
 One row per user per local date. Counters: `reviews_attempted/_correct/_skipped`,
 `words_discovered/_added`, `sentences_submitted`, `ai_feedback_received`,
 `confidence_points_earned/_spent`. Unique on `(user_id, local_date)`. Detailed source of truth
@@ -218,6 +245,7 @@ Two tables, deliberately separate: `learner_sentences` (user-written content) vs
 `ai_feedback_attempts` (attempts to generate feedback on that content).
 
 ### `learner_sentences`
+
 `meaning_id` (nullable — future free-writing may not target a specific meaning), `user_word_id`
 (nullable), `sentence_text`, `normalized_sentence_text`, `source`
 (`word_detail`/`review`/`daily_mission`/`free_practice`), `status`
@@ -226,6 +254,7 @@ Two tables, deliberately separate: `learner_sentences` (user-written content) vs
 characters — see [07](07-api-contract-and-dto-design.md) and [09](09-ai-features.md) §6).
 
 ### `ai_feedback_attempts`
+
 `learner_sentence_id`, `status` (`pending`/`succeeded`/`failed`/`cancelled`), `provider`, `model`,
 `prompt_version`, `request_hash`, `feedback_json jsonb`, `feedback_text`, `error_code`,
 `error_message`, `started_at`, `completed_at` (required when `status='succeeded'`; `error_code`
@@ -248,6 +277,7 @@ succeeded.
 ## 12. Confidence Points, streaks, and grace days
 
 ### `confidence_point_ledger`
+
 **Append-only.** Never just a balance field. `amount integer` (nonzero, may be negative),
 `balance_after`, `reason` (`review_correct`/`daily_mission_completed`/`sentence_submitted`/
 `ai_feedback_received`/`streak_bonus`/`admin_adjustment`), `source_type`
@@ -258,11 +288,13 @@ backend product configuration, not database constraints (see [06](06-backend-des
 actual point values).
 
 ### `streak_states`
+
 One row per user (unique). `current_streak_count`, `longest_streak_count` (check `>=` current),
 `last_completed_local_date`, `last_activity_local_date`, `timezone`, `status`
 (`active`/`at_risk`/`broken`). Backend calculates transitions from `daily_mission_snapshots`.
 
 ### `grace_day_ledger`
+
 Append-only. `amount` (nonzero), `balance_after`, `reason`
 (`earned_by_streak`/`manual_grant`/`used_for_missed_day`/`expired`/`admin_adjustment`),
 `source_type` (`daily_mission`/`streak`/`admin`), `applied_to_local_date`, `timezone`,
@@ -271,6 +303,7 @@ Append-only. `amount` (nonzero), `balance_after`, `reason`
 ## 13. Idempotency and audit records
 
 ### `idempotency_keys`
+
 `user_id`, `key text`, `scope text` (`review_submission`/`daily_mission_completion`/`word_addition`/
 `sentence_submission`/`ai_feedback_request`/`point_award`/`grace_day_application`),
 `request_hash`, `response_status`, `response_body jsonb`, `status`
@@ -280,6 +313,7 @@ may safely send the same key without sharing a response or blocking one another.
 are safe to hard-delete.
 
 ### `feature_audit_logs`
+
 Lightweight operational audit trail (not event sourcing). `action`, `entity_type`, `entity_id`,
 `request_id`, `actor_type` (`user`/`system`/`admin`/`ai`), `actor_id`, `metadata jsonb`.
 
@@ -298,13 +332,18 @@ users 1→many idempotency_keys/feature_audit_logs
 
 ## 15. Transaction rules (summary)
 
-Every multi-step flow below is one transaction, in this order: **add word** (validate user/meaning
+Every multi-step flow below is one atomic D1 batch or a separately justified coordinator, in this order: **add word** (validate user/meaning
 active → insert/restore `user_words` → update daily counters → audit log); **submit review** (lock
 row → validate → idempotency check → insert attempt → update schedule → update mission/activity →
 point ledger → streak); **complete daily mission** (mission + activity + point ledger + streak +
 grace ledger together); **AI feedback** (pending-row pattern, never holding a transaction across the
 external call); **account deletion** (must be transactional or safely staged, always with an audit
 log entry).
+
+Read-after-write flows declare D1 session-consistency requirements. Concurrency, duplicate requests,
+batch rollback, partial failure, and forward correction are covered by negative tests; a Durable
+Object is introduced only if a measured invariant cannot be represented safely by D1 batch/session
+semantics.
 
 ## 16. Deletion, anonymization, retention
 
@@ -329,25 +368,35 @@ completion target is 30 days, subject to legal review before production.
 No automatic `ON DELETE CASCADE` for core business tables — accidental cascades could destroy
 learning history. Cascade only where explicitly justified.
 
-## 17. Ent schema direction
+## 17. D1 schema direction
 
-One Ent schema file per table under `internal/ent/schema/`. Shared mixins: `IDMixin`, `TimeMixin`,
-`SoftDeleteMixin` — no broad generic `StatusMixin` (each table's valid status values differ).
-Application-generated UUIDs (prefer UUIDv7), generated before insert. Explicit `Table` annotation per
-schema. Atlas migration SQL must add what Ent can't fully express: partial unique indexes,
-expression indexes (`lower(email)`), check constraints, JSONB detail, conditional uniqueness.
+Versioned SQL under the Worker API workspace defines D1 directly. Application-generated UUIDs
+(prefer UUIDv7) are created before insert. Shared repository helpers may standardize IDs, timestamps,
+and soft-delete predicates, but each table keeps explicit status checks. SQLite indexes, expression
+indexes such as `lower(email)`, checks, foreign keys, JSON validation, and conditional uniqueness are
+written and tested explicitly. T11 retired Ent and the PostgreSQL runtime from the active tree.
 
 ## 18. Migration strategy
 
-Ent + Atlas. Auto-migration allowed for local/test/temporary databases only. **Production always
-uses Atlas versioned migrations with an explicit apply step — never automatic schema mutation at API
-startup.** Safety gate is automated checks (Atlas lint, fresh-DB apply, existing-DB apply, Ent
-compatibility check, constraint tests, transaction tests, seed rerun), not AI review — AI may help
-generate/explain/fix, but GitHub Actions and automated tests are the actual gate. Use
-expand-and-contract for potentially-breaking changes.
+Forward-only Wrangler D1 migrations with an explicit apply step; **no environment mutates schema at
+Worker startup**. Safety evidence includes fresh-D1 apply, repeated-state behavior, upgrade paths,
+prepared-statement/constraint tests, atomicity and consistency failure injection, seed rerun, and
+PostgreSQL-to-D1 parity/reconciliation. GitHub Actions and automated tests are deterministic gates;
+independent semantic review is separate. Use expand/migrate/contract for breaking changes.
+
+VOC-080-T09 binds a versioned normalized export contract to all 25 active PostgreSQL tables and
+their D1 destination columns. Synthetic conversion lowercases UUID/bytea representations,
+canonicalizes UTC timestamps and JSON, converts booleans, rejects unsafe integers, orders foreign
+keys, and applies bounded local-D1 batches with checksum-bound atomic checkpoints. Reconciliation
+compares per-table counts/checksums, foreign keys, and exact domain aggregates without exposing
+learner content or authentication material. A plan-bound D1 write guard freezes converted tables
+across the bounded multi-invocation page chain and is explicitly released only after completed
+evidence is recorded. The active recovery and authority boundary is documented in
+the [PostgreSQL-to-D1 conversion runbook](../operations/postgresql-to-d1-conversion.md).
 
 Migration order: extensions → users → external_identities → user_onboarding_profiles →
-user_settings → canonical_words → word_meanings → word_examples → usage_notes →
+user_settings → sessions → magic_links → oauth_states → email_change_links →
+account_deletion_requests → auth_rate_limits → canonical_words → word_meanings → word_examples → usage_notes →
 journey_situations → journey_words → user_words → review_attempts → daily_mission_snapshots →
 daily_activity_summaries → learner_sentences → ai_feedback_attempts → confidence_point_ledger →
 streak_states → grace_day_ledger → idempotency_keys → feature_audit_logs → indexes/constraints →
@@ -355,8 +404,8 @@ seed data.
 
 ## 19. Seed data
 
-Versioned, deterministic, reviewable, safe-to-rerun JSON seed files loaded by a Go seed command
-inside one transaction, using fixed UUIDs for stable relationships. Covers initial journey
+Versioned, deterministic, reviewable, safe-to-rerun seed files loaded through bounded D1 batches,
+using fixed UUIDs for stable relationships. Covers initial journey
 situations, canonical words/meanings/examples/usage-notes, and journey-word relationships.
 
 ## 20. Required database tests
@@ -376,6 +425,7 @@ purge/anonymization without retaining linkable learner content).
 Canonical content is separate from user learning state; word meanings (not bare words) are the core
 learning unit; review and AI-feedback history are preserved; daily missions and streaks are
 timezone-aware; Confidence Points and grace days are ledgers, not mutable balances; idempotency
-guards duplicate operations; account anonymization is a first-class workflow; Ent + Atlas with
-automated-test migration gating. Deliberately avoided: event sourcing, microservice databases,
-premature custom scheduling tables, unnecessary JSONB, production auto-migration at startup.
+guards duplicate operations; account anonymization is a first-class workflow; D1 uses explicit
+SQLite schema and deterministic migration/parity gates. Deliberately avoided: event sourcing,
+microservice databases, premature custom scheduling tables, unnecessary JSON, and production
+auto-migration at startup.

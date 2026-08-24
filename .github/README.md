@@ -7,12 +7,21 @@ This directory contains repository contribution and governance controls:
 - `ISSUE_TEMPLATE/` provides governed change intake and private security routing.
 - `CODEOWNERS` uses the verified human repository identity for review routing. It is
   not approval evidence and does not create a standing post-A-003 authority.
-- `workflows/ci.yml` runs the repository's deterministic validation command.
+- `actions/setup-toolchain/action.yml` is the shared pinned Node/pnpm
+  bootstrap. It installs the frozen dependency graph and caches only
+  correctness-neutral download stores.
+- `workflows/ci.yml` runs stable foundation, shared-package, OpenNext/workerd web,
+  Worker API/local-D1, disposable two-Worker local-stack, retirement-policy, and held
+  delivery checks plus the single `CI / ci required` aggregate. The aggregate requires
+  the local-stack result and fails closed when it fails or is cancelled.
 - `workflows/governance.yml` validates repository structure, prevents a pull request
   from declaring a risk below its changed-path floor, and reports the read-only
   normalized merge-eligibility decision and concrete reasons.
-- `workflows/quality.yml` runs path-filtered accessibility and Lighthouse checks.
-- `workflows/security.yml` audits dependencies and scans changed history for secrets.
+- `workflows/quality.yml` runs path-filtered accessibility and Lighthouse checks plus
+  `Quality / quality required`.
+- `workflows/security.yml` audits dependencies, scans changed history for secrets,
+  proves the scanner's synthetic rejection contract, and publishes
+  `Security / security required`.
 
 ## VOC-078 transition
 
@@ -29,18 +38,32 @@ the five superseded standalone quality/governance workflows after their replacem
 jobs passed on real pull requests. The workflow inventory is now exactly the four files
 listed above.
 
-The four target workflows use read-only repository permissions and deterministic local
-commands. They do not call an AI model or write to GitHub. Requirements, human/agent
-work, independent review, and merge decisions are recorded through ordinary issues,
-branches, pull requests, and comments. GitHub Free does not technically enforce private-
-repository branch protection, so policy and evidence must not be described as a hosted
-enforcement capability that does not exist.
+The four target workflows use explicit Bash semantics, read-only repository
+permissions, immutable action SHAs, non-persisted checkout credentials, pinned runner
+images, timeouts, cancellation, bounded failure artifacts, and deterministic local
+commands. Subsystem jobs do not hide one another's results, while stable aggregate
+checks provide durable check names. The shared cache cannot change correctness: frozen
+installation and every validation command still execute. The workflows do not call an
+AI model or write to GitHub. Requirements, human/agent work, independent review, and
+merge decisions are recorded through ordinary issues, branches, pull requests, and
+comments. The repository is public, current as observed at 2026-08-24, but public
+availability does not mean a ruleset, branch protection, security feature, or other
+hosted enforcement control is configured. Automatic deletion of merged branches is
+enabled as the one VOC-092 setting change; it is not branch protection or merge
+automation. See the [current point-in-time settings record](../docs/governance/repository-settings-current.yaml).
 
 Governance is role- and evidence-based across R0-R4. Every meaningful plan or
 implementation is built and independently reviewed by different human or AI roles, with
 the verdict bound to the exact revision and blocking findings resolved. R4 requires the
 strongest risk evidence but no founder approval solely because of its label. Explicit
 action-specific authority and genuinely triggered EHR remain separate gates.
+
+A role is a responsibility and an actor is an attributable human or separately
+instantiated AI participant. A different actor that did not author the exact revision
+is required for review; relabeling, another session, or model/provider provenance does
+not create separation or authority. A reviewer who materially edits a SHA is its
+builder and requires fresh checks and a different reviewer. The read-only eligibility
+decision cannot satisfy an action-specific authority hold.
 
 For new change packages, `automatic_merge_allowed` defaults to `true` across R0–R4;
 any `false` requires a non-placeholder package-local `automatic_merge_hold_reason`.
@@ -59,3 +82,52 @@ reviewer identity is recorded provenance, not falsely claimed hosted attribution
 See [`docs/governance/repository-settings.md`](../docs/governance/repository-settings.md)
 for the continuously maintained built-versus-pending record. DOC-17 and DOC-18's
 unbuilt Control Plane remains superseded and archived under `docs/archive/`.
+
+## VOC-080 direction
+
+The workflow inventory remains exactly four. T00 documents the Cloudflare target and
+external Ruflo boundary; it does not change workflow behavior or repository settings.
+T01 provides the refactored CI foundation. T03 extends its stable `web` entry point
+with an OpenNext transformation followed by generated Wrangler type verification,
+Worker compatibility scans, credential-free dry-run and size/startup checks, and
+representative local workerd requests through an API service binding. T04 and later
+tasks extend the Cloudflare migration with API and data checks.
+T04 adds a distinct credential-free `worker api` job for generated bindings,
+Hono/OpenAPI and canonical-contract drift, local D1 migrations, workerd tests,
+safety scans, build, and Wrangler dry-run.
+T05 keeps that same job and workflow inventory while extending it with the second
+forward D1 migration and 13 identity/account operations. Contract evidence now binds
+method, path, operation ID, primary success status, parameters, and public field shape
+to the migration contract snapshot; workerd fixtures cover hashing, expiry, replay,
+requester isolation, CSRF, rate/kill switches, idempotency, and injected D1 failures.
+T06-T08 complete Worker contract/domain parity, and T09 adds synthetic-only
+PostgreSQL-to-D1 conversion and exact reconciliation. T10 keeps the four-file
+invariant and adds the held delivery state machine only to `ci.yml`: PR/push jobs
+dry-run local/staging/production configurations without credentials; a manual event
+must pass all CI plus the exact-SHA/action-hold gate before either named environment
+can read its own Cloudflare token. The committed manifest is held, uses non-resource
+D1 sentinels and `.invalid` routes, and therefore blocks every live environment job.
+No GitHub environment, secret, Cloudflare resource, migration, route, or deployment
+was created by T10. See the
+[delivery runbook](../docs/operations/cloudflare-delivery.md).
+
+T11 removes the active Go/PostgreSQL runtime, Dockerfiles, Compose/Nginx/host assets,
+the remote server E2E harness, and their CI/toolchain dependencies after the T03-T10
+parity chain. The foundation retirement policy prevents those executable surfaces or
+stale commands from returning. Historical change packages and archived evidence are
+unchanged; compact API-contract and PostgreSQL-schema snapshots remain only as
+deterministic Worker conversion fixtures. No live server was inspected or stopped.
+
+VOC-081 keeps the four-file inventory. Its `local stack` job uses no credential,
+remote binding, Cloudflare account, or deploy path; it builds and starts disposable
+local workerd/D1 processes, proves the web-to-API service binding and D1 restart
+persistence, then requires bounded cleanup before `CI / ci required` may pass.
+
+Ruflo runs outside the repository and GitHub Actions. It may coordinate separate
+participants, but no issue/comment trigger, tracked launcher, workflow, or Ruflo tool
+may approve, merge, close, dispatch, deploy, access Cloudflare credentials, or consume
+production data. GitHub evidence and the read-only eligibility result remain canonical.
+VOC-080-T02's [external runbook](../docs/operations/ruflo-external-orchestration.md)
+records the exact locked installation and rehearsal. Repository guards reject local
+Ruflo/Claude Flow state or dependencies, generated instruction replacement, launchers,
+autonomous GitHub writes, and held external-effect commands.

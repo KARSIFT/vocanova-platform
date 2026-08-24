@@ -1,18 +1,13 @@
-import * as Sentry from "@sentry/nextjs";
+import { withSentry } from "@sentry/cloudflare";
 
-const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment -- Generated module existence varies by build state.
+// @ts-ignore -- This import is absent before OpenNext builds and present afterward,
+// so `@ts-expect-error` would make typechecking depend on generated local state.
+// Wrangler resolves the generated module while bundling this custom main.
+import openNextWorker from "./.open-next/worker.js";
+import { sentryOptions } from "./sentry.server.config";
 
-if (sentryDsn) {
-  Sentry.init({
-    dsn: sentryDsn,
-    environment:
-      process.env.SENTRY_ENVIRONMENT ??
-      process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ??
-      process.env.ENVIRONMENT ??
-      process.env.NODE_ENV,
-    release:
-      process.env.SENTRY_RELEASE ?? process.env.NEXT_PUBLIC_SENTRY_RELEASE,
-    debug: false,
-    spotlight: false,
-  });
-}
+// This is the Wrangler custom main. Sentry initializes from the per-request
+// Cloudflare env and wraps the generated OpenNext handler, so no Node/Next
+// server barrel is part of the Worker graph.
+export default withSentry(sentryOptions, openNextWorker);

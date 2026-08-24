@@ -94,6 +94,7 @@ PROTECTED_PATHS = (
     "CLAUDE.md",
     ".github/CODEOWNERS",
     ".github/pull_request_template.md",
+    ".github/actions/",
     ".github/workflows/",
     ".github/approved-policy/",
     "scripts/governance/",
@@ -140,6 +141,151 @@ PR_MARKERS = (
     "Automatic-merge status",
     "Lightweight R0",
 )
+
+# VOC-082 keeps the role-separation clarification fail-closed at the repository
+# foundation boundary. These are deliberately short, active-policy markers rather
+# than a second copy of the full operating model. Historical/vendor/tool records
+# are not scanned: they are preserved evidence or scoped permission boundaries.
+VOC082_POLICY_MARKERS = {
+    "AGENTS.md": (
+        ("distinct actor", "separately\n  instantiated AI participant"),
+        ("provider neutrality", "Model/provider provenance may"),
+        ("exact revision", "authorship of the reviewed exact revision"),
+        ("self-review/self-merge", "it cannot approve or merge its own work"),
+        ("action authority separation", "separately defined action-specific authority"),
+    ),
+    DOC16_PATH: (
+        ("distinct actor", "Any human or separately instantiated AI participant may occupy"),
+        ("provider neutrality", "optional runtime provenance or defense in depth, never authority"),
+        ("exact revision", "reviewer must not have\nauthored the reviewed exact revision"),
+        ("self-review/self-merge", "The builder cannot\nindependently review, approve, or merge its revision"),
+        ("action authority separation", "action-specific authority hold"),
+    ),
+    "docs/decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md": (
+        ("distinct actor", "separately instantiated AI participant"),
+        ("provider neutrality", "Runtime provenance"),
+        ("exact revision", "did not author the reviewed exact\nrevision"),
+        ("self-review/self-merge", "implementation builder\ncannot review, approve, or merge that revision"),
+        ("action authority separation", "Technical review and merge eligibility never satisfy a separately\ndefined authority"),
+    ),
+    "docs/governance/approval-matrix.md": (
+        ("distinct actor", "separately\ninstantiated AI participant"),
+        ("provider neutrality", "Model/provider choice may"),
+        ("exact revision", "exact revision"),
+        ("self-review/self-merge", "Builders cannot verify, approve, or merge their own\nrevision"),
+        ("action authority separation", "action-specific authority"),
+    ),
+}
+
+VOC082_ACTIVE_POLICY_PATHS = tuple(VOC082_POLICY_MARKERS)
+VOC082_UNSAFE_POLICY_PATTERNS = (
+    ("human-only role requirement", re.compile(r"\bhuman is required solely\s+(?:for|to)\b", re.IGNORECASE)),
+    ("vendor-derived authority", re.compile(r"\b(?:model|provider|vendor) identity grants authority\b", re.IGNORECASE)),
+    ("same-actor relabeling", re.compile(r"\brelabel(?:ing|ed)?\s+(?:itself\s+)?(?:creates?|establishes?)\s+(?:independence|separation)\b", re.IGNORECASE)),
+    ("review-as-action authority", re.compile(r"\b(?:review verdict|reviewer verdict|reviewer evidence)\s+(?:satisf(?:y|ies)|supplies|replaces)\s+the?\s*action-specific authority\b", re.IGNORECASE)),
+)
+VOC090_DOC15_PATH = "docs/operations/15-ai-native-product-and-engineering-operating-model.md"
+VOC090_DOC10_PATH = "docs/operations/10-development-workflow.md"
+VOC090_DOC12_PATH = "docs/product/12-mvp-implementation-plan.md"
+VOC090_DOC09_PATH = "docs/engineering/09-ai-features.md"
+VOC090_RUFLO_PATH = "docs/operations/ruflo-external-orchestration.md"
+VOC090_CHANGE_SPEC_TEMPLATE = "docs/templates/change-specification.md"
+VOC090_TEMPLATE_README = "specs/templates/change-package/README.md"
+VOC090_TEMPLATE_CHANGE = "specs/templates/change-package/change.yaml"
+VOC090_TEMPLATE_IMPL = "specs/templates/change-package/implementation-plan.md"
+VOC090_TEMPLATE_TASKS = "specs/templates/change-package/tasks.md"
+VOC090_POLICY_MARKERS = {
+    "AGENTS.md": (
+        "largest safe coherent delivery unit",
+        "one implementation pull request, and one minimum-sufficient task",
+        "Task IDs are traceability and evidence groupings, not branch or pull-request\n  units",
+    ),
+    "CLAUDE.md": (
+        "largest safe coherent delivery unit",
+        "task IDs are minimum-sufficient traceability/evidence groupings rather than PR\n   quotas",
+        "integration, rollback, and overhead rationale",
+    ),
+    "CONTRIBUTING.md": (
+        "largest safe coherent delivery\nunit across backend, frontend, contracts, tests, documentation, rollback, and",
+        "one approved package, one\nimplementation pull request, and one minimum-sufficient task",
+        "exact-review cycles, and bookkeeping overhead",
+    ),
+    ".github/pull_request_template.md": (
+        "Planned implementation pull-request count:",
+        "Multi-PR rationale or `N/A — one coherent PR default`:",
+        "Largest-safe-coherent-unit evidence",
+    ),
+    DOC16_PATH: (
+        "default delivery unit is one approved `VOC-###` package, one implementation pull\nrequest into `develop`, and one minimum-sufficient task",
+        "do not\nthemselves imply separate branches, worktrees, pull requests, releases, or merges",
+        "coordination, elapsed-time,\ntoken/context, repeated-check, exact-review, and bookkeeping overhead",
+    ),
+    VOC090_DOC15_PATH: (
+        "Tasks are minimum-sufficient, ordered, verifiable, and stable traceability units.",
+        "The default is one implementation pull request and one minimum-sufficient task.",
+        "Artificially splitting one coherent outcome into extra tasks, branches, or pull requests.",
+    ),
+    VOC090_DOC10_PATH: (
+        "Sizes are planning\nsignals, not automatic pull-request counts",
+        "A large coherent diff may remain one PR; a smaller incoherent diff may\nrequire separation.",
+        "exact-review cycles, and bookkeeping overhead",
+    ),
+    VOC090_RUFLO_PATH: (
+        "assigned work unit is one coherent implementation pull request",
+        "worktree map is keyed by implementation work\nunit, normally one coherent PR rather than each task ID",
+    ),
+    VOC090_DOC12_PATH: (
+        "one implementation pull request, and one minimum-sufficient task",
+        "Ordered\nimplementation-component sequence inside the default coherent P3/AI pull request",
+        "partial-state, rollback, and overhead\ncomparison required by the active governance model",
+    ),
+    VOC090_DOC09_PATH: (
+        "Ordered\nimplementation-component sequence inside the default coherent P3/AI pull request",
+        "partial-state coherence, integration/rollback explanation",
+        "bookkeeping overhead",
+    ),
+    "docs/governance/change-risk-classification.md": (
+        "not by diff size, line count, task count, or PR count alone",
+        "Task count, line count,\nor proposed PR count does not mandate or reduce the class",
+    ),
+    VOC090_CHANGE_SPEC_TEMPLATE: (
+        "Planned implementation pull-request count: `1` by default",
+        "Task IDs are minimum-sufficient traceability/evidence groupings.",
+        "largest safe coherent delivery unit",
+    ),
+    "specs/README.md": (
+        "one implementation pull request, and one minimum-sufficient task",
+        "Task IDs\ngroup traceability and evidence; they are not separate branch or PR quotas",
+    ),
+    VOC090_TEMPLATE_README: (
+        "planned implementation pull-request count",
+        "Task IDs are minimum-sufficient traceability/evidence groupings",
+    ),
+    VOC090_TEMPLATE_CHANGE: (
+        "implementation_pull_request_count: 1",
+        "multiple_pull_request_rationale: not-applicable-single-implementation-pr-default",
+    ),
+    VOC090_TEMPLATE_IMPL: (
+        "largest safe\ncoherent delivery unit, planned pull-request count, task-to-PR mapping",
+        "overhead rationale",
+    ),
+    VOC090_TEMPLATE_TASKS: (
+        "Implementation pull-request mapping",
+        "Task IDs group\nrequirements, dependencies, tests, and evidence; they do not imply separate branches",
+    ),
+}
+VOC090_P3_AI_SEQUENCE = (
+    "AI domain and persistence",
+    "validation and orchestration foundation",
+    "prompt and production provider",
+    "safety and moderation",
+    "API and frontend integration",
+    "evaluation and observability",
+)
+VOC090_TASK_PER_PR_PATTERN = re.compile(
+    r"(?i)(?:each|every)\s+task(?:\s+id)?\s+(?:requires|needs|owns|maps?\s+to)\s+(?:its\s+own\s+)?(?:branch|pull request|pr)"
+)
+VOC090_ONE_TASK_PER_PR_PATTERN = re.compile(r"(?i)\bone task per (?:pull request|pr)\b")
 
 ID_TOKEN = re.compile(
     r"VOC-001-(?:D\d+|T\d+|R\d+|(?:AC|TEST|DEP|EV|CON|AM)-\d+)"
@@ -1201,6 +1347,100 @@ def validate_governance_language(validation: Validation) -> None:
                 validation.error(relative, f"missing VOC-079 approval-neutral marker: {marker}")
 
 
+def validate_voc082_policy_markers(validation: Validation) -> None:
+    """Keep the active distinct-actor contract present and fail closed on regressions."""
+    active_text: dict[str, str] = {}
+    for relative, markers in VOC082_POLICY_MARKERS.items():
+        text = validation.read(relative)
+        active_text[relative] = text
+        for name, marker in markers:
+            if marker not in text:
+                validation.error(relative, f"missing VOC-082 {name} policy marker")
+
+    for relative in VOC082_ACTIVE_POLICY_PATHS:
+        text = active_text[relative]
+        for name, pattern in VOC082_UNSAFE_POLICY_PATTERNS:
+            if pattern.search(text):
+                validation.error(relative, f"prohibited VOC-082 {name} wording")
+
+
+def ordered_markers_present(text: str, markers: tuple[str, ...]) -> bool:
+    position = 0
+    for marker in markers:
+        index = text.find(marker, position)
+        if index < 0:
+            return False
+        position = index + len(marker)
+    return True
+
+
+def marker_present(text: str, marker: str) -> bool:
+    normalized_text = re.sub(r"\s+", " ", text).strip()
+    normalized_marker = re.sub(r"\s+", " ", marker).strip()
+    return normalized_marker in normalized_text
+
+
+def has_unlabelled_phrase(text: str, phrase: str) -> bool:
+    lowered_phrase = phrase.lower()
+    for line in text.splitlines():
+        lowered_line = line.lower()
+        if lowered_phrase in lowered_line and "historical" not in lowered_line:
+            return True
+    return False
+
+
+def validate_voc090_policy_markers(validation: Validation) -> None:
+    """Keep the coherent-outcome delivery contract present and fail closed on regressions."""
+    active_text: dict[str, str] = {}
+    for relative, markers in VOC090_POLICY_MARKERS.items():
+        text = validation.read(relative)
+        active_text[relative] = text
+        for marker in markers:
+            if not marker_present(text, marker):
+                validation.error(relative, f"missing VOC-090 policy marker: {marker}")
+
+    doc10 = active_text[VOC090_DOC10_PATH]
+    for name, pattern in (
+        ("fixed preferred line threshold", re.compile(r"100.?500|under 200|over 800", re.IGNORECASE)),
+        ("automatic L split", re.compile(r"an `L` issue directly; split it first", re.IGNORECASE)),
+    ):
+        if pattern.search(doc10):
+            validation.error(VOC090_DOC10_PATH, f"prohibited VOC-090 {name} wording")
+
+    for relative in (
+        "AGENTS.md",
+        "CONTRIBUTING.md",
+        ".github/pull_request_template.md",
+        VOC090_CHANGE_SPEC_TEMPLATE,
+        VOC090_TEMPLATE_TASKS,
+    ):
+        text = active_text[relative]
+        if VOC090_TASK_PER_PR_PATTERN.search(text) or VOC090_ONE_TASK_PER_PR_PATTERN.search(text):
+            validation.error(relative, "prohibited VOC-090 task-id-per-PR wording")
+
+    for relative in (VOC090_DOC12_PATH, VOC090_DOC09_PATH):
+        text = active_text[relative]
+        if not ordered_markers_present(text, VOC090_P3_AI_SEQUENCE):
+            validation.error(relative, "missing VOC-090 ordered P3/AI implementation-component sequence")
+
+    if has_unlabelled_phrase(active_text[VOC090_DOC12_PATH], "Mandatory six-PR order"):
+        validation.error(VOC090_DOC12_PATH, "prohibited VOC-090 active mandatory six-PR wording")
+    if has_unlabelled_phrase(active_text[VOC090_DOC09_PATH], "Recommended PR sequence"):
+        validation.error(VOC090_DOC09_PATH, "prohibited VOC-090 active recommended PR sequence wording")
+
+    template_values = validate_restricted_yaml(validation, VOC090_TEMPLATE_CHANGE)
+    if template_values.get("implementation_pull_request_count") != "1":
+        validation.error(
+            VOC090_TEMPLATE_CHANGE,
+            "VOC-090 template default must be implementation_pull_request_count: 1",
+        )
+    if template_values.get("multiple_pull_request_rationale") != "not-applicable-single-implementation-pr-default":
+        validation.error(
+            VOC090_TEMPLATE_CHANGE,
+            "VOC-090 template default must preserve the single-PR rationale marker",
+        )
+
+
 def validate_false_activation(validation: Validation) -> None:
     # AUTONOMOUS-RELEASE-AUTHORIZED-2026-08-08: protected-paths.yaml is now
     # legitimately authorized to say automatic_merge_allowed: true and
@@ -1257,6 +1497,8 @@ def validate_repository(root: Path) -> list[str]:
     validate_workflow(validation)
     validate_merge_eligibility(validation)
     validate_governance_language(validation)
+    validate_voc082_policy_markers(validation)
+    validate_voc090_policy_markers(validation)
     validate_false_activation(validation)
     return sorted(set(validation.errors))
 

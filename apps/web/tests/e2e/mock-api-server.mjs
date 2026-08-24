@@ -19,9 +19,9 @@
 // cookie is `vocanova_session`; the CSRF cookie is
 // `vocanova_csrf`. Mutations (POST/PATCH/DELETE) require the
 // `X-CSRF-Token` header to match the `vocanova_csrf` cookie
-// value, exactly as the real backend's `CSRFMiddleware` does
-// (apps/api/app/api/middleware.go). The /api/v1/auth/* routes
-// are exempt because they predate / establish the session.
+// value, matching the active API Worker's CSRF contract. The
+// /api/v1/auth/* routes are exempt because they predate /
+// establish the session.
 //
 // State (saved words, completed onboarding, per-session
 // settings, per-session progress) is tracked in memory keyed by
@@ -88,8 +88,8 @@
 //   POST   /api/v1/account-deletion-requests         -> 200 CreateAccountDeletionRequestResult
 //
 // Anything else returns 404. Mutations without a matching
-// X-CSRF-Token return 403 (matches the backend's
-// CSRFMiddleware). Mutations on /api/v1/auth/* are exempt.
+// X-CSRF-Token return 403 (matches the Worker API contract).
+// Mutations on /api/v1/auth/* are exempt.
 // The server logs each request to stderr so a CI failure's
 // log can be matched against the harness's expectations
 // without enabling extra debug output.
@@ -100,6 +100,15 @@ const PORT = Number(process.env.MOCK_API_PORT ?? 8080);
 const HOST = process.env.MOCK_API_HOST ?? "127.0.0.1";
 
 const ONBOARDING_STATUSES = new Set(["not_started", "in_progress", "completed"]);
+const WORD_DETAIL_REVIEW_STATES = new Map([
+  ["unsaved", null],
+  ["due", "due"],
+  ["new", "new"],
+  ["learning", "learning"],
+  ["reviewing", "reviewing"],
+  ["mastered", "mastered"],
+  ["not-reviewing", "not_reviewing"],
+]);
 
 const SESSION_COOKIE_NAME = "vocanova_session";
 const CSRF_COOKIE_NAME = "vocanova_csrf";
@@ -152,6 +161,142 @@ const DEFAULT_DAILY_MISSION = {
   status: "open",
   graceApplied: false,
   streak: DEFAULT_PROGRESS.streak,
+};
+
+const TRUNCATED_SAVED_WORDS_RESPONSE = {
+  items: [
+    {
+      userWordId: "e2e-preview-user-word-01",
+      meaningId: "e2e-preview-meaning-01",
+      wordId: "e2e-preview-word-01",
+      wordSlug: "arrival",
+      wordText: "arrival",
+      partOfSpeech: "noun",
+      shortDefinition: "the act of reaching a place",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-10T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-02",
+      meaningId: "e2e-preview-meaning-02",
+      wordId: "e2e-preview-word-02",
+      wordSlug: "baggage",
+      wordText: "baggage",
+      partOfSpeech: "noun",
+      shortDefinition: "bags carried while travelling",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-09T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-03",
+      meaningId: "e2e-preview-meaning-03",
+      wordId: "e2e-preview-word-03",
+      wordSlug: "counter",
+      wordText: "counter",
+      partOfSpeech: "noun",
+      shortDefinition: "a long flat surface for service",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-08T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-04",
+      meaningId: "e2e-preview-meaning-04",
+      wordId: "e2e-preview-word-04",
+      wordSlug: "departure",
+      wordText: "departure",
+      partOfSpeech: "noun",
+      shortDefinition: "the act of leaving a place",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-07T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-05",
+      meaningId: "e2e-preview-meaning-05",
+      wordId: "e2e-preview-word-05",
+      wordSlug: "gate",
+      wordText: "gate",
+      partOfSpeech: "noun",
+      shortDefinition: "the place where passengers board",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-06T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-06",
+      meaningId: "e2e-preview-meaning-06",
+      wordId: "e2e-preview-word-06",
+      wordSlug: "luggage",
+      wordText: "luggage",
+      partOfSpeech: "noun",
+      shortDefinition: "bags used for travelling",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-05T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-07",
+      meaningId: "e2e-preview-meaning-07",
+      wordId: "e2e-preview-word-07",
+      wordSlug: "passport",
+      wordText: "passport",
+      partOfSpeech: "noun",
+      shortDefinition: "an official document for international travel",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-04T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-08",
+      meaningId: "e2e-preview-meaning-08",
+      wordId: "e2e-preview-word-08",
+      wordSlug: "queue",
+      wordText: "queue",
+      partOfSpeech: "noun",
+      shortDefinition: "a line of people waiting",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-03T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-09",
+      meaningId: "e2e-preview-meaning-09",
+      wordId: "e2e-preview-word-09",
+      wordSlug: "reservation",
+      wordText: "reservation",
+      partOfSpeech: "noun",
+      shortDefinition: "an arrangement to keep a place",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-02T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-10",
+      meaningId: "e2e-preview-meaning-10",
+      wordId: "e2e-preview-word-10",
+      wordSlug: "terminal",
+      wordText: "terminal",
+      partOfSpeech: "noun",
+      shortDefinition: "an airport building for passengers",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-01T00:00:00.000Z",
+    },
+  ],
+  nextCursor: "e2e-saved-words-after-10",
 };
 
 const CANONICAL_WORDS = {
@@ -301,7 +446,7 @@ function buildSessionCookie(value) {
   // `HttpOnly` is intentionally omitted because the frontend's
   // `getCookieValue("vocanova_session")` is never called - the
   // frontend only reads the CSRF cookie. Session stays server-side
-  // only. The real backend's session cookie is HttpOnly; mirroring
+  // only. The active API Worker's session cookie is HttpOnly; mirroring
   // that here would force the mock to track an extra auth
   // relationship for the same security guarantee.
   return `${SESSION_COOKIE_NAME}=${value}; Path=/; SameSite=Lax`;
@@ -341,7 +486,7 @@ function createInitialState() {
     // session's "advance" refetch (which fires when the last
     // card is rated) returns an empty list and the page
     // transitions to the "all caught up" state, mirroring the
-    // real backend's review-step advance.
+    // API contract's review-step advance.
     reviewedMeaningIds: new Set(),
     settings: { ...DEFAULT_SETTINGS },
     progress: cloneProgress(DEFAULT_PROGRESS),
@@ -443,18 +588,31 @@ function buildDueWords(state) {
   };
 }
 
-function buildWordDetailResponse(state, slug) {
+function buildWordDetailResponse(state, slug, selectedFixture) {
   const word = CANONICAL_WORDS[slug];
   if (!word) {
     return null;
   }
-  const meanings = word.meanings.map((meaning) => ({
-    ...meaning,
-    saved: state.savedMeaningIds.has(meaning.id),
-    userWordId: state.savedMeaningIds.has(meaning.id)
-      ? `uw-${meaning.id}`
-      : undefined,
-  }));
+  const hasSelectedFixture = WORD_DETAIL_REVIEW_STATES.has(selectedFixture);
+  const selectedReviewState = hasSelectedFixture
+    ? WORD_DETAIL_REVIEW_STATES.get(selectedFixture)
+    : undefined;
+  const meanings = word.meanings.map((meaning) => {
+    const statefulSaved = state.savedMeaningIds.has(meaning.id);
+    const saved = hasSelectedFixture
+      ? selectedReviewState !== null
+      : statefulSaved;
+    return {
+      ...meaning,
+      saved,
+      userWordId: saved ? `uw-${meaning.id}` : undefined,
+      reviewState: hasSelectedFixture
+        ? selectedReviewState
+        : statefulSaved
+          ? "due"
+          : null,
+    };
+  });
   return {
     word: {
       ...word,
@@ -774,8 +932,10 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
-    const state = getSessionState(cookies);
-    const data = buildSavedWords(state);
+    const data =
+      cookies.e2e_saved_words_fixture === "truncated-page"
+        ? TRUNCATED_SAVED_WORDS_RESPONSE
+        : buildSavedWords(getSessionState(cookies));
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
@@ -783,6 +943,21 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/api/v1/user-words") {
     if (!checkCsrf(req, cookies, res, logLine)) {
+      return;
+    }
+    if (cookies.e2e_word_detail_save_failure === "1") {
+      logLine(req, 500, { reason: "fixture-forced-save-failure" });
+      jsonResponse(
+        res,
+        500,
+        {
+          type: "about:blank",
+          title: "Test save failure",
+          status: 500,
+          detail: "Unable to update saved state. Please try again.",
+        },
+        { "Content-Type": "application/problem+json; charset=utf-8" },
+      );
       return;
     }
     let body = {};
@@ -872,7 +1047,7 @@ const server = createServer(async (req, res) => {
       rating: body.rating,
       answeredAt: new Date().toISOString(),
     });
-    // The real backend advances the word's review schedule but
+    // The API contract advances the word's review schedule but
     // keeps it in the saved set; the T08 "review -> sentence"
     // step relies on the word remaining in savedMeaningIds after
     // the review submission so the sentence-feedback widget on
@@ -1017,7 +1192,11 @@ const server = createServer(async (req, res) => {
       url.pathname.slice("/api/v1/canonical-words/".length),
     );
     const state = getSessionState(cookies);
-    const response = buildWordDetailResponse(state, slug);
+    const response = buildWordDetailResponse(
+      state,
+      slug,
+      cookies.e2e_word_detail_review_state,
+    );
     if (!response) {
       logLine(req, 404, { slug });
       jsonResponse(res, 404, { error: "not_found", slug });

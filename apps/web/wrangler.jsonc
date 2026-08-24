@@ -1,0 +1,59 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "vocanova-web-local",
+  "main": "sentry.edge.config.ts",
+  "compatibility_date": "2026-08-22",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "services": [
+    {
+      "binding": "API",
+      "service": "vocanova-api-local",
+    },
+  ],
+  "vars": {
+    "ENVIRONMENT": "local",
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+    },
+  },
+  "env": {
+    "staging": {
+      "name": "vocanova-web-staging",
+      "workers_dev": false,
+      "preview_urls": false,
+      "services": [
+        {
+          "binding": "API",
+          "service": "vocanova-api-staging",
+        },
+      ],
+      "vars": {
+        "ENVIRONMENT": "staging",
+      },
+    },
+    "production": {
+      "name": "vocanova-web-production",
+      "workers_dev": false,
+      "preview_urls": false,
+      "services": [
+        {
+          "binding": "API",
+          "service": "vocanova-api-production",
+        },
+      ],
+      "vars": {
+        "ENVIRONMENT": "production",
+      },
+    },
+  },
+}
