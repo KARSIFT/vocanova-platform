@@ -5,8 +5,10 @@ implementation.
 
 Issue [#140](https://github.com/KARSIFT/vocanova-platform/issues/140) records that the
 active VOC-087 package on `develop` still describes completed adoption, implementation,
-post-merge, and issue-closure gates as pending. The exact planning base is
-`ea357ce506f42fe74c7e88f670db9ce4f848d80e`.
+post-merge, and issue-closure gates as pending. The issue baseline is
+`ea357ce506f42fe74c7e88f670db9ce4f848d80e`; the refreshed planning base
+`66c2cd20ab7197dd9af34dc2b78a4d03b2c5b48d` still contains the same stale active
+claims.
 
 The correction is repository-record only. A later implementation PR may update only the
 active lifecycle and evidence wording inside the VOC-087 package files listed in

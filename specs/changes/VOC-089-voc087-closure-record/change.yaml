@@ -18,7 +18,7 @@ authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/140
 requirement_approval_status: planning-authority-only
 base_branch: develop
-base_sha: ea357ce506f42fe74c7e88f670db9ce4f848d80e
+base_sha: 66c2cd20ab7197dd9af34dc2b78a4d03b2c5b48d
 plan_branch: plan/voc-089-voc087-closure-record
 target_branch: develop
 approved_candidate_sha: null
@@ -53,6 +53,9 @@ dependencies:
     description: >-
       Issue #140 records the stale active VOC-087 claims on develop at
       ea357ce506f42fe74c7e88f670db9ce4f848d80e and grants planning authority only.
+      Read-only revalidation on refreshed planning base
+      66c2cd20ab7197dd9af34dc2b78a4d03b2c5b48d confirms the same stale claims still
+      remain on current develop.
   - id: VOC-089-DEP-01
     status: verified-at-planning
     evidence: https://github.com/KARSIFT/vocanova-platform/pull/137

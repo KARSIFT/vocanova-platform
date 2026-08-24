@@ -3,8 +3,9 @@
 ## Objective and requirement source
 
 GitHub issue [#140](https://github.com/KARSIFT/vocanova-platform/issues/140) reports a
-repository-governance truthfulness defect. At exact `develop` commit
-`ea357ce506f42fe74c7e88f670db9ce4f848d80e`, the active VOC-087 package still says its
+repository-governance truthfulness defect. At the issue baseline `develop` commit
+`ea357ce506f42fe74c7e88f670db9ce4f848d80e`, and again on the refreshed planning base
+`66c2cd20ab7197dd9af34dc2b78a4d03b2c5b48d`, the active VOC-087 package still says its
 adoption effectiveness, implementation, and post-merge gates are pending even though
 the plan PR, implementation PR, post-merge checks, and issue closure have completed.
 
@@ -68,16 +69,16 @@ Out of scope:
 
 ## Evidence anchors
 
-| Event | Evidence |
-| --- | --- |
-| PR #137 final head | `dd4db05be3473a1cc4a2cbb790b0276cb0fe0029` |
-| PR #137 merge | `61894b46705d0383028e2829903815477ea82939` |
-| PR #137 final evidence | https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390946743 |
-| PR #137 merge-sequencing audit and post-merge proof | https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903 |
-| PR #138 implementation head | `14e146deeab182b6e663986a113b4c25d102a7dc` |
-| PR #138 merge | `ea357ce506f42fe74c7e88f670db9ce4f848d80e` |
-| PR #138 completion evidence | https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488 |
-| Issue #132 closure | https://github.com/KARSIFT/vocanova-platform/issues/132#issuecomment-5391130633 |
+| Event                                               | Evidence                                                                        |
+| --------------------------------------------------- | ------------------------------------------------------------------------------- |
+| PR #137 final head                                  | `dd4db05be3473a1cc4a2cbb790b0276cb0fe0029`                                      |
+| PR #137 merge                                       | `61894b46705d0383028e2829903815477ea82939`                                      |
+| PR #137 final evidence                              | https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390946743   |
+| PR #137 merge-sequencing audit and post-merge proof | https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903   |
+| PR #138 implementation head                         | `14e146deeab182b6e663986a113b4c25d102a7dc`                                      |
+| PR #138 merge                                       | `ea357ce506f42fe74c7e88f670db9ce4f848d80e`                                      |
+| PR #138 completion evidence                         | https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488   |
+| Issue #132 closure                                  | https://github.com/KARSIFT/vocanova-platform/issues/132#issuecomment-5391130633 |
 
 ## Risk and protected areas
 
