@@ -1,5 +1,9 @@
 # VOC-089 - Acceptance Criteria
 
+Current authority state: `VOC-089-AC-00` through `VOC-089-AC-04` remain the inactive
+future contract for PR #147. They are not complete or merge-authorizing until VOC-091
+recovery prospectively establishes VOC-089 implementation authority.
+
 ## VOC-089-AC-00 - Completed evidence is exact and traceable
 
 - Requirements: `VOC-089-D00`, `D04`
@@ -71,3 +75,40 @@ different-actor exact-SHA review, passes governance validation, risk classificat
 and `git diff --check`, and can be reverted by a normal repository revert PR. It
 contains no product, workflow, validator, evaluator, settings, deployment, Cloudflare,
 live-system, production-data, `main`, or branch-deletion change.
+
+## VOC-091 authority-recovery overlay
+
+The PR #141 merge is preserved as historical fact, not as completed activation. At
+`2026-08-24T11:33:44Z`, Governance run
+[`32722390643`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722390643)
+reported `decision: "blocked"`, `eligible: false`, with `review.identity_missing`,
+`review.stale`, `review.not_passing`, `review.blocking_findings`, and
+`review.evidence_missing`. The later exact bookkeeping review
+[5394643309](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394643309)
+did not populate the single binder or produce a later pre-merge `eligible: true` /
+`reasons: []` result, so the merge-readiness claim
+[5394657645](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394657645)
+was inaccurate.
+
+PR #141 merged as `925faf774ded5128c8aef2a298a8d6f506164ee0`. Its post-merge CI
+[`32722900390`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900390),
+Governance
+[`32722900352`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900352),
+and Security
+[`32722900426`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900426)
+passed on that merge SHA, but the independent audit
+[5394825877](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394825877)
+records that those post-merge facts do not retroactively satisfy the missing pre-merge
+eligibility gate. This differs from PR #137, whose audit
+[5390981903](https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903)
+preserves genuine pre-merge `eligible: true` / `reasons: []` evidence.
+
+`implementation_authorized: true` remains valid adoption evidence, while
+`implementation.authority_effective: false` remains the active state pending VOC-091
+recovery. The recovery implementation must receive its own exact different-actor
+review, one populated `merge-eligibility-evidence-v1` binder, literal pre-merge
+`eligible: true` / `reasons: []`, normal merge, and applicable post-merge checks before
+PR #147 may rebase or refresh. PR #147 remains draft/blocked under
+[5394841275](https://github.com/KARSIFT/vocanova-platform/pull/147#issuecomment-5394841275);
+issue #148 remains open until recovery merge/post-merge evidence, and issue #140 remains
+open until the later PR #147 completion boundary.

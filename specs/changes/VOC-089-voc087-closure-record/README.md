@@ -2,10 +2,11 @@
 
 Status: adopted for repository bookkeeping. Exact candidate
 `72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8` received independent PASS and the
-accountable adoption decision on PR #141. Implementation authorization is recorded but
-becomes effective only after the adoption-bookkeeping revision receives its own
-exact-SHA review and hosted evidence, PR #141 normally merges, and applicable
-post-merge checks pass. No merge, deployment, or external-effect authority is granted.
+accountable adoption decision on PR #141. Implementation authorization remains recorded
+as valid adoption evidence, but PR #141 did not make it effective: its final pre-merge
+Governance adapter decision was blocked before the later exact review was posted. No PR
+#147 merge, issue closure, deployment, or external-effect authority is granted until the
+VOC-091 recovery boundary completes prospectively.
 
 Issue [#140](https://github.com/KARSIFT/vocanova-platform/issues/140) records that the
 active VOC-087 package on `develop` still describes completed adoption, implementation,
@@ -67,6 +68,47 @@ The completed evidence to record is exact and already public in GitHub:
 - Issue #132 closed as completed with evidence at
   [5391130633](https://github.com/KARSIFT/vocanova-platform/issues/132#issuecomment-5391130633).
 
+## VOC-091 authority-recovery overlay
+
+PR [#141](https://github.com/KARSIFT/vocanova-platform/pull/141) merged as
+`925faf774ded5128c8aef2a298a8d6f506164ee0`, but that merge was not a normal activation
+merge for VOC-089. At `2026-08-24T11:33:44Z`, Governance run
+[`32722390643`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722390643)
+reported `decision: "blocked"`, `eligible: false`, and the five reason codes
+`review.identity_missing`, `review.stale`, `review.not_passing`,
+`review.blocking_findings`, and `review.evidence_missing`.
+
+The later exact bookkeeping review
+[5394643309](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394643309)
+did not refresh the PR body's single evidence binder or produce a later pre-merge
+`eligible: true` / `reasons: []` adapter result. The merge-readiness statement
+[5394657645](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394657645)
+therefore inaccurately claimed that run `32722390643` passed merge eligibility.
+
+Post-merge CI
+[`32722900390`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900390),
+Governance
+[`32722900352`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900352),
+and Security
+[`32722900426`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900426)
+all passed on merge `925faf774ded5128c8aef2a298a8d6f506164ee0`, but those post-merge
+facts do not retroactively supply the missing pre-merge eligibility proof. The
+independent incident audit
+[5394825877](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394825877)
+therefore controls the active state: VOC-089 implementation authority is authorized by
+the adoption decision but not effective.
+
+This differs from PR #137, whose preserved sequencing audit
+[5390981903](https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903)
+records genuine pre-merge `eligible: true` / `reasons: []` evidence before its separate
+sequencing incident. PR #147 remains open as a draft and blocked under
+[5394841275](https://github.com/KARSIFT/vocanova-platform/pull/147#issuecomment-5394841275).
+It may resume only after the VOC-091 recovery implementation has its own exact
+different-actor review, one populated `merge-eligibility-evidence-v1` binder, literal
+pre-merge `eligible: true` / `reasons: []`, normal merge, and applicable post-merge
+checks. Issue #148 closes only after that recovery merge and post-merge evidence; issue
+#140 remains open until the later PR #147 completion boundary.
+
 ## Plan review history
 
 Prior exact candidate `64f5fa8cf0437b4c83ccbadf32793bc2b5e40fa5` received independent
@@ -96,8 +138,9 @@ Governance eligibility
 and Security
 [`32721280574`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32721280574)
 passed. Quality was not applicable to this plan-only diff. Exact bookkeeping review,
-final hosted evidence on the bookkeeping head, normal PR #141 merge, and applicable
-post-merge checks remain pending; implementation must not begin before they pass.
+final hosted evidence on the bookkeeping head, and post-merge runs later existed, but
+the final pre-merge eligibility adapter for PR #141 remained blocked. Implementation
+must not begin before VOC-091 recovery completes the prospective activation boundary.
 
 Historical evidence must stay historical: the prior PASS on the earlier base, the
 refreshed-base FAIL, the amended exact PASS, the adoption decision, the exact

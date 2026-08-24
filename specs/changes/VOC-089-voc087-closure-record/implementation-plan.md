@@ -2,12 +2,49 @@
 
 Exact candidate `72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8` received different-actor
 PASS with zero blockers and the accountable adoption decision. `change.yaml` now
-records `status: adopted` and `implementation_authorized: true`. Do not implement yet:
-this authorization becomes effective only after the adoption-bookkeeping revision
-receives its own different-actor exact-SHA review and final hosted evidence, PR #141
-normally merges, and applicable post-merge checks pass. Candidate review never
-silently transfers to this later bookkeeping SHA, whose future SHA/review/merge/post-
-merge facts must not be invented inside the approved candidate commit.
+records `status: adopted` and `implementation_authorized: true`. Do not implement or
+resume PR #147 yet: PR #141 merged without the required pre-merge eligible adapter
+decision, so the authorization is not effective. Candidate review and the later
+bookkeeping review remain preserved evidence, but neither silently transfers across the
+missing binder/eligibility boundary.
+
+## VOC-091 recovery precondition
+
+PR [#141](https://github.com/KARSIFT/vocanova-platform/pull/141) merged as
+`925faf774ded5128c8aef2a298a8d6f506164ee0`, but Governance run
+[`32722390643`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722390643)
+logged the final pre-merge adapter JSON at `2026-08-24T11:33:44Z` as
+`decision: "blocked"`, `eligible: false`, with `review.identity_missing`,
+`review.stale`, `review.not_passing`, `review.blocking_findings`, and
+`review.evidence_missing`. The later bookkeeping review
+[5394643309](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394643309)
+did not refresh the PR body's single `merge-eligibility-evidence-v1` binder or produce
+a new pre-merge `eligible: true` / `reasons: []` run. The merge-readiness claim
+[5394657645](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394657645)
+was therefore inaccurate.
+
+PR #141 post-merge CI
+[`32722900390`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900390),
+Governance
+[`32722900352`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900352),
+and Security
+[`32722900426`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900426)
+passed on the merge SHA, but the independent audit
+[5394825877](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394825877)
+records that those post-merge checks do not retroactively activate VOC-089. This is
+distinct from PR #137's preserved audit
+[5390981903](https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903),
+which had genuine pre-merge `eligible: true` / `reasons: []` evidence before its
+sequencing incident.
+
+The implementation steps below remain the exact inactive future contract. They may be
+used only after the VOC-091 recovery implementation receives its own exact different-
+actor review, one fully populated binder, literal pre-merge `eligible: true` /
+`reasons: []`, normal merge, and applicable post-merge checks. PR #147 remains
+open/draft/blocked under
+[5394841275](https://github.com/KARSIFT/vocanova-platform/pull/147#issuecomment-5394841275)
+until that boundary completes; no current PR #147 review, check, SHA, or binder carries
+forward.
 
 ## Target files and exact edit intent
 
@@ -94,11 +131,19 @@ git diff --check
 
 Do not run long product suites for this package-record-only correction unless the diff
 unexpectedly touches application, test, package, or shared code paths. The PR must
-record exact-SHA independent review before merge and post-merge CI/Governance/Security
-evidence before issue #140 may close.
+record exact-SHA independent review, populated binder, genuine pre-merge
+`eligible: true` / `reasons: []`, normal merge, and post-merge CI/Governance/Security
+evidence. Issue #148 closes only after the VOC-091 recovery implementation merge and
+post-merge evidence. Issue #140 closes only after the later refreshed PR #147
+implementation completes under its own evidence.
 
 ## Rollback
 
 Rollback is a normal repository revert PR of the exact VOC-089 implementation commit.
 The revert restores the previous VOC-087 package record text only. No deployment,
 database, settings, branch, or live-system rollback exists or is needed.
+
+Rollback of the VOC-091 recovery overlay is also repository-only: a normal revert PR of
+the recovery implementation restores the prior VOC-089 record and does not make PR #141
+normal, reactivate VOC-089, change PR #147, close issue #148 or #140, or authorize any
+external action.
