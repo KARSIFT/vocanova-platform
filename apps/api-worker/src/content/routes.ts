@@ -44,6 +44,14 @@ const UsageNote = z.object({
   noteType: z.string(),
   noteText: z.string(),
 });
+const WordReviewState = z.enum([
+  "due",
+  "new",
+  "learning",
+  "reviewing",
+  "mastered",
+  "not_reviewing",
+]);
 const WordMeaning = z.object({
   id: Uuid,
   partOfSpeech: z.string(),
@@ -51,6 +59,7 @@ const WordMeaning = z.object({
   learnerDefinition: z.string().optional(),
   saved: z.boolean(),
   userWordId: Uuid.optional(),
+  reviewState: WordReviewState.nullable(),
   examples: z.array(WordExample),
   usageNotes: z.array(UsageNote),
 });

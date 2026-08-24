@@ -85,6 +85,9 @@ export interface WordUsageNote {
   noteText: string;
 }
 
+export type WordReviewState =
+  "due" | "new" | "learning" | "reviewing" | "mastered" | "not_reviewing";
+
 export interface WordMeaning {
   id: string;
   partOfSpeech: string;
@@ -92,6 +95,7 @@ export interface WordMeaning {
   learnerDefinition?: string;
   saved: boolean;
   userWordId?: string;
+  reviewState: WordReviewState | null;
   examples: WordExample[];
   usageNotes: WordUsageNote[];
 }

@@ -188,6 +188,7 @@ describe("VocanovaClient", () => {
                   partOfSpeech: "noun",
                   shortDefinition: "A document.",
                   saved: true,
+                  reviewState: "mastered",
                   examples: [],
                   usageNotes: [],
                 },
@@ -206,6 +207,7 @@ describe("VocanovaClient", () => {
     const { data } = await client.getCanonicalWord("boarding-pass");
     assert.equal(data.word.slug, "boarding-pass");
     assert.equal(data.word.meanings[0]!.saved, true);
+    assert.equal(data.word.meanings[0]!.reviewState, "mastered");
   });
 
   it("sends GET /api/v1/user-words", async () => {

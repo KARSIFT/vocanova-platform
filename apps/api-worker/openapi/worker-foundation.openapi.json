@@ -452,6 +452,21 @@
                               "partOfSpeech": {
                                 "type": "string"
                               },
+                              "reviewState": {
+                                "enum": [
+                                  "due",
+                                  "new",
+                                  "learning",
+                                  "reviewing",
+                                  "mastered",
+                                  "not_reviewing",
+                                  null
+                                ],
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
                               "saved": {
                                 "type": "boolean"
                               },
@@ -491,6 +506,7 @@
                               "partOfSpeech",
                               "shortDefinition",
                               "saved",
+                              "reviewState",
                               "examples",
                               "usageNotes"
                             ],
