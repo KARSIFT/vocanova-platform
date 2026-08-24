@@ -8,6 +8,7 @@ import {
   type SituationMeaning,
   type WordDetail,
   type WordMeaning,
+  type WordReviewState,
 } from "../domain/content-learning.js";
 import { MISSION_POLICY_VERSION, localDate } from "../domain/missions.js";
 import { D1MissionsRepository } from "../missions/repository.js";
@@ -102,6 +103,7 @@ export class D1ContentLearningRepository {
   }
 
   async getWord(userId: string, slug: string): Promise<{ word: WordDetail }> {
+    const nowIso = this.now().toISOString();
     const word = await this.database
       .prepare(
         `SELECT id, text, normalized_text, word_type, difficulty_level
@@ -114,7 +116,8 @@ export class D1ContentLearningRepository {
     const meaningResult = await this.database
       .prepare(
         `SELECT wm.id, wm.part_of_speech, wm.short_definition,
-                wm.learner_definition, wm.meaning_order, uw.id AS user_word_id
+                wm.learner_definition, wm.meaning_order, uw.id AS user_word_id,
+                uw.status AS user_word_status, uw.next_review_at
          FROM word_meanings wm
          LEFT JOIN user_words uw ON uw.meaning_id = wm.id AND uw.user_id = ?1
                                 AND uw.deleted_at IS NULL
@@ -141,6 +144,11 @@ export class D1ContentLearningRepository {
         ...(row.user_word_id !== null && {
           userWordId: String(row.user_word_id),
         }),
+        reviewState: projectWordReviewState(
+          row.user_word_status === null ? null : String(row.user_word_status),
+          row.next_review_at === null ? null : String(row.next_review_at),
+          nowIso,
+        ),
         examples: examples.get(id) ?? [],
         usageNotes: notes.get(id) ?? [],
       };
@@ -794,6 +802,32 @@ export class D1ContentLearningRepository {
     return {
       statements,
     };
+  }
+}
+
+export function projectWordReviewState(
+  status: string | null,
+  nextReviewAt: string | null,
+  nowIso: string,
+): WordReviewState | null {
+  if (status === null) return null;
+  if (
+    ["new", "learning", "reviewing"].includes(status) &&
+    (nextReviewAt === null || nextReviewAt <= nowIso)
+  ) {
+    return "due";
+  }
+  switch (status) {
+    case "new":
+    case "learning":
+    case "reviewing":
+    case "mastered":
+      return status;
+    case "ignored":
+    case "archived":
+      return "not_reviewing";
+    default:
+      throw new Error("unsupported user_words status");
   }
 }
 

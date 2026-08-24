@@ -100,6 +100,15 @@ const PORT = Number(process.env.MOCK_API_PORT ?? 8080);
 const HOST = process.env.MOCK_API_HOST ?? "127.0.0.1";
 
 const ONBOARDING_STATUSES = new Set(["not_started", "in_progress", "completed"]);
+const WORD_DETAIL_REVIEW_STATES = new Map([
+  ["unsaved", null],
+  ["due", "due"],
+  ["new", "new"],
+  ["learning", "learning"],
+  ["reviewing", "reviewing"],
+  ["mastered", "mastered"],
+  ["not-reviewing", "not_reviewing"],
+]);
 
 const SESSION_COOKIE_NAME = "vocanova_session";
 const CSRF_COOKIE_NAME = "vocanova_csrf";
@@ -579,18 +588,31 @@ function buildDueWords(state) {
   };
 }
 
-function buildWordDetailResponse(state, slug) {
+function buildWordDetailResponse(state, slug, selectedFixture) {
   const word = CANONICAL_WORDS[slug];
   if (!word) {
     return null;
   }
-  const meanings = word.meanings.map((meaning) => ({
-    ...meaning,
-    saved: state.savedMeaningIds.has(meaning.id),
-    userWordId: state.savedMeaningIds.has(meaning.id)
-      ? `uw-${meaning.id}`
-      : undefined,
-  }));
+  const hasSelectedFixture = WORD_DETAIL_REVIEW_STATES.has(selectedFixture);
+  const selectedReviewState = hasSelectedFixture
+    ? WORD_DETAIL_REVIEW_STATES.get(selectedFixture)
+    : undefined;
+  const meanings = word.meanings.map((meaning) => {
+    const statefulSaved = state.savedMeaningIds.has(meaning.id);
+    const saved = hasSelectedFixture
+      ? selectedReviewState !== null
+      : statefulSaved;
+    return {
+      ...meaning,
+      saved,
+      userWordId: saved ? `uw-${meaning.id}` : undefined,
+      reviewState: hasSelectedFixture
+        ? selectedReviewState
+        : statefulSaved
+          ? "due"
+          : null,
+    };
+  });
   return {
     word: {
       ...word,
@@ -923,6 +945,21 @@ const server = createServer(async (req, res) => {
     if (!checkCsrf(req, cookies, res, logLine)) {
       return;
     }
+    if (cookies.e2e_word_detail_save_failure === "1") {
+      logLine(req, 500, { reason: "fixture-forced-save-failure" });
+      jsonResponse(
+        res,
+        500,
+        {
+          type: "about:blank",
+          title: "Test save failure",
+          status: 500,
+          detail: "Unable to update saved state. Please try again.",
+        },
+        { "Content-Type": "application/problem+json; charset=utf-8" },
+      );
+      return;
+    }
     let body = {};
     try {
       body = await readJsonBody(req);
@@ -1155,7 +1192,11 @@ const server = createServer(async (req, res) => {
       url.pathname.slice("/api/v1/canonical-words/".length),
     );
     const state = getSessionState(cookies);
-    const response = buildWordDetailResponse(state, slug);
+    const response = buildWordDetailResponse(
+      state,
+      slug,
+      cookies.e2e_word_detail_review_state,
+    );
     if (!response) {
       logLine(req, 404, { slug });
       jsonResponse(res, 404, { error: "not_found", slug });

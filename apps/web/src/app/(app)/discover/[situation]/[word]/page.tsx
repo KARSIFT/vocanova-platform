@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ApiResponseError } from "@vocanova/api-client";
+import { ApiResponseError, type WordReviewState } from "@vocanova/api-client";
 
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
 import { SentenceFeedback } from "../../../_components/sentence-feedback";
@@ -67,6 +67,11 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
                       {meaning.learnerDefinition}
                     </p>
                   ) : null}
+                  {meaning.reviewState ? (
+                    <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+                      Review state: {reviewStateLabel(meaning.reviewState)}
+                    </p>
+                  ) : null}
                 </div>
                 <MeaningSaveButton
                   meaningId={meaning.id}
@@ -124,6 +129,18 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
       </section>
     </div>
   );
+}
+
+function reviewStateLabel(reviewState: WordReviewState): string {
+  const labels: Record<WordReviewState, string> = {
+    due: "Due now",
+    new: "New",
+    learning: "Learning",
+    reviewing: "Reviewing",
+    mastered: "Mastered",
+    not_reviewing: "Not in review",
+  };
+  return labels[reviewState];
 }
 
 function formatNoteType(noteType: string): string {
