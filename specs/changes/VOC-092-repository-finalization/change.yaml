@@ -1,0 +1,156 @@
+schema_version: 1
+
+id: VOC-092
+slug: repository-finalization
+title: Finalize repository promotion and stale-branch lifecycle
+
+type: repository-operations-and-settings-reconciliation
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because this coherent outcome combines a separately reviewed main promotion,
+  GitHub repository-setting mutation, and destructive remote/local ref cleanup. It
+  requires complete decision, impact, contingency, specialist, deterministic,
+  exact-revision independent-review, and action-authority evidence.
+canonical_path: specs/changes/VOC-092-repository-finalization
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/151
+requirement_approval_status: planning-only-pending-exact-plan-review-and-adoption
+base_branch: develop
+base_sha: 3c3547bac9697185b52414adcb2b31cb16afd9ca
+plan_branch: plan/voc-092-repository-finalization
+target_branch: develop
+approved_candidate_sha: pending
+
+approval_status: not-approved
+implementation_authorized: false
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
+promotion_pull_request_required: true
+promotion_pull_request_rationale: >-
+  DOC-16 requires develop-to-main promotion to use a separately reviewed release pull
+  request with a merge commit. This protected release boundary is not a second
+  implementation task or a component-driven split.
+automatic_merge_allowed: true
+production_impact: none-repository-history-and-settings-only
+rollback_required: true
+
+owners:
+  decision: accountable-repository-owner-operator-m-e-h-r-d-a-a-d
+  package_preparation: VOC-092-planner-actor
+  implementation: different-builder-actor-after-adoption
+  independent_verification: different-non-author-exact-revision-reviewer-actor
+  specialist: different-non-author-repository-operations-and-release-reviewer
+  merge: separate-authorized-non-author-merge-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - README.md
+  - .github/README.md
+  - docs/governance/16-autonomous-development-operating-model.md
+  - docs/governance/repository-settings.md
+  - docs/governance/repository-settings-current.yaml
+  - docs/operations/cloudflare-delivery.md
+  - scripts/foundation/voc085-settings-truthfulness-policy.mjs
+  - scripts/foundation/voc085-settings-truthfulness-policy.test.mjs
+protected_areas:
+  - repository-settings-truth
+  - develop-to-main-release-promotion
+  - destructive-branch-and-ref-cleanup
+  - canonical-change-package-lifecycle
+
+implementation:
+  authorized: false
+  required: true
+  status: blocked-pending-plan-adoption
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-092-T00
+
+action_specific_authority:
+  required: true
+  source: >-
+    Repository owner/operator @m-e-h-r-d-a-a-d directed completion of promotion and
+    stale-branch cleanup, canonicalized as the requirement source in issue #151. The
+    exact plan adoption decision must explicitly bind each action below; package review
+    and R4 classification do not replace this separate operator authority.
+  actions:
+    - id: VOC-092-AUTH-SETTINGS-00
+      action: PATCH repository delete_branch_on_merge from false to true
+      accountable_role: GitHub-repository-settings-operator-m-e-h-r-d-a-a-d
+      required_evidence: >-
+        adopted exact plan, pre-state read, intended one-field payload, rollback
+        payload, immediate governed documentation reconciliation, and post-state read
+      completion_condition: >-
+        live API read returns true and the exact settings-record implementation
+        revision is independently reviewed and merged through normal pull requests
+      expiry_condition: >-
+        expires at issue #151 closure, operator withdrawal, intended payload drift, or
+        any scope expansion; any later settings action needs fresh exact authority
+    - id: VOC-092-AUTH-REMOTE-CLEANUP-00
+      action: delete exact freshly frozen merged-only non-permanent remote branch refs
+      accountable_role: repository-owner-operator-m-e-h-r-d-a-a-d
+      required_evidence: >-
+        canonical manifest mapping every branch to exact tip and merged pull request,
+        no open pull request, reachability or merged-PR recovery proof, and explicit
+        exclusion of main and develop
+      completion_condition: >-
+        post-action read shows only permanent or demonstrably active/recovery remote
+        branches and every deleted ref remains recreatable from its recorded SHA
+      expiry_condition: >-
+        manifest expires on any target ref movement, new open PR, protection/default
+        change, operator withdrawal, or issue #151 closure
+    - id: VOC-092-AUTH-LOCAL-CLEANUP-00
+      action: remove exact clean disposable auxiliary local worktrees and merged branches
+      accountable_role: repository-owner-operator-m-e-h-r-d-a-a-d
+      required_evidence: >-
+        immediately preceding clean-status read, no unique unpreserved commit or
+        staged/untracked content, exact path/ref list, and preserved recovery record
+      completion_condition: >-
+        post-action audit lists only primary or explicitly retained dirty/unique local
+        state; no force removal is used for a dirty worktree
+      expiry_condition: >-
+        each target's proof expires on status, HEAD, worktree registration, process,
+        or ownership drift and must be refreshed immediately before removal
+
+external_effects:
+  product_behavior: prohibited
+  workflow_changes: prohibited
+  validator_changes: >-
+    authorized-only-for-reconciling-the-existing-voc085-settings-truthfulness-guard-
+    and-tests-to-the-fresh-observed-record
+  repository_settings: authorized-only-for-delete-branch-on-merge-true-after-adoption
+  main_promotion: authorized-only-by-separately-reviewed-release-pr-after-adoption
+  branch_deletion: authorized-only-for-exact-revalidated-manifest-after-adoption
+  cloudflare: prohibited
+  dns: prohibited
+  deployment: prohibited
+  live_systems: prohibited
+  production_data: prohibited
+  secrets: prohibited
+  spending: prohibited
+  public_launch: prohibited
+
+release:
+  required: true
+  mode: separately-reviewed-develop-to-main-repository-promotion
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-promotion-cleanup-readback-and-all-applicable-checks
+
+ehr: not-triggered
+blocking_reasons:
+  - exact-plan-review-pending
+  - adoption-decision-pending
+  - adoption-bookkeeping-and-exact-review-pending
+  - implementation-authority-not-effective
