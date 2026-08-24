@@ -947,7 +947,17 @@ const server = createServer(async (req, res) => {
     }
     if (cookies.e2e_word_detail_save_failure === "1") {
       logLine(req, 500, { reason: "fixture-forced-save-failure" });
-      jsonResponse(res, 500, { error: "save_failed" });
+      jsonResponse(
+        res,
+        500,
+        {
+          type: "about:blank",
+          title: "Test save failure",
+          status: 500,
+          detail: "Unable to update saved state. Please try again.",
+        },
+        { "Content-Type": "application/problem+json; charset=utf-8" },
+      );
       return;
     }
     let body = {};

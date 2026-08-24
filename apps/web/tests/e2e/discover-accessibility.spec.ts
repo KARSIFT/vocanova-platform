@@ -204,7 +204,7 @@ test.describe("Discover accessibility (VOC-031-T07b)", () => {
         page.getByRole("heading", { name: "pour", level: 1 }),
       ).toBeVisible();
       await expect(
-        page.getByText("to make liquid flow into a container"),
+        page.getByText("to make liquid flow into a container", { exact: true }),
       ).toBeVisible();
       await expect(
         page.getByText("Could you pour me a cup of coffee?"),
