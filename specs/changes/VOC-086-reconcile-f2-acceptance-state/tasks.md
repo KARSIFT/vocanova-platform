@@ -19,7 +19,7 @@ R4 specialist reviews, hosted proof, and post-merge checks are recorded on that 
 
 ## VOC-086-T01 — Make F2 status drift fail closed
 
-- Status: candidate-on-b0ce5b84c1530e97762c0235a094651028690d3f-pending-exact-review-r4-specialist-hosted-proof-and-merge
+- Status: complete-exact-SHA-4920ac170ca1c527b00dc6e2061b86ef236dc95d-merged-through-PR-135
 - Requirements: `VOC-086-D03`, `D04`, `D05`, `D06`
 - Acceptance: `VOC-086-AC-01`, `AC-02`
 - Tests: `VOC-086-TEST-03`, `TEST-04`
@@ -29,17 +29,22 @@ R4 specialist reviews, hosted proof, and post-merge checks are recorded on that 
 Add exhaustive positive and independent negative fixtures for all designated surfaces.
 Keep validation network-free and foundation-aggregated.
 
-This candidate must receive fresh exact-SHA general and R4 specialist review, hosted
-proof, and normal merge before T02 can begin.
+The final head `4920ac170ca1c527b00dc6e2061b86ef236dc95d` merged as
+`568d4491c59d3393b2b68ce91a42b2554d9eb9c6` through PR #135. Its final general and R4
+specialist reviews, hosted proof, and post-merge checks are recorded on that PR. Two
+superseded specialist FAIL verdicts remain historical evidence and are not rewritten.
 
 ## VOC-086-T02 — Final verification and closure
 
-- Status: blocked-on-VOC-086-T01
+- Status: final-candidate-pending-own-exact-review-r4-specialist-hosted-proof-normal-merge-postmerge-checks-and-issue-131-closure
 - Requirements: `VOC-086-D06`, `D07`
 - Acceptance: `VOC-086-AC-03`
 - Tests: `VOC-086-TEST-05`, `TEST-06`
 - Evidence: `VOC-086-EV-03`
 - Risk: R4
 
-Record exact task/review/hosted/rollback evidence. Issue #131 remains open until normal
-merge into `develop` and applicable post-merge checks pass.
+Record exact task/review/hosted/rollback evidence. This candidate cannot contain its own
+final SHA, review URLs, hosted workflow URLs, merge SHA, post-merge runs, or issue
+closure URL. Those belong to expected PR #136, or the final T02 PR if its number
+differs. Issue #131 remains open until normal merge into `develop` and applicable
+post-merge checks pass.

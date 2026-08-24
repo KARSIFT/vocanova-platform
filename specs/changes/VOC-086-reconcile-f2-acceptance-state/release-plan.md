@@ -12,3 +12,9 @@ worktrees and never delete broad or unresolved paths.
 No issue closure occurs on plan adoption or an intermediate task. After T02 merges and
 applicable post-merge checks pass, an accountable operator may close issue #131 with
 repository-only evidence. VOC-080-HOLD-00/01/02 remain held before and after closure.
+
+The T02 candidate does not and cannot contain its own final SHA, review URLs, hosted
+workflow URLs, merge SHA, post-merge runs, or issue-closure URL. Those facts belong to
+expected PR #136, or to the final T02 PR if its number differs. If any required T02
+review, hosted check, normal merge, or post-merge check fails, issue #131 remains open
+and the package stays in final-candidate-pending-closure status.
