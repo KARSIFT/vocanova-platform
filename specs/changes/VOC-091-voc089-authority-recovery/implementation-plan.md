@@ -1,8 +1,13 @@
 # VOC-091 - Implementation Plan
 
-Do not implement until VOC-091 is independently reviewed, adopted, and its adoption
-bookkeeping has itself satisfied the normal plan-PR boundary. This plan authorizes one
-future recovery implementation PR and one task, not a retroactive repair of PR #141.
+Exact candidate `c0b116fa26e87556695386e372542910cb4fa234` received independent PASS
+and the accountable adoption decision. This bookkeeping revision records
+`status: adopted` and `implementation_authorized: true`. Do not implement yet: this
+authorization becomes effective only after this bookkeeping SHA receives its own
+different-actor exact review, populated binder, genuine pre-merge `eligible: true` /
+`reasons: []`, normal PR #149 merge, and applicable post-merge checks. This plan
+authorizes one future recovery implementation PR and one task, not a retroactive repair
+of PR #141.
 
 ## Exact recovery allowlist and edit intent
 

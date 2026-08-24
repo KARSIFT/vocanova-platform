@@ -1,8 +1,14 @@
 # VOC-091 - Recover VOC-089 implementation authority prospectively
 
-Status: draft. Issue [#148](https://github.com/KARSIFT/vocanova-platform/issues/148)
-grants planning authority only; it does not authorize this correction, VOC-089
-implementation, PR #147 resumption, merge, issue closure, or any external action.
+Status: adopted in bookkeeping. Exact candidate
+`c0b116fa26e87556695386e372542910cb4fa234` received independent PASS and the
+accountable adoption decision on PR #149. Implementation authorization is recorded but
+becomes effective only after this adoption-bookkeeping revision receives its own
+exact-SHA review, a populated binder, a genuine pre-merge `eligible: true` /
+`reasons: []` result, normal PR #149 merge, and applicable post-merge checks. Issue
+[#148](https://github.com/KARSIFT/vocanova-platform/issues/148) granted planning
+authority only and does not itself authorize implementation, PR #147 resumption, merge,
+issue closure, or external action.
 
 PR [#141](https://github.com/KARSIFT/vocanova-platform/pull/141) merged as
 `925faf774ded5128c8aef2a298a8d6f506164ee0`, but its normal eligibility boundary was
@@ -55,6 +61,20 @@ needed VOC-089 implementation contract, and it omitted exact post-merge run anch
 This amendment resolves those findings by making the later recovery additive and
 preservation-first and recording the three runs. It needs a fresh exact-SHA independent
 review; the prior FAIL is not approval.
+
+Amended candidate `c0b116fa26e87556695386e372542910cb4fa234` received independent
+**PASS** with zero blockers at
+[comment 5395062917](https://github.com/KARSIFT/vocanova-platform/pull/149#issuecomment-5395062917),
+resolving the initial FAIL without erasing it. The accountable adoption decision is at
+[comment 5395082423](https://github.com/KARSIFT/vocanova-platform/pull/149#issuecomment-5395082423).
+Candidate CI
+[`32725952661`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32725952661)
+and Security
+[`32725952666`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32725952666)
+passed. Governance [`32725979472`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32725979472)
+passed structure/risk but its intentionally blank draft binder produced blocked
+eligibility; it is not final merge evidence. Quality is not applicable to plan-only
+paths. This later bookkeeping SHA needs fresh review and a newly populated binder.
 
 No product behavior, test behavior, workflow/evaluator/validator, settings,
 deployment, Cloudflare/live system, `main`, secret, or production-data change is in

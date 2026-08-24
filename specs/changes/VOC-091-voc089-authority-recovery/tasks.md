@@ -7,7 +7,9 @@
 - Tests: `VOC-091-TEST-00` through `VOC-091-TEST-08`
 - Evidence: `VOC-091-EV-00` through `VOC-091-EV-05`
 - Risk: R3
-- Status: draft-not-authorized
+- Status: adopted-authorized; effective only after bookkeeping revision review,
+  populated binder, genuine pre-merge eligibility, normal PR #149 merge, and applicable
+  post-merge checks
 
 In one future implementation PR, add a preservation-first incident/recovery overlay to
 the nine active VOC-089 package records. Preserve the existing D00-D05, AC00-AC04,

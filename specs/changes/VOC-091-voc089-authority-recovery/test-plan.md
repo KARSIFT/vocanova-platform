@@ -104,4 +104,6 @@
 
 This is a governance-record correction. Product suites would not establish authority
 truth. Evidence-source, exact JSON, binder, role-separation, scope, deterministic
-governance validation, normal merge, and post-merge checks are the material tests.
+governance validation, normal merge, and post-merge checks are the material tests. The
+adopted candidate review is not transferable to its later bookkeeping SHA, which needs
+fresh exact review and a newly populated binder before final eligibility evaluation.

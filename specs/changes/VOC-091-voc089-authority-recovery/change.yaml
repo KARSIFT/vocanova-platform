@@ -5,7 +5,7 @@ slug: voc089-authority-recovery
 title: Recover VOC-089 implementation authority prospectively
 
 type: governance-evidence-authority-recovery
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because the implementation corrects canonical governance lifecycle and
@@ -18,19 +18,19 @@ planned_implementation_risk_floor: >-
 canonical_path: specs/changes/VOC-091-voc089-authority-recovery
 authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/148
-requirement_approval_status: issue-recorded-for-planning-only
+requirement_approval_status: exact-plan-review-and-decision-owner-approved
 base_branch: develop
 base_sha: 925faf774ded5128c8aef2a298a8d6f506164ee0
 plan_branch: plan/voc-091-voc089-authority-recovery
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: c0b116fa26e87556695386e372542910cb4fa234
 
-approval_status: not-approved
-implementation_authorized: false
+approval_status: adopted
+implementation_authorized: true
 implementation_authority_status: >-
-  not-authorized-until-voc-091-exact-candidate-review-adoption-bookkeeping-exact-review-
-  populated-binder-genuine-premerge-eligible-true-reasons-empty-normal-merge-and-
-  applicable-postmerge-checks
+  authorized-by-adoption-decision-but-effective-only-after-voc-091-adoption-bookkeeping-
+  revision-exact-review-populated-binder-genuine-premerge-eligible-true-reasons-empty-
+  normal-pr-149-merge-and-applicable-postmerge-checks
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
 automatic_merge_allowed: true
@@ -48,6 +48,30 @@ plan_review_history:
     resolution_status: >-
       immutable-failure-addressed-by-later-candidate-that-preserves-voc-089-contract-
       additively-and-records-postmerge-runs;-fresh-exact-review-required
+  - candidate_sha: c0b116fa26e87556695386e372542910cb4fa234
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/149#issuecomment-5395062917
+    resolves_candidate_sha: 90b8f91f5c593e94a89e6c3841998d2078ddccad
+
+approvals:
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: c0b116fa26e87556695386e372542910cb4fa234
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/149#issuecomment-5395062917
+  adoption_decision:
+    status: approved-for-adoption
+    candidate_sha: c0b116fa26e87556695386e372542910cb4fa234
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/149#issuecomment-5395082423
+
+candidate_hosted_evidence:
+  candidate_sha: c0b116fa26e87556695386e372542910cb4fa234
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32725952661
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32725979472
+    structure_and_risk: pass
+    eligibility: blocked-pending-bookkeeping-review-and-populated-binder
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32725952666
+  quality: not-applicable-plan-only-path-filter
 
 owners:
   decision: accountable-repository-governance-decision-owner-after-independent-plan-review
@@ -154,10 +178,10 @@ protected_areas:
   - implementation-authority-evidence
 
 implementation:
-  authorized: false
+  authorized: true
   authority_effective: false
   required: true
-  status: draft-plan-not-authorized
+  status: authorized-pending-bookkeeping-review-binder-eligible-normal-merge-and-postmerge
   target_branch: develop
   pull_request_count: 1
   task: VOC-091-T00
@@ -170,6 +194,10 @@ release:
   rollback_required: true
   issue_148_closure: after-recovery-implementation-merge-and-applicable-postmerge-checks-only
   issue_140_closure: prohibited-until-pr-147-later-completes
+
+repository_adoption_status: adopted-pending-pr-149-normal-merge-and-applicable-postmerge-checks
+adoption_pr: 149
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/149#issuecomment-5395082423
 
 ehr: not-triggered
 action_specific_authority:
@@ -192,7 +220,11 @@ external_effects:
   secrets: prohibited
 
 blocking_reasons:
-  - voc-091-plan-review-and-adoption-pending
-  - voc-091-implementation-not-authorized
+  - exact-adoption-bookkeeping-revision-review-pending
+  - final-hosted-checks-after-populated-binder-pending
+  - final-normalized-eligible-true-reasons-empty-pending
+  - pr-149-normal-merge-pending
+  - applicable-postmerge-checks-pending
+  - recovery-implementation-authority-not-effective
   - pr-141-invalid-premerge-eligibility-does-not-activate-voc-089
   - pr-147-must-remain-blocked-until-recovery-postmerge-boundary

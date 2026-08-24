@@ -15,6 +15,12 @@ current VOC-089 record truthful, preserves every incident fact, and provides the
 path by which VOC-089 authority may later become effective. It does not normalize the
 invalid merge retroactively.
 
+Exact candidate `c0b116fa26e87556695386e372542910cb4fa234` has independent PASS and
+an accountable adoption decision. This bookkeeping revision records adoption but does
+not make recovery implementation authority effective: it still requires its own exact
+review, populated binder, literal pre-merge eligibility proof, normal PR #149 merge,
+and applicable post-merge checks.
+
 ## Scope
 
 In scope:

@@ -1,7 +1,10 @@
 # VOC-091 - Release and Rollback Plan
 
 VOC-091 has no product release, deployment, or live-system effect. Its only delivery is
-one repository-only recovery implementation PR to `develop`.
+one repository-only recovery implementation PR to `develop`. The plan is adopted in
+bookkeeping, but that delivery remains inactive until the bookkeeping revision itself
+receives exact review, populated binder, genuine pre-merge eligibility, normal PR #149
+merge, and applicable post-merge checks.
 
 ## Recovery merge boundary
 

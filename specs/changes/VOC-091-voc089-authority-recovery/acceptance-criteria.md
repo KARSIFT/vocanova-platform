@@ -1,5 +1,9 @@
 # VOC-091 - Acceptance Criteria
 
+Plan status: adopted in bookkeeping; recovery implementation authority remains inactive
+until the final bookkeeping revision satisfies its exact-review, binder, pre-merge
+eligibility, normal-merge, and post-merge gates.
+
 ## VOC-091-AC-00 - Incident record is complete and not sanitized
 
 - Requirements: `VOC-091-D00`, `D06`

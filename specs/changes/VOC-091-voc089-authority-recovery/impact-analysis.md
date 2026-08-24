@@ -8,6 +8,11 @@ blocked evidence; the incident was a merge actor reading job success instead of 
 normalized JSON after an exact review arrived later. The recovery therefore changes no
 workflow, evaluator, validator, settings, branch protection, or role policy.
 
+The adopted plan remains inactive for implementation until its adoption-bookkeeping
+revision has its own exact review, populated binder, genuine pre-merge eligibility,
+normal merge, and post-merge evidence. This avoids treating candidate review or the
+adoption decision as transferable evidence for a later SHA.
+
 The future implementation must reconcile every active VOC-089 record that now implies
 normal merge/effective authorization: `change.yaml`, README, specification, acceptance
 criteria, impact analysis, implementation plan, tasks, test plan, and release plan.
