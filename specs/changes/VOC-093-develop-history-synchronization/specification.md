@@ -43,20 +43,32 @@ require the safe history loop back into `develop` after that merge-commit promot
   `develop` history. `main` remains unchanged.
 - `VOC-093-D04` — The only content changes allowed beyond the ancestry merge are the
   prevention surfaces required to keep current release/finalization guidance truthful:
+  `AGENTS.md`,
+  `CONTRIBUTING.md`,
   `.github/README.md`,
   `docs/governance/16-autonomous-development-operating-model.md`,
-  `docs/governance/repository-settings.md`, and
-  `docs/operations/10-development-workflow.md`.
+  `docs/governance/repository-settings.md`,
+  `docs/operations/10-development-workflow.md`, and the current DOC-15 authority
+  matrix section in
+  `docs/operations/15-ai-native-product-and-engineering-operating-model.md`.
 - `VOC-093-D05` — Those living surfaces must state that a reviewed `develop` → `main`
   release PR is not the full branch-finalization boundary on its own. Finalization is
   complete only after the post-promotion history loop returns current `main` ancestry
   to `develop` through a short-lived synchronization branch and merge commit, while
   keeping deployment/settings/live-action boundaries unchanged.
-- `VOC-093-D06` — Add the minimum deterministic guard/tests needed to fail closed when
+- `VOC-093-D06` — The drafting review also checked `README.md`,
+  `docs/operations/11-devops-and-ci-cd.md`, and
+  `docs/governance/post-merge-activation-checklist.md`. They are explicitly excluded
+  from the required implementation diff because they are not current release/
+  finalization procedure sources: `README.md` is repository overview, DOC-11 is
+  environment/deployment architecture, and the post-merge activation checklist is a
+  prospective hosted-enforcement checklist. If implementation changes their subject
+  matter too, stop and return to planning rather than broadening silently.
+- `VOC-093-D07` — Add the minimum deterministic guard/tests needed to fail closed when
   the living release/governance surfaces omit or contradict that synchronization
   requirement. The guard must validate only current living guidance, not historical
   evidence files.
-- `VOC-093-D07` — Post-merge evidence must prove:
+- `VOC-093-D08` — Post-merge evidence must prove:
   - `git merge-base --is-ancestor origin/main origin/develop` succeeds;
   - `git rev-list --left-right --count origin/main...origin/develop` has left count
     `0`;
@@ -65,17 +77,22 @@ require the safe history loop back into `develop` after that merge-commit promot
   - permanent refs remain present; and
   - file-content differences from `main` are limited to the adopted documentation and
     deterministic-guard surfaces.
-- `VOC-093-D08` — Preserve the dirty VOC-090 worktree/branch and all other current
-  recovery exceptions. This package performs no branch deletion, worktree removal, or
-  settings mutation.
-- `VOC-093-D09` — Run the applicable deterministic checks for governance/doc/script
+- `VOC-093-D09` — Preserve the dirty VOC-090 worktree/branch and all other current
+  recovery exceptions. This package performs no manual branch deletion, no worktree
+  removal, and no settings mutation. The only allowed ref-deletion consequence is the
+  existing GitHub behavior that may automatically delete the merged short-lived plan or
+  implementation source branch head because `delete_branch_on_merge` is already true.
+  Record the exact source-branch name and tip SHA before merge, then read back the
+  post-merge branch set and the exact recreate command from that SHA. `main`,
+  `develop`, and any other permanent or manually targeted ref are excluded.
+- `VOC-093-D10` — Run the applicable deterministic checks for governance/doc/script
   changes, obtain different-actor exact-SHA independent review plus a different-actor
   release/governance specialist review, resolve every blocker, and merge through a
   non-author actor only after genuine eligibility evidence.
-- `VOC-093-D10` — No settings, Cloudflare, DNS, deployment, environment, secret,
+- `VOC-093-D11` — No settings, Cloudflare, DNS, deployment, environment, secret,
   production-data, migration, traffic, spending, launch, or `main` promotion action is
   in scope. Repository history changes stop at `develop`.
-- `VOC-093-D11` — `automatic_merge_allowed: true` is explicit read-only package policy
+- `VOC-093-D12` — `automatic_merge_allowed: true` is explicit read-only package policy
   metadata and must not be described as a merge executor.
 
 ## Data, security, privacy, analytics, and accessibility

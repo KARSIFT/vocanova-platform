@@ -28,15 +28,38 @@ describe promotion/finalization, add the minimum deterministic guard/tests for t
 boundary, and merge back to `develop` with a merge commit so ancestry is preserved.
 Using `main` itself as a temporary PR head is prohibited.
 
+Because the live repository setting `delete_branch_on_merge` is already `true`, a
+normal merge of this plan PR and of the later short-lived implementation PR is
+expected to let GitHub automatically delete only the merged short-lived source branch
+head after merge. This package therefore records exact pre-merge branch/SHA evidence,
+post-merge read-back, and recovery instructions for those short-lived heads. It does
+not authorize any manual branch deletion, any permanent-branch deletion, or any
+worktree removal.
+
 This package deliberately excludes:
 
 - any `main` mutation;
 - any GitHub settings mutation;
-- any branch or worktree deletion;
+- any manual branch deletion, any permanent-branch deletion, and any worktree
+  deletion;
 - any Cloudflare, DNS, deployment, environment, secret, production-data, migration,
   traffic, spending, or launch action; and
 - any interference with the dirty VOC-090 worktree/branch or other existing recovery
   exceptions.
+
+The living release/governance reconciliation set intentionally includes
+`AGENTS.md`, `CONTRIBUTING.md`, `.github/README.md`,
+`docs/governance/16-autonomous-development-operating-model.md`,
+`docs/governance/repository-settings.md`,
+`docs/operations/10-development-workflow.md`, and the current DOC-15 authority matrix
+in `docs/operations/15-ai-native-product-and-engineering-operating-model.md`.
+Drafting review also checked `README.md`, `docs/operations/11-devops-and-ci-cd.md`,
+and `docs/governance/post-merge-activation-checklist.md`; they are excluded because
+they do not define the current branch-finalization procedure. `README.md` is a
+repository overview, DOC-11 describes environment/deployment architecture rather than
+the release/finalization loop, and the post-merge activation checklist is a
+prospective hosted-enforcement checklist rather than the current promotion/finalization
+source of truth.
 
 `automatic_merge_allowed: true` is explicitly examined package metadata only. No
 workflow performs a merge, and this package does not change that.

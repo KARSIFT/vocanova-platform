@@ -12,7 +12,9 @@ The implementation intentionally changes `develop` history with a merge commit t
 records current `main` ancestry plus prevention-only documentation/guard updates.
 `main` is not changed. Because `delete_branch_on_merge` is already enabled, using a
 short-lived synchronization branch rather than `main` itself is required to avoid any
-accidental permanent-branch deletion semantics.
+accidental permanent-branch deletion semantics. A normal merge of the plan PR and the
+later implementation PR may automatically delete only their merged short-lived source
+heads; exact pre-merge SHA capture and post-merge readback are therefore required.
 
 ## Product behavior, analytics, and accessibility
 
@@ -29,13 +31,18 @@ changed.
   the repository's enabled automatic merged-branch deletion and protected-branch
   expectations. Mitigation: prohibit `main` as PR head; require a short-lived sync
   branch only.
-- `VOC-093-R02`: documentation could again describe promotion as complete without the
+- `VOC-093-R02`: the existing `delete_branch_on_merge=true` setting could be described
+  falsely as either no deletion or as permission for broader cleanup. Mitigation:
+  limit the package to GitHub's automatic deletion of only merged short-lived plan or
+  implementation source heads, record exact SHA/readback/recovery evidence, and
+  prohibit manual or permanent-ref deletion.
+- `VOC-093-R03`: documentation could again describe promotion as complete without the
   return loop to `develop`. Mitigation: update every living release/governance surface
   in scope and add a deterministic policy/test that fails closed on omission or drift.
-- `VOC-093-R03`: implementation could be mistaken for a live deployment, setting
+- `VOC-093-R04`: implementation could be mistaken for a live deployment, setting
   change, or cleanup action. Mitigation: explicit no-live-action scope, no settings
   mutation, and evidence that only `develop` history plus prevention surfaces changed.
-- `VOC-093-R04`: `main` or `develop` could move during review. Mitigation: refresh the
+- `VOC-093-R05`: `main` or `develop` could move during review. Mitigation: refresh the
   exact branch freeze and recompute ancestry evidence before merge if either ref
   changes.
 - `VOC-093-DEP-00`: package adoption and exact-SHA reviews are required before
@@ -46,7 +53,8 @@ changed.
 - `VOC-093-EV-00`: package review/adoption evidence and exact-SHA implementation
   reviews.
 - `VOC-093-EV-01`: exact pre/post ancestry reads, merge-base output, compare output,
-  merge commit SHA, and unchanged `main` proof.
+  merge commit SHA, unchanged `main` proof, and source-head deletion readback/recovery
+  evidence.
 - `VOC-093-EV-02`: doc diff limited to the declared living surfaces plus the new guard
   files, and deterministic guard/test output.
 - `VOC-093-EV-03`: preserved dirty worktree/recovery-state audit and no-live-action

@@ -49,10 +49,13 @@ artifacts:
   release_plan: release-plan.md
 
 affected_areas:
+  - AGENTS.md
+  - CONTRIBUTING.md
   - .github/README.md
   - docs/governance/16-autonomous-development-operating-model.md
   - docs/governance/repository-settings.md
   - docs/operations/10-development-workflow.md
+  - docs/operations/15-ai-native-product-and-engineering-operating-model.md
   - scripts/foundation/voc093-develop-history-synchronization-policy.mjs
   - scripts/foundation/voc093-develop-history-synchronization-policy.test.mjs
   - specs/changes/VOC-093-develop-history-synchronization
@@ -71,18 +74,48 @@ implementation:
   task: VOC-093-T00
 
 action_specific_authority:
-  required: false
+  required: true
   authorization_status: >-
-    not-required-beyond-normal-reviewed-repository-implementation-because-this-package
-    performs-no-settings-mutation-no-main-promotion-no-branch-deletion-and-no-live
-    external action
+    plan-and-implementation-branch-source-head-auto-deletion-under-current-
+    delete-branch-on-merge-true-must-be-explicitly-recorded-and-remains-limited-to-
+    merged-short-lived-non-permanent-heads-with-exact-recovery-and-readback-evidence
+  source: >-
+    The live repository setting `delete_branch_on_merge=true` was independently
+    observed on 2026-08-24 UTC during VOC-092. A normal merge of this plan PR and of
+    the later short-lived implementation PR is therefore expected to let GitHub
+    automatically delete only the merged source branch head after the merge completes.
+    This package does not authorize any manual branch deletion, any worktree removal,
+    or any deletion target other than the merged short-lived plan/implementation
+    source heads.
+  actions:
+    - id: VOC-093-AUTH-BRANCH-HEAD-00
+      action: >-
+        allow only GitHub's automatic post-merge deletion of a merged short-lived
+        plan or implementation source branch while `delete_branch_on_merge=true`
+      accountable_role: separate-authorized-non-author-merge-actor
+      required_evidence: >-
+        exact source-branch name, exact pre-merge tip SHA, proof that the branch is
+        a short-lived non-permanent plan or implementation head rather than `main`
+        or `develop`, post-merge branch-list readback, and exact recreate command
+        or push syntax from the recorded SHA
+      completion_condition: >-
+        post-merge evidence shows `main` and `develop` still present, no manual
+        branch-delete action was performed, and only the merged short-lived source
+        head was removed automatically if GitHub applied the setting
+      expiry_condition: >-
+        expires on source-branch rename, pre-merge SHA drift, setting drift away
+        from true, merge-target drift away from `develop`, operator withdrawal, or
+        any proposed deletion target beyond the merged short-lived source head
 
 external_effects:
   product_behavior: prohibited
   workflow_changes: prohibited
   repository_settings: prohibited
   main_promotion: prohibited
-  branch_deletion: prohibited
+  branch_deletion: >-
+    authorized-only-for-automatic-post-merge-deletion-of-the-merged-short-lived-plan-
+    or-implementation-source-head-under-current-delete-branch-on-merge-true-with-
+    exact-readback-and-recovery-evidence-no-manual-or-permanent-ref-deletion
   cloudflare: prohibited
   dns: prohibited
   deployment: prohibited
