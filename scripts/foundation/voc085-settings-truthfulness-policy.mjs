@@ -18,12 +18,14 @@ const EXPECTED_CURRENT_RECORD = {
     full_name: "KARSIFT/vocanova-platform",
   },
   observed_at: "2026-08-24",
+  observed_at_utc: "2026-08-24T22:06:57Z",
   as_of: "2026-08-24",
-  source: "github-rest-api-read-only",
+  source: "github-rest-api-read-only-after-authorized-voc092-setting-mutation",
   observation_evidence: {
-    issue: 119,
-    url: "https://github.com/KARSIFT/vocanova-platform/issues/119",
-    note: "read-only observation traceability only; no settings mutation authority",
+    issue: 151,
+    url: "https://github.com/KARSIFT/vocanova-platform/issues/151",
+    comment: 5402043002,
+    note: "post-mutation read-back of all previously recorded settings surfaces",
   },
   source_endpoints: [
     "GET /repos/KARSIFT/vocanova-platform",
@@ -174,13 +176,30 @@ const EXPECTED_CURRENT_RECORD = {
     required_follow_up:
       "immediate-governed-doc-only-reconciliation-after-future-mutation",
   },
-  settings_mutation: "prohibited",
+  settings_mutation: {
+    status: "completed",
+    field: "delete_branch_on_merge",
+    prior_value: false,
+    current_value: true,
+    pre_state_utc: "2026-08-24T22:06:14Z",
+    post_state_utc: "2026-08-24T22:06:18Z",
+    exact_payload: "delete_branch_on_merge-true",
+    rollback_payload: "delete_branch_on_merge-false",
+    authority: "https://github.com/KARSIFT/vocanova-platform/pull/152",
+    authority_comment: 5401902952,
+    pre_state_evidence:
+      "https://github.com/KARSIFT/vocanova-platform/issues/151",
+    pre_state_comment: 5402030322,
+    post_state_evidence:
+      "https://github.com/KARSIFT/vocanova-platform/issues/151",
+    post_state_comment: 5402032905,
+  },
   visibility: "public",
   default_branch: "main",
   allow_merge_commit: true,
   allow_squash_merge: true,
   allow_rebase_merge: false,
-  delete_branch_on_merge: false,
+  delete_branch_on_merge: true,
   actions: {
     enabled: true,
     allowed_actions: "selected",
@@ -209,15 +228,18 @@ const EXPECTED_CURRENT_RECORD = {
   },
   specialist_review: {
     required: true,
-    status: "pending-exact-final-revision-review",
+    status: "pass-exact-revision-zero-blockers",
+    candidate_sha: "0660dddbc070d54333aa4e1bb74b244d41878262",
+    evidence: "https://github.com/KARSIFT/vocanova-platform/pull/153",
+    evidence_review: 5013084998,
     scope: [
       "source-api-schema-and-endpoint-interpretation",
       "availability-versus-enabled-distinction",
       "dependency-vulnerability-alert-versus-dependabot-security-update-distinction",
       "point-in-time-freshness-and-staleness-semantics",
-      "no-mutation-boundary",
+      "exact-authorized-mutation-and-rollback-evidence",
     ],
-    note: "specialist exact-revision review remains pending for this implementation revision",
+    note: "distinct non-author settings specialist verified the exact semantic candidate",
   },
 };
 
@@ -233,7 +255,7 @@ const ACTIVE_DOCUMENT_REQUIREMENTS = [
       {
         label: "observed-versus-disabled hosted controls split",
         snippet:
-          "dependency/vulnerability alerts are enabled as observed, while rulesets and branch protection are absent and Dependabot security updates and GitHub-hosted secret scanning/push protection are disabled.",
+          "dependency/vulnerability alerts and automatic deletion of merged branches are enabled as observed, while rulesets and branch protection are absent and Dependabot security updates and GitHub-hosted secret scanning/push protection are disabled.",
       },
       {
         label: "public-availability warning",
@@ -248,6 +270,11 @@ const ACTIVE_DOCUMENT_REQUIREMENTS = [
         label: "current public settings guidance",
         snippet:
           "The repository is public, current as observed at 2026-08-24, but public availability does not mean a ruleset, branch protection, security feature, or other hosted enforcement control is configured.",
+      },
+      {
+        label: "automatic merged-branch deletion distinction",
+        snippet:
+          "Automatic deletion of merged branches is enabled as the one VOC-092 setting change; it is not branch protection or merge automation.",
       },
     ],
   },
@@ -292,11 +319,21 @@ const ACTIVE_DOCUMENT_REQUIREMENTS = [
       {
         label: "package does not activate prospective controls",
         snippet:
-          "None of the prospective controls is enabled by this documentation package; any activation remains under `VOC-085-HOLD-00`.",
+          "None of the other prospective controls is enabled by this documentation package; any later activation remains under `VOC-085-HOLD-00`.",
       },
       {
-        label: "no settings-mutation claim",
-        snippet: "This package and this guide perform no settings mutation.",
+        label: "record-versus-mutation boundary",
+        snippet:
+          "This guide records but does not itself perform VOC-092's completed one-field settings mutation.",
+      },
+      {
+        label: "automatic deletion current setting",
+        snippet: "rebase merges and automatic branch deletion enabled",
+      },
+      {
+        label: "exact mutation evidence boundary",
+        snippet:
+          "VOC-092 changed only `delete_branch_on_merge` from `false` to `true`",
       },
     ],
   },
@@ -306,7 +343,7 @@ const ACTIVE_DOCUMENT_REQUIREMENTS = [
       {
         label: "DOC-16 hosted settings observation boundary",
         snippet:
-          "for the hosted settings posture current as observed at 2026-08-24. Neither record is a live settings feed.",
+          "for the hosted settings posture current as observed at 2026-08-24, including VOC-092's enabled automatic deletion of merged branches. Neither record is a live settings feed, and automatic branch deletion is not automatic merge or deployment.",
       },
       {
         label: "DOC-16 dependency audit distinction",
@@ -340,7 +377,12 @@ const ACTIVE_DOCUMENT_REQUIREMENTS = [
       {
         label: "delivery guide held future settings mutation boundary",
         snippet:
-          "Any future GitHub settings mutation remains held by `VOC-085-HOLD-00` and requires an immediate governed documentation-only follow-up; Cloudflare delivery activation remains separately held by the VOC-080 holds above.",
+          "Any later GitHub settings mutation remains held by `VOC-085-HOLD-00` and requires an immediate governed documentation-only follow-up; Cloudflare delivery activation remains separately held by the VOC-080 holds above.",
+      },
+      {
+        label: "delivery guide automatic deletion distinction",
+        snippet:
+          "It also records VOC-092's enabled automatic deletion of merged branches, which is neither branch protection nor deployment.",
       },
     ],
   },

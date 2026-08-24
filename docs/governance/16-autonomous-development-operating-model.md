@@ -284,8 +284,9 @@ above) remains a separate, currently disabled gate - see
 [repository-settings.md](repository-settings.md) and
 [a003-transition-state.yaml](a003-transition-state.yaml) for the governance
 transition state, and [repository-settings-current.yaml](repository-settings-current.yaml)
-for the hosted settings posture current as observed at 2026-08-24. Neither record is
-a live settings feed.
+for the hosted settings posture current as observed at 2026-08-24, including
+VOC-092's enabled automatic deletion of merged branches. Neither record is a live
+settings feed, and automatic branch deletion is not automatic merge or deployment.
 
 ## Release gate
 

@@ -6,9 +6,10 @@ current as observed at 2026-08-24. See the [point-in-time repository settings
 record](docs/governance/repository-settings-current.yaml) and
 [`docs/governance/repository-settings.md`](docs/governance/repository-settings.md)
 for the exact hosted posture: selected Actions with SHA pinning and dependency/
-vulnerability alerts are enabled as observed, while rulesets and branch protection
-are absent and Dependabot security updates and GitHub-hosted secret scanning/push
-protection are disabled. Public availability does not mean a control is configured.
+vulnerability alerts and automatic deletion of merged branches are enabled as
+observed, while rulesets and branch protection are absent and Dependabot security
+updates and GitHub-hosted secret scanning/push protection are disabled. Public
+availability does not mean a control is configured.
 
 Its canonical runtime roots are `apps/web`, `apps/api-worker`, and the shared packages under `packages/`.
 Real, shipped product surfaces exist today - `apps/web` has working Home, Progress, and

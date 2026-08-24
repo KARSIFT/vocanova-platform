@@ -76,12 +76,14 @@ credential.
 The repository is public, current as observed at 2026-08-24. The [point-in-time
 settings record](../governance/repository-settings-current.yaml) covers public
 visibility and absent branch restrictions; it does not inspect environments or
-secrets. The repository therefore makes no claim that hosted environment approvals,
-secrets, or branch restrictions are configured. Public availability does not mean
-those controls exist. The committed fail-closed state does not pretend those settings
-exist. Any future GitHub settings mutation remains held by `VOC-085-HOLD-00` and
-requires an immediate governed documentation-only follow-up; Cloudflare delivery
-activation remains separately held by the VOC-080 holds above.
+secrets. It also records VOC-092's enabled automatic deletion of merged branches,
+which is neither branch protection nor deployment. The repository therefore makes no
+claim that hosted environment approvals, secrets, or branch restrictions are
+configured. Public availability does not mean those controls exist. The committed
+fail-closed state does not pretend those settings exist. Any later GitHub settings
+mutation remains held by `VOC-085-HOLD-00` and requires an immediate governed
+documentation-only follow-up; Cloudflare delivery activation remains separately held
+by the VOC-080 holds above.
 
 ## Ordered execution after future authorization
 
