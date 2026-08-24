@@ -154,6 +154,142 @@ const DEFAULT_DAILY_MISSION = {
   streak: DEFAULT_PROGRESS.streak,
 };
 
+const TRUNCATED_SAVED_WORDS_RESPONSE = {
+  items: [
+    {
+      userWordId: "e2e-preview-user-word-01",
+      meaningId: "e2e-preview-meaning-01",
+      wordId: "e2e-preview-word-01",
+      wordSlug: "arrival",
+      wordText: "arrival",
+      partOfSpeech: "noun",
+      shortDefinition: "the act of reaching a place",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-10T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-02",
+      meaningId: "e2e-preview-meaning-02",
+      wordId: "e2e-preview-word-02",
+      wordSlug: "baggage",
+      wordText: "baggage",
+      partOfSpeech: "noun",
+      shortDefinition: "bags carried while travelling",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-09T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-03",
+      meaningId: "e2e-preview-meaning-03",
+      wordId: "e2e-preview-word-03",
+      wordSlug: "counter",
+      wordText: "counter",
+      partOfSpeech: "noun",
+      shortDefinition: "a long flat surface for service",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-08T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-04",
+      meaningId: "e2e-preview-meaning-04",
+      wordId: "e2e-preview-word-04",
+      wordSlug: "departure",
+      wordText: "departure",
+      partOfSpeech: "noun",
+      shortDefinition: "the act of leaving a place",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-07T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-05",
+      meaningId: "e2e-preview-meaning-05",
+      wordId: "e2e-preview-word-05",
+      wordSlug: "gate",
+      wordText: "gate",
+      partOfSpeech: "noun",
+      shortDefinition: "the place where passengers board",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-06T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-06",
+      meaningId: "e2e-preview-meaning-06",
+      wordId: "e2e-preview-word-06",
+      wordSlug: "luggage",
+      wordText: "luggage",
+      partOfSpeech: "noun",
+      shortDefinition: "bags used for travelling",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-05T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-07",
+      meaningId: "e2e-preview-meaning-07",
+      wordId: "e2e-preview-word-07",
+      wordSlug: "passport",
+      wordText: "passport",
+      partOfSpeech: "noun",
+      shortDefinition: "an official document for international travel",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-04T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-08",
+      meaningId: "e2e-preview-meaning-08",
+      wordId: "e2e-preview-word-08",
+      wordSlug: "queue",
+      wordText: "queue",
+      partOfSpeech: "noun",
+      shortDefinition: "a line of people waiting",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-03T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-09",
+      meaningId: "e2e-preview-meaning-09",
+      wordId: "e2e-preview-word-09",
+      wordSlug: "reservation",
+      wordText: "reservation",
+      partOfSpeech: "noun",
+      shortDefinition: "an arrangement to keep a place",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-02T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-preview-user-word-10",
+      meaningId: "e2e-preview-meaning-10",
+      wordId: "e2e-preview-word-10",
+      wordSlug: "terminal",
+      wordText: "terminal",
+      partOfSpeech: "noun",
+      shortDefinition: "an airport building for passengers",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-01T00:00:00.000Z",
+    },
+  ],
+  nextCursor: "e2e-saved-words-after-10",
+};
+
 const CANONICAL_WORDS = {
   pour: {
     id: "word-pour",
@@ -774,8 +910,10 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
-    const state = getSessionState(cookies);
-    const data = buildSavedWords(state);
+    const data =
+      cookies.e2e_saved_words_fixture === "truncated-page"
+        ? TRUNCATED_SAVED_WORDS_RESPONSE
+        : buildSavedWords(getSessionState(cookies));
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
