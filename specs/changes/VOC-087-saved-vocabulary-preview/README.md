@@ -1,11 +1,14 @@
 # VOC-087 — Truthful saved-vocabulary preview on Progress
 
-Status: adopted for repository bookkeeping. Exact candidate
+Status: adopted and completed for repository bookkeeping. Exact candidate
 `eea8d41447a9dc88125df546d62bd851bd4ad496` received independent PASS and the
-accountable adoption decision on PR #137. Implementation authorization is recorded but
-becomes effective only after the adoption-bookkeeping revision receives its own exact-
-SHA review and hosted evidence, PR #137 normally merges, and applicable post-merge
-checks pass. No merge, deployment, or external-effect authority is granted.
+accountable adoption decision on PR #137. The final adoption-bookkeeping revision
+`dd4db05be3473a1cc4a2cbb790b0276cb0fe0029` received exact-SHA review and hosted
+evidence, PR #137 merged as `61894b46705d0383028e2829903815477ea82939`, and its
+applicable post-merge checks passed. VOC-087-T00 then completed through PR #138, which
+merged as `ea357ce506f42fe74c7e88f670db9ce4f848d80e`; issue #132 closed after that
+completion evidence. No deployment, `main`, repository-settings, Cloudflare, or
+live-system authority was granted or used.
 
 GitHub issue [#132](https://github.com/KARSIFT/vocanova-platform/issues/132)
 records a learner-facing correctness defect: Progress requests at most 10 saved words
@@ -19,18 +22,17 @@ response order, empty state, accessibility, and authentication behavior. A deter
 Playwright fixture with 10 items and a continuation cursor will prove the page does not
 render `10 words saved` or another length-derived total claim.
 
-The authorized implementation is one R1 implementation PR after the effectiveness
-boundary above. It may change
-only the Progress presentation and its existing Playwright fixture/spec. It may not add
-an API total, change a schema, fetch subsequent pages, alter saved-word ordering,
-redesign Progress or Home, deploy, promote `main`, or mutate Cloudflare, repository
-settings, secrets, production data, or any live system.
+The authorized implementation was one R1 implementation PR after the effectiveness
+boundary above. It changed only the Progress presentation and its existing Playwright
+fixture/spec. It did not add an API total, change a schema, fetch subsequent pages,
+alter saved-word ordering, redesign Progress or Home, deploy, promote `main`, or mutate
+Cloudflare, repository settings, secrets, production data, or any live system.
 
 The plan was prepared on `plan/voc-087-saved-vocabulary-preview` from exact base
 `a9f07c9baa44f61b16d5c5999f39fdea4b558842`. Candidate CI, Governance eligibility,
 and Security passed; Quality was not applicable to the plan-only path filter. The
-bookkeeping revision intentionally does not invent its own future exact SHA, review URL,
-merge SHA, or post-merge runs.
+bookkeeping revision did not invent future exact SHA, review URL, merge SHA, or
+post-merge runs before they existed; those completed facts are now recorded as history.
 
 ## Plan review history
 
@@ -54,5 +56,11 @@ Governance eligibility
 and Security
 [`32691232779`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32691232779)
 passed. Quality was not applicable to this plan-only diff. Exact bookkeeping review,
-final hosted evidence, normal PR #137 merge, and applicable post-merge checks remain
-pending; implementation must not begin before they pass.
+final hosted evidence, normal PR #137 merge, and applicable post-merge checks later
+completed. A sequencing audit preserved the process incident and confirmed substantive
+post-merge proof at
+[comment 5390981903](https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903).
+The bounded implementation then completed in PR #138 at head
+`14e146deeab182b6e663986a113b4c25d102a7dc`, merged as
+`ea357ce506f42fe74c7e88f670db9ce4f848d80e`, and issue #132 closed with
+[closure evidence](https://github.com/KARSIFT/vocanova-platform/issues/132#issuecomment-5391130633).

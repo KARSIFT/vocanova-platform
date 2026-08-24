@@ -42,20 +42,27 @@ useful, but the UI no longer under-reports learners who have more than 10 saved 
 ## Dependencies and evidence
 
 - `VOC-087-DEP-00`: the current API client exposes no authoritative saved-word total.
-- `VOC-087-DEP-01`: adoption must authorize implementation.
+- `VOC-087-DEP-01`: adoption authorized implementation and became effective after PR
+  #137 merged as `61894b46705d0383028e2829903815477ea82939` and post-merge checks
+  passed:
+  https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903.
 - `VOC-087-EV-00`: focused fixture/preview regression output and exact diff.
 - `VOC-087-EV-01`: rendered list count/order assertions.
 - `VOC-087-EV-02`: empty-state, accessibility, auth-preservation, and Quality evidence.
 - `VOC-087-EV-03`: local validation, hosted CI/Governance/Security/Quality, exact-SHA
-  review, rollback rehearsal, merge, post-merge checks, and issue-closure link.
+  review, rollback rehearsal, merge, post-merge checks, and issue-closure link were
+  recorded on PR #138 and issue #132:
+  https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488 and
+  https://github.com/KARSIFT/vocanova-platform/issues/132#issuecomment-5391130633.
 
 The initial exact plan candidate
 `cbede7d17e0883e0871d9921aaef781dee087f45` received a preserved independent FAIL at
 PR #137 comment `5390811909`. Amended exact candidate
 `eea8d41447a9dc88125df546d62bd851bd4ad496` received final PASS at comment
 `5390880861`, fully resolving the blocker. The prior FAIL remains immutable historical
-evidence and is not approval. The adoption-bookkeeping revision still requires its own
-exact-SHA review.
+evidence and is not approval. The adoption-bookkeeping revision later received its own
+exact-SHA review, PR #137 merged, and its post-merge evidence was recorded at comment
+`5390981903`, including the preserved merge-sequencing incident audit.
 
 ## Rollback impact
 
