@@ -5,7 +5,7 @@ slug: develop-history-synchronization
 title: Synchronize develop ancestry after main promotion
 
 type: repository-governance-and-release-history-reconciliation
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because this coherent outcome changes the documented protected-branch release
@@ -16,19 +16,65 @@ planned_implementation_risk_floor: >-
 canonical_path: specs/changes/VOC-093-develop-history-synchronization
 authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/155
-requirement_approval_status: issue-open-draft-package-prepared-for-independent-plan-review
+requirement_approval_status: exact-plan-review-specialist-review-and-decision-approved
 base_branch: develop
 base_sha: 0dd1c935354961f2d3ff9900efa128dd418fa61e
 plan_branch: plan/voc-093-develop-history-synchronization
 target_branch: develop
 
-approval_status: not-approved
-implementation_authorized: false
+approved_candidate_sha: 9081cd68f566393665507616251b8a0fe30aa1c1
+
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-adoption-but-effective-only-after-this-bookkeeping-
+  revision-exact-review-populated-binder-genuine-eligible-true-reasons-empty-normal-
+  pr-156-merge-and-applicable-postmerge-checks
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
 automatic_merge_allowed: true
 production_impact: none-repository-history-and-documentation-only
 rollback_required: true
+
+plan_review_history:
+  - candidate_sha: 01ec5ff96e0682cea74dc73ff045b2d47b0659a0
+    general_verdict: fail-three-blockers
+    general_evidence: https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402759531
+    resolution: >-
+      Preserved as immutable review history. The next candidate corrected the false
+      exact-SHA claim, truthfully modeled the live delete_branch_on_merge=true
+      consequence as limited automatic short-lived-source-head deletion, and expanded
+      the living release/finalization surface set to AGENTS.md, CONTRIBUTING.md, and
+      current DOC-15 section 17.2 with exact justified exclusions.
+  - candidate_sha: 9081cd68f566393665507616251b8a0fe30aa1c1
+    general_verdict: pass-exact-revision-zero-blockers
+    general_evidence: https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402851142
+    specialist_verdict: pass-exact-revision-zero-blockers
+    specialist_evidence: https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402893398
+
+approvals:
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 9081cd68f566393665507616251b8a0fe30aa1c1
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402851142
+  git_github_history_specialist:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 9081cd68f566393665507616251b8a0fe30aa1c1
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402893398
+  adoption_decision:
+    status: approved-for-adoption-and-owner-request-bound
+    candidate_sha: 9081cd68f566393665507616251b8a0fe30aa1c1
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402901236
+
+candidate_hosted_evidence:
+  candidate_sha: 9081cd68f566393665507616251b8a0fe30aa1c1
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32788991449
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32789177545
+    structure_and_risk: pass
+    eligibility: pass-at-adopted-candidate
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32788991463
+  quality: not-applicable-plan-only-path-filter
 
 owners:
   decision: accountable-repository-owner-operator-m-e-h-r-d-a-a-d
@@ -66,9 +112,10 @@ protected_areas:
   - deterministic-foundation-guards
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: planned-pending-independent-plan-review-and-adoption
+  authority_effective: false
+  status: authorized-pending-bookkeeping-review-binder-eligible-merge-and-postmerge
   target_branch: develop
   pull_request_count: 1
   task: VOC-093-T00
@@ -76,9 +123,10 @@ implementation:
 action_specific_authority:
   required: true
   authorization_status: >-
-    plan-and-implementation-branch-source-head-auto-deletion-under-current-
-    delete-branch-on-merge-true-must-be-explicitly-recorded-and-remains-limited-to-
-    merged-short-lived-non-permanent-heads-with-exact-recovery-and-readback-evidence
+    adopted-exact-candidate-binds-only-the-limited-short-lived-source-head-auto-
+    deletion-scope-but-remains-ineffective-until-this-bookkeeping-revision-exact-
+    review-populated-binder-genuine-eligible-true-reasons-empty-normal-pr-156-merge-
+    and-applicable-postmerge-checks
   source: >-
     The live repository setting `delete_branch_on_merge=true` was independently
     observed on 2026-08-24 UTC during VOC-092. A normal merge of this plan PR and of
@@ -133,8 +181,15 @@ release:
   rollback_required: true
   issue_closure: after-normal-merge-postmerge-history-readback-and-evidence
 
+repository_adoption_status: adopted-pending-pr-156-normal-merge-and-applicable-postmerge-checks
+adoption_pr: 156
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402901236
+
 ehr: not-triggered
 blocking_reasons:
-  - plan-pr-review-pending
-  - adoption-decision-pending
-  - implementation-not-authorized
+  - exact-adoption-bookkeeping-revision-review-pending
+  - final-hosted-checks-after-populated-binder-pending
+  - final-normalized-eligible-true-reasons-empty-pending
+  - pr-156-normal-merge-pending
+  - applicable-postmerge-checks-pending
+  - implementation-authority-not-yet-effective

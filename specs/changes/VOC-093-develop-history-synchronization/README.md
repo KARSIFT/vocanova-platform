@@ -1,6 +1,13 @@
 # VOC-093 — Synchronize develop ancestry after main promotion
 
-Status: draft. This package is not adopted and does not authorize implementation.
+Status: adopted for repository bookkeeping. Exact candidate
+`9081cd68f566393665507616251b8a0fe30aa1c1` received different-actor general/R4 PASS,
+Git/GitHub history specialist PASS, and the accountable adoption decision on PR #156.
+Implementation authorization is recorded but remains ineffective until this
+bookkeeping revision receives exact-SHA review, the populated binder produces genuine
+`eligible: true` with no reasons, PR #156 normally merges, and applicable post-merge
+checks pass. Issue [#155](https://github.com/KARSIFT/vocanova-platform/issues/155)
+remains open through the final implementation evidence.
 
 Issue [#155](https://github.com/KARSIFT/vocanova-platform/issues/155) records the
 current repository-history drift observed on 2026-08-24 UTC after VOC-092's verified
@@ -63,3 +70,21 @@ source of truth.
 
 `automatic_merge_allowed: true` is explicitly examined package metadata only. No
 workflow performs a merge, and this package does not change that.
+
+## Plan review history
+
+Candidate `01ec5ff96e0682cea74dc73ff045b2d47b0659a0` received a general/R4 FAIL at
+https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402759531 because
+the PR body recorded a false exact SHA, the package contradicted the live
+`delete_branch_on_merge=true` consequence, and the living release/finalization surface
+set omitted AGENTS.md, CONTRIBUTING.md, and current DOC-15 section 17.2. That FAIL is
+immutable history.
+
+Candidate `9081cd68f566393665507616251b8a0fe30aa1c1` resolved those blockers and
+received general PASS with zero blockers at
+https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402851142,
+specialist PASS with zero blockers at
+https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402893398, and the
+adoption decision at
+https://github.com/KARSIFT/vocanova-platform/pull/156#issuecomment-5402901236. The
+exact evidence URLs are recorded in `change.yaml`.
