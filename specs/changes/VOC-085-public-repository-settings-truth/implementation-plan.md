@@ -22,11 +22,14 @@ boundary, VOC-085-HOLD-00, and all distinct VOC-080 live-action holds.
 3. T02 adds the smallest useful network-free truthfulness guard and negative fixtures,
    with no workflow, GitHub, or external side effects.
 4. T03 performs inventory, validation, exact general and specialist review, hosted
-   proof, rollback, and post-merge closure recording.
+   proof, rollback, and post-merge closure recording. The plan and T00–T02 are now
+   merged through PR #126–#129; this candidate records their exact evidence and keeps
+   T03 review, hosted proof, merge, post-merge checks, and issue closure pending.
 
-Every task is a separate small draft PR, stacked on the adopted base or preceding
-merged task. A reviewer that edits a revision becomes its builder; fresh checks and a
-different reviewer are then required.
+Every task was a separate small PR, stacked on the adopted base or preceding merged
+task. A reviewer that edits a revision becomes its builder; fresh checks and a
+different reviewer are then required. The exact task chain is recorded in
+`t03-evidence.yaml`.
 
 ## Validation
 

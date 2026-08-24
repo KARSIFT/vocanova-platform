@@ -11,6 +11,12 @@ launch, environment, or `main` promotion authority.
 
 Before each task merge, require local validation, different-role exact-SHA PASS,
 resolved blockers, applicable hosted checks, and a separate non-author merge actor.
+The plan merged through PR #126 as `b3834b7cbf67679811666b00db7ec6525b69c39a`.
+T00, T01, and T02 merged through PRs #127–#129 as
+`c2a351158026b2b6b3a352cb7e4b58c9d9a061ba`,
+`d223002d0e232eff7bc13f35e5d66e625d751afb`, and
+`8dd45f50b3a8be120aee29485349bdedd5a6d3ca`, respectively. Their exact review,
+hosted, post-merge, and preserved FAIL records are in `t03-evidence.yaml`.
 The final outcome is truthful settings guidance current as observed at 2026-08-24 plus
 preserved VOC-080 history and a fail-closed static guard. Observed dependency/
 vulnerability alerts are recorded separately from disabled Dependabot security updates
@@ -33,6 +39,7 @@ If a current-as-observed-at-2026-08-24 field, historical boundary, active claim,
 scope assertion is
 wrong, revert the repository commits in reverse order and re-run the relevant checks.
 Do not repair a documentation defect by changing hosted settings. Preserve exact
-review FAIL history and corrected PASS evidence. Final evidence must include the exact
-candidate SHA, review, hosted runs, rollback tree equality, post-merge checks, and
-the issue closure record if closure is then authorized.
+review FAIL history and corrected PASS evidence. Final evidence is recorded in
+`t03-evidence.yaml`; this candidate records the base, completed task chain, rollback
+tree expectations, and closure gate, while exact T03 review, hosted proof, merge,
+post-merge checks, and any issue closure remain pending.

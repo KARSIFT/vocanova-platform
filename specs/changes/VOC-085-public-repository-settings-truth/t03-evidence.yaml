@@ -1,0 +1,155 @@
+schema_version: 1
+evidence_id: VOC-085-EV-04
+task_id: VOC-085-T03
+acceptance_criteria: VOC-085-AC-04
+status: candidate-pending-exact-review-hosted-proof-merge-and-post-merge-checks
+recorded_at: 2026-08-24
+base_sha: 8dd45f50b3a8be120aee29485349bdedd5a6d3ca
+candidate_revision_binding: exact-PR-head-review-and-hosted-evidence-not-self-referential
+canonical_issue:
+  url: https://github.com/KARSIFT/vocanova-platform/issues/119
+  read_back_state: open
+  closure_gate: >-
+    Keep open until this candidate merges into develop and applicable post-merge
+    checks pass; only then may an accountable operator close it with repository-only
+    current-as-observed-at-2026-08-24 and reconciled-guidance evidence.
+  prepared_closure_wording: >-
+    VOC-085 reconciled the public repository settings posture current as observed at
+    2026-08-24, preserved VOC-080 private settings history, and added the network-free
+    truthfulness guard. No repository or environment setting, live system, deployment,
+    secret, production-data, main-promotion, or branch-deletion action was performed.
+    The sole external effect is the separately gated repository-only #119 comment/state
+    closure after merge and post-merge proof. VOC-085-HOLD-00 and VOC-080-HOLD-00/01/02
+    remain held and distinct.
+plan:
+  pull_request: 126
+  approved_candidate_sha: d9a8280d3da7f1c1564cf912e00e099bcc27a183
+  approved_candidate_general_pass: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389018437
+  approved_candidate_specialist_pass: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389072261
+  approved_candidate_hosted:
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32672756263
+    governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32672756281
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32672756316
+    quality: not-applicable-plan-only-path-filter
+  final_bookkeeping_head: 72aaef493450b10d64e602ef4d2d1f2f87b817c1
+  bookkeeping_pass: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389124074
+  merge_commit: b3834b7cbf67679811666b00db7ec6525b69c39a
+  post_merge: https://github.com/KARSIFT/vocanova-platform/pull/126#issuecomment-5389165393
+tasks:
+  - id: VOC-085-T00
+    pull_request: 127
+    implementation_head: 429aee4c5b833c3f0ae2e870f11077fbd1e06cad
+    merge_commit: c2a351158026b2b6b3a352cb7e4b58c9d9a061ba
+    review_history:
+      - verdict: fail-specialist
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389208601
+    final_general_pass: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389226018
+    final_specialist_pass: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389229391
+    hosted: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389270043
+    post_merge: https://github.com/KARSIFT/vocanova-platform/pull/127#issuecomment-5389304520
+  - id: VOC-085-T01
+    pull_request: 128
+    implementation_head: efeb1d0b7f7e61138a2b705719a3d8e2389be342
+    merge_commit: d223002d0e232eff7bc13f35e5d66e625d751afb
+    review_history:
+      - verdict: fail-general
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389389522
+      - verdict: fail-specialist
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389399132
+    final_general_pass: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389417287
+    final_specialist_pass: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389420360
+    hosted: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389455062
+    post_merge: https://github.com/KARSIFT/vocanova-platform/pull/128#issuecomment-5389475734
+  - id: VOC-085-T02
+    pull_request: 129
+    implementation_head: 47293d416a7a85ecbbbee0c8f0b03608ae4d17c2
+    merge_commit: 8dd45f50b3a8be120aee29485349bdedd5a6d3ca
+    review_history:
+      - verdict: fail-general-superseded
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389557239
+      - verdict: fail-specialist
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389568782
+    final_general_pass: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389644430
+    final_specialist_pass: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389654353
+    hosted: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389678799
+    post_merge: https://github.com/KARSIFT/vocanova-platform/pull/129#issuecomment-5389697695
+rollback:
+  kind: repository-only-real-reverse-order-rehearsal
+  network_free: true
+  settings_or_live_mutation: false
+  disposable_worktree_status: created-for-rehearsal-and-removed-after-pass
+  result: pass-all-four-exact-trees
+  steps:
+    - command: git revert --no-edit -m 1 8dd45f50b3a8be120aee29485349bdedd5a6d3ca
+      expected_tree: 613c5d01848869b18c5f6ba48109e6f492f8199f
+      exact_predecessor: d223002d0e232eff7bc13f35e5d66e625d751afb
+    - command: git revert --no-edit -m 1 d223002d0e232eff7bc13f35e5d66e625d751afb
+      expected_tree: d583b22ae7aaf4951f2933ebdc355dcc47af310d
+      exact_predecessor: c2a351158026b2b6b3a352cb7e4b58c9d9a061ba
+    - command: git revert --no-edit -m 1 c2a351158026b2b6b3a352cb7e4b58c9d9a061ba
+      expected_tree: 05aaf00e778587f3f87d6c7059d420691abef4ea
+      exact_predecessor: b3834b7cbf67679811666b00db7ec6525b69c39a
+  checks:
+    - state: 8dd45f50b3a8be120aee29485349bdedd5a6d3ca
+      governance: pass
+      foundation: pass
+      direct_truth_guard: pass
+      diff_check: pass
+    - state: d223002d0e232eff7bc13f35e5d66e625d751afb
+      governance: pass
+      foundation: pass
+      direct_truth_guard: not-applicable-t02-guard-absent
+      diff_check: pass
+    - state: c2a351158026b2b6b3a352cb7e4b58c9d9a061ba
+      governance: pass
+      foundation: pass
+      direct_truth_guard: not-applicable-t02-guard-absent
+      diff_check: pass
+    - state: b3834b7cbf67679811666b00db7ec6525b69c39a
+      governance: pass
+      foundation: pass
+      direct_truth_guard: not-applicable-t02-guard-absent
+      diff_check: pass
+  candidate_revert:
+    command: git revert --no-edit <exact-reviewed-candidate-sha>
+    expected_tree: 5753c1ac4b8c80f66342bb03fd5e79aefe0f026e
+    exact_predecessor: 8dd45f50b3a8be120aee29485349bdedd5a6d3ca
+    status: pass-repository-only-exact-tree-equality
+    result: >-
+      The final amended candidate was reverted in a disposable worktree and matched
+      the exact base tree. The candidate SHA is intentionally bound by the PR's exact
+      head review/evidence record rather than stored self-referentially here.
+validation:
+  scope: network-free-repository-only
+  commands:
+    - bash scripts/governance/validate-governance.sh
+    - bash scripts/governance/classify-change-risk.sh --base 8dd45f50b3a8be120aee29485349bdedd5a6d3ca --head HEAD
+    - python3 -m unittest discover -s tooling/governance/tests -p 'test_*.py'
+    - pnpm validate
+    - pnpm audit --audit-level high
+    - git diff --check 8dd45f50b3a8be120aee29485349bdedd5a6d3ca HEAD
+  result: pass
+  results:
+    governance_validator: pass
+    governance_classifier: pass-path-floor-r1
+    governance_python_suite: pass-108-tests
+    direct_truth_guard: pass-internal-consistency-only
+    foundation_aggregate: pass-95-tests
+    workspace_validation: pass
+    pnpm_validate: pass
+    prettier: pass
+    diff_check: pass
+    audit_high_threshold: pass
+    audit_findings:
+      high: 0
+      critical: 0
+      moderate: 1
+  freshness_statement: >-
+    Repository validation proves internal consistency only; it does not prove live
+    GitHub settings freshness.
+post_merge_gate:
+  required_before_issue_closure: true
+  required_state: final-candidate-merged-into-develop-and-applicable-post-merge-checks-pass
+  issue_closure_before_gate: prohibited
+  settings_hold: VOC-085-HOLD-00-held
+  inherited_holds: VOC-080-HOLD-00/01/02-held

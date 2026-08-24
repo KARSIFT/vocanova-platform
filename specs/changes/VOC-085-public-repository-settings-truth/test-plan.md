@@ -71,7 +71,7 @@
 ## VOC-085-TEST-05 — Governance and prohibited-scope scan
 
 - Covers: `VOC-085-AC-04`
-- Preconditions: exact final candidate
+- Preconditions: exact T03 candidate based on merged T02 `8dd45f50b3a8be120aee29485349bdedd5a6d3ca`
 - Procedure: run governance validation, risk classification, relevant foundation and
   unit checks, `pnpm validate` as applicable, audit as applicable, and `git diff --check`;
   inspect changed paths and repository settings API activity.
@@ -81,17 +81,17 @@
   no settings, environment, live, secret, deployment, branch-protection/ruleset, `main`,
   or branch deletion action exists. Normal isolated branches and governed PR merges
   remain permitted.
-- Evidence: `VOC-085-EV-04`
+- Evidence: `VOC-085-EV-04` (`t03-evidence.yaml`)
 
 ## VOC-085-TEST-06 — Exact review, hosted proof, rollback, and closure gate
 
 - Covers: `VOC-085-AC-04`
-- Preconditions: completed builder evidence
+- Preconditions: completed T00–T02 evidence and T03 builder evidence
 - Procedure: reverse-revert tasks in a disposable worktree, verify exact predecessor
   trees, obtain different-actor exact-SHA general review and distinct settings-
   specialist review without redundant long suites, monitor applicable hosted checks,
   then verify post-merge checks before any issue closure.
-- Expected result: rollback and tree equality pass; both exact-SHA reviews PASS with
-  zero blockers; hosted checks pass; no deployment runs; #119 remains open until
-  post-merge proof; VOC-085-HOLD-00 remains held.
-- Evidence: `VOC-085-EV-04`
+- Expected result: reverse rollback and tree equality pass; T03 then receives both
+  exact-SHA reviews with zero blockers and applicable hosted proof. No deployment runs;
+  #119 remains open until merge plus post-merge proof; VOC-085-HOLD-00 remains held.
+- Evidence: `VOC-085-EV-04` (`t03-evidence.yaml`)
