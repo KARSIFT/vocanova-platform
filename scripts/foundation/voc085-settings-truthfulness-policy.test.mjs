@@ -303,6 +303,22 @@ test("appended contradictory current and held claims fail even when the safe sni
     ),
   );
 
+  const appendedCurrentHostedPrivate = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings.md", (text) =>
+      text.replace(
+        "mutation.\n\n## VOC-080 historical transition snapshot",
+        "mutation.\nThe repository is private.\n\n## VOC-080 historical transition snapshot",
+      ),
+    );
+  });
+  assert.ok(
+    appendedCurrentHostedPrivate.some((message) =>
+      /repository-settings\.md: contradictory private-current repository claim in active current hosted-posture section/.test(
+        message,
+      ),
+    ),
+  );
+
   const appendedSettingsMutation = errorsFor((root) => {
     mutate(root, "docs/governance/repository-settings.md", (text) =>
       text.replace(
@@ -351,6 +367,22 @@ test("appended contradictory current and held claims fail even when the safe sni
     ),
   );
 
+  const appendedDeliveryPrivate = errorsFor((root) => {
+    mutate(root, "docs/operations/cloudflare-delivery.md", (text) =>
+      text.replace(
+        "activation remains separately held by the VOC-080 holds above.\n",
+        "activation remains separately held by the VOC-080 holds above.\nThe repository is private.\n",
+      ),
+    );
+  });
+  assert.ok(
+    appendedDeliveryPrivate.some((message) =>
+      /cloudflare-delivery\.md: contradictory private-current repository claim in active delivery-settings section/.test(
+        message,
+      ),
+    ),
+  );
+
   const appendedDoc16PrivateCurrent = errorsFor((root) => {
     mutate(
       root,
@@ -358,7 +390,7 @@ test("appended contradictory current and held claims fail even when the safe sni
       (text) =>
         text.replace(
           "a live settings feed.\n\n## Release gate",
-          "a live settings feed.\nThe repository is private and current as observed at 2026-08-24.\n\n## Release gate",
+          "a live settings feed.\nThe repository is private.\n\n## Release gate",
         ),
     );
   });

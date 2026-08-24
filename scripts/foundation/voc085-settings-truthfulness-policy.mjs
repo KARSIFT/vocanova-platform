@@ -378,6 +378,11 @@ const ACTIVE_SECTION_CONTRADICTIONS = [
     label: "active current hosted-posture section",
     forbidden: [
       {
+        label: "private-current repository claim",
+        pattern:
+          /(?:^|[.!?]\s+)(?:The repository|this repository)\b[^.]*\b(?:is|remains)\s+private\b/i,
+      },
+      {
         label: "settings-mutation claim",
         pattern: /\bthis package and this guide perform settings mutation\b/i,
       },
@@ -425,7 +430,7 @@ const ACTIVE_SECTION_CONTRADICTIONS = [
       {
         label: "private-current repository claim",
         pattern:
-          /(?:^|[.!?]\s+)(?:The repository|this repository)\b[^.]*\b(?:is|remains)\s+private\b[^.]*\b(?:current|current as observed at 2026-08-24)\b/i,
+          /(?:^|[.!?]\s+)(?:The repository|this repository)\b[^.]*\b(?:is|remains)\s+private\b/i,
       },
       {
         label: "private-plan-as-current repository claim",
@@ -439,6 +444,11 @@ const ACTIVE_SECTION_CONTRADICTIONS = [
     anchor: "The repository is public, current as observed at 2026-08-24.",
     label: "active delivery-settings section",
     forbidden: [
+      {
+        label: "private-current repository claim",
+        pattern:
+          /(?:^|[.!?]\s+)(?:The repository|this repository)\b[^.]*\b(?:is|remains)\s+private\b/i,
+      },
       {
         label: "hosted environment or branch restrictions claimed configured",
         pattern:
