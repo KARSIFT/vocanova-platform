@@ -9,9 +9,9 @@ used to work alongside three separate amendments (A-002, A-003, A-004), each
 scoped to "supersedes only this clause." DOC-16 v2.0 folded all three amendments'
 operative rules directly into itself; the amendment files are retired and removed.
 DOC-16 v3.0 added VOC-079's approval-neutral R4 transition. DOC-16 v3.1 records
-VOC-080's Cloudflare-native target and external Ruflo permission boundary; v3.2
-records the VOC-082 distinct-actor clarification, and v3.3 records VOC-085's public
-settings truth and held activation boundary. Historical approval evidence remains
+VOC-080's Cloudflare-native target and external Ruflo permission boundary; historically,
+v3.2 recorded the VOC-082 distinct-actor clarification, and v3.3 records VOC-085's
+public settings truth and held activation boundary. Historical approval evidence remains
 preserved and non-reusable in DOC-16's "Amendment history" section.
 
 ## Current documents
