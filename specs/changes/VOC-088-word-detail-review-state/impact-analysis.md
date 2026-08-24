@@ -60,7 +60,9 @@ without exposing internal scheduling detail or inferring state from a raw step.
 - `VOC-088-DEP-00`: approved DOC-03/DOC-05 behavior and current DOC-06/07/08 runtime
   boundaries.
 - `VOC-088-DEP-01`: verified reduced DTO/query/UI at exact drafting base.
-- `VOC-088-DEP-02`: independent plan review and accountable adoption; pending.
+- `VOC-088-DEP-02`: exact candidate independent PASS and accountable adoption are
+  complete; bookkeeping exact-SHA review, normal plan merge, and post-merge checks
+  remain pending.
 - `VOC-088-EV-00`: fixed-clock exhaustive repository mapping output and exact diff.
 - `VOC-088-EV-01`: real-session authenticated isolation and anonymous denial output.
 - `VOC-088-EV-02`: OpenAPI generation/check, schema assertion, contract check,
@@ -83,6 +85,12 @@ effect, work stops and risk is reclassified before edits continue.
 R2 does not create founder or standing technical-steward approval. It does require
 proportionate deterministic evidence and different-actor exact-revision review. No EHR
 or action-specific external authority is currently triggered.
+
+Initial candidate `5958208c38a79b913b5147aa107fbfd618c277ff` received a preserved
+independent FAIL at PR #142 comment `5391308858`. Amended exact candidate
+`6587c0c459a18d5161dfb1f1237f6025ad00a664` resolved all three blockers and received
+PASS with zero findings at comment `5391526065`; the accountable adoption decision is
+comment `5391542035`. This later bookkeeping revision requires its own exact-SHA review.
 
 ## Rollback impact
 

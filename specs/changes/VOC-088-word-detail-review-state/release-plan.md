@@ -2,11 +2,12 @@
 
 ## Repository boundary and authorization
 
-This draft authorizes no implementation, merge, deployment, or live product release.
-After independent exact-plan review and adoption become effective, one implementation
-pull request may change the declared repository paths and target `develop`. It may
-merge normally only after its own deterministic evidence, different-actor exact-SHA
-PASS, no unresolved blocker, hosted eligibility, and separate non-author merge audit.
+Adoption is recorded, but implementation authority becomes effective only after this
+bookkeeping revision's exact-SHA review and hosted checks, normal PR #142 merge, and
+applicable post-merge checks. The later one implementation pull request may change the
+declared repository paths and target `develop`. It may merge normally only after its
+own deterministic evidence, different-actor exact-SHA PASS, no unresolved blocker,
+hosted eligibility, and separate non-author merge audit.
 
 `automatic_merge_allowed: true` is an examined package-policy record. No current
 workflow uses it to merge, and it bypasses no risk, check, review, evidence, EHR, or

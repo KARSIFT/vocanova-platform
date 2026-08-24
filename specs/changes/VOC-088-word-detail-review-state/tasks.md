@@ -1,10 +1,10 @@
 # VOC-088 — Tasks
 
-All tasks are pending and unauthorized in this draft. They may begin only after the
-exact plan candidate is independently reviewed, adopted, truthfully recorded, normally
-merged, and effective under the package preconditions. One implementation pull request
-owns all three tasks; task boundaries are review/evidence groupings, not permission for
-stacked partial merges.
+All tasks are adopted and authorized but not yet effective. They may begin only after
+this adoption-bookkeeping revision is independently reviewed, PR #142 normally merges,
+and applicable post-merge checks pass. One implementation pull request owns all three
+tasks; task boundaries are review/evidence groupings, not permission for stacked
+partial merges.
 
 ## VOC-088-T00 — Project and isolate the Worker review state
 
@@ -13,7 +13,7 @@ stacked partial merges.
 - Tests: `VOC-088-TEST-00` through `TEST-03`, `TEST-08`, `TEST-09`
 - Evidence: `VOC-088-EV-00`, `EV-01`, `EV-05`
 - Risk: R2
-- Status: pending; implementation unauthorized
+- Status: adopted-authorized; effective only after PR #142 normal merge and applicable post-merge checks
 
 Add the required nullable domain projection, select the two minimum schedule inputs in
 the existing requester-scoped prepared join, and export the exact pure
@@ -33,7 +33,7 @@ binding.
 - Tests: `VOC-088-TEST-03`, `TEST-04`, `TEST-08`, `TEST-09`
 - Evidence: `VOC-088-EV-02`, `EV-05`
 - Risk: R2
-- Status: pending; implementation unauthorized
+- Status: adopted-authorized; effective only after PR #142 normal merge and applicable post-merge checks
 
 Register the exact required-nullable Zod enum, regenerate the committed operational
 OpenAPI artifact with the existing command, mirror the union/property in maintained
@@ -48,7 +48,7 @@ client response changes.
 - Tests: `VOC-088-TEST-05` through `TEST-09`
 - Evidence: `VOC-088-EV-03` through `EV-05`
 - Risk: R2
-- Status: pending; implementation unauthorized
+- Status: adopted-authorized; effective only after PR #142 normal merge and applicable post-merge checks
 
 Render the exact copy inside each meaning card, refresh SSR only after confirmed
 save/unsave, extend the existing mock with bounded state/failure cookies, and add

@@ -1,11 +1,12 @@
 # VOC-088 — Show Backend-Authoritative Review State on Word Detail
 
-Status: draft planning package. GitHub issue
-[#139](https://github.com/KARSIFT/vocanova-platform/issues/139) authorizes planning
-only. This package has no approved candidate SHA, independent verdict, adoption
-decision, implementation authority, pull request, merge, deployment, or closure
-evidence. Those facts must not be inferred from this draft or filled with future
-placeholders.
+Status: adopted for repository bookkeeping. Exact candidate
+`6587c0c459a18d5161dfb1f1237f6025ad00a664` received independent PASS with zero
+findings and the accountable adoption decision on PR #142. Implementation
+authorization is recorded but becomes effective only after this bookkeeping revision
+receives its own exact-SHA review and hosted evidence, PR #142 normally merges, and
+applicable post-merge checks pass. No merge, deployment, or external-effect authority
+is granted.
 
 DOC-03 section 6 requires Word Detail to show the current review state of each saved
 meaning. DOC-05 section 9 makes `user_words` the authority for that state and defines
@@ -32,8 +33,8 @@ maps the projection to exact visible text headed by `Review state:` and refreshe
 server-rendered meaning after a successful save or unsave so review state and sentence
 practice stay coherent with the backend.
 
-The planned implementation is one R2 implementation pull request after independent
-plan review and adoption. It may touch only the eleven paths declared in
+The authorized implementation is one R2 implementation pull request after the
+effectiveness boundary above. It may touch only the eleven paths declared in
 `change.yaml`. It includes the Worker domain/repository/schema, generated committed
 OpenAPI artifact, maintained API-client source and compiled type generation, SSR and
 save/unsave refresh behavior, and focused D1/OpenAPI/client/browser fixtures and
@@ -51,5 +52,22 @@ generator.
 
 `automatic_merge_allowed: true` is an examined package-policy record under the active
 drafting rule. It creates no executable merge or external authority. A different
-non-author actor must review the exact plan candidate before adoption, and a later
-different builder/reviewer pair must supply exact-revision implementation evidence.
+non-author actor must review this adoption-bookkeeping revision before normal plan
+merge, and a later different builder/reviewer pair must supply exact-revision
+implementation evidence.
+
+## Plan review and adoption history
+
+Initial candidate `5958208c38a79b913b5147aa107fbfd618c277ff` received independent
+**FAIL** on
+[comment 5391308858](https://github.com/KARSIFT/vocanova-platform/pull/142#issuecomment-5391308858)
+for three test-contract blockers. Amended candidate
+`6587c0c459a18d5161dfb1f1237f6025ad00a664` resolved them and received independent
+**PASS** with zero findings on
+[comment 5391526065](https://github.com/KARSIFT/vocanova-platform/pull/142#issuecomment-5391526065).
+The accountable decision owner approved that exact candidate for adoption on
+[comment 5391542035](https://github.com/KARSIFT/vocanova-platform/pull/142#issuecomment-5391542035).
+An intervening plan-author comment expanded the abbreviated SHA incorrectly; the
+[preservation-first correction](https://github.com/KARSIFT/vocanova-platform/pull/142#issuecomment-5391457731)
+records the actual candidate, and the reviewer performed a fresh review explicitly
+bound to it rather than transferring a verdict.

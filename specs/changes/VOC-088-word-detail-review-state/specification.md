@@ -10,10 +10,12 @@ the due predicate. DOC-06 sections 7–8 require requester-scoped authorization 
 typed prepared D1 access. DOC-07 requires explicit DTOs and a generated committed
 OpenAPI contract. DOC-08 requires SSR through the Worker API and WCAG 2.2 AA behavior.
 
-Issue #139 grants planning authority only. Implementation remains prohibited until a
-different actor independently reviews the exact plan revision, the accountable
-decision owner adopts it, adoption bookkeeping is complete, and the plan PR normally
-merges with applicable post-merge checks.
+Issue #139 granted planning authority only. Exact candidate
+`6587c0c459a18d5161dfb1f1237f6025ad00a664` has since received independent PASS with
+zero findings and the accountable adoption decision. Implementation authorization is
+recorded by the adopted package but becomes effective only after this bookkeeping
+revision receives its own exact-SHA review and hosted evidence, PR #142 normally
+merges into `develop`, and applicable post-merge checks pass.
 
 ## Scope and non-goals
 
@@ -199,6 +201,7 @@ contract mirrors with deterministic drift/type checks, and excludes introducing 
 generator. That broader documentation/tooling discrepancy is not silently treated as
 authority to expand issue #139.
 
-There are no material open questions in this draft. Independent plan review may reject
-or amend a decision; any material amendment creates a new plan-author revision that
-requires fresh exact-SHA review.
+There are no material open questions in the adopted candidate. Independent review may
+still reject this bookkeeping revision if its lifecycle record is incomplete or false;
+any material requirements amendment would create a new candidate requiring fresh
+exact-SHA review and an accountable adoption decision.

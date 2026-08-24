@@ -2,12 +2,14 @@
 
 ## Preconditions and boundaries
 
-Do not implement this draft. Before implementation begins, a different non-author
-actor must review the exact plan candidate, the accountable decision owner must adopt
-that exact candidate, `change.yaml` must truthfully record adoption and
-`implementation_authorized: true`, the plan PR must normally merge into `develop`, and
-applicable post-merge checks must pass. Candidate review never transfers to a later
-bookkeeping SHA; every material edit needs fresh exact-revision review.
+Exact candidate `6587c0c459a18d5161dfb1f1237f6025ad00a664` received different-actor
+PASS with zero findings and the accountable adoption decision. `change.yaml` now
+records `status: adopted` and `implementation_authorized: true`. Do not implement yet:
+this authorization becomes effective only after this adoption-bookkeeping revision
+receives its own different-actor exact-SHA review and hosted evidence, PR #142 normally
+merges, and applicable post-merge checks pass. Candidate review never silently
+transfers to this bookkeeping SHA, whose future review, merge, and post-merge facts
+must not be invented inside this commit.
 
 The planned implementation is R2 with no protected path. Start from the exact adopted
 `develop` revision in a new isolated short-lived branch/worktree. Re-read all eleven
