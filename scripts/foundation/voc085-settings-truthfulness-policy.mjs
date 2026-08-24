@@ -418,6 +418,23 @@ const ACTIVE_SECTION_CONTRADICTIONS = [
     ],
   },
   {
+    path: "docs/governance/16-autonomous-development-operating-model.md",
+    heading: "## Release classes and production release authority",
+    label: "active DOC-16 release-authority section",
+    forbidden: [
+      {
+        label: "private-current repository claim",
+        pattern:
+          /(?:^|[.!?]\s+)(?:The repository|this repository)\b[^.]*\b(?:is|remains)\s+private\b[^.]*\b(?:current|current as observed at 2026-08-24)\b/i,
+      },
+      {
+        label: "private-plan-as-current repository claim",
+        pattern:
+          /(?:^|[.!?]\s+)(?:the private plan|private-plan limitations|the VOC-080 private-repository snapshot)\b[^.]*\b(?:is|are|remains)\s+(?:the\s+)?current\b[^.]*\brepository state\b/i,
+      },
+    ],
+  },
+  {
     path: "docs/operations/cloudflare-delivery.md",
     anchor: "The repository is public, current as observed at 2026-08-24.",
     label: "active delivery-settings section",

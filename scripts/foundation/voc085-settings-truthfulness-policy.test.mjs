@@ -81,6 +81,12 @@ test("explicitly labelled historical and prospective text remains accepted", () 
     );
     mutate(
       root,
+      "docs/governance/16-autonomous-development-operating-model.md",
+      (text) =>
+        `${text}\n\n## Historical note\n\n_Historical, no longer true:_ The repository was private and the private plan described the current repository state before the 2026-08-24 observation.\n`,
+    );
+    mutate(
+      root,
       "docs/operations/cloudflare-delivery.md",
       (text) =>
         `${text}\n\n## Historical examples\n\n_Historical, no longer true:_ Hosted environment approvals are configured and secrets are active for the delivery posture.\n\nProspective only: branch restrictions are configured after a separately authorized future settings mutation.\n`,
@@ -340,6 +346,25 @@ test("appended contradictory current and held claims fail even when the safe sni
   assert.ok(
     appendedLiveHostedClaim.some((message) =>
       /cloudflare-delivery\.md: contradictory hosted environment or branch restrictions claimed configured in active delivery-settings section/.test(
+        message,
+      ),
+    ),
+  );
+
+  const appendedDoc16PrivateCurrent = errorsFor((root) => {
+    mutate(
+      root,
+      "docs/governance/16-autonomous-development-operating-model.md",
+      (text) =>
+        text.replace(
+          "a live settings feed.\n\n## Release gate",
+          "a live settings feed.\nThe repository is private and current as observed at 2026-08-24.\n\n## Release gate",
+        ),
+    );
+  });
+  assert.ok(
+    appendedDoc16PrivateCurrent.some((message) =>
+      /16-autonomous-development-operating-model\.md: contradictory private-current repository claim in active DOC-16 release-authority section/.test(
         message,
       ),
     ),
