@@ -1,0 +1,128 @@
+schema_version: 1
+
+id: VOC-088
+slug: word-detail-review-state
+title: Show Backend-Authoritative Review State on Word Detail
+
+type: bugfix-cross-component-api-and-ui
+status: draft
+risk: R2
+planned_implementation_risk_floor: >-
+  R2 because the correction adds a backward-compatible learner-state field to an
+  authenticated Worker response and carries it through the committed OpenAPI
+  contract, API client, server-rendered web UI, and focused D1/browser tests. It
+  changes no schema, scheduling transition, authentication rule, protected-data
+  recipient, infrastructure, deployment, governance, or external state. Escalate
+  before implementation if any such boundary changes or the classifier/reviewer
+  identifies an R3 or R4 effect.
+canonical_path: specs/changes/VOC-088-word-detail-review-state
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/139
+requirement_approval_status: planning-only
+base_branch: develop
+base_sha: ea357ce506f42fe74c7e88f670db9ce4f848d80e
+plan_branch: plan/voc-088-word-detail-review-state
+target_branch: develop
+approved_candidate_sha: null
+
+approval_status: not-approved
+implementation_authorized: false
+implementation_authority_status: prohibited-until-independent-plan-review-and-adoption
+automatic_merge_allowed: true
+production_impact: none
+rollback_required: true
+
+owners:
+  decision: accountable-decision-owner-after-independent-plan-review
+  package_preparation: Codex planner actor for this draft only
+  implementation: different builder actor after adoption
+  independent_verification: different non-author exact-revision reviewer actor
+  merge: separate authorized merge actor after eligibility is proven
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-088-DEP-00
+    status: verified-at-drafting
+    evidence: >-
+      DOC-03 section 6 requires Word Detail to show the saved meaning's current
+      review state; DOC-05 section 9 defines user_words status, review_step,
+      next_review_at, deleted_at, and the inclusive due rule.
+  - id: VOC-088-DEP-01
+    status: verified-at-drafting
+    evidence: >-
+      At base ea357ce506f42fe74c7e88f670db9ce4f848d80e, getWord joins only
+      user_words.id, WordMeaning exposes only saved/userWordId, and the SSR page
+      renders no review-state text.
+  - id: VOC-088-DEP-02
+    status: pending-adoption
+    evidence: >-
+      Issue 139 authorizes planning only. A different actor must independently
+      review the exact plan revision and the accountable decision owner must adopt
+      it before implementation authorization can be recorded.
+
+affected_areas:
+  - apps/api-worker/src/domain/content-learning.ts
+  - apps/api-worker/src/content/repository.ts
+  - apps/api-worker/src/content/routes.ts
+  - apps/api-worker/openapi/worker-foundation.openapi.json
+  - apps/api-worker/test/content-review-parity.test.ts
+  - packages/api-client/src/index.ts
+  - packages/api-client/src/index.test.ts
+  - apps/web/src/app/(app)/discover/[situation]/[word]/page.tsx
+  - apps/web/src/app/(app)/discover/[situation]/[word]/_components/meaning-save-button.tsx
+  - apps/web/tests/e2e/mock-api-server.mjs
+  - apps/web/tests/e2e/discover-accessibility.spec.ts
+protected_areas: []
+
+implementation:
+  authorized: false
+  authority_effective: false
+  status: prohibited-pending-independent-plan-review-and-adoption
+  required: true
+  target_branch: develop
+  pull_request_count: 1
+  tasks:
+    - VOC-088-T00
+    - VOC-088-T01
+    - VOC-088-T02
+
+release:
+  required: false
+  mode: repository-only-reviewed-merge
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-implementation-merge-and-applicable-post-merge-checks-only
+
+repository_adoption_status: draft-not-adopted
+adoption_pr: null
+adoption_evidence: null
+
+ehr: not-triggered
+action_specific_authority:
+  required: false
+  reason: >-
+    The package authorizes no contract, spend, secret or personal-data disclosure
+    to a new recipient, production access, irreversible external mutation,
+    deployment, or launch.
+external_effects:
+  cloudflare: prohibited
+  repository_settings: prohibited
+  deployment: prohibited
+  main_promotion: prohibited
+  live_systems: prohibited
+  production_data: prohibited
+
+blocking_reasons:
+  - exact-plan-candidate-independent-review-pending
+  - accountable-adoption-decision-pending
+  - normal-plan-pr-merge-and-applicable-post-merge-checks-pending
