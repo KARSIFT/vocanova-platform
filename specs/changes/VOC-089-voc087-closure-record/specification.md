@@ -53,10 +53,10 @@ Out of scope:
   completed through PR #138 and issue #132 closed after post-merge evidence; it must
   not imply another implementation PR is still pending.
 - `VOC-089-D03` - Update only active stale status/evidence wording in the VOC-087
-  README, specification, acceptance criteria, implementation plan, and release plan so
-  they no longer say completed PR #137 or PR #138 gates remain pending. Preserve
-  prospective requirements and deterministic test descriptions as historical plan
-  contract text where they are still useful and true.
+  README, specification, acceptance criteria, impact analysis, implementation plan,
+  and release plan so they no longer say completed PR #137 or PR #138 gates remain
+  pending. Preserve prospective requirements and deterministic test descriptions as
+  historical plan contract text where they are still useful and true.
 - `VOC-089-D04` - Preserve the exact historical sequence: initial plan FAIL at
   `cbede7d17e0883e0871d9921aaef781dee087f45`, amended candidate PASS at
   `eea8d41447a9dc88125df546d62bd851bd4ad496`, final bookkeeping PASS at

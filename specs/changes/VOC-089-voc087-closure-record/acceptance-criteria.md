@@ -38,11 +38,12 @@ external-effect prohibitions remain intact.
 - Result: pending
 
 The active lifecycle/status text in VOC-087 `README.md`, `specification.md`,
-`acceptance-criteria.md`, `implementation-plan.md`, `release-plan.md`, and `tasks.md`
-no longer says the completed PR #137 adoption-effectiveness gate, PR #138
-implementation, post-merge proof, or issue #132 closure is pending. `tasks.md` carries
-a completed `VOC-087-T00` entry with exact evidence. Prospective test and requirement
-text remains only where it still accurately describes the implemented contract.
+`acceptance-criteria.md`, `impact-analysis.md`, `implementation-plan.md`,
+`release-plan.md`, and `tasks.md` no longer says the completed PR #137
+adoption-effectiveness gate, PR #138 implementation, post-merge proof, or issue #132
+closure is pending. `tasks.md` carries a completed `VOC-087-T00` entry with exact
+evidence. Prospective test and requirement text remains only where it still accurately
+describes the implemented contract.
 
 ## VOC-089-AC-03 - Historical failures and the sequencing incident remain preserved
 

@@ -8,11 +8,11 @@ different builder may implement `VOC-089-T00` in one repository-only PR.
 
 Issue #140 directly names `change.yaml` and `tasks.md`. Read-only comparison with the
 completed PR #137, PR #138, and issue #132 records proves that the VOC-087 README,
-specification, acceptance criteria, implementation plan, and release plan also contain
-active pending-state claims (not merely prospective contract text). Those five files
-are therefore the only additional targets necessary to make the package internally
-truthful. `impact-analysis.md` and `test-plan.md` are intentionally excluded: their
-remaining status/history and prospective procedures do not make a completed-gate claim.
+specification, acceptance criteria, impact analysis, implementation plan, and release
+plan also contain active pending-state claims (not merely prospective contract text).
+Those six files are therefore the only additional targets necessary to make the package
+internally truthful. `test-plan.md` remains intentionally excluded because its
+prospective procedures do not make a completed-gate claim.
 
 Update only these existing VOC-087 package files:
 
@@ -20,14 +20,15 @@ Update only these existing VOC-087 package files:
 - `specs/changes/VOC-087-saved-vocabulary-preview/README.md`
 - `specs/changes/VOC-087-saved-vocabulary-preview/specification.md`
 - `specs/changes/VOC-087-saved-vocabulary-preview/acceptance-criteria.md`
+- `specs/changes/VOC-087-saved-vocabulary-preview/impact-analysis.md`
 - `specs/changes/VOC-087-saved-vocabulary-preview/implementation-plan.md`
 - `specs/changes/VOC-087-saved-vocabulary-preview/release-plan.md`
 - `specs/changes/VOC-087-saved-vocabulary-preview/tasks.md`
 
 Do not edit VOC-087 product/test contract content except where the sentence is an
-active stale lifecycle claim. Do not edit VOC-087 `impact-analysis.md` or
-`test-plan.md` unless exact-diff review finds a concrete active stale claim that cannot
-be corrected in the listed files; if that happens, stop and return to planning.
+active stale lifecycle claim. Do not edit VOC-087 `test-plan.md` unless exact-diff
+review finds a concrete active stale claim that cannot be corrected in the listed
+files; if that happens, stop and return to planning.
 
 ## Required change.yaml updates
 
@@ -65,6 +66,9 @@ Update VOC-087 narrative files only where they actively report stale pending sta
   effectiveness and implementation facts.
 - `acceptance-criteria.md`: update `Result: pending` entries to completed results
   backed by PR #138 and issue #132 closure evidence.
+- `impact-analysis.md`: replace the active claim that adoption-bookkeeping exact-SHA
+  review is still required with completed review, merge, and post-merge evidence while
+  preserving the immutable initial FAIL and later PASS history.
 - `implementation-plan.md`: mark the plan as historically executed through PR #138
   instead of saying implementation must not begin.
 - `release-plan.md`: mark issue closure and post-merge evidence complete without

@@ -152,6 +152,7 @@ affected_areas:
   - specs/changes/VOC-087-saved-vocabulary-preview/README.md
   - specs/changes/VOC-087-saved-vocabulary-preview/specification.md
   - specs/changes/VOC-087-saved-vocabulary-preview/acceptance-criteria.md
+  - specs/changes/VOC-087-saved-vocabulary-preview/impact-analysis.md
   - specs/changes/VOC-087-saved-vocabulary-preview/implementation-plan.md
   - specs/changes/VOC-087-saved-vocabulary-preview/release-plan.md
   - specs/changes/VOC-087-saved-vocabulary-preview/change.yaml

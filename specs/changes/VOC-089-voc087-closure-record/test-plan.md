@@ -24,9 +24,9 @@
 
 - Covers: `VOC-089-AC-02`, `AC-03`
 - Procedure: inspect the VOC-087 README, specification, acceptance criteria,
-  implementation plan, release plan, and tasks diffs. Confirm historical FAIL/PASS and
-  incident evidence remains visible and that active status text no longer contradicts
-  completed GitHub evidence.
+  impact-analysis, implementation plan, release plan, and tasks diffs. Confirm
+  historical FAIL/PASS and incident evidence remains visible and that active status
+  text no longer contradicts completed GitHub evidence.
 - Expected: no active stale pending claim remains in the targeted narrative files; no
   historical failure or process incident is erased or relabelled.
 - Evidence: `VOC-089-EV-02`, `VOC-089-EV-03`
