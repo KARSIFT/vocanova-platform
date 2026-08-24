@@ -2,9 +2,10 @@
 
 ## Release and external-action authorization
 
-Plan adoption authorizes repository implementation only after its bookkeeping revision
-also passes exact review, genuine eligibility, normal merge, and post-merge checks.
-The adoption decision must additionally and explicitly bind the operator direction and
+Exact candidate `dcf887731e426906b17569c428eb400ad56f3e86` was adopted. Repository
+implementation authority and action direction become effective only after this
+bookkeeping revision also passes exact review, genuine eligibility, normal merge, and
+post-merge checks. The adoption decision explicitly binds the operator direction and
 three action holds for the one-field settings mutation, exact remote-ref cleanup, and
 exact safe local cleanup. `VOC-085-HOLD-00` remains a hard blocker until its named
 operator, exact authority/expiry, pre-state, payload, rollback owner, immediate docs

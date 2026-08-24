@@ -10,7 +10,8 @@
 - Implementation pull-request mapping: one settings/documentation PR into `develop`;
   the separately reviewed promotion PR is the mandatory release boundary for the same
   task, not another implementation task
-- Status: pending plan adoption
+- Status: adopted-authorized; effective only after bookkeeping exact-SHA review,
+  genuine eligible binder, PR #152 normal merge, and applicable post-merge checks
 
 In one coherent outcome, enable automatic deletion of merged branches, immediately
 reconcile canonical settings truth, promote the frozen verified integrated tree to

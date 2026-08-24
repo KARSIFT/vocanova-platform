@@ -1,8 +1,14 @@
 # VOC-092 — Repository Finalization
 
-Status: draft for independent exact-revision review and adoption. GitHub issue
-[#151](https://github.com/KARSIFT/vocanova-platform/issues/151) is the requirement
-source and grants planning authority only.
+Status: adopted for repository bookkeeping. Exact candidate
+`dcf887731e426906b17569c428eb400ad56f3e86` received fresh different-actor general/R4
+and repository-settings specialist PASS verdicts plus the accountable adoption
+decision on PR #152. Implementation and the exact actions are authorized but remain
+ineffective until this bookkeeping revision receives exact-SHA review, the populated
+binder produces genuine `eligible: true` with no reasons, PR #152 normally merges, and
+applicable post-merge checks pass. GitHub issue
+[#151](https://github.com/KARSIFT/vocanova-platform/issues/151) remains open through
+final outcome evidence.
 
 This package defines one coherent repository-finalization outcome and one
 minimum-sufficient task. It enables automatic deletion of merged branches, reconciles
@@ -43,3 +49,14 @@ founder or technical-steward gate.
 policy metadata; no current workflow performs a merge. This package authorizes no
 deployment, Cloudflare, DNS, secret, production-data, traffic, spending, or public
 launch action.
+
+## Plan review history
+
+Candidate `cb22a8187c73f8b590b7d037375e43025ee1290e` received a general/R4 PASS but a
+repository-settings specialist FAIL because it preselected an observation date,
+described the initial zero-open-record audit as current after #151/#152 opened, and did
+not clearly separate direct operator authority from issue canonicalization. That FAIL
+is immutable history. Candidate `dcf887731e426906b17569c428eb400ad56f3e86`
+resolved all three blockers and received fresh exact-SHA general and specialist PASS
+verdicts with zero blockers, followed by the adoption decision. Exact evidence URLs
+are recorded in `change.yaml`.

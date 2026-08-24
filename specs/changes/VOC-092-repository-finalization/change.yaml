@@ -5,7 +5,7 @@ slug: repository-finalization
 title: Finalize repository promotion and stale-branch lifecycle
 
 type: repository-operations-and-settings-reconciliation
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because this coherent outcome combines a separately reviewed main promotion,
@@ -15,15 +15,19 @@ planned_implementation_risk_floor: >-
 canonical_path: specs/changes/VOC-092-repository-finalization
 authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/151
-requirement_approval_status: planning-only-pending-exact-plan-review-and-adoption
+requirement_approval_status: exact-plan-review-specialist-review-and-decision-approved
 base_branch: develop
 base_sha: 3c3547bac9697185b52414adcb2b31cb16afd9ca
 plan_branch: plan/voc-092-repository-finalization
 target_branch: develop
-approved_candidate_sha: pending
+approved_candidate_sha: dcf887731e426906b17569c428eb400ad56f3e86
 
-approval_status: not-approved
-implementation_authorized: false
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-adoption-but-effective-only-after-this-bookkeeping-
+  revision-exact-review-populated-binder-genuine-eligible-true-reasons-empty-normal-
+  pr-152-merge-and-applicable-postmerge-checks
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
 promotion_pull_request_required: true
@@ -34,6 +38,47 @@ promotion_pull_request_rationale: >-
 automatic_merge_allowed: true
 production_impact: none-repository-history-and-settings-only
 rollback_required: true
+
+plan_review_history:
+  - candidate_sha: cb22a8187c73f8b590b7d037375e43025ee1290e
+    general_verdict: pass-exact-revision-zero-blockers
+    general_evidence: https://github.com/KARSIFT/vocanova-platform/pull/152#issuecomment-5401827962
+    specialist_verdict: fail-three-truthfulness-blockers
+    specialist_evidence: https://github.com/KARSIFT/vocanova-platform/pull/152#pullrequestreview-5012884520
+    resolution: >-
+      Preserved as immutable review history. The next candidate removed the
+      preselected local-date observation, distinguished the initial audit from the
+      now-open issue/PR, and separated direct operator authority from issue
+      canonicalization while recording Asia/Tehran and UTC dates explicitly.
+  - candidate_sha: dcf887731e426906b17569c428eb400ad56f3e86
+    general_verdict: pass-exact-revision-zero-blockers
+    general_evidence: https://github.com/KARSIFT/vocanova-platform/pull/152#issuecomment-5401896836
+    specialist_verdict: pass-exact-revision-zero-blockers
+    specialist_evidence: https://github.com/KARSIFT/vocanova-platform/pull/152#pullrequestreview-5012913015
+
+approvals:
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: dcf887731e426906b17569c428eb400ad56f3e86
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/152#issuecomment-5401896836
+  repository_settings_specialist:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: dcf887731e426906b17569c428eb400ad56f3e86
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/152#pullrequestreview-5012913015
+  adoption_decision:
+    status: approved-for-adoption-and-exact-actions-bound
+    candidate_sha: dcf887731e426906b17569c428eb400ad56f3e86
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/152#issuecomment-5401902952
+
+candidate_hosted_evidence:
+  candidate_sha: dcf887731e426906b17569c428eb400ad56f3e86
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32781813190
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32781833660
+    structure_and_risk: pass
+    eligibility: blocked-pending-adoption-bookkeeping-review-and-populated-binder
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32781813186
+  quality: not-applicable-plan-only-path-filter
 
 owners:
   decision: accountable-repository-owner-operator-m-e-h-r-d-a-a-d
@@ -69,15 +114,18 @@ protected_areas:
   - canonical-change-package-lifecycle
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: blocked-pending-plan-adoption
+  status: authorized-pending-bookkeeping-review-binder-eligible-merge-and-postmerge
   target_branch: develop
   pull_request_count: 1
   task: VOC-092-T00
 
 action_specific_authority:
   required: true
+  authorization_status: >-
+    directly-directed-by-repository-owner-operator-and-bound-by-exact-adoption-decision-
+    pending-plan-bookkeeping-review-eligible-merge-postmerge-and-fresh-action-evidence
   source: >-
     Repository owner/operator @m-e-h-r-d-a-a-d directly instructed completion of
     promotion and stale-branch cleanup in the operator session on 2026-08-25
@@ -150,9 +198,15 @@ release:
   rollback_required: true
   issue_closure: after-promotion-cleanup-readback-and-all-applicable-checks
 
+repository_adoption_status: adopted-pending-pr-152-normal-merge-and-applicable-postmerge-checks
+adoption_pr: 152
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/152#issuecomment-5401902952
+
 ehr: not-triggered
 blocking_reasons:
-  - exact-plan-review-pending
-  - adoption-decision-pending
-  - adoption-bookkeeping-and-exact-review-pending
-  - implementation-authority-not-effective
+  - exact-adoption-bookkeeping-revision-review-pending
+  - final-hosted-checks-after-populated-binder-pending
+  - final-normalized-eligible-true-reasons-empty-pending
+  - pr-152-normal-merge-pending
+  - applicable-postmerge-checks-pending
+  - implementation-authority-not-yet-effective

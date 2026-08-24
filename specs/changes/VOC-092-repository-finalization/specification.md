@@ -4,9 +4,11 @@
 
 Finish the repository-level lifecycle requested in issue #151: make the complete
 reviewed integrated tree canonical on `main`, remove verified merged residue, prevent
-future merged-branch buildup, and leave truthful canonical evidence. The issue is
-planning-only until this package receives exact-revision independent review and an
-accountable adoption decision.
+future merged-branch buildup, and leave truthful canonical evidence. Exact candidate
+`dcf887731e426906b17569c428eb400ad56f3e86` received exact-revision general/R4 and
+specialist PASS verdicts plus the adoption decision. Authorization becomes effective
+only after this bookkeeping revision's exact review, genuine eligible binder, normal
+PR #152 merge, and applicable post-merge checks.
 
 ## Baseline and problem
 
