@@ -3,25 +3,27 @@
 ## Summary
 
 This is a repository-only governance/process reconciliation. It changes how future
-work is grouped for delivery, not product behavior or merge/release authority. Its
-semantic effect would otherwise be R3, but the unchanged DOC-15 protected-path floor
-makes the effective implementation R4.
+work is maximally consolidated into the largest safe coherent delivery unit, not
+product behavior or merge/release authority. Its semantic effect would otherwise be
+R3, but the unchanged DOC-15 protected-path floor makes the effective implementation
+R4.
 
-| Area                                                  | Status                      | Evidence or required work                                                                                    |
-| ----------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Product scope and user experience                     | Not affected                | No learner behavior, promise, UI, or product decision changes.                                               |
-| Living governance and workflow documents              | Affected                    | Reconcile DOC-15, DOC-16, DOC-10, risk guidance, and the Ruflo runbook atomically.                           |
-| Agent/reviewer/contributor guidance                   | Affected                    | Align AGENTS.md, CLAUDE.md, CONTRIBUTING.md, and the PR template with the delivery-shape contract.           |
-| Change-package guidance/templates                     | Affected                    | Align specs index, documentation template, and active package README/change/plan/task templates.             |
-| Governance validation                                 | Affected                    | Add narrow network-free positive markers and negative fixtures in the existing foundation validator/test.    |
-| Risk classification/protected paths                   | Preserved                   | Wording may clarify that size is not risk; classifier/path floors do not change.                             |
-| Merge/review/approval authority                       | Preserved                   | No evaluator, adapter, workflow, permission, review-independence, EHR, or action-authority behavior changes. |
-| Frontend, backend, API, database, migrations          | Not affected                | No application/runtime/data path is authorized.                                                              |
-| Authentication, privacy, personal data, secrets       | Not affected                | No access, disclosure, collection, or logging change.                                                        |
-| Accessibility, performance, analytics, AI             | Not affected                | No product surface or runtime behavior changes.                                                              |
-| Infrastructure, deployment, Cloudflare, DNS, settings | Not affected and prohibited | Repository-only documentation/template/validator implementation.                                             |
-| Testing                                               | Affected                    | Focused static governance regression tests plus existing validation.                                         |
-| Support and operations                                | Affected                    | Future planning/review coordination uses the clarified default and split rationale.                          |
+| Area                                                  | Status                      | Evidence or required work                                                                                                                                                       |
+| ----------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product scope and user experience                     | Not affected                | No learner behavior, promise, UI, or product decision changes.                                                                                                                  |
+| Living governance and workflow documents              | Affected                    | Reconcile DOC-15, DOC-16, DOC-10, risk guidance, and the Ruflo runbook atomically.                                                                                              |
+| Product/engineering implementation guidance           | Affected                    | Reconcile DOC-12's mandatory future P3 six-PR order and DOC-09's matching recommended sequence into aligned ordered components, with only a D03–D05-compliant future exception. |
+| Agent/reviewer/contributor guidance                   | Affected                    | Align AGENTS.md, CLAUDE.md, CONTRIBUTING.md, and the PR template with the delivery-shape contract.                                                                              |
+| Change-package guidance/templates                     | Affected                    | Align specs index, documentation template, and active package README/change/plan/task templates.                                                                                |
+| Governance validation                                 | Affected                    | Add narrow network-free positive markers and negative fixtures in the existing foundation validator/test.                                                                       |
+| Risk classification/protected paths                   | Preserved                   | Wording may clarify that size is not risk; classifier/path floors do not change.                                                                                                |
+| Merge/review/approval authority                       | Preserved                   | No evaluator, adapter, workflow, permission, review-independence, EHR, or action-authority behavior changes.                                                                    |
+| Frontend, backend, API, database, migrations          | Not affected                | No application/runtime/data path is authorized.                                                                                                                                 |
+| Authentication, privacy, personal data, secrets       | Not affected                | No access, disclosure, collection, or logging change.                                                                                                                           |
+| Accessibility, performance, analytics, AI             | Not affected                | No product surface or runtime behavior changes.                                                                                                                                 |
+| Infrastructure, deployment, Cloudflare, DNS, settings | Not affected and prohibited | Repository-only documentation/template/validator implementation.                                                                                                                |
+| Testing                                               | Affected                    | Focused static governance regression tests plus existing validation.                                                                                                            |
+| Support and operations                                | Affected                    | Future planning/review coordination uses the clarified default and split rationale.                                                                                             |
 
 ## Existing-file reconciliation
 
@@ -33,6 +35,16 @@ makes the effective implementation R4.
 - DOC-10 sections 4 and 6 are present-needs-reconciliation: remove `L`-must-split and
   fixed line-count mandates; replace them with observable reviewability signals and
   overhead-aware rationale.
+- `docs/product/12-mvp-implementation-plan.md` section 5 is present-needs-
+  reconciliation: P3 remains unresolved and its mandatory six-PR order is active,
+  forward-looking guidance. Preserve the P3 objective, dependency/order, provider-
+  evaluation/privacy gate, specialist review, blockers, and milestone acceptance gate;
+  relabel the six items as ordered components inside the default coherent PR unless a
+  future adopted package supplies the complete D03–D05 multi-PR exception.
+- `docs/engineering/09-ai-features.md` section 24 is present-needs-reconciliation:
+  preserve all AI builder/reviewer, safety, privacy, provider, evaluation, and rollout
+  controls while replacing its recommended six-PR sequence with the same ordered non-
+  PR component sequence and future D03–D05 exception contract as DOC-12.
 - DOC-15 sections 10.10, 16.4, 24.10, 24.20, DG5-05, and applicable task/PR lifecycle
   wording are present-needs-reconciliation. Preserve historical/corrected sections and
   all authority boundaries.
@@ -75,6 +87,14 @@ makes the effective implementation R4.
 - `VOC-090-R06` — Multiple-PR rationale becomes empty ceremony. Mitigation: require the
   concrete boundary, partial-state/rollback/integration explanation, and quantified or
   qualitative overhead comparison; reject placeholders in templates/fixtures.
+- `VOC-090-R07` — Active milestone/AI guidance silently preserves a mandatory or
+  recommended PR sequence. Mitigation: include DOC-12/DOC-09 in the atomic file
+  inventory, require aligned non-PR component wording, and add negative fixtures for
+  active unrationalized PR sequences while allowing labelled history.
+- `VOC-090-R08` — Planners treat one PR as merely permitted instead of actively
+  consolidating all layers that share one outcome and control boundary. Mitigation:
+  require the largest safe coherent delivery unit explicitly and reject active policy
+  that omits that maximization rule.
 
 ## Privilege and authority analysis
 

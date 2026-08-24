@@ -1,11 +1,14 @@
 # VOC-090 — Acceptance Criteria
 
-## VOC-090-AC-00 — One coherent default delivery unit
+## VOC-090-AC-00 — Largest safe coherent default delivery unit
 
 Given the reconciled active governance and development guidance
 When a planner defines one coherent user or business outcome
-Then the documented default is one approved change package and one implementation
-pull request
+Then the planner must select the largest safe coherent unit across backend, frontend,
+contracts, tests, documentation, rollback, and evidence sharing the outcome and control
+boundary
+And the documented default is one approved change package, one implementation pull
+request, and one minimum-sufficient task
 And the guidance allows a justified split only through the adopted boundary criteria.
 
 ## VOC-090-AC-01 — Minimum-sufficient task semantics
@@ -21,9 +24,10 @@ worktree, pull request, merge, or release.
 
 Given a planner proposes multiple implementation pull requests
 When the plan and templates are completed
-Then a non-placeholder written rationale names an independently releasable/rollback-
+Then the proposal is treated as exceptional
+And a non-placeholder written rationale names an independently releasable/rollback-
 safe outcome, material risk or action-authority boundary, hard dependency,
-incompatible reviewer/owner need, or genuinely unreviewable diff
+incompatible reviewer/owner need, or demonstrated cognitive/reviewability limit
 And it explains partial-state coherence, integration order, and rollback
 And it compares the benefit with coordination, elapsed-time, token/context, repeated
 validation, hosted-check, exact-review, merge, and bookkeeping overhead.
@@ -35,6 +39,7 @@ When they are searched for delivery-size rules
 Then no fixed preferred line-count range or over-N-lines split mandate remains
 And component count, test layers, documentation, or generated artifacts alone are not
 split triggers
+And implementation convenience alone is not a split trigger
 And one coherent objective, reviewability, no unrelated cleanup, and separate handling
 of unrelated improvements remain explicit.
 
@@ -53,9 +58,11 @@ production data, deployment, `main`, or live system is changed or exercised.
 Given the network-free governance validator and its unit fixtures
 When run on the reconciled repository
 Then the positive tree passes
-And isolated mutations that restore fixed line thresholds, remove the one-package/
-one-PR default, imply task-ID-per-PR semantics, or omit multi-PR rationale fail with
-concrete messages
+And isolated mutations that restore fixed line thresholds, remove explicit largest-
+safe-coherent-unit or one-package/one-PR default wording, imply task-ID-per-PR
+semantics, preserve an
+active mandatory/recommended PR sequence without D03–D05 rationale, make DOC-12/DOC-09
+disagree, or omit multi-PR rationale fail with concrete messages
 And explicitly historical examples remain permitted.
 
 ## VOC-090-AC-06 — One-PR implementation and reversible completion
@@ -68,3 +75,15 @@ completed in one implementation pull request
 And a disposable repository-only revert restores every authorized path to the exact
 pre-implementation tree
 And issue #143 remains open until merge and applicable post-merge checks pass.
+
+## VOC-090-AC-07 — Future P3/AI sequence is coherent
+
+Given approved current DOC-12 and DOC-09 describe the same unresolved future six-item
+P3/AI sequence
+When the later implementation reconciles them
+Then both documents describe those items as ordered implementation components inside
+the default one coherent P3/AI pull request rather than mandatory or recommended PRs
+And either document permits multiple PRs only through a future adopted exception that
+records the D03 boundary, D04 partial-state/integration/rollback rationale, and D05
+coordination/time/token/repeated-check/exact-review overhead comparison
+And the two documents remain semantically aligned.

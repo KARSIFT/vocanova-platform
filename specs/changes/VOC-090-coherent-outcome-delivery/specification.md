@@ -22,6 +22,10 @@ At the drafting base:
   component/test/docs/evidence tasks;
 - DOC-10 section 4 requires an `L` issue to be split and section 6 prefers 100–500
   meaningful changed lines, under 200 for fixes, and normally splits over 800;
+- approved, current DOC-12 section 5 imposes a mandatory six-PR order for unresolved
+  future P3 delivery, while approved, current DOC-09 section 24 recommends the same
+  six-item PR sequence for future AI implementation, without a D03–D05 boundary or
+  overhead rationale;
 - DOC-15 section 16.4 and DG5-05 require a coherent pull request without unrelated
   cleanup, while section 24.20 prohibits artificial splitting;
 - the active specification/package templates require task tables but do not say task
@@ -37,20 +41,26 @@ independently releasable or rollback-safe boundary.
 
 ## Decisions and requirements
 
-- `VOC-090-D00` — The default delivery unit for one coherent user or business outcome
-  must be one approved `VOC-###` package and one implementation pull request into
-  `develop`. The rule is a default, not a ban on justified multi-PR delivery.
+- `VOC-090-D00` — A planner must select the largest safe coherent delivery unit that
+  consolidates every backend, frontend, contract, test, documentation, rollback, and
+  evidence layer sharing one approved user or business outcome and control boundary.
+  That unit defaults to one approved `VOC-###` package, one implementation pull request
+  into `develop`, and one minimum-sufficient task. The rule is a consolidation duty,
+  not a ban on justified multi-PR delivery.
 - `VOC-090-D01` — A package must use the minimum sufficient number of stable task IDs
   needed to group requirements, acceptance criteria, tests, dependencies, ownership,
   sequence, and evidence. A task ID must not itself imply a branch, worktree, pull
   request, merge, release, or independent outcome.
-- `VOC-090-D02` — Component boundaries, frontend/backend/database layers, test layers,
-  documentation updates, generated artifacts, and line counts must not by themselves
-  require separate tasks or implementation pull requests.
-- `VOC-090-D03` — A split may be required when it creates independently releasable and
-  rollback-safe outcomes, isolates a material risk or action-authority boundary,
-  respects a hard dependency, separates genuinely incompatible reviewers/owners, or
-  makes a diff reviewable when no clearer in-PR organization can do so.
+- `VOC-090-D02` — Component boundaries, frontend/backend/database layers, contracts,
+  test layers, documentation updates, generated artifacts, line counts, and
+  implementation convenience must not by themselves require separate tasks or
+  implementation pull requests. When they share D00's outcome and control boundary,
+  they must be consolidated unless a D03–D05 exception is proven.
+- `VOC-090-D03` — Splitting is exceptional and requires evidence that it creates
+  independently releasable and rollback-safe outcomes, isolates a material risk or
+  action-authority boundary, respects a hard dependency, separates genuinely
+  incompatible reviewers/owners, or addresses a demonstrated cognitive/reviewability
+  limit that clearer in-PR organization cannot solve.
 - `VOC-090-D04` — A plan proposing more than one implementation pull request must
   include a non-placeholder written rationale identifying the applicable `D03`
   condition, why one PR would be unsafe or genuinely unreviewable, the dependency and
@@ -84,20 +94,28 @@ independently releasable or rollback-safe boundary.
 - `VOC-090-D12` — A deterministic, network-free governance regression guard and
   negative fixtures must reject reintroduction of mandatory size thresholds,
   task-ID-equals-PR semantics, omission of the one-package/one-PR default, or a
-  multi-PR template shape without required rationale. The guard must allow explicitly
-  historical examples and must not attempt semantic risk or authority decisions.
+  multi-PR template or active mandatory/recommended PR sequence without required
+  rationale. The guard must allow explicitly labelled historical examples and must not
+  attempt semantic risk or authority decisions.
 - `VOC-090-D13` — The implementation itself must use one package, one implementation
   pull request, and one task `VOC-090-T00`; all documentation, template, validator,
   test, exact-review, rollback, hosted, merge, and post-merge evidence belongs to that
   same pull request.
+- `VOC-090-D14` — DOC-12's future P3 six items and DOC-09's matching AI six items must
+  be reconciled as an ordered component/implementation sequence inside the default one
+  coherent P3/AI implementation pull request, not as six pre-authorized PRs. A future
+  adopted P3/AI package may instead require multiple PRs only when it records a
+  concrete D03 boundary plus the D04 partial-state/integration/rollback explanation and
+  D05 overhead comparison. The two documents must remain semantically aligned.
 
 ## Scope
 
 In scope:
 
 - Reconcile DOC-15, DOC-16, DOC-10, risk guidance, agent/reviewer/contributor guidance,
-  the external-coordination runbook, the PR template, and active change-package
-  guidance/templates listed in `change.yaml`.
+  DOC-12's active P3 roadmap, DOC-09's active AI implementation guidance, the external-
+  coordination runbook, the PR template, and active change-package guidance/templates
+  listed in `change.yaml`.
 - Replace size-driven splitting mandates with the outcome/risk/rollback/reviewability
   contract above.
 - Add the smallest deterministic static guard and negative tests needed to prevent the

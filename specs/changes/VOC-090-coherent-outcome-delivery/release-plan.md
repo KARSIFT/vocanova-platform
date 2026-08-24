@@ -25,6 +25,8 @@ Before the one implementation PR may merge, record on that same PR:
 
 - exact adopted base and exact final head SHA;
 - the complete declared path inventory and excluded-surface proof;
+- aligned DOC-12/DOC-09 ordered-component wording and negative evidence rejecting an
+  active mandatory/recommended PR sequence without D03–D05 rationale;
 - decision, impact, privilege, and contingency evidence;
 - focused static guard and negative-fixture results;
 - Prettier, governance validation, unchanged R4 classifier result, and diff checks;
@@ -40,8 +42,9 @@ same PR. Do not create a ceremony-only follow-up implementation/evidence PR.
 ## Monitoring and outcome
 
 There is no live monitoring. The repository outcome is that active guidance and
-templates consistently produce outcome/risk/rollback/reviewability-driven delivery,
-and the static guard rejects the specified regressions. Future delivery metrics may
+templates consistently select the largest safe coherent outcome/risk/rollback/
+reviewability-driven delivery unit, and the static guard rejects the specified
+regressions. Future delivery metrics may
 observe elapsed time, review cycles, coordination, and cost under existing policy; this
 package adds no telemetry or service.
 

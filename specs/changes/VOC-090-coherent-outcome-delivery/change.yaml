@@ -38,6 +38,15 @@ owners:
   specialist_review: different non-author governance-and-delivery-workflow specialist actor
   merge: separate authorized non-author merge actor after eligibility is proven
 
+plan_review_history:
+  - candidate_sha: 98fd6f4f8c194e8ff1c0463b58efbf9d7780f62f
+    verdict: fail
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392546514
+    finding: active-doc12-doc09-future-six-pr-sequences-omitted
+    resolution_status: >-
+      immutable-failure-addressed-by-later-amended-candidate-adding-both-active
+      surfaces-and-requiring-fresh-exact-general-and-specialist-review
+
 artifacts:
   readme: README.md
   specification: specification.md
@@ -54,8 +63,9 @@ dependencies:
     evidence: >-
       At base ea357ce506f42fe74c7e88f670db9ce4f848d80e, DOC-15 sections
       10.10, 16.4, and 24.20, DOC-10 sections 4 and 6, active package templates,
-      contributor/agent guidance, the PR template, and the Ruflo runbook contain the
-      ambiguity and affected delivery-shape surfaces inventoried by this package.
+      DOC-12 section 5, DOC-09 section 24, contributor/agent guidance, the PR
+      template, and the Ruflo runbook contain the ambiguity and affected delivery-
+      shape surfaces inventoried by this package.
   - id: VOC-090-DEP-01
     status: pending-adoption
     evidence: >-
@@ -86,10 +96,11 @@ required_r4_evidence:
     role: governance-and-delivery-workflow specialist
     status: pending-exact-plan-candidate-and-later-implementation-revision-review
     evidence_contract: >-
-      Verify that the final policy is outcome/risk/rollback/reviewability driven,
-      multiple-PR rationale is enforceable, overhead is considered, all active
-      surfaces are reconciled, and unrelated-scope, security, risk, review,
-      rollback, EHR, and action-authority controls remain intact.
+      Verify that the final policy requires the largest safe coherent delivery unit
+      across all layers sharing one outcome and control boundary, that splitting is an
+      evidence-backed exception, multiple-PR rationale is enforceable, overhead is
+      considered, all active surfaces are reconciled, and unrelated-scope, security,
+      risk, review, rollback, EHR, and action-authority controls remain intact.
 
 affected_areas:
   - AGENTS.md
@@ -101,6 +112,8 @@ affected_areas:
   - docs/operations/10-development-workflow.md
   - docs/operations/15-ai-native-product-and-engineering-operating-model.md
   - docs/operations/ruflo-external-orchestration.md
+  - docs/product/12-mvp-implementation-plan.md
+  - docs/engineering/09-ai-features.md
   - docs/templates/change-specification.md
   - specs/README.md
   - specs/templates/change-package/README.md
