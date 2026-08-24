@@ -30,9 +30,18 @@ only; it does not inspect, mutate, or stop a live server.
 The [machine-readable current record](repository-settings-current.yaml) is the source
 for this point-in-time observation. It records a public repository with `main` as the
 default branch; merge commits and squash merges enabled; rebase merges and automatic
-branch deletion disabled; and Actions enabled with selected actions, required SHA
+branch deletion enabled; and Actions enabled with selected actions, required SHA
 pinning, read-only default workflow-token permissions, and pull-request review
 approval disabled.
+
+VOC-092 changed only `delete_branch_on_merge` from `false` to `true` at
+`2026-08-24T22:06:14Z`–`22:06:18Z` UTC after its exact action authority and adopted
+plan became effective. The [pre-state and payload](https://github.com/KARSIFT/vocanova-platform/issues/151#issuecomment-5402030322),
+[post-state read-back](https://github.com/KARSIFT/vocanova-platform/issues/151#issuecomment-5402032905),
+and [full fresh observation](https://github.com/KARSIFT/vocanova-platform/issues/151#issuecomment-5402043002)
+are canonical evidence. The inverse one-field payload restores `false`. Enabling this
+setting deletes the source branch after a future merged pull request; it does not merge
+a pull request, protect a branch, delete existing branches, or deploy anything.
 
 The same read-only observation records dependency/vulnerability alerts enabled. This
 is distinct from the disabled Dependabot security-update automation. GitHub-hosted
@@ -45,8 +54,8 @@ The record is point-in-time only. Its network-free guard proves internal consist
 with the committed observation; it cannot prove live freshness. It becomes stale if
 a later repository-settings mutation is authorized or observed, or if the observation
 cannot be independently reverified. Any future settings mutation requires an immediate
-governed documentation-only follow-up. This package and this guide perform no settings
-mutation.
+governed documentation-only follow-up. This guide records but does not itself perform
+VOC-092's completed one-field settings mutation.
 
 ## VOC-080 historical transition snapshot
 
@@ -67,6 +76,9 @@ GitHub repository-settings mutation. It names an accountable settings operator,
 requires separate exact-action authority, and requires a pre-state, intended payload,
 rollback, immediate documentation follow-up, post-state read-back, and exact evidence
 record. It does not block repository-only planning, implementation, review, or merge.
+VOC-092 completed one narrow instance of this hold for automatic merged-branch
+deletion; every later settings action remains separately held and needs fresh exact
+authority and evidence.
 
 The currently enabled dependency/vulnerability alerts are observed evidence, not a
 prospective held target. The distinct `VOC-080-HOLD-00`, `VOC-080-HOLD-01`, and
@@ -147,10 +159,11 @@ Future settings activation may consider:
 - other prospective hosted enforcement or environment-approval controls.
 
 The current observation has enabled dependency/vulnerability alerts, full-SHA Actions
-enforcement, a selected-action allowlist, and minimal default workflow-token
-permissions. Dependabot security updates, secret scanning/push protection, and
-validity checks are disabled. None of the prospective controls is enabled by this
-documentation package; any activation remains under `VOC-085-HOLD-00`.
+enforcement, a selected-action allowlist, minimal default workflow-token permissions,
+and automatic deletion of merged branches. Dependabot security updates, secret
+scanning/push protection, and validity checks are disabled. None of the other
+prospective controls is enabled by this documentation package; any later activation
+remains under `VOC-085-HOLD-00`.
 
 The verified human repository identity `@m-e-h-r-d-a-a-d` is formally recorded as
 founder and as the historical pre-A-003 qualified human technical steward in

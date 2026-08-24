@@ -125,6 +125,34 @@ test("missing point-in-time or freshness fields and aggregate omission fail clos
     ),
   );
 
+  const staleAutomaticDeletion = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings-current.yaml", (text) =>
+      text.replace(
+        "delete_branch_on_merge: true\n",
+        "delete_branch_on_merge: false\n",
+      ),
+    );
+  });
+  assert.ok(
+    staleAutomaticDeletion.some((message) =>
+      /current_record\.delete_branch_on_merge must equal true/.test(message),
+    ),
+  );
+
+  const missingMutationAuthority = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings-current.yaml", (text) =>
+      text.replace(
+        "  authority: https://github.com/KARSIFT/vocanova-platform/pull/152\n",
+        "",
+      ),
+    );
+  });
+  assert.ok(
+    missingMutationAuthority.some((message) =>
+      /missing current_record\.settings_mutation\.authority/.test(message),
+    ),
+  );
+
   const omitted = inspectFoundationScripts(
     JSON.stringify(
       {
@@ -224,14 +252,14 @@ test("held-control promotion, prospective-alert drift, non-blocking hold drift, 
   const settingsMutation = errorsFor((root) => {
     mutate(root, "docs/governance/repository-settings.md", (text) =>
       text.replace(
-        "This package and this guide perform no settings\nmutation.",
-        "This package and this guide perform settings\nmutation.",
+        "This guide records but does not itself perform\nVOC-092's completed one-field settings mutation.",
+        "This package and this guide perform settings mutation.",
       ),
     );
   });
   assert.ok(
     settingsMutation.some((message) =>
-      /repository-settings\.md: missing no settings-mutation claim/.test(
+      /repository-settings\.md: missing record-versus-mutation boundary/.test(
         message,
       ),
     ),
@@ -240,7 +268,7 @@ test("held-control promotion, prospective-alert drift, non-blocking hold drift, 
   const liveAction = errorsFor((root) => {
     mutate(root, "docs/operations/cloudflare-delivery.md", (text) =>
       text.replace(
-        "The repository therefore makes no claim that hosted environment approvals,\nsecrets, or branch restrictions are configured.",
+        "The repository therefore makes no\nclaim that hosted environment approvals, secrets, or branch restrictions are\nconfigured.",
         "The repository therefore claims that hosted environment approvals,\nsecrets, and branch restrictions are configured.",
       ),
     );
@@ -306,8 +334,8 @@ test("appended contradictory current and held claims fail even when the safe sni
   const appendedCurrentHostedPrivate = errorsFor((root) => {
     mutate(root, "docs/governance/repository-settings.md", (text) =>
       text.replace(
-        "mutation.\n\n## VOC-080 historical transition snapshot",
-        "mutation.\nThe repository is private.\n\n## VOC-080 historical transition snapshot",
+        "VOC-092's completed one-field settings mutation.\n\n## VOC-080 historical transition snapshot",
+        "VOC-092's completed one-field settings mutation.\nThe repository is private.\n\n## VOC-080 historical transition snapshot",
       ),
     );
   });
@@ -322,8 +350,8 @@ test("appended contradictory current and held claims fail even when the safe sni
   const appendedSettingsMutation = errorsFor((root) => {
     mutate(root, "docs/governance/repository-settings.md", (text) =>
       text.replace(
-        "mutation.\n\n## VOC-080 historical transition snapshot",
-        "mutation.\n\nThis package and this guide perform settings mutation to activate the current hosted posture.\n\n## VOC-080 historical transition snapshot",
+        "VOC-092's completed one-field settings mutation.\n\n## VOC-080 historical transition snapshot",
+        "VOC-092's completed one-field settings mutation.\n\nThis package and this guide perform settings mutation to activate the current hosted posture.\n\n## VOC-080 historical transition snapshot",
       ),
     );
   });
@@ -354,8 +382,8 @@ test("appended contradictory current and held claims fail even when the safe sni
   const appendedLiveHostedClaim = errorsFor((root) => {
     mutate(root, "docs/operations/cloudflare-delivery.md", (text) =>
       text.replace(
-        "exist. Any future GitHub settings mutation remains held by `VOC-085-HOLD-00` and\nrequires an immediate governed documentation-only follow-up; Cloudflare delivery\nactivation remains separately held by the VOC-080 holds above.\n",
-        "exist. Any future GitHub settings mutation remains held by `VOC-085-HOLD-00` and\nrequires an immediate governed documentation-only follow-up; Cloudflare delivery\nactivation remains separately held by the VOC-080 holds above.\nHosted environment approvals, secrets, and branch restrictions are configured for the current delivery posture.\n",
+        "by the VOC-080 holds above.\n",
+        "by the VOC-080 holds above.\nHosted environment approvals, secrets, and branch restrictions are configured for the current delivery posture.\n",
       ),
     );
   });
@@ -370,8 +398,8 @@ test("appended contradictory current and held claims fail even when the safe sni
   const appendedDeliveryPrivate = errorsFor((root) => {
     mutate(root, "docs/operations/cloudflare-delivery.md", (text) =>
       text.replace(
-        "activation remains separately held by the VOC-080 holds above.\n",
-        "activation remains separately held by the VOC-080 holds above.\nThe repository is private.\n",
+        "by the VOC-080 holds above.\n",
+        "by the VOC-080 holds above.\nThe repository is private.\n",
       ),
     );
   });
@@ -389,8 +417,8 @@ test("appended contradictory current and held claims fail even when the safe sni
       "docs/governance/16-autonomous-development-operating-model.md",
       (text) =>
         text.replace(
-          "a live settings feed.\n\n## Release gate",
-          "a live settings feed.\nThe repository is private.\n\n## Release gate",
+          "settings feed, and automatic branch deletion is not automatic merge or deployment.\n\n## Release gate",
+          "settings feed, and automatic branch deletion is not automatic merge or deployment.\nThe repository is private.\n\n## Release gate",
         ),
     );
   });
@@ -461,8 +489,8 @@ test("current-record API schema, normalized values, duplicates, and comments fai
   const commentAttempt = errorsFor((root) => {
     mutate(root, "docs/governance/repository-settings-current.yaml", (text) =>
       text.replace(
-        "source: github-rest-api-read-only\n",
-        "source: github-rest-api-read-only # comment attempt\n",
+        "source: github-rest-api-read-only-after-authorized-voc092-setting-mutation\n",
+        "source: github-rest-api-read-only-after-authorized-voc092-setting-mutation # comment attempt\n",
       ),
     );
   });
