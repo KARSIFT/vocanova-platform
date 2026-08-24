@@ -2,7 +2,7 @@
 
 ## VOC-086-T00 — Reconcile living F2 evidence
 
-- Status: blocked-until-plan-adoption
+- Status: candidate-on-adopted-base-b44c41256153cfefc40739b9e7eeb5dff6eb72ad-pending-exact-review-r4-specialist-hosted-proof-and-merge
 - Requirements: `VOC-086-D00`, `D01`, `D02`, `D04`, `D05`
 - Acceptance: `VOC-086-AC-00`, `AC-01`
 - Tests: `VOC-086-TEST-00`, `TEST-01`, `TEST-02`
