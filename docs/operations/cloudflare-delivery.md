@@ -73,10 +73,13 @@ evidence matching the reviewed manifest. Production learner data remains governe
 `VOC-080-HOLD-02`; the delivery workflow has no export/conversion input or learner-data
 credential.
 
-GitHub Free private-repository limitations remain accurately disclosed. This
-repository has not configured or verified hosted environment approvals, secrets, or
-branch restrictions. The committed fail-closed state does not pretend those settings
-exist.
+The repository is public, current as observed at 2026-08-24. The [point-in-time
+settings record](../governance/repository-settings-current.yaml) records that hosted
+environment approvals, secrets, and branch restrictions remain unconfigured or
+unverified; public availability does not mean those controls exist. The committed
+fail-closed state does not pretend those settings exist. Any future GitHub settings
+mutation remains held by `VOC-085-HOLD-00` and requires an immediate governed
+documentation-only follow-up.
 
 ## Ordered execution after future authorization
 

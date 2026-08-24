@@ -1,13 +1,13 @@
 ---
 id: DOC-16
 title: Vocanova Autonomous Development Operating Model
-version: 3.2
+version: 3.3
 status: approved
 owner: founder
 canonical_path: docs/governance/16-autonomous-development-operating-model.md
 approved_at: 2026-07-13
 approval_evidence: PR-3-founder-approval-comment-4961029533-reviewed-commit-09f97341ff093fd20a70683d88b772e154979330
-last_reviewed_at: 2026-08-23
+last_reviewed_at: 2026-08-24
 review_cycle: quarterly
 supersedes: null
 folds_in:
@@ -17,11 +17,12 @@ folds_in:
   - VOC-079 (R4 Approval-Neutral Governance; adopted 2026-08-19, PR #75)
   - VOC-080 (Cloudflare-native runtime and external Ruflo direction; adopted 2026-08-22, PR #86)
   - VOC-082 (Provider-neutral distinct-agent role separation; adopted 2026-08-23, PR #110)
+  - VOC-085 (Public repository settings truth and held activation boundary; adopted 2026-08-24, PR #126)
 revision_note: >
-  This v3.2 revision clarifies provider-neutral distinct-actor role separation. Risk
-  remains consequence-based, runtime provenance is not authority, external effects
-  stay separately held, and neither a hosting platform nor an orchestrator becomes
-  repository authority.
+  This v3.3 revision reconciles the public repository settings posture current as
+  observed at 2026-08-24. It preserves the universal evidence contract, distinguishes
+  configured Actions and dependency/vulnerability alerts from absent or disabled
+  hosted controls, and keeps future settings activation and external effects held.
 related_documents:
   - DOC-15
 related_decisions:
@@ -259,8 +260,10 @@ repository promotion from becoming live deployment.
 RL1/RL2 _technical_ activation (as opposed to the governance permission described
 above) remains a separate, currently disabled gate - see
 [repository-settings.md](repository-settings.md) and
-[a003-transition-state.yaml](a003-transition-state.yaml) for the live, current
-state of what's actually turned on.
+[a003-transition-state.yaml](a003-transition-state.yaml) for the governance
+transition state, and [repository-settings-current.yaml](repository-settings-current.yaml)
+for the hosted settings posture current as observed at 2026-08-24. Neither record is
+a live settings feed.
 
 ## Release gate
 
@@ -351,8 +354,8 @@ authority.
 | pnpm frozen installation, formatting, lint, type checking, unit tests, integration tests, build | Live - real `apps/web` and `apps/api-worker` applications, real CI on every PR                                                                                                                                                                                                                           |
 | Accessibility automation                                                                        | Live - Lighthouse CI budgets (Performance 85+/Accessibility 95+/Best Practices 90+)                                                                                                                                                                                                                      |
 | Database migration validation                                                                   | Live - forward D1 migrations, local workerd/D1 rehearsal, synthetic conversion, and reconciliation validation                                                                                                                                                                                            |
-| Dependency audit                                                                                | Live - pnpm audit and Dependabot                                                                                                                                                                                                                                                                         |
-| Secret scanning                                                                                 | Live in `security.yml` through pinned TruffleHog plus its synthetic rejection contract; GitHub-hosted secret scanning/push protection is not exposed as enabled on the current private Free plan                                                                                                         |
+| Dependency audit                                                                                | Live - pnpm audit and vulnerability alerts as observed; Dependabot security updates disabled                                                                                                                                                                                                             |
+| Secret scanning                                                                                 | Live in `security.yml` through pinned TruffleHog; GitHub-hosted secret scanning, push protection, and validity checks disabled as observed at 2026-08-24                                                                                                                                                 |
 | OpenNext/Worker/D1 compatibility                                                                | Live in the active tree after the T03-T10 parity chain and T11 server-runtime retirement; local workerd/D1 and credential-free dry runs only                                                                                                                                                             |
 | Preview status                                                                                  | Not built - per-PR Cloudflare previews remain genuinely unbuilt                                                                                                                                                                                                                                          |
 | Independent exact-revision verification                                                         | Live as a repository requirement; performed outside Actions and attached to the PR                                                                                                                                                                                                                       |
@@ -408,6 +411,7 @@ revision it governed without making any approval, transition, or boundary reusab
 | 2026-08-19           | R4 Approval-Neutral Governance (VOC-079; v3.0 of this document)                        | Retained R4 as the highest consequence class while replacing its class-wide founder gate with the universal evidence contract and explicit action-specific authority                                                                        | Adopted package candidate `25a3e246b8f66dd4b92ea9726eb5367c16363018`; PR #75 founder approval [5341799779](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5341799779) and independent package review [5340623965](https://github.com/KARSIFT/vocanova-platform/pull/75#issuecomment-5340623965). This one-time pre-transition authority is exhausted by VOC-079 and cannot authorize later work; exact implementation evidence is recorded on the implementation pull requests.                                                                                                     |
 | 2026-08-22           | Cloudflare-native runtime and external Ruflo boundary (VOC-080; v3.1 of this document) | Selected Workers/OpenNext/Hono/D1 as the parity-gated no-owned-server target and Ruflo as external coordination only; preserved the universal evidence contract and added no merge or live-system authority                                 | Adopted package candidate `6fb00a0b64e6f2d4adceb24a9caeffd9af98c779`; independent review [5379258747](https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379258747); final-head review [5379295472](https://github.com/KARSIFT/vocanova-platform/pull/86#issuecomment-5379295472); adoption PR #86 merged as `399ccefa879545b43574c02fdc3babff223a1db0`. Live staging, production, and learner-data actions remain held.                                                                                                                                                               |
 | 2026-08-23           | Provider-neutral distinct-agent role separation (VOC-082; v3.2)                        | Clarified that independent roles require distinct actors and non-authorship of the exact revision; model/provider provenance is optional hardening, while action-specific authority remains separate                                        | Adopted package VOC-082, PR #110; implementation evidence is recorded on its independently reviewed task pull requests. Historical provider and bootstrap evidence remains preserved.                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| 2026-08-24           | Public repository settings truth and held activation boundary (VOC-085; v3.3)          | Reconciled public settings posture and preserved held activation boundaries; no authority rules changed                                                                                                                                     | Adopted plan PR #126; implementation task PR pending assignment at initial revision and to be recorded on the final implementation revision.                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 The one-time VOC-002 migration approval and VOC-079 pre-transition approval recorded
 above are exhausted and must never be reused to justify a later change. Automatic
