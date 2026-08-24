@@ -143,7 +143,7 @@ Future settings activation may consider:
 
 - Dependabot security-update automation;
 - GitHub-hosted secret scanning, push protection, and validity checks;
-- private vulnerability reporting, which remains unobserved and unconfigured; and
+- private vulnerability reporting, which remains outside this observation and prospective; and
 - other prospective hosted enforcement or environment-approval controls.
 
 The current observation has enabled dependency/vulnerability alerts, full-SHA Actions
