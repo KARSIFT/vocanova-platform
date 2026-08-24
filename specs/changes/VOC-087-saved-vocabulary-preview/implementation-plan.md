@@ -2,14 +2,14 @@
 
 ## Preconditions and boundaries
 
-Do not implement while `change.yaml` remains draft or
-`implementation_authorized: false`. Before implementation, a different non-author
-actor must review the exact plan candidate, blocking findings must be resolved, and the
-plan PR must record the approved candidate SHA, review/approval evidence,
-`status: adopted`, and `implementation_authorized: true` before merge. The final
-adoption-bookkeeping revision must receive its own different-actor exact-SHA review if
-it differs from the reviewed candidate; candidate review never silently transfers to a
-later SHA.
+Exact candidate `eea8d41447a9dc88125df546d62bd851bd4ad496` received different-actor
+PASS with zero blockers and the accountable adoption decision. `change.yaml` now records
+`status: adopted` and `implementation_authorized: true`. Do not implement yet: this
+authorization becomes effective only after the adoption-bookkeeping revision receives
+its own different-actor exact-SHA review and final hosted evidence, PR #137 normally
+merges, and applicable post-merge checks pass. Candidate review never silently
+transfers to this later bookkeeping SHA, whose future SHA/review/merge/post-merge facts
+must not be invented inside the candidate commit.
 
 No protected area is in scope. Re-read the target files and classify concurrent work
 before editing. Any material conflict or need for an API/schema/auth/dependency/workflow

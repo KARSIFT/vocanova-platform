@@ -51,8 +51,11 @@ useful, but the UI no longer under-reports learners who have more than 10 saved 
 
 The initial exact plan candidate
 `cbede7d17e0883e0871d9921aaef781dee087f45` received a preserved independent FAIL at
-PR #137 comment `5390811909`. The amended candidate requires fresh exact-revision review;
-the prior FAIL is historical evidence, not approval.
+PR #137 comment `5390811909`. Amended exact candidate
+`eea8d41447a9dc88125df546d62bd851bd4ad496` received final PASS at comment
+`5390880861`, fully resolving the blocker. The prior FAIL remains immutable historical
+evidence and is not approval. The adoption-bookkeeping revision still requires its own
+exact-SHA review.
 
 ## Rollback impact
 

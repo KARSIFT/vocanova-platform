@@ -2,11 +2,13 @@
 
 ## Repository release boundary
 
-There is no deployment or live product release in this package. After adoption, the one
-implementation PR may merge normally into `develop` only after exact-revision review and
-required hosted checks. `main` promotion, Cloudflare delivery, repository/settings
-mutation, staging or production access, secrets, production data, and live verification
-are prohibited.
+There is no deployment or live product release in this package. Adoption is recorded,
+but implementation authority becomes effective only after the bookkeeping revision's
+exact-SHA review and hosted checks, normal PR #137 merge, and applicable post-merge
+checks. The later one implementation PR may merge normally into `develop` only after
+its own exact-revision review and required hosted checks. `main` promotion, Cloudflare
+delivery, repository/settings mutation, staging or production access, secrets,
+production data, and live verification are prohibited.
 
 `automatic_merge_allowed: true` is an examined package policy record under the current
 drafting rule; it creates no executable merge, bypass, or external authority. A separate

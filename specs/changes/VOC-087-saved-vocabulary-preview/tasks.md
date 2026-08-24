@@ -7,7 +7,7 @@
 - Tests: `VOC-087-TEST-00` through `VOC-087-TEST-06`
 - Evidence: `VOC-087-EV-00` through `VOC-087-EV-03`
 - Risk: R1
-- Status: pending-adoption; implementation unauthorized
+- Status: adopted-authorized; effective only after PR #137 normal merge and applicable post-merge checks
 
 In one implementation PR, make the Progress saved-vocabulary section explicitly a
 recent, up-to-10 preview and remove its page-length-as-total claim. Add the deterministic

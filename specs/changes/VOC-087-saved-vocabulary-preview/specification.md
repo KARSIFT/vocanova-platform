@@ -8,9 +8,12 @@ cursor-paginated and has no total count; and the page renders `savedWords.length
 `N word(s) saved`. For learners with more than 10 saved words, the resulting
 `10 words saved` claim under-reports their vocabulary and appears authoritative.
 
-Issue #132 authorizes planning only. Implementation begins only after this package has
-an exact-revision independent PASS, complete adoption bookkeeping, and a reviewed merge
-into `develop`.
+Issue #132 authorized planning only. Exact candidate
+`eea8d41447a9dc88125df546d62bd851bd4ad496` has since received independent PASS and the
+accountable adoption decision. Implementation authorization is recorded by the adopted
+package but becomes effective only after the bookkeeping revision receives its own
+exact-SHA review and hosted evidence, PR #137 normally merges into `develop`, and
+applicable post-merge checks pass.
 
 ## Scope and non-goals
 
