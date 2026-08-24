@@ -5,7 +5,7 @@ slug: reconcile-f2-acceptance-state
 title: Reconcile repository/local F2 acceptance state
 
 type: canonical-milestone-evidence-reconciliation
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because active DOC-12 milestone truth and machine-checked completion evidence can
@@ -15,9 +15,9 @@ canonical_path: specs/changes/VOC-086-reconcile-f2-acceptance-state
 base_branch: develop
 base_sha: 4a5f05672f5417e7a23fdf4e4d31fe9a4ce1f51d
 target_branch: develop
-approved_candidate_sha: pending-exact-plan-review
+approved_candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/131
-requirement_approval_status: recorded-for-planning-not-adopted
+requirement_approval_status: exact-plan-review-pass-and-decision-owner-approved
 
 authority_model: voc-079-approval-neutral-active
 owners:
@@ -32,20 +32,26 @@ approvals:
     status: recorded-for-planning
     evidence: https://github.com/KARSIFT/vocanova-platform/issues/131
   package_independent_verification:
-    status: pending
-    candidate_sha: pending
-    evidence: pending
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390095408
   package_specialist_verification:
-    status: pending
-    candidate_sha: pending
-    evidence: pending
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390105601
   adoption_decision:
-    status: pending
-    candidate_sha: pending
-    evidence: pending
+    status: approved-for-adoption
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390109890
+  candidate_hosted_evidence:
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853486
+    governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853397
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853459
+    quality: not-applicable-plan-only-path-filter
 
-approval_status: not-approved
-implementation_authorized: false
+approval_status: adopted
+implementation_authorized: true
 automatic_merge_allowed: true
 production_impact: none-repository-documentation-and-validation-only
 rollback_required: true
@@ -66,8 +72,9 @@ required_r4_evidence:
   specialist_evidence:
     required: true
     role: canonical-documentation-governance-and-milestone-evidence-specialist
-    status: pending-exact-revision
-    evidence: pending
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390105601
 
 action_specific_holds: []
 inherited_holds:
@@ -105,7 +112,7 @@ artifacts:
 
 dependencies:
   - id: VOC-086-DEP-00
-    status: pending-plan-review-adoption-and-merge
+    status: satisfied-exact-candidate-review-and-adoption-decision-pending-plan-pr-merge
     description: >-
       The exact plan candidate needs different-actor general and R4 specialist PASS
       evidence plus an accountable adoption decision before implementation.
@@ -122,9 +129,9 @@ dependencies:
       and applicable post-merge checks pass.
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: blocked-until-plan-adoption
+  status: authorized-upon-plan-pr-133-merge
   tasks:
     - VOC-086-T00
     - VOC-086-T01
@@ -139,7 +146,6 @@ release:
 
 ehr: not-triggered
 blocking_reasons:
-  - exact-plan-general-review-pending
-  - exact-plan-specialist-review-pending
-  - adoption-decision-pending
   - plan-pr-merge-pending
+repository_adoption_status: adopted-candidate-pending-pr-133-merge
+adoption_pr: 133
