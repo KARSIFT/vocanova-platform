@@ -1,0 +1,99 @@
+schema_version: 1
+
+id: VOC-087
+slug: saved-vocabulary-preview
+title: Truthful saved-vocabulary preview on Progress
+
+type: bugfix-frontend-presentation
+status: draft
+risk: R1
+planned_implementation_risk_floor: >-
+  R1 because this is a localized, backward-compatible learner-facing presentation
+  correction under apps/web with deterministic browser coverage. It changes no API,
+  schema, authentication rule, sensitive-data handling, infrastructure, deployment,
+  governance, or external state. Escalate before implementation if the final scope
+  crosses any of those boundaries or makes a material product decision.
+canonical_path: specs/changes/VOC-087-saved-vocabulary-preview
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/132
+requirement_approval_status: issue-recorded-for-planning-only
+base_branch: develop
+base_sha: a9f07c9baa44f61b16d5c5999f39fdea4b558842
+plan_branch: plan/voc-087-saved-vocabulary-preview
+target_branch: develop
+approved_candidate_sha: null
+
+approval_status: pending-independent-plan-review-and-adoption
+implementation_authorized: false
+automatic_merge_allowed: true
+production_impact: none
+rollback_required: true
+
+owners:
+  decision: accountable-decision-owner-after-independent-plan-review
+  package_preparation: Codex planner actor for this draft only
+  implementation: different builder actor after adoption
+  independent_verification: different non-author exact-revision reviewer actor
+  merge: separate authorized merge actor after eligibility is proven
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-087-DEP-00
+    status: verified-at-drafting
+    evidence: >-
+      Progress calls listSavedWords with limit 10; the API client response contains
+      items and optional nextCursor but no total; the repository orders newest first.
+  - id: VOC-087-DEP-01
+    status: required-before-implementation
+    evidence: >-
+      This exact package candidate must receive different-actor review, adoption
+      bookkeeping, and merge before implementation.authorized can become true.
+
+affected_areas:
+  - apps/web/src/app/(app)/progress/page.tsx
+  - apps/web/tests/e2e/mock-api-server.mjs
+  - apps/web/tests/e2e/progress-accessibility.spec.ts
+protected_areas: []
+
+implementation:
+  authorized: false
+  status: blocked-pending-plan-review-and-adoption
+  required: true
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-087-T00
+
+release:
+  required: false
+  mode: repository-only-reviewed-merge
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-implementation-merge-and-applicable-post-merge-checks-only
+
+ehr: not-triggered
+action_specific_authority:
+  required: false
+  reason: >-
+    The package authorizes no contract, spend, secret or personal-data disclosure,
+    production access, irreversible external mutation, deployment, or launch.
+external_effects:
+  cloudflare: prohibited
+  repository_settings: prohibited
+  deployment: prohibited
+  main_promotion: prohibited
+  live_systems: prohibited
+  production_data: prohibited
+
+blocking_reasons:
+  - exact-candidate-independent-plan-review-pending
+  - adoption-bookkeeping-and-plan-merge-pending
