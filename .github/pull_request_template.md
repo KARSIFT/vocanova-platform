@@ -7,6 +7,10 @@
 - Requirement source:
 - Stable acceptance-criteria mapping:
 - Implementation tasks/commits:
+- Planned delivery shape (`1 package / 1 implementation PR / 1 minimum-sufficient task` by default):
+- Planned implementation pull-request count:
+- Task-to-PR mapping:
+- Multi-PR rationale or `N/A — one coherent PR default`:
 
 Change mode: <!-- Standard | Lightweight R0 -->
 Risk classification: <!-- Replace with exactly R0, R1, R2, R3, or R4 -->
@@ -20,6 +24,7 @@ verifier result; mark genuinely irrelevant standard sections `N/A` with one reas
 - What changed:
 - In scope:
 - Out of scope:
+- Largest-safe-coherent-unit evidence (backend/frontend/contracts/tests/docs/rollback/evidence sharing one outcome):
 
 ## Existing-file reconciliation
 
@@ -132,6 +137,9 @@ action-specific hold.
 - [ ] The package's `automatic_merge_allowed` value was examined; R0–R4 default to
       `true`, and any `false` includes a package-local `automatic_merge_hold_reason`
       (except VOC-079's documented transition value).
+- [ ] The planned delivery shape is the largest safe coherent unit for the approved
+      outcome; task IDs are not being used as extra PRs without a recorded boundary
+      and overhead rationale.
 - [ ] The change stays within the approved scope and contains no unrelated cleanup.
 - [ ] All installed checks relevant to this change pass; unavailable checks are
       disclosed rather than represented as passing.

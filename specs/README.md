@@ -10,6 +10,12 @@ in `change.yaml`; prose files provide requirements, traceability, evidence, and
 rollback detail. Stable decision, acceptance, task, test, risk, dependency, and
 evidence identifiers must never be silently renumbered or reused.
 
+For one approved user or business outcome, the default delivery unit is one approved
+package, one implementation pull request, and one minimum-sufficient task. Task IDs
+group traceability and evidence; they are not separate branch or PR quotas. Multiple
+implementation PRs are exceptional and must record the concrete boundary, rollback
+coherence, integration order, and overhead rationale in the active templates.
+
 Reusable, deliberately non-approved placeholders live in
 [`templates/change-package/`](templates/change-package/README.md). A copied template
 is not approved implementation authority until its placeholders are replaced and the

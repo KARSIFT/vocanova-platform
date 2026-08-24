@@ -97,11 +97,21 @@ every affected or unknown entry.
 
 ## Implementation plan and tasks
 
-| Task ID     | Description  | Acceptance criteria | Dependencies | Owner         |
-| ----------- | ------------ | ------------------- | ------------ | ------------- |
-| VOC-###-T01 | Bounded task | AC-01               | None         | builder actor |
+- Planned implementation pull-request count: `1` by default
+- Task-to-PR mapping:
+- Multi-PR rationale or `N/A — one coherent PR default`:
 
-Record the technical approach, components, sequence, compatibility, and known risks.
+Task IDs are minimum-sufficient traceability/evidence groupings. They do not imply
+separate branches or pull requests. Use one task when it preserves clear mapping;
+use more only when a real dependency, owner, evidence, or rollback boundary exists.
+
+| Task ID     | Description                               | Acceptance criteria | Dependencies | Owner         |
+| ----------- | ----------------------------------------- | ------------------- | ------------ | ------------- |
+| VOC-###-T00 | Minimum-sufficient coherent delivery task | AC-01               | None         | builder actor |
+
+Record the technical approach, largest safe coherent delivery unit, component
+sequence, compatibility, known risks, and any justified multi-PR boundary/overhead
+rationale.
 
 ## Test plan
 

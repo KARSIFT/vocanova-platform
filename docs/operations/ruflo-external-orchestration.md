@@ -80,20 +80,25 @@ reviewed revision; relabeling an actor, changing a prompt/session, or selecting 
 different model/provider is not separation. Runtime provenance may harden evidence but
 does not grant authority. A material reviewer edit makes that reviewer the builder of
 the new SHA and requires fresh checks and a different reviewer. The non-author merge
-actor audits exact evidence only; it cannot satisfy an action-specific hold.
+actor audits exact evidence only; it cannot satisfy an action-specific hold. By
+default, the assigned work unit is one coherent implementation pull request; task IDs
+remain traceability groupings unless an adopted package explicitly records a justified
+multi-PR boundary and rationale.
 
 | Role                 | Workspace and output                                                                             | Permission ceiling                                                                                                              |
 | -------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
 | Planner              | Read-only source plus a separate `plan/` worktree only when an approved planning task permits it | Proposes requirements and evidence; cannot adopt or authorize                                                                   |
 | Task-orchestrator    | Sanitized external task ledger and worktree map                                                  | Coordinates only; cannot write GitHub or the product repository                                                                 |
-| Builder              | Exactly one assigned isolated task branch/worktree                                               | May implement adopted scope; cannot review, merge, deploy, or use held data/secrets                                             |
+| Builder              | Exactly one assigned isolated implementation worktree/PR unit                                    | May implement adopted scope; cannot review, merge, deploy, or use held data/secrets                                             |
 | Specialist/tester    | Read-only exact revision or separately assigned test workspace                                   | Returns focused findings/evidence; cannot expand scope or authority                                                             |
 | Independent reviewer | Read-only clean exact revision and completed deterministic evidence                              | Returns an exact-SHA verdict; does not duplicate completed long suites or start background processes without a specific finding |
 
 Only the assigned integration participant changes shared manifests or lockfiles. Two
-writers never share a worktree. A handoff identifies the package, task, base, head SHA,
-owned paths, completed commands/results, unresolved findings, rollback, and prohibited
-effects. GitHub holds the canonical copy of the accepted evidence.
+writers never share a worktree. The worktree map is keyed by implementation work
+unit, normally one coherent PR rather than each task ID. A handoff identifies the
+package, task-to-PR mapping, base, head SHA, owned paths, completed commands/results,
+unresolved findings, rollback, and prohibited effects. GitHub holds the canonical
+copy of the accepted evidence.
 
 ## Permission envelope
 

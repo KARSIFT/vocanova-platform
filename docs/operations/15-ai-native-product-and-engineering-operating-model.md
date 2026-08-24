@@ -1,12 +1,12 @@
 ---
 id: DOC-15
 title: Vocanova AI-Native Product and Engineering Operating Model
-version: 1.3
+version: 1.4
 status: approved
 owner: founder
 canonical_path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
 approved_at: 2026-07-13
-last_reviewed_at: 2026-08-23
+last_reviewed_at: 2026-08-24
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -31,9 +31,11 @@ related_decisions:
   - ADR-0004
   - ADR-0005
 revision_note: >
-  VOC-082 clarifies provider-neutral distinct-actor role separation. Provider names
-  remain historical examples or scoped tool boundaries, not permanent role authority;
-  owned-server and automatic-staging clauses remain history, not current behavior.
+  VOC-090 clarifies coherent-outcome delivery. One approved package, one
+  implementation pull request, and one minimum-sufficient task are the default safe
+  unit for one outcome; future P3/AI six-step work remains ordered components rather
+  than pre-authorized PR stacks. VOC-082's provider-neutral distinct-actor boundary
+  remains active.
 ---
 
 # 15 — Vocanova AI-Native Product and Engineering Operating Model v1.3
@@ -1001,19 +1003,19 @@ Codex may refine internal details only within approved product and architecture 
 
 ## 10.10 Tasks
 
-Tasks are small, ordered, verifiable, and stable.
+Tasks are minimum-sufficient, ordered, verifiable, and stable traceability units.
+They group requirements, acceptance criteria, tests, ownership, sequence, and
+evidence; they do not imply separate branches or pull requests.
 
 Example:
 
 ```markdown
-- [ ] VOC-023-T01 Add the approved authentication schema.
-- [ ] VOC-023-T02 Implement the authentication service.
-- [ ] VOC-023-T03 Implement sign-in API behavior.
-- [ ] VOC-023-T04 Build the sign-in interface.
-- [ ] VOC-023-T05 Add unit and integration tests.
-- [ ] VOC-023-T06 Update affected documentation.
-- [ ] VOC-023-T07 Provide acceptance-criteria evidence.
+- [ ] VOC-023-T00 Deliver the approved sign-in outcome across schema, service, API, UI, tests, documentation, rollback, and evidence.
 ```
+
+Ordered implementation-plan notes may still sequence schema, service, API, UI, test,
+documentation, and evidence work inside `VOC-023-T00`. Add more task IDs only when
+they create a real traceability, dependency, owner, or evidence boundary.
 
 ## 10.11 Test plan
 
@@ -1567,10 +1569,23 @@ Rules:
 
 - One primary change.
 - One linked package where applicable.
+- The pull request should be the largest safe coherent delivery unit that keeps
+  backend, frontend, contract, test, documentation, rollback, and evidence work for
+  that outcome together.
+- The default is one implementation pull request and one minimum-sufficient task.
+- Split only with a written rationale naming the independently releasable or
+  rollback-safe boundary, hard dependency, material risk or action-authority
+  boundary, incompatible reviewer/owner need, or demonstrated reviewability limit,
+  plus partial-state coherence, integration order, rollback, and the coordination,
+  elapsed-time, token/context, repeated-check, exact-review, and bookkeeping
+  overhead tradeoff.
 - Reviewable diff.
 - No unrelated cleanup.
 - Tests and documentation included.
 - Unrelated improvements become separate work.
+
+Component count, line count, test layers, documentation updates, and implementation
+convenience are review signals, not automatic split triggers.
 
 ## 16.5 Merge strategy
 
@@ -2473,7 +2488,8 @@ Use:
 - Daily and monthly alerts.
 - Separate implementation and review budgets.
 - Automatic stop on abnormal use.
-- Manual approval for unusually large tasks.
+- Delivery-shape decisions that account for coordination, elapsed time,
+  token/context, repeated checks, exact-review cycles, and bookkeeping overhead.
 - Smaller models where sufficient.
 - Bounded repository context.
 
@@ -2617,7 +2633,7 @@ Important releases and incidents should produce concise retrospectives with owne
 
 Agents must not improve metrics by:
 
-- Artificially splitting work.
+- Artificially splitting one coherent outcome into extra tasks, branches, or pull requests.
 - Suppressing findings.
 - Weakening tests.
 - Misclassifying risk.
@@ -3020,7 +3036,8 @@ The workflow distinguishes decision, implementation, release, and emergency pull
 
 ### DG5-05 — Coherent pull requests
 
-Each pull request contains one coherent change and avoids unrelated scope.
+Each pull request contains one coherent change, maximizes the safe coherent delivery
+unit, and avoids unrelated scope.
 
 ### DG5-06 — Squash implementation merges
 

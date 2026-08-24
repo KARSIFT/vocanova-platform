@@ -99,6 +99,10 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
         self.assertIn(old, text)
         path.write_text(text.replace(old, new, 1), encoding="utf-8")
 
+    def append(self, relative: str, extra: str) -> None:
+        path = self.root / relative
+        path.write_text(path.read_text(encoding="utf-8") + extra, encoding="utf-8")
+
     def test_valid_repository_passes(self) -> None:
         result = self.run_validator()
         self.assertEqual(0, result.returncode, result.stdout + result.stderr)
@@ -266,6 +270,79 @@ class RepositoryFoundationValidatorTests(unittest.TestCase):
             encoding="utf-8",
         )
         self.assert_failure("prohibited VOC-082 review-as-action authority wording")
+
+    def test_voc090_doc16_delivery_shape_marker_is_required(self) -> None:
+        self.replace(
+            "docs/governance/16-autonomous-development-operating-model.md",
+            "default delivery unit is one approved `VOC-###` package, one implementation pull\n"
+            "request into `develop`, and one minimum-sufficient task",
+            "default delivery unit marker removed",
+        )
+        self.assert_failure("missing VOC-090 policy marker")
+
+    def test_voc090_fixed_line_threshold_regression_fails(self) -> None:
+        self.append(
+            "docs/operations/10-development-workflow.md",
+            "\nPreferred size 100–500 meaningful changed lines (under 200 for fixes; over 800 normally split).\n",
+        )
+        self.assert_failure("prohibited VOC-090 fixed preferred line threshold wording")
+
+    def test_voc090_task_id_per_pr_wording_fails(self) -> None:
+        self.append(
+            ".github/pull_request_template.md",
+            "\nEach task ID requires its own pull request.\n",
+        )
+        self.assert_failure("prohibited VOC-090 task-id-per-PR wording")
+
+    def test_voc090_missing_multi_pr_rationale_marker_fails(self) -> None:
+        self.replace(
+            ".github/pull_request_template.md",
+            "Multi-PR rationale or `N/A — one coherent PR default`:",
+            "Split note:",
+        )
+        self.assert_failure("missing VOC-090 policy marker")
+
+    def test_voc090_active_mandatory_sequence_wording_fails(self) -> None:
+        self.append(
+            "docs/product/12-mvp-implementation-plan.md",
+            "\nMandatory six-PR order.\n",
+        )
+        self.assert_failure("prohibited VOC-090 active mandatory six-PR wording")
+
+    def test_voc090_active_recommended_sequence_wording_fails(self) -> None:
+        self.append(
+            "docs/engineering/09-ai-features.md",
+            "\nRecommended PR sequence.\n",
+        )
+        self.assert_failure("prohibited VOC-090 active recommended PR sequence wording")
+
+    def test_voc090_doc09_sequence_drift_fails(self) -> None:
+        self.replace(
+            "docs/engineering/09-ai-features.md",
+            "evaluation and observability",
+            "evaluation only",
+        )
+        self.assert_failure("missing VOC-090 ordered P3/AI implementation-component sequence")
+
+    def test_voc090_historical_sequence_example_remains_allowed(self) -> None:
+        self.append(
+            "docs/product/12-mvp-implementation-plan.md",
+            "\nHistorical example only: Mandatory six-PR order.\n",
+        )
+        self.append(
+            "docs/engineering/09-ai-features.md",
+            "\nHistorical example only: Recommended PR sequence.\n",
+        )
+        result = self.run_validator()
+        self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+
+    def test_voc090_template_default_pr_count_is_required(self) -> None:
+        self.replace(
+            "specs/templates/change-package/change.yaml",
+            "implementation_pull_request_count: 1",
+            "implementation_pull_request_count: 2",
+        )
+        self.assert_failure("implementation_pull_request_count: 1")
 
     def test_classifier_accepts_r4_for_protected_policy(self) -> None:
         result = self.run_classifier("R4")

@@ -1,7 +1,7 @@
 ---
 id: DOC-12
 title: VocaNova MVP Implementation Plan
-version: 1.3
+version: 1.4
 document_type: implementation-plan
 status: approved
 owner: founder
@@ -75,6 +75,13 @@ criteria; this document is about _sequencing_ the build, not restating what "don
 `Milestone → Epic (<MILESTONE>-E<n>) → GitHub Issue (<MILESTONE>-I<n>) → Pull Request
 (PR-<MILESTONE>-<n>)`. One PR = one coherent architectural/product change; unrelated issues are never
 combined just to reduce PR count.
+
+The default delivery unit for one accepted outcome is one approved change package,
+one implementation pull request, and one minimum-sufficient task. Task IDs are
+traceability/evidence groupings, not pre-assigned PRs. A future plan may use
+multiple implementation PRs only when it records a concrete outcome/risk/authority/
+dependency/reviewability boundary plus the partial-state, rollback, and overhead
+comparison required by the active governance model.
 
 ## 3. Milestone roadmap
 
@@ -157,12 +164,16 @@ learners get an accurate completion state.
 
 **P3 — Sentence Practice and AI Feedback.** Objective: original-sentence practice with focused,
 accurate, encouraging AI feedback (domain/persistence, validation/orchestration, prompt + production
-provider, safety/moderation, API+frontend integration, evaluation/observability). **Mandatory
-six-PR order**: (1) AI domain and persistence, (2) validation and orchestration foundation,
-(3) prompt and production provider, (4) safety and moderation, (5) API and frontend integration,
-(6) evaluation and observability — the production-provider PR cannot be accepted until provider
-candidates and privacy settings are evaluated and recorded (see [09](../engineering/09-ai-features.md) §18, §21–22 for
-the substance). Every P3 PR requires independent specialist review;
+provider, safety/moderation, API+frontend integration, evaluation/observability). **Ordered
+implementation-component sequence inside the default coherent P3/AI pull request**:
+(1) AI domain and persistence, (2) validation and orchestration foundation,
+(3) prompt and production provider, (4) safety and moderation,
+(5) API and frontend integration, (6) evaluation and observability — the
+production-provider component cannot be accepted until provider candidates and privacy
+settings are evaluated and recorded (see [09](../engineering/09-ai-features.md) §18,
+§21–22 for the substance). A future adopted package may use multiple P3 PRs only
+when it records a concrete D03 boundary plus the required partial-state,
+integration/rollback, and overhead rationale. Every P3 PR requires independent specialist review;
 safety/privacy/injection/cross-user/cost
 failures block release. **Gate:** matches [09](../engineering/09-ai-features.md) §3–5 completion criteria plus:
 mock-provider CI is complete, staging provider evaluation passes, AI can be disabled without

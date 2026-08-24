@@ -25,6 +25,18 @@ may refine them but may not weaken governance or security.
 - Record the objective, approved requirement, risk, protected areas, acceptance
   evidence, validation, independent verification, approvals, and rollback impact in
   the pull request.
+- Select the largest safe coherent delivery unit that keeps backend, frontend,
+  contract, test, documentation, rollback, and evidence work for one approved
+  outcome and control boundary together. Default to one approved package, one
+  implementation pull request, and one minimum-sufficient task.
+- Task IDs are traceability and evidence groupings, not branch or pull-request
+  units. Split only with a written rationale naming the releasable or rollback-safe
+  boundary, material risk or action-authority boundary, hard dependency,
+  incompatible owner/reviewer need, or demonstrated reviewability limit, plus the
+  coordination, elapsed-time, token/context, repeated-check, exact-review, and
+  bookkeeping overhead tradeoff. Component count, line count, test layers,
+  documentation updates, and implementation convenience alone do not justify a
+  split.
 - Use the highest builder, path-classifier, verifier, specialist, or accountable
   decision-owner risk class.
 - Never self-approve or weaken a check, ownership rule, test, or risk class to make a

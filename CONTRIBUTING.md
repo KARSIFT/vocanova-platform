@@ -51,6 +51,15 @@ isolated branch or worktree and target `develop`; release pull requests promote
 `develop` to `main`. Working branches are normally squash-merged. Release promotions
 use an identifiable merge commit.
 
+For one approved user or business outcome, choose the largest safe coherent delivery
+unit across backend, frontend, contracts, tests, documentation, rollback, and
+evidence sharing the same control boundary. The default is one approved package, one
+implementation pull request, and one minimum-sufficient task. Task IDs are
+traceability/evidence groupings, not separate branch or PR quotas. Split only with a
+written rationale naming the boundary, partial-state coherence, integration order,
+rollback plan, and the tradeoff against coordination, elapsed time, token/context,
+repeated checks, exact-review cycles, and bookkeeping overhead.
+
 Meaningful changes require a linked approved requirement or decision, risk
 classification, applicable tests, independent verification, and a pull request.
 Follow the [autonomous development model](docs/governance/16-autonomous-development-operating-model.md)
