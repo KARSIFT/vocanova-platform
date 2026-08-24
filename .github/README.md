@@ -42,13 +42,14 @@ The four target workflows use explicit Bash semantics, read-only repository
 permissions, immutable action SHAs, non-persisted checkout credentials, pinned runner
 images, timeouts, cancellation, bounded failure artifacts, and deterministic local
 commands. Subsystem jobs do not hide one another's results, while stable aggregate
-checks provide durable branch-protection names. The shared cache cannot change
-correctness: frozen installation and every validation command still execute. The
-workflows do not call an AI model or write to GitHub. Requirements, human/agent
-work, independent review, and merge decisions are recorded through ordinary issues,
-branches, pull requests, and comments. GitHub Free does not technically enforce private-
-repository branch protection, so policy and evidence must not be described as a hosted
-enforcement capability that does not exist.
+checks provide durable check names. The shared cache cannot change correctness: frozen
+installation and every validation command still execute. The workflows do not call an
+AI model or write to GitHub. Requirements, human/agent work, independent review, and
+merge decisions are recorded through ordinary issues, branches, pull requests, and
+comments. The repository is public, current as observed at 2026-08-24, but public
+availability does not mean a ruleset, branch protection, security feature, or other
+hosted enforcement control is configured. See the [current point-in-time settings
+record](../docs/governance/repository-settings-current.yaml).
 
 Governance is role- and evidence-based across R0-R4. Every meaningful plan or
 implementation is built and independently reviewed by different human or AI roles, with

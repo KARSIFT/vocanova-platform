@@ -1,11 +1,14 @@
 # Vocanova
 
 Vocanova is an AI-powered platform for practical English learning. It is maintained
-by KARSIFT as a pnpm Cloudflare Workers monorepo. The repository is currently private on GitHub
-Free, but private visibility is not a data-security boundary. See
-`docs/governance/repository-settings.md` for the exact hosted posture: vulnerability
-alerts and pinned selected Actions are enabled, while branch rulesets and hosted
-secret-scanning/push-protection enforcement are not claimed.
+by KARSIFT as a pnpm Cloudflare Workers monorepo. The repository is public on GitHub,
+current as observed at 2026-08-24. See the [point-in-time repository settings
+record](docs/governance/repository-settings-current.yaml) and
+[`docs/governance/repository-settings.md`](docs/governance/repository-settings.md)
+for the exact hosted posture: selected Actions with SHA pinning and dependency/
+vulnerability alerts are enabled as observed, while rulesets and branch protection
+are absent and Dependabot security updates and GitHub-hosted secret scanning/push
+protection are disabled. Public availability does not mean a control is configured.
 
 Its canonical runtime roots are `apps/web`, `apps/api-worker`, and the shared packages under `packages/`.
 Real, shipped product surfaces exist today - `apps/web` has working Home, Progress, and
