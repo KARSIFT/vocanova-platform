@@ -24,51 +24,102 @@ source_endpoints:
 source_schema_surface:
   repository:
     endpoint: GET /repos/KARSIFT/vocanova-platform
-    fields:
+    raw_response_fields:
       - visibility
       - default_branch
       - allow_merge_commit
       - allow_squash_merge
       - allow_rebase_merge
       - delete_branch_on_merge
+      - security_and_analysis.dependabot_security_updates.status
+      - security_and_analysis.secret_scanning.status
+      - security_and_analysis.secret_scanning_push_protection.status
+      - security_and_analysis.secret_scanning_validity_checks.status
+    normalized_record_fields:
+      - visibility
+      - default_branch
+      - allow_merge_commit
+      - allow_squash_merge
+      - allow_rebase_merge
+      - delete_branch_on_merge
+      - dependabot_security_updates
+      - secret_scanning.enabled
+      - secret_scanning.push_protection
+      - secret_scanning.validity_checks
   actions_permissions:
     endpoint: GET /repos/KARSIFT/vocanova-platform/actions/permissions
-    fields:
+    raw_response_fields:
       - enabled
       - allowed_actions
       - sha_pinning_required
+    normalized_record_fields:
+      - actions.enabled
+      - actions.allowed_actions
+      - actions.sha_pinning_required
   workflow_permissions:
     endpoint: GET /repos/KARSIFT/vocanova-platform/actions/permissions/workflow
-    fields:
+    raw_response_fields:
       - default_workflow_permissions
       - can_approve_pull_request_reviews
+    normalized_record_fields:
+      - actions.default_workflow_permissions
+      - actions.can_approve_pull_request_reviews
   rulesets:
     endpoint: GET /repos/KARSIFT/vocanova-platform/rulesets
-    fields:
+    raw_response_semantics:
+      http_status: 200
+      response_shape: top-level-array
+    normalized_record_fields:
       - rulesets
   branch_protection:
-    endpoints:
-      - GET /repos/KARSIFT/vocanova-platform/branches/develop/protection
-      - GET /repos/KARSIFT/vocanova-platform/branches/main/protection
-    fields:
-      - develop
-      - main
-      - http_status
+    develop:
+      endpoint: GET /repos/KARSIFT/vocanova-platform/branches/develop/protection
+      raw_response_semantics:
+        http_status: 404
+        message: Branch not protected
+      normalized_record_fields:
+        - branch_protection.develop
+    main:
+      endpoint: GET /repos/KARSIFT/vocanova-platform/branches/main/protection
+      raw_response_semantics:
+        http_status: 404
+        message: Branch not protected
+      normalized_record_fields:
+        - branch_protection.main
   dependency_vulnerability_alerts:
     endpoint: GET /repos/KARSIFT/vocanova-platform/vulnerability-alerts
-    fields:
-      - enabled
-      - endpoint_status
+    raw_response_semantics:
+      http_status: 204
+      response_body: no-content
+    normalized_record_fields:
+      - dependency_vulnerability_alerts.enabled
+      - dependency_vulnerability_alerts.endpoint_status
   dependabot_security_updates:
-    endpoint: GET /repos/KARSIFT/vocanova-platform/automated-security-fixes
-    fields:
-      - status
+    raw_sources:
+      automated_security_fixes:
+        endpoint: GET /repos/KARSIFT/vocanova-platform/automated-security-fixes
+        http_status: 200
+        body_fields:
+          - enabled
+          - paused
+      repository_security_and_analysis:
+        endpoint: GET /repos/KARSIFT/vocanova-platform
+        field_paths:
+          - security_and_analysis.dependabot_security_updates.status
+    normalized_record_fields:
+      - dependabot_security_updates
   secret_scanning:
-    endpoint: GitHub repository security-settings API fields for secret scanning
-    fields:
-      - secret_scanning
-      - secret_scanning_push_protection
-      - secret_scanning_validity_checks
+    raw_sources:
+      repository_security_and_analysis:
+        endpoint: GET /repos/KARSIFT/vocanova-platform
+        field_paths:
+          - security_and_analysis.secret_scanning.status
+          - security_and_analysis.secret_scanning_push_protection.status
+          - security_and_analysis.secret_scanning_validity_checks.status
+    normalized_record_fields:
+      - secret_scanning.enabled
+      - secret_scanning.push_protection
+      - secret_scanning.validity_checks
 freshness:
   semantics: point-in-time-observation-not-live-state
   network_free_guard_scope: internal-consistency-only-not-live-freshness
