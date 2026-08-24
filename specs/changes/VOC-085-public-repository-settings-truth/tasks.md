@@ -6,7 +6,7 @@
 - Acceptance: `VOC-085-AC-00`
 - Tests: `VOC-085-TEST-00`
 - Evidence: `VOC-085-EV-00`
-- Status: planned after adoption
+- Status: complete-exact-SHA-429aee4c5b833c3f0ae2e870f11077fbd1e06cad-merged-through-PR-127-with-final-hosted-and-post-merge-evidence
 
 Add `docs/governance/repository-settings-current.yaml` containing the verified
 read-only values, `observed_at: 2026-08-24`, `as_of: 2026-08-24`, source/API endpoint
@@ -29,7 +29,7 @@ or production data.
 - Acceptance: `VOC-085-AC-01`, `VOC-085-AC-02`
 - Tests: `VOC-085-TEST-01`, `VOC-085-TEST-02`
 - Evidence: `VOC-085-EV-01`, `VOC-085-EV-02`
-- Status: planned after adoption
+- Status: complete-exact-SHA-efeb1d0b7f7e61138a2b705719a3d8e2389be342-merged-through-PR-128-with-preserved-general-and-specialist-FAILs
 
 Update the active README, `.github` README, repository-settings guide, Cloudflare
 delivery guide, and DOC-16 wording/metadata as applicable. Use “current as observed at
@@ -45,7 +45,7 @@ changes. Do not rewrite historical records or activate any desired setting.
 - Acceptance: `VOC-085-AC-03`
 - Tests: `VOC-085-TEST-03`, `VOC-085-TEST-04`
 - Evidence: `VOC-085-EV-03`
-- Status: planned after adoption
+- Status: complete-exact-SHA-47293d416a7a85ecbbbee0c8f0b03608ae4d17c2-merged-through-PR-129-with-preserved-superseded-FAILs
 
 Add a deterministic, network-free validator and narrow negative fixtures, wiring it
 into the existing foundation aggregate without workflow or authority expansion. It
@@ -63,12 +63,14 @@ background process is permitted.
 - Acceptance: `VOC-085-AC-04`
 - Tests: `VOC-085-TEST-05`, `VOC-085-TEST-06`
 - Evidence: `VOC-085-EV-04`
-- Status: planned after adoption; issue closure post-merge only
+- Status: candidate-local-validation-and-reverse-order-rollback-prepared-pending-fresh-exact-review-hosted-proof-merge-post-merge-checks-and-issue-closure
 
 Run proportional governance/risk/diff validation, exact-SHA independent general and
 repository-governance/settings-specialist review, applicable hosted checks, and a
 disposable reverse-order repository rollback rehearsal.
 After a normal merge into `develop` and passing post-merge checks, an accountable
-operator may close #119 with repository-only evidence. Keep VOC-085-HOLD-00 and all
-VOC-080 holds open and distinct. Do not mutate settings, deploy, promote `main`, or
-delete branches; normal isolated branches and governed PR merges remain allowed.
+operator may close #119 with the prepared repository-only wording in `t03-evidence.yaml`.
+Keep VOC-085-HOLD-00 and all VOC-080 holds open and distinct. Do not mutate settings,
+deploy, promote `main`, or delete branches; normal isolated branches and governed PR
+merges remain allowed. The exact rollback and validation record remains candidate-only
+until fresh review, hosted proof, merge, and post-merge checks.

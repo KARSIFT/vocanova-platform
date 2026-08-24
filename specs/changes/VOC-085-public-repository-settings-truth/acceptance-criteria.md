@@ -6,6 +6,7 @@
 - Tasks: `VOC-085-T00`
 - Tests: `VOC-085-TEST-00`
 - Evidence: `VOC-085-EV-00`
+- Result: complete-exact-SHA-429aee4c5b833c3f0ae2e870f11077fbd1e06cad-merged-through-PR-127
 
 A machine-readable `docs/governance/repository-settings-current.yaml` record contains
 the exact read-only public-repository,
@@ -26,6 +27,7 @@ distinction.
 - Tasks: `VOC-085-T01`
 - Tests: `VOC-085-TEST-01`
 - Evidence: `VOC-085-EV-01`
+- Result: complete-exact-SHA-efeb1d0b7f7e61138a2b705719a3d8e2389be342-merged-through-PR-128
 
 README, `.github/README.md`, repository-settings guidance, Cloudflare delivery guidance,
 and DOC-16 no longer describe private-plan limitations as the current repository state.
@@ -40,6 +42,7 @@ settings targets.
 - Tasks: `VOC-085-T01`
 - Tests: `VOC-085-TEST-01`, `VOC-085-TEST-02`
 - Evidence: `VOC-085-EV-02`
+- Result: complete-exact-SHA-efeb1d0b7f7e61138a2b705719a3d8e2389be342-merged-through-PR-128
 
 Rulesets, protected branches, Dependabot security updates, secret scanning/push
 protection, environment protections, and delivery activation are described as
@@ -55,6 +58,7 @@ package merge.
 - Tasks: `VOC-085-T02`
 - Tests: `VOC-085-TEST-03`, `VOC-085-TEST-04`
 - Evidence: `VOC-085-EV-03`
+- Result: complete-exact-SHA-47293d416a7a85ecbbbee0c8f0b03608ae4d17c2-merged-through-PR-129
 
 The network-free validator passes the reconciled repository and rejects scoped negative
 fixtures for stale private-current claims, historical/current conflation, held-control
@@ -69,12 +73,14 @@ reviews are both required.
 - Tasks: `VOC-085-T03`
 - Tests: `VOC-085-TEST-05`, `VOC-085-TEST-06`
 - Evidence: `VOC-085-EV-04`
+- Result: candidate-local-validation-and-reverse-order-rollback-prepared-pending-fresh-exact-review-hosted-proof-merge-and-post-merge-checks
 
-The final implementation receives exact-SHA independent PASS, applicable hosted checks,
+The final implementation must receive exact-SHA independent PASS, applicable hosted checks,
 and a repository-only reverse rollback rehearsal. No setting, environment, live system,
 secret, production data, deployment, `main` promotion, branch-protection/ruleset
 mutation, or branch deletion occurs. Normal isolated branches and governed pull
 request merges remain allowed. Issue
-#119 remains open until the final merge and passing post-merge checks, after which it may
-be closed with exact current-as-observed-at-2026-08-24 state and documentation evidence
-only. VOC-085-HOLD-00 remains held for future settings activation.
+#119 remains open until the final merge and passing post-merge checks. The prepared
+repository-only closure wording is in `t03-evidence.yaml`; it may be used only after
+that gate with exact current-as-observed-at-2026-08-24 state and documentation evidence.
+VOC-085-HOLD-00 remains held for future settings activation.
