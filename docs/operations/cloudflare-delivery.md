@@ -74,12 +74,14 @@ evidence matching the reviewed manifest. Production learner data remains governe
 credential.
 
 The repository is public, current as observed at 2026-08-24. The [point-in-time
-settings record](../governance/repository-settings-current.yaml) records that hosted
-environment approvals, secrets, and branch restrictions remain unconfigured or
-unverified; public availability does not mean those controls exist. The committed
-fail-closed state does not pretend those settings exist. Any future GitHub settings
-mutation remains held by `VOC-085-HOLD-00` and requires an immediate governed
-documentation-only follow-up.
+settings record](../governance/repository-settings-current.yaml) covers public
+visibility and absent branch restrictions; it does not inspect environments or
+secrets. The repository therefore makes no claim that hosted environment approvals,
+secrets, or branch restrictions are configured. Public availability does not mean
+those controls exist. The committed fail-closed state does not pretend those settings
+exist. Any future GitHub settings mutation remains held by `VOC-085-HOLD-00` and
+requires an immediate governed documentation-only follow-up; Cloudflare delivery
+activation remains separately held by the VOC-080 holds above.
 
 ## Ordered execution after future authorization
 

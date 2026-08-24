@@ -1463,7 +1463,7 @@ develop
 
 `main` represents the production-approved state.
 
-_Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.2
+_Historical design rule: the bullets in §16.1 are preserved from v1.0. DOC-16 v3.3
 now governs merge/release authority through risk evidence and explicitly assigned
 action-specific authority; no R0-R4 label creates founder approval by itself._
 
@@ -2818,7 +2818,8 @@ The transition is complete when:
 - Manual copying between chat topics and repository files has ended.
 
 _Historical completion criteria: current release and production authority is defined
-by DOC-16 v3.2, including VOC-082's distinct-actor clarification, and VOC-080's held Cloudflare program, not by the risk label or this
+by DOC-16 v3.3, including VOC-082's distinct-actor clarification, VOC-085's held
+settings boundary, and VOC-080's held Cloudflare program, not by the risk label or this
 preserved v1.0 checklist._
 
 ## 25.12 Reversibility
