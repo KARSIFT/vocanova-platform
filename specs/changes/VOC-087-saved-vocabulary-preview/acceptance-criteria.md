@@ -6,7 +6,8 @@
 - Task: `VOC-087-T00`
 - Tests: `VOC-087-TEST-00`, `TEST-01`
 - Evidence: `VOC-087-EV-00`
-- Result: pending
+- Result: complete in PR #138; evidence:
+  https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488
 
 Given `page.context().addCookies` sets
 `e2e_saved_words_fixture=truncated-page` for the configured `baseURL`, when the
@@ -24,7 +25,8 @@ displays `A preview of up to 10 recently saved words.`, and does not display
 - Task: `VOC-087-T00`
 - Tests: `VOC-087-TEST-00`, `TEST-02`
 - Evidence: `VOC-087-EV-01`
-- Result: pending
+- Result: complete in PR #138; evidence:
+  https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488
 
 Given the 10-item fixture has distinct, known words in a declared order, when Progress
 renders it, then all 10 words and definitions appear exactly once in the same order
@@ -36,7 +38,8 @@ inside the saved-vocabulary list. No subsequent cursor page is requested.
 - Task: `VOC-087-T00`
 - Tests: `VOC-087-TEST-03`, `TEST-04`
 - Evidence: `VOC-087-EV-02`
-- Result: pending
+- Result: complete in PR #138; evidence:
+  https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488
 
 Given the default empty fixture, Progress retains the existing empty-state message.
 For empty and non-empty states, section heading/list semantics remain valid and the
@@ -49,11 +52,14 @@ handling still redirects through the unchanged `/progress` return path.
 - Task: `VOC-087-T00`
 - Tests: `VOC-087-TEST-05`, `TEST-06`
 - Evidence: `VOC-087-EV-03`
-- Result: pending
+- Result: complete in PR #138; evidence:
+  https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488
 
 The final diff changes only the authorized Progress presentation and existing
 Playwright fixture/spec; `api-server.ts` and `playwright.config.ts` remain unchanged.
 It introduces no API/schema/dependency/workflow/live effect, passes proportional local
 and hosted checks, receives different-actor exact-SHA review, and can be reverted to its
-pre-implementation tree. Issue #132 remains open until the implementation merges into
-`develop` and applicable post-merge checks pass.
+pre-implementation tree. Issue #132 closed at `2026-08-24T05:32:23Z` after PR #138
+merged into `develop` as `ea357ce506f42fe74c7e88f670db9ce4f848d80e` and applicable
+post-merge checks passed:
+https://github.com/KARSIFT/vocanova-platform/issues/132#issuecomment-5391130633.

@@ -10,10 +10,13 @@ cursor-paginated and has no total count; and the page renders `savedWords.length
 
 Issue #132 authorized planning only. Exact candidate
 `eea8d41447a9dc88125df546d62bd851bd4ad496` has since received independent PASS and the
-accountable adoption decision. Implementation authorization is recorded by the adopted
-package but becomes effective only after the bookkeeping revision receives its own
-exact-SHA review and hosted evidence, PR #137 normally merges into `develop`, and
-applicable post-merge checks pass.
+accountable adoption decision. The final bookkeeping revision received exact-SHA
+review and hosted evidence, PR #137 merged into `develop` as
+`61894b46705d0383028e2829903815477ea82939`, and applicable post-merge checks passed.
+The bounded implementation completed through PR #138 at head
+`14e146deeab182b6e663986a113b4c25d102a7dc`, merged as
+`ea357ce506f42fe74c7e88f670db9ce4f848d80e`, and issue #132 closed after post-merge
+evidence.
 
 ## Scope and non-goals
 
@@ -39,7 +42,8 @@ Out of scope:
   component/test framework.
 - Authentication, authorization, analytics, telemetry, deployment, Cloudflare,
   repository settings, secrets, production data, live access, `main` promotion, or
-  issue closure before implementation merge and post-merge checks.
+  issue closure before implementation merge and post-merge checks. Issue #132 closed
+  only after the completed PR #138 merge and applicable post-merge proof.
 
 ## Requirements and decisions
 
@@ -73,8 +77,9 @@ Out of scope:
   rows in order, and the default empty state.
 - `VOC-087-D07` — One implementation PR owns code, tests, validation, exact-revision
   review, hosted evidence, rollback evidence, merge, and its final PR evidence comment.
-  Issue #132 closes only after that merge and applicable post-merge checks pass; no
-  ceremony-only follow-up code or package-evidence PR is required.
+  PR #138 carried that implementation and issue #132 closed only after that merge and
+  applicable post-merge checks passed; no ceremony-only follow-up code or
+  package-evidence PR was required.
 - `VOC-087-D08` — The fixture test must establish the whole SSR selection chain without
   changing `api-server.ts` or `playwright.config.ts`: use
   `page.context().addCookies` with the exact cookie name/value and `url: baseURL` before

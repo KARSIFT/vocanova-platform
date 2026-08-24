@@ -3,12 +3,12 @@
 ## Repository release boundary
 
 There is no deployment or live product release in this package. Adoption is recorded,
-but implementation authority becomes effective only after the bookkeeping revision's
+and implementation authority became effective after the bookkeeping revision's
 exact-SHA review and hosted checks, normal PR #137 merge, and applicable post-merge
-checks. The later one implementation PR may merge normally into `develop` only after
+checks. The one implementation PR, PR #138, merged normally into `develop` only after
 its own exact-revision review and required hosted checks. `main` promotion, Cloudflare
 delivery, repository/settings mutation, staging or production access, secrets,
-production data, and live verification are prohibited.
+production data, and live verification were prohibited and not performed.
 
 `automatic_merge_allowed: true` is an examined package policy record under the current
 drafting rule; it creates no executable merge, bypass, or external authority. A separate
@@ -16,7 +16,7 @@ merge actor must still confirm normal eligibility.
 
 ## Preconditions and evidence
 
-Before implementation merge, record on the same PR:
+The implementation PR recorded:
 
 - exact base and final head SHAs plus the bounded file inventory;
 - immutable plan-review history, including the initial FAIL for candidate
@@ -26,10 +26,11 @@ Before implementation merge, record on the same PR:
 - different-actor exact-SHA PASS with all blockers resolved; and
 - disposable repository-only rollback rehearsal and tree equality.
 
-After merge, attach the merge SHA and applicable post-merge CI/Governance/Security
-results to the implementation PR. Quality is pull-request-only at drafting time, so its
-exact final PR run is the browser qualification; do not claim a post-merge Quality run
-unless the workflow is changed by separately authorized work.
+After merge, PR #138 recorded merge SHA `ea357ce506f42fe74c7e88f670db9ce4f848d80e`
+and applicable post-merge CI/Governance/Security results at
+https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488. Quality
+was pull-request-only for that path, so the exact final PR run remained the browser
+qualification; no post-merge Quality run is claimed.
 
 ## Rollback
 
@@ -42,9 +43,10 @@ deployment, cache purge, or live-system action applies.
 
 ## Closure
 
-Plan adoption does not close issue #132. Implementation merge alone also does not close
-it while applicable post-merge checks are pending. After those checks pass, an
-accountable operator may close the issue with links to the implementation PR, exact
-review, hosted evidence, merge SHA, and post-merge results. The final evidence belongs
-on the same implementation PR/issue record; no ceremony-only second repository PR is
-required.
+Plan adoption did not close issue #132. Implementation merge alone also did not close
+it while applicable post-merge checks were pending. After those checks passed, issue
+#132 closed at `2026-08-24T05:32:23Z` with links to the implementation PR, exact
+review, hosted evidence, merge SHA, and post-merge results:
+https://github.com/KARSIFT/vocanova-platform/issues/132#issuecomment-5391130633. The
+final evidence remains on the same implementation PR/issue record; no ceremony-only
+second repository PR was required.

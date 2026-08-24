@@ -26,7 +26,7 @@ approved_candidate_sha: eea8d41447a9dc88125df546d62bd851bd4ad496
 approval_status: adopted
 implementation_authorized: true
 implementation_authority_status: >-
-  authorized-by-adoption-decision-but-effective-only-after-pr-137-normal-merge-and-applicable-post-merge-checks
+  authorized-by-adoption-decision-and-effective-after-pr-137-merge-61894b46705d0383028e2829903815477ea82939-and-post-merge-evidence-5390981903
 automatic_merge_allowed: true
 production_impact: none
 rollback_required: true
@@ -86,12 +86,13 @@ dependencies:
       Progress calls listSavedWords with limit 10; the API client response contains
       items and optional nextCursor but no total; the repository orders newest first.
   - id: VOC-087-DEP-01
-    status: adoption-approved-effectiveness-pending
+    status: satisfied
     evidence: >-
-      Exact candidate review and the adoption decision are complete. The bookkeeping
-      revision still needs its own exact-SHA review and hosted evidence; authority
-      becomes effective only after PR #137 normally merges and applicable post-merge
-      checks pass.
+      Exact candidate review, adoption decision, final bookkeeping review, hosted
+      final-head evidence, normal PR #137 merge
+      61894b46705d0383028e2829903815477ea82939, and post-merge checks are complete.
+      Post-merge evidence is recorded at
+      https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903.
 
 affected_areas:
   - apps/web/src/app/(app)/progress/page.tsx
@@ -101,11 +102,17 @@ protected_areas: []
 
 implementation:
   authorized: true
-  authority_effective: false
-  status: authorized-pending-bookkeeping-review-hosted-normal-merge-and-postmerge
+  authority_effective: true
+  status: completed-through-pr-138
   required: true
   target_branch: develop
   pull_request_count: 1
+  pull_request: 138
+  final_head: 14e146deeab182b6e663986a113b4c25d102a7dc
+  final_merge_commit: ea357ce506f42fe74c7e88f670db9ce4f848d80e
+  review_evidence: https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391078183
+  final_pre_merge_evidence: https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391088079
+  post_merge_evidence: https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488
   task: VOC-087-T00
 
 release:
@@ -114,11 +121,15 @@ release:
   deployment: prohibited
   migration_required: false
   rollback_required: true
-  issue_closure: after-implementation-merge-and-applicable-post-merge-checks-only
+  issue_closure: closed-after-pr-138-merge-and-applicable-post-merge-checks
+  issue: 132
+  issue_closed_at: 2026-08-24T05:32:23Z
+  issue_closure_evidence: https://github.com/KARSIFT/vocanova-platform/issues/132#issuecomment-5391130633
 
-repository_adoption_status: adopted-pending-pr-137-normal-merge-and-applicable-post-merge-checks
+repository_adoption_status: adopted-effective-after-pr-137-merge-and-post-merge-checks
 adoption_pr: 137
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390882964
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/137#issuecomment-5390981903
 
 ehr: not-triggered
 action_specific_authority:
@@ -134,8 +145,4 @@ external_effects:
   live_systems: prohibited
   production_data: prohibited
 
-blocking_reasons:
-  - exact-adoption-bookkeeping-revision-review-pending
-  - final-hosted-checks-on-adoption-bookkeeping-revision-pending
-  - pr-137-normal-merge-pending
-  - applicable-post-merge-checks-pending
+blocking_reasons: []

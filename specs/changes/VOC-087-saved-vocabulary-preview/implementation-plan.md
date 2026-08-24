@@ -4,18 +4,19 @@
 
 Exact candidate `eea8d41447a9dc88125df546d62bd851bd4ad496` received different-actor
 PASS with zero blockers and the accountable adoption decision. `change.yaml` now records
-`status: adopted` and `implementation_authorized: true`. Do not implement yet: this
-authorization becomes effective only after the adoption-bookkeeping revision receives
-its own different-actor exact-SHA review and final hosted evidence, PR #137 normally
-merges, and applicable post-merge checks pass. Candidate review never silently
-transfers to this later bookkeeping SHA, whose future SHA/review/merge/post-merge facts
-must not be invented inside the candidate commit.
+`status: adopted` and `implementation_authorized: true`. That authorization became
+effective after the adoption-bookkeeping revision received its own different-actor
+exact-SHA review and final hosted evidence, PR #137 merged as
+`61894b46705d0383028e2829903815477ea82939`, and applicable post-merge checks passed.
+Candidate review did not silently transfer to the later bookkeeping SHA; the later
+SHA/review/merge/post-merge facts were recorded only after they existed. The bounded
+implementation then executed through PR #138.
 
 No protected area is in scope. Re-read the target files and classify concurrent work
 before editing. Any material conflict or need for an API/schema/auth/dependency/workflow
 change stops implementation and returns to planning.
 
-## One-PR implementation sequence
+## One-PR implementation sequence executed by PR #138
 
 1. From the adopted `develop` revision, create one isolated short-lived implementation
    branch/worktree for `VOC-087-T00`.
@@ -46,15 +47,17 @@ change stops implementation and returns to planning.
    keyboard, and non-color-only coverage. Bind the unchanged one-page request boundary
    through exact-diff review because browser request events cannot see the SSR fetch.
 5. Format and run the focused test, full `pnpm validate`, governance checks, and diff
-   checks in `test-plan.md`. Record exact commands and honest results in the PR.
+   checks in `test-plan.md`. PR #138 recorded exact commands and honest results.
 6. Rehearse a repository-only revert in a disposable worktree and prove the authorized
-   paths match the pre-implementation base. Remove the disposable worktree.
+   paths match the pre-implementation base. PR #138 recorded the rehearsal evidence.
 7. Obtain a different-actor review of the exact final SHA and passing hosted CI,
-   Governance, Security, and Quality evidence. Resolve every blocker with a new SHA and
-   fresh review/checks. A separate actor may merge normally into `develop`.
+   Governance, Security, and Quality evidence. PR #138 received exact-SHA PASS for
+   head `14e146deeab182b6e663986a113b4c25d102a7dc`.
 8. Attach final merge and applicable post-merge evidence to the same implementation PR.
-   Only then may an accountable operator close issue #132 with links to the merged PR
-   and post-merge evidence. No second code or evidence-only PR is planned.
+   PR #138 merged as `ea357ce506f42fe74c7e88f670db9ce4f848d80e`; post-merge evidence
+   was recorded at
+   https://github.com/KARSIFT/vocanova-platform/pull/138#issuecomment-5391130488, and
+   issue #132 closed after that proof. No second code or evidence-only PR was needed.
 
 ## Compatibility and rollback
 
