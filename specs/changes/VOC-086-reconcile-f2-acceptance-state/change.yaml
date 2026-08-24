@@ -1,0 +1,151 @@
+schema_version: 1
+
+id: VOC-086
+slug: reconcile-f2-acceptance-state
+title: Reconcile repository/local F2 acceptance state
+
+type: canonical-milestone-evidence-reconciliation
+status: adopted
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because active DOC-12 milestone truth and machine-checked completion evidence can
+  enable or block downstream planning. The implementation is repository-only, but a
+  false F2 completion or later-milestone claim could bypass the approved dependency order.
+canonical_path: specs/changes/VOC-086-reconcile-f2-acceptance-state
+base_branch: develop
+base_sha: 4a5f05672f5417e7a23fdf4e4d31fe9a4ce1f51d
+target_branch: develop
+approved_candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/131
+requirement_approval_status: exact-plan-review-pass-and-decision-owner-approved
+
+authority_model: voc-079-approval-neutral-active
+owners:
+  decision: accountable-decision-owner-after-independent-plan-review
+  package_preparation: plan-author-role
+  implementation: different-builder-after-adoption
+  independent_verification: different-non-author-general-and-specialist-reviewers
+  merge: different-non-author-merge-actor
+
+approvals:
+  requirement_direction:
+    status: recorded-for-planning
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/131
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390095408
+  package_specialist_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390105601
+  adoption_decision:
+    status: approved-for-adoption
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390109890
+  candidate_hosted_evidence:
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853486
+    governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853397
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853459
+    quality: not-applicable-plan-only-path-filter
+
+approval_status: adopted
+implementation_authorized: true
+automatic_merge_allowed: true
+production_impact: none-repository-documentation-and-validation-only
+rollback_required: true
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    evidence: specification.md decisions and issue #131
+  impact_assessment:
+    required: true
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    evidence: implementation-plan.md and release-plan.md
+  deterministic_evidence:
+    required: true
+    evidence: test-plan.md and exact hosted results
+  specialist_evidence:
+    required: true
+    role: canonical-documentation-governance-and-milestone-evidence-specialist
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390105601
+
+action_specific_holds: []
+inherited_holds:
+  - id: VOC-080-HOLD-00
+    status: held
+    action: create-or-mutate-cloudflare-staging-resources-and-secrets
+  - id: VOC-080-HOLD-01
+    status: held
+    action: deploy-or-route-production-traffic-or-apply-production-d1-migrations
+  - id: VOC-080-HOLD-02
+    status: held
+    action: access-export-transform-or-delete-production-learner-data
+
+scope_boundary:
+  repository_documentation: allowed-after-adoption
+  deterministic_repository_validation: allowed-after-adoption
+  f3_or_later_milestone_acceptance: prohibited
+  repository_or_environment_settings_mutation: prohibited
+  deployment_or_cloudflare_mutation: prohibited
+  dns_server_sentry_or_ssh: prohibited
+  secrets_or_production_data: prohibited
+  main_promotion: prohibited
+  branch_deletion: prohibited
+  issue_131_closure: post-merge-and-post-merge-checks-only
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-086-DEP-00
+    status: satisfied-exact-candidate-review-and-adoption-decision-pending-plan-pr-merge
+    description: >-
+      The exact plan candidate needs different-actor general and R4 specialist PASS
+      evidence plus an accountable adoption decision before implementation.
+  - id: VOC-086-DEP-01
+    status: satisfied-by-voc-081-and-voc-084-exact-evidence
+    description: >-
+      PR #108 exact head a8694932671ad9c44fd2a97c128b14e6089e5faf merged as
+      36d526bdec83e28b17aa30a6814d42b92f058ec1; the VOC-084 inventory preserves
+      its independent review, hosted, rollback, and post-merge evidence.
+  - id: VOC-086-DEP-02
+    status: pending-final-task-merge-and-post-merge-checks
+    description: >-
+      Issue #131 remains open until the final implementation task merges into develop
+      and applicable post-merge checks pass.
+
+implementation:
+  authorized: true
+  required: true
+  status: authorized-upon-plan-pr-133-merge
+  tasks:
+    - VOC-086-T00
+    - VOC-086-T01
+    - VOC-086-T02
+
+release:
+  required: false
+  mode: repository-only
+  deployment: prohibited
+  production_impact: none
+  rollback_required: true
+
+ehr: not-triggered
+blocking_reasons:
+  - plan-pr-merge-pending
+repository_adoption_status: adopted-candidate-pending-pr-133-merge
+adoption_pr: 133
