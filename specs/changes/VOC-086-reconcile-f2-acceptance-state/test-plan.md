@@ -37,4 +37,7 @@ and `git diff --check`. Record unavailable checks honestly.
 
 Obtain different-actor exact-SHA general and R4 specialist verdicts. Rehearse each task
 in reverse order and the final candidate revert in disposable worktrees; compare exact
-trees and remove the worktrees. Record hosted and post-merge results.
+trees and remove the worktrees. Record hosted and post-merge results. For T02, the
+candidate records only the immutable plan/T00/T01 evidence and the required closure
+contract; its own final exact-review, hosted, merge, post-merge, and issue-closure proof
+must be attached to expected PR #136, or the final T02 PR if its number differs.

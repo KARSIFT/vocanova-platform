@@ -43,12 +43,28 @@ approvals:
     status: approved-for-adoption
     candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
     evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390109890
+  package_bookkeeping_verification:
+    status: pass-exact-revision-zero-blockers
+    bookkeeping_sha: 63398689259db8728e3fcf5340e028d76ceb0284
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390118428
   candidate_hosted_evidence:
     candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
     ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853486
     governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853397
     security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853459
     quality: not-applicable-plan-only-path-filter
+  package_bookkeeping_hosted_evidence:
+    bookkeeping_sha: 63398689259db8728e3fcf5340e028d76ceb0284
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684108827
+    governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684267268
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684108902
+    quality: not-applicable-plan-only-path-filter
+  package_post_merge_evidence:
+    merge_commit: b44c41256153cfefc40739b9e7eeb5dff6eb72ad
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684416277
+    governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684416250
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684416247
+    quality: not-applicable-push-path-filter
 
 approval_status: adopted
 implementation_authorized: true
@@ -109,6 +125,7 @@ artifacts:
   tasks: tasks.md
   test_plan: test-plan.md
   release_plan: release-plan.md
+  final_evidence: final-evidence.md
 
 dependencies:
   - id: VOC-086-DEP-00
@@ -125,10 +142,13 @@ dependencies:
       36d526bdec83e28b17aa30a6814d42b92f058ec1; the VOC-084 inventory preserves
       its independent review, hosted, rollback, and post-merge evidence.
   - id: VOC-086-DEP-02
-    status: pending-final-task-merge-and-post-merge-checks
+    status: pending-final-t02-pr-review-hosted-proof-merge-post-merge-checks-and-issue-131-closure
     description: >-
       Issue #131 remains open until the final implementation task merges into develop
-      and applicable post-merge checks pass.
+      and applicable post-merge checks pass. The T02 candidate cannot contain its own
+      final SHA, exact-review URLs, hosted workflow URLs, merge SHA, post-merge runs, or
+      issue-closure URL; those facts belong to expected PR #136, or the final T02 PR if
+      its number differs.
 
 implementation:
   authorized: true
@@ -136,30 +156,97 @@ implementation:
   status: >-
     T00 complete at exact head 5f19974b44761e05a899f6ea50178eedd891d663, merged through
     PR #134 as b0ce5b84c1530e97762c0235a094651028690d3f, with distinct general and R4
-    specialist review, hosted proof, and post-merge evidence. T01 is a candidate pending
-    fresh exact-revision general/specialist review, hosted proof, and normal merge; T02
-    remains blocked on T01.
+    specialist review, hosted proof, and post-merge evidence. T01 complete at exact head
+    4920ac170ca1c527b00dc6e2061b86ef236dc95d, merged through PR #135 as
+    568d4491c59d3393b2b68ce91a42b2554d9eb9c6, with distinct final general and R4
+    specialist review, hosted proof, preserved superseded failure history, and
+    post-merge evidence. T02 is the final candidate pending its own exact-review,
+    hosted, merge, post-merge, and issue-closure evidence on expected PR #136 or the
+    final T02 PR if its number differs.
   tasks:
     - VOC-086-T00
     - VOC-086-T01
     - VOC-086-T02
   evidence:
+    - task: VOC-086-plan
+      candidate_sha: 6ab1e87c16312e1c793a47935aabd7721649df55
+      bookkeeping_sha: 63398689259db8728e3fcf5340e028d76ceb0284
+      pull_request: https://github.com/KARSIFT/vocanova-platform/pull/133
+      merge_commit: b44c41256153cfefc40739b9e7eeb5dff6eb72ad
+      review:
+        general: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390095408
+        r4_specialist: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390105601
+        adoption_decision: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390109890
+        bookkeeping: https://github.com/KARSIFT/vocanova-platform/pull/133#issuecomment-5390118428
+      hosted:
+        candidate_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853486
+        candidate_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853397
+        candidate_security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32683853459
+        bookkeeping_ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684108827
+        bookkeeping_governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684267268
+        bookkeeping_security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684108902
+        quality: not-applicable-plan-only-path-filter
+      post_merge:
+        ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684416277
+        governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684416250
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32684416247
+        quality: not-applicable-push-path-filter
     - task: VOC-086-T00
       implementation_head: 5f19974b44761e05a899f6ea50178eedd891d663
       pull_request: https://github.com/KARSIFT/vocanova-platform/pull/134
       merge_commit: b0ce5b84c1530e97762c0235a094651028690d3f
+      merge_tree: 5d188679a78cbba549b6da4015466200a2bc064e
       review:
         general: https://github.com/KARSIFT/vocanova-platform/pull/134#issuecomment-5390234117
         r4_specialist: https://github.com/KARSIFT/vocanova-platform/pull/134#issuecomment-5390232333
+        final_evidence: https://github.com/KARSIFT/vocanova-platform/pull/134#issuecomment-5390245126
+        record: https://github.com/KARSIFT/vocanova-platform/pull/134#issuecomment-5390274057
       hosted:
         ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685114495
         governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685353755
         security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685114520
+        quality: not-applicable-path-filter
       post_merge:
         ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685549441
         governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685549494
         security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32685549466
         quality: not-applicable-push-path-filter
+    - task: VOC-086-T01
+      implementation_head: 4920ac170ca1c527b00dc6e2061b86ef236dc95d
+      pull_request: https://github.com/KARSIFT/vocanova-platform/pull/135
+      merge_commit: 568d4491c59d3393b2b68ce91a42b2554d9eb9c6
+      merge_tree: c8ed5edde73b6106cd0ed3f0217ae164a5dd4d5c
+      review:
+        superseded_specialist_failures:
+          - sha: 23445f5bbe7b0b8bc32f90d8ad667ec872859910
+            evidence: https://github.com/KARSIFT/vocanova-platform/pull/135#issuecomment-5390397309
+          - sha: 6631ab2339404140951107bbfd8a03e6cf46cd63
+            evidence: https://github.com/KARSIFT/vocanova-platform/pull/135#issuecomment-5390480701
+        governance_eligibility_formatting_history:
+          status: >-
+            blocked-normalized-eligibility-until-original-reviewer-added-canonical-verdict-pass
+          run: https://github.com/KARSIFT/vocanova-platform/actions/runs/32688029316
+          note: jobs-green-before-canonical-verdict-formatting-was-normalized
+        general: https://github.com/KARSIFT/vocanova-platform/pull/135#issuecomment-5390508745
+        r4_specialist: https://github.com/KARSIFT/vocanova-platform/pull/135#issuecomment-5390510017
+        final_evidence: https://github.com/KARSIFT/vocanova-platform/pull/135#issuecomment-5390535565
+        record: https://github.com/KARSIFT/vocanova-platform/pull/135#issuecomment-5390555429
+      hosted:
+        ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32687904146
+        governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32688193055
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32687904177
+        quality: not-applicable-path-filter
+      post_merge:
+        ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32688320330
+        governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32688320496
+        security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32688320303
+        quality: not-applicable-push-path-filter
+    - task: VOC-086-T02
+      status: final-candidate-pending-own-review-hosted-merge-postmerge-and-issue-closure
+      evidence_boundary: >-
+        The T02 candidate commit cannot contain its own final SHA, exact-review URLs,
+        hosted workflow URLs, merge SHA, post-merge runs, or issue-closure URL. Those
+        facts belong to expected PR #136, or the final T02 PR if its number differs.
 
 release:
   required: false
@@ -170,12 +257,12 @@ release:
 
 ehr: not-triggered
 blocking_reasons:
-  - T01-exact-review-r4-specialist-hosted-proof-and-merge-pending
+  - T02-own-exact-review-r4-specialist-hosted-proof-normal-merge-postmerge-checks-and-issue-131-closure-pending
 repository_adoption_status: adopted-on-pr-133-merge
 adoption_pr: 133
 repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/133
 implementation_authority_status: active-after-pr-133-merge-b44c41256153cfefc40739b9e7eeb5dff6eb72ad
 post_adoption_task_gates:
   - T00-complete-on-PR-134-merge-b0ce5b84c1530e97762c0235a094651028690d3f
-  - T01-candidate-on-b0ce5b84c1530e97762c0235a094651028690d3f-pending-exact-review-r4-specialist-hosted-proof-and-merge
-  - T02-blocked-on-T01-merge
+  - T01-complete-on-PR-135-merge-568d4491c59d3393b2b68ce91a42b2554d9eb9c6
+  - T02-final-candidate-pending-own-exact-review-r4-specialist-hosted-proof-normal-merge-postmerge-checks-and-issue-131-closure
