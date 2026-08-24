@@ -16,6 +16,11 @@ additional `develop`-to-`main` pull request is a mandatory release/promotion bou
 not an extra implementation task. Remote deletion uses a fresh exact manifest attached
 to canonical GitHub evidence. Local cleanup fails closed for dirty or unique work.
 
+All current-setting dates and timestamps come from the actual execution-time UTC API
+evidence. The operator request occurred on 2026-08-25 in Asia/Tehran while its GitHub
+record is dated 2026-08-24 UTC; the package records both and does not future-date the
+canonical observation.
+
 The one-field settings mutation is held by `VOC-085-HOLD-00` until the accountable
 repository owner/operator's exact action direction, adopted plan, timestamped pre-state,
 payload, rollback owner, immediate follow-up, and post-state read-back are all recorded.

@@ -13,9 +13,12 @@ accountable adoption decision.
 At drafting, `origin/develop` is
 `3c3547bac9697185b52414adcb2b31cb16afd9ca`, `origin/main` is
 `99ebf9e8998783e221b97bdceee369f18781b5be`, and the histories diverge by 22
-main-only and 170 develop-only commits. There are no open pull requests or issues.
-GitHub reports 54 remote branches and `delete_branch_on_merge: false`; 52 branches are
-non-permanent and were mapped by the planning audit to merged pull requests.
+main-only and 170 develop-only commits. The initial read-only audit found no open pull
+requests or issues; issue #151 and this plan PR are the expected governed records now
+open for this outcome. Before the plan branch existed, GitHub reported 54 remote
+branches and `delete_branch_on_merge: false`; 52 branches were non-permanent and were
+mapped by the planning audit to merged pull requests. The plan branch is an additional
+active non-permanent ref and is not a cleanup target while its PR remains open.
 
 Locally there are 56 branches and 55 worktrees. Most auxiliary worktrees are clean,
 but `/tmp/vocanova-voc090-t00` has 19 staged tracked changes. The local-only
@@ -36,9 +39,11 @@ but `/tmp/vocanova-voc090-t00` has 19 staged tracked changes. The local-only
 - `VOC-092-D02` — Freeze the implementation base after the setting read-back and
   update the declared README, `.github` guide, DOC-16 cross-reference, repository
   settings guide/current YAML, Cloudflare-delivery cross-reference, and the existing
-  VOC-085 truthfulness guard/tests with a truthful 2026-08-25 observation, exact
-  mutation evidence boundary, and retained staleness semantics. Historical snapshots
-  remain immutable; no workflow or eligibility/classifier behavior changes.
+  VOC-085 truthfulness guard/tests with the truthful execution-time UTC observation,
+  exact mutation evidence boundary, and retained staleness semantics. Do not preselect
+  the observation date from the operator's timezone; bind it to the actual GitHub API
+  pre/post-state evidence. Historical snapshots remain immutable; no workflow or
+  eligibility/classifier behavior changes.
 - `VOC-092-D03` — The implementation PR into `develop` must receive applicable local
   and hosted checks plus different-actor exact-SHA general/R4 and repository-operations
   specialist review. A non-author actor merges only after real eligibility evidence.

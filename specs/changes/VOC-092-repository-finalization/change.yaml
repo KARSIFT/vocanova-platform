@@ -79,10 +79,12 @@ implementation:
 action_specific_authority:
   required: true
   source: >-
-    Repository owner/operator @m-e-h-r-d-a-a-d directed completion of promotion and
-    stale-branch cleanup, canonicalized as the requirement source in issue #151. The
+    Repository owner/operator @m-e-h-r-d-a-a-d directly instructed completion of
+    promotion and stale-branch cleanup in the operator session on 2026-08-25
+    Asia/Tehran (2026-08-24 UTC GitHub record). Issue #151 canonicalizes that direction
+    for repository planning/evidence but does not itself create action authority. The
     exact plan adoption decision must explicitly bind each action below; package review
-    and R4 classification do not replace this separate operator authority.
+    and R4 classification do not replace the direct operator authority.
   actions:
     - id: VOC-092-AUTH-SETTINGS-00
       action: PATCH repository delete_branch_on_merge from false to true

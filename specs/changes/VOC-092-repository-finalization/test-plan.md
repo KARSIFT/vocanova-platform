@@ -14,8 +14,10 @@
 
 - Covers: `VOC-092-AC-01`
 - Procedure: prove every `VOC-085-HOLD-00` field, capture timestamped GET pre-state,
-  apply the exact one-field PATCH, capture GET post-state, parse the YAML record, run installed settings truthfulness/foundation
-  tests, and compare every living claim. Negative-check a stale `false` claim and a
+  apply the exact one-field PATCH, capture GET post-state, derive the canonical
+  observation date/timestamp from that UTC evidence, parse the YAML record, run
+  installed settings truthfulness/foundation tests, and compare every living claim.
+  Negative-check a stale `false` claim, a future/local-time-derived observation, and a
   mutation claim without evidence.
 - Expected: live and canonical current values are `true`, rollback is exact, historical
   snapshots remain unchanged, and inconsistent fixtures fail.

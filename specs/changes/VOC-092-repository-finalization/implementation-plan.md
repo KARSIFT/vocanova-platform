@@ -23,9 +23,10 @@ share one task/evidence record; no component split is permitted.
    `delete_branch_on_merge` to `true`, read it back, and retain the inverse payload.
 3. From the adopted `develop` revision in one isolated implementation worktree, update
    every declared living settings surface and the existing VOC-085 truthfulness guard
-   and tests with the fresh date, source, value, mutation evidence boundary, staleness
-   rule, and specialist-review status. Do not rewrite immutable VOC-080 historical
-   snapshots or change workflows/eligibility/classification behavior.
+   and tests with the actual execution-time UTC date/timestamp, source, value, mutation
+   evidence boundary, staleness rule, and specialist-review status. Do not derive the
+   canonical date from the operator's local timezone, rewrite immutable VOC-080
+   historical snapshots, or change workflows/eligibility/classification behavior.
 4. Run YAML parsing/foundation settings tests where installed, governance validation,
    changed-path classification, formatting, diff whitespace, and exact path checks.
    Rehearse the docs rollback in a disposable worktree.
@@ -44,8 +45,9 @@ share one task/evidence record; no component split is permitted.
    upstream/PR state, unique-commit result, and recovery SHA. Remove only clean,
    stopped, disposable worktrees normally, then remove corresponding merged branches
    with non-force `git branch -d`. Preserve every dirty/unique exception.
-9. Enumerate every remote branch and PR relationship fresh after local cleanup. Attach the exact cleanup
-   manifest to canonical GitHub evidence before deletion. Exclude `main`, `develop`,
+9. Enumerate every remote branch and PR relationship fresh after local cleanup. Attach
+   the exact cleanup manifest to canonical GitHub evidence before deletion. Exclude
+   `main`, `develop`,
    any protected/default/worktree-attached/open-PR/ambiguous/unrecoverable ref, and then
    delete each authorized ref by its exact validated name. A non-ancestor squash-merge
    candidate requires exact merged-PR evidence; ancestry is not assumed. Read back the
