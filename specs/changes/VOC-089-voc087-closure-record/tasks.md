@@ -7,7 +7,7 @@
 - Tests: `VOC-089-TEST-00` through `VOC-089-TEST-04`
 - Evidence: `VOC-089-EV-00` through `VOC-089-EV-04`
 - Risk: R3
-- Status: draft-pending-adoption
+- Status: adopted-authorized; effective only after bookkeeping revision review/hosted evidence, PR #141 normal merge, and applicable post-merge checks
 
 In one implementation PR after this package is adopted, update only the active stale
 VOC-087 package-record wording identified by `implementation-plan.md`. Record exact

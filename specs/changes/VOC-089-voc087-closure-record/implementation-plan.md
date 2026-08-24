@@ -1,8 +1,13 @@
 # VOC-089 - Implementation Plan
 
-This draft does not authorize implementation. After exact-revision plan review,
-adoption bookkeeping, normal plan PR merge, and applicable post-merge checks, a
-different builder may implement `VOC-089-T00` in one repository-only PR.
+Exact candidate `72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8` received different-actor
+PASS with zero blockers and the accountable adoption decision. `change.yaml` now
+records `status: adopted` and `implementation_authorized: true`. Do not implement yet:
+this authorization becomes effective only after the adoption-bookkeeping revision
+receives its own different-actor exact-SHA review and final hosted evidence, PR #141
+normally merges, and applicable post-merge checks pass. Candidate review never
+silently transfers to this later bookkeeping SHA, whose future SHA/review/merge/post-
+merge facts must not be invented inside the approved candidate commit.
 
 ## Target files and exact edit intent
 

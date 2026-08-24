@@ -5,7 +5,7 @@ slug: voc087-closure-record
 title: Reconcile VOC-087 closure record with completed evidence
 
 type: governance-evidence-reconciliation
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because the implementation would correct canonical change-package lifecycle,
@@ -16,18 +16,56 @@ planned_implementation_risk_floor: >-
 canonical_path: specs/changes/VOC-089-voc087-closure-record
 authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/140
-requirement_approval_status: planning-authority-only
+requirement_approval_status: exact-plan-review-and-decision-owner-approved
 base_branch: develop
 base_sha: 66c2cd20ab7197dd9af34dc2b78a4d03b2c5b48d
 plan_branch: plan/voc-089-voc087-closure-record
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: 72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8
 
-approval_status: not-approved
-implementation_authorized: false
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-adoption-decision-but-effective-only-after-pr-141-bookkeeping-revision-exact-review-hosted-evidence-normal-merge-and-applicable-post-merge-checks
 automatic_merge_allowed: true
 production_impact: none-repository-record-only
 rollback_required: true
+
+plan_review_history:
+  - candidate_sha: 64f5fa8cf0437b4c83ccbadf32793bc2b5e40fa5
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5391312909
+    resolution_status: >-
+      immutable-superseded-pass-for-prior-base-ea357ce506f42fe74c7e88f670db9ce4f848d80e-replaced-by-refreshed-base-review-chain-on-66c2cd20ab7197dd9af34dc2b78a4d03b2c5b48d
+  - candidate_sha: 16a77c07991380882aa08221fc0b8ffb0ce0c8c4
+    verdict: fail
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394452250
+    finding: incomplete-voc-087-impact-analysis-allowlist-and-invalid-pr-body-head-sha
+    resolution_status: >-
+      immutable-superseded-failure-resolved-by-amended-candidate-72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8
+  - candidate_sha: 72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394526133
+    resolves_candidate_sha: 16a77c07991380882aa08221fc0b8ffb0ce0c8c4
+
+approvals:
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394526133
+  adoption_decision:
+    status: approved-for-adoption
+    candidate_sha: 72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394551210
+
+candidate_hosted_evidence:
+  candidate_sha: 72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32721280622
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32721348160
+    eligible: true
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32721280574
+  quality: not-applicable-plan-only-path-filter
 
 owners:
   decision: accountable-decision-owner-after-independent-plan-review
@@ -161,9 +199,10 @@ protected_areas:
   - canonical-change-package-lifecycle-evidence
 
 implementation:
-  authorized: false
+  authorized: true
+  authority_effective: false
   required: true
-  status: draft-pending-independent-plan-review-adoption-and-implementation-authority
+  status: authorized-pending-bookkeeping-review-hosted-normal-merge-and-postmerge
   target_branch: develop
   pull_request_count: 1
   task: VOC-089-T00
@@ -175,6 +214,10 @@ release:
   migration_required: false
   rollback_required: true
   issue_140_closure: after-implementation-merge-and-applicable-post-merge-checks-only
+
+repository_adoption_status: adopted-pending-pr-141-normal-merge-and-applicable-post-merge-checks
+adoption_pr: 141
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394551210
 
 ehr: not-triggered
 action_specific_authority:
@@ -215,6 +258,8 @@ required_r3_evidence:
     evidence: pending future PR review bound to the exact implementation SHA
 
 blocking_reasons:
-  - independent-plan-review-pending
-  - adoption-decision-pending
+  - exact-adoption-bookkeeping-revision-review-pending
+  - final-hosted-checks-on-adoption-bookkeeping-revision-pending
+  - pr-141-normal-merge-pending
+  - applicable-post-merge-checks-pending
   - implementation-authority-not-effective

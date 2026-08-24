@@ -1,7 +1,11 @@
 # VOC-089 - Reconcile VOC-087 closure record with completed evidence
 
-Status: draft plan package. This package has not been approved and does not authorize
-implementation.
+Status: adopted for repository bookkeeping. Exact candidate
+`72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8` received independent PASS and the
+accountable adoption decision on PR #141. Implementation authorization is recorded but
+becomes effective only after the adoption-bookkeeping revision receives its own
+exact-SHA review and hosted evidence, PR #141 normally merges, and applicable
+post-merge checks pass. No merge, deployment, or external-effect authority is granted.
 
 Issue [#140](https://github.com/KARSIFT/vocanova-platform/issues/140) records that the
 active VOC-087 package on `develop` still describes completed adoption, implementation,
@@ -63,7 +67,39 @@ The completed evidence to record is exact and already public in GitHub:
 - Issue #132 closed as completed with evidence at
   [5391130633](https://github.com/KARSIFT/vocanova-platform/issues/132#issuecomment-5391130633).
 
-Historical evidence must stay historical: the initial VOC-087 plan review FAIL, the
-later exact PASS, the adoption decision, the final bookkeeping PASS, expected hosted
-Governance refresh blocks, the exact implementation PASS, and the PR #137 sequencing
-incident must remain visible and must not be rewritten as a flawless sequence.
+## Plan review history
+
+Prior exact candidate `64f5fa8cf0437b4c83ccbadf32793bc2b5e40fa5` received independent
+**PASS** with zero blockers on
+[comment 5391312909](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5391312909)
+against the earlier planning base `ea357ce506f42fe74c7e88f670db9ce4f848d80e`. That
+PASS remains preserved history but was superseded when the branch refreshed onto
+current `develop` at `66c2cd20ab7197dd9af34dc2b78a4d03b2c5b48d`.
+
+Refreshed candidate `16a77c07991380882aa08221fc0b8ffb0ce0c8c4` then received an
+independent **FAIL** on
+[comment 5394452250](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394452250)
+because the later implementation allowlist still omitted active stale
+`impact-analysis.md` content and the PR body named a non-existent head SHA. That
+verdict remains immutable history and is not reinterpreted as approval.
+
+Amended exact candidate `72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8` received
+independent **PASS** with zero blockers on
+[comment 5394526133](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394526133),
+resolving that blocker without erasing the earlier FAIL. The accountable decision owner
+approved that exact candidate for adoption on
+[comment 5394551210](https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394551210).
+Candidate CI
+[`32721280622`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32721280622),
+Governance eligibility
+[`32721348160`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32721348160),
+and Security
+[`32721280574`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32721280574)
+passed. Quality was not applicable to this plan-only diff. Exact bookkeeping review,
+final hosted evidence on the bookkeeping head, normal PR #141 merge, and applicable
+post-merge checks remain pending; implementation must not begin before they pass.
+
+Historical evidence must stay historical: the prior PASS on the earlier base, the
+refreshed-base FAIL, the amended exact PASS, the adoption decision, the exact
+implementation PASS, and the PR #137 sequencing incident must remain visible and must
+not be rewritten as a flawless sequence.

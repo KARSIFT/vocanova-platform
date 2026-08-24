@@ -5,9 +5,10 @@ may merge to `develop` after the normal governed implementation PR sequence.
 
 ## Merge boundary
 
-The draft package must first receive exact-revision independent plan review,
-accountable adoption, normal merge, and applicable post-merge checks. Only then may a
-different builder implement `VOC-089-T00`.
+The package is adopted in repository bookkeeping, but implementation authority becomes
+effective only after the bookkeeping revision's exact-SHA review and hosted checks,
+normal PR #141 merge, and applicable post-merge checks. Only then may a different
+builder implement `VOC-089-T00`.
 
 The implementation PR may merge to `develop` only after:
 

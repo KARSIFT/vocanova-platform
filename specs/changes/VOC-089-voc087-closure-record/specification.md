@@ -9,9 +9,12 @@ repository-governance truthfulness defect. At the issue baseline `develop` commi
 adoption effectiveness, implementation, and post-merge gates are pending even though
 the plan PR, implementation PR, post-merge checks, and issue closure have completed.
 
-Issue #140 grants planning authority only. This package is a draft until it receives
-different-actor exact-revision plan review, accountable adoption, normal merge, and
-applicable post-merge checks. It creates no implementation authority while draft.
+Issue #140 granted planning authority only. Exact candidate
+`72847c42f3d34e91b24431f4dadfbcd5a9ac6fd8` has since received different-actor
+independent PASS and the accountable adoption decision. Implementation authorization is
+recorded by the adopted package but becomes effective only after the bookkeeping
+revision receives its own exact-SHA review and hosted evidence, PR #141 normally
+merges into `develop`, and applicable post-merge checks pass.
 
 ## Scope
 
