@@ -141,11 +141,10 @@ steward requirement from ownership routing or risk class.
 
 Future settings activation may consider:
 
-- secret scanning and push protection;
-- Dependabot alerts and security updates after a dependency manifest exists;
-- private vulnerability reporting;
-- Actions restricted to reviewed, immutable action SHAs; and
-- minimal default workflow token permissions.
+- Dependabot security-update automation;
+- GitHub-hosted secret scanning, push protection, and validity checks;
+- private vulnerability reporting, which remains unobserved and unconfigured; and
+- other prospective hosted enforcement or environment-approval controls.
 
 The current observation has enabled dependency/vulnerability alerts, full-SHA Actions
 enforcement, a selected-action allowlist, and minimal default workflow-token
