@@ -228,7 +228,10 @@ const EXPECTED_CURRENT_RECORD = {
   },
   specialist_review: {
     required: true,
-    status: "pending-exact-final-revision-review",
+    status: "pass-exact-revision-zero-blockers",
+    candidate_sha: "0660dddbc070d54333aa4e1bb74b244d41878262",
+    evidence: "https://github.com/KARSIFT/vocanova-platform/pull/153",
+    evidence_review: 5013084998,
     scope: [
       "source-api-schema-and-endpoint-interpretation",
       "availability-versus-enabled-distinction",
@@ -236,7 +239,7 @@ const EXPECTED_CURRENT_RECORD = {
       "point-in-time-freshness-and-staleness-semantics",
       "exact-authorized-mutation-and-rollback-evidence",
     ],
-    note: "specialist exact-revision review remains pending for this implementation revision",
+    note: "distinct non-author settings specialist verified the exact semantic candidate",
   },
 };
 

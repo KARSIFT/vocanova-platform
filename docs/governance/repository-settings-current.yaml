@@ -174,11 +174,14 @@ follow_up_boundary:
   this_record_does_not_authorize_or_perform_mutation: true
 specialist_review:
   required: true
-  status: pending-exact-final-revision-review
+  status: pass-exact-revision-zero-blockers
+  candidate_sha: 0660dddbc070d54333aa4e1bb74b244d41878262
+  evidence: https://github.com/KARSIFT/vocanova-platform/pull/153
+  evidence_review: 5013084998
   scope:
     - source-api-schema-and-endpoint-interpretation
     - availability-versus-enabled-distinction
     - dependency-vulnerability-alert-versus-dependabot-security-update-distinction
     - point-in-time-freshness-and-staleness-semantics
     - exact-authorized-mutation-and-rollback-evidence
-  note: specialist exact-revision review remains pending for this implementation revision
+  note: distinct non-author settings specialist verified the exact semantic candidate
