@@ -4,10 +4,13 @@
 
 - Covers: `VOC-091-AC-00`
 - Procedure: inspect issue #148; PR #141 body, comments, merge commit, and run
-  `32722390643` log; audit comment `5394825877`; and PR #137 audit comment `5390981903`.
+  `32722390643` log; exact post-merge CI `32722900390`, Governance `32722900352`, and
+  Security `32722900426` runs against merge `925faf774ded5128c8aef2a298a8d6f506164ee0`;
+  audit comment `5394825877`; and PR #137 audit comment `5390981903`.
 - Expected: the record names `blocked`, `eligible: false`, all five reason codes, later
-  review timing, inaccurate readiness statement, merge SHA, and the distinct PR #137
-  pre-merge eligibility fact without invention or omission.
+  review timing, inaccurate readiness statement, merge SHA, the three passing
+  post-merge anchors, and the distinct PR #137 pre-merge eligibility fact without
+  invention or omission. The post-merge passes are never an eligibility substitute.
 - Evidence: `VOC-091-EV-00`
 
 ## VOC-091-TEST-01 - Active VOC-089 authority-state review
@@ -83,6 +86,19 @@
 - Expected: no forbidden path changes; reverting restores the prior repository record
   without external action.
 - Evidence: `VOC-091-EV-04`
+
+## VOC-091-TEST-08 - VOC-089 contract-preservation review
+
+- Covers: `VOC-091-AC-05`
+- Procedure: compare the final VOC-089 records with the recovery base and inspect the
+  recovery diff around its specification, acceptance criteria, implementation plan,
+  tasks, test plan, and release plan.
+- Expected: VOC-089 D00-D05, AC00-AC04, TEST00-TEST04, mappings, one `VOC-089-T00`,
+  exact eight-file VOC-087 allowlist, R3/non-goals/rollback, and issue #140 boundary
+  remain intact and inactive pending recovery. Only authority/incident/lifecycle and
+  prospective recovery evidence is additive; no contract is deleted, broadened, or
+  repurposed.
+- Evidence: `VOC-091-EV-05`
 
 ## Test strategy rationale
 

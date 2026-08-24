@@ -46,11 +46,18 @@ Out of scope:
   `66c2cd20ab7197dd9af34dc2b78a4d03b2c5b48d`, adapter run `32722390643`, timestamp
   `2026-08-24T11:33:44Z`, decision `blocked`, `eligible: false`, all five reason codes,
   later review comment `5394643309`, inaccurate readiness comment `5394657645`, merge
-  `925faf774ded5128c8aef2a298a8d6f506164ee0`, and audit `5394825877`.
+  `925faf774ded5128c8aef2a298a8d6f506164ee0`, post-merge CI `32722900390`, Governance
+  `32722900352`, Security `32722900426` (all passing on that merge SHA), and audit
+  `5394825877`. The post-merge passes must be recorded as valid deterministic evidence
+  that cannot retroactively validate the missing pre-merge eligibility decision.
 - `VOC-091-D01` — Change VOC-089 active authority fields so they make no claim that
   PR #141 was a normal merge or that it activated implementation. The original
-  semantic-candidate PASS and adoption decision remain historical evidence; they are
-  insufficient for effectiveness without the missing pre-merge eligibility proof.
+  semantic-candidate PASS and adoption decision remain valid adoption/authorization
+  evidence, while `implementation.authority_effective: false` records that their
+  effectiveness was not established through PR #141. Preserve
+  `implementation_authorized: true` and add a machine-readable recovery-pending
+  distinction; recovery completion may make the existing bounded authorization
+  effective without rewriting the decision.
 - `VOC-091-D02` — Define exactly one future recovery implementation PR, limited to the
   nine listed VOC-089 package files. It must record its own exact final SHA review by a
   different non-author actor, one fully populated `merge-eligibility-evidence-v1`
@@ -76,6 +83,11 @@ Out of scope:
 - `VOC-091-D06` — The recovery must preserve the PR #137 sequencing audit as a distinct
   precedent: it had genuine pre-merge eligibility; its substantive-validity finding
   cannot be copied to PR #141.
+- `VOC-091-D07` — Preserve VOC-089's adopted objective and inactive future
+  implementation contract: D00-D05, AC00-AC04, their task/test/evidence mappings, the
+  exact eight-file VOC-087 allowlist, one `VOC-089-T00` implementation PR, R3 risk,
+  non-goals, rollback, and issue #140 completion boundary. Add an authority/incident
+  overlay only; do not delete, broaden, substitute, or silently repurpose that contract.
 
 ## Risk and protected areas
 

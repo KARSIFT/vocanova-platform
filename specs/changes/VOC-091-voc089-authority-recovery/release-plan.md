@@ -21,6 +21,11 @@ After normal merge, record applicable post-merge CI/Governance/Security evidence
 then does VOC-089 implementation authority become effective prospectively. The recovery
 does not make the PR #141 merge retrospectively normal or effective.
 
+The recovery implementation preserves VOC-089's existing one-task/eight-file
+implementation contract and issue #140 closure boundary. It does not replace that
+contract: after recovery, it makes the existing adopted authorization effective only
+for the same bounded PR #147 outcome, subject to PR #147's wholly fresh evidence.
+
 ## Issue and PR boundaries
 
 After recovery merge and applicable post-merge checks, an accountable operator may close

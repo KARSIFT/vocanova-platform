@@ -8,26 +8,30 @@ future recovery implementation PR and one task, not a retroactive repair of PR #
 
 The future recovery PR changes only these current VOC-089 records:
 
-1. `change.yaml` — replace the false effective-authority/adoption activation claims
-   with a structured invalid-premerge-eligibility incident record; preserve the
-   semantic-candidate PASS/adoption decision as historical evidence; set no effective
-   implementation authority; add the prospective recovery gates and PR #147 hold.
-2. `README.md` — replace the adoption/activation summary with the incident truth,
-   blocked JSON, no-retroactivity rule, and recovery/resumption boundary.
-3. `specification.md` — replace requirements that assume normal PR #141 activation
-   with the exact recovery requirements, incident anchors, and closure limits.
-4. `acceptance-criteria.md` — replace completion assumptions with observable record,
-   fail-closed recovery, and PR #147 resumption criteria.
-5. `impact-analysis.md` — replace the claim that VOC-089 merely reconciles already
-   completed evidence with the authority-invalidity impact and mitigations.
-6. `implementation-plan.md` — replace the invalid future VOC-087 edit sequence with
-   this recovery's nine-file scope and prospective activation sequence.
-7. `tasks.md` — supersede the inactive `VOC-089-T00` execution instruction with an
-   explicit blocked state and reference to VOC-091 as the sole recovery route.
-8. `test-plan.md` — replace VOC-087 closure-record tests with incident/binder/adapter,
-   exact-review, post-merge, scope, rollback, and resumption-boundary tests.
-9. `release-plan.md` — replace the invalid PR #141 merge boundary and issue #140
-   closure instruction with recovery and later PR #147 boundaries.
+1. `change.yaml` — preserve VOC-089's identity, approved candidate/adoption decision,
+   `implementation_authorized: true`, D00-D05 contract, R3 risk, one-task/eight-file
+   scope, non-goals, rollback, and issue #140 boundary. Add a structured
+   invalid-premerge-eligibility incident record, explicit `authority_effective: false`,
+   recovery-pending status, exact post-merge anchors, and prospective recovery gates.
+2. `README.md` — retain the VOC-089 objective and later implementation summary; add an
+   incident/recovery overlay with blocked JSON, no-retroactivity, post-merge anchors,
+   and PR #147 resumption boundary.
+3. `specification.md` — retain D00-D05 and add, rather than replace, exact recovery
+   requirements/incident anchors/closure limits. The eight-file VOC-087 outcome stays
+   the inactive contract.
+4. `acceptance-criteria.md` — retain AC00-AC04 and their mappings/results; add
+   recovery criteria proving authority distinction and contract preservation.
+5. `impact-analysis.md` — retain the original closure-record analysis and append the
+   authority-invalidity impact, exact post-merge distinction, and mitigations.
+6. `implementation-plan.md` — retain the exact eight-file VOC-087 edit sequence and
+   append the recovery precondition and prospective activation sequence; do not replace
+   the later implementation instructions.
+7. `tasks.md` — retain `VOC-089-T00`, its requirements, eight-file scope, and one-PR
+   contract, but mark it authorized-yet-ineffective pending VOC-091 recovery.
+8. `test-plan.md` — retain TEST00-TEST04 and append incident/binder/adapter,
+   post-merge, scope, rollback, contract-preservation, and resumption-boundary tests.
+9. `release-plan.md` — retain the later VOC-089 implementation and issue #140 closure
+   boundary; add the recovery boundary that must precede PR #147 resumption.
 
 The correction must not edit VOC-087 or PR #147. It must not delete historical evidence
 or state that the correction makes the 2026-08-24 merge normal.
@@ -37,11 +41,13 @@ or state that the correction makes the 2026-08-24 merge normal.
 1. Start from current `develop`; re-read the nine VOC-089 files, issue #148, PR #141's
    body/timeline/run log, its audit, and PR #147 hold. Confirm no new drift requires a
    separate issue.
-2. Make the nine-file records mutually consistent with `VOC-091-D00` through `D06`.
+2. Make the nine-file records mutually consistent with `VOC-091-D00` through `D07`.
    Preserve historical links and use unambiguous active-state values such as
-   `implementation_authorized: false` and `authority_effective: false` until recovery
-   completion; do not invent a recovery SHA, review, eligibility result, merge, or
-   post-merge outcome.
+   `implementation_authorized: true` (valid adopted authorization) and
+   `authority_effective: false` (ineffective through invalid PR #141) until recovery
+   completion. Do not invent a recovery SHA, review, eligibility result, merge, or
+   post-merge outcome, and do not delete or alter the inactive VOC-089 implementation
+   contract except to add the incident/recovery overlay.
 3. Run the package-level validation in `test-plan.md`, inspect the exact diff against
    the allowlist, and create one implementation PR to `develop` with a truthful body.
 4. A different non-author reviewer reviews the exact final head, including the literal

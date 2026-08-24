@@ -37,6 +37,18 @@ automatic_merge_allowed: true
 production_impact: none-repository-record-only
 rollback_required: true
 
+plan_review_history:
+  - candidate_sha: 90b8f91f5c593e94a89e6c3841998d2078ddccad
+    verdict: fail
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/149#issuecomment-5394970138
+    finding: >-
+      Recovery edit intent would replace the still-needed VOC-089 implementation
+      contract, and the immutable incident record omitted exact PR #141 post-merge
+      CI/Governance/Security anchors.
+    resolution_status: >-
+      immutable-failure-addressed-by-later-candidate-that-preserves-voc-089-contract-
+      additively-and-records-postmerge-runs;-fresh-exact-review-required
+
 owners:
   decision: accountable-repository-governance-decision-owner-after-independent-plan-review
   package_preparation: VOC-091 planner actor for draft package only
@@ -101,6 +113,15 @@ immutable_incident_evidence:
     later_bookkeeping_review: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394643309
     inaccurate_merge_readiness_claim: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394657645
     merge_sha: 925faf774ded5128c8aef2a298a8d6f506164ee0
+    post_merge:
+      merge_sha: 925faf774ded5128c8aef2a298a8d6f506164ee0
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900390
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900352
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900426
+      applicability: >-
+        All three passed on the merge SHA, but valid post-merge deterministic evidence
+        cannot retroactively replace the missing pre-merge eligible-true reasons-empty
+        adapter decision.
     post_merge_audit: https://github.com/KARSIFT/vocanova-platform/pull/141#issuecomment-5394825877
     invalidity: >-
       The success job conclusion and later review do not replace the missing genuine

@@ -29,6 +29,33 @@ complete binder, genuine pre-merge eligibility result, normal merge, and applica
 post-merge checks. PR #147 remains open as a draft and blocked; it may later rebase and
 refresh rather than close/reopen only after that recovery boundary completes.
 
+The recovery is preservation-first. It retains VOC-089's adopted objective, D00-D05,
+AC00-AC04, one-task/eight-file VOC-087 implementation contract, tests, evidence
+mappings, R3 risk, non-goals, rollback, and issue #140 closure boundary as an inactive
+future contract for PR #147. It changes only the false active normal-merge/effectiveness
+claims and adds incident/recovery evidence. The semantic-candidate PASS and adoption
+decision remain valid authorization evidence; `implementation_authorized: true` remains
+distinct from `authority_effective: false` until the recovery completes.
+
+PR #141's exact applicable post-merge evidence is CI
+[`32722900390`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900390),
+Governance
+[`32722900352`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900352),
+and Security
+[`32722900426`](https://github.com/KARSIFT/vocanova-platform/actions/runs/32722900426),
+all passing on merge `925faf774ded5128c8aef2a298a8d6f506164ee0`. They remain preserved
+post-merge facts, not a retroactive eligibility cure.
+
+## Plan review history
+
+Initial candidate `90b8f91f5c593e94a89e6c3841998d2078ddccad` received an independent
+**FAIL** at [comment 5394970138](https://github.com/KARSIFT/vocanova-platform/pull/149#issuecomment-5394970138).
+It remains immutable history: its recovery edit intent would have replaced the still-
+needed VOC-089 implementation contract, and it omitted exact post-merge run anchors.
+This amendment resolves those findings by making the later recovery additive and
+preservation-first and recording the three runs. It needs a fresh exact-SHA independent
+review; the prior FAIL is not approval.
+
 No product behavior, test behavior, workflow/evaluator/validator, settings,
 deployment, Cloudflare/live system, `main`, secret, or production-data change is in
 scope.

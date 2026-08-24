@@ -9,7 +9,8 @@
 - Result: pending
 
 All nine VOC-089 records preserve the exact blocked adapter decision, five reason
-codes, later review, inaccurate readiness claim, PR #141 merge, post-merge audit, and
+codes, later review, inaccurate readiness claim, PR #141 merge, post-merge CI
+`32722900390`, Governance `32722900352`, Security `32722900426`, post-merge audit, and
 the distinct PR #137 precedent. None describes PR #141 as normal or cured by later
 review or post-merge passes.
 
@@ -22,10 +23,11 @@ review or post-merge passes.
 - Result: pending
 
 VOC-089 `change.yaml` and all active narrative/status records state that PR #141 did
-not establish effective implementation authority, `implementation_authorized` and
-`authority_effective` are not claimed through that merge, and PR #147 remains blocked.
-The pre-existing semantic candidate review and adoption decision remain historical
-evidence, not activation evidence.
+not establish effective implementation authority and PR #147 remains blocked. They
+preserve the valid semantic-candidate/adoption authorization and
+`implementation_authorized: true`, while clearly recording
+`implementation.authority_effective: false` pending VOC-091 recovery. The adoption
+decision is not falsely treated as activation evidence.
 
 ## VOC-091-AC-02 - Prospective recovery has a fail-closed activation contract
 
@@ -68,3 +70,16 @@ the required governance/classifier/format/diff checks, receives exact independen
 review, and is recoverable by a normal revert PR. It changes no product, workflow,
 evaluator, validator, settings, deployment, Cloudflare/live system, `main`, secret, or
 production-data path.
+
+## VOC-091-AC-05 - The inactive VOC-089 implementation contract is preserved
+
+- Requirements: `VOC-091-D07`
+- Task: `VOC-091-T00`
+- Tests: `VOC-091-TEST-08`
+- Evidence: `VOC-091-EV-05`
+- Result: pending
+
+The recovery preserves VOC-089 D00-D05, AC00-AC04, task/test/evidence mappings, the
+one-task/eight-file PR #147 contract, risk/non-goals/rollback, and issue #140 boundary.
+It adds only the incident/recovery lifecycle overlay, so PR #147 has an exact inactive
+contract to revalidate after authority becomes effective.

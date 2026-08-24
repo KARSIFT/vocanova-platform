@@ -12,6 +12,10 @@ The future implementation must reconcile every active VOC-089 record that now im
 normal merge/effective authorization: `change.yaml`, README, specification, acceptance
 criteria, impact analysis, implementation plan, tasks, test plan, and release plan.
 Leaving any of those records unchanged would retain a contradictory authority claim.
+The correction is additive and preservation-first: the existing approved VOC-089
+objective, requirements, acceptance criteria, exact VOC-087 scope, test/evidence
+mappings, one-task delivery, risk, non-goals, rollback, and issue #140 boundary remain
+the inactive contract PR #147 must revalidate against after recovery.
 
 ## Product, runtime, data, and external effects
 
@@ -40,6 +44,9 @@ sequencing precedent but state the material difference in its pre-merge eligibil
 - An unnecessary close/reopen could add bookkeeping without safety benefit. Mitigation:
   retain PR #147 as an open draft, but require rebase/refresh and entirely fresh
   evidence; close it only if rebase/scope review proves it unsafe.
+- A recovery could erase the later implementation contract. Mitigation: exact-diff
+  review proves VOC-089 D00-D05, AC00-AC04, TEST00-TEST04, the eight-file allowlist,
+  and `VOC-089-T00` remain intact; only incident/effectiveness overlay text is added.
 
 ## Rollback impact
 
