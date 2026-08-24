@@ -7,6 +7,7 @@ export const CURRENT_RECORD_PATH =
   "docs/governance/repository-settings-current.yaml";
 export const FOUNDATION_COMMAND =
   "node scripts/foundation/voc085-settings-truthfulness-policy.mjs";
+const CLI_PATH = fileURLToPath(import.meta.url);
 
 const CURRENT_RECORD_REQUIREMENTS = [
   {
@@ -188,11 +189,89 @@ const ACTIVE_DOCUMENT_REQUIREMENTS = [
   },
 ];
 
+const ACTIVE_SECTION_CONTRADICTIONS = [
+  {
+    path: "docs/governance/repository-settings.md",
+    heading: "## Current hosted posture (observed 2026-08-24)",
+    label: "active current hosted-posture section",
+    forbidden: [
+      {
+        label: "settings-mutation claim",
+        pattern: /\bthis package and this guide perform settings mutation\b/i,
+      },
+      {
+        label: "live deployment or settings-activation claim",
+        pattern:
+          /\bthis package and this guide\b[^.]*\b(?:deploy|deploys|create|creates|configure|configures|activate|activates)\b[^.]*\b(?:current hosted posture|github environment|cloudflare resource|secret|delivery)\b/i,
+      },
+    ],
+  },
+  {
+    path: "docs/governance/repository-settings.md",
+    heading: "## Prospective settings held by VOC-085-HOLD-00",
+    label: "active held-controls section",
+    forbidden: [
+      {
+        label: "held controls promoted to configured current state",
+        pattern:
+          /\bdesired mature controls,\s*configured current state\b|\b(?:rulesets|protected `develop`\/`main` branches|pull-request-only changes and required checks|conversation, code-owner, bypass, and release protections|dependabot security updates|secret scanning and push protection|hosted enforcement|environment approval settings)\b[^.]*\b(?:are configured|is configured|are enabled|is enabled|are active|is active)\b/i,
+      },
+      {
+        label: "settings hold blocks repository-only merge",
+        pattern:
+          /\b(?:VOC-085-HOLD-00|It)\b[^.]*\b(?:blocks|prevents)\b[^.]*\brepository-only\b[^.]*\b(?:planning|implementation|review|merge)\b/i,
+      },
+    ],
+  },
+  {
+    path: "docs/operations/cloudflare-delivery.md",
+    anchor: "The repository is public, current as observed at 2026-08-24.",
+    label: "active delivery-settings section",
+    forbidden: [
+      {
+        label: "hosted environment or branch restrictions claimed configured",
+        pattern:
+          /(?:^|[.!?]\s+)(?:the repository therefore claims that\s+[^.]*\b(?:hosted environment approvals|secrets|branch restrictions)\b[^.]*\b(?:are configured|is configured|are active|is active)\b|hosted environment approvals\b[^.]*\b(?:are configured|is configured|are active|is active)\b)/i,
+      },
+      {
+        label: "settings observation claims live inspection",
+        pattern:
+          /\b(?:settings record|record)\b[^.]*\b(?:inspects|queries|queried|reads live)\b[^.]*\b(?:environments|secrets)\b/i,
+      },
+    ],
+  },
+];
+
 function normalizeWhitespace(value) {
   return value
     .replace(/\s+/g, " ")
     .replace(/\s*\/\s*/g, "/")
     .trim();
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function sectionText(text, heading) {
+  const headingPattern = new RegExp(`^${escapeRegExp(heading)}\\s*$`, "m");
+  const match = headingPattern.exec(text);
+  if (match === null) return null;
+
+  const start = match.index + match[0].length;
+  const remainder = text.slice(start);
+  const nextHeading = /^\n## .+$/m.exec(remainder);
+  const end =
+    nextHeading === null ? text.length : start + nextHeading.index + 1;
+  return text.slice(start, end);
+}
+
+function anchoredSectionText(text, anchor) {
+  const normalizedText = normalizeWhitespace(text);
+  const normalizedAnchor = normalizeWhitespace(anchor);
+  const index = normalizedText.indexOf(normalizedAnchor);
+  if (index === -1) return null;
+  return normalizedText.slice(index);
 }
 
 function readRequiredText(repositoryRoot, relativePath, errors) {
@@ -233,6 +312,34 @@ function inspectActiveDocuments(repositoryRoot) {
     if (text === null) continue;
     for (const { label, snippet } of requirements) {
       requireSnippet(errors, relativePath, text, label, snippet);
+    }
+  }
+
+  return errors;
+}
+
+function inspectActiveSectionContradictions(repositoryRoot) {
+  const errors = [];
+
+  for (const rule of ACTIVE_SECTION_CONTRADICTIONS) {
+    const text = readRequiredText(repositoryRoot, rule.path, errors);
+    if (text === null) continue;
+
+    const section =
+      "heading" in rule
+        ? sectionText(text, rule.heading)
+        : anchoredSectionText(text, rule.anchor);
+    if (section === null) {
+      errors.push(`${rule.path}: missing ${rule.label}`);
+      continue;
+    }
+
+    for (const forbidden of rule.forbidden) {
+      if (forbidden.pattern.test(section)) {
+        errors.push(
+          `${rule.path}: contradictory ${forbidden.label} in ${rule.label}`,
+        );
+      }
     }
   }
 
@@ -280,11 +387,12 @@ export function validateSettingsTruth(repositoryRoot) {
   }
   errors.push(...inspectCurrentRecord(repositoryRoot));
   errors.push(...inspectActiveDocuments(repositoryRoot));
+  errors.push(...inspectActiveSectionContradictions(repositoryRoot));
   return errors;
 }
 
 function main() {
-  const scriptRoot = path.dirname(fileURLToPath(import.meta.url));
+  const scriptRoot = path.dirname(CLI_PATH);
   const repositoryRoot = path.resolve(scriptRoot, "../..");
   const errors = validateSettingsTruth(repositoryRoot);
   if (errors.length > 0) {
@@ -303,4 +411,6 @@ function main() {
   );
 }
 
-main();
+if (process.argv[1] === CLI_PATH) {
+  main();
+}

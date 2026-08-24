@@ -229,3 +229,53 @@ test("held-control promotion, prospective-alert drift, non-blocking hold drift, 
     ),
   );
 });
+
+test("appended contradictory current and held claims fail even when the safe snippets remain", () => {
+  const appendedSettingsMutation = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings.md", (text) =>
+      text.replace(
+        "mutation.\n\n## VOC-080 historical transition snapshot",
+        "mutation.\n\nThis package and this guide perform settings mutation to activate the current hosted posture.\n\n## VOC-080 historical transition snapshot",
+      ),
+    );
+  });
+  assert.ok(
+    appendedSettingsMutation.some((message) =>
+      /repository-settings\.md: contradictory settings-mutation claim in active current hosted-posture section/.test(
+        message,
+      ),
+    ),
+  );
+
+  const appendedHeldPromotion = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings.md", (text) =>
+      text.replace(
+        "record. It does not block repository-only planning, implementation, review, or merge.\n",
+        "record. It does not block repository-only planning, implementation, review, or merge.\nRulesets and protected `develop`/`main` branches are configured current state for this repository.\n",
+      ),
+    );
+  });
+  assert.ok(
+    appendedHeldPromotion.some((message) =>
+      /repository-settings\.md: contradictory held controls promoted to configured current state in active held-controls section/.test(
+        message,
+      ),
+    ),
+  );
+
+  const appendedLiveHostedClaim = errorsFor((root) => {
+    mutate(root, "docs/operations/cloudflare-delivery.md", (text) =>
+      text.replace(
+        "exist. Any future GitHub settings mutation remains held by `VOC-085-HOLD-00` and\nrequires an immediate governed documentation-only follow-up; Cloudflare delivery\nactivation remains separately held by the VOC-080 holds above.\n",
+        "exist. Any future GitHub settings mutation remains held by `VOC-085-HOLD-00` and\nrequires an immediate governed documentation-only follow-up; Cloudflare delivery\nactivation remains separately held by the VOC-080 holds above.\nHosted environment approvals, secrets, and branch restrictions are configured for the current delivery posture.\n",
+      ),
+    );
+  });
+  assert.ok(
+    appendedLiveHostedClaim.some((message) =>
+      /cloudflare-delivery\.md: contradictory hosted environment or branch restrictions claimed configured in active delivery-settings section/.test(
+        message,
+      ),
+    ),
+  );
+});
