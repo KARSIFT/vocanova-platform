@@ -51,6 +51,15 @@ isolated branch or worktree and target `develop`; release pull requests promote
 `develop` to `main`. Working branches are normally squash-merged. Release promotions
 use an identifiable merge commit.
 
+After that release merge, complete post-promotion history synchronization before
+calling the branches finalized: create a short-lived branch from current `develop`,
+merge current `main` ancestry into it, and merge the reviewed synchronization PR back
+to `develop` with a merge commit. Do not use permanent `main` as the PR head. Verify
+that `main` is an ancestor of `develop` and that `develop` is zero commits behind
+`main`. This is repository-history maintenance; it does not change repository
+settings or deploy anything. Automatic source-branch deletion may remove only the
+merged short-lived head, whose exact SHA and recovery command must be recorded.
+
 For one approved user or business outcome, choose the largest safe coherent delivery
 unit across backend, frontend, contracts, tests, documentation, rollback, and
 evidence sharing the same control boundary. The default is one approved package, one

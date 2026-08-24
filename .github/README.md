@@ -52,6 +52,16 @@ hosted enforcement control is configured. Automatic deletion of merged branches 
 enabled as the one VOC-092 setting change; it is not branch protection or merge
 automation. See the [current point-in-time settings record](../docs/governance/repository-settings-current.yaml).
 
+Branch finalization after a release also requires post-promotion history
+synchronization. After `develop` is merge-committed to `main`, a separately reviewed
+short-lived synchronization branch must merge current `main` ancestry and then
+merge-commit back to `develop`; permanent `main` is never the pull-request head.
+Completion evidence proves `main` is an ancestor of `develop` and `develop` is zero
+commits behind `main`. The loop does not change repository settings and does not
+deploy or invoke Cloudflare. The enabled source-branch setting may automatically
+delete only the merged short-lived head after its exact SHA and recreation command
+are recorded.
+
 Governance is role- and evidence-based across R0-R4. Every meaningful plan or
 implementation is built and independently reviewed by different human or AI roles, with
 the verdict bound to the exact revision and blocking findings resolved. R4 requires the

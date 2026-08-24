@@ -1659,6 +1659,7 @@ new implementation revision followed by complete checks and fresh independent re
 | Independently verify a plan or implementation        | Reviewer role with no write access to the reviewed revision                                                               |
 | Merge into `develop`                                 | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
 | Promote `develop` to `main`                          | Separately reviewed pull request; no current promotion workflow                                                           |
+| Complete post-promotion history synchronization      | Separately reviewed short-lived-head PR merge-committed into `develop`; prove `main` ancestry and zero-behind readbacks   |
 | Deploy                                               | T10 held manual Cloudflare state machine exists; current manifest blocks before environment jobs/secrets                  |
 
 Roles are responsibilities, not permanent vendors. Actors are attributable humans or
@@ -1668,6 +1669,15 @@ revision needs fresh checks and different-actor review. A role relabel, new sess
 model, or provider is not independence or authority. Model/provider choice may harden
 evidence; an expressly applicable cross-model rule remains scoped evidence, not an
 approval source.
+
+The synchronization row is repository-history finalization, not another promotion or
+deployment. The short-lived branch starts from current `develop`, merges current
+`main`, and is merge-committed back into `develop`; permanent `main` is never its PR
+head. Completion proves `main` is an ancestor of `develop` and `develop` is zero
+commits behind `main`. It does not change repository settings, deploy, or invoke
+Cloudflare. Existing automatic source deletion may remove only the merged short-lived
+head after its exact SHA and recreation command are recorded; manual or
+permanent-branch deletion is not authorized.
 
 R0-R4 are consequence classes, not personal-approval classes. R4 requires an explicit
 decision record, impact and contingency evidence, applicable specialist and
