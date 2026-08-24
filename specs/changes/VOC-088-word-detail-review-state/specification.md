@@ -76,17 +76,30 @@ Out of scope:
 - `VOC-088-D02` — Due is an instant, not a local-calendar classification. The
   repository must capture `this.now().toISOString()` once at the start of `getWord`
   and use that same value for every meaning in the response. Equality is due. One
-  millisecond after the clock is not due. The web must say `Due now`, not calculate or
-  claim `Due today`.
+  millisecond after the clock is not due. The executable integration proof must return
+  at least two active meanings in one `getWord` response and inject a counting clock
+  whose first result is `2026-08-24T12:00:00.000Z` and second result is
+  `2026-08-24T12:00:00.001Z`. With the first meaning scheduled at the first instant and
+  the second at the second instant, the test must assert clock call count `1` and
+  ordered states `["due", "learning"]`; a per-meaning clock call would incorrectly
+  make the second meaning due and fail both assertions. The web must say `Due now`,
+  not calculate or claim `Due today`.
 - `VOC-088-D03` — The `getWord` prepared query must select only the requester's active
   row and the minimum new projection inputs (`uw.status`, `uw.next_review_at`) beside
   the existing `uw.id`. It must not remove the `uw.user_id = ?1` or
   `uw.deleted_at IS NULL` predicates, read another learner's state, add a cross-user
   fallback, or expose raw scheduling inputs in the public response.
-- `VOC-088-D04` — The mapper must derive `saved`, `userWordId`, and `reviewState` from
-  the same joined row. An impossible status outside the DOC-05/check-constraint enum
-  must fail rather than be labelled as another valid learner state. It must not use a
-  module-level mutable clock or request-state cache.
+- `VOC-088-D04` — `apps/api-worker/src/content/repository.ts` must export the exact
+  deterministic pure seam
+  `projectWordReviewState(status: string | null, nextReviewAt: string | null, nowIso: string): WordReviewState | null`.
+  A null status represents no active requester row and returns null. A supported
+  non-null persisted status returns exactly the `D01` projection; an unsupported
+  non-null status must throw `Error("unsupported user_words status")`, not silently
+  label it as a valid learner state. A direct unit assertion against this exported
+  function must prove that fail-closed branch without inserting a row that violates
+  D1's status check constraint. `getWord` must derive `saved`, `userWordId`, and the
+  mapper inputs from the same joined row and pass its single captured `nowIso` to every
+  call. Neither seam may use a module-level mutable clock or request-state cache.
 - `VOC-088-D05` — The Hono Zod schema must make `reviewState` required and nullable
   with exactly the six public enum values in `D00`. Running the existing
   `openapi:write` command must regenerate
@@ -116,10 +129,13 @@ Out of scope:
   saving the current DOC-05 row (`status=new`, `next_review_at=null`) shows
   `Review state: Due now` and sentence practice; unsaving removes both. A failed
   mutation must not refresh or change the prior saved state.
-- `VOC-088-D10` — Deterministic repository coverage must use fixed clock
-  `2026-08-24T12:00:00.000Z` and prove null, exact-equality, one-millisecond-future,
-  past/future, mastered, ignored, archived, soft-deleted, and cross-user cases. It must
-  also prove raw `reviewStep` and `nextReviewAt` are absent from Word Detail meanings.
+- `VOC-088-D10` — Deterministic coverage must table-drive the exported pure mapper at
+  fixed clock `2026-08-24T12:00:00.000Z` and prove null, exact equality,
+  one-millisecond-future, past/future, mastered, ignored, and archived cases plus the
+  direct unsupported-status throw. Separate workerd/D1 coverage must prove absent and
+  soft-deleted rows, minimized response fields, cross-user behavior, and the `D02`
+  two-active-meaning counting-clock invariant. It must also prove raw `reviewStep` and
+  `nextReviewAt` are absent from Word Detail meanings.
 - `VOC-088-D11` — Authenticated HTTP coverage must create distinct valid sessions for
   two seeded users with different active states for the same meaning, call the real
   canonical-word route with each session cookie, and prove each response contains only
@@ -137,9 +153,13 @@ Out of scope:
 - `VOC-088-D13` — Focused Playwright coverage must assert unsaved, due/new,
   learning/reviewing, mastered, and not-in-review visible behavior at all configured
   Discover viewports, retain zero critical/serious axe findings, keyboard reachability,
-  and non-color-only text, and prove the default save -> refresh -> due/sentence
-  practice -> unsave -> refresh -> no-state/no-practice round trip with an isolated
-  synthetic session and CSRF cookie.
+  and non-color-only text. For each fixture it must use
+  `page.context().addCookies([{ ... }])`, set a host-scoped selector cookie on the
+  configured web `baseURL`, make a direct `page.request.get` to the mock loopback URL
+  in that same browser context, and only after the direct contract assertion navigate
+  to the SSR route and assert the same state. It must also prove the default save ->
+  refresh -> due/sentence practice -> unsave -> refresh -> no-state/no-practice round
+  trip with an isolated synthetic session and CSRF cookie.
 - `VOC-088-D14` — The implementation is one pull request with the exact eleven-file
   allowlist in `change.yaml`. If implementation needs an API-client generator, schema,
   migration, auth/session change, scheduling behavior, new dependency, workflow,

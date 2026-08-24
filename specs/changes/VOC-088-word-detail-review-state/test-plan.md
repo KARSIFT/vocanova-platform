@@ -3,9 +3,11 @@
 ## VOC-088-TEST-00 — Exhaustive normalized mapping and due boundary
 
 - Covers: `VOC-088-AC-00`
-- Preconditions: isolated workerd D1 after committed migrations; repository clock fixed
-  at `2026-08-24T12:00:00.000Z`; active canonical word/meaning and USER_A fixture.
-- Procedure: table-drive `getWord(USER_A, "flat-white")` through these exact row cases:
+- Preconditions: exported pure `projectWordReviewState`; isolated workerd D1 after
+  committed migrations; USER_A fixture; repository clock seam available for a
+  counting/incrementing function.
+- Procedure: table-drive `projectWordReviewState(status, nextReviewAt, nowIso)` with
+  `nowIso` fixed at `2026-08-24T12:00:00.000Z` through these exact cases:
 
   | Status      | `next_review_at`           | Expected        |
   | ----------- | -------------------------- | --------------- |
@@ -20,10 +22,22 @@
   | `ignored`   | null and a past value      | `not_reviewing` |
   | `archived`  | null and a past value      | `not_reviewing` |
 
-  Reuse/update one active synthetic row between cases and prove the injected clock is
-  called once per `getWord` invocation, not once per meaning.
+  Also pass null status and assert null, then pass an unsupported non-null status and
+  assert the exact `Error("unsupported user_words status")` throw directly through the
+  pure seam without inserting an invalid D1 row or weakening its status constraint.
 
-- Expected result: exact mapping and inclusive equality; no calendar/day inference.
+  Separately seed at least two active meanings for `flat-white` and active USER_A
+  `learning` rows scheduled at `2026-08-24T12:00:00.000Z` and
+  `2026-08-24T12:00:00.001Z`, ordered in that sequence. Inject a counting/incrementing
+  repository clock whose first call returns `2026-08-24T12:00:00.000Z` and whose
+  second call would return `2026-08-24T12:00:00.001Z`. Call
+  `getWord(USER_A, "flat-white")` once and assert clock call count `1` and ordered
+  `reviewState` values `["due", "learning"]`. A per-meaning clock would call twice and
+  incorrectly make the second meaning due.
+
+- Expected result: exact exhaustive mapping, inclusive equality, direct fail-closed
+  unsupported-status evidence, and one shared request instant across multiple meanings;
+  no calendar/day inference.
 - Evidence: `VOC-088-EV-00`
 
 ## VOC-088-TEST-01 — Unsaved, soft-deleted, saved identifiers, and minimized DTO
@@ -81,24 +95,40 @@
 - Covers: `VOC-088-AC-03`
 - Preconditions: production-build Playwright harness and mock API on its configured
   loopback port.
-- Procedure: for `unsaved`, `due`, `new`, `learning`, `reviewing`, `mastered`, and
-  `not-reviewing`, set `e2e_word_detail_review_state` through
-  `page.context().addCookies({ url: baseURL, ... })`, then use browser-context-associated
-  `page.request.get` on the mock's canonical `pour` URL. Deep-assert `saved`, optional
-  `userWordId`, required `reviewState`, unchanged content, and absence of raw schedule
-  keys. Clear the selector and prove the default response remains stateful.
+- Procedure: resolve `baseURL` from `testInfo.project.use.baseURL`. For `unsaved`,
+  `due`, `new`, `learning`, `reviewing`, `mastered`, and `not-reviewing`, set the
+  host-scoped selector with the exact array-form call
+  `await page.context().addCookies([{ name: "e2e_word_detail_review_state", value: fixture, url: baseURL }])`.
+  In that same browser context, use the exact browser-associated request sequence:
+
+  ```ts
+  const mockApiPort = Number(process.env.MOCK_API_PORT ?? 8080);
+  const fixtureResponse = await page.request.get(
+    `http://127.0.0.1:${mockApiPort}/api/v1/canonical-words/pour`,
+  );
+  ```
+
+  Deep-assert `saved`, optional `userWordId`, required `reviewState`, unchanged
+  content, and absence of raw schedule keys. Before selecting the next fixture,
+  complete the same-context SSR navigation/assertion in TEST-06. Clear the selector
+  after the table and prove the default response remains stateful. Do not use
+  `page.route`.
+
 - Expected result: exact `D12` contract; selector affects only canonical-word GET.
 - Evidence: `VOC-088-EV-03`
 
 ## VOC-088-TEST-06 — SSR copy, content, and accessibility
 
 - Covers: `VOC-088-AC-03`
-- Preconditions: each direct fixture assertion in TEST-05 passes before navigation.
-- Procedure: navigate to `/discover/ordering-at-a-cafe/pour` for each state in the same
-  browser context and assert the exact `Review state:` text or its complete absence,
-  saved/unsaved button, saved-only sentence practice, and unchanged definition/example/
-  usage-note content. Retain axe, keyboard, heading/list, and non-color-only assertions
-  across the existing 360 px, 430 px, and desktop projects.
+- Preconditions: for the current table row, its cookie is set and its direct
+  `page.request.get` fixture assertion in TEST-05 has just passed in the same context.
+- Procedure: before changing the fixture cookie, navigate that same context to
+  `/discover/ordering-at-a-cafe/pour` and assert the exact `Review state:` text or its
+  complete absence, saved/unsaved button, saved-only sentence practice, and unchanged
+  definition/example/usage-note content. Repeat the set cookie -> direct mock GET ->
+  SSR navigation/assertion sequence for every state. Retain axe, keyboard,
+  heading/list, and non-color-only assertions across the existing 360 px, 430 px, and
+  desktop projects.
 - Expected result: all six public values have exact learner copy, unsaved has no row,
   no raw enum/step is shown, and zero critical/serious axe findings remain.
 - Evidence: `VOC-088-EV-03`

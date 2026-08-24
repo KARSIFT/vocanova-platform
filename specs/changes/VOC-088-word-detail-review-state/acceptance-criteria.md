@@ -15,7 +15,13 @@ mapping. Null or exact-equality schedules for active review statuses are `due`; 
 millisecond later is the underlying `new`, `learning`, or `reviewing` state;
 `mastered` is never overridden by due; and `ignored`/`archived` normalize to
 `not_reviewing`. A soft-deleted or absent requester row produces `saved: false`, no
-`userWordId`, and `reviewState: null`. No raw step or schedule field appears.
+`userWordId`, and `reviewState: null`. The exhaustive table is exercised directly
+through exported pure `projectWordReviewState`, including an unsupported non-null
+status that throws `Error("unsupported user_words status")` without an invalid D1
+insert. One `getWord` call returning two active meanings uses the specified
+incrementing clock, calls it exactly once, and returns ordered states
+`["due", "learning"]` from the shared first instant. No raw step or schedule field
+appears.
 
 ## VOC-088-AC-01 — Authenticated requester isolation is preserved
 
@@ -61,7 +67,10 @@ exactly one corresponding row: `Due now`, `New`, `Learning`, `Reviewing`, `Maste
 or `Not in review`. Saved fixtures retain the Saved/unsave control and sentence
 practice. The text is present in the accessibility tree, no state depends on color,
 the existing meaning/example/note structure remains, and configured viewport axe and
-keyboard assertions pass.
+keyboard assertions pass. Each fixture proof sets the host-scoped cookie with
+`page.context().addCookies([{ ... }])`, deep-asserts the mock response through
+same-context `page.request.get`, and then navigates to and asserts SSR before changing
+the fixture.
 
 ## VOC-088-AC-04 — Save, unsave, and sentence practice remain backend-coherent
 

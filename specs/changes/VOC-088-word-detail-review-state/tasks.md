@@ -16,11 +16,15 @@ stacked partial merges.
 - Status: pending; implementation unauthorized
 
 Add the required nullable domain projection, select the two minimum schedule inputs in
-the existing requester-scoped prepared join, and implement the exhaustive pure mapping
-at one injected clock instant. Extend the existing workerd/D1 parity test with every
-status/time/soft-delete boundary, negative raw-field checks, real-session cross-user
-isolation, anonymous denial, and runtime OpenAPI shape evidence. Change no write,
-transition, due-queue, schema, migration, auth, or Worker binding.
+the existing requester-scoped prepared join, and export the exact pure
+`projectWordReviewState(status, nextReviewAt, nowIso)` seam. Directly table-test every
+status/time boundary and its unsupported-status throw without invalid D1 insertion.
+Extend the existing workerd/D1 parity test with a single response containing at least
+two active meanings and a counting/incrementing clock that proves exactly one capture
+and ordered `["due", "learning"]` results, plus absent/soft-delete, negative raw-field,
+real-session cross-user isolation, anonymous denial, and runtime OpenAPI shape
+evidence. Change no write, transition, due-queue, schema, migration, auth, or Worker
+binding.
 
 ## VOC-088-T01 — Reconcile OpenAPI and the API-client contract
 
@@ -48,9 +52,12 @@ client response changes.
 
 Render the exact copy inside each meaning card, refresh SSR only after confirmed
 save/unsave, extend the existing mock with bounded state/failure cookies, and add
-focused contract, accessibility, and stateful mutation assertions. Preserve all
-canonical content, save/unsave request semantics, sentence-feedback behavior, default
-mock state, and unrelated browser tests.
+focused contract, accessibility, and stateful mutation assertions. Each fixture must
+use array-form `page.context().addCookies([{ ... }])`, direct same-context
+`page.request.get` to the configured `127.0.0.1:${MOCK_API_PORT ?? 8080}` mock, and
+only then SSR navigation/assertion in that context. Preserve all canonical content,
+save/unsave request semantics, sentence-feedback behavior, default mock state, and
+unrelated browser tests.
 
 Any task must stop and return to planning if it requires a twelfth file or crosses a
 declared schema, scheduling, auth, dependency, workflow/configuration, governance,

@@ -23,14 +23,25 @@ the task and returns to planning.
    to `WordMeaning`. Do not add raw schedule fields.
 2. In `apps/api-worker/src/content/repository.ts`, capture one ISO request clock inside
    `getWord`, extend the existing prepared meaning query with only `uw.status` and
-   `uw.next_review_at`, and add a pure exhaustive mapper implementing `D01`. Preserve
-   the bound `userId`, active-row predicate, query count/order, and example/note
-   behavior. Unexpected active statuses throw rather than normalize silently.
+   `uw.next_review_at`, and export
+   `projectWordReviewState(status: string | null, nextReviewAt: string | null, nowIso: string): WordReviewState | null`
+   as the deterministic pure mapper implementing `D01`. Preserve the bound `userId`,
+   active-row predicate, query count/order, and example/note behavior. The mapper must
+   throw `Error("unsupported user_words status")` for an unsupported non-null value;
+   do not add an invalid D1 row or weaken the database constraint to reach this branch.
 3. In `apps/api-worker/test/content-review-parity.test.ts`, extend the existing fixed
    D1 harness with:
 
-   - a table-driven projection test for absent, soft-deleted, every status, null,
-     past, exact equality, and +1 ms boundaries;
+   - a direct table-driven `projectWordReviewState` test for every status, null, past,
+     exact equality, and +1 ms boundaries, plus a direct assertion that an unsupported
+     status throws the exact `D04` error without invalid D1 insertion;
+   - a repository integration fixture with at least two active meanings in one word,
+     schedules at `2026-08-24T12:00:00.000Z` and
+     `2026-08-24T12:00:00.001Z`, and an injected counting/incrementing clock returning
+     those instants in order; one `getWord` must assert clock call count `1` and ordered
+     states `["due", "learning"]`, proving every meaning receives the shared first
+     instant while leaving the exhaustive mapper table intact;
+   - absent and soft-deleted row coverage;
    - negative assertions for raw `reviewStep`/`nextReviewAt` response fields;
    - two hashed, non-expiring synthetic session tokens attached to USER_A/USER_B,
      conflicting rows for the same meaning, and real authenticated route requests
@@ -62,6 +73,23 @@ the task and returns to planning.
 
    - a table-driven SSR assertion for all seven fixture values and exact copy/absence,
      with saved/practice behavior and no raw enum/step copy;
+   - for each table row, resolve the current harness web URL from
+     `testInfo.project.use.baseURL`, set the selector with the exact array-form call
+     `page.context().addCookies([{ name, value, url: baseURL }])`, then use this
+     browser-context-associated request call in that same context:
+
+     ```ts
+     const mockApiPort = Number(process.env.MOCK_API_PORT ?? 8080);
+     const fixtureResponse = await page.request.get(
+       `http://127.0.0.1:${mockApiPort}/api/v1/canonical-words/pour`,
+     );
+     ```
+
+     Deep-assert the fixture, then navigate to
+     `/discover/ordering-at-a-cafe/pour` and assert the matching SSR output before
+     selecting the next fixture; the cookie is host-scoped to `127.0.0.1`, so the
+     context sends it to both configured loopback ports, and no `page.route` is used;
+
    - axe, keyboard, and non-color-only evidence across existing 360 px, 430 px, and
      desktop projects; and
    - one isolated-session/CSRF functional round trip proving save -> refreshed due +
