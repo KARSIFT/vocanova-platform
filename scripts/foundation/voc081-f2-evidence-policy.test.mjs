@@ -23,7 +23,7 @@ const document = readFileSync(
 );
 const clone = (value) => structuredClone(value);
 
-test("the VOC-081 F2 candidate record is internally consistent", () => {
+test("the accepted VOC-081 repository/local F2 record is internally consistent", () => {
   assert.deepEqual(validateF2Evidence(repositoryRoot), []);
 });
 
@@ -49,13 +49,13 @@ test("task omission, stale revision, or noncanonical evidence fails closed", () 
   );
 });
 
-test("false F2 activation, later-gate release, or external effect fails closed", () => {
-  const activated = clone(record);
-  activated.status = "accepted";
-  activated.milestone_state.f3_staging = "passed";
-  activated.external_effects.deployment_performed = true;
-  const errors = inspectF2Record(activated);
-  assert.ok(errors.some((error) => error.includes("integration-pending")));
+test("stale F2 status, later-gate release, or external effect fails closed", () => {
+  const stale = clone(record);
+  stale.status = "repository-local-f2-candidate-integration-pending";
+  stale.milestone_state.f3_staging = "passed";
+  stale.external_effects.deployment_performed = true;
+  const errors = inspectF2Record(stale);
+  assert.ok(errors.some((error) => error.includes("completion")));
   assert.ok(errors.some((error) => error.includes("milestone/hold")));
   assert.ok(errors.some((error) => error.includes("deployment_performed")));
 });

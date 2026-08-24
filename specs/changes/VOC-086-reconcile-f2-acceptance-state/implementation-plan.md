@@ -1,7 +1,10 @@
 # VOC-086 — Implementation Plan
 
-Implementation is blocked until this exact plan candidate is independently reviewed,
-adopted, recorded in `change.yaml`, and merged into `develop`.
+PR #133 merged the independently reviewed and adopted plan as
+`b44c41256153cfefc40739b9e7eeb5dff6eb72ad`, so repository-only implementation is
+authorized. T00 is now a candidate pending fresh exact-revision general and R4
+specialist review, hosted proof, and normal merge; T01 and T02 remain blocked on their
+predecessors.
 
 1. `VOC-086-T00`: from the adopted plan merge, atomically reconcile the six living F2
    surfaces and the existing VOC-081 evidence-validator baseline. Preserve candidate

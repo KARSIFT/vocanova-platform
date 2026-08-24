@@ -20,6 +20,25 @@ const EXPECTED_TASKS = [
   ["VOC-081-T03", "ca7596cb72128e5fa47483a65678773a6968dd79", 107],
 ];
 
+const EXPECTED_FINAL_HEAD = "a8694932671ad9c44fd2a97c128b14e6089e5faf";
+const EXPECTED_MERGE = "36d526bdec83e28b17aa30a6814d42b92f058ec1";
+const EXPECTED_PR = "https://github.com/KARSIFT/vocanova-platform/pull/108";
+const EXPECTED_REVIEW = `${EXPECTED_PR}#issuecomment-5383790286`;
+const EXPECTED_HOSTED_EVIDENCE = `${EXPECTED_PR}#issuecomment-5385582178`;
+const EXPECTED_ROLLBACK_EVIDENCE = `${EXPECTED_PR}#issuecomment-5383822937`;
+const EXPECTED_HOSTED_RUNS = {
+  ci: 32612887965,
+  governance: 32634344456,
+  quality: 32612888017,
+  security: 32612888012,
+};
+const EXPECTED_POST_MERGE_RUNS = {
+  ci: 32634654242,
+  governance: 32634654225,
+  quality: "not-applicable-push-path-filter",
+  security: 32634654343,
+};
+
 const EXPECTED_COMMANDS = [
   "pnpm validate",
   "pnpm run ci:local-stack",
@@ -35,13 +54,19 @@ const EXPECTED_COMMANDS = [
 
 export function inspectF2Record(record) {
   const errors = [];
-  if (record?.schema_version !== "vocanova-voc081-f2-v1")
+  if (record?.schema_version !== "vocanova-voc081-f2-v2")
     errors.push("F2 record schema is invalid");
   if (
-    record?.task !== "VOC-081-T04" ||
-    record?.status !== "repository-local-f2-candidate-integration-pending"
+    record?.recorded_at_utc !== "2026-08-23T02:05:53Z" ||
+    record?.acceptance_reconciled_on !== "2026-08-24"
   ) {
-    errors.push("F2 task/status must remain integration-pending");
+    errors.push("F2 candidate and acceptance record dates are invalid");
+  }
+  if (
+    record?.task !== "VOC-081-T04" ||
+    record?.status !== "repository-local-f2-complete-effective"
+  ) {
+    errors.push("F2 task/status must report repository/local completion");
   }
   if (
     record?.package?.path !==
@@ -59,9 +84,13 @@ export function inspectF2Record(record) {
       "3d6699c5eb378b9a00679d61a5c28b6b7e27c32c" ||
     record?.repository_stack?.exact_implementation_sha !==
       EXPECTED_TASKS.at(-1)[1] ||
-    record?.repository_stack?.verified_through_task !== "VOC-081-T03"
+    record?.repository_stack?.final_evidence_sha !== EXPECTED_FINAL_HEAD ||
+    record?.repository_stack?.verified_through_task !== "VOC-081-T04" ||
+    record?.repository_stack?.integrated_by_pull_request !== 108 ||
+    record?.repository_stack?.merge_sha !== EXPECTED_MERGE ||
+    record?.repository_stack?.integrated_into_develop !== true
   ) {
-    errors.push("F2 stack boundaries or executable tip are invalid");
+    errors.push("F2 stack boundaries or integration evidence are invalid");
   }
   for (const field of [
     "merged_by_implementer",
@@ -69,6 +98,24 @@ export function inspectF2Record(record) {
   ]) {
     if (record?.repository_stack?.[field] !== false)
       errors.push(`repository_stack.${field} must remain false`);
+  }
+
+  const acceptance = record?.current_acceptance;
+  if (
+    acceptance?.scope !== "repository-local-f2-only" ||
+    acceptance?.effective !== true ||
+    acceptance?.pull_request !== EXPECTED_PR ||
+    acceptance?.final_head_sha !== EXPECTED_FINAL_HEAD ||
+    acceptance?.merge_sha !== EXPECTED_MERGE ||
+    acceptance?.review_evidence !== EXPECTED_REVIEW ||
+    acceptance?.hosted_evidence !== EXPECTED_HOSTED_EVIDENCE ||
+    acceptance?.rollback_failure_evidence !== EXPECTED_ROLLBACK_EVIDENCE ||
+    JSON.stringify(acceptance?.hosted_runs) !==
+      JSON.stringify(EXPECTED_HOSTED_RUNS) ||
+    JSON.stringify(acceptance?.post_merge_runs) !==
+      JSON.stringify(EXPECTED_POST_MERGE_RUNS)
+  ) {
+    errors.push("F2 current acceptance evidence is incomplete or inaccurate");
   }
   if (
     JSON.stringify(record?.workflow_inventory) !==
@@ -140,11 +187,12 @@ export function inspectF2Record(record) {
 
   const milestones = record?.milestone_state;
   if (
-    milestones?.f2_repository_local !==
-      "candidate-passes-only-after-integration-and-revalidation" ||
+    milestones?.f2_repository_local !== "complete-effective" ||
     milestones?.f3_staging !== "unresolved-held" ||
     milestones?.a1_authenticated_product_acceptance !== "unresolved" ||
+    milestones?.p1_plus_product_acceptance !== "unresolved" ||
     milestones?.production !== "held" ||
+    milestones?.live_activation !== "unresolved-held" ||
     JSON.stringify(milestones?.voc080_holds) !==
       JSON.stringify(["VOC-080-HOLD-00", "VOC-080-HOLD-01", "VOC-080-HOLD-02"])
   ) {
@@ -163,7 +211,16 @@ export function inspectF2Record(record) {
     if (record?.external_effects?.[field] !== false)
       errors.push(`external_effects.${field} must remain false`);
   }
-  const closure = record?.t04_closure_evidence;
+  const history = record?.candidate_history;
+  if (
+    history?.status !== "repository-local-f2-candidate-integration-pending" ||
+    !history?.effective_condition?.includes(
+      "integrated into develop and revalidated",
+    )
+  ) {
+    errors.push("F2 candidate-era status and condition must remain historical");
+  }
+  const closure = history?.t04_closure_evidence_in_candidate_revision;
   for (const field of [
     "exact_sha",
     "pull_request",
@@ -171,11 +228,13 @@ export function inspectF2Record(record) {
     "hosted_evidence",
   ]) {
     if (closure?.[field] !== null)
-      errors.push(`t04_closure_evidence.${field} must remain null in Git`);
+      errors.push(
+        `candidate_history.t04_closure_evidence_in_candidate_revision.${field} must remain null`,
+      );
   }
   if (!closure?.reason?.includes("self-referential commit hash"))
     errors.push(
-      "T04 closure evidence must explain its self-reference boundary",
+      "T04 candidate history must explain its self-reference boundary",
     );
   return errors;
 }
@@ -185,12 +244,22 @@ export function inspectF2Document(source, record) {
   for (const marker of [
     "# VOC-081 F2 Repository/Local Evidence Record",
     "## Acceptance boundary",
+    "## Exact integration evidence",
+    "## Historical candidate state",
     "## Exact task evidence",
     "## Command and CI contract",
     "## Local shape and limitations",
     "## No-live and later-gate state",
     "## Rollback status",
-    "F2 becomes effective only after",
+    "Repository/local F2 is complete and effective",
+    EXPECTED_FINAL_HEAD,
+    EXPECTED_MERGE,
+    "5383790286",
+    "5385582178",
+    "5383822937",
+    ...Object.values(EXPECTED_HOSTED_RUNS).map(String),
+    ...Object.values(EXPECTED_POST_MERGE_RUNS).map(String),
+    "repository-local-f2-candidate-integration-pending",
     "Native Windows behavior is not claimed",
     ".wrangler/state/vocanova-local",
     "VOC-080-HOLD-00",

@@ -1,13 +1,13 @@
 ---
 id: DOC-12
 title: VocaNova MVP Implementation Plan
-version: 1.2
+version: 1.3
 document_type: implementation-plan
 status: approved
 owner: founder
 canonical_path: docs/product/12-mvp-implementation-plan.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-08-23
+last_reviewed_at: 2026-08-24
 review_cycle: monthly
 supersedes: null
 related_documents:
@@ -55,10 +55,12 @@ until a separately reviewed VOC-080 task installs the specific held capability.
 VOC-081 supplies the missing contributor-level F2 gate: explicit persistent local D1
 initialization, fixed loopback origins, supervised fast and two-Worker loops, real
 service-binding proof, disposable restart/persistence evidence, and a required hosted
-local-stack job. The repository/local F2 candidate becomes accepted only after the
-complete VOC-081 stack and final evidence revision are integrated into `develop` and
-revalidated there. A draft PR or passing task branch does not itself change milestone
-state. F3 staging, A1 authenticated-product acceptance, production, and
+local-stack job. PR #108 integrated the complete VOC-081 stack and final evidence
+revision into `develop`, and the required post-merge checks passed. Repository/local
+F2 is therefore complete and effective. Before that merge, the work remained an
+integration-pending candidate; that candidate-era state remains historical evidence,
+and a draft PR or task branch still cannot change milestone state. F3 staging, A1/P1+
+product acceptance, production, deployment, live activation, and
 `VOC-080-HOLD-00` through `HOLD-02` remain unresolved/held.
 
 ## 1. Product outcome
@@ -96,12 +98,13 @@ can't be _accepted_ before its
 dependency passes. A milestone is never "done" merely because its code merged — its acceptance gate
 must pass (see §5).
 
-F1 is complete. VOC-081 implements the repository/local F2 candidate on a stacked
-task chain, but F2 does not pass merely because those draft branches exist. It becomes
-effective only after the complete final evidence revision is integrated and
-revalidated. Current completion is bound by the
-[VOC-081 F2 evidence record](../operations/voc-081-f2-evidence.md), not inferred from
-code presence or chat direction.
+F1 is complete. Repository/local F2 is complete and effective because PR #108
+integrated VOC-081's complete stacked task chain and final evidence revision, followed
+by passing post-merge revalidation. The earlier integration-pending candidate state is
+preserved in the
+[VOC-081 F2 evidence record](../operations/voc-081-f2-evidence.md). Completion is bound
+to that exact evidence, not inferred from code presence or chat direction. F3, A1/P1+
+acceptance, staging, production, deployment, and live activation remain unresolved.
 
 ## 4. Roles (summary — authority comes from the [approval matrix](../governance/approval-matrix.md)
 

@@ -40,8 +40,10 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
   implementation and external effects.
 - [VOC-081's F2 record](operations/voc-081-f2-evidence.md) binds the local D1,
   supervised-loop, service-binding, disposable-stack, CI, and limitation evidence. Its
-  candidate state becomes effective only after integration and revalidation; F3 and
-  every inherited live-action hold remain unresolved.
+  complete stack was integrated by PR #108 and passed post-merge revalidation, so
+  repository/local F2 is complete and effective. F3/staging, A1/P1+ acceptance,
+  production, deployment, live activation, and every inherited live-action hold
+  remain unresolved.
 
 ## Canonical document index
 

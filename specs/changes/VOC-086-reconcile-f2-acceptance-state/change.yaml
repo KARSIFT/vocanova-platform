@@ -112,10 +112,12 @@ artifacts:
 
 dependencies:
   - id: VOC-086-DEP-00
-    status: satisfied-exact-candidate-review-and-adoption-decision-pending-plan-pr-merge
+    status: satisfied-by-exact-plan-review-adoption-decision-and-pr-133-merge-b44c41256153cfefc40739b9e7eeb5dff6eb72ad
     description: >-
-      The exact plan candidate needs different-actor general and R4 specialist PASS
-      evidence plus an accountable adoption decision before implementation.
+      The exact plan candidate received different-actor general and R4 specialist PASS
+      evidence plus an accountable adoption decision; the bookkeeping revision was
+      independently reviewed and PR #133 merged as
+      b44c41256153cfefc40739b9e7eeb5dff6eb72ad before implementation began.
   - id: VOC-086-DEP-01
     status: satisfied-by-voc-081-and-voc-084-exact-evidence
     description: >-
@@ -131,7 +133,11 @@ dependencies:
 implementation:
   authorized: true
   required: true
-  status: authorized-upon-plan-pr-133-merge
+  status: >-
+    T00 candidate implemented from adopted base
+    b44c41256153cfefc40739b9e7eeb5dff6eb72ad, pending fresh exact-revision general
+    and R4 specialist review, hosted proof, and normal merge. T01 and T02 remain
+    blocked on their predecessors.
   tasks:
     - VOC-086-T00
     - VOC-086-T01
@@ -146,6 +152,12 @@ release:
 
 ehr: not-triggered
 blocking_reasons:
-  - plan-pr-merge-pending
-repository_adoption_status: adopted-candidate-pending-pr-133-merge
+  - T00-exact-review-r4-specialist-hosted-proof-and-merge-pending
+repository_adoption_status: adopted-on-pr-133-merge
 adoption_pr: 133
+repository_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/133
+implementation_authority_status: active-after-pr-133-merge-b44c41256153cfefc40739b9e7eeb5dff6eb72ad
+post_adoption_task_gates:
+  - T00-candidate-on-b44c41256153cfefc40739b9e7eeb5dff6eb72ad-pending-exact-review-r4-specialist-hosted-proof-and-merge
+  - T01-blocked-on-T00-merge
+  - T02-blocked-on-T01-merge

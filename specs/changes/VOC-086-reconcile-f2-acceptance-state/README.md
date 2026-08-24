@@ -1,7 +1,7 @@
 # VOC-086 — Reconcile repository/local F2 acceptance state
 
-Status: **adopted candidate; implementation authority becomes effective only after
-PR #133's final bookkeeping revision is independently reviewed and merged**.
+Status: **adopted through PR #133; T00 is an implementation candidate pending
+exact-revision general and R4 specialist review, hosted proof, and merge**.
 
 This package responds to [issue #131](https://github.com/KARSIFT/vocanova-platform/issues/131).
 VOC-081's canonical package and the VOC-084 closure inventory prove that repository/local
@@ -15,8 +15,10 @@ preserving candidate-era facts as history. It will not claim F3, staging, A1 or 
 product-milestone acceptance, production, deployment, or live verification.
 `VOC-080-HOLD-00`, `VOC-080-HOLD-01`, and `VOC-080-HOLD-02` remain held.
 
-Exact candidate `6ab1e87c16312e1c793a47935aabd7721649df55` received independent
+Exact plan candidate `6ab1e87c16312e1c793a47935aabd7721649df55` received independent
 general and R4 documentation/governance-specialist PASS verdicts with zero blockers,
-and the accountable adoption decision approved that exact candidate. Implementation
-may begin only after the metadata-only bookkeeping revision receives fresh exact-SHA
-review, hosted checks pass, and this plan PR merges.
+and the accountable adoption decision approved that exact candidate. The
+metadata-only bookkeeping revision was independently reviewed and PR #133 merged as
+`b44c41256153cfefc40739b9e7eeb5dff6eb72ad`, activating repository-only
+implementation authority. T00 changes remain candidate evidence until fresh exact-SHA
+general and R4 specialist review, hosted checks, and normal merge.
