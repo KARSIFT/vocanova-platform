@@ -68,9 +68,19 @@ candidate_hosted_evidence:
     url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32696336312
     structure: pass
     changed_path_risk: pass
-    merge_eligibility: expected-fail-while-candidate-package-remained-draft
+    merge_eligibility: fail-closed-pr-body-missing-exactly-one-evidence-v1-block
   security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32696336330
   quality: not-applicable-plan-only-path-filter
+
+bookkeeping_review_history:
+  - candidate_sha: 8fb4c4af9a6f3c294adfee51f8dbf549d3cde75b
+    verdict: fail
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/142#issuecomment-5391636025
+    findings:
+      - candidate-governance-failure-cause-recorded-inaccurately
+      - pr-body-stale-and-missing-required-evidence-v1-block
+    resolution_status: >-
+      preserved-failure-addressed-by-a-later-corrected-bookkeeping-candidate-and-pr-body-refresh-requiring-fresh-exact-sha-review
 
 owners:
   decision: accountable-decision-owner-after-independent-plan-review
