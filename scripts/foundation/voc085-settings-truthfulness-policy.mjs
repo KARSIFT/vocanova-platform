@@ -9,60 +9,217 @@ export const FOUNDATION_COMMAND =
   "node scripts/foundation/voc085-settings-truthfulness-policy.mjs";
 const CLI_PATH = fileURLToPath(import.meta.url);
 
-const CURRENT_RECORD_REQUIREMENTS = [
-  {
-    label: "repository identity",
-    snippet:
-      "repository: KARSIFT/vocanova-platform repository_identity: owner: KARSIFT name: vocanova-platform full_name: KARSIFT/vocanova-platform",
+const EXPECTED_CURRENT_RECORD = {
+  schema_version: 1,
+  repository: "KARSIFT/vocanova-platform",
+  repository_identity: {
+    owner: "KARSIFT",
+    name: "vocanova-platform",
+    full_name: "KARSIFT/vocanova-platform",
   },
-  {
-    label: "point-in-time observation dates",
-    snippet: "observed_at: 2026-08-24 as_of: 2026-08-24",
+  observed_at: "2026-08-24",
+  as_of: "2026-08-24",
+  source: "github-rest-api-read-only",
+  observation_evidence: {
+    issue: 119,
+    url: "https://github.com/KARSIFT/vocanova-platform/issues/119",
+    note: "read-only observation traceability only; no settings mutation authority",
   },
-  {
-    label: "read-only source contract",
-    snippet:
-      "source: github-rest-api-read-only observation_evidence: issue: 119",
+  source_endpoints: [
+    "GET /repos/KARSIFT/vocanova-platform",
+    "GET /repos/KARSIFT/vocanova-platform/actions/permissions",
+    "GET /repos/KARSIFT/vocanova-platform/actions/permissions/workflow",
+    "GET /repos/KARSIFT/vocanova-platform/rulesets",
+    "GET /repos/KARSIFT/vocanova-platform/branches/develop/protection",
+    "GET /repos/KARSIFT/vocanova-platform/branches/main/protection",
+    "GET /repos/KARSIFT/vocanova-platform/vulnerability-alerts",
+    "GET /repos/KARSIFT/vocanova-platform/automated-security-fixes",
+    "GitHub repository security-settings API fields for secret scanning",
+  ],
+  source_schema_surface: {
+    repository: {
+      endpoint: "GET /repos/KARSIFT/vocanova-platform",
+      raw_response_fields: [
+        "visibility",
+        "default_branch",
+        "allow_merge_commit",
+        "allow_squash_merge",
+        "allow_rebase_merge",
+        "delete_branch_on_merge",
+        "security_and_analysis.dependabot_security_updates.status",
+        "security_and_analysis.secret_scanning.status",
+        "security_and_analysis.secret_scanning_push_protection.status",
+        "security_and_analysis.secret_scanning_validity_checks.status",
+      ],
+      normalized_record_fields: [
+        "visibility",
+        "default_branch",
+        "allow_merge_commit",
+        "allow_squash_merge",
+        "allow_rebase_merge",
+        "delete_branch_on_merge",
+        "dependabot_security_updates",
+        "secret_scanning.enabled",
+        "secret_scanning.push_protection",
+        "secret_scanning.validity_checks",
+      ],
+    },
+    actions_permissions: {
+      endpoint: "GET /repos/KARSIFT/vocanova-platform/actions/permissions",
+      raw_response_fields: [
+        "enabled",
+        "allowed_actions",
+        "sha_pinning_required",
+      ],
+      normalized_record_fields: [
+        "actions.enabled",
+        "actions.allowed_actions",
+        "actions.sha_pinning_required",
+      ],
+    },
+    workflow_permissions: {
+      endpoint:
+        "GET /repos/KARSIFT/vocanova-platform/actions/permissions/workflow",
+      raw_response_fields: [
+        "default_workflow_permissions",
+        "can_approve_pull_request_reviews",
+      ],
+      normalized_record_fields: [
+        "actions.default_workflow_permissions",
+        "actions.can_approve_pull_request_reviews",
+      ],
+    },
+    rulesets: {
+      endpoint: "GET /repos/KARSIFT/vocanova-platform/rulesets",
+      raw_response_semantics: {
+        http_status: 200,
+        response_shape: "top-level-array",
+      },
+      normalized_record_fields: ["rulesets"],
+    },
+    branch_protection: {
+      develop: {
+        endpoint:
+          "GET /repos/KARSIFT/vocanova-platform/branches/develop/protection",
+        raw_response_semantics: {
+          http_status: 404,
+          message: "Branch not protected",
+        },
+        normalized_record_fields: ["branch_protection.develop"],
+      },
+      main: {
+        endpoint:
+          "GET /repos/KARSIFT/vocanova-platform/branches/main/protection",
+        raw_response_semantics: {
+          http_status: 404,
+          message: "Branch not protected",
+        },
+        normalized_record_fields: ["branch_protection.main"],
+      },
+    },
+    dependency_vulnerability_alerts: {
+      endpoint: "GET /repos/KARSIFT/vocanova-platform/vulnerability-alerts",
+      raw_response_semantics: {
+        http_status: 204,
+        response_body: "no-content",
+      },
+      normalized_record_fields: [
+        "dependency_vulnerability_alerts.enabled",
+        "dependency_vulnerability_alerts.endpoint_status",
+      ],
+    },
+    dependabot_security_updates: {
+      raw_sources: {
+        automated_security_fixes: {
+          endpoint:
+            "GET /repos/KARSIFT/vocanova-platform/automated-security-fixes",
+          http_status: 200,
+          body_fields: ["enabled", "paused"],
+        },
+        repository_security_and_analysis: {
+          endpoint: "GET /repos/KARSIFT/vocanova-platform",
+          field_paths: [
+            "security_and_analysis.dependabot_security_updates.status",
+          ],
+        },
+      },
+      normalized_record_fields: ["dependabot_security_updates"],
+    },
+    secret_scanning: {
+      raw_sources: {
+        repository_security_and_analysis: {
+          endpoint: "GET /repos/KARSIFT/vocanova-platform",
+          field_paths: [
+            "security_and_analysis.secret_scanning.status",
+            "security_and_analysis.secret_scanning_push_protection.status",
+            "security_and_analysis.secret_scanning_validity_checks.status",
+          ],
+        },
+      },
+      normalized_record_fields: [
+        "secret_scanning.enabled",
+        "secret_scanning.push_protection",
+        "secret_scanning.validity_checks",
+      ],
+    },
   },
-  {
-    label: "freshness semantics",
-    snippet:
-      "freshness: semantics: point-in-time-observation-not-live-state network_free_guard_scope: internal-consistency-only-not-live-freshness live_freshness_proven: false",
+  freshness: {
+    semantics: "point-in-time-observation-not-live-state",
+    network_free_guard_scope: "internal-consistency-only-not-live-freshness",
+    live_freshness_proven: false,
+    stale_when: [
+      "any later repository-settings mutation is authorized or observed",
+      "the observation can no longer be independently reverified",
+    ],
+    required_follow_up:
+      "immediate-governed-doc-only-reconciliation-after-future-mutation",
   },
-  {
-    label: "staleness contract",
-    snippet:
-      "stale_when: - any later repository-settings mutation is authorized or observed - the observation can no longer be independently reverified required_follow_up: immediate-governed-doc-only-reconciliation-after-future-mutation",
+  settings_mutation: "prohibited",
+  visibility: "public",
+  default_branch: "main",
+  allow_merge_commit: true,
+  allow_squash_merge: true,
+  allow_rebase_merge: false,
+  delete_branch_on_merge: false,
+  actions: {
+    enabled: true,
+    allowed_actions: "selected",
+    sha_pinning_required: true,
+    default_workflow_permissions: "read",
+    can_approve_pull_request_reviews: false,
   },
-  {
-    label: "settings-mutation prohibition",
-    snippet: "settings_mutation: prohibited",
+  rulesets: [],
+  branch_protection: {
+    develop: "http-404-not-protected",
+    main: "http-404-not-protected",
   },
-  {
-    label: "follow-up mutation boundary",
-    snippet:
-      "follow_up_boundary: future_settings_mutation_requires_immediate_governed_doc_only_follow_up: true this_record_does_not_authorize_or_perform_mutation: true",
+  dependency_vulnerability_alerts: {
+    enabled: true,
+    endpoint_status: 204,
   },
-  {
-    label: "dependency and vulnerability alert state",
-    snippet:
-      "dependency_vulnerability_alerts: enabled: true endpoint_status: 204",
+  dependabot_security_updates: "disabled",
+  secret_scanning: {
+    enabled: false,
+    push_protection: false,
+    validity_checks: false,
   },
-  {
-    label: "Dependabot security-update state",
-    snippet: "dependabot_security_updates: disabled",
+  follow_up_boundary: {
+    future_settings_mutation_requires_immediate_governed_doc_only_follow_up: true,
+    this_record_does_not_authorize_or_perform_mutation: true,
   },
-  {
-    label: "secret scanning state",
-    snippet:
-      "secret_scanning: enabled: false push_protection: false validity_checks: false",
+  specialist_review: {
+    required: true,
+    status: "pending-exact-final-revision-review",
+    scope: [
+      "source-api-schema-and-endpoint-interpretation",
+      "availability-versus-enabled-distinction",
+      "dependency-vulnerability-alert-versus-dependabot-security-update-distinction",
+      "point-in-time-freshness-and-staleness-semantics",
+      "no-mutation-boundary",
+    ],
+    note: "specialist exact-revision review remains pending for this implementation revision",
   },
-  {
-    label: "specialist review marker",
-    snippet:
-      "specialist_review: required: true status: pending-exact-final-revision-review",
-  },
-];
+};
 
 const ACTIVE_DOCUMENT_REQUIREMENTS = [
   {
@@ -191,6 +348,31 @@ const ACTIVE_DOCUMENT_REQUIREMENTS = [
 
 const ACTIVE_SECTION_CONTRADICTIONS = [
   {
+    path: "README.md",
+    anchor: "The repository is public on GitHub,",
+    label: "active README repository-summary section",
+    forbidden: [
+      {
+        label: "private-current repository claim",
+        pattern:
+          /(?:^|[.!?]\s+)The repository is private(?: on GitHub)?(?:,\s*current as observed at 2026-08-24)?\b/i,
+      },
+    ],
+  },
+  {
+    path: ".github/README.md",
+    anchor:
+      "The repository is public, current as observed at 2026-08-24, but public availability does not mean a ruleset, branch protection, security feature, or other hosted enforcement control is configured.",
+    label: "active .github current-settings section",
+    forbidden: [
+      {
+        label: "private-current repository claim",
+        pattern:
+          /(?:^|[.!?]\s+)The repository is private(?: on GitHub)?(?:,\s*current as observed at 2026-08-24)?\b/i,
+      },
+    ],
+  },
+  {
     path: "docs/governance/repository-settings.md",
     heading: "## Current hosted posture (observed 2026-08-24)",
     label: "active current hosted-posture section",
@@ -224,6 +406,18 @@ const ACTIVE_SECTION_CONTRADICTIONS = [
     ],
   },
   {
+    path: "docs/governance/repository-settings.md",
+    heading: "## VOC-080 historical transition snapshot",
+    label: "active VOC-080 historical-boundary section",
+    forbidden: [
+      {
+        label: "VOC-080 private snapshot claimed current",
+        pattern:
+          /(?:^|[.!?]\s+)(?:The VOC-080 private(?:-repository)? snapshot|VOC-080(?:'s)? private(?:-repository)? snapshot|The private-repository snapshot|The VOC-080 transition record|The JSON source)\b[^.]*\b(?:is|are|remains)\s+(?:now\s+|still\s+)?(?:the\s+)?(?:current hosted state|source for the current(?:-as-observed-at-2026-08-24)? repository settings)\b/i,
+      },
+    ],
+  },
+  {
     path: "docs/operations/cloudflare-delivery.md",
     anchor: "The repository is public, current as observed at 2026-08-24.",
     label: "active delivery-settings section",
@@ -253,6 +447,17 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
+function whitespaceTolerantPattern(value) {
+  return new RegExp(
+    value
+      .trim()
+      .split(/\s+/)
+      .map((part) => escapeRegExp(part))
+      .join("\\s+"),
+    "m",
+  );
+}
+
 function sectionText(text, heading) {
   const headingPattern = new RegExp(`^${escapeRegExp(heading)}\\s*$`, "m");
   const match = headingPattern.exec(text);
@@ -267,14 +472,269 @@ function sectionText(text, heading) {
 }
 
 function anchoredSectionText(text, anchor) {
-  const index = text.indexOf(anchor);
-  if (index === -1) return null;
+  const match = whitespaceTolerantPattern(anchor).exec(text);
+  if (match === null) return null;
+  const index = match.index;
 
   const remainder = text.slice(index);
   const nextHeading = /^\n## .+$/m.exec(remainder);
   const end =
     nextHeading === null ? text.length : index + nextHeading.index + 1;
   return text.slice(index, end);
+}
+
+function parseScalarValue(rawValue, relativePath, lineNumber, errors) {
+  if (rawValue === "[]") return [];
+  if (rawValue === "true") return true;
+  if (rawValue === "false") return false;
+  if (/^-?\d+$/.test(rawValue)) return Number(rawValue);
+  if (rawValue.startsWith("[") || rawValue.startsWith("{")) {
+    errors.push(
+      `${relativePath}:${lineNumber}: unsupported inline collection '${rawValue}'`,
+    );
+    return null;
+  }
+  return rawValue;
+}
+
+function parseStrictYamlSubset(text, relativePath) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const errors = [];
+
+  for (const [index, line] of lines.entries()) {
+    const trimmed = line.trim();
+    if (trimmed === "") continue;
+    if (line.includes("\t")) {
+      errors.push(`${relativePath}:${index + 1}: tabs are not allowed`);
+    }
+    if (trimmed.includes("#")) {
+      errors.push(
+        `${relativePath}:${index + 1}: comments are not allowed in this strict YAML subset`,
+      );
+    }
+  }
+
+  const state = { index: 0 };
+
+  function skipBlankLines() {
+    while (state.index < lines.length && lines[state.index].trim() === "") {
+      state.index += 1;
+    }
+  }
+
+  function indentation(line) {
+    return line.match(/^ */)[0].length;
+  }
+
+  function parseList(expectedIndent) {
+    const items = [];
+
+    while (true) {
+      skipBlankLines();
+      if (state.index >= lines.length) break;
+
+      const line = lines[state.index];
+      const lineIndent = indentation(line);
+      if (lineIndent < expectedIndent) break;
+      if (lineIndent !== expectedIndent) {
+        errors.push(
+          `${relativePath}:${state.index + 1}: malformed indentation in list item`,
+        );
+        state.index += 1;
+        continue;
+      }
+
+      const trimmed = line.slice(expectedIndent);
+      if (!trimmed.startsWith("- ")) break;
+
+      const valueText = trimmed.slice(2).trim();
+      if (valueText === "") {
+        errors.push(
+          `${relativePath}:${state.index + 1}: nested list or map items are unsupported`,
+        );
+        state.index += 1;
+        continue;
+      }
+
+      items.push(
+        parseScalarValue(valueText, relativePath, state.index + 1, errors),
+      );
+      state.index += 1;
+    }
+
+    return items;
+  }
+
+  function parseMap(expectedIndent) {
+    const object = {};
+
+    while (true) {
+      skipBlankLines();
+      if (state.index >= lines.length) break;
+
+      const line = lines[state.index];
+      const lineIndent = indentation(line);
+      if (lineIndent < expectedIndent) break;
+      if (lineIndent !== expectedIndent) {
+        errors.push(
+          `${relativePath}:${state.index + 1}: malformed indentation in mapping`,
+        );
+        state.index += 1;
+        continue;
+      }
+
+      const trimmed = line.slice(expectedIndent);
+      if (trimmed.startsWith("- ")) {
+        errors.push(
+          `${relativePath}:${state.index + 1}: unexpected list item at mapping level`,
+        );
+        state.index += 1;
+        continue;
+      }
+
+      const separatorIndex = trimmed.indexOf(":");
+      if (separatorIndex <= 0) {
+        errors.push(
+          `${relativePath}:${state.index + 1}: invalid mapping entry '${trimmed}'`,
+        );
+        state.index += 1;
+        continue;
+      }
+
+      const key = trimmed.slice(0, separatorIndex).trim();
+      const valueText = trimmed.slice(separatorIndex + 1).trim();
+      if (Object.hasOwn(object, key)) {
+        errors.push(
+          `${relativePath}:${state.index + 1}: duplicate key '${key}'`,
+        );
+      }
+
+      state.index += 1;
+
+      if (valueText !== "") {
+        object[key] = parseScalarValue(
+          valueText,
+          relativePath,
+          state.index,
+          errors,
+        );
+        continue;
+      }
+
+      skipBlankLines();
+      if (state.index >= lines.length) {
+        errors.push(
+          `${relativePath}:${state.index}: key '${key}' is missing a nested block`,
+        );
+        object[key] = null;
+        break;
+      }
+
+      const nextLine = lines[state.index];
+      const nextIndent = indentation(nextLine);
+      if (nextIndent <= expectedIndent) {
+        errors.push(
+          `${relativePath}:${state.index + 1}: key '${key}' is missing a nested block`,
+        );
+        object[key] = null;
+        continue;
+      }
+      if (nextIndent !== expectedIndent + 2) {
+        errors.push(
+          `${relativePath}:${state.index + 1}: malformed indentation under key '${key}'`,
+        );
+      }
+
+      object[key] = nextLine.slice(nextIndent).startsWith("- ")
+        ? parseList(nextIndent)
+        : parseMap(nextIndent);
+    }
+
+    return object;
+  }
+
+  skipBlankLines();
+  const data = parseMap(0);
+  skipBlankLines();
+
+  return { data, errors };
+}
+
+function describeValue(value) {
+  if (Array.isArray(value))
+    return `[${value.map((item) => describeValue(item)).join(", ")}]`;
+  if (value !== null && typeof value === "object") return "object";
+  return JSON.stringify(value);
+}
+
+function compareCurrentRecord(expected, actual, path, errors, relativePath) {
+  if (Array.isArray(expected)) {
+    if (!Array.isArray(actual)) {
+      errors.push(
+        `${relativePath}: ${path} must be an array, found ${describeValue(actual)}`,
+      );
+      return;
+    }
+    if (actual.length !== expected.length) {
+      errors.push(
+        `${relativePath}: ${path} must contain ${expected.length} item(s), found ${actual.length}`,
+      );
+      return;
+    }
+    for (const [index, expectedValue] of expected.entries()) {
+      compareCurrentRecord(
+        expectedValue,
+        actual[index],
+        `${path}[${index}]`,
+        errors,
+        relativePath,
+      );
+    }
+    return;
+  }
+
+  if (expected !== null && typeof expected === "object") {
+    if (
+      actual === null ||
+      typeof actual !== "object" ||
+      Array.isArray(actual)
+    ) {
+      errors.push(
+        `${relativePath}: ${path} must be an object, found ${describeValue(actual)}`,
+      );
+      return;
+    }
+
+    for (const key of Object.keys(expected)) {
+      if (!Object.hasOwn(actual, key)) {
+        errors.push(`${relativePath}: missing ${path}.${key}`);
+      }
+    }
+
+    for (const key of Object.keys(actual)) {
+      if (!Object.hasOwn(expected, key)) {
+        errors.push(`${relativePath}: unexpected ${path}.${key}`);
+      }
+    }
+
+    for (const [key, expectedValue] of Object.entries(expected)) {
+      if (!Object.hasOwn(actual, key)) continue;
+      compareCurrentRecord(
+        expectedValue,
+        actual[key],
+        `${path}.${key}`,
+        errors,
+        relativePath,
+      );
+    }
+    return;
+  }
+
+  if (actual !== expected) {
+    errors.push(
+      `${relativePath}: ${path} must equal ${describeValue(expected)}, found ${describeValue(actual)}`,
+    );
+  }
 }
 
 function readRequiredText(repositoryRoot, relativePath, errors) {
@@ -297,9 +757,17 @@ function inspectCurrentRecord(repositoryRoot) {
   const text = readRequiredText(repositoryRoot, CURRENT_RECORD_PATH, errors);
   if (text === null) return errors;
 
-  for (const { label, snippet } of CURRENT_RECORD_REQUIREMENTS) {
-    requireSnippet(errors, CURRENT_RECORD_PATH, text, label, snippet);
-  }
+  const parsed = parseStrictYamlSubset(text, CURRENT_RECORD_PATH);
+  errors.push(...parsed.errors);
+  if (parsed.errors.length > 0) return errors;
+
+  compareCurrentRecord(
+    EXPECTED_CURRENT_RECORD,
+    parsed.data,
+    "current_record",
+    errors,
+    CURRENT_RECORD_PATH,
+  );
 
   return errors;
 }

@@ -63,6 +63,24 @@ test("explicitly labelled historical and prospective text remains accepted", () 
   const errors = errorsFor((root) => {
     mutate(
       root,
+      "README.md",
+      (text) =>
+        `${text}\n\n## Historical note\n\n_Historical, no longer true:_ The repository was private on GitHub before the 2026-08-24 observation.\n`,
+    );
+    mutate(
+      root,
+      ".github/README.md",
+      (text) =>
+        `${text}\n\n## Historical note\n\n_Historical, no longer true:_ The repository was private on GitHub before the public observation record.\n`,
+    );
+    mutate(
+      root,
+      "docs/governance/repository-settings.md",
+      (text) =>
+        `${text}\n\n## Historical examples\n\n_Historical, no longer true:_ The VOC-080 private-repository snapshot was the current hosted state before the public observation record existed.\n\nProspective only: a future governed observation may become the source for current repository settings after a later re-verification.\n`,
+    );
+    mutate(
+      root,
       "docs/operations/cloudflare-delivery.md",
       (text) =>
         `${text}\n\n## Historical examples\n\n_Historical, no longer true:_ Hosted environment approvals are configured and secrets are active for the delivery posture.\n\nProspective only: branch restrictions are configured after a separately authorized future settings mutation.\n`,
@@ -79,7 +97,7 @@ test("missing point-in-time or freshness fields and aggregate omission fail clos
   });
   assert.ok(
     missingObservedAt.some((message) =>
-      /repository-settings-current\.yaml: missing point-in-time observation dates/.test(
+      /repository-settings-current\.yaml: missing current_record\.observed_at/.test(
         message,
       ),
     ),
@@ -95,7 +113,7 @@ test("missing point-in-time or freshness fields and aggregate omission fail clos
   });
   assert.ok(
     missingFreshness.some((message) =>
-      /repository-settings-current\.yaml: missing freshness semantics/.test(
+      /repository-settings-current\.yaml: missing current_record\.freshness\.network_free_guard_scope/.test(
         message,
       ),
     ),
@@ -231,6 +249,54 @@ test("held-control promotion, prospective-alert drift, non-blocking hold drift, 
 });
 
 test("appended contradictory current and held claims fail even when the safe snippets remain", () => {
+  const appendedReadmePrivateCurrent = errorsFor((root) => {
+    mutate(root, "README.md", (text) =>
+      text.replace(
+        "configured.\n\nIts canonical runtime roots",
+        "configured.\n\nThe repository is private on GitHub, current as observed at 2026-08-24.\n\nIts canonical runtime roots",
+      ),
+    );
+  });
+  assert.ok(
+    appendedReadmePrivateCurrent.some((message) =>
+      /README\.md: contradictory private-current repository claim in active README repository-summary section/.test(
+        message,
+      ),
+    ),
+  );
+
+  const appendedGithubPrivateCurrent = errorsFor((root) => {
+    mutate(root, ".github/README.md", (text) =>
+      text.replace(
+        "record](../docs/governance/repository-settings-current.yaml).\n",
+        "record](../docs/governance/repository-settings-current.yaml).\nThe repository is private, current as observed at 2026-08-24.\n",
+      ),
+    );
+  });
+  assert.ok(
+    appendedGithubPrivateCurrent.some((message) =>
+      /\.github\/README\.md: contradictory private-current repository claim in active \.github current-settings section/.test(
+        message,
+      ),
+    ),
+  );
+
+  const appendedVoc080CurrentClaim = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings.md", (text) =>
+      text.replace(
+        "current-as-observed-at-2026-08-24 repository settings.\n",
+        "current-as-observed-at-2026-08-24 repository settings.\nThe VOC-080 private-repository snapshot remains the current hosted state.\n",
+      ),
+    );
+  });
+  assert.ok(
+    appendedVoc080CurrentClaim.some((message) =>
+      /repository-settings\.md: contradictory VOC-080 private snapshot claimed current in active VOC-080 historical-boundary section/.test(
+        message,
+      ),
+    ),
+  );
+
   const appendedSettingsMutation = errorsFor((root) => {
     mutate(root, "docs/governance/repository-settings.md", (text) =>
       text.replace(
@@ -274,6 +340,78 @@ test("appended contradictory current and held claims fail even when the safe sni
   assert.ok(
     appendedLiveHostedClaim.some((message) =>
       /cloudflare-delivery\.md: contradictory hosted environment or branch restrictions claimed configured in active delivery-settings section/.test(
+        message,
+      ),
+    ),
+  );
+});
+
+test("current-record API schema, normalized values, duplicates, and comments fail with concrete reasons", () => {
+  const missingEndpoint = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings-current.yaml", (text) =>
+      text.replace("  - GET /repos/KARSIFT/vocanova-platform/rulesets\n", ""),
+    );
+  });
+  assert.ok(
+    missingEndpoint.some((message) =>
+      /repository-settings-current\.yaml: current_record\.source_endpoints must contain 9 item\(s\), found 8/.test(
+        message,
+      ),
+    ),
+  );
+
+  const contradictorySchema = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings-current.yaml", (text) =>
+      text.replace("      http_status: 204\n", "      http_status: 200\n"),
+    );
+  });
+  assert.ok(
+    contradictorySchema.some((message) =>
+      /repository-settings-current\.yaml: current_record\.source_schema_surface\.dependency_vulnerability_alerts\.raw_response_semantics\.http_status must equal 204, found 200/.test(
+        message,
+      ),
+    ),
+  );
+
+  const contradictoryNormalizedValue = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings-current.yaml", (text) =>
+      text.replace("visibility: public\n", "visibility: private\n"),
+    );
+  });
+  assert.ok(
+    contradictoryNormalizedValue.some((message) =>
+      /repository-settings-current\.yaml: current_record\.visibility must equal "public", found "private"/.test(
+        message,
+      ),
+    ),
+  );
+
+  const duplicateKey = errorsFor((root) => {
+    mutate(
+      root,
+      "docs/governance/repository-settings-current.yaml",
+      (text) => `${text}\nvisibility: private\n`,
+    );
+  });
+  assert.ok(
+    duplicateKey.some((message) =>
+      /repository-settings-current\.yaml:\d+: duplicate key 'visibility'/.test(
+        message,
+      ),
+    ),
+  );
+
+  const commentAttempt = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings-current.yaml", (text) =>
+      text.replace(
+        "source: github-rest-api-read-only\n",
+        "source: github-rest-api-read-only # comment attempt\n",
+      ),
+    );
+  });
+  assert.ok(
+    commentAttempt.some((message) =>
+      /repository-settings-current\.yaml:\d+: comments are not allowed in this strict YAML subset/.test(
         message,
       ),
     ),
