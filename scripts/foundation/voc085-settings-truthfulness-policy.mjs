@@ -267,11 +267,14 @@ function sectionText(text, heading) {
 }
 
 function anchoredSectionText(text, anchor) {
-  const normalizedText = normalizeWhitespace(text);
-  const normalizedAnchor = normalizeWhitespace(anchor);
-  const index = normalizedText.indexOf(normalizedAnchor);
+  const index = text.indexOf(anchor);
   if (index === -1) return null;
-  return normalizedText.slice(index);
+
+  const remainder = text.slice(index);
+  const nextHeading = /^\n## .+$/m.exec(remainder);
+  const end =
+    nextHeading === null ? text.length : index + nextHeading.index + 1;
+  return text.slice(index, end);
 }
 
 function readRequiredText(repositoryRoot, relativePath, errors) {

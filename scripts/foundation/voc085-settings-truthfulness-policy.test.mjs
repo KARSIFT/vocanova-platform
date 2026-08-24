@@ -63,9 +63,9 @@ test("explicitly labelled historical and prospective text remains accepted", () 
   const errors = errorsFor((root) => {
     mutate(
       root,
-      "README.md",
+      "docs/operations/cloudflare-delivery.md",
       (text) =>
-        `${text}\n\n_Historical, no longer true:_ The repository was private before the 2026-08-24 observation.\n\nProspective only: rulesets and protected branches may be activated only after a separately authorized future settings mutation.\n`,
+        `${text}\n\n## Historical examples\n\n_Historical, no longer true:_ Hosted environment approvals are configured and secrets are active for the delivery posture.\n\nProspective only: branch restrictions are configured after a separately authorized future settings mutation.\n`,
     );
   });
   assert.deepEqual(errors, []);
