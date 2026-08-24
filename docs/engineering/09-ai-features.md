@@ -1,13 +1,13 @@
 ---
 id: DOC-09
 title: VocaNova AI Features
-version: 1.1
+version: 1.2
 document_type: ai-feature-design
 status: approved
 owner: founder
 canonical_path: docs/engineering/09-ai-features.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
+last_reviewed_at: 2026-08-24
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -394,10 +394,15 @@ The **builder role** implements domain types/persistence/migrations, determinist
 matching, feedback-provider and moderation interfaces, mock provider, one production adapter,
 prompt/versioning package, structured-output validator, orchestration service, transaction-safe
 mission completion, rate limiting, idempotency/dedup, stable REST behavior, frontend integration,
-reporting, observability, evaluation fixtures/tooling, tests, operational docs. Recommended PR
-sequence: (1) AI domain and persistence, (2) validation and orchestration foundation, (3) prompt and
-production provider, (4) safety and moderation, (5) API and frontend integration, (6) evaluation and
-observability.
+reporting, observability, evaluation fixtures/tooling, tests, operational docs. Ordered
+implementation-component sequence inside the default coherent P3/AI pull request:
+(1) AI domain and persistence, (2) validation and orchestration foundation,
+(3) prompt and production provider, (4) safety and moderation,
+(5) API and frontend integration, (6) evaluation and observability. A future adopted
+package may use multiple P3/AI PRs only when it records a concrete boundary,
+partial-state coherence, integration/rollback explanation, and the tradeoff against
+coordination, elapsed time, token/context, repeated checks, exact-review cycles, and
+bookkeeping overhead.
 
 Coding begins only after this document is approved, API-contract alignment is checked, database
 support is confirmed, provider candidates are evaluated, provider privacy settings are verified,

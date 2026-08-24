@@ -29,16 +29,20 @@ approvals are exhausted and must never be reused.
    floor, protected areas, and diff.
 2. Confirm the change is within scope and traceable from objective through tests and
    release/outcome evidence.
-3. Inspect completed evidence for every installed relevant deterministic check. Do not
+3. Verify that the builder selected the largest safe coherent delivery unit, that
+   task IDs are minimum-sufficient traceability/evidence groupings rather than PR
+   quotas, and that any multi-PR plan records its boundary, partial-state
+   coherence, integration, rollback, and overhead rationale.
+4. Inspect completed evidence for every installed relevant deterministic check. Do not
    duplicate a completed long-running suite unless the review assignment explicitly
    requires it. Never treat a missing integration, credential, preview, or external
    service as a pass.
-4. Review semantic risk; raise the class when path rules miss a protected or R4
+5. Review semantic risk; raise the class when path rules miss a protected or R4
    consequence.
-5. Check migrations, rollout, monitoring, rollback, documentation, complete risk
+6. Check migrations, rollout, monitoring, rollback, documentation, complete risk
    evidence, and any separately required action-specific authority.
-6. Re-review the exact revision after material remediation.
-7. Bind the report to the exact reviewed commit SHA and explicitly verify that the
+7. Re-review the exact revision after material remediation.
+8. Bind the report to the exact reviewed commit SHA and explicitly verify that the
    implementation builder did not approve or merge it, identify the active authority model,
    and report every still-required R3/R4 evidence, action-specific authority, EHR,
    adoption, and activation gate.

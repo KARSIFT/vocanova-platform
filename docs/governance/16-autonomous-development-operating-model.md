@@ -1,7 +1,7 @@
 ---
 id: DOC-16
 title: Vocanova Autonomous Development Operating Model
-version: 3.3
+version: 3.4
 status: approved
 owner: founder
 canonical_path: docs/governance/16-autonomous-development-operating-model.md
@@ -19,10 +19,10 @@ folds_in:
   - VOC-082 (Provider-neutral distinct-agent role separation; adopted 2026-08-23, PR #110)
   - VOC-085 (Public repository settings truth and held activation boundary; adopted 2026-08-24, PR #126)
 revision_note: >
-  This v3.3 revision reconciles the public repository settings posture current as
-  observed at 2026-08-24. It preserves the universal evidence contract, distinguishes
-  configured Actions and dependency/vulnerability alerts from absent or disabled
-  hosted controls, and keeps future settings activation and external effects held.
+  This v3.4 revision adds the coherent-outcome delivery default: one approved
+  package, one implementation pull request, and one minimum-sufficient task are the
+  normal safe unit for one outcome, while multi-PR delivery remains an explicit,
+  overhead-aware exception.
 related_documents:
   - DOC-15
 related_decisions:
@@ -138,6 +138,28 @@ artifacts, issues, branches, pull requests, tests, releases, and outcome records
 Trivial R0 corrections may use a linked issue or a concise pull-request description
 instead of a full change package, but they must still identify objective, scope,
 evidence, and risk.
+
+## Delivery-shape default
+
+For one approved user or business outcome, the planner selects the largest safe
+coherent delivery unit across backend, frontend, contracts, tests, documentation,
+rollback, and evidence layers that share the same outcome and control boundary. The
+default delivery unit is one approved `VOC-###` package, one implementation pull
+request into `develop`, and one minimum-sufficient task.
+
+Task IDs are traceability and evidence groupings. They map requirements, acceptance
+criteria, dependencies, ownership, sequence, tests, and evidence, but they do not
+themselves imply separate branches, worktrees, pull requests, releases, or merges.
+
+Splitting is exceptional. More than one implementation pull request is justified only
+when the plan records an independently releasable and rollback-safe outcome boundary,
+a material risk or action-authority boundary, a hard dependency, incompatible
+reviewer/owner needs, or a demonstrated reviewability limit that clearer in-PR
+organization cannot solve. The rationale must explain partial-state coherence,
+integration order, rollback, and the tradeoff against coordination, elapsed-time,
+token/context, repeated-check, exact-review, and bookkeeping overhead. Component
+count, line count, test layers, documentation updates, and implementation convenience
+do not by themselves justify a split.
 
 ## Risk classification
 

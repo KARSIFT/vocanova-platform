@@ -1,13 +1,13 @@
 ---
 id: DOC-10
 title: VocaNova Development Workflow
-version: 1.2
+version: 1.3
 document_type: engineering-workflow
 status: approved
 owner: founder
 canonical_path: docs/operations/10-development-workflow.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-08-23
+last_reviewed_at: 2026-08-24
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -34,8 +34,10 @@ the Cloudflare Worker/D1 target, and
 external Ruflo coordination. GitHub remains canonical. Ruflo may coordinate isolated
 provider-neutral roles but cannot approve, merge, deploy, access secrets or production
 data, or turn issues/comments into execution. The four Actions workflows remain
-deterministic evidence only. Repository migration proceeds through VOC-080's stacked,
-independently reviewed tasks; live Cloudflare and data actions remain separately held.
+deterministic evidence only. Repository migration proceeds through VOC-080's
+already-adopted stacked, independently reviewed tasks; that package-specific history
+does not make stacked tasks or PRs the default for unrelated work. Live Cloudflare
+and data actions remain separately held.
 VOC-080-T11 completed the repository-only retirement after the exact T03-T10 parity
 chain: the active tree now contains only the OpenNext/Hono/D1 runtime. That removal did
 not inspect, mutate, or stop a live server.
@@ -134,7 +136,10 @@ production history → Releases/deployments.
 
 Priorities P0 (critical: outage, data loss, active security incident) through P3 (post-MVP
 polish); most planned work is P2. Sizes XS/S/M/L — a builder actor should never receive
-an `L` issue directly; split it first.
+an `L` issue directly without an explicit coherent-unit decision. Sizes are planning
+signals, not automatic pull-request counts: one `L` issue may still stay one PR when
+it remains one rollback-safe, reviewable outcome, while a smaller issue may still
+split if it crosses a real boundary.
 
 ## 5. Definition of Ready / Definition of Done
 
@@ -153,12 +158,19 @@ activation change complete.
 
 ## 6. Pull-request standards
 
-One coherent outcome per PR; unrelated work becomes a separate issue. Preferred size 100–500
-meaningful changed lines (under 200 for fixes; over 800 normally split). Conventional Commits
-(`feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`, `perf`, `security`, `revert`); no
-AI agent names in commit messages. PR body must cover: summary, linked issue, requirement sources,
-scope, implementation, acceptance criteria, testing performed, security/database/API/environment
-impact, documentation impact, known risks, and review status.
+One coherent outcome per PR; unrelated work becomes a separate issue. Reviewability
+signals include cohesion, requirement/acceptance mapping, dependency order,
+generated-versus-authored content, concentrated risk, test evidence, and rollback
+clarity. A large coherent diff may remain one PR; a smaller incoherent diff may
+require separation. When a plan proposes more than one implementation PR, it must
+record the boundary, partial-state coherence, integration order, rollback approach,
+and the tradeoff against coordination, elapsed time, token/context, repeated local
+and hosted checks, exact-review cycles, and bookkeeping overhead. Conventional
+Commits (`feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `build`, `ci`, `perf`,
+`security`, `revert`); no AI agent names in commit messages. PR body must cover:
+summary, linked issue, requirement sources, scope, implementation, acceptance
+criteria, testing performed, security/database/API/environment impact, documentation
+impact, known risks, and review status.
 
 ## 7. Testing strategy
 

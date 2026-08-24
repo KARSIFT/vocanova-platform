@@ -9,9 +9,17 @@ value only from an approved requirement source.
 Record the package ID, title, canonical path, lifecycle state, risk, owner, approval
 evidence, target branch, and linked GitHub issue.
 
+Record the planned implementation pull-request count. The default is one coherent
+implementation PR for one approved outcome. More than one PR requires a non-
+placeholder rationale naming the concrete boundary, partial-state coherence,
+integration order, rollback, and the tradeoff against coordination, elapsed time,
+token/context, repeated checks, exact-review cycles, and bookkeeping overhead.
+
 ## Objective and requirement source
 
 State the approved objective and canonical documents or decisions that authorize it.
+Task IDs are minimum-sufficient traceability/evidence groupings; they do not imply
+separate branches or pull requests.
 
 ## Scope, non-goals, risk, and protected areas
 

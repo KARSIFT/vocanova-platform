@@ -1,9 +1,9 @@
 # Change Risk Classification
 
 Risk is classified by consequence, reversibility, blast radius, data sensitivity,
-and authority impact—not by diff size alone. The effective class is the highest class
-identified by the builder, path-based policy check, independent verifier, technical
-steward, or founder.
+and authority impact—not by diff size, line count, task count, or PR count alone.
+The effective class is the highest class identified by the builder, path-based
+policy check, independent verifier, technical steward, or founder.
 
 | Class | Objective criteria and examples                                                                                                                                                                                                                                 | Required verification                                                                                                                                                                                                       | Approval                                                                                                           | Release and rollback                                                                                                                      |
 | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -53,7 +53,8 @@ Use the highest `Yes` answer:
    Classify R0.
 
 Uncertainty raises the class until resolved. Splitting a change does not lower the
-classification if the parts produce one combined consequence.
+classification if the parts produce one combined consequence. Task count, line count,
+or proposed PR count does not mandate or reduce the class.
 
 ## Initial governance bootstrap classification
 
