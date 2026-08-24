@@ -5,7 +5,7 @@ slug: coherent-outcome-delivery
 title: Coherent Outcome Delivery
 
 type: governance-process-reconciliation
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   The semantic effect is R3 governance and development-process guidance, but the
@@ -21,18 +21,20 @@ base_branch: develop
 base_sha: ea357ce506f42fe74c7e88f670db9ce4f848d80e
 plan_branch: plan/voc-090-coherent-outcome-delivery
 target_branch: develop
-approved_candidate_sha: null
+approved_candidate_sha: 55a4a88012f47bf4b1263bb0bc5f6b80ec42a315
 
-approval_status: pending-independent-plan-and-specialist-review-and-adoption
-implementation_authorized: false
-implementation_authority_status: prohibited-until-independent-plan-review-and-adoption
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-adoption-decision-but-effective-only-after-exact
+  bookkeeping-review-final-hosted-evidence-pr-144-normal-merge-and-applicable-postmerge
 automatic_merge_allowed: true
 production_impact: none
 rollback_required: true
 
 owners:
   decision: accountable-repository-governance-decision-role-after-independent-plan-review
-  package_preparation: Codex planner actor for this draft only
+  package_preparation: Codex plan-author and adoption-bookkeeping actor only
   implementation: different builder actor after adoption
   independent_verification: different non-author exact-revision governance-process reviewer actor
   specialist_review: different non-author governance-and-delivery-workflow specialist actor
@@ -46,6 +48,44 @@ plan_review_history:
     resolution_status: >-
       immutable-failure-addressed-by-later-amended-candidate-adding-both-active
       surfaces-and-requiring-fresh-exact-general-and-specialist-review
+  - candidate_sha: 55a4a88012f47bf4b1263bb0bc5f6b80ec42a315
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392707783
+    resolves_candidate_sha: 98fd6f4f8c194e8ff1c0463b58efbf9d7780f62f
+
+approvals:
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 55a4a88012f47bf4b1263bb0bc5f6b80ec42a315
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392707783
+  governance_and_delivery_workflow_specialist:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 55a4a88012f47bf4b1263bb0bc5f6b80ec42a315
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392757947
+  adoption_decision:
+    status: approved-for-adoption
+    candidate_sha: 55a4a88012f47bf4b1263bb0bc5f6b80ec42a315
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392779914
+
+candidate_hosted_evidence:
+  candidate_sha: 55a4a88012f47bf4b1263bb0bc5f6b80ec42a315
+  ci:
+    status: success
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32706850295
+    applicability: >-
+      Foundation, web, packages, worker API, local stack, Cloudflare delivery policy,
+      and required aggregation passed; Cloudflare delivery gate, staging, and
+      production jobs skipped under the no-live-effect boundary.
+  governance:
+    status: success
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32706992793
+    applicability: changed-path-risk-structure-and-merge-eligibility-passed
+    superseded_cancelled_run: https://github.com/KARSIFT/vocanova-platform/actions/runs/32706850301
+  security:
+    status: success
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32706850315
+    applicability: dependency-audit-secret-scan-and-required-aggregation-passed
+  quality: not-applicable-plan-only-path-filter
 
 artifacts:
   readme: README.md
@@ -67,25 +107,26 @@ dependencies:
       template, and the Ruflo runbook contain the ambiguity and affected delivery-
       shape surfaces inventoried by this package.
   - id: VOC-090-DEP-01
-    status: pending-adoption
+    status: adoption-approved-effectiveness-pending
     evidence: >-
-      Issue #143 authorizes planning only. A different actor must independently review
-      the exact plan candidate, an accountable decision owner must adopt that exact
-      candidate, adoption bookkeeping must record implementation authorization, and
-      the plan PR must merge normally before implementation may begin.
+      Exact candidate review, R4 specialist review, and accountable adoption are
+      complete for 55a4a88012f47bf4b1263bb0bc5f6b80ec42a315. The bookkeeping
+      revision still needs its own exact-SHA review and final hosted evidence; authority
+      becomes effective only after PR #144 normally merges and applicable post-merge
+      checks pass.
 
 required_r4_evidence:
   decision_record:
     required: true
-    status: draft-package-decision-contract-pending-exact-review-and-adoption
+    status: adopted-exact-candidate
     evidence: specification.md
   impact_assessment:
     required: true
-    status: drafted-pending-exact-review
+    status: accepted-for-exact-adopted-candidate
     evidence: impact-analysis.md
   contingency_and_rollback:
     required: true
-    status: drafted-pending-rehearsal
+    status: accepted-plan-contract-implementation-rehearsal-pending
     evidence: implementation-plan.md and release-plan.md
   deterministic_evidence:
     required: true
@@ -94,7 +135,9 @@ required_r4_evidence:
   specialist_evidence:
     required: true
     role: governance-and-delivery-workflow specialist
-    status: pending-exact-plan-candidate-and-later-implementation-revision-review
+    status: pass-exact-adopted-candidate-later-implementation-revision-review-pending
+    candidate_sha: 55a4a88012f47bf4b1263bb0bc5f6b80ec42a315
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392757947
     evidence_contract: >-
       Verify that the final policy requires the largest safe coherent delivery unit
       across all layers sharing one outcome and control boundary, that splitting is an
@@ -131,9 +174,9 @@ protected_areas:
   - governance-validation
 
 implementation:
-  authorized: false
+  authorized: true
   authority_effective: false
-  status: prohibited-pending-independent-plan-review-and-adoption
+  status: authorized-pending-bookkeeping-review-hosted-normal-merge-and-postmerge
   required: true
   target_branch: develop
   pull_request_count: 1
@@ -148,9 +191,9 @@ release:
   rollback_required: true
   issue_closure: after-implementation-merge-and-applicable-post-merge-checks-only
 
-repository_adoption_status: draft-not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted-pending-pr-144-normal-merge-and-applicable-post-merge-checks
+adoption_pr: 144
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392779914
 
 ehr: not-triggered
 action_specific_authority:
@@ -173,7 +216,7 @@ external_effects:
   issue_closure_before_completed_implementation: prohibited
 
 blocking_reasons:
-  - exact-plan-candidate-independent-review-pending
-  - exact-plan-candidate-governance-and-delivery-workflow-specialist-review-pending
-  - accountable-adoption-decision-pending
-  - adoption-bookkeeping-and-normal-plan-pr-merge-pending
+  - exact-adoption-bookkeeping-revision-review-pending
+  - final-hosted-checks-on-adoption-bookkeeping-revision-pending
+  - pr-144-normal-merge-pending
+  - applicable-post-merge-checks-pending

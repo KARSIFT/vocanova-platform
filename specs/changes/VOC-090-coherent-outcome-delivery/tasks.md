@@ -7,7 +7,7 @@
 - Tests: `VOC-090-TEST-00` through `VOC-090-TEST-05`
 - Evidence: `VOC-090-EV-00` through `VOC-090-EV-04`
 - Risk: R4 (otherwise-R3 semantic effect elevated by unchanged DOC-15 path floor)
-- Status: draft; implementation prohibited pending exact plan review and adoption
+- Status: adopted-authorized; effective only after bookkeeping exact-SHA review and hosted evidence, PR #144 normal merge, and applicable post-merge checks
 
 In one implementation pull request, reconcile every active governance, workflow,
 agent/reviewer/contributor, coordination, PR, and change-package template surface

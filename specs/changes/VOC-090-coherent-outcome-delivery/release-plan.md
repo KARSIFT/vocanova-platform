@@ -2,11 +2,10 @@
 
 ## Repository-only boundary
 
-This package has no deployment or live release. The draft plan authorizes no
-implementation. After exact plan review, applicable exact-candidate specialist review,
-accountable adoption, bookkeeping review, normal plan merge, and applicable post-merge
-checks, the adopted package may authorize one repository-only implementation pull
-request into `develop`.
+This package has no deployment or live release. Adoption is recorded and authorizes one
+repository-only implementation pull request into `develop`, but that authority remains
+ineffective until this bookkeeping revision receives its own exact-SHA review and final
+hosted evidence, PR #144 normally merges, and applicable post-merge checks pass.
 
 `automatic_merge_allowed: true` is an explicitly examined package-policy value under
 the current R0–R4 drafting default. The Governance workflow may read it for a report,
@@ -63,7 +62,7 @@ deployment, cache purge, Cloudflare action, or live rollback applies.
 
 If one-PR implementation becomes genuinely unsafe or unreviewable, stop rather than
 silently split. Return to the adopted package through a separately reviewed scope
-change that supplies the `VOC-090-D04`/`D05` rationale; the current draft authorizes
+change that supplies the `VOC-090-D04`/`D05` rationale; the adopted package authorizes
 exactly one implementation PR.
 
 ## Closure

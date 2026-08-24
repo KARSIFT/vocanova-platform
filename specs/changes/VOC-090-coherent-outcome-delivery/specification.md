@@ -8,11 +8,13 @@ while accounting for the real coordination and evidence cost of each additional 
 or pull request. The policy must preserve all current security, governance, exact-SHA
 review, risk, rollback, scope, EHR, and action-specific authority controls.
 
-Issue #143 grants planning authority only. This draft does not adopt itself and does
-not authorize edits outside this nine-file package. Implementation remains prohibited
-until exact-candidate independent review, accountable adoption, complete adoption
-bookkeeping, and normal plan merge. Because the package is R4, adoption also requires
-the applicable governance/delivery-workflow specialist evidence on the exact candidate.
+Issue #143 grants planning authority only. Exact candidate
+`55a4a88012f47bf4b1263bb0bc5f6b80ec42a315` received fresh different-actor general/R4
+and governance/delivery-workflow specialist PASS verdicts and the accountable adoption
+decision. The adopted package records implementation authorization, but it remains
+ineffective until this bookkeeping revision receives its own exact-SHA review and final
+hosted evidence, PR #144 normally merges, and applicable post-merge checks pass. No
+authority extends outside the adopted repository-only scope.
 
 ## Problem
 

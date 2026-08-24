@@ -105,9 +105,16 @@ for the repository-only plan or later implementation. If implementation discover
 external or executable-policy effect, it must stop and return to planning.
 
 R4 is driven by the existing DOC-15 path floor, not by a material autonomous-authority
-expansion. Complete R4 evidence still applies. EHR is not triggered at drafting time;
+expansion. Complete R4 evidence still applies. EHR was not triggered by planning or adoption;
 any qualifying unresolved security/governance conflict must stop the work under the
 existing rules.
+
+Exact candidate `55a4a88012f47bf4b1263bb0bc5f6b80ec42a315` received fresh general/R4
+and governance/delivery-workflow specialist PASS verdicts and the accountable adoption
+decision. That evidence accepts this impact boundary for the candidate only; it does
+not transfer a verdict to the bookkeeping revision or make implementation authority
+effective before reviewed bookkeeping, normal PR #144 merge, and applicable post-merge
+checks.
 
 ## Rollback impact
 

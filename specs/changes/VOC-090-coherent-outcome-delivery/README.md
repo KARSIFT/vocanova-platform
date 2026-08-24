@@ -1,9 +1,14 @@
 # VOC-090 — Coherent Outcome Delivery
 
-Status: draft planning package only. GitHub issue
-[#143](https://github.com/KARSIFT/vocanova-platform/issues/143) authorizes preparation
-and review of this plan; it does not adopt the package or authorize implementation,
-merge, repository-setting mutation, deployment, or any live/external effect.
+Status: adopted for repository bookkeeping. Exact candidate
+`55a4a88012f47bf4b1263bb0bc5f6b80ec42a315` received fresh different-actor general/R4
+and governance/delivery-workflow specialist PASS verdicts and the accountable adoption
+decision on PR #144. Implementation authorization is recorded but becomes effective
+only after this bookkeeping revision receives its own exact-SHA review and final hosted
+evidence, PR #144 normally merges, and applicable post-merge checks pass. GitHub issue
+[#143](https://github.com/KARSIFT/vocanova-platform/issues/143) remains planning-only;
+no merge, repository-setting mutation, deployment, or live/external authority is
+granted.
 
 Repository guidance currently pulls in two directions. DOC-15 requires one coherent
 objective and prohibits artificially splitting work, while its task example decomposes
@@ -16,7 +21,7 @@ request units. The resulting ambiguity can multiply coordination, validation,
 exact-SHA review, hosted-check, merge, time, and token cost without reducing outcome,
 rollback, or security risk.
 
-This package proposes one atomic governance/process reconciliation. Planners must
+This adopted package specifies one atomic governance/process reconciliation. Planners must
 select the largest safe coherent delivery unit containing every backend, frontend,
 contract, test, documentation, rollback, and evidence layer that shares one approved
 user or business outcome and control boundary. That unit defaults to one approved
@@ -32,7 +37,7 @@ implementation pull requests must record a concrete written rationale that compa
 those benefits with coordination, elapsed-time, token, repeated-check, bookkeeping,
 and exact-review overhead.
 
-The later implementation is deliberately one pull request and one minimum-sufficient
+The authorized implementation, once authority becomes effective, is deliberately one pull request and one minimum-sufficient
 task, `VOC-090-T00`, because the full reconciliation is the largest safe coherent unit.
 It reconciles every affected living guidance/template surface and adds a narrow
 deterministic regression guard. Unrelated-scope separation,
@@ -57,8 +62,23 @@ general/R4 **FAIL** on
 [PR #144 comment 5392546514](https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392546514)
 because the active-surface inventory omitted DOC-12's mandatory future P3 six-PR order
 and DOC-09's recommended AI six-PR sequence. That verdict is immutable history and is
-not reinterpreted as approval. This amended candidate adds both active documents and
+not reinterpreted as approval. The amended exact candidate added both active documents and
 requires their six items to become ordered non-PR implementation components inside the
 default coherent PR, unless a future adopted package records a D03–D05-compliant,
-overhead-aware multi-PR exception. Fresh exact-SHA general and specialist review remain
-required.
+overhead-aware multi-PR exception. That exact candidate then received fresh general/R4
+**PASS** with zero blockers on
+[comment 5392707783](https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392707783)
+and fresh governance/delivery-workflow specialist **PASS** with zero corrections on
+[comment 5392757947](https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392757947).
+The accountable decision owner adopted that exact candidate on
+[comment 5392779914](https://github.com/KARSIFT/vocanova-platform/pull/144#issuecomment-5392779914).
+
+Candidate [CI](https://github.com/KARSIFT/vocanova-platform/actions/runs/32706850295),
+[Governance](https://github.com/KARSIFT/vocanova-platform/actions/runs/32706992793),
+and [Security](https://github.com/KARSIFT/vocanova-platform/actions/runs/32706850315)
+passed. Quality was not applicable to the plan-only path filter. The earlier
+[Governance run](https://github.com/KARSIFT/vocanova-platform/actions/runs/32706850301)
+was cancelled after the PR-body update and is preserved as superseded history; the
+later run passed changed-path risk, structure, and merge eligibility. This bookkeeping
+revision intentionally does not preclaim its own future review verdict, final hosted
+results, merge SHA, or post-merge results.

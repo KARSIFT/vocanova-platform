@@ -2,13 +2,14 @@
 
 ## Preconditions and protected areas
 
-Do not implement from issue #143 or this draft. Before `VOC-090-T00` begins, a
-different non-author actor must independently review the exact plan candidate, the
-applicable different non-author governance/delivery-workflow specialist must review
-that exact candidate, the accountable governance decision owner must adopt it,
-adoption bookkeeping must record `status: adopted` and implementation authorization,
-the bookkeeping revision must receive fresh exact-SHA review and hosted evidence, and
-the plan PR must merge normally with applicable post-merge checks.
+Do not implement from issue #143 alone. Exact candidate
+`55a4a88012f47bf4b1263bb0bc5f6b80ec42a315` received fresh different-actor general/R4
+and governance/delivery-workflow specialist PASS verdicts and the accountable adoption
+decision. `change.yaml` now records `status: adopted` and implementation authorization.
+Do not implement yet: authority becomes effective only after this bookkeeping revision
+receives its own different-actor exact-SHA review and final hosted evidence, PR #144
+normally merges, and applicable post-merge checks pass. Candidate verdicts do not
+transfer to this bookkeeping SHA.
 
 The implementation is one R4 pull request because DOC-15 has an unchanged R4 path
 floor. It requires complete decision, impact, contingency, deterministic, governance-
