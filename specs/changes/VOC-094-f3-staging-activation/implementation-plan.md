@@ -3,15 +3,20 @@
 ## Preconditions and delivery shape
 
 Do not begin until the package is adopted and `implementation.authorized: true` is
-recorded through reviewed bookkeeping. Use one isolated short-lived implementation
-branch/worktree from then-current `origin/develop`, one builder actor, one task, and
-one PR. Record all worktrees/recovery refs before work and preserve them while plan and
-implementation PRs remain open.
+recorded through reviewed bookkeeping. Use one task and two isolated short-lived
+implementation branches/worktrees from then-current `origin/develop`: main PR1 and the
+immediate post-ACT-03 documentation-only PR2. Record all worktrees/recovery refs before
+work and preserve them while any plan or implementation PR remains open.
 
-The implementation PR stays one coherent unit because code/config, policy, tests,
-living docs, external settings/resource binders, baseline, dispatch, and closure all
-control whether the same staging state is safe and reversible. External actions are
-ordered holds inside the unit, not separate implementation PRs.
+The two-PR exception is required by a hard external-settings/truth boundary. PR1 cannot
+truthfully claim an ACT-03 post-state that does not yet exist, while ACT-03 cannot
+precede PR1. Partial states are explicit: PR1 makes repository delivery ready but
+ineligible; ACT-03 creates only the environment/two secrets while dispatch remains
+held; PR2 reconciles living documentation and supplies the dispatch SHA. Repository
+rollback never silently undoes external settings; an ACT-03 rollback requires truthful
+PR2/corrective documentation. The cost is an extra branch/PR, hosted/local checks,
+exact reviews, merge/source-head evidence, elapsed time, coordination, context, and
+bookkeeping, justified by this non-combinable truth boundary.
 
 ## Ordered implementation and action sequence
 
@@ -35,8 +40,8 @@ ordered holds inside the unit, not separate implementation PRs.
    issuing any write token.
 3. **Phase 1 / ACT-01 — provision D1.** From the same clean exact reviewed repository
    SHA and still-unmodified tracked tree, issue a separate short-lived Phase 1 write
-   token with the adopted scope, then create D1 exactly once requesting `--location
-eeur` and no jurisdiction. Record the real UUID, requested hint, actual placement/
+   token with the adopted scope, then create D1 exactly once with the `eeur` location
+   hint (`--location eeur`) and no jurisdiction. Record the real UUID, requested hint, actual placement/
    served-region readback, schema-independent pre-state, Free-plan state, and exact
    two-Worker/two-domain resource authorization. Stop on collision, duplicate, Paid
    prompt, unplanned permission, or production drift.
@@ -45,13 +50,13 @@ eeur` and no jurisdiction. Record the real UUID, requested hint, actual placemen
    real D1/Worker bindings, synthetic-only vars, `workers_dev: false`, preview URLs
    false, and web `API` service binding. Secure auth stays outside it. Hash and review
    the sanitized overlay and resource manifest, and pass their credential-free local/
-   schema/dry-run checks before any live command. Apply ordered migrations, then use locked Wrangler 4.125.0
-   `wrangler deploy` as the narrow first-creation exception to create/deploy route-free
+   schema/dry-run checks before any live command. Apply ordered migrations, then use
+   locked Wrangler 4.125.0 `wrangler deploy` as the narrow first-creation exception to create/deploy route-free
    API, resolve/tag/read back its baseline UUID, and only then create/deploy route-free
    web bound to the existing API and resolve its UUID. Locked `versions upload` must
    fail closed for a nonexistent script and is not used for either first creation.
-   Next hash/review a separate route-bearing overlay and use locked `wrangler triggers
-deploy` to attach exactly the two Custom Domains; read back ownership, certificates,
+   Next hash/review a separate route-bearing overlay and use locked Wrangler command
+   `wrangler triggers deploy` to attach exactly the two Custom Domains; read back ownership, certificates,
    and DNS, then smoke. No public route exists before this trigger step. To claim live
    rollback, use `versions upload` only now that scripts exist, exact `versions deploy`
    for a newer reviewed probe/candidate, verify it, then roll both Workers to baseline
@@ -62,37 +67,48 @@ deploy` to attach exactly the two Custom Domains; read back ownership, certifica
    external workspace. Use only sanitized Phase 1 evidence for bounded coordination;
    provide no credential or privileged tool. Capture sanitized receipts and remove
    disposable Ruflo state.
-6. **Phase 3 — one repository implementation PR.** A different builder starts one
+6. **Phase 3 — main repository implementation PR1.** A different builder starts one
    isolated short-lived implementation branch/worktree from then-current
    `origin/develop`. Bind the real Phase 1 account/zone/D1/version/domain/action
    readbacks into the manifest, both Wrangler configs, `ci.yml`, delivery policy/tests,
    and every declared living document. Add `custom_domain: true`, baseline equality,
    separate action/expiry fields, synthetic/privacy/zero-cost guards, and production
    negatives. Historical evidence stays immutable and production sentinels stay
-   unchanged. No GitHub environment or secret exists yet because of this package.
-7. Run all credential-free validation/negative fixtures on the final Phase 3 head.
+   unchanged. Every living settings surface truthfully records `cloudflare-staging` as
+   absent, held, and planned through PR1 merge; PR1 claims no ACT-03 post-state.
+7. Run all credential-free validation/negative fixtures on the final PR1 head.
    Obtain fresh different-actor exact-SHA Cloudflare and security/settings specialist
    PASS plus independent R4 PASS; any material fix requires fresh applicable checks and
    reviews. Let a non-author actor merge normally into `develop`. Record the exact
-   implementation head, merge SHA, hosted/post-merge checks, source-head readback and
+   PR1 head, merge SHA, hosted/post-merge checks, source-head readback and
    recreation command, and no manual deletion.
 8. **Phase 4 / ACT-03 — environment and distinct token after merge.** Only now create
    or reconcile `cloudflare-staging` under an exact scoped `VOC-085-HOLD-00` action
    record, issue the third distinct short-lived Phase 4 token once, and securely set
    exactly `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`. Record the authorized
-   settings operator/authority, pre-state, exact payload, rollback, immediate merged
-   documentation reconciliation, secret names only, token scope/expiry, post-state,
-   and no production drift. This discharges only that exact settings action;
-   `VOC-085-HOLD-00` remains held for all others. Never reuse or reissue either earlier
-   credential.
-9. Independently verify the exact merged `develop` SHA, hosted checks, real manifest
-   binders, environment/secret-name readback, current resources/baseline, action
-   authority, and zero-cent estimate. Under `VOC-094-ACT-04`, dispatch staging once
-   with that exact SHA, authority URL, `0`, baseline UUIDs, and confirmation. Preserve
-   migration, unique immutable UUID, 100% promotion, API/config/contract/web smoke,
-   binding/domain/resource, bounded soak, Free usage, privacy-log, and no-production
-   evidence.
-10. Under `VOC-094-ACT-05`, revoke/expire the distinct Phase 4 token, preserve
+   settings operator/authority, pre-state, exact payload, rollback, secret names only,
+   token scope/expiry, post-state, and no production drift. Dispatch remains held and
+   ACT-03 is not complete until PR2 merges. `VOC-085-HOLD-00` remains held for all
+   other settings. Never reuse or reissue either earlier credential.
+9. **Phase 4 — immediate documentation-only PR2.** From current `develop`, create a
+   second isolated short-lived implementation branch under the same adopted package and
+   `VOC-094-T00`. Record the exact sanitized ACT-03 pre-state, payload, rollback,
+   post-state readback, and exactly the two secret names without values. Change no
+   product/workflow behavior and make no further setting mutation. Run all applicable
+   local/hosted checks, obtain different-actor exact-revision review, and let a
+   different non-author merge normally. Record the exact PR2 head, merge SHA,
+   post-merge checks, source-head readback, and recreation command. ACT-03 completes
+   only after that post-merge readback. If ACT-03/ACT-04 authority or the Phase 4 token
+   expires while PR2 is open, stop; any replacement requires a fresh exact authority/
+   settings record, never a silent token reissue.
+10. Independently verify the exact PR2 merged `develop` SHA, hosted checks, real manifest
+    binders, environment/secret-name readback, current resources/baseline, action
+    authority, and zero-cent estimate. Under `VOC-094-ACT-04`, dispatch staging once
+    with that exact SHA, authority URL, `0`, baseline UUIDs, and confirmation. Preserve
+    migration, unique immutable UUID, 100% promotion, API/config/contract/web smoke,
+    binding/domain/resource, bounded soak, Free usage, privacy-log, and no-production
+    evidence.
+11. Under `VOC-094-ACT-05`, revoke/expire the distinct Phase 4 token, preserve
     successful staging resources, and clean failed partial resources only when the
     exact record permits them. Confirm ACT-00 read-only credential, Phase 1 write-token/
     overlay, and Phase 2 Ruflo cleanup evidence, then attach final GitHub/Cloudflare/
@@ -103,12 +119,13 @@ deploy` to attach exactly the two Custom Domains; read back ownership, certifica
 
 ## File reconciliation contract
 
-The affected-area list in `change.yaml` is mandatory, not illustrative. Before final
-review, search all living docs and executable guards for claims that staging is held,
-no environment exists, routes are `.invalid`, or all VOC-080 holds remain current.
-Update current-state surfaces atomically, while leaving adopted/completed packages,
-transition records, and other historical evidence unchanged. If another living surface
-describes the changed behavior, add it to the PR and package inventory before review.
+The affected-area list in `change.yaml` is mandatory, not illustrative. Before each PR's
+final review, search all living docs and executable guards for relevant state claims.
+PR1 replaces resource sentinels but must retain the truthful environment absent/held/
+planned state. PR2 changes only the settings documentation required to match ACT-03's
+sanitized readback. Leave adopted/completed packages, transition records, and other
+historical evidence unchanged. If another living surface describes the changed state,
+add it to the applicable PR and package inventory before review.
 
 ## Validation and review
 

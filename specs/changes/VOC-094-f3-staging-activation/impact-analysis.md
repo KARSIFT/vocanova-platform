@@ -6,7 +6,7 @@
 | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | Public staging          | Creates two Worker Custom Domains and exposes synthetic staging health/web behavior.                                                           |
 | Cloudflare account      | Creates/updates two Workers and one D1; write permissions are account-wide within the selected account.                                        |
-| GitHub settings/secrets | Creates only `cloudflare-staging`; records two secret names without values.                                                                    |
+| GitHub settings/secrets | After PR1, ACT-03 creates only `cloudflare-staging`; immediate PR2 records sanitized settings truth and two secret names without values.       |
 | CI/CD                   | Changes the held staging manifest/policy/workflow to a time-bounded authorized staging path; production remains fail closed.                   |
 | Data/privacy            | Remote D1 has synthetic/non-personal data only; no production import or learner content logging.                                               |
 | Cost                    | Workers Free only, integer ceiling 0 cents; no Paid activation, overage, or add-on authority.                                                  |
@@ -46,8 +46,19 @@
   external features, a privacy field allowlist, and sanitized Ruflo context apply.
 - `VOC-094-R10` — ACT-03 could be mistaken for broad GitHub settings authority.
   Mitigation: keep it held by `VOC-085-HOLD-00` until the exact operator/authority,
-  pre-state, payload, rollback, immediate docs, post-state, and expiry contract passes;
-  discharge only that environment/two-secret action and leave all other settings held.
+  pre-state, payload, rollback, post-state, expiry, and immediate PR2 contract passes;
+  complete only after PR2 merge/readback, discharge only that environment/two-secret
+  action, and leave all other settings held.
+- `VOC-094-R12` — PR1 could falsely preclaim settings post-state, or ACT-03 could leave
+  settings and living documentation inconsistent. Mitigation: PR1 records the
+  environment absent/held/planned; ACT-03 occurs only after PR1; dispatch stays held
+  while immediate docs-only PR2 records exact sanitized pre-state/payload/rollback/
+  post-state and secret names, passes fresh checks/review/non-author merge, and supplies
+  the exact independently reviewed dispatch SHA. If ACT-03/ACT-04 authority or the
+  Phase 4 token expires during PR2, stop and require a fresh exact settings record with
+  no silent reissue. The hard
+  truth boundary justifies an extra branch/PR, hosted/local checks, exact reviews,
+  merge/source-head evidence, elapsed time, coordination, context, and bookkeeping.
 - `VOC-094-R11` — Exact-SHA review without successful current checks could still send
   unchecked code/config to live staging. Mitigation: ACT-01/02 bind the clean SHA to
   successful applicable hosted and local checks and bind the manifest/overlay hashes
@@ -73,8 +84,8 @@
 - `VOC-094-DEP-00` — adopted exact plan and effective implementation authority.
 - `VOC-094-DEP-01` — live read-only account/zone/plan/inventory/collision facts.
 - `VOC-094-DEP-02` — real D1 and baseline version UUID binders.
-- `VOC-094-EV-00` — package shape, adoption, roles, exact-SHA reviews, merge/source-
-  head evidence.
+- `VOC-094-EV-00` — package shape, adoption, roles, exact-SHA reviews, both
+  implementation merges/source-head evidence, and the PR1 → ACT-03 → PR2 boundary.
 - `VOC-094-EV-01` — Phase 1 account/zone/plan/permission inventory, residual-scope
   decision, ACT-00 read-only credential no-write/scope/expiry/no-disclosure evidence,
   its revocation, exact-SHA hosted/local check binders, and no-premature-write proof.
@@ -83,14 +94,16 @@
 - `VOC-094-EV-03` — route-free first-creation deploys, baseline UUIDs, route-bearing
   trigger attachment, migration/smoke, post-creation rollback probe, and forward-
   correction evidence.
-- `VOC-094-EV-04` — post-merge GitHub environment/two-secret-name evidence, distinct
-  third-token scope/expiry, scoped `VOC-085-HOLD-00` authority/pre/post/rollback/docs
-  evidence, ordinary dispatch, exact promotions, smoke/soak, usage, and logs.
+- `VOC-094-EV-04` — post-PR1 GitHub environment/two-secret-name evidence, distinct
+  third-token scope/expiry, scoped `VOC-085-HOLD-00` authority/pre/post/rollback,
+  reviewed/merged PR2 reconciliation, exact PR2-merge dispatch SHA, ordinary dispatch,
+  exact promotions, smoke/soak, usage, and logs.
 - `VOC-094-EV-05` — Phase 1 overlay/credential cleanup, Phase 2 Ruflo verification/
   removal, Phase 4 token expiry/revocation, partial-state cleanup, and living-doc
   reconciliation.
-- `VOC-094-EV-06` — local/hosted validation, independent reviews, merge, post-merge,
-  final external readbacks, and closure.
+- `VOC-094-EV-06` — local/hosted validation, independent reviews, both merges and
+  source-head lifecycles, exact PR2 post-merge review, final external readbacks, and
+  closure.
 
 ## Rollback impact
 

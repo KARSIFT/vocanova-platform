@@ -25,8 +25,20 @@ implementation_authorized: false
 automatic_merge_allowed: true
 production_impact: prohibited
 rollback_required: true
-implementation_pull_request_count: 1
-multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
+implementation_pull_request_count: 2
+multiple_pull_request_rationale: >-
+  Two implementation PRs are required by the hard external-settings/truth boundary:
+  PR1 must merge while cloudflare-staging is still absent, held, and planned, and
+  ACT-03 cannot mutate settings before PR1. After ACT-03, PR2 immediately reconciles
+  the observed sanitized settings record before dispatch. The partial states are
+  explicit: PR1 makes repository delivery ready but ineligible; ACT-03 creates only
+  the environment/two secrets while dispatch stays held; PR2 makes living truth match
+  the readback and its reviewed merge SHA becomes dispatchable. Rollback of repository
+  changes never silently rolls back settings, and ACT-03 rollback requires a truthful
+  PR2/correction. This boundary adds an extra branch/PR, hosted and local checks,
+  exact reviews, merge/source-head evidence, elapsed time, coordination, context, and
+  bookkeeping; that overhead is necessary because preclaiming post-state is forbidden
+  and the settings action cannot precede PR1.
 
 owners:
   decision: accountable-staging-action-owner-after-independent-plan-review
@@ -138,19 +150,24 @@ action_specific_holds:
     accountable_role: explicitly-authorized-GitHub-settings-and-secret-operator
     required_evidence: >-
       Exact scoped VOC-085-HOLD-00 authority naming the settings operator, merged
-      develop SHA, GitHub environment pre-state, exact environment/secret-name payload,
-      rollback payload, immediate living-document reconciliation already present in
-      the merged implementation, cloudflare-staging post-state readback, exactly
+      PR1 develop SHA, GitHub environment pre-state, exact environment/secret-name
+      payload, rollback payload, cloudflare-staging post-state readback, exactly
       CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN secret names with no values
       disclosed, a third distinct short-lived Phase4 token, no variables or production
-      mutation, and exact authority expiry/drift conditions.
-    completion_or_expiry: discharges VOC-085-HOLD-00 only for this one post-merge Phase4 environment-and-two-secret settings action; expires on payload, environment, secret-name, merged revision, credential, authority, or pre/post-state drift; VOC-085-HOLD-00 remains held for every other settings action
+      mutation, exact authority expiry/drift conditions, and an immediate governed
+      documentation-only PR2 opened from current develop that records the sanitized
+      pre-state, payload, rollback, post-state readback, and secret names only, passes
+      exact local/hosted checks and different-actor exact-revision review, and is
+      non-author merged with exact pre-merge head, post-merge/source-head readback, and
+      recreation-command evidence.
+    completion_or_expiry: discharges VOC-085-HOLD-00 only for this one post-PR1 Phase4 environment-and-two-secret settings action and only after PR2 merge/post-merge readback; expires on payload, environment, secret-name, PR1 or PR2 revision, credential, authority, pre/post-state, check, or review drift; if ACT-03 or ACT-04 authority or the Phase4 token expires while PR2 is open, stop and require fresh exact authority/settings record with no silent token reissue; VOC-085-HOLD-00 remains held for every other settings action
   - id: VOC-094-ACT-04
     action: dispatch-one-ordinary-staging-delivery-and-bounded-soak
     status: held-by-VOC-080-HOLD-00
     accountable_role: explicitly-authorized-non-Ruflo-workflow-dispatch-operator
     required_evidence: >-
-      Exact reviewed develop SHA, matching manifest/action URLs and expiry, zero-cent
+      Exact independently reviewed PR2 merged develop SHA, completed ACT-03/PR2
+      settings reconciliation, matching manifest/action URLs and expiry, zero-cent
       estimate, real last-known-good UUIDs, exact confirmation, successful migration,
       immutable uploads, exact 100 percent promotions, smoke, readback, soak, and outcome.
     completion_or_expiry: one staging workflow_dispatch; expires on SHA, manifest, authority, cost, baseline, secret, resource, route, migration, smoke, or time-window drift
@@ -195,8 +212,14 @@ implementation:
   status: blocked-pending-adoption
   required: true
   target_branch: develop
-  pull_request_count: 1
-  multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
+  pull_request_count: 2
+  multiple_pull_request_rationale: >-
+    PR1 implements repository delivery while truthfully recording cloudflare-staging
+    absent/held/planned; after ACT-03, PR2 is the immediate governed documentation-only
+    reconciliation. This hard truth/settings boundary justifies the extra branch/PR,
+    checks, exact reviews, merge/source-head evidence, elapsed time, coordination,
+    context, and bookkeeping because settings cannot precede PR1 and PR1 may not
+    preclaim ACT-03 post-state.
   task: VOC-094-T00
 
 release:
@@ -211,7 +234,7 @@ release:
 ehr: not-triggered
 external_effects:
   cloudflare_staging: held-pending-VOC-094-ACT-00-through-ACT-04
-  github_cloudflare_staging_environment: held-by-VOC-085-HOLD-00-pending-exact-post-merge-VOC-094-ACT-03
+  github_cloudflare_staging_environment: held-by-VOC-085-HOLD-00-pending-post-PR1-ACT-03-and-immediate-reviewed-merged-PR2
   all_other_github_settings: held-by-VOC-085-HOLD-00
   production: prohibited
   production_data: prohibited

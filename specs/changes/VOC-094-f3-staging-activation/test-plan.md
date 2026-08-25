@@ -6,12 +6,15 @@ under their adopted exact action records.
 ## VOC-094-TEST-00 — Package shape, lifecycle, roles, and ref preservation
 
 - Covers: `VOC-094-AC-00`
-- Procedure: validate one task/one implementation PR, draft/adoption/implementation
-  gates, R4 evidence, role/actor separation, action record separation, merge metadata,
-  worktree/recovery inventories, exact pre-merge plan/implementation tips,
-  post-merge source-head readbacks, recreation commands, and mandatory Phase 1 → Phase
-  2 → Phase 3 → Phase 4 ordering. Negative fixtures reject GitHub environment/secrets
-  before the Phase 3 merge or tracked sentinel replacement before Phase 1 readbacks.
+- Procedure: validate one task/two implementation PRs, the hard truth/settings split
+  rationale, PR1-main/PR2-docs task mapping, draft/adoption/implementation gates, R4
+  evidence, role/actor separation, action record separation, merge metadata, worktree/
+  recovery inventories, exact pre-merge plan/PR1/PR2 tips, post-merge source-head
+  readbacks, recreation commands, and mandatory Phase 1 → Phase 2 → Phase 3 PR1 →
+  Phase 4 ACT-03 → PR2 → ACT-04 ordering. Negative fixtures reject GitHub environment/
+  secrets before PR1 merge, PR1 claims that the absent/held/planned environment already
+  exists, dispatch before reviewed/merged/read-back PR2, missing immediate PR2, or
+  tracked sentinel replacement before Phase 1 readbacks.
 - Expected: no implementation/external action begins early; no actor self-reviews or
   merges authored work; no automatic merge is claimed; only GitHub may auto-delete a
   merged short-lived head and no worktree/recovery/permanent ref is removed.
@@ -88,16 +91,21 @@ under their adopted exact action records.
 
 - Covers: `VOC-094-AC-04`
 - Procedure: exercise mocked delivery events for every gate, then dispatch once on the
-  exact independently reviewed merged `develop` SHA, but only after ACT-03 creates
+  exact independently reviewed PR2 merged `develop` SHA, but only after PR1 truthfully
+  records the environment absent/held/planned and merges, ACT-03 creates
   `cloudflare-staging` under exact scoped `VOC-085-HOLD-00` authority and stores exactly
-  the account ID plus the third distinct Phase 4 token. Verify operator/authority,
-  settings pre-state/payload/rollback/immediate-docs/post-state/expiry evidence, secret
-  names/no values, migration/upload/
+  the account ID plus the third distinct Phase 4 token, and immediate docs-only PR2 from
+  current `develop` records sanitized pre-state/payload/rollback/post-state and secret
+  names only. Verify PR2 local/hosted checks, different-actor exact review, non-author
+  merge, post-merge/source-head readback, ACT-03 completion only after that merge,
+  operator/authority/expiry evidence, and migration/upload/
   promotion/smoke order, UUIDs, API `/healthz`, `/configz`, `/openapi.json`, service-
   binding-backed web HTML, release marker, resource/domain/deployment readbacks,
   bounded soak, usage/errors, and redaction. Negative cases include environment/secret
-  before merge, missing/broad/reused `VOC-085-HOLD-00` authority, failure to leave
-  other settings held, reuse of either earlier credential, non-dispatch event, wrong
+  before PR1 merge, PR1 post-state preclaim, missing/stale/unmerged/unreviewed PR2,
+  ACT-03 marked complete before PR2 readback, missing/broad/reused `VOC-085-HOLD-00`
+  authority, authority/token expiry during PR2 followed by silent reissue, failure to
+  leave other settings held, reuse of either earlier credential, non-dispatch event, wrong
   ref/SHA/account/zone/route, expired/mismatched authority, nonzero estimate, fake
   baseline, extra/missing secret or variable, migration/upload/promotion/smoke failure,
   cancellation, retry without fresh review, limit pressure, and production selection.
@@ -141,8 +149,9 @@ under their adopted exact action records.
 
   Inspect the final declared path inventory and current-vs-historical doc treatment;
   run applicable hosted CI, Governance, Quality, and Security; obtain exact-SHA
-  Cloudflare, security/settings, and independent R4 verdicts; record normal merge,
-  post-merge checks, source-head lifecycle, external action records, final readbacks,
+  Cloudflare, security/settings, and independent R4 verdicts; record both normal merges,
+  post-merge checks, both source-head lifecycles, external action records, exact PR2
+  merged-SHA dispatch review, final readbacks,
   and issue closure. If a committed package script changes before implementation,
   use its then-current documented command and record the drift; do not invent a pass.
 

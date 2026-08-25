@@ -6,8 +6,8 @@ not implementation or external-action authority. This package remains
 `implementation_authorized: false`; it contains no approval, review verdict, live
 identifier, credential, deployment result, or activation claim.
 
-The proposed coherent outcome is one package, one minimum-sufficient task, and one
-future implementation pull request into `develop`. It would activate only the named
+The proposed coherent outcome is one package, one minimum-sufficient task, and two
+future implementation pull requests into `develop`. It would activate only the named
 synthetic Cloudflare staging boundary:
 
 - web Custom Domain `stag.vocanova.site` on `vocanova-web-staging`;
@@ -53,11 +53,26 @@ The external sequence is fixed:
 2. **Phase 2:** reverify and use Ruflo 3.38.16 only in a disposable external sanitized
    workspace, then remove its state.
 3. **Phase 3:** a different builder binds the real Phase 1 IDs/routes/evidence into the
-   repository manifest, Wrangler config, policy, tests, and living docs in one
-   implementation PR; obtain exact-SHA reviews and a non-author merge into `develop`.
-4. **Phase 4:** only after that merge, create/reconcile `cloudflare-staging`, securely
-   add its two secrets using a third distinct short-lived GitHub-environment token,
-   independently verify the merged `develop` SHA, dispatch once, soak, and clean up.
+   repository manifest, Wrangler config, policy, tests, and living docs in main
+   implementation PR1. Through PR1 merge, those docs truthfully record
+   `cloudflare-staging` as absent, held, and planned. Obtain exact-SHA reviews and a
+   non-author merge into `develop`.
+4. **Phase 4:** only after PR1 merges, ACT-03 creates/reconciles
+   `cloudflare-staging` and securely adds its two secrets using a third distinct
+   short-lived GitHub-environment token. Immediately open documentation-only PR2 from
+   current `develop` under this same package/task to record the exact sanitized
+   settings pre-state, payload, rollback, post-state readback, and secret names only.
+   After fresh checks, different-actor exact review, non-author merge, source-head
+   readback, and independent verification of PR2's merged `develop` SHA, dispatch that
+   exact SHA once, soak, and clean up.
+
+Two PRs are necessary because PR1 may not preclaim an external settings post-state and
+ACT-03 may not precede PR1. The boundary creates an extra branch/PR, local and hosted
+checks, exact reviews, merge/source-head evidence, elapsed time, coordination, context,
+and bookkeeping. It keeps partial states and rollback explicit: after PR1 delivery is
+repository-ready but ineligible; after ACT-03 settings exist but dispatch remains held;
+only PR2 reconciles living truth and supplies the dispatch SHA. A repository revert
+never silently reverses settings.
 
 No credential value is printed or placed in an overlay, repository, evidence, Ruflo
 memory, or command argument. The ACT-00 read-only credential/session, Phase 1 write
@@ -84,9 +99,12 @@ migration, datum, and setting is untouched.
 
 The Phase 4 GitHub environment/two-secret mutation is separately held by
 `VOC-085-HOLD-00` until its exact operator, authority, pre-state, payload, rollback,
-immediate documentation reconciliation, post-state, and expiry record is complete.
-That action discharges only its exact scope; `VOC-085-HOLD-00` remains held for every
-other repository or environment setting.
+post-state, expiry, and immediate PR2 documentation reconciliation record is complete.
+ACT-03 discharges only after PR2 is reviewed, merged, and read back; every other
+repository or environment settings action remains held by `VOC-085-HOLD-00`. If the
+ACT-03/ACT-04 authority or Phase 4 token expires while PR2 is open, stop. Any
+replacement requires a fresh exact authority/settings record; never silently reissue
+the token.
 
 Ruflo 3.38.16 may be reverified and used only from a disposable external workspace
 with sanitized context. It receives no GitHub write/approve/merge/close/dispatch,
@@ -94,10 +112,10 @@ Cloudflare, DNS, secret, spend, deployment, production-data, or launch authority
 its disposable state is removed after evidence handoff.
 
 The live repository setting `delete_branch_on_merge: true` may automatically delete
-only merged short-lived plan and implementation source heads. Before each merge,
+only merged short-lived plan, PR1, and PR2 source heads. Before each merge,
 record the exact branch and tip SHA; after merge, read the branch back and record the
 exact recreation command. Do not manually delete a branch, permanent ref, worktree,
-or recovery ref. Preserve every existing worktree and recovery ref while either PR is
+or recovery ref. Preserve every existing worktree and recovery ref while any PR is
 open, including `/tmp/vocanova-voc090-t00` and
 `backup/pre-voc091-refresh-8ce72e9`.
 

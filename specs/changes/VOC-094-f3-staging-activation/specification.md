@@ -14,14 +14,20 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
 
 ## Decisions and requirements
 
-- `VOC-094-D00` — Use one package, one minimum-sufficient task, and one
-  implementation PR into `develop`. Repository config, policy, tests, documentation,
-  settings evidence, provisioning, baseline, dispatch, soak, rollback, and closure
-  share one staging outcome and control boundary; ordered external holds are not a
-  multi-PR rationale. Preserve the mandatory order: Phase 1 Cloudflare inventory,
-  resources, baseline, domains, and rollback evidence; Phase 2 external Ruflo; Phase 3
-  repository implementation/review/non-author merge; Phase 4 GitHub environment,
-  secrets, merged-SHA verification, dispatch, soak, and cleanup.
+- `VOC-094-D00` — Use one package, one minimum-sufficient task, and two implementation
+  PRs into `develop`. Main PR1 binds repository config, policy, tests, and the truthful
+  pre-settings documentation state. The hard external-settings/truth boundary then
+  requires ACT-03 before immediate documentation-only PR2 can record its observed
+  sanitized post-state. This split explicitly contains partial state, integration, and
+  rollback: PR1 is repository-ready but ineligible, ACT-03 creates only the environment/
+  secrets while dispatch stays held, and PR2 reconciles living truth and supplies the
+  dispatch SHA. A repository rollback never silently undoes settings. The justified
+  overhead is an extra branch/PR, hosted/local checks, exact reviews, merge/source-head
+  evidence, elapsed time, coordination, context, and bookkeeping; PR1 may not preclaim
+  post-state and settings may not precede PR1. Preserve the mandatory order: Phase 1
+  Cloudflare inventory/resources/baseline/domains/rollback evidence; Phase 2 external
+  Ruflo; Phase 3 PR1 review/non-author merge; Phase 4 ACT-03, PR2 review/non-author
+  merge, exact PR2-merge-SHA verification, dispatch, soak, and cleanup.
 - `VOC-094-D01` — Bind only `vocanova-api-staging`, `vocanova-web-staging`, D1
   `vocanova-staging`, API Custom Domain `api-stag.vocanova.site`, and web Custom
   Domain `stag.vocanova.site`. Wrangler uses route objects with
@@ -51,7 +57,7 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   account and, if the adopted Custom Domain mechanism requires it, the selected
   `vocanova.site` zone. Its permission-group readback grants only Workers Scripts
   write/read, D1 write/read, and the minimum Custom Domain/Workers Routes permission
-  actually required; revoke/expire it after ACT-02. After the Phase 3 merge, ACT-03
+  actually required; revoke/expire it after ACT-02. After the Phase 3 PR1 merge, ACT-03
   issues a third distinct short-lived token once for the Phase 4 GitHub environment.
   Deny DNS write, billing, user/org, production, KV, R2, AI, Access, and unrelated
   products. No value is printed, committed, placed in the disposable overlay/evidence,
@@ -64,21 +70,30 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   in a time-bounded exact action record naming the discovered resources, risks,
   operator, permitted commands, and expiry. Absence of an inventory or acceptance is
   a blocker, not a warning.
-- `VOC-094-D07` — Only in Phase 4, after the implementation PR normally merges and the
-  exact resulting `develop` SHA is known, create/reconcile GitHub environment exactly
+- `VOC-094-D07` — Main PR1 must truthfully record `cloudflare-staging` as absent, held,
+  and planned through its merge; it must not claim settings post-state. Only in Phase 4,
+  after PR1 normally merges and the exact resulting `develop` SHA is known,
+  create/reconcile GitHub environment exactly
   `cloudflare-staging`. At the action readback it has exactly two secret names,
   `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, no values in GitHub output,
   repository files, PR comments, logs, artifacts, or Ruflo memory, and no variables
-  or production changes. Record settings pre-state, payload, rollback, post-state,
-  Phase 4 token expiry, and immediate living-document reconciliation already present
-  in the merged Phase 3 implementation. Pull requests, builders, Ruflo, and
+  or production changes. Record settings pre-state, payload, rollback, post-state, and
+  Phase 4 token expiry. Then immediately open documentation-only PR2 under the same
+  adopted package/task from current `develop`; it records the exact sanitized pre-state,
+  payload, rollback, post-state readback, and secret names only. PR2 requires applicable
+  local/hosted checks, different-actor exact-revision review, non-author merge, and
+  post-merge/source-head readback. Pull requests, builders, Ruflo, and
   credential-free jobs never receive the secrets. No GitHub environment or secret is
   created during Phase 1, Phase 2, or Phase 3. This exact settings mutation remains
   held by `VOC-085-HOLD-00` until an action record names its authorized operator,
-  authority, pre-state, exact payload, rollback, immediate documentation
-  reconciliation, post-state readback, expiry, and drift conditions. Completion
-  discharges only this exact `cloudflare-staging` environment/two-secret action;
+  authority, pre-state, exact payload, rollback, immediate PR2 documentation
+  reconciliation, post-state readback, expiry, and drift conditions. Completion occurs
+  only after PR2 merge/post-merge readback and discharges only this exact
+  `cloudflare-staging` environment/two-secret action;
   `VOC-085-HOLD-00` remains held for every other repository or environment setting.
+  ACT-04 may use only the independently reviewed PR2 merged `develop` SHA. If ACT-03 or
+  ACT-04 authority or the Phase 4 token expires while PR2 is open, stop; replacement
+  requires a fresh exact authority/settings record and no silent token reissue.
 - `VOC-094-D08` — Phase 1 provisions and bootstraps before any repository sentinel is
   weakened. Use a clean exact independently reviewed repository SHA and an untracked
   disposable external Wrangler config/overlay. The overlay contains only the reviewed
@@ -168,10 +183,10 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   that it contains synthetic data only. Never infer broad cleanup authority from
   failure.
 - `VOC-094-D15` — Because `delete_branch_on_merge` is currently true, GitHub may
-  automatically delete only merged short-lived plan and implementation source heads.
+  automatically delete only merged short-lived plan, PR1, and PR2 source heads.
   Capture their exact names/tip SHAs before merge, read back after merge, and record
   recreation commands. Do not manually delete any branch, permanent ref, worktree, or
-  recovery ref, and preserve all existing worktrees/recovery refs while either PR is
+  recovery ref, and preserve all existing worktrees/recovery refs while any PR is
   open.
 - `VOC-094-D16` — Every final repository revision receives full applicable checks,
   different-actor exact-SHA Cloudflare and security/settings specialist review,
@@ -183,6 +198,9 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   review. A reviewed but unchecked, failed, stale, or drifted SHA/manifest/overlay may
   not write D1, Workers, or domains. Authority expires on SHA, manifest, overlay hash,
   dependency/lock/workflow, or local/hosted check-result drift.
+  Both PR1 and PR2 require exact-revision review and different non-author merge; the
+  exact independently reviewed PR2 merged `develop` SHA is the sole ACT-04 dispatch
+  revision.
   `automatic_merge_allowed: true` is eligibility metadata only.
 
 ## Exact public platform references

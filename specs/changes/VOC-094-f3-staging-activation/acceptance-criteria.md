@@ -8,10 +8,11 @@
 - Evidence: `VOC-094-EV-00`, `EV-06`
 - Result: pending
 
-One adopted package, one task, and one implementation PR show exact-SHA builder,
+One adopted package, one task, and two implementation PRs show exact-SHA builder,
 specialist, independent-reviewer, merge-actor, and action-operator separation with no
-unresolved blocker. `automatic_merge_allowed: true` performs no merge. Plan and
-implementation source-head lifecycle evidence is complete, while every existing
+unresolved blocker. PR1 is the main repository implementation; PR2 is the immediate
+post-ACT-03 documentation-only reconciliation. `automatic_merge_allowed: true`
+performs no merge. Plan, PR1, and PR2 source-head lifecycle evidence is complete, while every existing
 worktree/recovery ref remains preserved and no manual branch/worktree deletion occurs.
 
 ## VOC-094-AC-01 — Phase 1 account, zone, permissions, and Free plan fail closed
@@ -81,13 +82,18 @@ are removed only after evidence capture.
 - Evidence: `VOC-094-EV-04`
 - Result: pending
 
-After the Phase 3 implementation PR merges, GitHub has exactly
-`cloudflare-staging`, only the two named secrets backed by a third distinct Phase 4
-short-lived token, no disclosed value or variable, and no production mutation. Its
-exact `VOC-085-HOLD-00` record contains operator/authority, pre-state, payload,
-rollback, immediate merged-doc reconciliation, post-state, and expiry; completion
-discharges only this scoped action and leaves every other settings action held. One
-manual staging-only dispatch on the exact independently reviewed merged `develop` SHA
+PR1 merges while truthfully documenting `cloudflare-staging` as absent, held, and
+planned. Only afterward ACT-03 creates/reconciles exactly that environment and the two
+named secrets backed by a third distinct Phase 4 short-lived token, with no disclosed
+value, variable, or production mutation. Its exact `VOC-085-HOLD-00` record contains
+operator/authority, pre-state, payload, rollback, post-state, expiry, and the immediate
+PR2 documentation-only reconciliation from current `develop`. PR2 records exact
+sanitized pre-state/payload/rollback/post-state and secret names only, passes exact
+checks/review, and is non-author merged and read back. ACT-03 completes only then,
+discharges only this scoped action, and leaves every other settings action held. If
+ACT-03/ACT-04 authority or the token expires while PR2 is open, work stops until a
+fresh exact authority/settings record exists; no token is silently reissued. One
+manual staging-only dispatch on the exact independently reviewed PR2 merged `develop` SHA
 passes authority/expiry/zero-cost/baseline gates, ordered migrations, immutable
 uploads, unique UUID resolution, 100% promotion, API/config/contract/web smoke,
 resource/version/domain readback, and bounded soak. Logs contain no prohibited data;
@@ -103,7 +109,9 @@ the run and any failure history remain immutable evidence.
 
 After Phase 1, pinned Ruflo is reverified externally in Phase 2 using sanitized
 context, performs no privileged action, and leaves no disposable process/state. Phase
-3 binds real readbacks in one reviewed/merged implementation PR. The ACT-00 read-only
+3 binds real readbacks in reviewed/merged PR1 while recording settings as absent/
+held/planned; Phase 4 ACT-03 is followed immediately by reviewed/merged docs-only PR2.
+The ACT-00 read-only
 credential, Phase 1 write token, and distinct Phase 4 token are expired/revoked in
 their own windows; successful staging resources remain unless separately
 authorized cleanup applies; failed partial resources are handled only by exact-ID
@@ -119,6 +127,7 @@ observed staging state and preserve production exclusions.
 - Result: pending
 
 All declared local/hosted checks, exact-SHA specialist and independent verdicts,
-non-author merge, implementation source-head readback/recreation evidence, post-merge
-`develop` review, external action records, successful dispatch, and final Cloudflare/
+non-author merges, both implementation source-head readback/recreation records,
+independent review of the exact PR2 merged `develop` SHA, external action records,
+successful dispatch, and final Cloudflare/
 GitHub/no-production readbacks are attached before issue #158 closes.
