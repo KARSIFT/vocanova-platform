@@ -19,34 +19,44 @@ ordered holds inside the unit, not separate implementation PRs.
    repository SHA, production sentinels, worktrees/recovery refs, affected-surface
    inventory, and current living-document claims. Obtain the exact Phase 1 action
    authority and exact-SHA Cloudflare/security/independent reviews required for the
-   external overlay/resource manifest. Reverify official Cloudflare docs, locked
-   Wrangler `4.125.0`, config schema, and exact command help. No tracked sentinel,
-   GitHub environment, or secret changes occur.
-2. **Phase 1 / ACT-00 — authenticate locally and inventory first.** Issue one secure
-   local/interactive short-lived Cloudflare credential with the reviewed selected-
-   account/zone permissions and expiry. Keep its value out of files, arguments,
-   output, and evidence. Its first use is read-only: bind account ID, Active
-   `vocanova.site` zone ID/name, Workers Free/billing posture, every Worker/D1/Custom
-   Domain, hostname collision state, and permission groups. Stop before writes if
-   production Workers/D1 exist without explicit residual account-wide acceptance.
+   external overlay/resource manifest. Bind the clean SHA to successful applicable
+   hosted CI, Governance, Quality, and Security and local validation/credential-free
+   dry runs. Reverify official Cloudflare docs, locked Wrangler `4.125.0`, config
+   schema, and exact command help. Failed, unchecked, stale, or drifted evidence stops
+   before credentials or writes. No tracked sentinel, GitHub environment, or secret
+   changes occur.
+2. **Phase 1 / ACT-00 — read-only authentication and inventory.** Issue a distinct
+   secure local/interactive short-lived credential/session with read permissions only
+   and no write permission. Keep its value out of files, arguments, output, and
+   evidence. Bind account ID, Active `vocanova.site` zone ID/name, Workers Free/billing
+   posture, every Worker/D1/Custom Domain, hostname collision state, and permission
+   groups. Stop if production Workers/D1 exist without explicit residual account-wide
+   acceptance. Record the decision, then revoke/expire this read-only credential before
+   issuing any write token.
 3. **Phase 1 / ACT-01 — provision D1.** From the same clean exact reviewed repository
-   SHA and still-unmodified tracked tree, create D1 exactly once requesting
-   `--location eeur` and no jurisdiction. Record the real UUID, requested hint, actual
-   placement/served-region readback, schema-independent pre-state, Free-plan state, and
-   exact two-Worker/two-domain resource authorization. Stop on collision, duplicate,
-   Paid prompt, unplanned permission, or production drift.
+   SHA and still-unmodified tracked tree, issue a separate short-lived Phase 1 write
+   token with the adopted scope, then create D1 exactly once requesting `--location
+eeur` and no jurisdiction. Record the real UUID, requested hint, actual placement/
+   served-region readback, schema-independent pre-state, Free-plan state, and exact
+   two-Worker/two-domain resource authorization. Stop on collision, duplicate, Paid
+   prompt, unplanned permission, or production drift.
 4. **Phase 1 / ACT-02 — bootstrap outside tracked config.** Create an untracked
-   disposable external Wrangler config/overlay containing only reviewed non-secret
-   real D1/Worker/domain bindings, synthetic-only vars, and web `API` service binding.
-   Secure auth stays local and outside the overlay. Hash and independently review the
-   sanitized overlay. Using the exact application and migrations from the clean SHA,
-   apply ordered migrations, upload/deploy/smoke API first, then upload/deploy/smoke
-   web, attach/read back only the two Custom Domains, and record real baseline UUIDs.
-   To claim a live rollback rehearsal, next upload and promote a newer reviewed
-   probe/candidate or equivalent valid traffic transition, verify it, roll both
-   Workers back to their baseline UUIDs, and prove 100% traffic/health plus unchanged
-   D1 state. Capture evidence, then delete only the overlay and revoke/expire the
-   single Phase 1 credential. Do not issue it again.
+   disposable external route-free Wrangler overlay containing only reviewed non-secret
+   real D1/Worker bindings, synthetic-only vars, `workers_dev: false`, preview URLs
+   false, and web `API` service binding. Secure auth stays outside it. Hash and review
+   the sanitized overlay and resource manifest, and pass their credential-free local/
+   schema/dry-run checks before any live command. Apply ordered migrations, then use locked Wrangler 4.125.0
+   `wrangler deploy` as the narrow first-creation exception to create/deploy route-free
+   API, resolve/tag/read back its baseline UUID, and only then create/deploy route-free
+   web bound to the existing API and resolve its UUID. Locked `versions upload` must
+   fail closed for a nonexistent script and is not used for either first creation.
+   Next hash/review a separate route-bearing overlay and use locked `wrangler triggers
+deploy` to attach exactly the two Custom Domains; read back ownership, certificates,
+   and DNS, then smoke. No public route exists before this trigger step. To claim live
+   rollback, use `versions upload` only now that scripts exist, exact `versions deploy`
+   for a newer reviewed probe/candidate, verify it, then roll both Workers to baseline
+   UUIDs and prove 100% traffic/health plus unchanged D1. Capture evidence, delete only
+   the overlays, and revoke/expire the Phase 1 write token. Do not issue it again.
 5. **Phase 2 — external Ruflo only.** Reverify exact Ruflo version, hashes, patched
    frozen graph, audit, role contract, and no background process in a disposable
    external workspace. Use only sanitized Phase 1 evidence for bounded coordination;
@@ -67,11 +77,14 @@ ordered holds inside the unit, not separate implementation PRs.
    implementation head, merge SHA, hosted/post-merge checks, source-head readback and
    recreation command, and no manual deletion.
 8. **Phase 4 / ACT-03 — environment and distinct token after merge.** Only now create
-   or reconcile `cloudflare-staging`, issue a new distinct short-lived Phase 4 token
-   once, and securely set exactly `CLOUDFLARE_ACCOUNT_ID` and
-   `CLOUDFLARE_API_TOKEN`. Record environment/settings pre-state, payload, rollback,
-   secret names only, token scope/expiry, post-state, and no production drift. Never
-   reuse or reissue the Phase 1 credential.
+   or reconcile `cloudflare-staging` under an exact scoped `VOC-085-HOLD-00` action
+   record, issue the third distinct short-lived Phase 4 token once, and securely set
+   exactly `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`. Record the authorized
+   settings operator/authority, pre-state, exact payload, rollback, immediate merged
+   documentation reconciliation, secret names only, token scope/expiry, post-state,
+   and no production drift. This discharges only that exact settings action;
+   `VOC-085-HOLD-00` remains held for all others. Never reuse or reissue either earlier
+   credential.
 9. Independently verify the exact merged `develop` SHA, hosted checks, real manifest
    binders, environment/secret-name readback, current resources/baseline, action
    authority, and zero-cent estimate. Under `VOC-094-ACT-04`, dispatch staging once
@@ -81,9 +94,12 @@ ordered holds inside the unit, not separate implementation PRs.
    evidence.
 10. Under `VOC-094-ACT-05`, revoke/expire the distinct Phase 4 token, preserve
     successful staging resources, and clean failed partial resources only when the
-    exact record permits them. Confirm Phase 1 overlay/credential and Phase 2 Ruflo
-    cleanup evidence, then attach final GitHub/Cloudflare/DNS/ref/worktree/no-production
-    readbacks. Close issue #158 only after AC-00 through AC-06 pass.
+    exact record permits them. Confirm ACT-00 read-only credential, Phase 1 write-token/
+    overlay, and Phase 2 Ruflo cleanup evidence, then attach final GitHub/Cloudflare/
+    DNS/ref/worktree/no-production readbacks plus the exact Phase 1 local/hosted check
+    binders. If a pre-write check fails or drifts, revoke the credential without a live
+    mutation and preserve the failure. Close issue #158 only after AC-00 through AC-06
+    pass.
 
 ## File reconciliation contract
 

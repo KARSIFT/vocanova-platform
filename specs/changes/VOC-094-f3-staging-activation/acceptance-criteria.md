@@ -25,10 +25,14 @@ worktree/recovery ref remains preserved and no manual branch/worktree deletion o
 Readback binds one account ID and the Active `vocanova.site` zone ID, verifies Workers
 Free and USD 0, and inventories all account Workers/D1/Custom Domains. No mutation is
 possible if production Workers/D1 exist without explicit residual-scope acceptance.
-One Phase 1 local/interactive short-lived credential has only the adopted account/zone
-permissions, is used first for inventory, is never disclosed or stored in the overlay,
-and is revoked/expired after Phase 1. No GitHub environment or secret exists yet
-because of this package.
+A clean exact reviewed repository SHA has successful applicable hosted CI, Governance,
+Quality, and Security and local validation/credential-free dry runs; failed,
+unchecked, stale, or drifted evidence blocks writes.
+A distinct ACT-00 local/interactive short-lived read-only credential/session has no
+write permissions, is never disclosed or stored in an overlay, and is revoked/expired
+after inventory and the residual-scope decision. Only then is a separate Phase 1 write
+token issued for ACT-01/02 with the adopted account/zone permissions. No GitHub
+environment or secret exists yet because of this package.
 
 ## VOC-094-AC-02 — Exact staging resources and privacy controls read back correctly
 
@@ -57,13 +61,17 @@ and `HOLD-02` remain unchanged.
 
 Separate Phase 1 action evidence binds a clean exact reviewed repository SHA and the
 hash of a sanitized untracked disposable external Wrangler overlay containing only
-reviewed non-secret real bindings/vars. It proves ordered migrations, API-first
-creation/promotion, web creation/promotion with service binding, Custom Domain
-bootstrap/readback, smoke, and real immutable API/web UUIDs without tracked sentinel
-changes. A claimed rollback rehearsal first promotes a newer reviewed probe/candidate
-or equivalent valid transition, then returns both Workers to the baseline UUIDs and
-proves unchanged D1; migration compatibility and forward-correction evidence are
-complete. The overlay and Phase 1 credential are removed only after evidence capture.
+reviewed non-secret real bindings/vars. The resource manifest and both overlay hashes
+pass exact review and credential-free local/schema/dry-run checks. After migrations, a hashed/reviewed route-free
+overlay uses locked `wrangler deploy` as the narrow first-creation exception for API,
+then web bound to the existing API, and resolves both baseline UUIDs; `versions upload`
+is not used while either script is nonexistent. Only then does a separately hashed/
+reviewed route-bearing overlay use locked `wrangler triggers deploy` to attach the two
+domains and read back ownership/certificates/DNS before smoke. No public route exists
+earlier. A claimed rollback rehearsal uses `versions upload` only after scripts exist,
+promotes a newer reviewed probe/candidate with exact `versions deploy`, then returns
+both Workers to baseline and proves unchanged D1. The overlays and Phase 1 write token
+are removed only after evidence capture.
 
 ## VOC-094-AC-04 — One exact ordinary staging dispatch and soak succeed
 
@@ -74,8 +82,11 @@ complete. The overlay and Phase 1 credential are removed only after evidence cap
 - Result: pending
 
 After the Phase 3 implementation PR merges, GitHub has exactly
-`cloudflare-staging`, only the two named secrets backed by a new distinct Phase 4
-short-lived token, no disclosed value or variable, and no production mutation. One
+`cloudflare-staging`, only the two named secrets backed by a third distinct Phase 4
+short-lived token, no disclosed value or variable, and no production mutation. Its
+exact `VOC-085-HOLD-00` record contains operator/authority, pre-state, payload,
+rollback, immediate merged-doc reconciliation, post-state, and expiry; completion
+discharges only this scoped action and leaves every other settings action held. One
 manual staging-only dispatch on the exact independently reviewed merged `develop` SHA
 passes authority/expiry/zero-cost/baseline gates, ordered migrations, immutable
 uploads, unique UUID resolution, 100% promotion, API/config/contract/web smoke,
@@ -92,8 +103,9 @@ the run and any failure history remain immutable evidence.
 
 After Phase 1, pinned Ruflo is reverified externally in Phase 2 using sanitized
 context, performs no privileged action, and leaves no disposable process/state. Phase
-3 binds real readbacks in one reviewed/merged implementation PR. The distinct Phase 4
-token is expired/revoked; successful staging resources remain unless separately
+3 binds real readbacks in one reviewed/merged implementation PR. The ACT-00 read-only
+credential, Phase 1 write token, and distinct Phase 4 token are expired/revoked in
+their own windows; successful staging resources remain unless separately
 authorized cleanup applies; failed partial resources are handled only by exact-ID
 cleanup authority. All living delivery/settings/governance documents match the
 observed staging state and preserve production exclusions.

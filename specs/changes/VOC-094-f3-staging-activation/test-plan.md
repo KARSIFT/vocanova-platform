@@ -22,15 +22,20 @@ under their adopted exact action records.
 - Covers: `VOC-094-AC-01`
 - Procedure: read back exact account/zone/Active/Free/billing facts, list every Worker,
   D1, and Custom Domain, inspect permission groups/token resource selectors and expiry,
-  and prove the single secure local/interactive credential is first used only for
-  read-only inventory and kept out of files, overlay, arguments, logs, and evidence.
+  and prove the distinct ACT-00 secure local/interactive credential/session has no
+  write permission, is used only for read-only inventory, stays out of files,
+  overlays, arguments, logs, and evidence, and is revoked before a separate Phase 1
+  write token is issued.
   Negative fixtures cover missing/stale inventory; account/zone mismatch; production
   resource without residual acceptance; broad account/zone/DNS/billing permission;
   Paid plan/cost above 0; credential value disclosure; premature write; GitHub
-  environment/secret creation; credential reissue/reuse; and production mutation.
+  environment/secret creation; read-only credential with write permission; write token
+  before ACT-00 decision/revocation; unchecked, failed, or stale applicable hosted/local
+  checks; SHA/dependency/lock/workflow/check-result drift; credential reissue/reuse; and
+  production mutation.
 - Expected: exact selected scope, no unauthorized account-wide residual, zero paid
-  spend, one undisclosed Phase 1 credential with exact expiry, no GitHub environment
-  yet, and no production change.
+  spend, an undisclosed/revoked no-write ACT-00 credential followed only then by a
+  separate Phase 1 write token, no GitHub environment yet, and no production change.
 - Evidence: `VOC-094-EV-01`
 
 ## VOC-094-TEST-02 — Resource, config, domain, D1, privacy, and production isolation
@@ -54,21 +59,29 @@ under their adopted exact action records.
 
 - Covers: `VOC-094-AC-03`
 - Procedure: from a clean exact reviewed repository SHA, hash/review an untracked
-  sanitized disposable external Wrangler overlay containing only approved non-secret
-  real bindings/vars while auth remains outside it. List/apply migrations in order,
-  verify migration table/schema/integrity, upload/deploy/smoke API first, then web with
-  service binding, attach/read back Custom Domains, resolve baseline UUIDs, and verify
-  distinct action/baseline evidence. For a live rollback rehearsal, upload/promote a
-  newer reviewed probe/candidate or equivalent valid transition, verify it, roll both
-  Workers to baseline UUIDs, then compare D1 before/after and rehearse forward
-  correction. Capture sanitized evidence before deleting the overlay and
-  revoking/expiring the Phase 1 credential. Negative fixtures cover tracked sentinel
-  edits in Phase 1, auth in overlay, overlay/app SHA mismatch, web-first creation,
-  missing target, migration failure, tag ambiguity, fake/mismatched UUID, reused/
-  expired action record, missing domain/binding, baseline-only false rollback claim,
-  unhealthy probe/rollback smoke, incompatible schema, and any D1 rollback attempt.
+  sanitized route-free disposable Wrangler overlay containing only approved non-secret
+  real bindings/vars while the separate Phase 1 write token remains outside it. Apply
+  exact review and credential-free local/schema/dry-run checks to the resource manifest
+  and both overlay hashes. Apply migrations only after they pass, then use locked
+  `wrangler deploy` as the narrow first-creation exception
+  to create/deploy API route-free and resolve/tag/read back its baseline UUID, followed
+  by web route-free with service binding to the existing API and its baseline UUID.
+  Hash/review a separate route-bearing overlay, apply it only after both scripts exist
+  with locked `wrangler triggers deploy`, read back exact domain ownership/certificates/
+  DNS, then smoke. For live rollback, use `versions upload` only after scripts exist,
+  exact `versions deploy` for a newer reviewed probe, verify it, roll both Workers to
+  baseline, and compare D1 before/after. Capture evidence before deleting overlays and
+  revoking the write token. Negative fixtures cover tracked sentinel edits, auth in an
+  overlay, overlay/app SHA mismatch, `versions upload` against nonexistent Worker,
+  unchecked/failed/stale overlay or resource-manifest checks, overlay-hash or
+  dependency/lock/workflow/check-result drift,
+  web before API, service binding to absent API, domain trigger before both scripts,
+  public route before trigger attachment, wrong/missing route overlay hash, migration
+  failure, fake/mismatched UUID, baseline-only false rollback, unhealthy probe/rollback,
+  incompatible schema, and any D1 rollback attempt.
 - Expected: real proven baseline exists before ordinary dispatch; Worker rollback is
-  immediate and D1 state is unchanged/forward-correctable.
+  immediate and D1 state is unchanged/forward-correctable; no live write occurs from a
+  reviewed-but-unchecked or drifted SHA/manifest/overlay.
 - Evidence: `VOC-094-EV-03`
 
 ## VOC-094-TEST-04 — Ordinary dispatch, exact promotion, smoke, soak, and failure
@@ -76,15 +89,18 @@ under their adopted exact action records.
 - Covers: `VOC-094-AC-04`
 - Procedure: exercise mocked delivery events for every gate, then dispatch once on the
   exact independently reviewed merged `develop` SHA, but only after ACT-03 creates
-  `cloudflare-staging` and stores exactly the account ID plus new distinct Phase 4
-  token. Verify settings pre/post evidence, secret names/no values, migration/upload/
+  `cloudflare-staging` under exact scoped `VOC-085-HOLD-00` authority and stores exactly
+  the account ID plus the third distinct Phase 4 token. Verify operator/authority,
+  settings pre-state/payload/rollback/immediate-docs/post-state/expiry evidence, secret
+  names/no values, migration/upload/
   promotion/smoke order, UUIDs, API `/healthz`, `/configz`, `/openapi.json`, service-
   binding-backed web HTML, release marker, resource/domain/deployment readbacks,
   bounded soak, usage/errors, and redaction. Negative cases include environment/secret
-  before merge, reuse of Phase 1 credential, non-dispatch event, wrong ref/SHA/account/
-  zone/route, expired/mismatched authority, nonzero estimate, fake baseline, extra/
-  missing secret or variable, migration/upload/promotion/smoke failure, cancellation,
-  retry without fresh review, limit pressure, and production selection.
+  before merge, missing/broad/reused `VOC-085-HOLD-00` authority, failure to leave
+  other settings held, reuse of either earlier credential, non-dispatch event, wrong
+  ref/SHA/account/zone/route, expired/mismatched authority, nonzero estimate, fake
+  baseline, extra/missing secret or variable, migration/upload/promotion/smoke failure,
+  cancellation, retry without fresh review, limit pressure, and production selection.
 - Expected: one authorized staging run succeeds; failures remain visible, invoke only
   Worker rollback where eligible, and never mutate D1 or production.
 - Evidence: `VOC-094-EV-04`
@@ -94,8 +110,9 @@ under their adopted exact action records.
 - Covers: `VOC-094-AC-05`
 - Procedure: verify exact Ruflo version/integrity/hashes/frozen graph/audit externally;
   run a bounded sanitized coordination rehearsal and prove no background process or
-  repository state remains. Verify Phase 1 overlay/credential cleanup before Ruflo,
-  distinct Phase 4 token expiry/revocation after dispatch, and action-scoped cleanup
+  repository state remains. Verify ACT-00 read-only credential and Phase 1 write-token/
+  overlays cleanup before Ruflo, third Phase 4 token expiry/revocation after dispatch,
+  and action-scoped cleanup
   readbacks. Negative fixtures deny Ruflo GitHub/Cloudflare/DNS/secret/dispatch/deploy/
   spend/production access and reject wildcard cleanup, successful-resource deletion,
   D1 deletion without synthetic proof, worktree/ref deletion, and unrecorded commands.

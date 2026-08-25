@@ -10,18 +10,22 @@
 - Implementation pull-request mapping: one future implementation PR into `develop`
 - Status: planned-pending-adoption
 
-After adoption and exact action authority, execute Phase 1 with one secure
-local/interactive credential: `ACT-00` read-only account/zone/inventory and residual-
-permission decision, `ACT-01` exact D1/resource provisioning, and `ACT-02` a clean-
-SHA disposable-overlay API-first/web-second baseline, domains, readbacks, valid Worker-
-only rollback rehearsal, evidence capture, and Phase 1 credential/overlay cleanup.
+After adoption and exact action authority, execute Phase 1 with a distinct ACT-00
+read-only credential/session having no write permissions, then revoke it after the
+account/zone/inventory and residual-permission decision. Only then issue a separate
+Phase 1 write token for `ACT-01` D1/resource provisioning and `ACT-02`: from a clean
+SHA, use reviewed route-free `wrangler deploy` first-creation API then web, resolve
+baseline UUIDs, then reviewed route-bearing `wrangler triggers deploy` for domains,
+readbacks, a post-creation versions-upload/deploy Worker-only rollback rehearsal,
+evidence capture, and write-token/overlay cleanup.
 Then execute Phase 2 external sanitized Ruflo verification/coordination.
 
 Only in Phase 3 does a different builder use one isolated short-lived implementation
 worktree/PR to bind the real IDs/routes/baseline into the staging manifest, Wrangler
 configuration, delivery workflow/policy/tests, and every affected living document.
-After exact reviews and non-author merge, Phase 4 performs `ACT-03` GitHub environment
-and distinct two-secret token setup, exact merged-`develop` review, `ACT-04` ordinary
+After exact reviews and non-author merge, Phase 4 performs `ACT-03` under the exact
+scoped `VOC-085-HOLD-00` GitHub environment/third-token/two-secret settings authority,
+leaving all other settings held, then exact merged-`develop` review, `ACT-04` ordinary
 dispatch/soak, and `ACT-05` bounded token/partial-failure cleanup.
 
 The task is not complete at repository merge. It completes only after the exact merged

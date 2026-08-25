@@ -44,18 +44,18 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   the exact build, usage envelope, or required feature cannot run on Free; monitor
   Worker requests/CPU/errors and D1 rows read/written/storage against Free limits and
   stop before any paid-plan change.
-- `VOC-094-D05` — Phase 1 and Phase 4 use two distinct credentials. Issue the Phase 1
-  secure local/interactive short-lived Cloudflare credential once, scope it only to
-  the selected account and, if the adopted Custom Domain mechanism requires it, the
-  selected `vocanova.site` zone, and use it first for read-only inventory. Only after
-  `ACT-00` passes may the same Phase 1 credential perform its authorized writes. Its
-  current permission-group readback grants only Workers Scripts write/read, D1
-  write/read, and the minimum Custom Domain/Workers Routes permission actually
-  required. Revoke/expire it at the end of Phase 1. After the Phase 3 merge, issue a
-  new distinct short-lived token once for the Phase 4 GitHub environment. Deny DNS
-  write, billing, user/org, production, KV, R2, AI, Access, and unrelated products.
-  Neither value is printed, committed, placed in the disposable overlay/evidence, or
-  reused/reissued across phases.
+- `VOC-094-D05` — Use three distinct credentials. ACT-00 uses a secure local/
+  interactive short-lived read-only credential/session with no write permissions;
+  revoke/expire it after inventory and the residual-scope decision. Only then may
+  ACT-01 issue a separate short-lived Phase 1 write token, scoped only to the selected
+  account and, if the adopted Custom Domain mechanism requires it, the selected
+  `vocanova.site` zone. Its permission-group readback grants only Workers Scripts
+  write/read, D1 write/read, and the minimum Custom Domain/Workers Routes permission
+  actually required; revoke/expire it after ACT-02. After the Phase 3 merge, ACT-03
+  issues a third distinct short-lived token once for the Phase 4 GitHub environment.
+  Deny DNS write, billing, user/org, production, KV, R2, AI, Access, and unrelated
+  products. No value is printed, committed, placed in the disposable overlay/evidence,
+  reused, or reissued across boundaries.
 - `VOC-094-D06` — Workers Scripts and D1 permissions are account-wide within the
   selected account; Cloudflare cannot restrict them to the two scripts and one D1
   database. Before any write token exists, inventory all Workers, D1 databases, and
@@ -73,7 +73,12 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   Phase 4 token expiry, and immediate living-document reconciliation already present
   in the merged Phase 3 implementation. Pull requests, builders, Ruflo, and
   credential-free jobs never receive the secrets. No GitHub environment or secret is
-  created during Phase 1, Phase 2, or Phase 3.
+  created during Phase 1, Phase 2, or Phase 3. This exact settings mutation remains
+  held by `VOC-085-HOLD-00` until an action record names its authorized operator,
+  authority, pre-state, exact payload, rollback, immediate documentation
+  reconciliation, post-state readback, expiry, and drift conditions. Completion
+  discharges only this exact `cloudflare-staging` environment/two-secret action;
+  `VOC-085-HOLD-00` remains held for every other repository or environment setting.
 - `VOC-094-D08` — Phase 1 provisions and bootstraps before any repository sentinel is
   weakened. Use a clean exact independently reviewed repository SHA and an untracked
   disposable external Wrangler config/overlay. The overlay contains only the reviewed
@@ -93,13 +98,26 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   smoke/readback evidence. The delivery policy must validate these fields and reject
   missing, duplicated, expired, mismatched, or placeholder binders.
 
-  Apply ordered compatible D1 migrations; upload/promote/smoke the API target first;
-  then upload/promote/smoke the web Worker with its API service binding; apply and
-  read back both Custom Domains; record real immutable API and web UUIDs as the
-  last-known-good baseline. Ordinary dispatch is prohibited until both baseline
-  UUIDs, migrations, bindings, domains, and smoke results are proven. Phase 3 alone
-  replaces staging sentinels with those readbacks; Phase 1 must not edit tracked
-  manifest/Wrangler/policy/docs files.
+  Apply ordered compatible D1 migrations, then use locked Wrangler `4.125.0` from the
+  separately hashed/reviewed **route-free** disposable overlay to run the narrowly
+  reviewed first-creation exception: `wrangler deploy` creates and deploys the API
+  Worker first with `workers_dev: false` and preview URLs false. Resolve/tag/read back
+  its real baseline UUID. Next, only after the API script exists, use route-free
+  `wrangler deploy` to create/deploy the web Worker with service binding `API` to the
+  existing API Worker, then resolve/tag/read back its baseline UUID. Neither Worker
+  has a public route at this point. Initial `wrangler deploy` is permitted only for
+  this exact first-creation bootstrap because locked `versions upload` rejects a
+  nonexistent Worker; it is not the ordinary delivery mechanism.
+
+  Only after both scripts and baseline UUIDs exist may a second, separately hashed and
+  reviewed route-bearing disposable overlay add exactly
+  `api-stag.vocanova.site` and `stag.vocanova.site` with `custom_domain: true`.
+  Apply it using locked `wrangler triggers deploy`, then read back exact Worker/domain
+  ownership, certificates, and DNS before smoke. No public route exists before this
+  trigger step. Ordinary delivery remains immutable `versions upload` followed by
+  exact `versions deploy`. Phase 3 alone replaces staging sentinels with the resulting
+  D1/version/domain readbacks; Phase 1 must not edit tracked manifest/Wrangler/policy/
+  docs files.
 
 - `VOC-094-D09` — Ordinary delivery remains manual `workflow_dispatch` on exact
   `refs/heads/develop`. Inputs bind the independently reviewed 40-character SHA,
@@ -112,14 +130,15 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   reviewed corrective revision or fresh action record as applicable.
 - `VOC-094-D10` — Worker rollback changes Worker traffic only and never rolls back D1.
   A claimed live Phase 1 rehearsal must first create and promote a newer exact reviewed
-  probe/candidate version (or an equivalent valid traffic transition) after the real
-  baseline exists, verify that transition, then explicitly roll both Workers back to
-  the recorded baseline UUIDs and verify 100% traffic, domains, and health. Merely
-  deploying the baseline does not prove rollback. Record D1 state before/after to prove
-  it was not restored or changed by Worker rollback. Migrations remain forward-only
-  and expand-compatible with probe/new and baseline code; recovery is a reviewed
-  forward correction. Time Travel restore and D1 deletion are separate destructive
-  actions and not authorized by ordinary rollback.
+  probe/candidate version with `versions upload` only after both Worker scripts exist,
+  deploy that probe with exact `versions deploy` (or use an equivalent valid traffic
+  transition), verify it, then explicitly roll both Workers back to the recorded
+  baseline UUIDs and verify 100% traffic, domains, and health. Merely deploying the
+  baseline does not prove rollback. Record D1 state before/after to prove it was not
+  restored or changed by Worker rollback. Migrations remain forward-only and expand-
+  compatible with probe/new and baseline code; recovery is a reviewed forward
+  correction. Time Travel restore and D1 deletion are separate destructive actions
+  and not authorized by ordinary rollback.
 - `VOC-094-D11` — Staging contains only synthetic/non-personal data. Signup, new-user
   onboarding, OAuth, magic links/email, AI generation/provider calls, paid providers,
   and production import remain off. Logs/metrics/traces may contain release UUID,
@@ -139,13 +158,15 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   traffic, migrations, data, DNS, or `main`. Deterministic negative tests must fail on
   any production drift or attempt to release `HOLD-01`/`HOLD-02`.
 - `VOC-094-D14` — Cleanup is explicit and attributable. On successful activation,
-  preserve the named staging resources and evidence. Revoke/expire the Phase 1 local
-  credential after Phase 1 and the distinct Phase 4 environment token after dispatch;
-  delete the Phase 1 overlay and Phase 2 Ruflo state only after sanitized evidence is
-  captured. On partial failure, cleanup may affect only exact resources created by
-  that action and only if its pre-authorized cleanup record names IDs, order, evidence
-  retention, and readback; D1 deletion requires explicit confirmation that it contains
-  synthetic data only. Never infer broad cleanup authority from failure.
+  preserve the named staging resources and evidence. Revoke/expire the ACT-00
+  read-only credential before Phase 1 write-token issuance, the ACT-01/02 Phase 1 write
+  token after Phase 1, and the third distinct Phase 4 environment token after
+  dispatch; delete the Phase 1 overlay and Phase 2 Ruflo state only after sanitized
+  evidence is captured. On partial failure, cleanup may affect only exact resources
+  created by that action and only if its pre-authorized cleanup record names IDs,
+  order, evidence retention, and readback; D1 deletion requires explicit confirmation
+  that it contains synthetic data only. Never infer broad cleanup authority from
+  failure.
 - `VOC-094-D15` — Because `delete_branch_on_merge` is currently true, GitHub may
   automatically delete only merged short-lived plan and implementation source heads.
   Capture their exact names/tip SHAs before merge, read back after merge, and record
@@ -155,6 +176,13 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
 - `VOC-094-D16` — Every final repository revision receives full applicable checks,
   different-actor exact-SHA Cloudflare and security/settings specialist review,
   different-actor independent R4 review, resolved blockers, and non-author merge.
+  Before any ACT-01/02 Cloudflare write, the clean exact repository SHA must also bind
+  successful applicable hosted CI, Governance, Quality, and Security plus local
+  validation and credential-free dry runs. The reviewed resource manifest and both
+  overlay hashes bind successful credential-free local/schema/dry-run checks and exact
+  review. A reviewed but unchecked, failed, stale, or drifted SHA/manifest/overlay may
+  not write D1, Workers, or domains. Authority expires on SHA, manifest, overlay hash,
+  dependency/lock/workflow, or local/hosted check-result drift.
   `automatic_merge_allowed: true` is eligibility metadata only.
 
 ## Exact public platform references

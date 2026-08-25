@@ -39,41 +39,54 @@ of that residual account-wide permission boundary.
 The external sequence is fixed:
 
 1. **Phase 1:** after plan adoption, exact action authority, and review of a clean exact
-   repository SHA, use one secure local/interactive short-lived Cloudflare credential
-   first for read-only inventory and then, only after that gate passes, for D1,
-   API-first/web-second baseline, service binding, Custom Domains, readbacks, and a
-   valid Worker-only rollback rehearsal. A hashed sanitized untracked external
-   Wrangler overlay carries only reviewed non-secret real bindings/vars; secure auth is
-   outside it. Preserve repository sentinels until readbacks exist, capture evidence,
-   remove the overlay, and revoke/expire that Phase 1 credential.
+   repository SHA with successful applicable hosted and local validation/dry-run
+   evidence, use a distinct local/interactive read-only credential/session with
+   no write permission for inventory and the residual-scope decision, then revoke it.
+   Only after that gate passes, issue a separate short-lived Phase 1 write token for
+   D1, API-first/web-second baseline, service binding, Custom Domains, readbacks, and a
+   valid Worker-only rollback rehearsal. Separately hashed/reviewed route-free and
+   route-bearing disposable Wrangler overlays carry only reviewed non-secret real
+   bindings/vars and pass credential-free local/schema/dry-run checks and exact review;
+   secure auth is outside them. Preserve repository sentinels until
+   readbacks exist, capture evidence, remove the overlays, and revoke/expire the Phase
+   1 write token.
 2. **Phase 2:** reverify and use Ruflo 3.38.16 only in a disposable external sanitized
    workspace, then remove its state.
 3. **Phase 3:** a different builder binds the real Phase 1 IDs/routes/evidence into the
    repository manifest, Wrangler config, policy, tests, and living docs in one
    implementation PR; obtain exact-SHA reviews and a non-author merge into `develop`.
 4. **Phase 4:** only after that merge, create/reconcile `cloudflare-staging`, securely
-   add its two secrets using a new distinct short-lived GitHub-environment token,
+   add its two secrets using a third distinct short-lived GitHub-environment token,
    independently verify the merged `develop` SHA, dispatch once, soak, and clean up.
 
-Neither credential value is printed or placed in the overlay, repository, evidence,
-Ruflo memory, or command arguments. The Phase 1 credential and Phase 4 environment
-token are different credentials with separately recorded scope and expiry; neither is
-issued twice or reused across phases.
+No credential value is printed or placed in an overlay, repository, evidence, Ruflo
+memory, or command argument. The ACT-00 read-only credential/session, Phase 1 write
+token, and Phase 4 environment token are three different credentials with separately
+recorded permissions and expiry; none is issued twice or reused across boundaries.
 
-The first ordinary delivery requires the Phase 1 reviewed bootstrap: create and
-promote a real last-known-good API version first, then a web version with its service
-binding, attach both Custom Domains, smoke/read back both UUIDs, and record them before
-ordinary `workflow_dispatch`. A live rollback rehearsal is valid only after a newer
-reviewed probe/candidate or equivalent version is promoted and traffic is then rolled
-back to the baseline UUIDs. Worker rollback changes traffic only; it never reverses
-D1. Migrations remain forward-only and expand-compatible, with forward correction as
-the default recovery.
+The first ordinary delivery requires the Phase 1 reviewed bootstrap. Locked Wrangler
+4.125.0 rejects `versions upload` for a nonexistent Worker, so the exact first-creation
+exception uses route-free `wrangler deploy` to create/deploy API first and resolve its
+baseline UUID, then create/deploy web with its service binding to the existing API and
+resolve its UUID. Only after both scripts exist does locked `wrangler triggers deploy`
+apply the separately reviewed route-bearing overlay and attach the two Custom Domains;
+no public route exists earlier. A live rollback rehearsal is valid only after
+`versions upload`/exact `versions deploy` promotes a newer reviewed probe/candidate or
+equivalent version and traffic is then rolled back to the baseline UUIDs. Ordinary
+delivery remains versions upload plus exact deploy. Worker rollback changes traffic
+only; it never reverses D1.
 
 This package may complete only `VOC-080-HOLD-00` for its exact staging resources,
 actions, revision, and expiry window. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain
 held and unchanged. `prod.vocanova.site` and `api-prod.vocanova.site` are reserved
 names only; every production Worker, D1, route/domain, environment, secret, traffic,
 migration, datum, and setting is untouched.
+
+The Phase 4 GitHub environment/two-secret mutation is separately held by
+`VOC-085-HOLD-00` until its exact operator, authority, pre-state, payload, rollback,
+immediate documentation reconciliation, post-state, and expiry record is complete.
+That action discharges only its exact scope; `VOC-085-HOLD-00` remains held for every
+other repository or environment setting.
 
 Ruflo 3.38.16 may be reverified and used only from a disposable external workspace
 with sanitized context. It receives no GitHub write/approve/merge/close/dispatch,

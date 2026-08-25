@@ -18,19 +18,21 @@
 ## Risks and mitigations
 
 - `VOC-094-R00` — An account-scoped token can mutate unrelated/production Workers or
-  D1 in the selected account. Mitigation: complete read-only inventory before token
-  issuance; fail closed if production exists unless exact residual acceptance is
-  recorded; command/name allowlists, short expiry, post-action readback, and specialist
-  review.
+  D1 in the selected account. Mitigation: ACT-00 uses a distinct credential/session
+  with read-only permissions and no writes; revoke it after inventory/residual decision
+  and only then issue a separate short-lived Phase 1 write token. Fail closed if
+  production exists without exact residual acceptance; apply command/name allowlists,
+  short expiry, post-action readback, and specialist review.
 - `VOC-094-R01` — Custom Domain bootstrap could collide with existing DNS, domain,
   route, or Worker ownership. Mitigation: exact DNS/Cloudflare domain collision
   readbacks; use `custom_domain: true`; stop on any existing CNAME or ownership
   mismatch; authorize only the two staging hostnames and no DNS write.
 - `VOC-094-R02` — The first deployment has no real rollback UUIDs. Mitigation:
-  separate reviewed clean-SHA/disposable-overlay API-first/web-second baseline action,
-  smoke/readback and immutable UUID binder before Phase 3. A live rehearsal additionally
-  promotes a newer reviewed probe/equivalent transition before rolling traffic back to
-  baseline; baseline deployment alone is not rehearsal evidence.
+  locked `wrangler deploy` is a narrowly reviewed route-free first-creation exception
+  for API then web because `versions upload` rejects nonexistent scripts. Resolve both
+  baseline UUIDs before a separately reviewed `triggers deploy` attaches domains. A
+  live rehearsal uses `versions upload` only after scripts exist and promotes a newer
+  reviewed probe before rollback; baseline deployment alone is not rehearsal evidence.
 - `VOC-094-R03` — Worker rollback leaves a migrated D1 schema/data state. Mitigation:
   forward-only expand-compatible migrations, compatibility checks against baseline
   and new Workers, and reviewed forward correction; no automatic Time Travel restore.
@@ -38,10 +40,19 @@
   Mitigation: verify Free plan and bundle/usage envelope, zero-cent gate, usage/CPU/D1
   monitoring, stop on limit pressure, and forbid plan/billing/add-on change.
 - `VOC-094-R05` — Secrets or learner content leak to logs, comments, artifacts, or
-  Ruflo. Mitigation: secure local/interactive Phase 1 auth outside the sanitized
-  overlay, post-merge environment-scoped Phase 4 secrets, secret-name-only readbacks,
-  redaction scans, synthetic data, disabled external features, privacy field allowlist,
-  and sanitized disposable Ruflo context.
+  Ruflo. Mitigation: ACT-00 read-only auth and the separate Phase 1 write token stay
+  outside both sanitized overlays; post-merge environment-scoped Phase 4 secrets use a
+  third token; secret-name-only readbacks, redaction scans, synthetic data, disabled
+  external features, a privacy field allowlist, and sanitized Ruflo context apply.
+- `VOC-094-R10` — ACT-03 could be mistaken for broad GitHub settings authority.
+  Mitigation: keep it held by `VOC-085-HOLD-00` until the exact operator/authority,
+  pre-state, payload, rollback, immediate docs, post-state, and expiry contract passes;
+  discharge only that environment/two-secret action and leave all other settings held.
+- `VOC-094-R11` — Exact-SHA review without successful current checks could still send
+  unchecked code/config to live staging. Mitigation: ACT-01/02 bind the clean SHA to
+  successful applicable hosted and local checks and bind the manifest/overlay hashes
+  to credential-free local/schema/dry runs plus exact review; any result or dependency/
+  lock/workflow drift expires authority and revokes the token before mutation.
 - `VOC-094-R06` — Staging activation accidentally releases production holds or edits
   reserved production names/config. Mitigation: production hash/sentinel readbacks and
   negative fixtures across manifest, Wrangler, workflow, policy, docs, Cloudflare,
@@ -65,14 +76,16 @@
 - `VOC-094-EV-00` — package shape, adoption, roles, exact-SHA reviews, merge/source-
   head evidence.
 - `VOC-094-EV-01` — Phase 1 account/zone/plan/permission inventory, residual-scope
-  decision, local credential scope/expiry/no-disclosure, and no-premature-write proof.
+  decision, ACT-00 read-only credential no-write/scope/expiry/no-disclosure evidence,
+  its revocation, exact-SHA hosted/local check binders, and no-premature-write proof.
 - `VOC-094-EV-02` — exact Cloudflare resources/bindings/domains/D1/privacy/no-
   production readbacks.
-- `VOC-094-EV-03` — migration, baseline UUID, smoke, rollback, and forward-correction
-  rehearsal evidence.
+- `VOC-094-EV-03` — route-free first-creation deploys, baseline UUIDs, route-bearing
+  trigger attachment, migration/smoke, post-creation rollback probe, and forward-
+  correction evidence.
 - `VOC-094-EV-04` — post-merge GitHub environment/two-secret-name evidence, distinct
-  Phase 4 token scope/expiry, ordinary dispatch, exact promotions, smoke/soak, usage,
-  and logs.
+  third-token scope/expiry, scoped `VOC-085-HOLD-00` authority/pre/post/rollback/docs
+  evidence, ordinary dispatch, exact promotions, smoke/soak, usage, and logs.
 - `VOC-094-EV-05` — Phase 1 overlay/credential cleanup, Phase 2 Ruflo verification/
   removal, Phase 4 token expiry/revocation, partial-state cleanup, and living-doc
   reconciliation.
