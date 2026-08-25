@@ -30,14 +30,17 @@ bookkeeping, justified by this non-combinable truth boundary.
    schema, and exact command help. Failed, unchecked, stale, or drifted evidence stops
    before credentials or writes. No tracked sentinel, GitHub environment, or secret
    changes occur.
-2. **Phase 1 / ACT-00 — read-only authentication and inventory.** Issue a distinct
-   secure local/interactive short-lived credential/session with read permissions only
-   and no write permission. Keep its value out of files, arguments, output, and
-   evidence. Bind account ID, Active `vocanova.site` zone ID/name, Workers Free/billing
-   posture, every Worker/D1/Custom Domain, hostname collision state, and permission
-   groups. Stop if production Workers/D1 exist without explicit residual account-wide
-   acceptance. Record the decision, then revoke/expire this read-only credential before
-   issuing any write token.
+2. **Phase 1 / ACT-00 — inventory closure and residual-scope decision.** The completed
+   no-write readback binds account `0a9eda28b96d77c24dcde74f3e074d47`, Active Free
+   Website zone `vocanova.site` (`63286d93b5f32925ac7366b4e97908be`), three existing
+   Workers, no D1/Custom Domains/routes/selected DNS records, and no staging collision;
+   its credential is revoked. It also found an unrelated existing USD 5/month Basic
+   Load Balancing subscription. Before any write credential, obtain a separate
+   attributable record with exact expiry that accepts only the unavoidable selected-
+   account Workers Scripts/D1 scope, names and prohibits commands targeting or mutating those Workers,
+   allows only the exact VocaNova commands/resources, and confirms zero incremental
+   VocaNova staging cost with Workers Free and D1 Free. Stop on any cost/scope drift;
+   do not modify, expand, or attribute the unrelated subscription.
 3. **Phase 1 / ACT-01 — provision D1.** From the same clean exact reviewed repository
    SHA and still-unmodified tracked tree, issue a separate short-lived Phase 1 write
    token with the adopted scope, then create D1 exactly once with the `eeur` location
@@ -75,7 +78,9 @@ bookkeeping, justified by this non-combinable truth boundary.
    separate action/expiry fields, synthetic/privacy/zero-cost guards, and production
    negatives. Historical evidence stays immutable and production sentinels stay
    unchanged. Every living settings surface truthfully records `cloudflare-staging` as
-   absent, held, and planned through PR1 merge; PR1 claims no ACT-03 post-state.
+   absent, held, and planned through PR1 merge; PR1 claims no ACT-03 post-state. Keep
+   the incremental-only zero-cost gate and unrelated-subscription exclusion explicit in
+   the manifest, policy, tests, and living documentation.
 7. Run all credential-free validation/negative fixtures on the final PR1 head.
    Obtain fresh different-actor exact-SHA Cloudflare and security/settings specialist
    PASS plus independent R4 PASS; any material fix requires fresh applicable checks and

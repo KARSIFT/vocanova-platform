@@ -2,7 +2,7 @@
 
 ## VOC-094-T00 — Activate and verify the bounded synthetic F3 staging outcome
 
-- Requirements: `VOC-094-D00` through `VOC-094-D16`
+- Requirements: `VOC-094-D00` through `VOC-094-D16` (as amended by `VOC-094-AM-01`)
 - Acceptance criteria: `VOC-094-AC-00` through `VOC-094-AC-06`
 - Tests: `VOC-094-TEST-00` through `VOC-094-TEST-06`
 - Evidence: `VOC-094-EV-00` through `VOC-094-EV-06`
@@ -11,9 +11,13 @@
   immediate post-ACT-03 documentation-only reconciliation, both into `develop`
 - Status: planned-pending-adoption
 
-After adoption and exact action authority, execute Phase 1 with a distinct ACT-00
-read-only credential/session having no write permissions, then revoke it after the
-account/zone/inventory and residual-permission decision. Only then issue a separate
+The ACT-00 inventory is complete and its read-only credential revoked: account
+`0a9eda28b96d77c24dcde74f3e074d47`, Active Free Website zone `vocanova.site`, three
+unrelated existing Workers, and no D1/Custom Domains/routes/selected DNS/staging
+collision. Before ACT-01, record the separately attributable, time-bounded residual
+account-scope acceptance that prohibits commands targeting or mutating those Workers and confirms the
+USD 0 incremental VocaNova staging gate; preserve the unrelated USD 5/month Basic Load
+Balancing subscription unchanged and not attributed. Only then issue a separate
 Phase 1 write token for `ACT-01` D1/resource provisioning and `ACT-02`: from a clean
 SHA, use reviewed route-free `wrangler deploy` first-creation API then web, resolve
 baseline UUIDs, then reviewed route-bearing `wrangler triggers deploy` for domains,

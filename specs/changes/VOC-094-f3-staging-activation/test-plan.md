@@ -29,14 +29,18 @@ under their adopted exact action records.
   write permission, is used only for read-only inventory, stays out of files,
   overlays, arguments, logs, and evidence, and is revoked before a separate Phase 1
   write token is issued.
-  Negative fixtures cover missing/stale inventory; account/zone mismatch; production
-  resource without residual acceptance; broad account/zone/DNS/billing permission;
-  Paid plan/cost above 0; credential value disclosure; premature write; GitHub
+  Negative fixtures cover missing/stale inventory; account/zone mismatch; the three
+  known unrelated Workers absent from the acceptance record; any mutation allowance for
+  them; missing/exact-expiry failure of residual acceptance; broad account/zone/DNS/
+  billing permission; incremental VocaNova cost above 0; paid Workers/D1, add-on,
+  upgrade, overage, billing change, or payment prompt; treating an unrelated existing
+  subscription as VocaNova cost or modifying/expanding it; credential value disclosure; premature write; GitHub
   environment/secret creation; read-only credential with write permission; write token
   before ACT-00 decision/revocation; unchecked, failed, or stale applicable hosted/local
   checks; SHA/dependency/lock/workflow/check-result drift; credential reissue/reuse; and
   production mutation.
-- Expected: exact selected scope, no unauthorized account-wide residual, zero paid
+- Expected: exact selected scope, the inventory facts and unrelated subscription remain
+  preserved, no unauthorized account-wide residual, zero incremental VocaNova staging
   spend, an undisclosed/revoked no-write ACT-00 credential followed only then by a
   separate Phase 1 write token, no GitHub environment yet, and no production change.
 - Evidence: `VOC-094-EV-01`
@@ -51,7 +55,8 @@ under their adopted exact action records.
   conventional/wildcard/wrong-zone route, absent `custom_domain: true`, public web-to-
   API fetch replacing binding, jurisdiction set, omission/misstatement of the requested
   `eeur` hint, false claim that the hint guarantees actual region/residency, external
-  feature enabled, personal data/log field, paid capability, and any production
+  feature enabled, personal data/log field, paid Workers/D1/add-on/upgrade/overage or
+  unrelated-subscription mutation/attribution, and any production
   sentinel drift. An actual Cloudflare placement different from `eeur` is recorded and
   accepted when it reflects documented nearest viable placement.
 - Expected: exact staging resources work with synthetic data and production remains

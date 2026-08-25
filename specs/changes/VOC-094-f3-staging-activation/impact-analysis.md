@@ -2,18 +2,18 @@
 
 ## Impact summary
 
-| Area                    | Effect and boundary                                                                                                                            |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| Public staging          | Creates two Worker Custom Domains and exposes synthetic staging health/web behavior.                                                           |
-| Cloudflare account      | Creates/updates two Workers and one D1; write permissions are account-wide within the selected account.                                        |
-| GitHub settings/secrets | After PR1, ACT-03 creates only `cloudflare-staging`; immediate PR2 records sanitized settings truth and two secret names without values.       |
-| CI/CD                   | Changes the held staging manifest/policy/workflow to a time-bounded authorized staging path; production remains fail closed.                   |
-| Data/privacy            | Remote D1 has synthetic/non-personal data only; no production import or learner content logging.                                               |
-| Cost                    | Workers Free only, integer ceiling 0 cents; no Paid activation, overage, or add-on authority.                                                  |
-| Production              | No effect. Reserved domains, Workers, D1, environments, secrets, traffic, migrations, data, `main`, `HOLD-01`, and `HOLD-02` remain untouched. |
-| Product/accessibility   | No new product behavior. Existing representative web smoke covers rendered HTML; no accessibility scope change.                                |
-| Ruflo                   | External sanitized coordination provenance only; no tracked integration or authority.                                                          |
-| Repository refs         | Only normal PR history; GitHub may auto-delete merged short-lived heads, with exact recovery evidence.                                         |
+| Area                    | Effect and boundary                                                                                                                                                                                         |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Public staging          | Creates two Worker Custom Domains and exposes synthetic staging health/web behavior.                                                                                                                        |
+| Cloudflare account      | Creates/updates only two VocaNova Workers and one D1; write permissions are account-wide, so an expiring residual-scope acceptance must protect the three unrelated existing Workers.                       |
+| GitHub settings/secrets | After PR1, ACT-03 creates only `cloudflare-staging`; immediate PR2 records sanitized settings truth and two secret names without values.                                                                    |
+| CI/CD                   | Changes the held staging manifest/policy/workflow to a time-bounded authorized staging path; production remains fail closed.                                                                                |
+| Data/privacy            | Remote D1 has synthetic/non-personal data only; no production import or learner content logging.                                                                                                            |
+| Cost                    | Workers Free and D1 Free only, integer ceiling 0 cents for every incremental VocaNova staging action; the unrelated existing USD 5/month Basic Load Balancing subscription is preserved and not attributed. |
+| Production              | No effect. Reserved domains, Workers, D1, environments, secrets, traffic, migrations, data, `main`, `HOLD-01`, and `HOLD-02` remain untouched.                                                              |
+| Product/accessibility   | No new product behavior. Existing representative web smoke covers rendered HTML; no accessibility scope change.                                                                                             |
+| Ruflo                   | External sanitized coordination provenance only; no tracked integration or authority.                                                                                                                       |
+| Repository refs         | Only normal PR history; GitHub may auto-delete merged short-lived heads, with exact recovery evidence.                                                                                                      |
 
 ## Risks and mitigations
 
@@ -37,8 +37,16 @@
   forward-only expand-compatible migrations, compatibility checks against baseline
   and new Workers, and reviewed forward correction; no automatic Time Travel restore.
 - `VOC-094-R04` — Free limits could fail staging or prompt unauthorized spend.
-  Mitigation: verify Free plan and bundle/usage envelope, zero-cent gate, usage/CPU/D1
-  monitoring, stop on limit pressure, and forbid plan/billing/add-on change.
+  Mitigation: verify Workers Free and D1 Free plus the incremental bundle/usage
+  envelope, zero-cent gate, usage/CPU/D1 monitoring, stop on limit pressure/payment
+  prompt, and forbid any paid Workers/D1/add-on/upgrade/overage/billing change. The
+  existing unrelated Basic Load Balancing subscription is neither modified nor used to
+  satisfy this gate.
+- `VOC-094-R13` — The known three unrelated account Workers could be reached by a
+  selected-account write token. Mitigation: before ACT-01, require a separately
+  attributable, exact-expiry residual-scope acceptance that names them, denies commands
+  targeting or mutating them, and permits only VocaNova allowlisted commands/resources; any drift stops
+  the action.
 - `VOC-094-R05` — Secrets or learner content leak to logs, comments, artifacts, or
   Ruflo. Mitigation: ACT-00 read-only auth and the separate Phase 1 write token stay
   outside both sanitized overlays; post-merge environment-scoped Phase 4 secrets use a
@@ -82,7 +90,8 @@
 ## Dependencies and evidence
 
 - `VOC-094-DEP-00` — adopted exact plan and effective implementation authority.
-- `VOC-094-DEP-01` — live read-only account/zone/plan/inventory/collision facts.
+- `VOC-094-DEP-01` — completed read-only account/zone/plan/inventory/collision facts,
+  revoked credential, and pending time-bounded residual-scope acceptance.
 - `VOC-094-DEP-02` — real D1 and baseline version UUID binders.
 - `VOC-094-EV-00` — package shape, adoption, roles, exact-SHA reviews, both
   implementation merges/source-head evidence, and the PR1 → ACT-03 → PR2 boundary.

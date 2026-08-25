@@ -27,8 +27,11 @@ pass, and that credential must be revoked/expired, before a separate short-lived
 1 write token is issued. Phase 1 does not require a GitHub environment, repository
 real-ID binding, implementation merge, or post-merge review.
 
-ACT-01/ACT-02 then require exact account/Active zone/Free/collision evidence and the
-separate Phase 1 write token. A hashed/reviewed route-free overlay tied to the clean SHA
+ACT-01/ACT-02 then require the completed exact account/Active Free Website zone/
+collision inventory, the separately attributable unexpired residual-scope acceptance,
+Workers Free and D1 Free, and a USD 0 **incremental VocaNova staging** estimate. The
+unrelated existing USD 5/month Basic Load Balancing subscription is preserved unchanged,
+not expanded, and not attributed to VocaNova. A hashed/reviewed route-free overlay tied to the clean SHA
 and resource manifest must pass credential-free local/schema/dry-run checks and exact
 review before writes. It uses locked `wrangler deploy` as the narrow first-creation
 exception for API then web,
@@ -100,8 +103,10 @@ and unconfigured by this package.
   forward correction. Time Travel restore/deletion is not authorized here.
 - Secret exposure: stop, revoke token, remove/replace the environment secret securely,
   preserve sanitized evidence, and follow incident governance.
-- Free-limit/cost risk: stop requests/dispatch and do not upgrade. A paid plan requires
-  a new explicit spend decision and package/action authority.
+- Free-limit/cost risk: stop requests/dispatch and do not upgrade. Any Paid Workers or
+  D1 capability, add-on, upgrade, overage, billing change, paid provider, or action that
+  could modify/expand the unrelated Basic Load Balancing subscription requires a new
+  explicit spend decision and package/action authority.
 - Repository regression: normal reviewed revert PR to `develop`; never reset or force
   push permanent branches. External staging/settings removal requires a new exact
   action record because a Git revert does not undo live resources.

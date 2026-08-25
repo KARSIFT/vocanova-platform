@@ -33,10 +33,11 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   Domain `stag.vocanova.site`. Wrangler uses route objects with
   `custom_domain: true`; `workers_dev` and preview URLs remain false. The web Worker
   retains service binding `API` to `vocanova-api-staging`.
-- `VOC-094-D02` — The selected zone is exactly `vocanova.site` and must read back
-  Active. The selected account ID and zone ID are non-secret evidence values, but
-  must come from read-only Cloudflare readback, not chat or placeholders, and bind
-  every action record, manifest, token resource selector, and post-action readback.
+- `VOC-094-D02` — ACT-00 readback binds selected account
+  `0a9eda28b96d77c24dcde74f3e074d47` and Active Free Website zone `vocanova.site`
+  (`63286d93b5f32925ac7366b4e97908be`). These are non-secret evidence values and bind
+  every later action record, manifest, token resource selector, and post-action
+  readback; any account or zone drift stops the outcome.
 - `VOC-094-D03` — In Phase 1, request D1 `vocanova-staging` with location hint `eeur`
   and no jurisdiction. Record the requested hint, real UUID, and Cloudflare's actual
   placement/served-region readback plus name, migration table, applied migration
@@ -44,12 +45,17 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   the nearest viable placement and may not equal the actual placement; a different
   documented actual region is not failure. Neither hint nor readback is a legal
   residency promise.
-- `VOC-094-D04` — Workers Free and `cost_ceiling_cents: 0` are absolute. Read back
-  the plan and billing posture before action. Do not activate Paid, add-ons, overage,
-  Queues, Workers AI, R2, paid observability, or another billable capability. Stop if
-  the exact build, usage envelope, or required feature cannot run on Free; monitor
-  Worker requests/CPU/errors and D1 rows read/written/storage against Free limits and
-  stop before any paid-plan change.
+- `VOC-094-D04` — Workers Free, D1 Free, and `cost_ceiling_cents: 0` are absolute for
+  **every incremental VocaNova staging resource and action**, rather than a claim that
+  the selected account's existing subscriptions total zero. ACT-00 found a pre-existing
+  unrelated Basic Load Balancing subscription at USD 5/month; preserve it unchanged,
+  do not expand it, and never attribute it to VocaNova. Do not activate Paid Workers or
+  D1, add-ons, upgrades, overage, Queues, Workers AI, R2, paid observability, a paid
+  provider, or another billable capability. Stop if the exact build, usage envelope, or
+  required feature cannot run on Free, if any payment prompt/estimate is nonzero, or if
+  an action could modify that unrelated subscription; monitor Worker
+  requests/CPU/errors and D1 rows read/written/storage against Free limits and stop
+  before any paid-plan change.
 - `VOC-094-D05` — Use three distinct credentials. ACT-00 uses a secure local/
   interactive short-lived read-only credential/session with no write permissions;
   revoke/expire it after inventory and the residual-scope decision. Only then may
@@ -64,12 +70,15 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   reused, or reissued across boundaries.
 - `VOC-094-D06` — Workers Scripts and D1 permissions are account-wide within the
   selected account; Cloudflare cannot restrict them to the two scripts and one D1
-  database. Before any write token exists, inventory all Workers, D1 databases, and
-  Custom Domains in that account. If any production Worker or D1 is present, fail
-  closed unless the operator explicitly accepts the residual account-wide boundary
-  in a time-bounded exact action record naming the discovered resources, risks,
-  operator, permitted commands, and expiry. Absence of an inventory or acceptance is
-  a blocker, not a warning.
+  database. ACT-00 has inventoried exactly three existing Workers
+  (`patient-poetry-73ce`, `telegram-mcp`, and `vergecloud-zoho-sprints-mcp`), no D1,
+  no Workers Custom Domains/routes, no selected DNS records, and no staging collision;
+  its read-only credential is revoked. Before any write token exists, a separately
+  attributable, time-bounded acceptance must name those resources, confirm the no-D1
+  result, prohibit commands targeting or mutating the existing Workers, list only the
+  allowlisted VocaNova commands/resources, name the residual account-wide risks and
+  exact expiry, and fail on account, inventory, plan, command, credential, or cost
+  drift. Absence or expiry of that acceptance is a blocker, not a warning.
 - `VOC-094-D07` — Main PR1 must truthfully record `cloudflare-staging` as absent, held,
   and planned through its merge; it must not claim settings post-state. Only in Phase 4,
   after PR1 normally merges and the exact resulting `develop` SHA is known,
@@ -227,6 +236,8 @@ Primary official references are Cloudflare's
 ## Scope exclusions
 
 No product behavior, production release, `develop` → `main` promotion, public launch,
-paid-provider use, real learner account, production data, broad DNS editing, preview
+paid-provider use, any paid Workers/D1/add-on/upgrade/overage, modification or
+expansion of the unrelated Basic Load Balancing subscription, real learner account,
+production data, broad DNS editing, preview
 environment, repository-local Ruflo integration, or permanent resource cleanup is in
 scope.
