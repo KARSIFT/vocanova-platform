@@ -214,6 +214,14 @@ be a disguised hold on all R4 work.
   a held Cloudflare publication state machine, but its committed manifest blocks
   before environment jobs and secrets; it creates no automatic branch-to-environment
   effect.
+- A release merge alone does not complete branch finalization. Post-promotion history
+  synchronization uses a short-lived branch from current `develop`, merges the exact
+  current `main` ancestry into that branch, and merge-commits its separately reviewed
+  PR into `develop`. Permanent `main` is never that PR's head. Final evidence proves
+  `main` is an ancestor of `develop` and `develop` is zero commits behind `main`.
+  This loop does not change repository settings and does not deploy or authorize a
+  live-system action. Existing automatic source deletion may remove only the merged
+  short-lived head after exact recovery evidence is recorded.
 
 **A pull request is merge-eligible into `develop`** when: required deterministic
 checks pass; a different reviewer role records a passing verdict bound to the exact
@@ -277,7 +285,11 @@ VOC-078-T01 retired the workflow that previously promoted completed packages fro
 current GitHub workflow executes that promotion. Promotion uses a separately reviewed
 `develop`-to-`main` pull request. VOC-080-T10 defines held Cloudflare publication, but
 its manifest, placeholder resources, credential absence, and action holds prevent
-repository promotion from becoming live deployment.
+repository promotion from becoming live deployment. The required post-promotion
+history synchronization back into `develop` is another reviewed repository-history
+boundary within the same release finalization outcome; it is not another promotion or
+deployment and cannot be declared complete until the ancestry and zero-behind
+readbacks pass.
 
 RL1/RL2 _technical_ activation (as opposed to the governance permission described
 above) remains a separate, currently disabled gate - see

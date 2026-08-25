@@ -114,6 +114,8 @@ separate activation change complete.
 
 ```text
 feature/* ──PR──► develop ──release PR──► main
+                    ▲                       │
+                    └── reviewed sync PR ──┘
                     │                       │
           Held Cloudflare staging    Production-history source
 ```
@@ -123,6 +125,15 @@ Task branches: `<type>/<issue-number>-<short-description>` (`feature/`, `fix/`, 
 merge commit for `develop → main`. Rebase before final review; `git push --force-with-lease`, never
 plain `--force`. These mechanics do not grant merge or release authority; that authority comes from
 canonical governance.
+
+The release PR alone does not finish branch finalization. Post-promotion history
+synchronization starts a short-lived branch from current `develop`, merges current
+`main` ancestry into it, and merge-commits its separately reviewed PR back to
+`develop`; permanent `main` is never the PR head. Final evidence requires `main` to be
+an ancestor of `develop` and `develop` to be zero commits behind `main`. The loop does
+not change repository settings and does not deploy or invoke Cloudflare. Existing
+automatic deletion may remove only the merged short-lived head after its exact SHA
+and recreation command are recorded.
 
 ## 4. Work hierarchy
 

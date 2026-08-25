@@ -43,6 +43,16 @@ are canonical evidence. The inverse one-field payload restores `false`. Enabling
 setting deletes the source branch after a future merged pull request; it does not merge
 a pull request, protect a branch, delete existing branches, or deploy anything.
 
+The enabled setting also affects the short-lived head used for required
+post-promotion history synchronization. After a reviewed `develop` -> `main` release
+merge, branch finalization uses a short-lived branch from current `develop`, merges
+current `main` ancestry, and merge-commits the reviewed PR back into `develop`.
+Permanent `main` is never the PR head. Evidence must prove `main` is an ancestor of
+`develop`, `develop` is zero commits behind `main`, and record the short-lived head's
+exact SHA and recreation command before GitHub may automatically delete it. This loop
+does not change repository settings and does not deploy or invoke Cloudflare; no
+manual or permanent-branch deletion is part of it.
+
 The same read-only observation records dependency/vulnerability alerts enabled. This
 is distinct from the disabled Dependabot security-update automation. GitHub-hosted
 secret scanning, push protection, and validity checks are disabled as observed.

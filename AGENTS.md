@@ -95,6 +95,18 @@ Plan PRs require independent review too. Record a structured verdict bound to th
 exact candidate revision before adoption. GitHub Actions does not call an AI reviewer;
 the reviewer runs separately and its evidence is attached to the pull request.
 
+After a reviewed `develop` -> `main` release merge, branch finalization is not
+complete until post-promotion history synchronization returns that exact `main`
+ancestry to `develop`. Use a short-lived synchronization branch based on current
+`develop`, merge current `main` into it, and merge its independently reviewed pull
+request into `develop` with a merge commit. Never use permanent `main` itself as the
+pull-request head while automatic source-branch deletion is enabled. Before closure,
+prove `main` is an ancestor of `develop` and `develop` is zero commits behind `main`.
+This repository-history loop does not change repository settings and does not deploy
+or authorize Cloudflare or any other live-system action. GitHub may automatically
+delete only the merged short-lived synchronization head under the existing setting;
+record its exact SHA, post-merge readback, and recreation command.
+
 ## External orchestration
 
 ADR-0004 permits pinned Ruflo to coordinate provider-neutral planner, builder,
@@ -219,7 +231,9 @@ Do not invent or report an unavailable check as passing.
 There is no current workflow that promotes `develop` to `main`, opens a release
 approval issue, or advances a package. Promotion is a separately reviewed pull request.
 The previous automatic-release delegation remains historical evidence but has no
-executable workflow after VOC-078-T01.
+executable workflow after VOC-078-T01. The required post-promotion history
+synchronization is likewise a separately reviewed repository-only pull request; it is
+part of branch finalization, not a second release or deployment.
 
 There is no active repository deployment, server-health polling, or scheduled
 Sentry-to-GitHub monitoring. VOC-080-T10 adds a held manual Cloudflare delivery state
