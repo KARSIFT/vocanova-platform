@@ -1,10 +1,16 @@
 # VOC-094 — F3 staging activation
 
-Status: draft planning package. GitHub issue
-[#158](https://github.com/KARSIFT/vocanova-platform/issues/158) is planning intake,
-not implementation or external-action authority. This package remains
-`implementation_authorized: false`; it contains no approval, review verdict, live
-identifier, credential, deployment result, or activation claim.
+Status: adopted planning package. Exact candidate
+`873f8957fb2f6d182662e4312f5c05e2d559ac88` received Cloudflare,
+security/settings, and independent R4 PASS verdicts and an accountable ADOPT decision.
+GitHub issue [#158](https://github.com/KARSIFT/vocanova-platform/issues/158) remains
+planning intake, not external-action authority. Repository implementation is
+authorized but not yet effective: this adoption-bookkeeping revision still requires
+fresh exact review, hosted checks, genuine pre-merge `eligible: true` with `reasons: []`,
+normal non-author PR #159 merge, and applicable post-merge checks. No live identifier,
+credential, deployment result, environment, secret, or activation is claimed here;
+`ACT-00` through `ACT-05` remain separately held, and `VOC-080-HOLD-01` and
+`VOC-080-HOLD-02` remain unchanged.
 
 The proposed coherent outcome is one package, one minimum-sufficient task, and two
 future implementation pull requests into `develop`. It would activate only the named
