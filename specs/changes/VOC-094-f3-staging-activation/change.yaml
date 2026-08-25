@@ -1,0 +1,221 @@
+schema_version: 1
+
+id: VOC-094
+slug: f3-staging-activation
+title: F3 staging activation
+type: cloudflare-staging-activation-and-delivery
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because the outcome changes CI/CD activation policy, GitHub environment settings
+  and secrets, public DNS/Custom Domains, Cloudflare Workers and D1, remote migrations,
+  and live staging traffic. It requires complete decision, impact, contingency,
+  deterministic, Cloudflare, security/settings, and exact-revision independent evidence.
+canonical_path: specs/changes/VOC-094-f3-staging-activation
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/158
+requirement_approval_status: operator-decisions-recorded-for-plan-drafting-only
+base_branch: develop
+base_sha: 07b63e6d69709807e1e4a8cb4658fd452d3a92d5
+plan_branch: plan/voc-094-f3-staging-activation
+target_branch: develop
+
+approval_status: not-approved
+implementation_authorized: false
+automatic_merge_allowed: true
+production_impact: prohibited
+rollback_required: true
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
+
+owners:
+  decision: accountable-staging-action-owner-after-independent-plan-review
+  package_preparation: separate-VOC-094-plan-author-actor
+  implementation: different-builder-actor-only-after-adoption
+  cloudflare_specialist: different-non-author-exact-revision-actor
+  security_settings_specialist: different-non-author-exact-revision-actor
+  independent_verification: different-non-author-exact-revision-R4-reviewer
+  external_actions: named-account-or-settings-operator-in-each-action-record
+  merge: separate-authorized-non-author-merge-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-094-DEP-00
+    status: open-plan-adoption
+    evidence: Exact candidate independent R4 and specialist PASS verdicts and an accountable adoption decision are required; none is claimed in this draft.
+  - id: VOC-094-DEP-01
+    status: runtime-readback-required-before-mutation
+    evidence: Exact selected account ID, zone ID/name/Active state, Free plan, account inventory, hostname collision state, and current billing state must be read back without mutation.
+  - id: VOC-094-DEP-02
+    status: runtime-resource-binder-required
+    evidence: A real vocanova-staging D1 UUID, Custom Domain records, and real immutable baseline API/web UUIDs must replace all staging sentinels before ordinary dispatch.
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    status: draft
+    evidence: specification.md
+  impact_assessment:
+    required: true
+    status: draft
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    status: draft-not-rehearsed
+    evidence: implementation-plan.md and release-plan.md
+  deterministic_evidence:
+    required: true
+    status: planned-not-run-for-implementation
+    evidence: test-plan.md
+  cloudflare_specialist_evidence:
+    required: true
+    status: pending
+    scope: account-and-zone-scope-custom-domains-D1-service-binding-versions-migrations-rollback-free-plan
+  security_settings_specialist_evidence:
+    required: true
+    status: pending
+    scope: token-residual-environment-secret-action-record-privacy-production-exclusion
+  independent_exact_revision_evidence:
+    required: true
+    status: pending
+
+action_specific_holds:
+  - id: VOC-094-ACT-00
+    action: phase1-read-only-account-zone-inventory-and-residual-scope-decision
+    status: held
+    accountable_role: cloudflare-account-owner-or-explicitly-delegated-phase1-operator
+    required_evidence: >-
+      Exact selected account ID and zone ID/name, vocanova.site Active readback, Workers
+      Free and zero-paid-spend readback, complete Workers/D1/Custom-Domain inventory,
+      Phase1 secure local/interactive short-lived credential scope and expiry without
+      value disclosure, permission-group readback, and either no production Workers/D1
+      in that account or explicit operator acceptance of the residual account-wide
+      Workers Scripts/D1 scope. No write occurs until this evidence passes.
+    completion_or_expiry: expires on account, zone, inventory, plan, permission, billing, credential, or scope drift and before the first Phase1 write
+  - id: VOC-094-ACT-01
+    action: phase1-provision-staging-D1-and-authorize-exact-Worker-and-Custom-Domain-resource-set
+    status: held-by-VOC-080-HOLD-00
+    accountable_role: explicitly-authorized-cloudflare-staging-resource-operator
+    required_evidence: >-
+      Adopted exact resource manifest, clean exact reviewed repository SHA, final
+      pre-action review, strict USD 0 ceiling, ACT-00 pass, no collision, D1 eeur
+      location-hint request with no jurisdiction, real D1 UUID/readback, exact reviewed
+      Worker/domain resource set, and bounded partial-failure cleanup authority.
+    completion_or_expiry: one Phase1 provisioning window; expires on revision, resource, hostname, D1 schema, account, zone, plan, credential, cost, or authority drift
+  - id: VOC-094-ACT-02
+    action: phase1-bootstrap-real-last-known-good-staging-baseline-and-rehearse-Worker-rollback
+    status: held-by-VOC-080-HOLD-00
+    accountable_role: explicitly-authorized-cloudflare-staging-baseline-operator
+    required_evidence: >-
+      Separate exact action record; clean exact reviewed repository SHA; hashed,
+      sanitized, untracked disposable external Wrangler overlay containing only reviewed
+      non-secret resource bindings and vars; secure local auth outside the overlay;
+      ordered migrations; API then web immutable upload/deploy/smoke; service binding;
+      Custom Domain attachment/readback; real baseline UUIDs; and, if claimed, a newer
+      reviewed probe/equivalent traffic transition followed by rollback to baseline and
+      proof that D1 did not change. Delete the overlay only after evidence capture and
+      revoke/expire the single Phase1 credential; repository sentinels remain unchanged.
+    completion_or_expiry: one Phase1 baseline window; expires on revision, overlay hash, binding, migration, domain, resource, version, smoke, credential, or authority drift
+  - id: VOC-094-ACT-03
+    action: phase4-create-cloudflare-staging-GitHub-environment-and-enter-two-secrets
+    status: held
+    accountable_role: explicitly-authorized-GitHub-settings-and-secret-operator
+    required_evidence: >-
+      Exact merged develop SHA and action record, pre-state, payload, rollback,
+      cloudflare-staging readback, exactly CLOUDFLARE_ACCOUNT_ID and
+      CLOUDFLARE_API_TOKEN secret names with no values disclosed, a new distinct
+      Phase4 short-lived token, no variables or production mutation, and immediate
+      living-document reconciliation already present in the merged implementation.
+    completion_or_expiry: one post-merge Phase4 settings action; expires on payload, environment, secret-name, merged revision, credential, or authority drift
+  - id: VOC-094-ACT-04
+    action: dispatch-one-ordinary-staging-delivery-and-bounded-soak
+    status: held-by-VOC-080-HOLD-00
+    accountable_role: explicitly-authorized-non-Ruflo-workflow-dispatch-operator
+    required_evidence: >-
+      Exact reviewed develop SHA, matching manifest/action URLs and expiry, zero-cent
+      estimate, real last-known-good UUIDs, exact confirmation, successful migration,
+      immutable uploads, exact 100 percent promotions, smoke, readback, soak, and outcome.
+    completion_or_expiry: one staging workflow_dispatch; expires on SHA, manifest, authority, cost, baseline, secret, resource, route, migration, smoke, or time-window drift
+  - id: VOC-094-ACT-05
+    action: phase4-revoke-token-and-clean-only-explicit-disposable-or-failed-staging-state
+    status: held
+    accountable_role: operator-named-in-the-exact-cleanup-record
+    required_evidence: >-
+      Exact created-resource IDs, success-or-failure state, ordered cleanup payload,
+      Distinct Phase4 token revocation/expiry, disposable Ruflo paths, preservation
+      list, and pre/post readbacks. Phase1 credential/overlay cleanup evidence comes
+      from ACT-02 and is not reissued or reused.
+    completion_or_expiry: cleanup is limited to the named Phase4 token, disposable Ruflo state, or resources created in the failed action; no successful staging resource is deleted without new authority
+
+affected_areas:
+  - AGENTS.md
+  - .github/README.md
+  - .github/workflows/ci.yml
+  - apps/api-worker/wrangler.jsonc
+  - apps/web/wrangler.jsonc
+  - infrastructure/cloudflare/delivery-manifest.json
+  - scripts/foundation/cloudflare-delivery-policy.mjs
+  - scripts/foundation/cloudflare-delivery-policy.test.mjs
+  - docs/governance/16-autonomous-development-operating-model.md
+  - docs/governance/repository-settings.md
+  - docs/governance/repository-settings-current.yaml
+  - docs/operations/11-devops-and-ci-cd.md
+  - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+  - docs/operations/cloudflare-delivery.md
+  - docs/operations/ruflo-external-orchestration.md
+  - docs/product/12-mvp-implementation-plan.md
+protected_areas:
+  - cloudflare-live-staging
+  - public-custom-domains
+  - remote-D1-migrations
+  - workflow-and-delivery-policy
+  - github-environment-and-secrets
+  - governance-and-authority-records
+
+implementation:
+  authorized: false
+  status: blocked-pending-adoption
+  required: true
+  target_branch: develop
+  pull_request_count: 1
+  multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
+  task: VOC-094-T00
+
+release:
+  required: true
+  mode: separately-authorized-synthetic-staging-only
+  deployment: held-pending-adoption-exact-reviews-and-VOC-094-action-records
+  migration_required: staging-D1-only
+  rollback_required: true
+  production: prohibited-by-VOC-080-HOLD-01
+  production_data: prohibited-by-VOC-080-HOLD-02
+
+ehr: not-triggered
+external_effects:
+  cloudflare_staging: held-pending-VOC-094-ACT-00-through-ACT-04
+  github_cloudflare_staging_environment: held-pending-post-merge-VOC-094-ACT-03
+  production: prohibited
+  production_data: prohibited
+  paid_spend: prohibited-zero-cents
+  dns_custom_domains: staging-hostnames-only-during-Phase1-ACT-02
+  public_launch: prohibited
+  main_promotion: prohibited
+  manual_branch_or_worktree_deletion: prohibited
+
+blocking_reasons:
+  - exact-plan-candidate-independent-R4-review-pending
+  - exact-plan-candidate-cloudflare-specialist-review-pending
+  - exact-plan-candidate-security-settings-specialist-review-pending
+  - accountable-plan-adoption-pending
+  - implementation-authority-not-granted
+  - exact-runtime-account-zone-inventory-and-residual-permission-decision-pending
+  - action-specific-records-VOC-094-ACT-00-through-ACT-05-pending
