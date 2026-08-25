@@ -1,0 +1,366 @@
+schema_version: 1
+
+id: VOC-094
+slug: f3-staging-activation
+title: F3 staging activation
+type: cloudflare-staging-activation-and-delivery
+status: adopted
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because the outcome changes CI/CD activation policy, GitHub environment settings
+  and secrets, public DNS/Custom Domains, Cloudflare Workers and D1, remote migrations,
+  and live staging traffic. It requires complete decision, impact, contingency,
+  deterministic, Cloudflare, security/settings, and exact-revision independent evidence.
+canonical_path: specs/changes/VOC-094-f3-staging-activation
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/158
+requirement_approval_status: exact-plan-specialist-independent-review-and-adoption-decision-approved
+base_branch: develop
+base_sha: 07b63e6d69709807e1e4a8cb4658fd452d3a92d5
+plan_branch: plan/voc-094-f3-staging-activation
+target_branch: develop
+approved_candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-adoption-but-effective-only-after-this-bookkeeping-
+  revision-receives-fresh-exact-review-genuine-eligible-true-reasons-empty-normal-
+  non-author-pr-159-merge-and-applicable-postmerge-checks
+automatic_merge_allowed: true
+production_impact: prohibited
+rollback_required: true
+implementation_pull_request_count: 2
+multiple_pull_request_rationale: >-
+  Two implementation PRs are required by the hard external-settings/truth boundary:
+  PR1 must merge while cloudflare-staging is still absent, held, and planned, and
+  ACT-03 cannot mutate settings before PR1. After ACT-03, PR2 immediately reconciles
+  the observed sanitized settings record before dispatch. The partial states are
+  explicit: PR1 makes repository delivery ready but ineligible; ACT-03 creates only
+  the environment/two secrets while dispatch stays held; PR2 makes living truth match
+  the readback and its reviewed merge SHA becomes dispatchable. Rollback of repository
+  changes never silently rolls back settings, and ACT-03 rollback requires a truthful
+  PR2/correction. This boundary adds an extra branch/PR, hosted and local checks,
+  exact reviews, merge/source-head evidence, elapsed time, coordination, context, and
+  bookkeeping; that overhead is necessary because preclaiming post-state is forbidden
+  and the settings action cannot precede PR1.
+
+plan_review_history:
+  - candidate_sha: a820d212272c296c75737a5b25316930d70b1324
+    verdict: fail-preserved-three-independent-review-records
+    findings:
+      - review_class: security-settings
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416643649
+        finding: >-
+          ACT-00 inventory needed a distinct no-write credential before a separately
+          issued Phase1 write token, and ACT-03 needed an exact VOC-085-HOLD-00
+          settings-action contract.
+      - review_class: cloudflare-specialist
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416650214
+        finding: >-
+          Locked Wrangler 4.125.0 cannot versions-upload to nonexistent Workers; the
+          plan needed route-free API-first/web-second first-creation deploys, later
+          trigger attachment, and only then version-based rollback rehearsal.
+      - review_class: independent-R4
+        evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416702559
+        finding: >-
+          ACT-01/02 writes needed successful exact-SHA hosted and local checks plus
+          checked/reviewed manifest and overlay hashes, with drift expiry and a
+          negative unchecked/stale-evidence test.
+    resolution_candidate_sha: 9a76285288a565355d87426645b115a686bcaa55
+    resolution: >-
+      Preserved as immutable FAIL history. Candidate 9a762852 separated the inventory,
+      Phase1-write, and Phase4 credentials; bound ACT-03 to VOC-085-HOLD-00; specified
+      the locked-Wrangler first-creation/trigger/version sequence; and made successful
+      hosted/local and overlay checks preconditions for every Phase1 write.
+  - candidate_sha: 9a76285288a565355d87426645b115a686bcaa55
+    verdict: fail-independent-settings-truth-boundary
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416809730
+    finding: >-
+      PR1 could not preclaim an ACT-03 post-state; a governed post-settings
+      documentation reconciliation was required before dispatch.
+    resolution_candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    resolution: >-
+      Preserved as immutable FAIL history. Candidate 873f8957 introduced the hard
+      PR1-to-ACT-03-to-PR2 truth boundary, kept one task with two implementation PRs,
+      and made the independently reviewed PR2 merge SHA the only dispatch SHA.
+  - candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    verdict: fail-security-evidence-metadata-then-resolved-without-candidate-content-change
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416933911
+    finding: required security/settings evidence metadata in the pull-request body was incomplete
+    resolution: >-
+      The pull-request body metadata was corrected without changing candidate content;
+      the FAIL remains preserved and no verdict was transferred. Fresh exact-candidate
+      Cloudflare, independent R4, and final security/settings PASS records followed.
+    final_passes:
+      cloudflare_specialist: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416934239
+      independent_R4: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416941306
+      security_settings: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416956833
+
+approvals:
+  cloudflare_specialist:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416934239
+  package_independent_R4_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416941306
+  security_settings_specialist:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416956833
+  adoption_decision:
+    status: approved-for-adoption-with-external-action-holds-preserved
+    candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416984827
+
+candidate_hosted_evidence:
+  candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32900104484
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32900104356
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32900361822
+    structure: pass
+    changed_path_risk: pass
+    merge_eligibility: blocked-as-expected-before-adoption-bookkeeping
+  quality: not-applicable-plan-only-path-filter
+
+adoption_bookkeeping_gate:
+  bookkeeping_revision: pending-final-head
+  fresh_exact_revision_review: pending
+  hosted_checks: pending-on-bookkeeping-revision
+  merge_eligibility:
+    required_eligible: true
+    required_reasons: []
+    current_status: pending-populated-binder-and-fresh-review
+  merge: pending-normal-non-author-pr-159-merge
+  postmerge_checks: pending
+  authority_effect: false-until-every-gate-above-passes
+
+owners:
+  decision: accountable-staging-action-owner-after-independent-plan-review
+  package_preparation: separate-VOC-094-plan-author-actor
+  implementation: different-builder-actor-only-after-adoption
+  cloudflare_specialist: different-non-author-exact-revision-actor
+  security_settings_specialist: different-non-author-exact-revision-actor
+  independent_verification: different-non-author-exact-revision-R4-reviewer
+  external_actions: named-account-or-settings-operator-in-each-action-record
+  merge: separate-authorized-non-author-merge-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+dependencies:
+  - id: VOC-094-DEP-00
+    status: satisfied-for-plan-adoption-authority-effectiveness-pending-bookkeeping-gate
+    evidence: >-
+      Exact candidate 873f8957 has Cloudflare, security/settings, and independent R4
+      PASS verdicts plus the accountable ADOPT decision recorded in approvals. This
+      bookkeeping revision still requires its own exact review, genuine eligible=true
+      with reasons=[], normal non-author PR #159 merge, and applicable postmerge checks.
+  - id: VOC-094-DEP-01
+    status: runtime-readback-required-before-mutation
+    evidence: Exact selected account ID, zone ID/name/Active state, Free plan, account inventory, hostname collision state, and current billing state must be read back without mutation.
+  - id: VOC-094-DEP-02
+    status: runtime-resource-binder-required
+    evidence: A real vocanova-staging D1 UUID, Custom Domain records, and real immutable baseline API/web UUIDs must replace all staging sentinels before ordinary dispatch.
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    status: pass-exact-candidate-adopted
+    evidence: specification.md and https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416984827
+  impact_assessment:
+    required: true
+    status: pass-exact-candidate-plan-evidence
+    evidence: impact-analysis.md and https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416941306
+  contingency_and_rollback:
+    required: true
+    status: pass-exact-candidate-plan-only-live-rehearsal-remains-held
+    evidence: implementation-plan.md, release-plan.md, and https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416934239
+  deterministic_evidence:
+    required: true
+    status: pass-plan-candidate-hosted-evidence-implementation-evidence-pending
+    evidence: test-plan.md and candidate_hosted_evidence
+  cloudflare_specialist_evidence:
+    required: true
+    status: pass-exact-revision-zero-blockers
+    scope: account-and-zone-scope-custom-domains-D1-service-binding-versions-migrations-rollback-free-plan
+    candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416934239
+  security_settings_specialist_evidence:
+    required: true
+    status: pass-exact-revision-zero-blockers
+    scope: token-residual-environment-secret-action-record-privacy-production-exclusion
+    candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416956833
+  independent_exact_revision_evidence:
+    required: true
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416941306
+
+action_specific_holds:
+  - id: VOC-094-ACT-00
+    action: phase1-read-only-account-zone-inventory-and-residual-scope-decision
+    status: held
+    accountable_role: cloudflare-account-owner-or-explicitly-delegated-phase1-operator
+    required_evidence: >-
+      Exact selected account ID and zone ID/name, vocanova.site Active readback, Workers
+      Free and zero-paid-spend readback, complete Workers/D1/Custom-Domain inventory,
+      a distinct secure local/interactive read-only credential/session with no write
+      permission and no value disclosure, permission-group readback, and either no
+      production Workers/D1 in that account or explicit operator acceptance of the
+      residual account-wide Workers Scripts/D1 scope. Revoke/expire the read-only
+      credential after the decision and before any Phase1 write token is issued.
+    completion_or_expiry: expires on account, zone, inventory, plan, permission, billing, read-only credential, or scope drift and before Phase1 write-token issuance
+  - id: VOC-094-ACT-01
+    action: phase1-provision-staging-D1-and-authorize-exact-Worker-and-Custom-Domain-resource-set
+    status: held-by-VOC-080-HOLD-00
+    accountable_role: explicitly-authorized-cloudflare-staging-resource-operator
+    required_evidence: >-
+      Adopted exact resource manifest, clean exact reviewed repository SHA, final
+      pre-action review, successful applicable hosted CI/Governance/Quality/Security
+      and local validation/dry-run evidence bound to that SHA, strict USD 0 ceiling,
+      ACT-00 pass, no collision, D1 eeur location-hint request with no jurisdiction,
+      real D1 UUID/readback, exact reviewed Worker/domain resource set, a separately
+      issued short-lived Phase1 write token, and bounded partial-failure cleanup authority.
+    completion_or_expiry: one Phase1 provisioning window; expires on revision, manifest, dependency/lock/workflow, local-or-hosted-check result, resource, hostname, D1 schema, account, zone, plan, credential, cost, or authority drift
+  - id: VOC-094-ACT-02
+    action: phase1-bootstrap-real-last-known-good-staging-baseline-and-rehearse-Worker-rollback
+    status: held-by-VOC-080-HOLD-00
+    accountable_role: explicitly-authorized-cloudflare-staging-baseline-operator
+    required_evidence: >-
+      Separate exact action record; clean exact reviewed repository SHA; hashed,
+      sanitized, untracked route-free overlay containing only reviewed non-secret
+      bindings/vars and secure write auth outside it; credential-free local/schema/
+      dry-run checks and exact overlay/resource-manifest review; ordered migrations; locked
+      Wrangler 4.125.0 first-creation exception using route-free wrangler deploy for API
+      then web/service binding; real baseline UUID readbacks; separately hashed/reviewed
+      route-bearing overlay applied only afterward with wrangler triggers deploy for
+      exact Custom Domains and ownership/cert/DNS readback; smoke; and, if claimed,
+      versions upload/deploy of a newer probe only after scripts exist, followed by
+      Worker rollback to baseline and unchanged-D1 proof. Delete overlays only after
+      evidence capture and revoke/expire the Phase1 write token; repository sentinels
+      remain unchanged.
+    completion_or_expiry: one Phase1 baseline window; expires on revision, manifest, either overlay hash, dependency/lock/workflow, local-or-hosted-check result, binding, migration, domain, resource, version, smoke, credential, or authority drift
+  - id: VOC-094-ACT-03
+    action: phase4-create-cloudflare-staging-GitHub-environment-and-enter-two-secrets
+    status: held-by-VOC-085-HOLD-00
+    accountable_role: explicitly-authorized-GitHub-settings-and-secret-operator
+    required_evidence: >-
+      Exact scoped VOC-085-HOLD-00 authority naming the settings operator, merged
+      PR1 develop SHA, GitHub environment pre-state, exact environment/secret-name
+      payload, rollback payload, cloudflare-staging post-state readback, exactly
+      CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN secret names with no values
+      disclosed, a third distinct short-lived Phase4 token, no variables or production
+      mutation, exact authority expiry/drift conditions, and an immediate governed
+      documentation-only PR2 opened from current develop that records the sanitized
+      pre-state, payload, rollback, post-state readback, and secret names only, passes
+      exact local/hosted checks and different-actor exact-revision review, and is
+      non-author merged with exact pre-merge head, post-merge/source-head readback, and
+      recreation-command evidence.
+    completion_or_expiry: discharges VOC-085-HOLD-00 only for this one post-PR1 Phase4 environment-and-two-secret settings action and only after PR2 merge/post-merge readback; expires on payload, environment, secret-name, PR1 or PR2 revision, credential, authority, pre/post-state, check, or review drift; if ACT-03 or ACT-04 authority or the Phase4 token expires while PR2 is open, stop and require fresh exact authority/settings record with no silent token reissue; VOC-085-HOLD-00 remains held for every other settings action
+  - id: VOC-094-ACT-04
+    action: dispatch-one-ordinary-staging-delivery-and-bounded-soak
+    status: held-by-VOC-080-HOLD-00
+    accountable_role: explicitly-authorized-non-Ruflo-workflow-dispatch-operator
+    required_evidence: >-
+      Exact independently reviewed PR2 merged develop SHA, completed ACT-03/PR2
+      settings reconciliation, matching manifest/action URLs and expiry, zero-cent
+      estimate, real last-known-good UUIDs, exact confirmation, successful migration,
+      immutable uploads, exact 100 percent promotions, smoke, readback, soak, and outcome.
+    completion_or_expiry: one staging workflow_dispatch; expires on SHA, manifest, authority, cost, baseline, secret, resource, route, migration, smoke, or time-window drift
+  - id: VOC-094-ACT-05
+    action: phase4-revoke-token-and-clean-only-explicit-disposable-or-failed-staging-state
+    status: held
+    accountable_role: operator-named-in-the-exact-cleanup-record
+    required_evidence: >-
+      Exact created-resource IDs, success-or-failure state, ordered cleanup payload,
+      Distinct Phase4 token revocation/expiry, disposable Ruflo paths, preservation
+      list, and pre/post readbacks. ACT-00 read-only credential cleanup and ACT-02
+      Phase1 write-token/overlay cleanup evidence are not reissued or reused.
+    completion_or_expiry: cleanup is limited to the named Phase4 token, disposable Ruflo state, or resources created in the failed action; no successful staging resource is deleted without new authority
+
+affected_areas:
+  - AGENTS.md
+  - .github/README.md
+  - .github/workflows/ci.yml
+  - apps/api-worker/wrangler.jsonc
+  - apps/web/wrangler.jsonc
+  - infrastructure/cloudflare/delivery-manifest.json
+  - scripts/foundation/cloudflare-delivery-policy.mjs
+  - scripts/foundation/cloudflare-delivery-policy.test.mjs
+  - docs/governance/16-autonomous-development-operating-model.md
+  - docs/governance/repository-settings.md
+  - docs/governance/repository-settings-current.yaml
+  - docs/operations/11-devops-and-ci-cd.md
+  - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+  - docs/operations/cloudflare-delivery.md
+  - docs/operations/ruflo-external-orchestration.md
+  - docs/product/12-mvp-implementation-plan.md
+protected_areas:
+  - cloudflare-live-staging
+  - public-custom-domains
+  - remote-D1-migrations
+  - workflow-and-delivery-policy
+  - github-environment-and-secrets
+  - governance-and-authority-records
+
+implementation:
+  authorized: true
+  authority_effective: false
+  status: authorized-pending-bookkeeping-review-genuine-eligible-normal-merge-and-postmerge
+  required: true
+  target_branch: develop
+  pull_request_count: 2
+  multiple_pull_request_rationale: >-
+    PR1 implements repository delivery while truthfully recording cloudflare-staging
+    absent/held/planned; after ACT-03, PR2 is the immediate governed documentation-only
+    reconciliation. This hard truth/settings boundary justifies the extra branch/PR,
+    checks, exact reviews, merge/source-head evidence, elapsed time, coordination,
+    context, and bookkeeping because settings cannot precede PR1 and PR1 may not
+    preclaim ACT-03 post-state.
+  task: VOC-094-T00
+
+release:
+  required: true
+  mode: separately-authorized-synthetic-staging-only
+  deployment: held-pending-effective-implementation-authority-and-exact-VOC-094-action-records
+  migration_required: staging-D1-only
+  rollback_required: true
+  production: prohibited-by-VOC-080-HOLD-01
+  production_data: prohibited-by-VOC-080-HOLD-02
+
+ehr: not-triggered
+external_effects:
+  cloudflare_staging: held-pending-VOC-094-ACT-00-through-ACT-04
+  github_cloudflare_staging_environment: held-by-VOC-085-HOLD-00-pending-post-PR1-ACT-03-and-immediate-reviewed-merged-PR2
+  all_other_github_settings: held-by-VOC-085-HOLD-00
+  production: prohibited
+  production_data: prohibited
+  paid_spend: prohibited-zero-cents
+  dns_custom_domains: staging-hostnames-only-during-Phase1-ACT-02
+  public_launch: prohibited
+  main_promotion: prohibited
+  manual_branch_or_worktree_deletion: prohibited
+
+repository_adoption_status: adopted-pending-pr-159-normal-non-author-merge-and-applicable-postmerge-checks
+adoption_pr: 159
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416984827
+
+blocking_reasons:
+  - exact-adoption-bookkeeping-revision-review-pending
+  - final-hosted-checks-on-adoption-bookkeeping-revision-pending
+  - genuine-premerge-eligible-true-reasons-empty-pending
+  - pr-159-normal-non-author-merge-pending
+  - applicable-postmerge-checks-pending
+  - implementation-authority-not-yet-effective
