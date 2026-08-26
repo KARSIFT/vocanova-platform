@@ -7,10 +7,28 @@ verify the exact Cloudflare staging resources, reconcile the repository and GitH
 staging environment, create a real reviewed rollback baseline, and run the existing
 manual staging delivery state machine on an exact reviewed `develop` revision.
 
-The issue and operator decisions authorize this draft only. Implementation begins
-only after adoption and external actions begin only after their separate exact action
+The adopted original package and effective AM-01 bookkeeping authorize repository
+implementation only. External actions begin only under their separate exact action
 records. Completing this package may release `VOC-080-HOLD-00` only for the named
 staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
+
+AM-01 final bookkeeping revision
+`aad884a6d53c5e0f13b94f8042774b14a07015af` received fresh exact independent and
+specialist PASS reviews, Governance run `32913984893` reported `eligible: true` with
+`reasons: []`, PR #160 merged normally as
+`75e5c9909fe105a9af3e6e8a3600fec27fcbd593`, and post-merge CI, Security, and
+Governance passed. Those facts remove the AM-01 repository-authority blocker but do
+not satisfy any external-action hold.
+
+## Preserved sequencing incident
+
+Before the stale canonical AM-01 state was detected, ACT-01 created only D1
+`vocanova-staging` UUID `22ae386f-e3f5-4d98-a3ad-18b39d3b8556`. It read back with
+zero tables, no user data, no migrations, no jurisdiction, and zero incremental cost.
+Issue #161 records the incident. ACT-02 stopped before Worker creation, D1 migration,
+Custom Domain, DNS, traffic, deployment, rollback, production, billing, or launch
+action. The D1 must remain preserved and unused until fresh corrected-SHA resource/
+overlay review, current Free/$0 evidence, and exact time-bounded ACT-02 authority pass.
 
 ## Decisions and requirements
 
@@ -38,8 +56,10 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
   (`63286d93b5f32925ac7366b4e97908be`). These are non-secret evidence values and bind
   every later action record, manifest, token resource selector, and post-action
   readback; any account or zone drift stops the outcome.
-- `VOC-094-D03` — In Phase 1, request D1 `vocanova-staging` with location hint `eeur`
-  and no jurisdiction. Record the requested hint, real UUID, and Cloudflare's actual
+- `VOC-094-D03` — ACT-01 requested D1 `vocanova-staging` with location hint `eeur`
+  and no jurisdiction and created UUID `22ae386f-e3f5-4d98-a3ad-18b39d3b8556` without
+  applying migrations. Preserve its readback; under fresh ACT-02 authority, record the
+  requested hint, real UUID, and Cloudflare's actual
   placement/served-region readback plus name, migration table, applied migration
   order, schema integrity, and synthetic-only contents. The hint asks Cloudflare for
   the nearest viable placement and may not equal the actual placement; a different
@@ -71,14 +91,14 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
 - `VOC-094-D06` — Workers Scripts and D1 permissions are account-wide within the
   selected account; Cloudflare cannot restrict them to the two scripts and one D1
   database. ACT-00 has inventoried exactly three existing Workers
-  (`patient-poetry-73ce`, `telegram-mcp`, and `vergecloud-zoho-sprints-mcp`), no D1,
-  no Workers Custom Domains/routes, no selected DNS records, and no staging collision;
-  its read-only credential is revoked. Before any write token exists, a separately
-  attributable, time-bounded acceptance must name those resources, confirm the no-D1
-  result, prohibit commands targeting or mutating the existing Workers, list only the
-  allowlisted VocaNova commands/resources, name the residual account-wide risks and
-  exact expiry, and fail on account, inventory, plan, command, credential, or cost
-  drift. Absence or expiry of that acceptance is a blocker, not a warning.
+  (`patient-poetry-73ce`, `telegram-mcp`, and `vergecloud-zoho-sprints-mcp`), and at
+  inventory time found no D1, Workers Custom Domains/routes, selected DNS records, or
+  staging collision; its read-only credential is revoked. Before ACT-01's write token
+  existed, a separately attributable, time-bounded acceptance named those resources,
+  confirmed the inventory-time no-D1 result, prohibited commands targeting or mutating
+  the existing Workers, and allowlisted only the D1 creation action. That historical
+  acceptance does not authorize ACT-02; absence or expiry of a fresh exact action
+  record is a blocker, not a warning.
 - `VOC-094-D07` — Main PR1 must truthfully record `cloudflare-staging` as absent, held,
   and planned through its merge; it must not claim settings post-state. Only in Phase 4,
   after PR1 normally merges and the exact resulting `develop` SHA is known,
@@ -200,7 +220,7 @@ staging outcome. `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
 - `VOC-094-D16` — Every final repository revision receives full applicable checks,
   different-actor exact-SHA Cloudflare and security/settings specialist review,
   different-actor independent R4 review, resolved blockers, and non-author merge.
-  Before any ACT-01/02 Cloudflare write, the clean exact repository SHA must also bind
+  Before any new ACT-02 Cloudflare write, the clean corrected repository SHA must bind
   successful applicable hosted CI, Governance, Quality, and Security plus local
   validation and credential-free dry runs. The reviewed resource manifest and both
   overlay hashes bind successful credential-free local/schema/dry-run checks and exact

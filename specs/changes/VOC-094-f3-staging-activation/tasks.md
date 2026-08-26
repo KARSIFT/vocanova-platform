@@ -9,20 +9,26 @@
 - Risk: R4
 - Implementation pull-request mapping: PR1 main repository implementation plus PR2
   immediate post-ACT-03 documentation-only reconciliation, both into `develop`
-- Status: adopted-AM-01-pending-bookkeeping-review-eligible-non-author-merge-and-postmerge
+- Status: adopted-AM-01-bookkeeping-effective-repository-implementation-authorized-external-actions-held
+
+The AM-01 final bookkeeping revision, exact reviews, literal eligible decision, normal
+PR #160 merge, and post-merge checks are complete. This activates repository
+implementation authority only; it does not authorize an external action.
 
 The ACT-00 inventory is complete and its read-only credential revoked: account
 `0a9eda28b96d77c24dcde74f3e074d47`, Active Free Website zone `vocanova.site`, three
-unrelated existing Workers, and no D1/Custom Domains/routes/selected DNS/staging
-collision. Before ACT-01, record the separately attributable, time-bounded residual
-account-scope acceptance that prohibits commands targeting or mutating those Workers and confirms the
-USD 0 incremental VocaNova staging gate; preserve the unrelated USD 5/month Basic Load
-Balancing subscription unchanged and not attributed. Only then issue a separate
-Phase 1 write token for `ACT-01` D1/resource provisioning and `ACT-02`: from a clean
-SHA, use reviewed route-free `wrangler deploy` first-creation API then web, resolve
-baseline UUIDs, then reviewed route-bearing `wrangler triggers deploy` for domains,
-readbacks, a post-creation versions-upload/deploy Worker-only rollback rehearsal,
-evidence capture, and write-token/overlay cleanup.
+unrelated existing Workers, and—at inventory time—no D1/Custom Domains/routes/selected
+DNS/staging collision. The separately attributable residual-scope acceptance protected
+those Workers and preserved the unrelated USD 5/month Basic Load Balancing subscription.
+ACT-01 then created only D1 `vocanova-staging` UUID
+`22ae386f-e3f5-4d98-a3ad-18b39d3b8556`, with zero tables, no user data or migrations,
+and zero incremental cost. The sequencing incident is recorded in issue #161.
+
+ACT-02 remains held. Before any further Cloudflare command, re-review the corrected
+merged SHA, exact resource manifest and overlays, current Workers Free/D1 Free and USD
+0 incremental evidence, and obtain a fresh time-bounded action record. Only then may
+the reviewed route-free API-first/web-second baseline, route-bearing domain triggers,
+version UUID readbacks, rollback rehearsal, evidence capture, and token/overlay cleanup proceed.
 Then execute Phase 2 external sanitized Ruflo verification/coordination.
 
 Only in Phase 3 does a different builder use isolated main PR1 to bind the real IDs/

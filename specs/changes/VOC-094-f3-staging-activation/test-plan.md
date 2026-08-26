@@ -3,6 +3,12 @@
 Tests use no credential value or production data. Live readbacks/actions occur only
 under their adopted exact action records.
 
+AM-01 bookkeeping is complete and repository implementation authority is effective.
+The F3 execution tests remain pending. Issue #161 and `change.yaml` preserve the only
+completed write so far: empty, unmigrated D1 `vocanova-staging` UUID
+`22ae386f-e3f5-4d98-a3ad-18b39d3b8556`. ACT-02 requires fresh corrected-SHA review,
+current resource/overlay and Free/$0 evidence, and exact time-bounded authority.
+
 ## VOC-094-TEST-00 — Package shape, lifecycle, roles, and ref preservation
 
 - Covers: `VOC-094-AC-00`
@@ -23,12 +29,14 @@ under their adopted exact action records.
 ## VOC-094-TEST-01 — Phase 1 account scope, local credential, and zero spend
 
 - Covers: `VOC-094-AC-01`
-- Procedure: read back exact account/zone/Active/Free/billing facts, list every Worker,
-  D1, and Custom Domain, inspect permission groups/token resource selectors and expiry,
+- Procedure: preserve the completed exact account/zone/Active/Free/billing inventory,
+  its inventory-time Worker/D1/Custom-Domain facts, ACT-01's empty staging-D1 readback,
+  and the protected-Worker list. Before ACT-02, re-read current D1/Worker/domain state,
+  inspect permission groups/token resource selectors and expiry,
   and prove the distinct ACT-00 secure local/interactive credential/session has no
   write permission, is used only for read-only inventory, stays out of files,
   overlays, arguments, logs, and evidence, and is revoked before a separate Phase 1
-  write token is issued.
+  write token is used.
   Negative fixtures cover missing/stale inventory; account/zone mismatch; the three
   known unrelated Workers absent from the acceptance record; any mutation allowance for
   them; missing/exact-expiry failure of residual acceptance; broad account/zone/DNS/
@@ -39,10 +47,10 @@ under their adopted exact action records.
   before ACT-00 decision/revocation; unchecked, failed, or stale applicable hosted/local
   checks; SHA/dependency/lock/workflow/check-result drift; credential reissue/reuse; and
   production mutation.
-- Expected: exact selected scope, the inventory facts and unrelated subscription remain
-  preserved, no unauthorized account-wide residual, zero incremental VocaNova staging
-  spend, an undisclosed/revoked no-write ACT-00 credential followed only then by a
-  separate Phase 1 write token, no GitHub environment yet, and no production change.
+- Expected: exact selected scope, the inventory facts, empty ACT-01 D1, and unrelated
+  subscription remain preserved; no unauthorized account-wide residual; zero
+  incremental VocaNova staging spend; no use of the separate Phase 1 token without a
+  fresh ACT-02 record; no GitHub environment yet; and no production change.
 - Evidence: `VOC-094-EV-01`
 
 ## VOC-094-TEST-02 — Resource, config, domain, D1, privacy, and production isolation
@@ -66,7 +74,8 @@ under their adopted exact action records.
 ## VOC-094-TEST-03 — Baseline, migrations, bindings, domains, and rollback
 
 - Covers: `VOC-094-AC-03`
-- Procedure: from a clean exact reviewed repository SHA, hash/review an untracked
+- Procedure: from a clean exact reviewed corrected repository SHA and fresh ACT-02
+  authority, hash/review an untracked
   sanitized route-free disposable Wrangler overlay containing only approved non-secret
   real bindings/vars while the separate Phase 1 write token remains outside it. Apply
   exact review and credential-free local/schema/dry-run checks to the resource manifest
