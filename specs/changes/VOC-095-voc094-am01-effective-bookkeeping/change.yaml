@@ -1,0 +1,275 @@
+schema_version: 1
+
+id: VOC-095
+slug: voc094-am01-effective-bookkeeping
+title: Reconcile VOC-094-AM-01 adoption bookkeeping and implementation effectiveness
+type: repository-governance-lifecycle-reconciliation
+status: adopted
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because the correction changes canonical adoption, implementation-authority,
+  release-gate, and blocker records for an externally consequential Cloudflare
+  staging package. It is repository-only and grants no external authority, but a
+  false effective/ineffective state could permit or incorrectly block live action;
+  exact evidence, R4 review, deterministic validation, and rollback are required.
+canonical_path: specs/changes/VOC-095-voc094-am01-effective-bookkeeping
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/161
+requirement_approval_status: exact-plan-review-pass-and-accountable-adoption-decision-approved
+base_branch: develop
+base_sha: 75e5c9909fe105a9af3e6e8a3600fec27fcbd593
+plan_branch: plan/voc-095-voc094-am01-effective-bookkeeping
+target_branch: develop
+approved_candidate_sha: b0b1b5fbbe642a1d1db356ff813f2fbef73ec907
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-for-one-repository-only-implementation-pr-after-adoption; external
+  Cloudflare-DNS-deployment-spending-production-data-and-public-launch-actions-remain
+  prohibited-and-ACT-02-remains-held
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
+automatic_merge_allowed: true
+production_impact: none-repository-record-only
+rollback_required: true
+
+objective: >-
+  Through one separately reviewed repository-only implementation PR, make the
+  canonical VOC-094 package truthful about the completed VOC-094-AM-01 bookkeeping
+  boundary: bind the exact PR-160 candidate, final review and eligibility evidence,
+  normal non-author merge, post-merge checks, and lifecycle readback; make AM-01 and
+  implementation authority effective in the record; preserve all historic evidence;
+  and keep every Cloudflare, DNS, spending, secret, production, data, launch, and
+  ACT-02 action hold explicit.
+
+incident_record:
+  issue: https://github.com/KARSIFT/vocanova-platform/issues/161
+  root_cause: >-
+    PR-160 correctly could not preclaim its future merge and post-merge state, but
+    no immediate separately reviewed repository-only correction reconciled the
+    deliberately pending AM-01 bookkeeping fields after those events completed.
+  sequence: >-
+    During ACT-02 pre-authority review, the stale canonical state was discovered and
+    ACT-02 stopped before Worker creation, migration, Custom Domain, DNS, traffic,
+    deployment, rollback, production, billing, or launch action. Before discovery,
+    ACT-01 created only the staging D1 under its own external authority; that
+    sequencing fact is preserved as evidence and does not authorize or ratify any
+    future action.
+  preserved_d1:
+    name: vocanova-staging
+    uuid: 22ae386f-e3f5-4d98-a3ad-18b39d3b8556
+    state: zero-tables-no-user-data-no-migrations-no-jurisdiction-zero-incremental-cost
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5424676862
+    treatment: preserve-do-not-delete-migrate-or-use-until-fresh-act02-authority
+
+evidence:
+  adopted_am01_candidate:
+    sha: c99be122fa2143ebceaf18bb64639a2bbf66a1a3
+    approval: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418657086
+  final_bookkeeping_candidate:
+    sha: aad884a6d53c5e0f13b94f8042774b14a07015af
+    independent_r4_review: https://github.com/KARSIFT/vocanova-platform/pull/160#issuecomment-5418760783
+    cloudflare_review: https://github.com/KARSIFT/vocanova-platform/pull/160#issuecomment-5418703931
+    security_settings_review: https://github.com/KARSIFT/vocanova-platform/pull/160#issuecomment-5418764879
+    premerge_eligibility:
+      run: 32913984893
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32913984893
+      result: eligible-true-reasons-empty
+  merge:
+    pull_request: 160
+    source_branch: plan/voc-094-incremental-zero-cost
+    source_sha: aad884a6d53c5e0f13b94f8042774b14a07015af
+    target_branch: develop
+    prior_target_sha: 2b85457a3046ecc5cb0a4b0c7764df301112ec0b
+    merge_sha: 75e5c9909fe105a9af3e6e8a3600fec27fcbd593
+    mode: normal-non-author-merge-commit
+    lifecycle: https://github.com/KARSIFT/vocanova-platform/pull/160#issuecomment-5418849810
+  postmerge:
+    develop_sha: 75e5c9909fe105a9af3e6e8a3600fec27fcbd593
+    ci:
+      run: 32914336969
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32914336969
+      result: success
+    security:
+      run: 32914336980
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32914336980
+      result: success
+    governance:
+      run: 32914336981
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32914336981
+      result: success
+
+plan_review_history:
+  - candidate_sha: b0b1b5fbbe642a1d1db356ff813f2fbef73ec907
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5424979883
+    resolution: >-
+      Independent R4 review verified the complete bounded package, exact VOC-094
+      lifecycle evidence, ACT-01/D1 preservation, external-action prohibitions, and
+      the ACT-02 hold. No blocking findings remained.
+
+approvals:
+  package_independent_R4_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: b0b1b5fbbe642a1d1db356ff813f2fbef73ec907
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5424979883
+  adoption_decision:
+    status: approved-for-adoption-with-external-action-holds-preserved
+    candidate_sha: b0b1b5fbbe642a1d1db356ff813f2fbef73ec907
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5425430085
+
+requirements:
+  - id: VOC-095-D00
+    statement: >-
+      Use one task and one minimum-sufficient repository-only implementation PR into
+      develop. Do not edit VOC-094 or any living document in this plan PR; the later
+      implementation PR must edit only the enumerated reconciliation surfaces.
+  - id: VOC-095-D01
+    statement: >-
+      Preserve VOC-094's original approved candidate/adoption and AM-01 approved
+      candidate, all historic PASS/FAIL reviews, ACT-00 inventory and credential
+      closure, and the ACT-01 sequencing/D1 evidence as immutable historical facts.
+  - id: VOC-095-D02
+    statement: >-
+      In the later implementation PR, update VOC-094 change.yaml's AM-01
+      adoption_bookkeeping_gate with the exact bookkeeping SHA, final independent
+      review, genuine eligible=true/reasons=[], normal non-author merge SHA, and all
+      three successful post-merge run binders. Set only the AM-01 effectiveness and
+      implementation bookkeeping fields that those facts establish to effective.
+  - id: VOC-095-D03
+    statement: >-
+      Reconcile VOC-094 README, tasks, specification, acceptance, impact,
+      implementation, test, and release documents so they no longer claim that
+      AM-01's exact review, eligibility, PR-160 merge, or post-merge checks are
+      pending. Keep implementation execution, ACT-02, ACT-03, ACT-04, and ACT-05
+      separately held until their own exact action records pass.
+  - id: VOC-095-D04
+    statement: >-
+      Audit all other living repository claims for this VOC-094 AM-01 state. Change
+      only a direct stale contradiction, record the audit and justified exclusions in
+      the implementation PR, and do not broaden the package into a general document
+      refresh.
+  - id: VOC-095-D05
+    statement: >-
+      The correction itself grants no Cloudflare, DNS, GitHub settings/environment,
+      secret, deployment, migration, traffic, spending, production-data, production,
+      public-launch, or main-promotion authority. ACT-02 remains held pending the
+      corrected merged SHA, fresh exact overlay/resource review, current Free/$0
+      evidence, and a fresh exact ACT-02 action-authority record.
+  - id: VOC-095-D06
+    statement: >-
+      Record the ACT-01 sequencing incident and staging D1 UUID as preserved
+      non-secret evidence only. Do not delete, migrate, query, attach, or otherwise
+      mutate that D1 under this package; do not claim that ACT-01 evidence makes
+      ACT-02 eligible.
+  - id: VOC-095-D07
+    statement: >-
+      Run governance validation, risk classification, git diff --check, applicable
+      hosted checks, and exact-revision independent R4 verification. The later
+      implementation PR must use one current-head merge-eligibility binder, and its
+      implementation authority becomes effective only after that PR's own exact
+      review, genuine eligible result, normal non-author merge, and post-merge checks.
+  - id: VOC-095-D08
+    statement: >-
+      automatic_merge_allowed remains true as read-only package metadata. It is not a
+      merge executor, approval, authority grant, or bypass for exact review,
+      eligibility, action-specific authority, or external holds.
+
+owners:
+  decision: accountable-repository-owner-after-independent-plan-review
+  package_preparation: VOC-095-planner-actor
+  implementation: different-builder-actor-after-adoption
+  independent_verification: different-non-author-exact-revision-R4-reviewer
+  specialist: different-non-author-governance-and-lifecycle-reviewer
+  merge: separate-authorized-non-author-merge-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - specs/changes/VOC-094-f3-staging-activation/README.md
+  - specs/changes/VOC-094-f3-staging-activation/change.yaml
+  - specs/changes/VOC-094-f3-staging-activation/specification.md
+  - specs/changes/VOC-094-f3-staging-activation/acceptance-criteria.md
+  - specs/changes/VOC-094-f3-staging-activation/impact-analysis.md
+  - specs/changes/VOC-094-f3-staging-activation/implementation-plan.md
+  - specs/changes/VOC-094-f3-staging-activation/tasks.md
+  - specs/changes/VOC-094-f3-staging-activation/test-plan.md
+  - specs/changes/VOC-094-f3-staging-activation/release-plan.md
+  - specs/changes/VOC-095-voc094-am01-effective-bookkeeping
+protected_areas:
+  - canonical-adoption-and-implementation-authority
+  - R4-governance-evidence-and-lifecycle
+  - Cloudflare-staging-action-holds
+  - zero-cost-and-unrelated-subscription-boundary
+  - production-and-public-launch-exclusions
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    status: plan-requirement-bound-to-issue-161
+    evidence: specification.md
+  impact_assessment:
+    required: true
+    status: plan-only
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    status: plan-only-revert-package-record-only
+    evidence: release-plan.md
+  deterministic_evidence:
+    required: true
+    status: pass-plan-validation-implementation-validation-still-required
+    evidence: test-plan.md
+  exact_revision_independent_verification:
+    required: true
+    status: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5424979883
+  action_authority:
+    required: false
+    status: no-external-action-authority-in-this-package
+    evidence: specification.md
+
+implementation:
+  authorized: true
+  required: true
+  authority_effective: false
+  status: authorized-after-adoption-pending-one-exact-implementation-pr-review-and-merge
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-095-T00
+
+release:
+  required: false
+  mode: repository-only-canonical-record-reconciliation
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-implementation-merge-postmerge-readback-and-evidence
+
+external_effects:
+  cloudflare: prohibited
+  dns: prohibited
+  github_settings_and_secrets: prohibited
+  deployment_and_workflow_dispatch: prohibited
+  remote_migrations_and_data: prohibited
+  spending_and_billing: prohibited
+  production_and_production_data: prohibited
+  public_launch: prohibited
+  main_promotion: prohibited
+  branch_or_worktree_deletion: prohibited
+
+repository_adoption_status: adopted-pending-one-exact-implementation-pr-review-and-merge
+adoption_pr: 162
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5425430085
+implementation_authority_before_adoption: false
+blocking_reasons:
+  - later-implementation-pr-exact-review-and-hosted-checks-pending
+  - ACT-02-fresh-corrected-SHA-overlay-review-and-action-authority-required
