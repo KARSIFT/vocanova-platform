@@ -21,12 +21,107 @@ plan_branch: plan/voc-094-f3-staging-activation
 target_branch: develop
 approved_candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
 
+amendment:
+  id: VOC-094-AM-01
+  status: adopted-pending-bookkeeping-review-eligible-non-author-merge-and-postmerge
+  purpose: >-
+    Clarify the strict zero-cent constraint after the completed ACT-00 read-only
+    inventory found an unrelated pre-existing subscription. This governed package
+    amendment creates no external-action authority.
+  approved_candidate_sha: c99be122fa2143ebceaf18bb64639a2bbf66a1a3
+  approval_status: adopted
+  accountable_approval_evidence: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418657086
+  exact_candidate_reviews:
+    cloudflare_specialist:
+      status: pass-exact-revision-zero-blockers
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/160#issuecomment-5418618865
+    security_settings_specialist:
+      status: pass-exact-revision-zero-blockers
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/160#issuecomment-5418665008
+    independent_R4:
+      status: pass-exact-revision-zero-blockers
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/160#issuecomment-5418664133
+  candidate_hosted_evidence:
+    ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32912507189
+    security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32912507229
+    governance:
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32912992151
+      structure: pass
+      changed_path_risk: pass
+      merge_eligibility: eligible-true-reasons-empty
+  adoption_bookkeeping_gate:
+    bookkeeping_revision: pending-final-head
+    fresh_exact_revision_review: pending
+    hosted_checks: pending-on-bookkeeping-revision
+    merge_eligibility:
+      required_eligible: true
+      required_reasons: []
+      current_status: pending-populated-binder-and-fresh-review
+    merge: pending-normal-non-author-pr-160-merge
+    postmerge_checks: pending
+    authority_effect: false-until-every-gate-above-passes
+  prior_adoption_preserved:
+    candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    merge_sha: 2b85457a3046ecc5cb0a4b0c7764df301112ec0b
+  inventory_readback:
+    captured_at: 2026-08-25T23:41:19Z
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418505220
+    account_id: 0a9eda28b96d77c24dcde74f3e074d47
+    zone:
+      id: 63286d93b5f32925ac7366b4e97908be
+      name: vocanova.site
+      status: active
+      plan: Free Website
+      monthly_price_usd: 0
+    existing_workers:
+      - patient-poetry-73ce
+      - telegram-mcp
+      - vergecloud-zoho-sprints-mcp
+    existing_d1_databases: []
+    existing_workers_custom_domains: []
+    existing_workers_routes: []
+    selected_dns_records: []
+    staging_collisions: none
+    revoked_read_only_credential_evidence: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418513920
+  cost_gate:
+    incremental_vocanova_staging_ceiling_cents: 0
+    applies_to: every incremental VocaNova staging resource and action
+    required_plans: [Workers Free, D1 Free]
+    prohibited:
+      [
+        Workers Paid,
+        D1 paid,
+        add-ons,
+        upgrades,
+        overages,
+        billing changes,
+        paid providers,
+      ]
+    unrelated_existing_subscription:
+      product: Basic Load Balancing
+      monthly_price_usd: 5
+      treatment: preserve-unchanged-unexpanded-and-not-attributed-to-vocanova
+    stop_condition: >-
+      Stop before a VocaNova resource, configuration, dispatch, or billing action that
+      would create any incremental charge, prompt for payment, enable a paid capability,
+      or alter the unrelated subscription.
+  residual_scope_gate:
+    status: pending-time-bounded-acceptance-before-ACT-01
+    required_record: >-
+      Before a write token exists, a separately attributable operator record must name
+      the three existing unrelated Workers, confirm that no D1 exists, accept only the
+      unavoidable selected-account Workers Scripts/D1 residual scope for the exact
+      ACT-01/ACT-02 window, prohibit commands targeting or mutating those Workers, name the
+      allowlisted VocaNova commands/resources, and state an exact expiry. It expires on
+      account, inventory, plan, resource, command, credential, or cost drift and never
+      renews automatically.
+
 approval_status: adopted
 implementation_authorized: true
 implementation_authority_status: >-
-  authorized-by-exact-candidate-adoption-but-effective-only-after-this-bookkeeping-
-  revision-receives-fresh-exact-review-genuine-eligible-true-reasons-empty-normal-
-  non-author-pr-159-merge-and-applicable-postmerge-checks
+  original-VOC-094-adoption-effective-after-PR-159;-AM-01-adopted-but-effective-only-
+  after-this-bookkeeping-revision-receives-fresh-exact-review-genuine-eligible-true-
+  reasons-empty-normal-non-author-PR-160-merge-and-applicable-postmerge-checks
 automatic_merge_allowed: true
 production_impact: prohibited
 rollback_required: true
@@ -127,16 +222,25 @@ candidate_hosted_evidence:
   quality: not-applicable-plan-only-path-filter
 
 adoption_bookkeeping_gate:
-  bookkeeping_revision: pending-final-head
-  fresh_exact_revision_review: pending
-  hosted_checks: pending-on-bookkeeping-revision
-  merge_eligibility:
-    required_eligible: true
-    required_reasons: []
-    current_status: pending-populated-binder-and-fresh-review
-  merge: pending-normal-non-author-pr-159-merge
-  postmerge_checks: pending
-  authority_effect: false-until-every-gate-above-passes
+  original_adoption:
+    approved_candidate_sha: 873f8957fb2f6d182662e4312f5c05e2d559ac88
+    bookkeeping_revision: aa7e3d65c43f43ad14b4c963f2ed8fb59171d831
+    fresh_exact_revision_review: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5417089256
+    premerge_eligibility: >-
+      https://github.com/KARSIFT/vocanova-platform/actions/runs/32901600024
+      reported eligible=true with reasons=[]
+    merge: 2b85457a3046ecc5cb0a4b0c7764df301112ec0b
+    merge_and_lifecycle_evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5417157681
+    postmerge_checks:
+      ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/32901854232
+      security: https://github.com/KARSIFT/vocanova-platform/actions/runs/32901854378
+      governance: https://github.com/KARSIFT/vocanova-platform/actions/runs/32901854262
+    authority_effect: true
+  amendment_AM_01:
+    approved_candidate_sha: c99be122fa2143ebceaf18bb64639a2bbf66a1a3
+    decision_and_review_evidence: amendment.exact_candidate_reviews-and-accountable_approval_evidence
+    bookkeeping_gate: amendment.adoption_bookkeeping_gate
+    authority_effect: false-until-AM-01-bookkeeping-gate-passes
 
 owners:
   decision: accountable-staging-action-owner-after-independent-plan-review
@@ -160,15 +264,23 @@ artifacts:
 
 dependencies:
   - id: VOC-094-DEP-00
-    status: satisfied-for-plan-adoption-authority-effectiveness-pending-bookkeeping-gate
+    status: original-adoption-effective-AM-01-pending-bookkeeping-gate
     evidence: >-
       Exact candidate 873f8957 has Cloudflare, security/settings, and independent R4
-      PASS verdicts plus the accountable ADOPT decision recorded in approvals. This
+      PASS verdicts, adoption bookkeeping PASS, eligible=true with reasons=[], normal
+      non-author PR #159 merge 2b85457, and successful postmerge checks. AM-01 exact
+      candidate c99be12 has its accountable decision, Cloudflare/security/independent
+      R4 PASS reviews, and hosted CI/Security/Governance evidence, but this AM-01
       bookkeeping revision still requires its own exact review, genuine eligible=true
-      with reasons=[], normal non-author PR #159 merge, and applicable postmerge checks.
+      with reasons=[], normal non-author PR #160 merge, and applicable postmerge checks.
   - id: VOC-094-DEP-01
-    status: runtime-readback-required-before-mutation
-    evidence: Exact selected account ID, zone ID/name/Active state, Free plan, account inventory, hostname collision state, and current billing state must be read back without mutation.
+    status: inventory-complete-residual-scope-acceptance-pending
+    evidence: >-
+      ACT-00 readback at issue comment 5418505220 binds the exact selected account and
+      Active Free Website zone, three existing Workers, no D1/Custom Domains/routes or
+      selected DNS records, no staging collision, and the unrelated USD 5/month Basic
+      Load Balancing subscription. The credential was revoked at issue comment
+      5418513920. Time-bounded residual-scope acceptance remains required before ACT-01.
   - id: VOC-094-DEP-02
     status: runtime-resource-binder-required
     evidence: A real vocanova-staging D1 UUID, Custom Domain records, and real immutable baseline API/web UUIDs must replace all staging sentinels before ordinary dispatch.
@@ -211,17 +323,23 @@ required_r4_evidence:
 action_specific_holds:
   - id: VOC-094-ACT-00
     action: phase1-read-only-account-zone-inventory-and-residual-scope-decision
-    status: held
+    status: inventory-complete-residual-scope-acceptance-pending
     accountable_role: cloudflare-account-owner-or-explicitly-delegated-phase1-operator
     required_evidence: >-
-      Exact selected account ID and zone ID/name, vocanova.site Active readback, Workers
-      Free and zero-paid-spend readback, complete Workers/D1/Custom-Domain inventory,
+      Exact selected account ID and zone ID/name, vocanova.site Active/Free Website
+      readback, complete Workers/D1/Custom-Domain/route and selected-DNS inventory,
+      strict zero-cent incremental VocaNova staging cost readback (not total account
+      subscription price),
       a distinct secure local/interactive read-only credential/session with no write
       permission and no value disclosure, permission-group readback, and either no
       production Workers/D1 in that account or explicit operator acceptance of the
       residual account-wide Workers Scripts/D1 scope. Revoke/expire the read-only
       credential after the decision and before any Phase1 write token is issued.
-    completion_or_expiry: expires on account, zone, inventory, plan, permission, billing, read-only credential, or scope drift and before Phase1 write-token issuance
+    completion_or_expiry: >-
+      Inventory is complete only for the captured account/zone facts; ACT-00 remains
+      incomplete until the separate time-bounded residual-scope acceptance is recorded.
+      It expires on account, zone, inventory, plan, permission, billing, credential, or
+      scope drift and before Phase1 write-token issuance.
   - id: VOC-094-ACT-01
     action: phase1-provision-staging-D1-and-authorize-exact-Worker-and-Custom-Domain-resource-set
     status: held-by-VOC-080-HOLD-00
@@ -229,8 +347,9 @@ action_specific_holds:
     required_evidence: >-
       Adopted exact resource manifest, clean exact reviewed repository SHA, final
       pre-action review, successful applicable hosted CI/Governance/Quality/Security
-      and local validation/dry-run evidence bound to that SHA, strict USD 0 ceiling,
-      ACT-00 pass, no collision, D1 eeur location-hint request with no jurisdiction,
+      and local validation/dry-run evidence bound to that SHA, strict USD 0 incremental
+      VocaNova ceiling with Workers Free and D1 Free required, ACT-00 pass including the
+      time-bounded residual-scope acceptance, no collision, D1 eeur location-hint request with no jurisdiction,
       real D1 UUID/readback, exact reviewed Worker/domain resource set, a separately
       issued short-lived Phase1 write token, and bounded partial-failure cleanup authority.
     completion_or_expiry: one Phase1 provisioning window; expires on revision, manifest, dependency/lock/workflow, local-or-hosted-check result, resource, hostname, D1 schema, account, zone, plan, credential, cost, or authority drift
@@ -318,7 +437,9 @@ protected_areas:
 implementation:
   authorized: true
   authority_effective: false
-  status: authorized-pending-bookkeeping-review-genuine-eligible-normal-merge-and-postmerge
+  status: >-
+    original-adoption-effective-AM-01-authorized-pending-bookkeeping-review-genuine-
+    eligible-normal-merge-and-postmerge
   required: true
   target_branch: develop
   pull_request_count: 2
@@ -334,7 +455,7 @@ implementation:
 release:
   required: true
   mode: separately-authorized-synthetic-staging-only
-  deployment: held-pending-effective-implementation-authority-and-exact-VOC-094-action-records
+  deployment: held-pending-AM-01-bookkeeping-effective-implementation-authority-and-exact-VOC-094-action-records
   migration_required: staging-D1-only
   rollback_required: true
   production: prohibited-by-VOC-080-HOLD-01
@@ -347,20 +468,25 @@ external_effects:
   all_other_github_settings: held-by-VOC-085-HOLD-00
   production: prohibited
   production_data: prohibited
-  paid_spend: prohibited-zero-cents
+  paid_spend: prohibited-zero-incremental-vocanova-staging-cents
+  unrelated_basic_load_balancing_subscription: preserve-unchanged-unexpanded-not-vocanova
   dns_custom_domains: staging-hostnames-only-during-Phase1-ACT-02
   public_launch: prohibited
   main_promotion: prohibited
   manual_branch_or_worktree_deletion: prohibited
 
-repository_adoption_status: adopted-pending-pr-159-normal-non-author-merge-and-applicable-postmerge-checks
+repository_adoption_status: >-
+  original-adoption-complete-effective-on-PR-159-merge-AM-01-adopted-pending-PR-160-
+  bookkeeping-review-eligible-normal-non-author-merge-and-applicable-postmerge-checks
 adoption_pr: 159
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/159#issuecomment-5416984827
+amendment_adoption_pr: 160
+amendment_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418657086
 
 blocking_reasons:
-  - exact-adoption-bookkeeping-revision-review-pending
-  - final-hosted-checks-on-adoption-bookkeeping-revision-pending
-  - genuine-premerge-eligible-true-reasons-empty-pending
-  - pr-159-normal-non-author-merge-pending
-  - applicable-postmerge-checks-pending
-  - implementation-authority-not-yet-effective
+  - AM-01-exact-bookkeeping-revision-review-pending
+  - AM-01-final-hosted-checks-on-bookkeeping-revision-pending
+  - AM-01-genuine-premerge-eligible-true-reasons-empty-pending
+  - AM-01-pr-160-normal-non-author-merge-pending
+  - AM-01-applicable-postmerge-checks-pending
+  - AM-01-implementation-authority-not-yet-effective

@@ -1,13 +1,17 @@
 # VOC-094 — F3 staging activation
 
-Status: adopted planning package. Exact candidate
+Status: adopted planning package with adopted `VOC-094-AM-01` cost-gate amendment.
+The historic candidate/adoption record remains preserved and effective after PR #159.
+AM-01's exact candidate is adopted but remains ineffective until this bookkeeping
+revision has a fresh exact review, genuine `eligible: true` / `reasons: []`, a normal
+non-author PR #160 merge, and applicable post-merge checks. Exact original candidate
 `873f8957fb2f6d182662e4312f5c05e2d559ac88` received Cloudflare,
 security/settings, and independent R4 PASS verdicts and an accountable ADOPT decision.
 GitHub issue [#158](https://github.com/KARSIFT/vocanova-platform/issues/158) remains
-planning intake, not external-action authority. Repository implementation is
-authorized but not yet effective: this adoption-bookkeeping revision still requires
-fresh exact review, hosted checks, genuine pre-merge `eligible: true` with `reasons: []`,
-normal non-author PR #159 merge, and applicable post-merge checks. No live identifier,
+planning intake, not external-action authority. Repository implementation is authorized
+but AM-01 is not yet effective: this bookkeeping revision still requires fresh exact
+review, hosted checks, genuine pre-merge `eligible: true` with `reasons: []`, normal
+non-author PR #160 merge, and applicable post-merge checks. No live identifier,
 credential, deployment result, environment, secret, or activation is claimed here;
 `ACT-00` through `ACT-05` remain separately held, and `VOC-080-HOLD-01` and
 `VOC-080-HOLD-02` remain unchanged.
@@ -30,17 +34,30 @@ and web version UUIDs are runtime evidence values: they must be read from Cloudf
 bound to attributable action records, and inserted where the adopted implementation
 contract requires them. No placeholder may pass an activation gate.
 
-The Workers Free plan and an all-in paid-spend ceiling of exactly USD 0 are hard
-constraints. Any Paid activation, add-on, overage, billing change, or feature that
-cannot remain within Free limits stops the outcome. Staging is synthetic-only:
+The ACT-00 no-write inventory step completed for account
+`0a9eda28b96d77c24dcde74f3e074d47` and Active Free Website zone `vocanova.site`
+(`63286d93b5f32925ac7366b4e97908be`): the three existing Workers are
+`patient-poetry-73ce`, `telegram-mcp`, and `vergecloud-zoho-sprints-mcp`; there is no
+D1, Workers Custom Domain, Workers route, selected DNS record, or staging collision.
+The read-only credential was revoked. The inventory also found one pre-existing,
+unrelated USD 5/month Basic Load Balancing subscription. It is preserved, not modified,
+expanded, or attributed to VocaNova. See the [sanitized inventory](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418505220)
+and [credential closure](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418513920).
+
+The Workers Free and D1 Free plans and a ceiling of exactly USD 0 for **every
+incremental VocaNova staging resource and action** are hard constraints. Any Paid
+Workers/D1 capability, add-on, upgrade, overage, billing change, paid provider, or
+feature that cannot remain within Free limits stops the outcome. This ceiling is not a
+claim that the unrelated account subscription must be cancelled. Staging is synthetic-only:
 signup, OAuth, magic-link/email delivery, AI generation/provider calls, production
 learner data, and learner-content logging remain disabled.
 
-Cloudflare's Workers Scripts and D1 token permissions are scoped to a selected
-account, not to the two Worker names or one D1 database. Activation therefore fails
-closed until a read-only inventory proves the selected account has no production
-Workers or D1 databases, or the operator records an explicit, time-bounded acceptance
-of that residual account-wide permission boundary.
+Cloudflare's Workers Scripts and D1 token permissions are scoped to a selected account,
+not to the two Worker names or one D1 database. Before ACT-01, a separate attributable,
+time-bounded residual-scope acceptance must name the three existing unrelated Workers,
+confirm the absence of D1, allow only the exact VocaNova resource commands, prohibit
+commands targeting or mutating the existing Workers, and expire on any relevant drift. Until
+then, no Phase 1 write credential exists and activation remains held.
 
 The external sequence is fixed:
 

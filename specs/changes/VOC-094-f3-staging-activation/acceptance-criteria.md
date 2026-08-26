@@ -23,9 +23,16 @@ worktree/recovery ref remains preserved and no manual branch/worktree deletion o
 - Evidence: `VOC-094-EV-01`
 - Result: pending
 
-Readback binds one account ID and the Active `vocanova.site` zone ID, verifies Workers
-Free and USD 0, and inventories all account Workers/D1/Custom Domains. No mutation is
-possible if production Workers/D1 exist without explicit residual-scope acceptance.
+Readback binds account `0a9eda28b96d77c24dcde74f3e074d47`, Active Free Website zone
+`vocanova.site` (`63286d93b5f32925ac7366b4e97908be`), its three existing Workers, and
+no D1/Workers Custom Domain/Workers route/selected DNS record/staging collision. The
+unrelated existing USD 5/month Basic Load Balancing subscription is preserved unchanged
+and excluded from VocaNova attribution. Workers Free and D1 Free with USD 0 incremental
+VocaNova staging cost are verified; any paid Workers/D1 feature, add-on, upgrade,
+overage, billing change, or paid provider blocks action. No mutation is possible until
+a separate time-bounded residual-scope acceptance names the existing Workers, allows
+only exact VocaNova commands/resources, prohibits commands targeting or mutating them,
+and has not expired.
 A clean exact reviewed repository SHA has successful applicable hosted CI, Governance,
 Quality, and Security and local validation/credential-free dry runs; failed,
 unchecked, stale, or drifted evidence blocks writes.
