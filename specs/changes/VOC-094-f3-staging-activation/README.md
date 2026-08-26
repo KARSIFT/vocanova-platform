@@ -1,16 +1,17 @@
 # VOC-094 — F3 staging activation
 
-Status: adopted planning package with proposed `VOC-094-AM-01` cost-gate amendment.
-The historic candidate/adoption record remains preserved; the amendment itself needs
-fresh exact-revision review and adoption before it can change any implementation gate.
-Exact candidate
+Status: adopted planning package with adopted `VOC-094-AM-01` cost-gate amendment.
+The historic candidate/adoption record remains preserved and effective after PR #159.
+AM-01's exact candidate is adopted but remains ineffective until this bookkeeping
+revision has a fresh exact review, genuine `eligible: true` / `reasons: []`, a normal
+non-author PR #160 merge, and applicable post-merge checks. Exact original candidate
 `873f8957fb2f6d182662e4312f5c05e2d559ac88` received Cloudflare,
 security/settings, and independent R4 PASS verdicts and an accountable ADOPT decision.
 GitHub issue [#158](https://github.com/KARSIFT/vocanova-platform/issues/158) remains
-planning intake, not external-action authority. Repository implementation is
-authorized but not yet effective: this adoption-bookkeeping revision still requires
-fresh exact review, hosted checks, genuine pre-merge `eligible: true` with `reasons: []`,
-normal non-author PR #159 merge, and applicable post-merge checks. No live identifier,
+planning intake, not external-action authority. Repository implementation is authorized
+but AM-01 is not yet effective: this bookkeeping revision still requires fresh exact
+review, hosted checks, genuine pre-merge `eligible: true` with `reasons: []`, normal
+non-author PR #160 merge, and applicable post-merge checks. No live identifier,
 credential, deployment result, environment, secret, or activation is claimed here;
 `ACT-00` through `ACT-05` remain separately held, and `VOC-080-HOLD-01` and
 `VOC-080-HOLD-02` remain unchanged.

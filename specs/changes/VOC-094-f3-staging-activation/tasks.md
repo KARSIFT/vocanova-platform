@@ -9,7 +9,7 @@
 - Risk: R4
 - Implementation pull-request mapping: PR1 main repository implementation plus PR2
   immediate post-ACT-03 documentation-only reconciliation, both into `develop`
-- Status: planned-pending-adoption
+- Status: adopted-AM-01-pending-bookkeeping-review-eligible-non-author-merge-and-postmerge
 
 The ACT-00 inventory is complete and its read-only credential revoked: account
 `0a9eda28b96d77c24dcde74f3e074d47`, Active Free Website zone `vocanova.site`, three
