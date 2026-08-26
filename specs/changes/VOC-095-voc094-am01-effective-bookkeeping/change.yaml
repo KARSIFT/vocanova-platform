@@ -4,7 +4,7 @@ id: VOC-095
 slug: voc094-am01-effective-bookkeeping
 title: Reconcile VOC-094-AM-01 adoption bookkeeping and implementation effectiveness
 type: repository-governance-lifecycle-reconciliation
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because the correction changes canonical adoption, implementation-authority,
@@ -15,15 +15,18 @@ planned_implementation_risk_floor: >-
 canonical_path: specs/changes/VOC-095-voc094-am01-effective-bookkeeping
 authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/161
-requirement_approval_status: pending-independent-plan-review-and-adoption-decision
+requirement_approval_status: exact-plan-review-pass-and-accountable-adoption-decision-approved
 base_branch: develop
 base_sha: 75e5c9909fe105a9af3e6e8a3600fec27fcbd593
 plan_branch: plan/voc-095-voc094-am01-effective-bookkeeping
 target_branch: develop
-approved_candidate_sha: pending-plan-review
-approval_status: not-approved
-implementation_authorized: false
-implementation_authority_status: not-authorized-until-adoption-and-later-exact-implementation-review
+approved_candidate_sha: b0b1b5fbbe642a1d1db356ff813f2fbef73ec907
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-for-one-repository-only-implementation-pr-after-adoption; external
+  Cloudflare-DNS-deployment-spending-production-data-and-public-launch-actions-remain
+  prohibited-and-ACT-02-remains-held
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
 automatic_merge_allowed: true
@@ -95,6 +98,25 @@ evidence:
       run: 32914336981
       url: https://github.com/KARSIFT/vocanova-platform/actions/runs/32914336981
       result: success
+
+plan_review_history:
+  - candidate_sha: b0b1b5fbbe642a1d1db356ff813f2fbef73ec907
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5424979883
+    resolution: >-
+      Independent R4 review verified the complete bounded package, exact VOC-094
+      lifecycle evidence, ACT-01/D1 preservation, external-action prohibitions, and
+      the ACT-02 hold. No blocking findings remained.
+
+approvals:
+  package_independent_R4_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: b0b1b5fbbe642a1d1db356ff813f2fbef73ec907
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5424979883
+  adoption_decision:
+    status: approved-for-adoption-with-external-action-holds-preserved
+    candidate_sha: b0b1b5fbbe642a1d1db356ff813f2fbef73ec907
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5425430085
 
 requirements:
   - id: VOC-095-D00
@@ -204,22 +226,22 @@ required_r4_evidence:
     evidence: release-plan.md
   deterministic_evidence:
     required: true
-    status: pending-implementation-validation
+    status: pass-plan-validation-implementation-validation-still-required
     evidence: test-plan.md
   exact_revision_independent_verification:
     required: true
-    status: pending-plan-review
-    evidence: pending
+    status: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5424979883
   action_authority:
     required: false
     status: no-external-action-authority-in-this-package
     evidence: specification.md
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
   authority_effective: false
-  status: pending-adoption-and-later-exact-implementation-review
+  status: authorized-after-adoption-pending-one-exact-implementation-pr-review-and-merge
   target_branch: develop
   pull_request_count: 1
   task: VOC-095-T00
@@ -244,9 +266,10 @@ external_effects:
   main_promotion: prohibited
   branch_or_worktree_deletion: prohibited
 
-repository_adoption_status: draft-pending-independent-review-and-adoption-decision
+repository_adoption_status: adopted-pending-one-exact-implementation-pr-review-and-merge
+adoption_pr: 162
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/162#issuecomment-5425430085
+implementation_authority_before_adoption: false
 blocking_reasons:
-  - plan-independent-exact-revision-review-pending
-  - accountable-adoption-decision-pending
   - later-implementation-pr-exact-review-and-hosted-checks-pending
   - ACT-02-fresh-corrected-SHA-overlay-review-and-action-authority-required
