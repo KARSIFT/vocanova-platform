@@ -2,8 +2,10 @@
 
 ## Preconditions and delivery shape
 
-Do not begin until the package is adopted and `implementation.authorized: true` is
-recorded through reviewed bookkeeping. Use one task and two isolated short-lived
+The package is adopted and AM-01 reviewed bookkeeping now records both
+`implementation.authorized: true` and `implementation.authority_effective: true`.
+This permits repository implementation only; every external action remains separately
+held. Use one task and two isolated short-lived
 implementation branches/worktrees from then-current `origin/develop`: main PR1 and the
 immediate post-ACT-03 documentation-only PR2. Record all worktrees/recovery refs before
 work and preserve them while any plan or implementation PR remains open.
@@ -20,7 +22,7 @@ bookkeeping, justified by this non-combinable truth boundary.
 
 ## Ordered implementation and action sequence
 
-1. **Prepare without implementation.** Freeze the adopted package, a clean exact
+1. **Prepare without external action.** Freeze the adopted package, a clean exact
    repository SHA, production sentinels, worktrees/recovery refs, affected-surface
    inventory, and current living-document claims. Obtain the exact Phase 1 action
    authority and exact-SHA Cloudflare/security/independent reviews required for the
@@ -28,32 +30,33 @@ bookkeeping, justified by this non-combinable truth boundary.
    hosted CI, Governance, Quality, and Security and local validation/credential-free
    dry runs. Reverify official Cloudflare docs, locked Wrangler `4.125.0`, config
    schema, and exact command help. Failed, unchecked, stale, or drifted evidence stops
-   before credentials or writes. No tracked sentinel, GitHub environment, or secret
+   before credential use or writes. No tracked sentinel, GitHub environment, or secret
    changes occur.
-2. **Phase 1 / ACT-00 — inventory closure and residual-scope decision.** The completed
+2. **Phase 1 / ACT-00 — completed inventory closure and residual-scope decision.** The completed
    no-write readback binds account `0a9eda28b96d77c24dcde74f3e074d47`, Active Free
    Website zone `vocanova.site` (`63286d93b5f32925ac7366b4e97908be`), three existing
-   Workers, no D1/Custom Domains/routes/selected DNS records, and no staging collision;
+   Workers, inventory-time absence of D1/Custom Domains/routes/selected DNS records,
+   and no staging collision;
    its credential is revoked. It also found an unrelated existing USD 5/month Basic
-   Load Balancing subscription. Before any write credential, obtain a separate
-   attributable record with exact expiry that accepts only the unavoidable selected-
-   account Workers Scripts/D1 scope, names and prohibits commands targeting or mutating those Workers,
-   allows only the exact VocaNova commands/resources, and confirms zero incremental
-   VocaNova staging cost with Workers Free and D1 Free. Stop on any cost/scope drift;
-   do not modify, expand, or attribute the unrelated subscription.
-3. **Phase 1 / ACT-01 — provision D1.** From the same clean exact reviewed repository
-   SHA and still-unmodified tracked tree, issue a separate short-lived Phase 1 write
-   token with the adopted scope, then create D1 exactly once with the `eeur` location
-   hint (`--location eeur`) and no jurisdiction. Record the real UUID, requested hint, actual placement/
-   served-region readback, schema-independent pre-state, Free-plan state, and exact
-   two-Worker/two-domain resource authorization. Stop on collision, duplicate, Paid
-   prompt, unplanned permission, or production drift.
+   Load Balancing subscription. The separate attributable residual-scope record named
+   and protected the three Workers, allowed only the exact D1 action, confirmed Workers
+   Free/D1 Free and zero incremental cost, and did not modify or attribute the unrelated
+   subscription. That authority is historical and cannot authorize ACT-02.
+3. **Phase 1 / ACT-01 — completed D1 creation with incident preserved.** ACT-01 used its
+   separate time-bounded record to create only D1 `vocanova-staging` UUID
+   `22ae386f-e3f5-4d98-a3ad-18b39d3b8556` with requested `eeur` hint and no
+   jurisdiction. It read back in EEUR with zero tables, no user data, no migrations,
+   and zero incremental cost. Issue #161 records that this occurred before the stale
+   AM-01 canonical state was discovered. The D1 remains preserved and unusable under
+   this bookkeeping correction.
 4. **Phase 1 / ACT-02 — bootstrap outside tracked config.** Create an untracked
    disposable external route-free Wrangler overlay containing only reviewed non-secret
    real D1/Worker bindings, synthetic-only vars, `workers_dev: false`, preview URLs
    false, and web `API` service binding. Secure auth stays outside it. Hash and review
    the sanitized overlay and resource manifest, and pass their credential-free local/
-   schema/dry-run checks before any live command. Apply ordered migrations, then use
+   schema/dry-run checks before any live command. Obtain a fresh exact corrected-SHA,
+   overlay/resource, Free/$0, protected-Worker, and time-bounded ACT-02 authority record;
+   the existing token's presence is never sufficient. Apply ordered migrations, then use
    locked Wrangler 4.125.0 `wrangler deploy` as the narrow first-creation exception to create/deploy route-free
    API, resolve/tag/read back its baseline UUID, and only then create/deploy route-free
    web bound to the existing API and resolve its UUID. Locked `versions upload` must

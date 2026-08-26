@@ -1,5 +1,12 @@
 # VOC-094 — Acceptance Criteria
 
+AM-01 repository bookkeeping is complete and effective: exact final revision
+`aad884a6d53c5e0f13b94f8042774b14a07015af`, independent/specialist PASS evidence,
+Governance `eligible: true` with `reasons: []`, normal PR #160 merge
+`75e5c9909fe105a9af3e6e8a3600fec27fcbd593`, and successful post-merge checks are
+bound in `change.yaml`. The results below remain pending for the F3 staging outcome,
+not for AM-01 adoption. External actions remain independently held.
+
 ## VOC-094-AC-00 — Package, review, and authority remain exact and separated
 
 - Requirements: `VOC-094-D00`, `D15`, `D16`
@@ -25,21 +32,24 @@ worktree/recovery ref remains preserved and no manual branch/worktree deletion o
 
 Readback binds account `0a9eda28b96d77c24dcde74f3e074d47`, Active Free Website zone
 `vocanova.site` (`63286d93b5f32925ac7366b4e97908be`), its three existing Workers, and
-no D1/Workers Custom Domain/Workers route/selected DNS record/staging collision. The
+the inventory-time absence of D1/Workers Custom Domain/Workers route/selected DNS
+record/staging collision. ACT-01 subsequently created only D1 `vocanova-staging` UUID
+`22ae386f-e3f5-4d98-a3ad-18b39d3b8556`; it remains empty, unmigrated, and unusable
+until a fresh corrected-SHA ACT-02 record passes. The
 unrelated existing USD 5/month Basic Load Balancing subscription is preserved unchanged
 and excluded from VocaNova attribution. Workers Free and D1 Free with USD 0 incremental
 VocaNova staging cost are verified; any paid Workers/D1 feature, add-on, upgrade,
-overage, billing change, or paid provider blocks action. No mutation is possible until
-a separate time-bounded residual-scope acceptance names the existing Workers, allows
-only exact VocaNova commands/resources, prohibits commands targeting or mutating them,
-and has not expired.
+overage, billing change, or paid provider blocks action. ACT-01's time-bounded
+residual-scope acceptance protected the existing Workers and allowed only its exact
+D1 action; it grants no continuing authority. No further mutation is possible until
+a fresh exact action record passes.
 A clean exact reviewed repository SHA has successful applicable hosted CI, Governance,
 Quality, and Security and local validation/credential-free dry runs; failed,
 unchecked, stale, or drifted evidence blocks writes.
-A distinct ACT-00 local/interactive short-lived read-only credential/session has no
+A distinct ACT-00 local/interactive short-lived read-only credential/session had no
 write permissions, is never disclosed or stored in an overlay, and is revoked/expired
-after inventory and the residual-scope decision. Only then is a separate Phase 1 write
-token issued for ACT-01/02 with the adopted account/zone permissions. No GitHub
+after inventory and the residual-scope decision. Only then was a separate Phase 1 write
+token issued; its existence cannot substitute for fresh ACT-02 authority. No GitHub
 environment or secret exists yet because of this package.
 
 ## VOC-094-AC-02 — Exact staging resources and privacy controls read back correctly

@@ -7,6 +7,14 @@ immediate post-ACT-03 documentation-only PR2 both target `develop` and are merge
 normally by non-authors after exact-SHA checks/reviews and repository eligibility pass.
 Neither merge deploys.
 
+AM-01 repository bookkeeping is complete: final revision
+`aad884a6d53c5e0f13b94f8042774b14a07015af` passed exact review and literal hosted
+eligibility, PR #160 merged normally as
+`75e5c9909fe105a9af3e6e8a3600fec27fcbd593`, and applicable post-merge checks passed.
+This makes repository implementation authority effective but grants no external action.
+Issue #161 preserves the pre-correction ACT-01 creation of only empty D1
+`vocanova-staging` UUID `22ae386f-e3f5-4d98-a3ad-18b39d3b8556`; ACT-02 remains held.
+
 Separate attributable `VOC-094-ACT-00` through `ACT-05` records govern account/token
 selection/inventory, Cloudflare resources, external baseline/rollback evidence,
 post-merge GitHub environment/secrets, ordinary dispatch, and cleanup. Each record
@@ -16,19 +24,20 @@ or successful merge cannot substitute for one.
 
 ## Phase-specific preconditions
 
-Phase 1 may begin only after package adoption, effective Phase 1 action authority, a
-clean exact reviewed repository SHA, current Cloudflare/Wrangler/price/permission
+Further Phase 1 work may begin only after fresh effective ACT-02 action authority, a
+clean exact reviewed corrected repository SHA, current Cloudflare/Wrangler/price/permission
 verification, successful applicable hosted CI/Governance/Quality/Security and local
 validation/credential-free dry-run evidence bound to that SHA, strict zero-cent
 evidence, preserved production/worktree/ref inventory, and a distinct securely held
 local/interactive read-only credential/session with exact
 scope/expiry and no write permission. ACT-00 inventory and the residual decision must
-pass, and that credential must be revoked/expired, before a separate short-lived Phase
-1 write token is issued. Phase 1 does not require a GitHub environment, repository
-real-ID binding, implementation merge, or post-merge review.
+pass, and that credential was revoked/expired before the separate Phase 1 write token
+was issued. The completed ACT-00/ACT-01 evidence does not authorize ACT-02. Phase 1
+does not require a GitHub environment, repository real-ID binding, implementation
+merge, or post-merge review.
 
-ACT-01/ACT-02 then require the completed exact account/Active Free Website zone/
-collision inventory, the separately attributable unexpired residual-scope acceptance,
+ACT-02 requires the completed exact account/Active Free Website zone/collision
+inventory, a fresh separately attributable unexpired residual-scope/action record,
 Workers Free and D1 Free, and a USD 0 **incremental VocaNova staging** estimate. The
 unrelated existing USD 5/month Basic Load Balancing subscription is preserved unchanged,
 not expanded, and not attributed to VocaNova. A hashed/reviewed route-free overlay tied to the clean SHA
@@ -40,7 +49,8 @@ a separately hashed/reviewed route-bearing overlay uses locked Wrangler command
 `wrangler triggers deploy` for the two domains; no public route exists earlier. Only after scripts exist
 may `versions upload`/exact deploy create a newer rollback probe. Phase 1 ends by
 retaining sanitized evidence, deleting both overlays, and revoking/expiring the write
-token.
+token. The token's existence or remaining TTL never substitutes for the fresh action
+record.
 
 Any SHA, manifest, overlay-hash, dependency/lock/workflow, or hosted/local check-result
 drift expires Phase 1 authority. Unchecked, failed, or stale evidence requires token

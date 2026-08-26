@@ -1,20 +1,20 @@
 # VOC-094 — F3 staging activation
 
-Status: adopted planning package with adopted `VOC-094-AM-01` cost-gate amendment.
-The historic candidate/adoption record remains preserved and effective after PR #159.
-AM-01's exact candidate is adopted but remains ineffective until this bookkeeping
-revision has a fresh exact review, genuine `eligible: true` / `reasons: []`, a normal
-non-author PR #160 merge, and applicable post-merge checks. Exact original candidate
-`873f8957fb2f6d182662e4312f5c05e2d559ac88` received Cloudflare,
-security/settings, and independent R4 PASS verdicts and an accountable ADOPT decision.
-GitHub issue [#158](https://github.com/KARSIFT/vocanova-platform/issues/158) remains
-planning intake, not external-action authority. Repository implementation is authorized
-but AM-01 is not yet effective: this bookkeeping revision still requires fresh exact
-review, hosted checks, genuine pre-merge `eligible: true` with `reasons: []`, normal
-non-author PR #160 merge, and applicable post-merge checks. No live identifier,
-credential, deployment result, environment, secret, or activation is claimed here;
-`ACT-00` through `ACT-05` remain separately held, and `VOC-080-HOLD-01` and
-`VOC-080-HOLD-02` remain unchanged.
+Status: adopted planning package with effective `VOC-094-AM-01` cost-gate amendment.
+The original candidate/adoption record remains preserved and effective after PR #159.
+AM-01 final bookkeeping revision
+`aad884a6d53c5e0f13b94f8042774b14a07015af` received fresh independent R4,
+Cloudflare, and security/settings PASS reviews; Governance run
+[32913984893](https://github.com/KARSIFT/vocanova-platform/actions/runs/32913984893)
+reported `eligible: true` with `reasons: []`; PR #160 merged normally as
+`75e5c9909fe105a9af3e6e8a3600fec27fcbd593`; and post-merge CI, Security, and
+Governance passed. Repository implementation authority is therefore effective.
+
+That effectiveness is not external-action authority. GitHub issue
+[#158](https://github.com/KARSIFT/vocanova-platform/issues/158), a review verdict,
+merge, or package field cannot authorize Cloudflare, DNS, deployment, settings,
+secrets, spending, production, or launch action. ACT-02 through ACT-05 remain
+separately held, and `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain unchanged.
 
 The proposed coherent outcome is one package, one minimum-sufficient task, and two
 future implementation pull requests into `develop`. It would activate only the named
@@ -37,12 +37,22 @@ contract requires them. No placeholder may pass an activation gate.
 The ACT-00 no-write inventory step completed for account
 `0a9eda28b96d77c24dcde74f3e074d47` and Active Free Website zone `vocanova.site`
 (`63286d93b5f32925ac7366b4e97908be`): the three existing Workers are
-`patient-poetry-73ce`, `telegram-mcp`, and `vergecloud-zoho-sprints-mcp`; there is no
-D1, Workers Custom Domain, Workers route, selected DNS record, or staging collision.
-The read-only credential was revoked. The inventory also found one pre-existing,
+`patient-poetry-73ce`, `telegram-mcp`, and `vergecloud-zoho-sprints-mcp`; at inventory
+time there was no D1, Workers Custom Domain, Workers route, selected DNS record, or
+staging collision. The read-only credential was revoked. The inventory also found one pre-existing,
 unrelated USD 5/month Basic Load Balancing subscription. It is preserved, not modified,
 expanded, or attributed to VocaNova. See the [sanitized inventory](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418505220)
 and [credential closure](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418513920).
+
+Before the stale AM-01 record was discovered, ACT-01 created only D1
+`vocanova-staging`, UUID `22ae386f-e3f5-4d98-a3ad-18b39d3b8556`, under its explicit
+external-action record. It read back with zero tables, no user data, no migrations,
+no jurisdiction, and zero incremental cost. Issue
+[#161](https://github.com/KARSIFT/vocanova-platform/issues/161) records the sequencing
+incident. ACT-02 then stopped before Worker creation, migration, Custom Domain, DNS,
+traffic, deployment, rollback, production, billing, or launch action. The D1 is
+preserved non-secret evidence only and must not be deleted, migrated, queried,
+attached, or used until a fresh corrected-SHA ACT-02 review and authority record pass.
 
 The Workers Free and D1 Free plans and a ceiling of exactly USD 0 for **every
 incremental VocaNova staging resource and action** are hard constraints. Any Paid
@@ -53,11 +63,11 @@ signup, OAuth, magic-link/email delivery, AI generation/provider calls, producti
 learner data, and learner-content logging remain disabled.
 
 Cloudflare's Workers Scripts and D1 token permissions are scoped to a selected account,
-not to the two Worker names or one D1 database. Before ACT-01, a separate attributable,
-time-bounded residual-scope acceptance must name the three existing unrelated Workers,
-confirm the absence of D1, allow only the exact VocaNova resource commands, prohibit
-commands targeting or mutating the existing Workers, and expire on any relevant drift. Until
-then, no Phase 1 write credential exists and activation remains held.
+not to the two Worker names or one D1 database. ACT-01 used a separately attributable,
+time-bounded residual-scope acceptance naming the three existing unrelated Workers and
+allowing only the exact D1 creation command while prohibiting commands targeting those
+Workers. That completed action does not carry forward: the operator-held Phase 1 token
+remains outside the repository and must not be used without fresh exact authority.
 
 The external sequence is fixed:
 

@@ -5,7 +5,7 @@
 | Area                    | Effect and boundary                                                                                                                                                                                         |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Public staging          | Creates two Worker Custom Domains and exposes synthetic staging health/web behavior.                                                                                                                        |
-| Cloudflare account      | Creates/updates only two VocaNova Workers and one D1; write permissions are account-wide, so an expiring residual-scope acceptance must protect the three unrelated existing Workers.                       |
+| Cloudflare account      | ACT-01 created only the empty VocaNova staging D1; fresh ACT-02 may create/update only two VocaNova Workers and use that D1. Account-wide write scope requires exact protection of three unrelated Workers. |
 | GitHub settings/secrets | After PR1, ACT-03 creates only `cloudflare-staging`; immediate PR2 records sanitized settings truth and two secret names without values.                                                                    |
 | CI/CD                   | Changes the held staging manifest/policy/workflow to a time-bounded authorized staging path; production remains fail closed.                                                                                |
 | Data/privacy            | Remote D1 has synthetic/non-personal data only; no production import or learner content logging.                                                                                                            |
@@ -14,6 +14,12 @@
 | Product/accessibility   | No new product behavior. Existing representative web smoke covers rendered HTML; no accessibility scope change.                                                                                             |
 | Ruflo                   | External sanitized coordination provenance only; no tracked integration or authority.                                                                                                                       |
 | Repository refs         | Only normal PR history; GitHub may auto-delete merged short-lived heads, with exact recovery evidence.                                                                                                      |
+
+AM-01 bookkeeping is complete and repository implementation authority is effective.
+Issue #161 preserves the sequencing incident: D1 `vocanova-staging` UUID
+`22ae386f-e3f5-4d98-a3ad-18b39d3b8556` exists with zero tables, no user data or
+migrations, and zero incremental cost; ACT-02 stopped before every Worker/domain/DNS/
+traffic/deployment action. This correction creates no external authority.
 
 ## Risks and mitigations
 
@@ -43,10 +49,10 @@
   existing unrelated Basic Load Balancing subscription is neither modified nor used to
   satisfy this gate.
 - `VOC-094-R13` — The known three unrelated account Workers could be reached by a
-  selected-account write token. Mitigation: before ACT-01, require a separately
-  attributable, exact-expiry residual-scope acceptance that names them, denies commands
-  targeting or mutating them, and permits only VocaNova allowlisted commands/resources; any drift stops
-  the action.
+  selected-account write token. Mitigation: ACT-01's separately attributable
+  residual-scope acceptance named and protected them for only the exact D1 action; it
+  does not carry forward. Fresh ACT-02 authority must again deny commands targeting or
+  mutating them and permit only exact VocaNova resources; any drift stops the action.
 - `VOC-094-R05` — Secrets or learner content leak to logs, comments, artifacts, or
   Ruflo. Mitigation: ACT-00 read-only auth and the separate Phase 1 write token stay
   outside both sanitized overlays; post-merge environment-scoped Phase 4 secrets use a
@@ -68,7 +74,7 @@
   truth boundary justifies an extra branch/PR, hosted/local checks, exact reviews,
   merge/source-head evidence, elapsed time, coordination, context, and bookkeeping.
 - `VOC-094-R11` — Exact-SHA review without successful current checks could still send
-  unchecked code/config to live staging. Mitigation: ACT-01/02 bind the clean SHA to
+  unchecked code/config to live staging. Mitigation: each new ACT-02 write binds the clean corrected SHA to
   successful applicable hosted and local checks and bind the manifest/overlay hashes
   to credential-free local/schema/dry runs plus exact review; any result or dependency/
   lock/workflow drift expires authority and revokes the token before mutation.
@@ -89,10 +95,14 @@
 
 ## Dependencies and evidence
 
-- `VOC-094-DEP-00` — adopted exact plan and effective implementation authority.
+- `VOC-094-DEP-00` — adopted exact plan and effective AM-01 repository implementation
+  authority, bound to final candidate `aad884a6`, eligible run `32913984893`, merge
+  `75e5c990`, and successful post-merge checks.
 - `VOC-094-DEP-01` — completed read-only account/zone/plan/inventory/collision facts,
-  revoked credential, and pending time-bounded residual-scope acceptance.
-- `VOC-094-DEP-02` — real D1 and baseline version UUID binders.
+  revoked credential, completed ACT-01 residual-scope decision, and no continuing
+  authority for ACT-02.
+- `VOC-094-DEP-02` — preserved real D1 UUID; baseline API/web version UUIDs remain
+  pending fresh ACT-02.
 - `VOC-094-EV-00` — package shape, adoption, roles, exact-SHA reviews, both
   implementation merges/source-head evidence, and the PR1 → ACT-03 → PR2 boundary.
 - `VOC-094-EV-01` — Phase 1 account/zone/plan/permission inventory, residual-scope
