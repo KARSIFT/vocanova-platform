@@ -17,9 +17,11 @@ ceremony, and future self-effectiveness bookkeeping.
 The target operating model is:
 
 - staging: only `m-e-h-r-d-a-a-d` may manually dispatch from `develop`; GitHub
-  environment `cloudflare-staging` requires `NegarJafari` review with self-review and
-  admin bypass disabled, then exposes environment-scoped `CLOUDFLARE_ACCOUNT_ID` /
-  `CLOUDFLARE_API_TOKEN`;
+  environment `cloudflare-staging` names that same GitHub identity as reviewer,
+  allows identity-layer self-review, and disables admin bypass. The dispatcher may
+  not approve: a fresh, non-author AI subagent using a different model performs the
+  exact-run review and submits an attributable approval receipt before the environment
+  exposes `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN`;
 - production: separate `cloudflare-production` environment and credential, `main`
   only, still disabled and held by `VOC-080-HOLD-01` and `VOC-080-HOLD-02`;
 - credentials: reusable across dispatches, least privilege, rotated independently
@@ -27,6 +29,12 @@ The target operating model is:
 - repository delivery: one delivery-control PR, one separately authorized settings
   action, and one immediate documentation-only settings-truth PR. This one-time split
   follows current `AGENTS.md`; it is not a per-dispatch binder or a new plan.
+
+GitHub cannot distinguish the dispatcher from that subagent because both use the
+same account. The separation is therefore a governed, auditable actor boundary rather
+than a native GitHub identity control: missing or mismatched AI-review provenance
+fails the run, and dispatcher self-approval is an incident requiring a stop and token
+revocation.
 
 Adopting or merging this package authorizes repository implementation only. It does
 not authorize GitHub settings, secret entry, token creation, Cloudflare mutation,

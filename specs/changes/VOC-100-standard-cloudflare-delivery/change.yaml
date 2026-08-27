@@ -15,6 +15,7 @@ canonical_path: specs/changes/VOC-100-standard-cloudflare-delivery
 authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/173
 related_activation_issue: https://github.com/KARSIFT/vocanova-platform/issues/158
+operator_reviewer_amendment: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446157004
 superseded_future_contracts:
   - VOC-094-ACT-03-to-PR2-to-ACT-04-ceremony
   - VOC-096-five-record-runtime-binder
@@ -113,16 +114,22 @@ requirements:
       cloudflare-staging, the exact event SHA, successful required validation in the
       same run, cost ceiling zero, exact staging manifest/resources, and confirmation
       DEPLOY staging followed by that exact 40-character event SHA. The environment
-      requires reviewer NegarJafari, prevents self-review, and disables admin bypass;
-      its approval is the standard per-run action record. Remove
+      requires GitHub reviewer identity m-e-h-r-d-a-a-d, allows self-review because
+      GitHub cannot represent the separately instantiated AI participant, and disables
+      admin bypass. Only a fresh non-author AI deployment-review subagent may submit
+      that approval. Its approval comment records participant/task/model provenance,
+      exact run/SHA/environment/checks, PASS verdict, and no-secret boundary; model
+      provenance supports attribution but grants no authority. The human dispatcher
+      may not approve the run. Remove
       action-authority, ACT-03, PR2-review, binder-review, raw-body digest, nonce,
       reviewed-SHA, estimated-cost, and operator-supplied rollback-version inputs.
   - id: VOC-100-D05
     statement: >-
       Before any environment job, use the read-only GitHub token to fail unless the
-      live cloudflare-staging environment exists with required reviewer NegarJafari,
-      self-review prevention, admin bypass disabled, and exactly one custom deployment
-      branch policy for develop. Before the first Cloudflare write, read and record
+      live cloudflare-staging environment exists with sole reviewer identity
+      m-e-h-r-d-a-a-d, self-review allowed, admin bypass disabled, and exactly one
+      custom deployment branch policy for develop. Before the first Cloudflare write,
+      require the environment approval and attributable AI review receipt, then read and record
       sanitized current API and web deployment version IDs as rollback targets,
       verify both environment secrets are non-empty and the account ID is exact, and
       fail on drift. Each Worker must have exactly one deployed UUID at 100% traffic.
@@ -147,13 +154,13 @@ requirements:
   - id: VOC-100-D07
     statement: >-
       After the delivery-control PR merges, configure cloudflare-staging once under
-      separately recorded settings/secret authority. Require reviewer NegarJafari,
-      prevent self-review, disable admin bypass, enable custom deployment branches
-      with exactly one branch policy named develop, and enter exactly the two
-      environment secrets. The action record must include the named reviewer's
-      confirmed willingness and availability; absent that, stop and amend the reviewed
-      plan rather than substitute an unreviewed actor. Sanitized pre-state, payload,
-      rollback, post-state,
+      separately recorded settings/secret authority. Require sole reviewer identity
+      m-e-h-r-d-a-a-d, allow self-review at GitHub's identity layer, disable admin
+      bypass, enable custom deployment branches with exactly one branch policy named
+      develop, and enter exactly the two environment secrets. The setting does not
+      make the human dispatcher an authorized reviewer: the separate standing action
+      delegation grants pending-deployment approval only to a fresh non-author AI
+      subagent after its exact-run review. Sanitized pre-state, payload, rollback, post-state,
       reviewer/protection/branch policy, environment secret names, and absence of the
       same names from repository and organization Actions secrets must be recorded in
       one immediate documentation-only settings-truth PR authorized by this package.
@@ -195,7 +202,9 @@ owners:
   independent_verification: different-non-author-exact-revision-R4-actor
   settings_and_secret_action: separately-explicitly-authorized-operator
   staging_dispatcher: m-e-h-r-d-a-a-d-after-separate-standing-staging-delegation
-  staging_environment_reviewer: NegarJafari-per-run-with-self-review-and-admin-bypass-disabled
+  staging_environment_reviewer: >-
+    fresh-non-author-AI-subagent-using-m-e-h-r-d-a-a-d-GitHub-identity-with-
+    self-review-allowed-admin-bypass-disabled-and-attributable-approval-comment
   merge: separate-authorized-non-author-actor
 
 plan_review_history:
@@ -235,6 +244,30 @@ plan_review_history:
     resolution_status: >-
       superseded-by-changed-candidate-fixing-parser-proof-reviewer-substitution-
       contingency-and-explicit-elapsed-time-overhead
+  - candidate_sha: 4909e3f762cdb1c64fa7766b855dd59cb28bda82
+    verdict: pass-security-settings-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446070579
+    resolution_status: >-
+      immutable-pass-and-nontransferable-after-operator-replaced-the-human-
+      environment-reviewer-with-a-separate-AI-reviewer
+  - candidate_sha: 4909e3f762cdb1c64fa7766b855dd59cb28bda82
+    verdict: pass-independent-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446119597
+    resolution_status: >-
+      immutable-pass-and-nontransferable-after-operator-replaced-the-human-
+      environment-reviewer-with-a-separate-AI-reviewer
+  - candidate_sha: 4909e3f762cdb1c64fa7766b855dd59cb28bda82
+    verdict: pass-cloudflare-wrangler-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446121815
+    resolution_status: >-
+      immutable-pass-and-nontransferable-after-operator-replaced-the-human-
+      environment-reviewer-with-a-separate-AI-reviewer
+  - candidate_sha: 4909e3f762cdb1c64fa7766b855dd59cb28bda82
+    verdict: adopted-then-materially-amended-before-bookkeeping-or-merge
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446148741
+    resolution_status: >-
+      exact-candidate-adoption-does-not-transfer; operator-amendment-evidence-is-
+      https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446157004
 
 approvals:
   cloudflare_wrangler_plan_review:
@@ -375,14 +408,15 @@ external_actions:
     required_for_first_staging_dispatch: true
     authorized_by_package_adoption: false
     required_record: >-
-      exact-separate-settings-and-secret-action-authority-including-NegarJafari-
-      reviewer-participation-confirmation
+      exact-separate-settings-and-secret-action-authority-with-m-e-h-r-d-a-a-d-
+      reviewer-identity-self-review-allowed-admin-bypass-disabled-and-custom-develop
   staging_dispatch:
     required_for_activation: true
     authorized_by_package_adoption: false
     required_record: >-
       exact-separate-maximum-90-day-standing-delegation-for-m-e-h-r-d-a-a-d-
-      dispatcher-and-NegarJafari-required-reviewer-with-per-run-SHA-bound-approval
+      dispatcher-and-fresh-non-author-AI-subagent-reviewer-with-per-run-SHA-bound-
+      attributable-environment-approval; human-dispatcher-self-approval-prohibited
   production:
     status: prohibited-and-held
     holds: [VOC-080-HOLD-01, VOC-080-HOLD-02]

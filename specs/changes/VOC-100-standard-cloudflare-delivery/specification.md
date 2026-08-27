@@ -59,9 +59,15 @@ the failed replacement. No PR or deploy is required for ordinary rotation.
 ### VOC-100-D04 — Manual dispatch has a standard enforceable approval
 
 Only actor `m-e-h-r-d-a-a-d` may dispatch staging from `develop`. Confirmation is
-`DEPLOY staging <github.sha>`. The environment requires `NegarJafari` review, prevents
-self-review, and disables admin bypass. That GitHub deployment approval is the
-per-run action record; no issue-comment binder is reconstructed.
+`DEPLOY staging <github.sha>`. The environment names GitHub reviewer identity
+`m-e-h-r-d-a-a-d`, allows identity-layer self-review, and disables admin bypass.
+Only a fresh, separately instantiated AI subagent that did not author the exact SHA
+and uses a different model from the dispatcher may review and submit the approval.
+Its approval receipt records participant/task/model provenance, exact run, SHA,
+environment, checks reviewed, PASS verdict, and no-secret boundary. GitHub cannot
+distinguish that subagent from the dispatcher, so the dispatcher is procedurally
+prohibited from approving and a missing or mismatched receipt fails closed. No
+issue-comment binder is reconstructed.
 
 ### VOC-100-D05 — Preflight and rollback discovery precede secrets and writes
 
@@ -83,9 +89,11 @@ nonces, replay state, and binder/credential-expiry coupling.
 
 The delivery-control PR merges first with staging fail-closed while the environment is
 absent. A separately authorized operator then creates/reconciles the exact environment,
-reviewer/protections/custom branch policy, and two secrets, while proving broader-
-scope name absence. One immediate documentation-only settings-truth PR records the
-sanitized result. It is a one-time governance boundary, not a per-deploy PR.
+reviewer identity/protections/custom branch policy, and two secrets, while proving
+broader-scope name absence. The standing action delegation grants pending-deployment
+approval only to the qualified AI reviewer described in D04, not to the dispatcher.
+One immediate documentation-only settings-truth PR records the sanitized result. It
+is a one-time governance boundary, not a per-deploy PR.
 
 ### VOC-100-D08 — Production stays separate and held
 
@@ -116,20 +124,24 @@ split requires a newly documented hard boundary and overhead tradeoff.
 
 Environment secrets are narrower than repository or organization secrets because
 only jobs referencing the protected environment can access them after its rules pass.
-The separate environment reviewer catches workflow misuse by the dispatcher;
-credential-free live settings checks catch protection drift. Credentials are scoped
-at individual steps, never echoed, and absent from PR/push jobs. Account-wide
+The fresh non-author AI reviewer checks workflow misuse by the dispatcher;
+credential-free live settings checks catch protection drift. GitHub nevertheless
+records both actors as `m-e-h-r-d-a-a-d`, so this is an auditable procedural boundary,
+not platform-enforced identity separation. Credentials are scoped at individual
+steps, never echoed, and absent from PR/push jobs. Account-wide
 Workers/D1 permissions still create residual risk to unrelated resources in that
 account; exact manifest/resource checks, separate production credentials, expiry,
 review, and revocation mitigate but cannot eliminate that platform limitation.
 
 Package adoption authorizes repository implementation only. Settings/secret entry
 requires separate exact authority. A later exact standing staging delegation names
-the sole dispatcher, reviewer, scope, token-expiry ceiling, revocation conditions,
-and completion/expiry; it also records the named reviewer's confirmed participation.
-Without that confirmation, activation stops for a reviewed plan amendment rather than
-silently substituting an actor. Each environment approval binds a particular event
-SHA. Production remains prohibited.
+the sole dispatcher, AI-reviewer qualification, scope, token-expiry ceiling,
+revocation conditions, and completion/expiry. Each run creates an attributable
+review receipt; no standing human reviewer confirmation is required. A review by the
+dispatcher, an author of the exact SHA, an unrecorded participant, or a same-model
+participant fails the contract and triggers stop, audit, and credential revocation.
+Each environment approval binds a particular event SHA. Production remains
+prohibited.
 
 ## Data, migrations, analytics, and accessibility
 

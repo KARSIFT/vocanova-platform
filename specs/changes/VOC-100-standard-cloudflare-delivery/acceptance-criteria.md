@@ -22,12 +22,13 @@ exactly the two implementation PRs required by the one-time settings truth bound
 - Result: pending
 
 Sanitized GitHub readback proves `cloudflare-staging` has required reviewer
-`NegarJafari`, self-review prevention, admin bypass disabled, exactly one custom
-deployment branch rule for `develop`, and exactly `CLOUDFLARE_ACCOUNT_ID` and
-`CLOUDFLARE_API_TOKEN` environment secret names. Repository and organization secret
-readback show neither name. The account ID is classified non-secret; no token value
-appears anywhere in evidence. Sanitized Cloudflare dashboard evidence proves the exact
-account, two permissions, status, and maximum-90-day expiry before secret entry.
+identity `m-e-h-r-d-a-a-d`, identity-layer self-review allowed, admin bypass disabled,
+exactly one custom deployment branch rule for `develop`, and exactly
+`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` environment secret names.
+Repository and organization secret readback show neither name. The account ID is
+classified non-secret; no token value appears anywhere in evidence. Sanitized
+Cloudflare dashboard evidence proves the exact account, two permissions, status, and
+maximum-90-day expiry before secret entry.
 
 ## VOC-100-AC-02 — Manual staging delivery has a small deterministic gate
 
@@ -40,7 +41,10 @@ account, two permissions, status, and maximum-90-day expiry before secret entry.
 The workflow has no five-record binder inputs or comment fetch. A staging dispatch
 fails unless the actor is `m-e-h-r-d-a-a-d`, ref is `develop`, confirmation includes
 the exact event SHA, required same-run checks pass, live environment protections are
-exact, `NegarJafari` approves, cost is zero, and account/resources/secrets match.
+exact, and a fresh non-author AI subagent using a different model submits a structured
+approval receipt for the exact run before approving under the shared GitHub identity.
+The dispatcher may not approve. Cost must be zero and account/resources/secrets must
+match.
 Current API/web deployment state must be one UUID at 100% each; those IDs are captured
 before promotion and used for Worker rollback. PR/push/validation paths cannot read
 or enter a job that can evaluate either environment secret.

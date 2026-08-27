@@ -9,7 +9,7 @@
 | Decision/change records | Affected | VOC-100 prospectively supersedes conflicting future binder instructions; historical VOC-080/VOC-094–099 records remain immutable. |
 | Frontend | Not affected | Web code and UI are unchanged; only the existing Worker delivery step is controlled. |
 | Backend and API | Not affected | Hono/API behavior and contracts are unchanged; existing version upload/promotion is retained. |
-| Authentication/authorization | Affected | Delivery authorization moves from bespoke comments to named dispatcher plus different environment reviewer and live protection readback. Product auth is unchanged. |
+| Authentication/authorization | Affected | Delivery authorization moves from bespoke comments to a named dispatcher plus a fresh non-author, different-model AI reviewer using the same GitHub identity, attributable receipt, and live protection readback. Product auth is unchanged. |
 | Security and privacy | Affected | Reusable credential lifetime, environment/repository/organization secret scope, redaction, reviewer, and synthetic-data boundaries change. |
 | Data and migrations | Affected | No schema changes now; future staging retains ordered D1 migrations and forward-only correction. |
 | Analytics | Not affected | No product analytics change; only sanitized workflow summaries remain. |
@@ -21,15 +21,16 @@
 | Support and operations | Affected | Operators use one manual dispatch plus one environment approval; rotation uses a no-write credential check, not a PR. |
 | Cost and billing | Not affected | Free plan and zero-paid-spend ceiling remain exact; any paid requirement stops work. |
 | Production and learner data | Not affected | Production environment, credentials, traffic, D1, data, and HOLD-01/HOLD-02 remain prohibited. |
-| Unknowns | None material to the design | Reviewer account/read access and locked Wrangler surfaces were read back; reviewer participation confirmation plus live settings/token state are fail-closed external-action preconditions. |
+| Unknowns | One accepted platform limitation | GitHub cannot distinguish dispatcher and AI reviewer under their shared account identity. Exact receipt checks, non-authorship/model provenance, post-run audit, and incident revocation provide procedural detection but cannot technically prevent dispatcher self-approval. Locked Wrangler surfaces were read back. |
 
 ## Security and privacy
 
 The change removes unauditable operational complexity and reduces the number of
-places that describe authorization. Environment-scoped secrets plus required reviewer
-`NegarJafari`, self-review prevention, disabled admin bypass, exact custom `develop`
-policy, live pre-environment readback, and sole dispatcher `m-e-h-r-d-a-a-d` prevent
-ordinary unrelated jobs from reaching staging credentials. Repository and
+places that describe authorization. Environment-scoped secrets plus a fresh
+non-author, different-model AI review, attributable approval receipt, disabled admin
+bypass, exact custom `develop` policy, live pre-environment readback, and sole
+dispatcher `m-e-h-r-d-a-a-d` prevent ordinary unrelated jobs from reaching staging
+credentials. Repository and
 organization secrets with the same names are prohibited. Step-scoped variables reduce
 exposure duration. No token value is an input or stored in Git/evidence/agent context.
 
@@ -43,12 +44,13 @@ review, and exact manifest/resource checks.
 This intentionally expands durable staging authority relative to a one-use binder:
 the named dispatcher can request multiple deployments while the token/delegation is
 valid. It does not expand repository merge, production, DNS, billing, or data
-authority. A different required reviewer must approve every SHA-bound run; GitHub
-records both actors; the standing delegation expires with the token no later than 90
-days and is revoked on role/scope/security drift. The repository administrator can
-change settings, an irreducible platform-owner capability; live preflight, sanitized
-settings truth, audit history, and separate reviewer make such drift visible and fail
-closed before the environment job.
+authority. A different non-author AI actor must approve every SHA-bound run, but
+GitHub records dispatcher and reviewer under the same account identity. The standing
+delegation expires with the token no later than 90 days and is revoked on actor,
+scope, receipt, or security drift. The repository administrator can change settings
+or self-approve, irreducible platform-owner capabilities; live preflight, sanitized
+settings truth, attributable receipts, and post-run audit make violations visible and
+fail closed where the workflow can detect them.
 
 Staging remains synthetic-only. Production learner data and all production effects
 remain held.
@@ -69,7 +71,7 @@ sanitized operational evidence only.
 
 - `VOC-100-R00`: a reusable token has a longer exposure window than a per-run token.
   Mitigation: least privilege, environment scope, maximum 90-day rotation, immediate
-  incident rotation, different per-run reviewer, sole dispatcher, and separate
+  incident rotation, different per-run AI reviewer, sole dispatcher, and separate
   production credential. Owner: settings/secret operator. Tests/evidence: TEST-01/02,
   EV-01. Contingency: revoke, remove secrets, and restore prior unrevoked token only
   if it still satisfies the exact contract.
@@ -104,13 +106,17 @@ sanitized operational evidence only.
   readback under the same adopted package. Owner: settings operator and PR2 builder.
   Tests/evidence: TEST-00/01/07, EV-00/01/05. Contingency: roll settings back to the
   documented pre-state if PR2 cannot open or pass review.
-- `VOC-100-R07`: the named reviewer may be unavailable, slowing deployment.
-  Mitigation: availability is accepted for enforceable separation; any replacement
-  requires a reviewed/adopted plan amendment before a settings action, followed by
-  exact environment-policy testing and immediate settings truth. Owner: accountable
-  plan decision role. Tests/evidence: TEST-01, EV-01. Contingency: stop without
-  environment mutation or dispatch; if partial settings exist, restore the documented
-  pre-state and revoke/remove any newly entered credential until the amendment lands.
+- `VOC-100-R07`: GitHub cannot distinguish the human dispatcher from the AI reviewer
+  because both use `m-e-h-r-d-a-a-d` and identity-layer self-review must be enabled.
+  A dispatcher could therefore bypass the intended actor separation. Mitigation:
+  instantiate a fresh task-scoped reviewer that did not author the exact SHA and uses
+  a different model; provide only sanitized run evidence; require its attributable
+  exact-run receipt before writes; audit the GitHub approval and receipt after every
+  run; disable admin bypass; prohibit dispatcher approval. Owner: staging dispatcher
+  and independent deployment-review actor. Tests/evidence: TEST-01/03/04, EV-01/02.
+  Contingency: reject or cancel the run; if any write occurred, stop delivery, revoke
+  the token, remove/disable the environment secrets, audit the run, and require a
+  reviewed corrective package before reactivation.
 - `VOC-100-R08`: locked Wrangler command drift can fail after credentials are exposed.
   Mitigation: exact migration/status/promotion/rollback invocations parse without
   authentication or network in a no-help CI harness, deliberate unknown-option
@@ -127,8 +133,8 @@ sanitized operational evidence only.
   secrets are available to all workflows in the repository.
 - `VOC-100-EV-00`: exact plan review/adoption/eligibility and normal merge evidence.
 - `VOC-100-EV-01`: sanitized reviewer/protection/branch-policy/environment-secret,
-  repository/organization-secret absence, token-policy/status/expiry, and credential-
-  check readback.
+  repository/organization-secret absence, token-policy/status/expiry, AI-review
+  provenance/receipt, and credential-check readback.
 - `VOC-100-EV-02`: workflow diff and positive/negative delivery-policy tests.
 - `VOC-100-EV-03`: manifest, Wrangler dry-run, migration, smoke, cost, and privacy
   validation.

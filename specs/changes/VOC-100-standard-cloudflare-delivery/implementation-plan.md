@@ -9,9 +9,11 @@ branches, evidence, and historical packages.
 
 Settings/secret entry and the standing staging-dispatch delegation require separate
 exact action records. The proposed standing delegation names `m-e-h-r-d-a-a-d` as
-dispatcher and `NegarJafari` as different per-run environment reviewer, expires with
-the token within 90 days, and is revoked on actor/scope/protection drift. Production
-remains prohibited.
+dispatcher and a fresh, non-author AI subagent using a different model as the per-run
+reviewer. It expires with the token within 90 days and is revoked on actor, receipt,
+scope, or protection drift. GitHub records both actors under `m-e-h-r-d-a-a-d`, so
+the dispatcher is procedurally prohibited from approving and the attributable receipt
+is mandatory. Production remains prohibited.
 
 ## One coherent implementation sequence
 
@@ -48,17 +50,22 @@ remains prohibited.
 10. Prepare the documentation-only PR2 worktree/branch. Under separate exact authority,
     the account owner creates and dashboard-verifies the finite exact-scope token. The
     settings operator proves the same names absent at repository/organization scope,
-    creates `cloudflare-staging`, configures required reviewer `NegarJafari`, self-
-    review prevention, no admin bypass, and one custom `develop` policy, then enters
-    exactly the two environment secrets. At each failure, remove incomplete settings,
-    revoke the new token, and restore the documented pre-state.
+    creates `cloudflare-staging`, configures reviewer identity `m-e-h-r-d-a-a-d`,
+    identity-layer self-review allowed, no admin bypass, and one custom `develop`
+    policy, then enters exactly the two environment secrets. At each failure, remove
+    incomplete settings, revoke the new token, and restore the documented pre-state.
 11. Immediately record sanitized settings/token-policy readback in PR2. Obtain
     applicable exact-SHA reviews/checks and a different non-author merge. Record both
     PR lifecycles. Do not dispatch as part of either PR.
 12. Under the separately approved standing delegation, run the no-write credential
     check; on rotation revoke the prior token only after success. Then dispatch one
-    SHA-bound staging delivery, obtain `NegarJafari` approval, inspect migration/
-    promotion/smoke/rollback evidence, and perform a bounded soak.
+    SHA-bound staging delivery. Instantiate a fresh different-model deployment-review
+    subagent with no authorship of the exact SHA and no secret access; give it only
+    sanitized run/SHA/environment/check evidence. It records a structured PASS/FAIL
+    receipt and, only on PASS, submits the environment approval using the shared
+    GitHub identity. The dispatcher never approves. Inspect migration/promotion/smoke/
+    rollback evidence, audit approval-to-receipt correspondence, and perform a bounded
+    soak.
 
 ## Validation and independent verification
 
@@ -93,4 +100,7 @@ truth. If PR2 cannot open/pass, restore the documented settings pre-state. Crede
 rollback retains/reinstalls the valid old token until the new credential check passes
 and revokes the failed/affected token. Worker rollback uses
 the exact pre-promotion API/web versions captured by the workflow. D1 uses forward
-correction only.
+correction only. A dispatcher approval, missing/mismatched AI receipt, or reviewer
+authorship/model violation stops the run; after any write it also revokes the token,
+disables/removes the environment secrets, and requires reviewed correction before
+reactivation.

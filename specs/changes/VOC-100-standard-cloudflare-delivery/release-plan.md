@@ -5,8 +5,10 @@
 The plan and implementation merges are repository-only. They do not deploy. GitHub
 environment/secret setup and a maximum-90-day standing staging delegation require
 separate exact action authority. The delegation names dispatcher `m-e-h-r-d-a-a-d`
-and required reviewer `NegarJafari`; every run remains SHA-bound. Production, paid
-spend, DNS change, learner data, and launch remain prohibited.
+and a fresh, non-author, different-model AI subagent as per-run reviewer; every run
+remains SHA-bound. GitHub records both through `m-e-h-r-d-a-a-d`, but the dispatcher
+may not approve and every approval requires an attributable AI receipt. Production,
+paid spend, DNS change, learner data, and launch remain prohibited.
 
 ## Preconditions and staging outcome
 
@@ -20,12 +22,13 @@ Before PR1 delivery-control merge:
 Before PR2 settings-truth merge:
 
 - a separate exact action record authorizes the named token/settings actors and
-  payload/rollback and records `NegarJafari` participation confirmation;
+  payload/rollback and the AI-reviewer qualification/receipt contract;
 - Cloudflare dashboard readback proves the finite token's exact account, two
   permissions, status, and expiry before entry;
 - repository/organization secret absence is proven;
-- `cloudflare-staging` requires only `NegarJafari`, prevents self-review/admin bypass,
-  and has exactly one custom `develop` branch rule;
+- `cloudflare-staging` requires only reviewer identity `m-e-h-r-d-a-a-d`, allows
+  identity-layer self-review, disables admin bypass, and has exactly one custom
+  `develop` branch rule;
 - the two environment secrets are entered without disclosing values;
 - immediate PR2 records sanitized truth, passes applicable checks/reviews, and a
   different actor merges it normally.
@@ -39,11 +42,13 @@ Before first staging dispatch:
 - production remains held and staging contains synthetic data only.
 
 The dispatcher selects `staging` on `develop` with `DEPLOY staging <sha>` and
-`NegarJafari` approves the environment deployment. The workflow
-runs required validation, captures current API/web versions, applies ordered D1
-migrations, uploads immutable SHA-tagged versions, promotes exact UUIDs, smokes the
-API/web contract, and records a sanitized summary. Bounded soak monitors health,
-errors, and Free-limit signals without learner content.
+a fresh non-author AI subagent using a different model reviews sanitized exact-run
+evidence, records its attributable receipt, and submits the environment approval under
+the shared GitHub identity. The workflow runs required validation, captures current
+API/web versions, applies ordered D1 migrations, uploads immutable SHA-tagged
+versions, promotes exact UUIDs, smokes the API/web contract, and records a sanitized
+summary. Bounded soak monitors health, errors, and Free-limit signals without learner
+content.
 
 ## Rollback
 
@@ -55,7 +60,10 @@ environment check; otherwise reinstall the prior value and revoke the replacemen
 Revoke compromised/over-scoped tokens immediately. On promotion/smoke failure,
 restore both exact pre-promotion Worker version IDs. Do not attempt automatic D1 rollback; use the
 reviewed forward corrective migration path. Revert repository policy only through a
-reviewed rollback PR and keep live settings documentation truthful.
+reviewed rollback PR and keep live settings documentation truthful. On dispatcher
+self-approval or missing/mismatched AI receipt, cancel before writes; if writes
+occurred, stop delivery, revoke the token, disable/remove the environment secrets,
+audit the run, and require a reviewed correction before reactivation.
 
 ## Independent verification and closure
 

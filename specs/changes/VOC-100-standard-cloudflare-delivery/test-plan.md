@@ -15,10 +15,13 @@
 - Covers: `VOC-100-AC-01`
 - Procedure: sanitize API readback for environment, required reviewer, self-review,
   admin bypass, complete custom branch-policy list, environment secret names, and
-  repository/organization secret names; scan workflows/logs/diffs/artifacts.
-- Expected: reviewer is only `NegarJafari`, self-review/admin bypass are false, the
-  sole custom branch policy is `develop`, exactly two environment secret names exist,
-  neither exists at broader scope, and no token value is disclosed.
+  repository/organization secret names; validate an AI-review receipt fixture; scan
+  workflows/logs/diffs/artifacts.
+- Expected: reviewer identity is only `m-e-h-r-d-a-a-d`, self-review is allowed,
+  admin bypass is false, the sole custom branch policy is `develop`, exactly two
+  environment secret names exist, neither exists at broader scope, the receipt binds
+  a non-author/different-model participant to the exact run/SHA/environment/checks,
+  and no token value is disclosed.
 - Evidence: `VOC-100-EV-01`
 
 ## VOC-100-TEST-02 — Token contract and rotation
@@ -38,22 +41,31 @@
 - Covers: `VOC-100-AC-02`
 - Procedure: run credential-free fixtures for actor `m-e-h-r-d-a-a-d`, manual
   `develop`, SHA-bound confirmation, exact live environment-protection response,
-  active staging manifest, zero cost, required jobs, then environment approval.
-- Expected: pre-environment gate passes without secrets; only after `NegarJafari`
-  approval may the environment job run and expose credentials to bounded steps.
+  active staging manifest, zero cost, required jobs, then a fresh non-author AI
+  subagent using a different model reviews sanitized evidence, records its structured
+  exact-run PASS receipt, and submits environment approval.
+- Expected: pre-environment gate passes without secrets; only after the attributable
+  qualified-AI receipt and approval may the environment job expose credentials to
+  bounded steps. The dispatcher cannot satisfy the procedural review contract.
 - Evidence: `VOC-100-EV-02`
 
 ## VOC-100-TEST-04 — Negative events and rollback discovery
 
 - Covers: `VOC-100-AC-02`
 - Procedure: test wrong actor; push, PR, pull_request_target and reusable events;
-  wrong ref/SHA confirmation; missing/wrong reviewer, self-review/admin bypass,
-  extra/wrong branch policy; nonzero cost; broader secret duplication; wrong account/
-  resources; absent environment secrets; production selection; missing/mixed/not-
-  100%-single current deployments; and failed promotion/smoke. Parse the workflow job
-  graph to prove no non-environment job can evaluate either secret reference.
+  wrong ref/SHA confirmation; missing/wrong reviewer identity, self-review disabled,
+  admin bypass, extra/wrong branch policy; missing/malformed/mismatched AI receipt;
+  author, same-model, or dispatcher approval; nonzero cost; broader secret
+  duplication; wrong account/resources; absent environment secrets; production
+  selection; missing/mixed/not-100%-single current deployments; and failed
+  promotion/smoke. Parse the workflow job graph to prove no non-environment job can
+  evaluate either secret reference. Exercise post-run audit detection of an approval
+  without the matching AI receipt.
 - Expected: each invalid case fails before mutation; valid current deployments yield
   exact API/web rollback IDs; promotion/smoke failure invokes Worker rollback only.
+  Because GitHub cannot technically prevent dispatcher self-approval under the shared
+  identity, audit detection cancels an unwritten run or invokes incident stop,
+  credential revocation, and environment-secret disabling after any write.
 - Evidence: `VOC-100-EV-02`
 
 ## VOC-100-TEST-05 — Retained Cloudflare staging invariants
