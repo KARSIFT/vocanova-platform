@@ -4,7 +4,7 @@ id: VOC-098
 slug: voc097-effectiveness-pr168-remediation
 title: Reconcile VOC-097 effectiveness and remediate PR 168 exactly
 type: repository-governance-delivery-policy-correction
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because implementation changes canonical repository-authority effectiveness,
@@ -20,19 +20,22 @@ related_governance_bugs:
   - https://github.com/KARSIFT/vocanova-platform/issues/164
   - https://github.com/KARSIFT/vocanova-platform/issues/166
 related_implementation_pr: https://github.com/KARSIFT/vocanova-platform/pull/168
-requirement_approval_status: pending-independent-plan-review-and-accountable-adoption
+requirement_approval_status: >-
+  exact-security-settings-cloudflare-wrangler-independent-R4-plan-review-pass-and-
+  accountable-adoption-decision-approved
 base_branch: develop
 base_sha: 45590a0673937f4a9464b57393e026871678b3d4
 plan_branch: plan/voc-098-voc097-factual-reconciliation
 target_branch: develop
-approved_candidate_sha: null
-approval_status: pending
-implementation_authorized: false
+approved_candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+approval_status: adopted
+implementation_authorized: true
 implementation_authority_status: >-
-  prohibited-until-this-exact-plan-receives-independent-reviews-accountable-adoption-
-  truthful-bookkeeping-fresh-bookkeeping-review-genuine-eligible-true-reasons-empty-
-  normal-non-author-plan-merge-and-applicable-postmerge-checks; all-external-actions-
-  remain-separately-held
+  authorized-by-exact-candidate-adoption-for-the-declared-repository-only-
+  implementation-but-effective-only-after-this-adoption-bookkeeping-revision-
+  receives-fresh-exact-SHA-review-a-populated-binder-genuine-eligible-true-reasons-
+  empty-normal-non-author-PR-170-merge-and-applicable-postmerge-checks; all-external-
+  actions-remain-separately-held
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-resumes-the-single-preserved-PR-168
 automatic_merge_allowed: true
@@ -108,6 +111,56 @@ rejected_implementation_candidate:
     - stale-VOC094-27-path-operative-text-and-test-false-positive-closure
   out_of_scope_blocker_now_added:
     - all-nine-VOC097-package-lifecycle-and-effectiveness-surfaces
+
+plan_review_history:
+  - candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+    verdict: pass-cloudflare-wrangler-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444131844
+    resolution: >-
+      Exact approved-candidate Cloudflare/Wrangler review evidence. It authorizes no
+      Cloudflare, DNS, D1, credential, dispatch, deployment, production, or other
+      external action and transfers to no changed SHA or rejected implementation SHA.
+  - candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+    verdict: pass-security-settings-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444132890
+    resolution: >-
+      Exact approved-candidate security/settings review evidence. It authorizes no
+      settings, secret, credential, dispatch, production, or other external action and
+      transfers to no changed SHA or rejected implementation SHA.
+  - candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+    verdict: pass-independent-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444187655
+    resolution: >-
+      Exact approved-candidate independent R4 review evidence. It authorizes no
+      external action and transfers to no changed SHA or rejected implementation SHA.
+
+approvals:
+  cloudflare_wrangler_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444131844
+  security_settings_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444132890
+  independent_R4_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444187655
+  adoption_decision:
+    status: approved-for-adoption-and-repository-only-implementation-after-effectiveness-gates
+    decision_id: VOC-098-ADOPT-01
+    candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444235889
+
+approved_candidate_hosted_evidence:
+  candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/33107588391
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/33107588364
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33107675747
+    structure_and_changed_path_risk: pass
+    eligibility: fail-closed-pending-adoption-bookkeeping-review-and-binder
 
 requirements:
   - id: VOC-098-D00
@@ -286,34 +339,34 @@ protected_areas:
 required_r4_evidence:
   decision_record:
     required: true
-    status: pending-independent-plan-review-and-adoption
-    evidence: specification.md
+    status: pass-exact-candidate-adopted
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444235889
   impact_assessment:
     required: true
-    status: plan-draft
-    evidence: impact-analysis.md
+    status: pass-exact-candidate-reviewed
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444187655
   contingency_and_rollback:
     required: true
-    status: plan-draft-repository-revert-only
-    evidence: release-plan.md
+    status: pass-exact-candidate-repository-revert-only
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444131844
   deterministic_evidence:
     required: true
-    status: plan-validation-and-implementation-validation-pending
-    evidence: test-plan.md
+    status: pass-plan-candidate-local-and-hosted-implementation-validation-still-required
+    evidence: https://github.com/KARSIFT/vocanova-platform/actions/runs/33107588391
   cloudflare_specialist_evidence:
     required: true
-    status: pending-exact-plan-candidate-review
+    status: pass-exact-candidate-zero-blockers
     scope: Workers-Wrangler-timeouts-generated-types-resource-cost-and-production-gates
-    evidence: null
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444131844
   security_settings_specialist_evidence:
     required: true
-    status: pending-exact-plan-candidate-review
+    status: pass-exact-candidate-zero-blockers
     scope: lifecycle-authority-secret-deadline-strict-JSON-and-settings-holds
-    evidence: null
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444132890
   independent_exact_revision_evidence:
     required: true
-    status: pending-exact-plan-candidate-review
-    evidence: null
+    status: pass-exact-candidate-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444187655
   action_authority:
     required: false
     status: no-external-action-authority-in-this-package
@@ -330,10 +383,13 @@ affected_areas:
   - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation
 
 implementation:
-  authorized: false
+  authorized: true
   authority_effective: false
   required: true
-  status: draft-pending-independent-plan-review-adoption-and-effectiveness-gates
+  status: >-
+    adopted-authorized-for-repository-only-implementation-but-effective-only-after-
+    bookkeeping-revision-exact-review-genuine-eligibility-normal-non-author-plan-
+    merge-and-applicable-postmerge-checks
   target_branch: develop
   pull_request_count: 1
   pull_request: 168
@@ -370,11 +426,10 @@ preserved_holds:
   production_data: VOC-080-HOLD-02
 
 ehr: not-triggered
-repository_adoption_status: draft-not-adopted
-adoption_pr: null
-adoption_evidence: null
+repository_adoption_status: adopted-pending-bookkeeping-review-eligibility-non-author-merge-postmerge
+adoption_pr: 170
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444235889
 blocking_reasons:
-  - exact-plan-Cloudflare-security-settings-and-independent-R4-reviews-pending
-  - accountable-adoption-bookkeeping-review-eligibility-plan-merge-and-postmerge-pending
+  - adoption-bookkeeping-revision-exact-review-populated-binder-and-normal-non-author-plan-merge-pending
   - preserved-PR168-remains-rejected-and-unmerged-until-fresh-corrected-SHA-reviews
   - all-external-actions-remain-separately-held-and-are-not-authorized-by-VOC-098
