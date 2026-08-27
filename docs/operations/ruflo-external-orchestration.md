@@ -4,6 +4,18 @@ This runbook implements VOC-080-T02 and ADR-0004. It describes an operator-side
 coordination aid. It does not grant repository, GitHub, Cloudflare, deployment,
 production-data, spending, DNS, or launch authority.
 
+## VOC-094 Phase-2 closure
+
+On 2026-08-27 the pinned installation below was verified only from a disposable
+external workspace, used for bounded synthetic checks and sanitized coordination, and
+then removed. The canonical
+[execution/incident record](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438113746),
+[workspace cleanup](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438119353),
+and [independent closure](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438136312)
+are supporting provenance. The run did not store Cloudflare/GitHub credentials or
+receive write, approve, merge, settings, or dispatch authority. No repository-local
+Ruflo state, init, daemon, autopilot, or MCP setup was introduced.
+
 ## Installed and audited baseline
 
 The 2026-08-22 operator installation is outside the repository at

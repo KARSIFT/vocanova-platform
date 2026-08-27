@@ -18,6 +18,13 @@ related_decisions:
   - ADR-0003
 adoption_change: VOC-008
 amendments:
+  - id: VOC-096-staging-runtime-binder-amendment
+    title: "Prepared staging tuple and live dispatch binder"
+    adopted_in: VOC-096
+    adopted_at: 2026-08-27
+    approving_owner: approved-voc-096-package
+    resolution_recorded_in: specs/changes/VOC-096-voc094-dispatch-binder-transition/change.yaml
+    notes: "Phase 1 and Phase 2 are complete; PR1 binds real staging resources in a prepared but dispatch-ineligible state while production remains held."
   - id: VOC-083-workerd-compatibility-amendment
     title: "Generated Worker inventory and fail-closed workerd diagnostics"
     adopted_in: VOC-083
@@ -80,6 +87,15 @@ Staging (from `develop`), Production (from `main`).
 > completed the repository parity chain, and T11 removed the old runtime assets from
 > the active tree. None of those repository changes inspected, mutated, or stopped a
 > live server or created Cloudflare, DNS, secret, data, or deployment state.
+
+> **Active amendment (`VOC-096-staging-runtime-binder-amendment`, adopted
+> 2026-08-27).** Phase 1 has since created and independently closed only the exact
+> synthetic staging Workers, D1, routes, seven schema-only migrations, rollback
+> baselines, and public smoke at $0 incremental cost; Phase 2 external Ruflo evidence
+> is also closed. VOC-096 PR1 records those staging IDs/routes as `prepared` but remains
+> dispatch-ineligible. The `cloudflare-staging` GitHub environment is still
+> absent/held/planned until ACT-03; exact five-file PR2 and a five-record live binder
+> are required before ACT-04. Production and learner-data holds remain unchanged.
 
 | Capability   | Current repository state                                                                            | Separately held live state                                                       |
 | ------------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |

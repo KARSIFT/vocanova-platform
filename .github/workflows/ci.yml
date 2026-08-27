@@ -1,4 +1,7 @@
 name: CI
+run-name: >-
+  CI ${{ github.event.inputs.delivery_environment || github.event_name }}
+  authority=${{ github.event.inputs.action_authority_sha256 || 'none' }}-${{ github.event.inputs.dispatch_nonce || 'none' }}
 
 # Deterministic repository validation. Commands remain in package scripts so the
 # same validation can be run locally without reproducing CI-only logic.
@@ -19,7 +22,39 @@ on:
         required: true
         type: string
       action_authority_url:
-        description: Exact action-specific authority evidence bound in the manifest
+        description: Exact canonical VOC-094 ACT-04 authority comment
+        required: true
+        type: string
+      action_authority_sha256:
+        description: Exact ACT-04 raw-body SHA-256
+        required: true
+        type: string
+      act03_evidence_url:
+        description: Exact canonical VOC-094 ACT-03 comment
+        required: true
+        type: string
+      act03_evidence_sha256:
+        description: Exact ACT-03 raw-body SHA-256
+        required: true
+        type: string
+      pr2_review_url:
+        description: Exact merged-PR2 independent-review comment
+        required: true
+        type: string
+      pr2_review_sha256:
+        description: Exact merged-PR2 review raw-body SHA-256
+        required: true
+        type: string
+      binder_review_url:
+        description: Exact post-authority binder-review comment
+        required: true
+        type: string
+      binder_review_sha256:
+        description: Exact binder-review raw-body SHA-256
+        required: true
+        type: string
+      dispatch_nonce:
+        description: Exact one-use 128-bit-or-stronger ACT-04 nonce
         required: true
         type: string
       estimated_cost_cents:
@@ -219,7 +254,7 @@ jobs:
         with:
           install-dependencies: "false"
 
-      - name: Enforce exact SHA and action hold
+      - name: Enforce exact SHA and live runtime binder
         id: gate
         run: >-
           node scripts/foundation/cloudflare-delivery-policy.mjs
@@ -248,12 +283,28 @@ jobs:
       - name: Build exact API and web releases without credentials
         run: pnpm run build:packages && pnpm run build:worker-api && pnpm --filter @vocanova/web cloudflare:build
 
+      - name: Recheck live runtime binder before any secret-bearing step
+        id: pre-secret-recheck
+        run: >-
+          node scripts/foundation/cloudflare-delivery-policy.mjs
+          --event-path "$GITHUB_EVENT_PATH"
+          --pre-secret-recheck
+
       - name: Apply ordered compatible staging D1 migrations
         id: migrate
         env:
+          ACT04_EXPIRES_AT: ${{ steps.pre-secret-recheck.outputs.act04_expires_at }}
+          PHASE4_TOKEN_EXPIRES_AT: ${{ steps.pre-secret-recheck.outputs.phase4_token_expires_at }}
+          SECRET_DEADLINE_BINDING_SHA256: ${{ steps.pre-secret-recheck.outputs.secret_deadline_binding_sha256 }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
+          secret_step_started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
+          SECRET_STEP_STARTED_AT="$secret_step_started_at" \
+            node scripts/foundation/cloudflare-delivery-policy.mjs \
+              --verify-secret-step-start \
+              --event-path "$GITHUB_EVENT_PATH"
+          echo "Staging secret-bearing sequence started at ${secret_step_started_at}."
           test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"
           pnpm --filter @vocanova/api-worker exec wrangler d1 migrations apply DB --remote --env staging --experimental-provision=false --experimental-auto-create=false
 

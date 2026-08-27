@@ -4,6 +4,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { validateServerRetirement } from "./server-retirement-policy.mjs";
+import { validateDeliveryRepository } from "./cloudflare-delivery-policy.mjs";
 
 export const TRANSITION_RECORD_PATH =
   "docs/operations/voc-080-transition-record.json";
@@ -54,7 +55,12 @@ const LIVE_FALSE_FIELDS = [
   "deployment_performed",
 ];
 
-export function inspectTransitionRecord(record, retirement, delivery) {
+export function inspectTransitionRecord(
+  record,
+  retirement,
+  delivery,
+  preparedValidationErrors,
+) {
   const errors = [];
   if (record?.schema_version !== "vocanova-voc080-transition-v1") {
     errors.push("transition record schema is invalid");
@@ -129,14 +135,7 @@ export function inspectTransitionRecord(record, retirement, delivery) {
       errors.push(`${holdId} must remain held`);
     }
   }
-  for (const environment of ["staging", "production"]) {
-    if (delivery?.environments?.[environment]?.state !== "held") {
-      errors.push(`${environment} delivery manifest must remain held`);
-    }
-  }
-  if (delivery?.status !== "held") {
-    errors.push("delivery manifest status must remain held");
-  }
+  errors.push(...inspectDeliveryState(delivery, preparedValidationErrors));
   for (const field of LIVE_FALSE_FIELDS) {
     if (record?.live_activation?.[field] !== false) {
       errors.push(`live_activation.${field} must remain false`);
@@ -159,6 +158,38 @@ export function inspectTransitionRecord(record, retirement, delivery) {
     errors.push(
       "T12 closure evidence must explain its self-reference boundary",
     );
+  }
+  return errors;
+}
+
+export function inspectDeliveryState(delivery, preparedValidationErrors) {
+  const errors = [];
+  const top = delivery?.status;
+  const staging = delivery?.environments?.staging?.state;
+  const production = delivery?.environments?.production?.state;
+  if (production !== "held") {
+    errors.push("production delivery manifest must remain held");
+  }
+  const legacyHeld = top === "held" && staging === "held";
+  const validatedPrepared = top === "prepared" && staging === "prepared";
+  if (!legacyHeld && !validatedPrepared) {
+    errors.push(
+      "delivery manifest must be legacy held/held or validated prepared/prepared",
+    );
+    return errors;
+  }
+  if (validatedPrepared) {
+    if (!Array.isArray(preparedValidationErrors)) {
+      errors.push(
+        "prepared staging requires the complete Cloudflare delivery validator",
+      );
+    } else {
+      errors.push(
+        ...preparedValidationErrors.map(
+          (error) => `prepared staging validation failed: ${error}`,
+        ),
+      );
+    }
   }
   return errors;
 }
@@ -392,7 +423,14 @@ export function validateFinalEvidence(repositoryRoot) {
       "active workflow directory must contain exactly four canonical workflows",
     );
   }
-  errors.push(...inspectTransitionRecord(record, retirement, delivery));
+  errors.push(
+    ...inspectTransitionRecord(
+      record,
+      retirement,
+      delivery,
+      validateDeliveryRepository(repositoryRoot, delivery),
+    ),
+  );
   for (const [relative, inspect] of [
     [TRANSITION_DOCUMENT_PATH, inspectTransitionDocument],
     [TRANSITION_VISUAL_PATH, inspectTransitionVisual],

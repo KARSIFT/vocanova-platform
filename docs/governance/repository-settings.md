@@ -19,7 +19,7 @@ inspect, stop, or mutate any existing server.
 
 VOC-080 selects Cloudflare Workers/D1 as the target and external Ruflo as optional
 coordination. T10 adds held Cloudflare delivery code after parity, but does not mutate
-settings, create a GitHub environment or Cloudflare resource, configure a secret, or
+settings, create a GitHub environment, configure a secret, or
 deploy. Its manifest blocks before credentialed jobs. Ruflo never receives a GitHub
 write token, Cloudflare credential, production secret/data, DNS permission, or
 deployment authority. T11 removes the old runtime from the active repository tree
@@ -210,7 +210,12 @@ T10 records and validates the repository-owned portion in
 commands, distinct logical Worker/D1/environment names, credential-free dry runs,
 ordered version/migration/promotion/smoke/rollback behavior, cost ceilings, exact-SHA
 gating, and evidence format. The committed D1 IDs/routes are non-resource sentinels and
-activation remains held.
+VOC-094 Phase 1 later created only its exact reviewed synthetic staging resources and
+proved baseline/probe/rollback/public smoke at zero incremental VocaNova cost. VOC-096
+records that tuple as `prepared`, not standing-authorized. The GitHub environment and
+two secret names remain absent, held, and planned through PR1; ACT-03 plus immediate
+documentation-only PR2 are still required before a one-use runtime-bound dispatch.
+Production activation remains held.
 
 Before a future activation change can authorize either environment, record and validate:
 

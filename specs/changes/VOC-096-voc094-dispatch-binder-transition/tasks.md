@@ -1,5 +1,13 @@
 # VOC-096 — Tasks
 
+## VOC-097 operative validator closure
+
+The preserved PR1 now maps to an exact 29-path core plus nine VOC-096 package
+reconciliation paths, 38 authorized paths total. Only the VOC-080 final-evidence
+policy and paired test were added to the former core. Full-validator composition,
+legacy held compatibility, prepared-state negatives, production holds, and no standing
+authorization are part of this same task.
+
 ## VOC-096-T00 — Implement the fail-closed post-PR2 runtime binder
 
 - Requirements: `VOC-096-D00` through `VOC-096-D13`, `VOC-096-D13A`, and
@@ -8,7 +16,7 @@
 - Tests: `VOC-096-TEST-00` through `VOC-096-TEST-07`
 - Evidence: `VOC-096-EV-00` through `VOC-096-EV-07`
 - Risk: R4
-- Implementation mapping: PR1 exact 27-file VOC-094 reconciliation, generated-type
+- Implementation mapping: PR1 exact 29-path-core VOC-094 reconciliation, generated-type
   refresh, and prepared-binder implementation; ACT-03; PR2 exact five-file
   documentation-only settings reconciliation; distinct post-merge exact-PR2 review,
   ACT-04 authority, and different-actor binder review; one ACT-04 dispatch; ACT-05

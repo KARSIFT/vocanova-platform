@@ -1,5 +1,14 @@
 # VOC-096 — Acceptance Criteria
 
+## VOC-097 operative validator closure
+
+The corrected PR1 inventory is 29 core paths plus these nine VOC-096 reconciliation
+paths, 38 authorized paths total. The two added core paths are only the VOC-080
+final-evidence policy and paired test. Acceptance now also requires legacy held/held
+PASS, exact prepared/prepared PASS only through complete delivery-policy composition,
+and fail-closed rejection of every mismatch, production/hold drift, generic URL,
+self-asserted envelope fact, or standing authorization.
+
 ## VOC-096-AC-00 — The governed correction has exact scope
 
 - Requirements: `VOC-096-D00`, `D01`, `D14`, `D15`
@@ -9,9 +18,9 @@
 - Result: pending
 
 The plan PR contains exactly nine package files. Implementation uses exactly two PRs:
-PR1's 27-file set (including the complete nine-file VOC-094 bounded reconciliation and
+PR1's 29-path core (including the complete nine-file VOC-094 bounded reconciliation and
 both locked-Wrangler generated type files)
-and PR2's five-file documentation-only set. Review and merge actors
+plus the nine VOC-096 reconciliation paths, and PR2's five-file documentation-only set. Review and merge actors
 are separate, all blockers are resolved, and no external action is attributed to
 VOC-096 adoption or merge.
 

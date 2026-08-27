@@ -153,6 +153,71 @@ amendment:
       treatment: preserve-do-not-delete-migrate-query-attach-or-use-until-fresh-ACT-02-authority
     authority_effect: historical-non-secret-evidence-only-no-future-external-action-authority
 
+voc096_transition:
+  amendment_package: VOC-096-voc094-dispatch-binder-transition
+  status: adopted-operative-for-still-future-phase3-and-phase4-only
+  preservation: >-
+    Original VOC-094 adoption, AM-01, completed Phase-1 actions, review records, and
+    their immutable evidence remain history. VOC-096 replaces only contradictory
+    still-future binder/PR1/PR2 clauses and grants no external authority.
+  phase1:
+    status: complete-independent-closure-pass
+    activation_revision: 0d5ccc1231edb0e652d5c883cb214b85bcc9635e
+    activation_manifest_sha256: 7c98c7a05679d10a182bcba66075d21802020acaa6cb9df38f86f2a52c280e92
+    evidence_sha256: 80c54181c91c194cfa37e7bd5bd00b2083d1ee9e9cada247d74275e74189d52f
+    reconciliation: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5435923878
+    dashboard_token_closure: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5437982455
+    independent_closure: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438014817
+    account_id: 0a9eda28b96d77c24dcde74f3e074d47
+    zone_id: 63286d93b5f32925ac7366b4e97908be
+    d1_uuid: 22ae386f-e3f5-4d98-a3ad-18b39d3b8556
+    api_baseline_uuid: ace13c0b-c148-4ef1-ad9a-fdfdb07f264f
+    web_baseline_uuid: 5255e64d-872e-469f-90b6-bea49efd5e75
+    zero_traffic_probe_uuids:
+      - 858009b5-0840-499d-92f4-e0a0483e0b33
+      - 0dc15f45-d178-480e-ba32-ca5279cc2c17
+      - 7b694392-8f38-4329-bd2f-af982c3c6a56
+    migration_count: 7
+    application_rows: 0
+    incremental_vocanova_cost_cents: 0
+  phase2:
+    status: complete-independent-closure-pass
+    evidence: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438113746
+    cleanup: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438119353
+    independent_closure: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438136312
+  repository_transition:
+    pr1_file_count: 27
+    pr1_manifest_state: prepared-dispatch-ineligible
+    pr2_file_count: 5
+    github_environment_before_ACT_03: absent-held-planned
+    prepared_staging_tuple_sha256: 25ac2748678adb7d41c8a525bf05443154ba8ac1678ce6647a75e6ceeca45871
+    runtime_records:
+      [
+        settings_authority,
+        act03,
+        pr2_exact_review,
+        act04_authority,
+        binder_review,
+      ]
+    maximum_authorization_seconds: 1800
+    maximum_dispatches: 1
+    live_checks_per_dispatch: 2
+    runtime_evidence: null
+  production_holds: [VOC-080-HOLD-01, VOC-080-HOLD-02]
+  voc097_validator_closure:
+    package: VOC-097-voc096-final-evidence-validator-closure
+    status: adopted-operative-repository-only
+    corrected_core_path_count: 29
+    voc096_reconciliation_path_count: 9
+    total_authorized_path_count: 38
+    added_core_paths:
+      - scripts/foundation/voc080-final-evidence-policy.mjs
+      - scripts/foundation/voc080-final-evidence-policy.test.mjs
+    compatibility_rule: legacy-held-or-complete-VOC-096-validated-prepared-only
+    standing_authority: false
+    production_holds: [VOC-080-HOLD-01, VOC-080-HOLD-02]
+    external_action_authority: none
+
 approval_status: adopted
 implementation_authorized: true
 implementation_authority_status: >-
@@ -313,17 +378,21 @@ dependencies:
       CI 32914336969, Security 32914336980, and Governance 32914336981 passed. This
       establishes repository implementation authority only; external actions remain held.
   - id: VOC-094-DEP-01
-    status: inventory-and-ACT-01-residual-decision-complete-no-continuing-ACT-02-authority
+    status: phase1-complete-token-and-overlay-closed-independent-pass
     evidence: >-
       ACT-00 readback at issue comment 5418505220 binds the exact selected account and
       Active Free Website zone, three existing Workers, no D1/Custom Domains/routes or
       selected DNS records at inventory time, no staging collision, and the unrelated
       USD 5/month Basic Load Balancing subscription. The credential was revoked at
       issue comment 5418513920. ACT-01's time-bounded residual-scope acceptance is issue
-      comment 5424583998 and has no authority effect for ACT-02.
+      comment 5424583998. ACT-02 later completed under separate authority and is
+      independently closed at issue comment 5438014817.
   - id: VOC-094-DEP-02
-    status: runtime-resource-binder-required
-    evidence: A real vocanova-staging D1 UUID, Custom Domain records, and real immutable baseline API/web UUIDs must replace all staging sentinels before ordinary dispatch.
+    status: runtime-resource-tuple-complete-PR1-binding-required
+    evidence: >-
+      The reviewed D1, Custom Domain, DNS, immutable baseline/probe UUIDs, migration,
+      smoke, and Free/$0 tuple is complete. VOC-096 PR1 binds it with digest
+      25ac2748678adb7d41c8a525bf05443154ba8ac1678ce6647a75e6ceeca45871.
 
 required_r4_evidence:
   decision_record:
@@ -399,7 +468,7 @@ action_specific_holds:
       future_effect: none-ACT-02-and-all-other-actions-remain-held
   - id: VOC-094-ACT-02
     action: phase1-bootstrap-real-last-known-good-staging-baseline-and-rehearse-Worker-rollback
-    status: held-by-VOC-080-HOLD-00
+    status: complete-token-revoked-overlays-removed-independent-pass
     accountable_role: explicitly-authorized-cloudflare-staging-baseline-operator
     required_evidence: >-
       Separate exact action record; clean exact reviewed repository SHA; hashed,
@@ -415,6 +484,12 @@ action_specific_holds:
       evidence capture and revoke/expire the Phase1 write token; repository sentinels
       remain unchanged.
     completion_or_expiry: one Phase1 baseline window; expires on revision, manifest, either overlay hash, dependency/lock/workflow, local-or-hosted-check result, binding, migration, domain, resource, version, smoke, credential, or authority drift
+    completion_record:
+      successful_execution: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5435923878
+      final_readback: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5437898152
+      dashboard_token_closure: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5437982455
+      overlay_cleanup: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438005803
+      independent_closure: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438014817
   - id: VOC-094-ACT-03
     action: phase4-create-cloudflare-staging-GitHub-environment-and-enter-two-secrets
     status: held-by-VOC-085-HOLD-00
@@ -482,8 +557,8 @@ implementation:
   authorized: true
   authority_effective: true
   status: >-
-    original-adoption-and-AM-01-bookkeeping-effective-repository-implementation-
-    authorized-external-actions-separately-held
+    phase1-and-phase2-complete-VOC-096-PR1-prepared-binder-implementation-in-progress-
+    ACT-03-through-ACT-05-separately-held
   required: true
   target_branch: develop
   pull_request_count: 2
@@ -499,7 +574,7 @@ implementation:
 release:
   required: true
   mode: separately-authorized-synthetic-staging-only
-  deployment: held-pending-exact-VOC-094-action-records-reviewed-implementation-and-dispatch-authority
+  deployment: phase1-baseline-complete-ordinary-staging-dispatch-held-pending-reviewed-PR1-ACT-03-reviewed-PR2-and-runtime-binder
   migration_required: staging-D1-only
   rollback_required: true
   production: prohibited-by-VOC-080-HOLD-01
@@ -507,14 +582,14 @@ release:
 
 ehr: not-triggered
 external_effects:
-  cloudflare_staging: held-pending-VOC-094-ACT-00-through-ACT-04
+  cloudflare_staging: phase1-baseline-complete-ordinary-delivery-held-pending-VOC-094-ACT-04
   github_cloudflare_staging_environment: held-by-VOC-085-HOLD-00-pending-post-PR1-ACT-03-and-immediate-reviewed-merged-PR2
   all_other_github_settings: held-by-VOC-085-HOLD-00
   production: prohibited
   production_data: prohibited
   paid_spend: prohibited-zero-incremental-vocanova-staging-cents
   unrelated_basic_load_balancing_subscription: preserve-unchanged-unexpanded-not-vocanova
-  dns_custom_domains: staging-hostnames-only-during-Phase1-ACT-02
+  dns_custom_domains: exact-staging-hostnames-active-production-unchanged
   public_launch: prohibited
   main_promotion: prohibited
   manual_branch_or_worktree_deletion: prohibited
@@ -528,7 +603,6 @@ amendment_adoption_pr: 160
 amendment_adoption_evidence: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5418657086
 
 blocking_reasons:
-  - VOC-094-ACT-02-fresh-corrected-SHA-overlay-resource-Free-zero-cost-review-and-authority-required
   - repository-implementation-PR1-exact-check-review-and-non-author-merge-pending
   - VOC-094-ACT-03-and-VOC-085-HOLD-00-settings-boundary-held
   - repository-documentation-PR2-and-VOC-094-ACT-04-dispatch-held

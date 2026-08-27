@@ -1,5 +1,26 @@
 # VOC-094 — F3 staging activation: Specification
 
+## VOC-096 operative transition
+
+### VOC-097 validator closure
+
+Adopted VOC-097 corrects only the repository validator/scope gap: PR1 has a 29-path
+core plus nine VOC-096 reconciliation paths, 38 authorized paths total. The legacy
+held snapshot remains valid; prepared staging passes only through the complete
+VOC-096 delivery validator. Production, HOLD-01/HOLD-02, ACT-03/04/05, and every
+external-action boundary remain unchanged.
+
+VOC-096 supersedes only contradictory still-future Phase 3/4 binder language in this
+adopted package. Completed VOC-094/AM-01/Phase-1 history remains immutable. ACT-02 is
+complete with the exact prepared staging tuple at activation revision
+`0d5ccc1231edb0e652d5c883cb214b85bcc9635e`; Phase 2 is independently closed. PR1
+commits the tuple and a `prepared` but dispatch-ineligible binder. After PR1 merge,
+ACT-03 and exact five-file PR2 remain ordered as before. ACT-04 is authorized only by
+five live-fetched closed records plus exact raw-body digests, live PR2/push/check
+proof, a one-use nonce, no more than 30 minutes of authority/token validity, and two
+credential-free evaluations. No future PR2 SHA or authority timestamp is predicted
+or made equal to a PR1 placeholder. Production holds remain unchanged.
+
 ## Objective and authority boundary
 
 Deliver the F3 synthetic staging outcome described by issue #158: provision and

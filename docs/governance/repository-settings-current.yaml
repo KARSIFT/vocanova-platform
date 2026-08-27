@@ -172,6 +172,7 @@ secret_scanning:
 follow_up_boundary:
   future_settings_mutation_requires_immediate_governed_doc_only_follow_up: true
   this_record_does_not_authorize_or_perform_mutation: true
+
 specialist_review:
   required: true
   status: pass-exact-revision-zero-blockers

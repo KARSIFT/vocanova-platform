@@ -1,5 +1,13 @@
 # VOC-096 — Impact Analysis
 
+## VOC-097 operative validator closure
+
+VOC-097 adds only the legacy VOC-080 final-evidence policy/test to the former PR1
+core and reconciles these nine package records: 29 core paths and 38 authorized paths
+total. This closes a repository validator mismatch by composing with the complete
+prepared-state gate; it does not loosen production holds, create standing dispatch
+authority, or cause any external effect.
+
 ## Security and settings
 
 The implementation changes a security-critical authorization gate but adds no write
@@ -94,7 +102,7 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
 - `VOC-096-R11`: body-selected issuance time could extend authority. Mitigation: the
   authority API envelope's immutable `created_at` is the only issuance time; the body
   has no `issued_at`; `created_at < actual expires_at <= min(created_at + 30m,
-  effective token expiry)` with no unused-window buffer; strict server-time
+effective token expiry)` with no unused-window buffer; strict server-time
   ordering and both live checks before expiry remain mandatory.
 - `VOC-096-R12`: generic issue history or stale generated types could select the wrong
   Cloudflare state. Mitigation: commit the full resource/domain/certificate/DNS/

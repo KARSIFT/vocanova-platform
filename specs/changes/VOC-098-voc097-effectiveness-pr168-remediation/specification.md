@@ -90,3 +90,17 @@ The authoritative 47-path inventory is in `change.yaml`: VOC-097's existing 38-p
 union plus exactly the nine VOC-097 package files. No product behavior, new dependency,
 resource recreation, token creation, external read/write, branch deletion, or broad
 documentation cleanup is in scope.
+
+## VOC-099 completed PR #170 lifecycle reconciliation
+
+The operative VOC-098 plan lifecycle is complete: reviewed bookkeeping head
+`6545cbb968a03a7630ccd63de3023c6e6da23ccd`, exact review comment `5444345026`,
+Governance run `33109750265` with literal `eligible: true` and `reasons: []`, normal
+non-author merge `10e9acf540b9af5ed85cc59a0e053900aec3c359`, successful post-merge CI
+`33109968598`, Security `33109968586`, Governance `33109968546`, and lifecycle
+readback comment `5444428909`. The adopted repository-only PR #168 authority is
+usable without another self-effectiveness plan. Rejected SHA
+`cde0f665031a212b51a45af541a4ebaff23e8f7a` and its three FAIL reviews remain
+immutable and non-transferable. ACT-03/04/05, VOC-085-HOLD-00, VOC-080-HOLD-01,
+VOC-080-HOLD-02, and every external action remain held; fresh exact-SHA checks/reviews
+and non-author merge remain required for PR #168.

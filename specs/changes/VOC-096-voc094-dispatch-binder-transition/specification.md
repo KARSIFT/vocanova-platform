@@ -1,5 +1,14 @@
 # VOC-096 — Specification
 
+## VOC-097 operative validator closure
+
+VOC-097 expands only PR1's governed core from 27 to 29 paths by adding the legacy
+VOC-080 final-evidence validator and its paired test. Reconciliation of all nine files
+in this package yields 38 authorized paths total. Prepared staging may satisfy that
+legacy closure only through the complete validator defined here; held/held history is
+preserved, every other top/staging pair fails, production remains held, and no standing
+authorization or external action is created.
+
 ## Objective and baseline
 
 Repair issue #164 through a bounded amendment/reconciliation of VOC-094's operative
@@ -22,9 +31,10 @@ the only dispatch revision. Those conditions have no fixed point.
   Phase-1 history verbatim as immutable history; label the bounded VOC-096 amendment
   and replace only the still-unstarted contradictory Phase-3/4 contract. Do not reopen
   completed Cloudflare provisioning or authorize any external action.
-- `VOC-096-D01` — Preserve exactly two implementation PRs and one task. PR1 changes
-  exactly the 27 declared repository files, including all nine VOC-094 package files,
+- `VOC-096-D01` — Preserve exactly two implementation PRs and one task. As corrected
+  by VOC-097, PR1 changes the exact 29-path core, including all nine VOC-094 package files,
   both Wrangler configs, and both tracked generated `worker-configuration.d.ts` files.
+  It also reconciles this package's exact nine files, producing 38 authorized paths.
   PR2 changes exactly the five declared settings-document files. Any newly discovered
   required path is drift: stop and amend
   the reviewed package rather than silently broadening either PR.
@@ -91,7 +101,7 @@ the only dispatch revision. Those conditions have no fixed point.
   URL/digest, or API metadata. After creation, the immutable fetched API `created_at`
   is the sole issuance time and must satisfy
   `created_at < actual expires_at <= min(created_at + 30 minutes, effective token
-  expiry)` without an edit. The prepared
+expiry)` without an edit. The prepared
   publisher script sets `expires_at` to a fresh unauthenticated GitHub API `Date` plus
   exactly 25 minutes, posts once, and requires comment `created_at` within 60 seconds
   after that preflight Date. It never predicts or copies `created_at` into the body.
@@ -174,8 +184,8 @@ the only dispatch revision. Those conditions have no fixed point.
   step immediately before the first secret-bearing migration step. Both the current
   run's GitHub server `created_at` and the actual time of each live check must be
   strictly before actual authority body `expires_at`, where `authority.created_at <
-  actual expires_at <= min(authority.created_at + 30 minutes, effective
-  ACT03.phase4_token.expires_at)`. The
+actual expires_at <= min(authority.created_at + 30 minutes, effective
+ACT03.phase4_token.expires_at)`. The
   first secret-bearing step records its start before reading a secret and also occurs
   before the earlier deadline. The authority envelope `created_at` is
   the sole issue time and body-selected issuance is forbidden. Credential

@@ -59,9 +59,16 @@ local-stack job. PR #108 integrated the complete VOC-081 stack and final evidenc
 revision into `develop`, and the required post-merge checks passed. Repository/local
 F2 is therefore complete and effective. Before that merge, the work remained an
 integration-pending candidate; that candidate-era state remains historical evidence,
-and a draft PR or task branch still cannot change milestone state. F3 staging, A1/P1+
+and a draft PR or task branch still cannot change milestone state. At their remaining
+action boundaries, F3 staging, A1/P1+
 product acceptance, production, deployment, live activation, and
-`VOC-080-HOLD-00` through `HOLD-02` remain unresolved/held.
+`VOC-080-HOLD-00` through `HOLD-02` remain unresolved/held. VOC-094 Phase-1 resource
+and rollback proof is the bounded exception described next.
+VOC-094 Phase 1 has separately created and rollback-proved the bounded synthetic
+staging resources, and Phase 2 external Ruflo verification is complete. VOC-096 PR1
+binds that exact tuple in a dispatch-ineligible `prepared` state. The staging GitHub
+environment/secrets and ACT-04 dispatch remain held; `VOC-080-HOLD-01` and `HOLD-02`
+remain fully unresolved and unchanged.
 
 ## 1. Product outcome
 
@@ -111,7 +118,8 @@ by passing post-merge revalidation. The earlier integration-pending candidate st
 preserved in the
 [VOC-081 F2 evidence record](../operations/voc-081-f2-evidence.md). Completion is bound
 to that exact evidence, not inferred from code presence or chat direction. F3, A1/P1+
-acceptance, staging, production, deployment, and live activation remain unresolved.
+acceptance beyond the Phase-1 resource/rollback proof, ordinary staging workflow
+delivery, production, and live product activation remain unresolved.
 
 ## 4. Roles (summary — authority comes from the [approval matrix](../governance/approval-matrix.md)
 
