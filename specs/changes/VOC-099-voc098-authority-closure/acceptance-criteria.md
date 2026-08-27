@@ -10,12 +10,13 @@ action occurs.
 
 ## VOC-099-AC-01 — Recursive authority gate is removed
 
-Before plan merge, bookkeeping records the exact reviewed candidate, independent
-review and adoption evidence, `status: adopted`, and `implementation.authorized:
-true`. The adopted package contains no false authority-effectiveness field, draft
-implementation/task claim, pending future self-bookkeeping dependency, or requirement
-for another plan to activate its repository authority. Mandatory review, eligibility,
-non-author merge, and post-merge checks remain intact.
+Final pre-merge bookkeeping records candidate `10a9a822...`, all three independent
+PASS reviews, `VOC-099-ADOPT-01`, `status: adopted`, and
+`implementation.authorized: true`. The adopted package contains no false authority-
+effectiveness field, adopted-but-inactive implementation/task claim, future self-
+bookkeeping dependency, or requirement for another plan to activate its repository
+authority. Fresh bookkeeping review, eligibility, non-author merge, and post-merge
+checks remain intact.
 
 ## VOC-099-AC-02 — VOC-098 lifecycle is truthful
 

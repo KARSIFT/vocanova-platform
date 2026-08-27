@@ -12,12 +12,12 @@ SHA `cde0f665031a212b51a45af541a4ebaff23e8f7a`.
 
 ## Requirements
 
-- `VOC-099-D00` — Treat issue #171, prior issues, lifecycle comments, and rejected
-  PR #168 reviews as evidence only. This draft grants no implementation authority.
-  Before the plan PR merges, a different-actor exact candidate review and accountable
-  adoption must be recorded in its bookkeeping with `status: adopted` and
-  `implementation.authorized: true`, followed by fresh bookkeeping review, genuine
-  eligibility, and normal non-author merge.
+- `VOC-099-D00` — Issue #171, prior issues, lifecycle comments, and rejected PR #168
+  reviews grant nothing by themselves. Exact candidate `10a9a822...` received all
+  three required different-actor PASS reviews and accountable `VOC-099-ADOPT-01`.
+  This bookkeeping records `status: adopted` and `implementation.authorized: true`.
+  Fresh different-actor bookkeeping review, genuine eligibility, and normal
+  non-author merge remain required process and evidence, not a later authority gate.
 - `VOC-099-D01` — Do not encode another self-staling authority gate. The adopted
   package must omit an `authority_effective: false` field and must not say repository
   implementation remains draft, pending a future plan, or dependent on a later

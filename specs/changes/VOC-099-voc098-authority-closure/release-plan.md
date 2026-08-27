@@ -2,12 +2,14 @@
 
 ## Repository-only delivery
 
-VOC-099 has no deployment or external release. After its non-recursive adoption is
-merged to `develop`, the same open PR #168 adds the nine VOC-098 lifecycle surfaces,
-retains all VOC-098-authorized reconciliations/remediations, and produces a fresh
-candidate. That head targets `develop`, receives complete checks and three fresh
-exact-SHA reviews, and is merged only by a different non-author actor after genuine
-eligibility. Merge changes repository history only.
+VOC-099 has no deployment or external release. Exact candidate `10a9a822...` is
+reviewed and adopted by `VOC-099-ADOPT-01`; this final bookkeeping requires fresh
+exact-SHA review and normal non-author plan merge. Once the adopted package is on
+`develop`, the same open PR #168 adds the nine VOC-098 lifecycle surfaces, retains all
+VOC-098-authorized reconciliations/remediations, and produces a fresh candidate. That
+head targets `develop`, receives complete checks and three fresh exact-SHA reviews,
+and is merged only by a different non-author actor after genuine eligibility. Merge
+changes repository history only.
 
 Rejected SHA `cde0f665031a212b51a45af541a4ebaff23e8f7a` and FAIL comments
 `5443876203`, `5443893558`, and `5443923705` remain immutable and grant nothing.

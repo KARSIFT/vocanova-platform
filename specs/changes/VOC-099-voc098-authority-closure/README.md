@@ -7,14 +7,16 @@ non-author, and passed its post-merge checks, but its committed package still sa
 repository implementation authority is ineffective and pending those completed
 events. That repeats the recursive fixed point previously found in VOC-097.
 
-This package follows the governing AGENTS.md rule directly. Before this plan PR may
-merge, its adoption bookkeeping must record the exact approved candidate and review
-evidence, `status: adopted`, and `implementation.authorized: true`. Once that adopted
-package is present on `develop`, its declared repository-only authority is usable;
-there is no `authority_effective: false` field, no post-merge self-repair requirement,
-and no future plan needed to activate this plan. Exact review, genuine eligibility,
-normal non-author merge, and post-merge checks remain mandatory process and evidence,
-not an indefinitely false package state.
+This package follows the governing AGENTS.md rule directly. Exact candidate
+`10a9a822a98c57a91f6b3a74a90ba7e6b2fdb9d2` received zero-blocker security/settings,
+Cloudflare/Wrangler/Workers, and independent R4 reviews, then accountable decision
+`VOC-099-ADOPT-01`. This bookkeeping records `status: adopted` and
+`implementation.authorized: true`. Once the adopted package is present on `develop`,
+its declared repository-only authority is usable; there is no
+`authority_effective: false` field, post-merge self-repair requirement, or future plan
+needed to activate it. Fresh bookkeeping review, genuine eligibility, normal
+non-author merge, and post-merge checks remain mandatory process and evidence, not an
+indefinitely false package state.
 
 The later implementation resumes the same preserved PR #168 and adds all nine
 VOC-098 package surfaces to the existing VOC-098 47-path authorization, producing

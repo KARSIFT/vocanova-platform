@@ -7,22 +7,23 @@ nor reads live Cloudflare or GitHub secret/settings state. It removes the invent
 recursive authority fixed point, reconciles VOC-098 to completed PR #170 facts, and
 retains all corrections already authorized for PR #168.
 
-| Area                        | Effect and boundary                                                          |
-| --------------------------- | ---------------------------------------------------------------------------- |
-| VOC-099 adoption            | Final repository authority bookkeeping before merge; no self-staling field.  |
-| VOC-098 lifecycle           | Reconciles all nine package surfaces to exact completed PR #170 facts.       |
-| VOC-097 and PR #168 fixes   | Retains every correction/reconciliation already authorized by VOC-098.       |
-| PR #168 scope               | Expands 47 to 56 authorized paths; 55 expected diffs; one recorded non-diff. |
-| Review/merge gates          | Fresh exact-SHA checks/reviews and non-author merge remain mandatory.        |
-| Cloudflare/settings/secrets | No action; ACT-03/04/05 and VOC-085-HOLD-00 remain held.                     |
-| Production/data/cost        | No effect; HOLD-01/HOLD-02, Free/$0, and Basic LB boundaries remain exact.   |
+| Area                        | Effect and boundary                                                            |
+| --------------------------- | ------------------------------------------------------------------------------ |
+| VOC-099 adoption            | Exact candidate reviewed/adopted; final bookkeeping has no self-staling field. |
+| VOC-098 lifecycle           | Reconciles all nine package surfaces to exact completed PR #170 facts.         |
+| VOC-097 and PR #168 fixes   | Retains every correction/reconciliation already authorized by VOC-098.         |
+| PR #168 scope               | Expands 47 to 56 authorized paths; 55 expected diffs; one recorded non-diff.   |
+| Review/merge gates          | Fresh exact-SHA checks/reviews and non-author merge remain mandatory.          |
+| Cloudflare/settings/secrets | No action; ACT-03/04/05 and VOC-085-HOLD-00 remain held.                       |
+| Production/data/cost        | No effect; HOLD-01/HOLD-02, Free/$0, and Basic LB boundaries remain exact.     |
 
 ## Risks and mitigations
 
 - `VOC-099-R00` — Removing a false field could be mistaken for bypassing review.
-  Mitigation: retain exact review, adoption, fresh bookkeeping review, eligibility,
-  normal non-author merge, and post-merge checks as explicit process/evidence while
-  following AGENTS.md's final pre-merge adoption record.
+  Mitigation: bind the exact completed candidate reviews and adoption, then retain
+  fresh bookkeeping review, eligibility, normal non-author merge, and post-merge
+  checks as explicit process/evidence while following AGENTS.md's final pre-merge
+  adoption record.
 - `VOC-099-R01` — Repository authority could be confused with external-action
   authority. Mitigation: scope authority only to the declared PR #168 repository
   correction and repeat every settings, secret, Cloudflare, dispatch, production,

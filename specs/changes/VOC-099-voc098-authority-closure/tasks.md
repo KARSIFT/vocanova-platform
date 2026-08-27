@@ -9,9 +9,9 @@
 - Risk: R4
 - Implementation mapping: resume the single preserved PR #168 with exact 56-path
   authorization and 55 expected actual diffs
-- Current plan status: draft pending independent exact-candidate review and adoption
-- Required adopted bookkeeping status: adopted and repository implementation
-  authorized; no later self-effectiveness correction pending
+- Status: adopted; declared repository implementation authorized once this package is
+  on `develop`; fresh bookkeeping review and normal non-author plan merge remain
+  required process, with no later self-effectiveness correction
 
 This is one task because truthful VOC-098 authority, retained VOC-097 reconciliation,
 the four exact-review remediations, preserved prepared-binder gates, and fresh exact-

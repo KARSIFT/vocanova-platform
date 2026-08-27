@@ -1,16 +1,18 @@
 # VOC-099 — Implementation Plan
 
-## Plan adoption preconditions
+## Adoption record and remaining pre-merge process
 
-1. Independently review the exact VOC-099 candidate. The plan author cannot review or
-   adopt it and no prior VOC-098 review transfers.
-2. Before plan merge, update bookkeeping to the exact approved candidate/review and
-   adoption evidence, `status: adopted`, and `implementation.authorized: true`.
-   Remove draft/pending implementation language. Do not add
-   `authority_effective: false` or a future self-bookkeeping condition.
-3. Obtain a fresh different-actor exact-SHA bookkeeping review, genuine eligibility,
-   and normal non-author plan merge. Record post-merge checks as evidence. Once the
-   adopted plan is on `develop`, its declared repository-only authority is usable.
+1. Exact candidate `10a9a822...` received separate zero-blocker security/settings,
+   Cloudflare/Wrangler/Workers, and independent R4 reviews. Accountable decision
+   `VOC-099-ADOPT-01` adopted only that candidate; no evidence transfers.
+2. This bookkeeping binds those exact records, sets `status: adopted` and
+   `implementation.authorized: true`, and omits `authority_effective: false` or any
+   future self-bookkeeping condition.
+3. A fresh different-actor exact-SHA bookkeeping review, truthful merge-evidence
+   binder, genuine eligibility, and normal non-author plan merge remain required.
+   Record post-merge checks as evidence. These are merge controls, not future package
+   authority activation. Once the adopted plan is on `develop`, its declared
+   repository-only authority is usable.
 
 ## Ordered repository work
 

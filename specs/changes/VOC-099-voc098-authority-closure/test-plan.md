@@ -9,12 +9,12 @@ byte-identical; and no 57th path exists. Evidence: `VOC-099-EV-00`.
 
 ## VOC-099-TEST-01 — Non-recursive adoption contract
 
-For the reviewed candidate, require draft/pending authority. For final pre-merge
-bookkeeping, require the exact approved candidate and review/adoption evidence,
-`status: adopted`, and `implementation.authorized: true`; reject
-`authority_effective: false`, adopted-but-draft task/status text, future plan or
-post-merge self-repair conditions, and any external-action grant. Evidence:
-`VOC-099-EV-01`.
+Verify the immutable reviewed candidate truthfully granted no authority before
+adoption. For this final pre-merge bookkeeping, require the exact approved candidate,
+three review URLs, adoption decision, `status: adopted`, and
+`implementation.authorized: true`; reject `authority_effective: false`, adopted-but-
+inactive task/status text, future plan or post-merge self-repair conditions, and any
+external-action grant. Evidence: `VOC-099-EV-01`.
 
 ## VOC-099-TEST-02 — Exact PR #170 lifecycle reconciliation
 
