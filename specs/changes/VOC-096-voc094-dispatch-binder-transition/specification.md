@@ -2,7 +2,8 @@
 
 ## Objective and baseline
 
-Repair issue #164 without editing the adopted VOC-094 historical package and without
+Repair issue #164 through a bounded amendment/reconciliation of VOC-094's operative
+Phase-3/4 contract while preserving its immutable adoption/review history and without
 recreating or changing staging resources. At drafting, `origin/develop` is
 `0d5ccc1231edb0e652d5c883cb214b85bcc9635e`. The current policy requires
 `manifest.status == authorized`, staging `state == authorized`, runtime
@@ -14,10 +15,16 @@ the only dispatch revision. Those conditions have no fixed point.
 ## Decisions and requirements
 
 - `VOC-096-D00` — This package is a narrow correction applied in conjunction with
-  adopted VOC-094/VOC-095. It does not rewrite historical packages, reopen completed
-  Cloudflare provisioning, or authorize any external action.
+  adopted VOC-094/VOC-095. PR1 must reconcile all nine VOC-094 package surfaces so
+  their operative Phase-3/4 requirements, acceptance criteria, implementation/test/
+  release plans, task mapping, and package metadata no longer contradict VOC-096.
+  Preserve the original adoption, amendment, review, approval, evidence, and completed
+  Phase-1 history verbatim as immutable history; label the bounded VOC-096 amendment
+  and replace only the still-unstarted contradictory Phase-3/4 contract. Do not reopen
+  completed Cloudflare provisioning or authorize any external action.
 - `VOC-096-D01` — Preserve exactly two implementation PRs and one task. PR1 changes
-  exactly the 16 declared repository files. PR2 changes exactly the five declared
+  exactly the 25 declared repository files, including all nine VOC-094 package files.
+  PR2 changes exactly the five declared
   settings-document files. Any newly discovered required path is drift: stop and amend
   the reviewed package rather than silently broadening either PR.
 - `VOC-096-D02` — PR1 binds the reviewed account, zone, D1, routes, Worker names,

@@ -19,6 +19,10 @@ all adopted evidence exists. It does not recreate resources or promote traffic. 
 resource IDs, baseline UUIDs, routes, Free-plan state, rollback, and exact zero cost are
 equality-bound. Production sentinels and holds are unchanged.
 
+The bounded VOC-094 package reconciliation is required to avoid two simultaneously
+adopted contradictory contracts. It preserves immutable adoption/review/completed
+Phase-1 history and changes only the still-unstarted operative Phase-3/4 transition.
+
 ## Risks and mitigations
 
 - `VOC-096-R00`: runtime evidence could target PR1 rather than PR2. Mitigation: fetch
@@ -43,6 +47,10 @@ equality-bound. Production sentinels and holds are unchanged.
   Mitigation: prepare and review every script/check/readback first, publish binder last,
   dispatch once promptly, and require a fresh record—not a fresh Cloudflare token by
   default—if the binder expires before any attempt.
+- `VOC-096-R08`: VOC-096 could be implemented while the older VOC-094 files remain
+  canonically contradictory. Mitigation: PR1 reconciles all nine package surfaces in
+  the same exact-reviewed diff and deterministic tests reject any surviving old
+  static-future-binder or PR2-executable instruction.
 
 ## Privacy, accessibility, and analytics
 

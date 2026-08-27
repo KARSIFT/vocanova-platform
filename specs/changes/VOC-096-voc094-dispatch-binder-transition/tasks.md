@@ -7,7 +7,7 @@
 - Tests: `VOC-096-TEST-00` through `VOC-096-TEST-07`
 - Evidence: `VOC-096-EV-00` through `VOC-096-EV-07`
 - Risk: R4
-- Implementation mapping: PR1 exact 16-file prepared binder implementation; ACT-03;
+- Implementation mapping: PR1 exact 25-file VOC-094 reconciliation and prepared-binder implementation; ACT-03;
   PR2 exact five-file documentation-only settings reconciliation; post-PR2 authority
   and different-actor binder review; one ACT-04 dispatch; ACT-05 cleanup
 - Status: planned-pending-adoption

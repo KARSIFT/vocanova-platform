@@ -13,8 +13,10 @@ making PR2 executable, or weakening the fail-closed gate.
 This package supplies the missing state transition without changing VOC-094's two-PR
 shape:
 
-1. PR1 commits real staging resources and baselines plus a **prepared**, never
-   standing-authorized, runtime-binder contract.
+1. PR1 performs a bounded reconciliation of VOC-094's nine package files, preserving
+   immutable adoption/review history while replacing the contradictory operative
+   Phase-3/4 clauses. The same PR commits real staging resources and baselines plus a
+   **prepared**, never standing-authorized, runtime-binder contract.
 2. ACT-03 occurs only after PR1. PR2 changes exactly the five declared settings
    documents and remains incapable of changing delivery eligibility.
 3. After PR2 merges and its exact merge SHA is independently reviewed, the accountable
@@ -27,8 +29,8 @@ shape:
    Missing, edited, stale, replayed, unreachable, or mismatched evidence blocks before
    an environment job or Cloudflare secret is reached.
 
-The plan PR adds exactly the nine files in this directory. It edits no adopted
-VOC-094 file, executable surface, configuration, or living documentation. It
+The plan PR adds exactly the nine files in this directory. It does not itself edit an
+adopted VOC-094 file, executable surface, configuration, or living documentation. It
 authorizes no Cloudflare mutation, GitHub setting/secret change, workflow dispatch,
 deployment, production action, credential creation, or secret disclosure.
 

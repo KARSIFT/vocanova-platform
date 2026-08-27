@@ -8,8 +8,10 @@ candidate SHA before a non-author plan merge. Implementation remains two PRs int
 `develop`; neither merge deploys or changes GitHub/Cloudflare settings. Both source
 heads and all existing worktrees/recovery refs remain recoverable while open.
 
-PR1 is repository-ready but dispatch-ineligible. ACT-03 and PR2 retain VOC-094's
-truthful settings boundary. PR2 is documentation-only and its merge SHA becomes the
+PR1's bounded amendment makes all nine VOC-094 package surfaces agree with the
+corrected transition while preserving immutable history; it is repository-ready but
+dispatch-ineligible. ACT-03 and PR2 retain VOC-094's truthful settings boundary. PR2
+is documentation-only and its merge SHA becomes the
 sole possible ACT-04 revision only after live authority/review binders pass. There is
 no `develop` to `main` release in this package.
 

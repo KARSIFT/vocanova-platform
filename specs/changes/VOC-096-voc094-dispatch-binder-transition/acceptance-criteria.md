@@ -9,7 +9,8 @@
 - Result: pending
 
 The plan PR contains exactly nine package files. Implementation uses exactly two PRs:
-PR1's 16-file set and PR2's five-file documentation-only set. Review and merge actors
+PR1's 25-file set (including the complete nine-file VOC-094 bounded reconciliation)
+and PR2's five-file documentation-only set. Review and merge actors
 are separate, all blockers are resolved, and no external action is attributed to
 VOC-096 adoption or merge.
 
@@ -23,7 +24,9 @@ VOC-096 adoption or merge.
 
 PR1 contains real reviewed staging resources and baselines but no future ACT-03/04 URL,
 expiry, nonce, or authorized post-state. PR2 cannot edit or influence executable gate
-inputs. Missing runtime evidence remains ineligible.
+inputs. All nine VOC-094 package files retain immutable completed/adoption evidence but
+state the corrected operative transition consistently. Missing runtime evidence remains
+ineligible.
 
 ## VOC-096-AC-02 — The post-PR2 binder proves exact sequencing
 

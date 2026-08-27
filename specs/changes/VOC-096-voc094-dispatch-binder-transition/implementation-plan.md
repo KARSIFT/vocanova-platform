@@ -8,7 +8,7 @@ complete adoption bookkeeping, a genuine eligible result, and a normal non-autho
 merge. Preserve the dirty VOC-090 worktree and every recovery ref.
 
 Use one minimum-sufficient task and exactly two implementation PRs. PR1 is the
-16-file executable/resource/living-doc unit. ACT-03 then creates or reconciles only the
+25-file package-reconciliation/executable/resource/living-doc unit. ACT-03 then creates or reconciles only the
 held staging environment and two secret names. PR2 is the five-file documentation-only
 settings reconciliation. No third executable PR is needed because the runtime binder
 is created only after the exact PR2 merge SHA exists.
@@ -20,9 +20,13 @@ is created only after the exact PR2 merge SHA exists.
    current Cloudflare public readbacks. Stop on staging resource, baseline, cost, or
    production drift. Do not provision, redeploy, migrate, promote, or delete anything.
 2. A different builder creates isolated PR1 from current `origin/develop` and changes
-   exactly the 16 files declared in `change.yaml`. Bind the exact existing staging
-   account/zone/D1/routes/Workers/baselines/evidence and zero-cost facts. Keep every
-   production sentinel/hold unchanged.
+   exactly the 25 files declared in `change.yaml`. First reconcile all nine VOC-094
+   package surfaces: preserve adoption, amendment, review, approval, evidence, and
+   completed Phase-1 history; label the VOC-096 amendment; and replace every
+   contradictory still-unstarted Phase-3/4 static-binder/PR2 clause with the prepared
+   runtime-binder transition. Bind the exact existing staging account/zone/D1/routes/
+   Workers/baselines/evidence and zero-cost facts. Keep every production sentinel/hold
+   unchanged.
 3. In PR1, implement `prepared` state and the strict runtime-binder schema/evaluator.
    Add workflow inputs for authority/review URLs and digests plus nonce; exact
    digest/nonce run naming; first-attempt and prior-run replay rejection; public
@@ -31,10 +35,10 @@ is created only after the exact PR2 merge SHA exists.
    credential-free verification immediately before migration; and a network-free
    injected-fixture test path unavailable to workflow inputs. Never fetch or execute
    arbitrary URLs and never add GitHub-token permissions for these reads.
-4. Update all 16 declared living/executable/config surfaces consistently. PR1 must say
+4. Update all 25 declared package/living/executable/config surfaces consistently. PR1 must say
    the GitHub staging environment remains absent/held/planned through its merge and
-   must not preclaim ACT-03 or ACT-04 post-state. Historical packages/evidence remain
-   unchanged.
+   must not preclaim ACT-03 or ACT-04 post-state. Historical evidence within VOC-094
+   remains preserved and all other adopted/completed packages remain unchanged.
 5. Run all applicable checks on the exact PR1 head, including governance, risk,
    diff-check, full workspace validation, delivery/foundation tests, Wrangler config
    validation/dry runs, production-sentinel hashes, secret-placement scans, strict

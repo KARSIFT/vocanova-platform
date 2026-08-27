@@ -3,7 +3,8 @@
 ## VOC-096-TEST-00 — Package, PR, file, action, and role shape
 
 Validate one nine-file plan PR, one task, exactly two implementation PRs, PR1's exact
-16 files, PR2's exact five documentation files, zero new external actions, the three
+25 files including all nine VOC-094 package surfaces, PR2's exact five documentation
+files, zero new external actions, the three
 unchanged VOC-094 actions, explicit `automatic_merge_allowed: true`, and separate
 builder/reviewer/merge/action actors. Evidence: `VOC-096-EV-00`.
 
@@ -13,7 +14,9 @@ Positive fixtures accept real staging resources/baselines in `prepared` state wh
 delivery is ineligible without runtime records. Negative fixtures reject committed
 future ACT-03/04 URLs, expiry, nonce, standing `authorized` state, PR2 executable
 changes, documentation consumed as gate input, staging sentinels, or changed production
-sentinels. Evidence: `VOC-096-EV-01`.
+sentinels. Inspect every VOC-094 package surface and reject a surviving contradictory
+operative Phase-3/4 instruction while requiring immutable adoption/review/completed
+Phase-1 evidence to remain. Evidence: `VOC-096-EV-01`.
 
 ## VOC-096-TEST-02 — Exact PR2 sequencing and file boundary
 
