@@ -35,13 +35,15 @@ minimized/colliding review, reviewer authorship, or nonzero blockers. Evidence:
 
 ## VOC-096-TEST-03 — Strict ACT-03, PR2-review, authority, and binder-review records
 
-Positive fixture verifies exact canonical URLs/API `html_url`, raw-body SHA-256,
-schema/key/type/length allowlists, committed publisher login `m-e-h-r-d-a-a-d`/ID
+Positive fixture verifies the separate closed API-envelope projection, exact canonical
+URLs/API `html_url`, envelope-calculated raw-body SHA-256, RFC-8785 byte equality, and
+all six committed contract digests/key/type/length allowlists; committed publisher login `m-e-h-r-d-a-a-d`/ID
 `7955432`/type `User`/site-admin false/association `MEMBER`, distinct governance actor
-IDs/provenance, nonce, and all four schemas. Require ACT-03 < PR2 merge < PR2 review <
-authority < binder review < current-run creation; authority body `issued_at` exactly
-equals API `created_at`; expiry is at most 30 minutes later; and both live checks occur
-before expiry. Verify manifest/workflow/policy hashes and the full prepared tuple,
+IDs/exact nested provenance, nonce, and all four body schemas. Require ACT-03 < PR2 merge < PR2 review <
+authority < binder review < current-run creation; authority API `created_at` is the
+sole issuance time, the body contains no `issued_at`, and
+`created_at < expires_at <= created_at + 30 minutes`; both live checks occur before
+expiry. Verify manifest/workflow/policy hashes and the full prepared tuple,
 including distinct original/final-readback binders, sealed schema/migrations, exact
 domain/certificate/DNS IDs, baseline-only rollback UUIDs, all three zero-traffic probes,
 current smoke, Free plans, cost `0`, unchanged Basic Load Balancing, and production
@@ -49,7 +51,21 @@ holds. Reject generic URL, redirect, wrong issue/repo/publisher field, a claim t
 publisher equality proves actor separation, edit/minimization, unknown/duplicate key,
 malformed JSON, digest/actor/resource/hash/cost/expiry drift, wrong domain/certificate/
 DNS/binding ID, any probe as baseline, nonzero probe traffic, missing unrelated Worker,
-time equality/reordering/skew, or secret-like content. Evidence: `VOC-096-EV-03`.
+time equality/reordering/skew, any own URL/digest/API timestamp/publisher field in a
+body, body/envelope confusion, self-hash fixture, or secret-like content. Evidence:
+`VOC-096-EV-03`.
+
+Constructibility fixtures use a fetched server `Date`, set body `expires_at` to
+exactly 25 minutes later, post once within 60 seconds, and bind the returned envelope.
+Reject a second post, any edit, copied/predicted `created_at`, a preflight/comment gap
+over 60 seconds, and both exact expiry boundaries (`expires_at <= created_at` or
+`expires_at > created_at + 30 minutes`).
+
+Recompute the seven unambiguous binders: prepared tuple; shared definitions; API
+envelope; and four body schemas. Reject a changed shared definition with unchanged
+leaf-schema digests, any changed schema with unchanged manifest binding, inclusion of a
+`schema_sha256` field in its own digest input, unresolved `$ref`, or any body-bound
+manifest hash that differs from the exact manifest containing all six contract digests.
 
 ## VOC-096-TEST-04 — Replay and rerun defense
 
@@ -60,13 +76,21 @@ nonce absent from exact run name; current-run GET mismatch/absence; a filtered r
 set at/over 1,000; and concurrent duplicate. Prove `cancel-in-progress: false` and
 environment-scoped concurrency remain. Evidence: `VOC-096-EV-04`.
 
+Verify the exact two-pass unauthenticated budget: 18 requests per pass, 36 total,
+`per_page=100`, no in-pass retry, at least 36 remaining before pass one and 18 before
+pass two. Reject missing/inconsistent Date or rate-limit headers, a second PR-files
+page for the exact five-file PR, an eleventh run page, or any budget underflow before
+secrets.
+
 ## VOC-096-TEST-05 — Live/offline isolation and hostile input
 
 Offline tests use only injected sanitized fixtures and clock. Workflow tests prove no
 input selects fixture mode and live API failure cannot fall back. Reject oversized,
 wrong-content-type, non-JSON, duplicate-key, control-character, shell metacharacter,
-expression marker, and unexpected-host responses without executing content. Prove both
-gate checks are credential-free. Evidence: `VOC-096-EV-05`.
+expression marker, non-canonical body bytes, leading/trailing whitespace, final
+newline, and unexpected-host responses without executing content. Construct each body,
+post once, and bind its fetched envelope without edit, prediction, or self-reference.
+Prove both gate checks are credential-free. Evidence: `VOC-096-EV-05`.
 
 ## VOC-096-TEST-06 — Existing gate parity, secret placement, and production negatives
 

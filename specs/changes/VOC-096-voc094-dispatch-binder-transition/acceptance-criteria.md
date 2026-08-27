@@ -51,11 +51,14 @@ SHA is the PR2 merge commit on `develop`; a valid-shaped record targeting PR1 fa
 
 The live gate accepts only exact current dedicated comments whose API publishers match
 the committed login/numeric-ID/type/site-admin/association trust root and whose bodies
-match the input digests. It distinguishes that publisher authentication from separately
-reviewed actor provenance. Authority `issued_at` exactly equals server `created_at`,
-expiry is within 30 minutes, both live checks precede expiry, and the binder has never
-been dispatched. Edits, fetch failures, replay, run reruns, actor collisions, and
-fixture fallback block before Cloudflare secrets or mutations.
+match the input digests. The closed body schemas and separate closed API-envelope
+projection reject unknown/duplicate fields and forbid a record's own URL, digest, or
+server timestamp inside its body. It distinguishes publisher authentication from the
+exact nested actor-provenance records. The authority envelope's immutable API
+`created_at` is the sole issuance time; the body has no `issued_at`, and requires
+`created_at < expires_at <= created_at + 30 minutes`. Both live checks precede expiry,
+and the binder has never been dispatched. Edits, fetch failures, replay, run reruns,
+actor collisions, and fixture fallback block before Cloudflare secrets or mutations.
 
 ## VOC-096-AC-04 — Existing delivery and production gates are not weakened
 

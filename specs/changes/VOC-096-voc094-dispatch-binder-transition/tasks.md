@@ -26,10 +26,11 @@ and final-readback closure hashes, and regenerates/checks both locked-Wrangler W
 type files. The live transition fetches four strict records: ACT-03, merged-PR2 exact
 review, ACT-04 authority, and binder review. Each must match the committed GitHub API
 publisher trust root, while separately attributable actor/provenance records—not the
-shared publisher—carry governance independence. Server time is ordered exactly from
-PR2 merge through review/authority/binder/current run; authority `issued_at` equals its
-comment `created_at`, expiry is at most 30 minutes later, and both live checks precede
-expiry.
+shared publisher—carry governance independence. The closed body schemas are separate
+from fetched API-envelope metadata and forbid self URL/hash/timestamp fields. Server
+time is ordered exactly from PR2 merge through review/authority/binder/current run;
+authority API `created_at` alone is issuance, body `expires_at` is later by at most 30
+minutes, and both live checks precede expiry.
 
 VOC-096 authorizes zero external actions. The three remaining actions are the existing
 VOC-094-ACT-03, ACT-04, and ACT-05, each still requiring its own accountable actor and

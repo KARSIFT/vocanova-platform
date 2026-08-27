@@ -33,11 +33,13 @@ runtime binder validates an authority; it does not create one.
 
 All four canonical records must match the committed GitHub publisher login/numeric ID/
 type/site-admin/association. This authenticates the relay account only. Distinct
-governance actors remain separately attributable through actor/provenance records and
-independent review. The merged-PR2 review is created after merge; authority follows it;
-body `issued_at` equals authority-comment server `created_at`; binder review follows;
-and current-run creation plus both live checks remain strictly before the at-most-
-30-minute expiry.
+governance actors remain separately attributable through the exact nested provenance
+shape and independent review. The merged-PR2 review is created after merge; authority
+follows it. Each URL, digest, timestamp, and publisher is a fetched envelope fact, not
+a same-body self-reference. The authority body has no `issued_at`; immutable API
+`created_at` is the sole issuance time and must precede body `expires_at` by no more
+than 30 minutes. Binder review follows, and current-run creation plus both live checks
+remain strictly before expiry.
 
 ## Rollback
 

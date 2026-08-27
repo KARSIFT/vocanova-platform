@@ -60,6 +60,29 @@ plan_review_history:
       live fetchable binder, and commits the exact retained Cloudflare resource,
       domain/certificate/DNS, migration/hash, baseline/probe, cost, and production
       tuple with probe-as-baseline negatives. No verdict transfers to the next SHA.
+  - candidate_sha: ebd762086b350b8fe1bfe935eb624b1eb70d2146
+    verdict: fail-security-settings-two-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5438894154
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate replaces the four prose
+      record descriptions with a closed deterministic schema bundle and removes the
+      unknowable body-issued-at/server-created-at equality. No verdict transfers.
+  - candidate_sha: ebd762086b350b8fe1bfe935eb624b1eb70d2146
+    verdict: fail-independent-R4-two-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5438898204
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate separates fetched API
+      envelope metadata from body JSON, forbids self-URL/self-hash fields, specifies
+      exact raw-body canonicalization, and makes GitHub created_at the sole issuance
+      time. No verdict transfers.
+  - candidate_sha: ebd762086b350b8fe1bfe935eb624b1eb70d2146
+    verdict: fail-cloudflare-wrangler-one-blocker
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5438926272
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate removes the timestamp
+      fixed point while retaining strict server-time expiry and ordering. This review
+      explicitly cleared the prepared Cloudflare tuple and domain IDs. No verdict
+      transfers.
 
 owners:
   decision: accountable-governance-decision-owner-after-independent-plan-review
@@ -318,41 +341,700 @@ prepared_staging_tuple:
       sha256: f9d9a9d33c5b1606c979e4591fffd299353c680e3863223c9dbd98003d42d0fa
 
 runtime_record_contract:
-  api_publisher_equality: publisher_trust_root.permitted_issue_comment_publisher
-  actor_provenance: >-
-    Each record has a distinct governance actor ID, role, non-authorship declaration,
-    and canonical provenance URL. The gate compares required distinct IDs/URLs and the
-    binder reviewer attests to separation; GitHub publisher equality alone is never
-    reported as proof of actor independence.
-  act03:
-    schema: vocanova-voc094-act03-settings-v1
-    required: >-
-      exact canonical URL/raw-body SHA-256, trusted API publisher, actor/provenance,
-      VOC-085-HOLD-00 authority URL, PR1 merge SHA/ref, exact cloudflare-staging pre-
-      and post-state, exactly CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN secret names
-      with no values, token scope/expiry metadata, rollback, no production/cost drift,
-      created_at=updated_at, and strict JSON with no unknown or duplicate keys
-  pr2_exact_review:
-    schema: vocanova-voc096-pr2-merged-sha-review-v1
-    required: >-
-      exact canonical URL/raw-body SHA-256, trusted API publisher, different reviewer
-      actor/provenance/non-authorship, PASS/zero blockers, exact PR2 number/head/merge
-      SHA/base/ref/five-file set, ACT-03 URL/digest, hosted checks, created_at=updated_at,
-      and strict JSON with no unknown or duplicate keys
-  act04_authority:
-    schema: vocanova-voc094-act04-authority-v1
-    required: >-
-      exact ACT-03 and PR2-review URLs/digests, full prepared tuple, exact artifact
-      hashes, one-use nonce, maximum_dispatches=1, issued_at exactly equal to the live
-      authority comment created_at, expires_at no later than created_at plus 30 minutes,
-      created_at=updated_at, and strict JSON with no unknown or duplicate keys
-  binder_review:
-    schema: vocanova-voc096-act04-binder-review-v1
-    required: >-
-      exact ACT-03, PR2-review, and authority URLs/digests; full prepared tuple and
-      artifact hash equality; different reviewer actor/provenance/non-authorship;
-      PASS/zero blockers; created_at=updated_at; and strict JSON with no unknown or
-      duplicate keys
+  bundle_id: vocanova-voc096-runtime-record-contract
+  bundle_version: 1
+  schema_dialect: JSON-Schema-2020-12
+  prepared_staging_tuple_binding:
+    canonicalization: RFC-8785-JCS-of-change-yaml-prepared_staging_tuple
+    sha256: 25ac2748678adb7d41c8a525bf05443154ba8ac1678ce6647a75e6ceeca45871
+  manifest_binding:
+    required_fields:
+      - bundle_id
+      - bundle_version
+      - shared_definitions_sha256
+      - api_envelope_schema_sha256
+      - act03_body_schema_sha256
+      - pr2_exact_review_body_schema_sha256
+      - act04_authority_body_schema_sha256
+      - binder_review_body_schema_sha256
+    digest_rule: >-
+      Each digest is lowercase SHA-256 of RFC-8785 JCS for the named mapping after
+      removing only that mapping's schema_sha256 field. PR1 must commit the calculated
+      values in both this package reconciliation and the delivery manifest; runtime
+      verification recomputes and equality-checks them. No schema digest is supplied
+      by workflow input or a comment body.
+    executable_chain: >-
+      The six contract digests are shared definitions, API envelope, and four body
+      schemas. Every body schema resolves its #/$defs references from the exact shared
+      definitions mapping. The PR2-review, authority, and binder-review bodies bind the
+      exact delivery manifest through executable_digests.manifest_sha256; that manifest
+      carries all six values. Runtime recomputes all six before body validation, then
+      compares the body-bound manifest hash. No leaf schema embeds its own digest.
+    shared_definitions_sha256: 3a8a53234a70ef3f36a3257f9211c804d12b6d74e21e0f662250d1e5d1e2d637
+    api_envelope_schema_sha256: 5a4b65c711329b64f0c25bfdba9ea4d2fcae148b24b8b53a10ba6d7cc5c77e18
+    act03_body_schema_sha256: a159b12f43941e0368fcb4a512ee9b372a7f8d078e4341c9e1957e87f5ad6923
+    pr2_exact_review_body_schema_sha256: 190e752db9779a41c728747ae84e539fd1e8989e802cf819a1e6c595b6170f09
+    act04_authority_body_schema_sha256: ac2815ef550b26ce23ff25ad75e310cfbc22713c14ce8f2595e7e27267c0f372
+    binder_review_body_schema_sha256: c70ae327b0e547d6e46df2ebaedcf7e30ce08b10575915fe8df9bf8503be1597
+  raw_body_contract:
+    encoding: UTF-8-without-BOM
+    minimum_bytes: 2
+    maximum_bytes: 60000
+    serialization: RFC-8785-JCS
+    exactness: >-
+      The API body string must byte-equal RFC-8785 JCS of the parsed object. Leading or
+      trailing whitespace, a final newline, Unicode normalization, or any other byte
+      transformation is forbidden. SHA-256 is calculated over the exact UTF-8 bytes
+      returned in the fetched API body field after the response is received.
+    parsing: >-
+      A duplicate-key-detecting UTF-8 JSON parser must reject duplicate object member
+      names before ordinary JSON parsing. Non-finite numbers, invalid Unicode/control
+      characters, unknown keys, and values outside the closed schemas fail closed.
+    self_reference_rule: >-
+      No record body contains its own comment ID, URL, raw-body digest, created_at,
+      updated_at, publisher, or author_association. Those values exist only in the API
+      envelope after creation. A body may reference only already-created earlier
+      records by URL and raw-body digest.
+  shared_definitions:
+    schema_sha256: 3a8a53234a70ef3f36a3257f9211c804d12b6d74e21e0f662250d1e5d1e2d637
+    sha256:
+      type: string
+      pattern: "^[0-9a-f]{64}$"
+    git_sha:
+      type: string
+      pattern: "^[0-9a-f]{40}$"
+    uuid:
+      type: string
+      pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    rfc3339_utc_second:
+      type: string
+      pattern: "^[0-9]{4}-(0[1-9]|1[0-2])-([0-2][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]Z$"
+    canonical_comment_url:
+      type: string
+      pattern: "^https://github\\.com/KARSIFT/vocanova-platform/issues/158#issuecomment-[1-9][0-9]{0,19}$"
+      minLength: 80
+      maxLength: 120
+    github_details_url:
+      type: string
+      pattern: "^https://github\\.com/KARSIFT/vocanova-platform/(actions/runs|pull)/[1-9][0-9]{0,19}(/job/[1-9][0-9]{0,19})?(#.*)?$"
+      minLength: 55
+      maxLength: 180
+    record_reference:
+      type: object
+      additionalProperties: false
+      required: [url, raw_body_sha256]
+      properties:
+        url:
+          $ref: "#/$defs/canonical_comment_url"
+        raw_body_sha256:
+          $ref: "#/$defs/sha256"
+    actor:
+      type: object
+      additionalProperties: false
+      required: [actor_id, role, provenance]
+      properties:
+        actor_id:
+          type: string
+          pattern: "^[a-z0-9][a-z0-9._:-]{2,127}$"
+          minLength: 3
+          maxLength: 128
+        role:
+          type: string
+          enum:
+            - github-settings-operator
+            - merged-pr2-exact-reviewer
+            - act04-accountable-actor
+            - act04-binder-reviewer
+        provenance:
+          type: object
+          additionalProperties: false
+          required:
+            - schema
+            - participant_kind
+            - assignment_scope
+            - assignment_revision
+            - session_reference
+            - provider
+            - model
+            - non_authorship_of_reviewed_revision
+          properties:
+            schema:
+              const: vocanova-voc096-actor-provenance-v1
+            participant_kind:
+              enum: [human, separately-instantiated-ai]
+            assignment_scope:
+              const: KARSIFT/vocanova-platform#158/VOC-096
+            assignment_revision:
+              $ref: "#/$defs/git_sha"
+            session_reference:
+              type: string
+              pattern: "^[A-Za-z0-9][A-Za-z0-9._:/-]{7,127}$"
+              minLength: 8
+              maxLength: 128
+            provider:
+              type: [string, "null"]
+              minLength: 1
+              maxLength: 64
+              pattern: "^[A-Za-z0-9][A-Za-z0-9 ._/-]{0,63}$"
+            model:
+              type: [string, "null"]
+              minLength: 1
+              maxLength: 96
+              pattern: "^[A-Za-z0-9][A-Za-z0-9 ._:/-]{0,95}$"
+            non_authorship_of_reviewed_revision:
+              const: true
+    repository_revision:
+      type: object
+      additionalProperties: false
+      required: [pull_request_number, head_sha, merge_sha, base, ref, merged_at]
+      properties:
+        pull_request_number:
+          type: integer
+          minimum: 1
+          maximum: 999999999
+        head_sha:
+          $ref: "#/$defs/git_sha"
+        merge_sha:
+          $ref: "#/$defs/git_sha"
+        base:
+          const: develop
+        ref:
+          const: refs/heads/develop
+        merged_at:
+          $ref: "#/$defs/rfc3339_utc_second"
+    tuple_binding:
+      type: object
+      additionalProperties: false
+      required: [schema, canonicalization, sha256]
+      properties:
+        schema:
+          const: vocanova-voc096-prepared-staging-tuple-v1
+        canonicalization:
+          const: RFC-8785-JCS
+        sha256:
+          const: 25ac2748678adb7d41c8a525bf05443154ba8ac1678ce6647a75e6ceeca45871
+    executable_digests:
+      type: object
+      additionalProperties: false
+      required: [manifest_sha256, workflow_sha256, policy_sha256]
+      properties:
+        manifest_sha256:
+          $ref: "#/$defs/sha256"
+        workflow_sha256:
+          $ref: "#/$defs/sha256"
+        policy_sha256:
+          $ref: "#/$defs/sha256"
+    staging_assertions:
+      type: object
+      additionalProperties: false
+      required:
+        - account_id
+        - zone_id
+        - d1_uuid
+        - d1_application_rows
+        - applied_migration_count
+        - api_baseline_uuid
+        - web_baseline_uuid
+        - zero_traffic_probe_uuids
+        - custom_domains_active
+        - public_smoke_passed
+        - workers_plan
+        - d1_plan
+        - incremental_vocanova_cost_cents
+        - unrelated_basic_load_balancing
+        - production_state
+        - production_holds
+      properties:
+        account_id:
+          const: 0a9eda28b96d77c24dcde74f3e074d47
+        zone_id:
+          const: 63286d93b5f32925ac7366b4e97908be
+        d1_uuid:
+          const: 22ae386f-e3f5-4d98-a3ad-18b39d3b8556
+        d1_application_rows:
+          const: 0
+        applied_migration_count:
+          const: 7
+        api_baseline_uuid:
+          const: ace13c0b-c148-4ef1-ad9a-fdfdb07f264f
+        web_baseline_uuid:
+          const: 5255e64d-872e-469f-90b6-bea49efd5e75
+        zero_traffic_probe_uuids:
+          type: array
+          minItems: 3
+          maxItems: 3
+          prefixItems:
+            - const: 858009b5-0840-499d-92f4-e0a0483e0b33
+            - const: 0dc15f45-d178-480e-ba32-ca5279cc2c17
+            - const: 7b694392-8f38-4329-bd2f-af982c3c6a56
+          items: false
+        custom_domains_active:
+          const: true
+        public_smoke_passed:
+          const: true
+        workers_plan:
+          const: Free
+        d1_plan:
+          const: Free
+        incremental_vocanova_cost_cents:
+          const: 0
+        unrelated_basic_load_balancing:
+          const: unchanged-unexpanded-not-attributed-to-vocanova
+        production_state:
+          const: no-worker-d1-domain-traffic-or-change
+        production_holds:
+          type: array
+          minItems: 2
+          maxItems: 2
+          prefixItems:
+            - const: VOC-080-HOLD-01
+            - const: VOC-080-HOLD-02
+          items: false
+    hosted_check:
+      type: object
+      additionalProperties: false
+      required: [name, conclusion, details_url, completed_at]
+      properties:
+        name:
+          type: string
+          pattern: "^[A-Za-z0-9][A-Za-z0-9 ./_()':-]{2,127}$"
+          minLength: 3
+          maxLength: 128
+        conclusion:
+          const: success
+        details_url:
+          $ref: "#/$defs/github_details_url"
+        completed_at:
+          $ref: "#/$defs/rfc3339_utc_second"
+    compilation_rule: >-
+      For each body validator, construct one in-memory JSON Schema root with $schema
+      equal to https://json-schema.org/draft/2020-12/schema, $defs equal to this mapping
+      after removing schema_sha256 and compilation_rule, and the selected body mapping
+      after removing schema_id and schema_sha256. No other definition or keyword is
+      injected. Schema compilation failure blocks delivery.
+  api_envelope_schema:
+    schema_sha256: 5a4b65c711329b64f0c25bfdba9ea4d2fcae148b24b8b53a10ba6d7cc5c77e18
+    type: object
+    additionalProperties: false
+    required:
+      - comment_id
+      - html_url
+      - created_at
+      - updated_at
+      - raw_body_sha256
+      - raw_body_bytes
+      - body
+      - publisher
+      - author_association
+    properties:
+      comment_id:
+        type: integer
+        minimum: 1
+        maximum: 9999999999999999999
+      html_url:
+        $ref: "#/$defs/canonical_comment_url"
+      created_at:
+        $ref: "#/$defs/rfc3339_utc_second"
+      updated_at:
+        $ref: "#/$defs/rfc3339_utc_second"
+      raw_body_sha256:
+        $ref: "#/$defs/sha256"
+      raw_body_bytes:
+        type: integer
+        minimum: 2
+        maximum: 60000
+      body:
+        type: string
+        minLength: 2
+        maxLength: 60000
+      publisher:
+        type: object
+        additionalProperties: false
+        required: [login, numeric_id, type, site_admin]
+        properties:
+          login:
+            const: m-e-h-r-d-a-a-d
+          numeric_id:
+            const: 7955432
+          type:
+            const: User
+          site_admin:
+            const: false
+      author_association:
+        const: MEMBER
+    extraction_rule: >-
+      This is the exact closed projection consumed from the GitHub response, not a
+      claim that the upstream response has no other documented members. Map API id to
+      comment_id, user.id to publisher.numeric_id, and body byte length/digest to the
+      calculated fields; then validate this projection. Require status 200, JSON
+      content type, no redirect, canonical API host/repository/comment ID, and API
+      html_url equality to the dispatch input.
+    immutability_rule: created_at-must-equal-updated_at
+    issuance_rule: >-
+      For ACT-04 only, this fetched immutable created_at is the sole issuance time.
+      No issued_at member exists in the ACT-04 body or any other record body.
+  record_body_schemas:
+    act03:
+      schema_id: vocanova-voc094-act03-settings-v1
+      schema_sha256: a159b12f43941e0368fcb4a512ee9b372a7f8d078e4341c9e1957e87f5ad6923
+      type: object
+      additionalProperties: false
+      required:
+        - schema
+        - actor
+        - settings_authority
+        - pr1
+        - environment
+        - phase4_token
+        - rollback
+        - tuple_binding
+      properties:
+        schema:
+          const: vocanova-voc094-act03-settings-v1
+        actor:
+          allOf:
+            - $ref: "#/$defs/actor"
+            - properties:
+                role:
+                  const: github-settings-operator
+        settings_authority:
+          type: object
+          additionalProperties: false
+          required: [hold_id, evidence]
+          properties:
+            hold_id:
+              const: VOC-085-HOLD-00
+            evidence:
+              $ref: "#/$defs/record_reference"
+        pr1:
+          $ref: "#/$defs/repository_revision"
+        environment:
+          type: object
+          additionalProperties: false
+          required:
+            - name
+            - pre_state
+            - post_state
+            - secret_names
+            - secret_values_recorded
+            - production_environment_changed
+          properties:
+            name:
+              const: cloudflare-staging
+            pre_state:
+              const: absent
+            post_state:
+              const: created
+            secret_names:
+              type: array
+              minItems: 2
+              maxItems: 2
+              prefixItems:
+                - const: CLOUDFLARE_ACCOUNT_ID
+                - const: CLOUDFLARE_API_TOKEN
+              items: false
+            secret_values_recorded:
+              const: false
+            production_environment_changed:
+              const: false
+        phase4_token:
+          type: object
+          additionalProperties: false
+          required:
+            - distinct_from_all_prior_tokens
+            - account_id
+            - permissions
+            - value_recorded
+            - expires_at
+          properties:
+            distinct_from_all_prior_tokens:
+              const: true
+            account_id:
+              const: 0a9eda28b96d77c24dcde74f3e074d47
+            permissions:
+              type: array
+              minItems: 2
+              maxItems: 2
+              prefixItems:
+                - const: Account.Workers Scripts.Edit
+                - const: Account.D1.Edit
+              items: false
+            value_recorded:
+              const: false
+            expires_at:
+              $ref: "#/$defs/rfc3339_utc_second"
+        rollback:
+          type: object
+          additionalProperties: false
+          required:
+            [
+              plan_sha256,
+              owner_actor_id,
+              rehearsed,
+              settings_truth_followup_required,
+            ]
+          properties:
+            plan_sha256:
+              $ref: "#/$defs/sha256"
+            owner_actor_id:
+              type: string
+              pattern: "^[a-z0-9][a-z0-9._:-]{2,127}$"
+              minLength: 3
+              maxLength: 128
+            rehearsed:
+              const: true
+            settings_truth_followup_required:
+              const: true
+        tuple_binding:
+          $ref: "#/$defs/tuple_binding"
+    pr2_exact_review:
+      schema_id: vocanova-voc096-pr2-merged-sha-review-v1
+      schema_sha256: 190e752db9779a41c728747ae84e539fd1e8989e802cf819a1e6c595b6170f09
+      type: object
+      additionalProperties: false
+      required:
+        - schema
+        - actor
+        - verdict
+        - blocking_findings
+        - pr2
+        - changed_files
+        - act03
+        - hosted_checks
+        - executable_digests
+        - tuple_binding
+        - staging_assertions
+      properties:
+        schema:
+          const: vocanova-voc096-pr2-merged-sha-review-v1
+        actor:
+          allOf:
+            - $ref: "#/$defs/actor"
+            - properties:
+                role:
+                  const: merged-pr2-exact-reviewer
+        verdict:
+          const: PASS
+        blocking_findings:
+          type: array
+          maxItems: 0
+        pr2:
+          $ref: "#/$defs/repository_revision"
+        changed_files:
+          type: array
+          minItems: 5
+          maxItems: 5
+          prefixItems:
+            - const: .github/README.md
+            - const: docs/governance/repository-settings.md
+            - const: docs/governance/repository-settings-current.yaml
+            - const: docs/operations/11-devops-and-ci-cd.md
+            - const: docs/operations/cloudflare-delivery.md
+          items: false
+        act03:
+          $ref: "#/$defs/record_reference"
+        hosted_checks:
+          type: array
+          minItems: 1
+          maxItems: 64
+          uniqueItems: true
+          items:
+            $ref: "#/$defs/hosted_check"
+        executable_digests:
+          $ref: "#/$defs/executable_digests"
+        tuple_binding:
+          $ref: "#/$defs/tuple_binding"
+        staging_assertions:
+          $ref: "#/$defs/staging_assertions"
+    act04_authority:
+      schema_id: vocanova-voc094-act04-authority-v1
+      schema_sha256: ac2815ef550b26ce23ff25ad75e310cfbc22713c14ce8f2595e7e27267c0f372
+      type: object
+      additionalProperties: false
+      required:
+        - schema
+        - actor
+        - act03
+        - pr2_exact_review
+        - pr2
+        - executable_digests
+        - tuple_binding
+        - staging_assertions
+        - nonce
+        - maximum_dispatches
+        - expires_at
+      properties:
+        schema:
+          const: vocanova-voc094-act04-authority-v1
+        actor:
+          allOf:
+            - $ref: "#/$defs/actor"
+            - properties:
+                role:
+                  const: act04-accountable-actor
+        act03:
+          $ref: "#/$defs/record_reference"
+        pr2_exact_review:
+          $ref: "#/$defs/record_reference"
+        pr2:
+          $ref: "#/$defs/repository_revision"
+        executable_digests:
+          $ref: "#/$defs/executable_digests"
+        tuple_binding:
+          $ref: "#/$defs/tuple_binding"
+        staging_assertions:
+          $ref: "#/$defs/staging_assertions"
+        nonce:
+          type: string
+          pattern: "^[0-9a-f]{32,128}$"
+          minLength: 32
+          maxLength: 128
+        maximum_dispatches:
+          const: 1
+        expires_at:
+          $ref: "#/$defs/rfc3339_utc_second"
+    binder_review:
+      schema_id: vocanova-voc096-act04-binder-review-v1
+      schema_sha256: c70ae327b0e547d6e46df2ebaedcf7e30ce08b10575915fe8df9bf8503be1597
+      type: object
+      additionalProperties: false
+      required:
+        - schema
+        - actor
+        - verdict
+        - blocking_findings
+        - act03
+        - pr2_exact_review
+        - authority
+        - pr2
+        - executable_digests
+        - tuple_binding
+        - staging_assertions
+        - actor_separation
+      properties:
+        schema:
+          const: vocanova-voc096-act04-binder-review-v1
+        actor:
+          allOf:
+            - $ref: "#/$defs/actor"
+            - properties:
+                role:
+                  const: act04-binder-reviewer
+        verdict:
+          const: PASS
+        blocking_findings:
+          type: array
+          maxItems: 0
+        act03:
+          $ref: "#/$defs/record_reference"
+        pr2_exact_review:
+          $ref: "#/$defs/record_reference"
+        authority:
+          $ref: "#/$defs/record_reference"
+        pr2:
+          $ref: "#/$defs/repository_revision"
+        executable_digests:
+          $ref: "#/$defs/executable_digests"
+        tuple_binding:
+          $ref: "#/$defs/tuple_binding"
+        staging_assertions:
+          $ref: "#/$defs/staging_assertions"
+        actor_separation:
+          type: object
+          additionalProperties: false
+          required:
+            - actor_ids_pairwise_distinct
+            - session_references_pairwise_distinct
+            - publisher_identity_not_used_as_actor_identity
+            - reviewer_did_not_author_pr1
+            - reviewer_did_not_author_pr2
+            - reviewer_did_not_author_authority_body
+          properties:
+            actor_ids_pairwise_distinct:
+              const: true
+            session_references_pairwise_distinct:
+              const: true
+            publisher_identity_not_used_as_actor_identity:
+              const: true
+            reviewer_did_not_author_pr1:
+              const: true
+            reviewer_did_not_author_pr2:
+              const: true
+            reviewer_did_not_author_authority_body:
+              const: true
+  cross_record_rules:
+    - >-
+      Validate each fetched API envelope, raw-body contract, and selected body schema
+      independently. Body schema IDs must be pairwise the four constants above.
+    - >-
+      Require API created_at == updated_at for every comment. Require ACT03.created_at
+      < PR2.merged_at < PR2-review.created_at < authority.created_at <
+      binder-review.created_at < current-run.created_at. Equality fails closed.
+    - >-
+      Authority API created_at is the sole issuance time. The authority body contains
+      no issued_at. Require authority.created_at < authority.body.expires_at <=
+      authority.created_at + 30 minutes. Require both live-check server Date values
+      and their captured local completion instants strictly before expires_at.
+    - >-
+      Compare every later record_reference URL/digest to the already-fetched earlier
+      envelope html_url/raw_body_sha256. Compare PR2, executable_digests,
+      tuple_binding, and staging_assertions for deep exact equality across every body
+      where present and to independently fetched repository/Cloudflare evidence.
+    - >-
+      Require the four actor IDs and four actor.provenance.session_reference values to
+      be pairwise distinct, each role to match its record schema, each assignment
+      revision to equal the reviewed PR1 or PR2 SHA applicable to that role, and every
+      non-authorship flag to be true. GitHub publisher equality authenticates only the
+      relay account and never satisfies actor separation.
+    - >-
+      hosted_checks must be sorted ascending by name using Unicode code-point order,
+      have unique names, equal the required-check set fetched for PR2 merge SHA, and
+      all conclude success. Any missing, duplicate, extra, pending, or stale check
+      fails closed.
+    - >-
+      All four dispatch URL/digest inputs must equal their fetched envelopes. The
+      nonce input must equal authority.body.nonce. No API envelope metadata or digest
+      may be taken from a body, and no body-selected timestamp may extend authority.
+  live_http_contract:
+    authentication: none-no-GITHUB_TOKEN-no-Authorization-header
+    redirect: error
+    connect_timeout_seconds: 5
+    request_timeout_seconds: 15
+    response_maximum_bytes: 1000000
+    per_page: 100
+    run_scan_maximum_pages_per_check: 10
+    checks_per_dispatch: 2
+    maximum_requests_per_check: 18
+    maximum_requests_per_dispatch: 36
+    request_allocation_per_check:
+      rate_limit_preflight: 1
+      four_comment_gets: 4
+      pr_metadata_get: 1
+      pr_files_get_pages: 1
+      current_run_get: 1
+      prior_run_scan_pages: 10
+    remaining_budget_rule: >-
+      Before the first pass, X-RateLimit-Remaining must be at least 36; immediately
+      before the second pass, it must be at least 18. Every response's GitHub Date and
+      rate-limit headers must parse consistently. A missing header, lower remaining
+      value, 403/429, extra page need, 1,000-result boundary, or any request beyond the
+      allocation blocks before secrets. No retry occurs inside either pass.
+  authority_construction_rule:
+    preflight_source: unauthenticated-GitHub-API-Date-header
+    body_expires_at: preflight-Date-plus-exactly-25-minutes
+    maximum_preflight_to-comment_created_at_seconds: 60
+    post_count: 1
+    edit_count: 0
+    readback: immediate
+    acceptance: >-
+      Fetch a successful canonical GitHub API response immediately before building the
+      authority body. Set body expires_at to that response's server Date plus exactly
+      25 minutes and start the one create-comment request within the same bounded
+      script. After creation, fetch the comment and require preflight Date <= API
+      created_at <= preflight Date + 60 seconds and created_at < expires_at <=
+      created_at + 30 minutes. Any failure consumes no dispatch authority; do not edit
+      the comment. Reissue requires the unchanged ACT-04 actor to create a new body
+      only after current drift checks, not a new Cloudflare token by default.
 
 affected_areas:
   - AGENTS.md

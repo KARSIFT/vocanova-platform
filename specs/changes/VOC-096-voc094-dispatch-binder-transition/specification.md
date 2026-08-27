@@ -48,6 +48,14 @@ the only dispatch revision. Those conditions have no fixed point.
   numeric ID `7955432`, type `User`, `site_admin=false`, association `MEMBER`.
   Equality to that API publisher authenticates only the relaying GitHub account; it
   does not prove governance actor identity, independence, or action authority.
+  `runtime_record_contract` is the exhaustive contract: a versioned closed API-envelope
+  projection, shared definitions, four closed body schemas, RFC-8785 raw-body rules,
+  schema/tuple digests whose digest field is excluded from its own hash, and exact
+  cross-record comparisons. PR1 binds those committed schema/version digests in the
+  manifest; the three later bodies bind that manifest hash. Thus seven values are
+  unambiguous: one prepared-tuple digest plus six contract digests (shared definitions,
+  envelope, four bodies). An implementation may add no field, definition, or
+  alternative serialization.
 - `VOC-096-D04` — ACT-03 remains after PR1 and under VOC-085-HOLD-00. PR2 remains a
   documentation-only truth reconciliation of exactly the five declared files. It may
   record sanitized ACT-03 evidence and the two secret names, never values, but it may
@@ -56,27 +64,32 @@ the only dispatch revision. Those conditions have no fixed point.
 - `VOC-096-D05` — After PR2 normally merges, a different-actor exact reviewer of the
   merged `develop` SHA relays a dedicated strict
   `vocanova-voc096-pr2-merged-sha-review-v1` JSON comment on issue #158. The record has
-  an exact canonical URL/raw-body SHA-256, trusted API publisher equality, distinct
-  governance reviewer actor ID/provenance URL/non-authorship statement, `PASS`, zero
-  blockers, and exact PR2 number/head/merge SHA/base/ref/five-file set, ACT-03
-  URL/digest, and hosted checks. It is unedited/unminimized and created strictly after
-  PR2's GitHub `merged_at`. Only after that record exists may the unchanged ACT-04
-  accountable actor relay one strict JSON authority record. It binds the ACT-03 and
+  distinct reviewer actor/nested provenance/non-authorship, `PASS`, zero blockers,
+  exact PR2 number/head/merge SHA/base/ref/five-file set, ACT-03 URL/digest, and hosted
+  checks. Its canonical URL, raw-body SHA-256, server timestamps, publisher, and
+  association are derived only from the fetched API envelope after one immutable post;
+  none is a body field. It is unedited/unminimized and created strictly after PR2's
+  GitHub `merged_at`. Only after that record exists may the unchanged ACT-04 accountable
+  actor relay one strict JSON authority body. It binds the ACT-03 and
   exact-PR2-review URLs/digests plus the exact PR2 number, head SHA, merge SHA,
   base/ref, merged time, manifest/workflow/policy digests, the complete
   `prepared_staging_tuple`, current smoke, Free plans, incremental cost `0`, unchanged
   Basic Load Balancing, production holds, a cryptographically random 128-bit-or-stronger
-  nonce, and `maximum_dispatches: 1`. Body `issued_at` must equal the authority
-  comment's GitHub server `created_at` exactly (zero clock skew), and `expires_at` is
-  no later than 30 minutes after that server timestamp.
+  nonce, `maximum_dispatches: 1`, and `expires_at`, but contains no `issued_at`, own
+  URL/digest, or API metadata. After creation, the immutable fetched API `created_at`
+  is the sole issuance time and must satisfy
+  `created_at < expires_at <= created_at + 30 minutes` without an edit. The prepared
+  publisher script sets `expires_at` to a fresh unauthenticated GitHub API `Date` plus
+  exactly 25 minutes, posts once, and requires comment `created_at` within 60 seconds
+  after that preflight Date. It never predicts or copies `created_at` into the body.
 - `VOC-096-D06` — A different non-author binder reviewer, with no authorship of the
   reviewed exact revision or authority record, re-fetches PR2 and ACT-03/ACT-04
   evidence and posts a second dedicated strict JSON comment on #158. It binds `PASS`,
-  the exact authority URL and raw-body SHA-256, ACT-03 and exact-PR2-review URLs/
+  the exact fetched authority-envelope URL and raw-body SHA-256, ACT-03 and exact-PR2-review URLs/
   digests, exact PR2 merge SHA, manifest/workflow/policy digests, the complete prepared
-  tuple, distinct reviewer actor ID/provenance/non-authorship, and zero blockers. The
+  tuple, distinct reviewer actor/exact nested provenance/non-authorship, and zero blockers. The
   review record is created strictly after the authority record and before dispatch.
-  Trusted publisher equality, pairwise-distinct actor IDs/provenance URLs, and the
+  Trusted publisher equality, pairwise-distinct actor IDs/session references, and the
   reviewer's attestation are evidence inputs; the gate and docs must never claim the
   shared GitHub publishing account alone proves separately instantiated actors.
 - `VOC-096-D07` — Dispatch inputs include the exact ACT-03, exact-PR2-review,
@@ -88,12 +101,18 @@ the only dispatch revision. Those conditions have no fixed point.
 - `VOC-096-D08` — In live mode the credential-free gate uses only public read-only
   unauthenticated GitHub REST requests and sends no `GITHUB_TOKEN` or authorization
   header. It re-fetches the ACT-03, exact-PR2-review, authority, and binder-review comments;
-  requires exact repository/issue association, strict JSON with no unknown keys,
-  exact committed publisher equality, distinct governance actor/provenance metadata,
-  `created_at == updated_at`, current raw-body digest, and the ordered GitHub server
+  requires exact repository/issue association, duplicate-key rejection, exact
+  RFC-8785 body bytes and closed body schema, a separately closed API-envelope
+  projection, exact committed publisher equality, distinct governance actor/provenance
+  metadata, `created_at == updated_at`, envelope-calculated raw-body digest, and the ordered GitHub server
   timestamps ACT-03 < PR2 merge < exact-PR2 review < authority < binder review <
   current-run creation. It fails closed on redirect, timeout, rate limit, pagination gap,
   malformed response, edit, deletion, minimization, actor/role collision, or mismatch.
+  Each of the two checks has an exact 18-request maximum and uses `per_page=100`:
+  one rate-limit preflight, four comment GETs, one PR GET, one PR-files page, one
+  current-run GET, and at most ten prior-run pages. Require at least 36 unauthenticated
+  requests remaining before the first pass and 18 before the second; never retry a
+  request inside a pass.
 - `VOC-096-D09` — The gate independently fetches PR2 metadata and every changed-file
   page. It requires merged state, `merge_commit_sha == event.sha == reviewed_sha`, base
   `develop`, required ref `refs/heads/develop`, the authority's exact PR2 number/head,
@@ -112,7 +131,8 @@ the only dispatch revision. Those conditions have no fixed point.
 - `VOC-096-D11` — Re-run the same live binder verification as the final credential-free
   step immediately before the first secret-bearing migration step. Both the current
   run's GitHub server `created_at` and the actual time of each live check must be
-  strictly before authority `expires_at`; timestamp skew is exactly zero. Credential
+  strictly before authority body `expires_at`; the authority envelope `created_at` is
+  the sole issue time and body-selected issuance is forbidden. Credential
   references remain step-scoped to the existing migration/upload/promotion/rollback
   steps. Neither gate receives Cloudflare secrets, and no fetched text is evaluated as
   shell, JavaScript, YAML, or workflow expression.
@@ -146,9 +166,12 @@ Only secret names and sanitized hashes/identifiers are recorded. Public GitHub
 readbacks are untrusted input and pass strict schema, size, host, content-type, and
 field allowlists before comparison.
 
-The ACT-03, merged-PR2 exact review, ACT-04 authority, and binder-review schemas are
-exhaustively defined by `runtime_record_contract` in `change.yaml`; implementation may
-add no unreviewed record type or field. All four comments must match the committed
-GitHub login, numeric ID, type, site-admin flag, and association. Their governance
-actor IDs and provenance records remain separately attributable evidence reviewed
-under AGENTS.md, not identities derived from GitHub's shared publisher fields.
+The ACT-03, merged-PR2 exact review, ACT-04 authority, and binder-review body schemas,
+shared definitions, separate API-envelope projection, raw-body canonicalization, and
+cross-record comparisons are exhaustively defined by `runtime_record_contract` in
+`change.yaml`; implementation may add no unreviewed record type or field. A body may
+reference an already-created earlier comment but never its own URL, digest, API
+timestamp, publisher, or association. All four fetched envelopes must match the
+committed GitHub login, numeric ID, type, site-admin flag, and association. Their
+governance actor IDs and exact nested provenance records remain separately attributable
+evidence reviewed under AGENTS.md, not identities derived from shared publisher fields.

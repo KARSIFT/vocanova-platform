@@ -40,6 +40,9 @@ is created only after the exact PR2 merge SHA exists.
    credential-free verification immediately before migration; and a network-free
    injected-fixture test path unavailable to workflow inputs. Never fetch or execute
    arbitrary URLs and never add GitHub-token permissions for these reads.
+   Implement the exact committed schema-bundle digests. Parse each RFC-8785 body with
+   duplicate-key rejection and separately project/validate fetched API envelope
+   metadata. A body never contains its own URL/digest/timestamps/publisher fields.
 4. Update all 27 declared package/living/executable/config/generated surfaces
    consistently. PR1 must say
    the GitHub staging environment remains absent/held/planned through its merge and
@@ -70,12 +73,19 @@ is created only after the exact PR2 merge SHA exists.
    diff, hosted checks, ACT-03 truth, manifest/workflow/policy hashes, staging resources,
    baselines/probes, current smoke, zero application rows/seven sealed migrations, Free
    plans, exact incremental cost `0`, unchanged Basic Load Balancing, and production
-   holds. Relay the dedicated strict exact-PR2-merged-SHA review record with trusted API
-   publisher equality, different governance actor provenance, PASS, and zero blockers.
+   holds. Relay the dedicated strict exact-PR2-merged-SHA body with trusted API
+   publisher equality established only from its later fetched envelope, exact nested
+   governance actor provenance, PASS, and zero blockers. After creation, fetch its
+   canonical URL, immutable server timestamps, and raw-body digest; none is
+   self-asserted in the body.
 9. Under the separately authorized VOC-094-ACT-04 only and strictly after the PR2 review
-   record, relay the strict authority record on issue #158 with `issued_at` exactly
-   equal to GitHub comment `created_at`, expiry at most 30 minutes later, and a one-use
-   nonce. A different non-author reviewer re-fetches ACT-03, PR2 review, authority, PR/
+   record, relay the strict authority body on issue #158 with a proposed `expires_at`
+   and one-use nonce but no `issued_at`, self URL, self digest, or server timestamp.
+   Use the already reviewed publisher script: fetch a GitHub API `Date`, set body
+   `expires_at` to exactly 25 minutes later, and create the comment once within 60
+   seconds. Immediately fetch the created comment; its immutable API `created_at` is the sole
+   issuance time and must satisfy `created_at < expires_at <= created_at + 30 minutes`
+   without an edit. A different non-author reviewer re-fetches ACT-03, PR2 review, authority, PR/
    run metadata, and the exact tuple, then relays the strict binder-review record.
    Never put a token value in any record. GitHub publisher equality authenticates the
    relayer only; separately reviewed actor/provenance records establish role separation.

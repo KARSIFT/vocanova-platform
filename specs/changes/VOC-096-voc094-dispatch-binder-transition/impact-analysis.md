@@ -6,7 +6,9 @@ The implementation changes a security-critical authorization gate but adds no wr
 permission. Public GitHub responses are hostile input. Strict host/path/content-type/
 size/schema/actor/time/digest checks, no dynamic evaluation, injected offline fixtures,
 and fail-closed network handling constrain that risk. The post-binder reviewer prevents
-an authority record's self-asserted body digest from becoming its own proof.
+an authority body from becoming its own proof. Every comment URL, raw-body digest,
+server timestamp, publisher field, and association is derived from the fetched API
+envelope rather than asserted inside that same body.
 
 The committed GitHub login/numeric-ID/type/site-admin/association allowlist is a trust
 root only for the API publisher. Different governance actors may be relayed through the
@@ -39,8 +41,9 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
 - `VOC-096-R00`: runtime evidence could target PR1 rather than PR2. Mitigation: fetch
   PR2 metadata/files and require its merge commit to equal the event SHA.
 - `VOC-096-R01`: an authority comment could be edited, stale, or self-attested.
-  Mitigation: current raw-body hashing, `created_at == updated_at`, bounded expiry, and
-  a later different-actor binder-review record bound to the authority digest.
+  Mitigation: current envelope-derived raw-body hashing, `created_at == updated_at`, no
+  body self-URL/self-digest/server-time fields, bounded expiry, and a later
+  different-actor binder-review record bound to the authority envelope digest.
 - `VOC-096-R02`: a valid record could be replayed. Mitigation: 128-bit nonce, digest-
   bound run name, first-attempt-only, environment concurrency, and exhaustive prior-run
   readback through the authority window. Every attempt consumes the record.
@@ -69,9 +72,10 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
 - `VOC-096-R10`: an authority could self-assert that exact PR2 review occurred.
   Mitigation: require a distinct fetchable merged-PR2-review URL/digest/schema created
   after merge and bound by the later authority, binder review, and dispatch inputs.
-- `VOC-096-R11`: body-selected issuance time could extend authority. Mitigation:
-  `issued_at == authority.created_at`, zero skew, `expires_at <= created_at + 30m`,
-  strict server-time ordering, and both live checks before expiry.
+- `VOC-096-R11`: body-selected issuance time could extend authority. Mitigation: the
+  authority API envelope's immutable `created_at` is the only issuance time; the body
+  has no `issued_at`; `created_at < expires_at <= created_at + 30m`; strict server-time
+  ordering and both live checks before expiry remain mandatory.
 - `VOC-096-R12`: generic issue history or stale generated types could select the wrong
   Cloudflare state. Mitigation: commit the full resource/domain/certificate/DNS/
   baseline/probe/evidence/hash tuple, include both generated type files, and reject

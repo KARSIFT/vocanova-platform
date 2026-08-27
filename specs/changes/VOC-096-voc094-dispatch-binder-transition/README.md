@@ -32,6 +32,13 @@ shape:
    Missing, edited, stale, replayed, unreachable, or mismatched evidence blocks before
    an environment job or Cloudflare secret is reached.
 
+The package commits a versioned closed schema bundle for the four JSON bodies and a
+separate fetched GitHub API-envelope projection. Comment IDs/URLs, server timestamps,
+publisher metadata, and raw-body SHA-256 are envelope facts computed only after fetch;
+no body contains its own URL/hash or predicts a server field. The ACT-04 envelope's
+immutable `created_at` is the sole issuance time, and its body contains only the later
+`expires_at` bound.
+
 The manifest commits the exact trusted GitHub publisher login/numeric ID/association.
 That authenticates only the account relaying issue comments; separately attributable
 actor/provenance records and reviews establish governance role separation. The package
