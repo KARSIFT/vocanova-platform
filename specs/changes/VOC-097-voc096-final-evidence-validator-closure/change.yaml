@@ -1,0 +1,308 @@
+schema_version: 1
+
+id: VOC-097
+slug: voc096-final-evidence-validator-closure
+title: Close the VOC-096 final-evidence validator scope gap
+type: governance-delivery-policy-correction
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because implementation changes a repository-owned final-evidence validator for
+  the Cloudflare delivery authorization boundary and reconciles the exact scope of an
+  adopted R4 package. It must preserve the complete VOC-096 prepared-binder gate,
+  production holds, exact-revision review, rollback, cost, secret, and no-external-
+  action boundaries.
+canonical_path: specs/changes/VOC-097-voc096-final-evidence-validator-closure
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/166
+related_activation_issue: https://github.com/KARSIFT/vocanova-platform/issues/158
+related_governance_bug: https://github.com/KARSIFT/vocanova-platform/issues/164
+requirement_approval_status: pending-independent-plan-review-and-accountable-adoption
+base_branch: develop
+base_sha: 8b902830e25583b1dbb1190708c3b777a28ec635
+plan_branch: plan/voc-097-voc096-validator-closure
+target_branch: develop
+approved_candidate_sha: null
+approval_status: pending
+implementation_authorized: false
+implementation_authority_status: >-
+  prohibited-until-exact-plan-review-accountable-adoption-complete-bookkeeping-
+  genuine-eligibility-normal-non-author-plan-merge-and-applicable-postmerge-checks;
+  all-external-actions-remain-separately-held
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-resumes-the-single-preserved-VOC-096-PR1
+automatic_merge_allowed: true
+production_impact: prohibited
+rollback_required: true
+
+objective: >-
+  Through the preserved VOC-096 PR1, add exactly the two omitted VOC-080 final-
+  evidence validator paths, fail-closed permit prepared staging only through the
+  complete VOC-096 delivery validator, preserve legacy held evidence and every
+  production hold, and reconcile exact scope/count across the operative VOC-096 and
+  VOC-094 package surfaces without any live-system action.
+
+defect:
+  reproduction:
+    command: node --test scripts/foundation/voc080-final-evidence-policy.test.mjs
+    result: 5-of-6-pass-repository-positive-test-fails
+    errors:
+      - staging delivery manifest must remain held
+      - delivery manifest status must remain held
+  root_cause: >-
+    The legacy VOC-080 closure validator hard-codes top-level and staging held state.
+    Adopted VOC-096 requires the complete validated staging-only prepared state while
+    remaining dispatch-ineligible, but omitted the legacy validator and paired test
+    from its exact 27-path PR1 core.
+  safe_state: >-
+    The preserved VOC-096 PR1 worktree contains only its reviewed original scope; the
+    two omitted paths are untouched; no implementation commit, push, or PR exists;
+    no external action occurred; Phase-1/2 evidence and production holds remain valid.
+
+requirements:
+  - id: VOC-097-D00
+    statement: >-
+      Issue 166 is a bug report only. No implementation begins until exact plan review,
+      adoption, effectiveness bookkeeping, genuine eligibility, normal non-author plan
+      merge, and applicable post-merge checks pass.
+  - id: VOC-097-D01
+    statement: >-
+      Resume the preserved VOC-096 PR1 branch/worktree without reset, recreation,
+      destructive checkout, discard, or overwrite. Preserve dirty VOC-090 and every
+      worktree, branch, and recovery ref.
+  - id: VOC-097-D02
+    statement: >-
+      Expand the VOC-096 PR1 core from 27 to exactly 29 authorized paths by adding only
+      scripts/foundation/voc080-final-evidence-policy.mjs and its paired test. Reconcile
+      the nine VOC-096 package files in the same implementation PR, producing exactly
+      38 authorized paths total. The nine VOC-094 files remain within the core. A 39th
+      path or an omitted required reconciliation is blocking drift.
+  - id: VOC-097-D03
+    statement: >-
+      Preserve legacy held transition evidence. Accept only held/held legacy state or
+      prepared/prepared staging state; reject all other top-level/staging combinations.
+  - id: VOC-097-D04
+    statement: >-
+      Accept prepared only by composing with the complete current Cloudflare delivery
+      repository validator for the exact manifest, Wrangler configs, closed runtime
+      contract, prepared tuple, schema bundle, eight binders, resources, baselines,
+      cost, privacy, production, and dispatch-ineligible invariants. Do not create a
+      partial duplicated exception.
+  - id: VOC-097-D05
+    statement: >-
+      Production remains held; every production sentinel and VOC-080-HOLD-01/HOLD-02
+      remains unchanged. Historical transition-record action holds remain held evidence.
+  - id: VOC-097-D06
+    statement: >-
+      Reject committed authorized, active, or unknown state. Prepared state never
+      supplies standing dispatch authority and remains ineligible without the later
+      live five-record runtime binder.
+  - id: VOC-097-D07
+    statement: >-
+      Add deterministic positives for exact prepared repository and legacy held fixture,
+      plus negatives for malformed or mismatched prepared state, missing binder,
+      tuple/schema/manifest/digest drift, production activation, hold weakening,
+      generic URL fallback, self-asserted authority/envelope facts, and premature
+      dispatch eligibility.
+  - id: VOC-097-D08
+    statement: >-
+      Preserve every VOC-096 exact-SHA, URL/ID, body/envelope, replay, expiry, two-
+      runtime JCS, request-budget, Free-zero-cost, Basic-Load-Balancing, secret,
+      rollback, and production gate. Never weaken an existing delivery gate.
+  - id: VOC-097-D09
+    statement: >-
+      Run complete VOC-096 PR1 local/hosted validation and obtain separate exact-SHA
+      Cloudflare, security/settings, and independent R4 PASS reviews before a distinct
+      non-author merge. Material edits require fresh checks and reviews.
+  - id: VOC-097-D10
+    statement: >-
+      Authorize repository work only. Cloudflare, DNS, D1, GitHub settings/secrets,
+      credentials, dispatch, deployment, migration, traffic, spending, production,
+      data, main promotion, and launch remain prohibited by this package; unchanged
+      VOC-094-ACT-03/04/05 and VOC-085-HOLD-00 remain separate.
+
+owners:
+  decision: accountable-governance-decision-owner-after-independent-plan-review
+  package_preparation: separate-VOC-097-plan-author-actor
+  implementation: existing-different-VOC-096-builder-after-adoption
+  cloudflare_specialist: different-non-author-exact-revision-actor
+  security_settings_specialist: different-non-author-exact-revision-actor
+  independent_verification: different-non-author-exact-revision-R4-reviewer
+  merge: separate-authorized-non-author-merge-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+delivery_shape:
+  plan_pull_request:
+    count: 1
+    file_count: 9
+    files:
+      - README.md
+      - change.yaml
+      - specification.md
+      - acceptance-criteria.md
+      - impact-analysis.md
+      - implementation-plan.md
+      - tasks.md
+      - test-plan.md
+      - release-plan.md
+  implementation_pull_requests:
+    count: 1
+    mapping: preserved-VOC-096-PR1
+    original_core_file_count: 27
+    corrected_core_file_count: 29
+    correction_record_file_count: 9
+    total_authorized_path_count: 38
+    added_core_files:
+      - scripts/foundation/voc080-final-evidence-policy.mjs
+      - scripts/foundation/voc080-final-evidence-policy.test.mjs
+    corrected_core_files:
+      - AGENTS.md
+      - .github/README.md
+      - .github/workflows/ci.yml
+      - apps/api-worker/wrangler.jsonc
+      - apps/api-worker/worker-configuration.d.ts
+      - apps/web/wrangler.jsonc
+      - apps/web/worker-configuration.d.ts
+      - infrastructure/cloudflare/delivery-manifest.json
+      - scripts/foundation/cloudflare-delivery-policy.mjs
+      - scripts/foundation/cloudflare-delivery-policy.test.mjs
+      - scripts/foundation/voc080-final-evidence-policy.mjs
+      - scripts/foundation/voc080-final-evidence-policy.test.mjs
+      - docs/governance/16-autonomous-development-operating-model.md
+      - docs/governance/repository-settings.md
+      - docs/governance/repository-settings-current.yaml
+      - docs/operations/11-devops-and-ci-cd.md
+      - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+      - docs/operations/cloudflare-delivery.md
+      - docs/operations/ruflo-external-orchestration.md
+      - docs/product/12-mvp-implementation-plan.md
+      - specs/changes/VOC-094-f3-staging-activation/README.md
+      - specs/changes/VOC-094-f3-staging-activation/change.yaml
+      - specs/changes/VOC-094-f3-staging-activation/specification.md
+      - specs/changes/VOC-094-f3-staging-activation/acceptance-criteria.md
+      - specs/changes/VOC-094-f3-staging-activation/impact-analysis.md
+      - specs/changes/VOC-094-f3-staging-activation/implementation-plan.md
+      - specs/changes/VOC-094-f3-staging-activation/tasks.md
+      - specs/changes/VOC-094-f3-staging-activation/test-plan.md
+      - specs/changes/VOC-094-f3-staging-activation/release-plan.md
+    voc096_reconciliation_files:
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/README.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/change.yaml
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/specification.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/acceptance-criteria.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/impact-analysis.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/implementation-plan.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/tasks.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/test-plan.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/release-plan.md
+    generated_type_rule: >-
+      Both generated Worker type paths remain in the corrected core and must be
+      regenerated and checked with locked Wrangler 4.125.0. A byte-identical result is
+      recorded as validation evidence and need not be fabricated as a changed diff.
+
+protected_areas:
+  - cloudflare-delivery-authorization
+  - VOC-080-final-evidence-validator
+  - exact-revision-independent-review
+  - github-environment-and-secret-boundary
+  - production-holds-and-sentinels
+  - incremental-zero-cost-gate
+  - dirty-worktree-and-recovery-references
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    status: draft-bound-to-issue-166
+    evidence: specification.md
+  impact_assessment:
+    required: true
+    status: draft
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    status: draft-repository-revert-only
+    evidence: release-plan.md
+  deterministic_evidence:
+    required: true
+    status: pending-plan-and-implementation-validation
+    evidence: test-plan.md
+  cloudflare_specialist_evidence:
+    required: true
+    status: pending-exact-revision-review
+    scope: prepared-delivery-validation-resource-baseline-cost-production-holds
+  security_settings_specialist_evidence:
+    required: true
+    status: pending-exact-revision-review
+    scope: authority-envelope-generic-URL-secret-settings-production-boundaries
+  independent_exact_revision_evidence:
+    required: true
+    status: pending-exact-revision-R4-review
+  action_authority:
+    required: false
+    status: no-external-action-authority-in-this-package
+    evidence: specification.md
+
+affected_areas:
+  - scripts/foundation/voc080-final-evidence-policy.mjs
+  - scripts/foundation/voc080-final-evidence-policy.test.mjs
+  - specs/changes/VOC-094-f3-staging-activation
+  - specs/changes/VOC-096-voc094-dispatch-binder-transition
+  - specs/changes/VOC-097-voc096-final-evidence-validator-closure
+
+implementation:
+  authorized: false
+  authority_effective: false
+  required: true
+  status: draft-pending-independent-review-adoption-and-effectiveness-gates
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-097-T00
+  resume_worktree: /tmp/vocanova-voc094-pr1
+  resume_branch: impl/voc-094-f3-staging-activation-pr1
+
+release:
+  required: false
+  mode: repository-only-correction-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: issue-166-after-reviewed-implementation-merge-and-postmerge-evidence
+
+external_effects:
+  cloudflare: prohibited
+  dns: prohibited
+  github_settings_and_secrets: prohibited
+  credentials: prohibited
+  workflow_dispatch: prohibited
+  deployment_and_traffic: prohibited
+  migrations_and_data: prohibited
+  spending_and_billing: prohibited
+  production_and_production_data: prohibited
+  public_launch: prohibited
+  main_promotion: prohibited
+  branch_worktree_or_recovery_ref_deletion: prohibited
+
+preserved_holds:
+  github_settings: VOC-085-HOLD-00
+  remaining_actions: [VOC-094-ACT-03, VOC-094-ACT-04, VOC-094-ACT-05]
+  production: VOC-080-HOLD-01
+  production_data: VOC-080-HOLD-02
+
+ehr: not-triggered
+repository_adoption_status: draft-not-adopted
+adoption_pr: null
+adoption_evidence: null
+blocking_reasons:
+  - exact-plan-cloudflare-security-settings-and-independent-R4-reviews-pending
+  - accountable-adoption-and-effectiveness-bookkeeping-pending
+  - preserved-VOC-096-PR1-remains-paused
+  - external-actions-remain-separately-held-and-are-not-authorized-by-VOC-097
