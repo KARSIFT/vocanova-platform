@@ -4,7 +4,7 @@ id: VOC-100
 slug: standard-cloudflare-delivery
 title: Standard Cloudflare Environment Delivery
 type: cloudflare-delivery-control-simplification
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because implementation changes the first secret-bearing Cloudflare delivery
@@ -27,19 +27,22 @@ preserved_historical_packages:
   - VOC-097
   - VOC-098
   - VOC-099
-requirement_approval_status: pending-independent-plan-review-and-accountable-adoption
+requirement_approval_status: >-
+  exact-cloudflare-wrangler-security-settings-and-independent-R4-plan-review-pass-
+  and-accountable-VOC-100-ADOPT-01-approved
 base_branch: develop
 base_sha: 2b946024cae036a494494665cd08f5243911e529
 plan_branch: plan/voc-100-simplify-cloudflare-delivery
 target_branch: develop
-approved_candidate_sha: null
-approval_status: pending
-implementation_authorized: false
+approved_candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+approval_status: adopted
+implementation_authorized: true
 implementation_authority_status: >-
-  prohibited-while-draft; before-plan-merge-bookkeeping-must-record-the-exact-
-  reviewed-candidate-status-adopted-and-implementation-authorized-true; once-that-
-  adopted-package-is-on-develop-its-declared-repository-only-authority-is-usable-
-  without-a-future-self-effectiveness-package
+  authorized-by-the-three-exact-candidate-reviews-and-VOC-100-ADOPT-01-for-the-
+  declared-repository-only-two-PR-implementation; usable-once-this-adopted-package-
+  is-on-develop-without-a-future-self-effectiveness-package; fresh-exact-bookkeeping-
+  review-eligibility-and-normal-non-author-plan-merge-remain-required-process; all-
+  external-actions-remain-separately-held
 implementation_pull_request_count: 2
 multiple_pull_request_rationale: >-
   A hard GitHub-settings action-authority and truth boundary requires the repository
@@ -67,11 +70,13 @@ objective: >-
 requirements:
   - id: VOC-100-D00
     statement: >-
-      Issue 173 and chat grant no repository implementation. While draft,
-      implementation is prohibited. Before plan merge, exact candidate reviews and
-      accountable adoption must record status adopted and implementation.authorized
-      true. The adopted package must not encode authority_effective false, a future
-      self-referential bookkeeping dependency, or a follow-up plan requirement.
+      Issue 173 and chat alone granted no repository implementation. Exact candidate
+      e5f908c88d15c41bae0f1b1306708f0df7751ae5 received three zero-blocker reviews
+      and VOC-100-ADOPT-01. This bookkeeping revision truthfully records status
+      adopted and implementation.authorized true. It does not encode authority_effective
+      false, a future self-referential bookkeeping dependency, or a follow-up plan
+      requirement. Fresh exact-bookkeeping review, eligibility, and normal non-author
+      merge remain required process and grant no external authority.
   - id: VOC-100-D01
     statement: >-
       Preserve the merged PR-168 staging resources, hostnames, D1 identity and eeur
@@ -304,25 +309,61 @@ plan_review_history:
     resolution_status: >-
       immutable-pass-for-exact-old-candidate-only; fresh-review-required-because-
       receipt-order-authenticated-proxy-and-residual-risk-acceptance-changed
+  - candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    verdict: pass-cloudflare-wrangler-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312511
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-proxy-dispatch-
+      Cloudflare-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    verdict: pass-security-settings-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312667
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-proxy-dispatch-
+      Cloudflare-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    verdict: pass-independent-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312786
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-proxy-dispatch-
+      Cloudflare-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    verdict: adopted-for-declared-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446324840
+    resolution_status: >-
+      VOC-100-ADOPT-01-authorizes-only-the-declared-repository-implementation-once-
+      the-adopted-package-is-on-develop; every-external-action-remains-held
 
 approvals:
   cloudflare_wrangler_plan_review:
-    status: pending
-    candidate_sha: null
-    evidence: null
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312511
   security_settings_plan_review:
-    status: pending
-    candidate_sha: null
-    evidence: null
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312667
   independent_R4_plan_review:
-    status: pending
-    candidate_sha: null
-    evidence: null
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312786
   adoption_decision:
-    status: pending
-    decision_id: null
-    candidate_sha: null
-    evidence: null
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-100-ADOPT-01
+    candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446324840
+
+approved_candidate_hosted_evidence:
+  candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/33125084264
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/33125084255
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33125113521
+    structure_and_changed_path_risk: pass
+    eligibility: fail-closed-before-adoption-bookkeeping-evidence
 
 artifacts:
   readme: README.md
@@ -386,34 +427,36 @@ protected_areas:
 required_r4_evidence:
   decision_record:
     required: true
-    status: pending-independent-exact-candidate-review-and-adoption
+    status: approved-candidate-reviewed-and-adopted
     evidence: specification.md
   impact_assessment:
     required: true
-    status: pending-independent-exact-candidate-review
+    status: pass-approved-candidate
     evidence: impact-analysis.md
   contingency_and_rollback:
     required: true
-    status: pending-independent-exact-candidate-review
+    status: pass-approved-candidate
     evidence: release-plan.md
   deterministic_evidence:
     required: true
-    status: pending-plan-local-and-hosted-checks
+    status: pass-approved-candidate-local-and-hosted-checks
     evidence: test-plan.md
   cloudflare_specialist_evidence:
     required: true
-    status: pending-exact-candidate-review
+    status: pass-approved-candidate-zero-blockers
     scope: Workers-Wrangler-D1-versions-token-scope-cost-and-production-holds
-    evidence: null
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312511
   security_settings_specialist_evidence:
     required: true
-    status: pending-exact-candidate-review
+    status: pass-approved-candidate-zero-blockers
     scope: GitHub-environment-branch-policy-secret-lifetime-redaction-and-action-authority
-    evidence: null
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312667
   independent_exact_revision_evidence:
     required: true
-    status: pending-exact-candidate-review
-    evidence: null
+    status: >-
+      approved-candidate-pass-zero-blockers; fresh-changed-bookkeeping-SHA-review-
+      pending-before-merge
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312786
   action_authority:
     required: true
     status: >-
@@ -429,12 +472,12 @@ affected_areas:
   - living-governance-and-operations-documents
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
   status: >-
-    prohibited-while-draft; before-plan-merge-replace-with-truthful-adopted-
-    repository-implementation-authorized-status-with-no-future-self-effectiveness-
-    condition
+    adopted-and-authorized-for-the-declared-repository-only-two-PR-implementation-
+    usable-once-this-package-is-on-develop-with-no-future-self-effectiveness-
+    condition; all-external-actions-remain-separately-held
   target_branch: develop
   pull_request_count: 2
   task: VOC-100-T00
@@ -467,7 +510,7 @@ release:
   issue_closure: after-implementation-merge-settings-readback-and-first-successful-staging-dispatch
 
 external_effects:
-  cloudflare: prohibited-by-this-draft
+  cloudflare: prohibited-by-this-package-adoption-without-separate-exact-authority
   dns: prohibited
   github_settings_and_secrets: prohibited-without-separate-exact-authority
   credentials: prohibited-without-separate-exact-authority
@@ -479,11 +522,10 @@ external_effects:
   main_promotion: prohibited
 
 ehr: not-triggered
-repository_adoption_status: draft-not-adopted
-adoption_pr: null
-adoption_evidence: null
-blocking_reasons:
-  - exact-plan-cloudflare-security-settings-and-independent-R4-reviews-pending
-  - accountable-adoption-and-final-premerge-bookkeeping-pending
-  - repository-implementation-prohibited-until-adoption
-  - all-external-actions-remain-separately-held
+repository_adoption_status: adopted-repository-implementation-authorized
+adoption_pr: 174
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446324840
+remaining_process_and_scope_constraints:
+  - fresh-exact-bookkeeping-review-evidence-v1-genuine-eligibility-and-normal-non-author-plan-merge-required
+  - declared-repository-implementation-is-usable-only-once-this-package-is-on-develop
+  - all-settings-secrets-approval-proxy-dispatch-Cloudflare-and-production-actions-remain-separately-held

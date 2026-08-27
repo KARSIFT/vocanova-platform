@@ -8,7 +8,8 @@
 - Evidence: `VOC-100-EV-00` through `VOC-100-EV-05`
 - Implementation pull-request mapping: ordered delivery-control PR followed after the
   separately authorized settings action by one documentation-only settings-truth PR
-- Status: draft; implementation prohibited pending exact review and adoption
+- Status: adopted; repository-only implementation authorized once this package is on
+  `develop`; all external actions remain separately held
 
 The task includes workflow, policy, tests, manifest, all living documentation,
 sanitized one-time GitHub settings readback, full validation, exact-SHA reviews,

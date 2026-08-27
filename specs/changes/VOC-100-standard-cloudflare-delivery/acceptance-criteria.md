@@ -6,7 +6,9 @@
 - Task: `VOC-100-T00`
 - Tests: `VOC-100-TEST-00`
 - Evidence: `VOC-100-EV-00`
-- Result: pending
+- Result: satisfied by `VOC-100-ADOPT-01` for approved candidate
+  `e5f908c88d15c41bae0f1b1306708f0df7751ae5`; final bookkeeping-SHA review and
+  normal plan merge remain required process
 
 Before plan merge, the exact reviewed candidate is recorded as adopted with both
 implementation authorization fields true. The adopted package contains no false

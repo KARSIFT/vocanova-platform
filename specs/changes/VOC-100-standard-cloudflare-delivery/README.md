@@ -1,6 +1,7 @@
 # VOC-100 — Standard Cloudflare Environment Delivery
 
-Status: draft; implementation is not authorized.
+Status: adopted; the declared repository-only implementation is authorized once this
+package is merged to `develop`. All external actions remain separately held.
 
 This package replaces the still-future operational parts of the VOC-094/VOC-096
 custom five-record runtime binder with standard GitHub environment controls. It is

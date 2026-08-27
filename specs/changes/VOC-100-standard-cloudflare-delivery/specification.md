@@ -7,7 +7,7 @@ the custom five-record binder is an operational defect: it duplicates GitHub rev
 and check evidence, couples credential expiry to bookkeeping, and has already caused
 multiple corrective packages without producing a staging dispatch.
 
-This draft defines one prospective supersession. It does not rewrite VOC-094 through
+This adopted package defines one prospective supersession. It does not rewrite VOC-094 through
 VOC-099; those remain historical evidence. Where their still-future delivery
 instructions conflict with an adopted VOC-100, VOC-100 controls.
 
