@@ -83,6 +83,29 @@ plan_review_history:
       fixed point while retaining strict server-time expiry and ordering. This review
       explicitly cleared the prepared Cloudflare tuple and domain IDs. No verdict
       transfers.
+  - candidate_sha: f73e7cb535ca696331c251406519e9a3c5a991bb
+    verdict: fail-independent-R4-two-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5439392123
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate removes the contradictory
+      canonical-comment URL length floor and allocates an exact check-runs read whose
+      closed projection is bound to the PR2 merge SHA. No verdict transfers.
+  - candidate_sha: f73e7cb535ca696331c251406519e9a3c5a991bb
+    verdict: fail-security-settings-three-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5439400690
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate caps API integer IDs at
+      the RFC-8785/ECMAScript safe-integer ceiling, fetches the separately authorized
+      VOC-085 settings record, and makes the Phase-4 token expiry an executable stop
+      across PR2, all binders, the run, and the first secret-bearing step. No verdict
+      transfers.
+  - candidate_sha: f73e7cb535ca696331c251406519e9a3c5a991bb
+    verdict: fail-cloudflare-wrangler-two-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5439446542
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate accepts real canonical
+      ten-digit comment URLs and requires two independent runtime implementations to
+      recompute every affected RFC-8785 digest. No verdict transfers.
 
 owners:
   decision: accountable-governance-decision-owner-after-independent-plan-review
@@ -175,7 +198,7 @@ publisher_trust_root:
     numeric_id: 7955432
     type: User
     site_admin: false
-    author_association: MEMBER
+    author_association: CONTRIBUTOR
   interpretation: >-
     These committed values authenticate only the GitHub account that publishes or
     relays a canonical record. They do not prove that the governance actor named in a
@@ -183,6 +206,11 @@ publisher_trust_root:
     actor independence requires distinct attributable actor IDs and provenance records,
     non-authorship evidence, and independent review under AGENTS.md; the shared trusted
     publisher account is not actor identity or action authority.
+  unauthenticated_observation: >-
+    The live contract is unauthenticated, and public issue-comment GET responses for
+    the intended publisher report author_association CONTRIBUTOR. An authenticated
+    `gh api` response may report MEMBER for the same comment; that credential-dependent
+    observation is not the live gate's trust root and must not be substituted.
 
 prepared_staging_tuple:
   evidence:
@@ -353,6 +381,7 @@ runtime_record_contract:
       - bundle_version
       - shared_definitions_sha256
       - api_envelope_schema_sha256
+      - settings_authority_body_schema_sha256
       - act03_body_schema_sha256
       - pr2_exact_review_body_schema_sha256
       - act04_authority_body_schema_sha256
@@ -364,16 +393,17 @@ runtime_record_contract:
       verification recomputes and equality-checks them. No schema digest is supplied
       by workflow input or a comment body.
     executable_chain: >-
-      The six contract digests are shared definitions, API envelope, and four body
+      The seven contract digests are shared definitions, API envelope, and five body
       schemas. Every body schema resolves its #/$defs references from the exact shared
       definitions mapping. The PR2-review, authority, and binder-review bodies bind the
       exact delivery manifest through executable_digests.manifest_sha256; that manifest
-      carries all six values. Runtime recomputes all six before body validation, then
-      compares the body-bound manifest hash. No leaf schema embeds its own digest.
-    shared_definitions_sha256: 3a8a53234a70ef3f36a3257f9211c804d12b6d74e21e0f662250d1e5d1e2d637
-    api_envelope_schema_sha256: 5a4b65c711329b64f0c25bfdba9ea4d2fcae148b24b8b53a10ba6d7cc5c77e18
-    act03_body_schema_sha256: a159b12f43941e0368fcb4a512ee9b372a7f8d078e4341c9e1957e87f5ad6923
-    pr2_exact_review_body_schema_sha256: 190e752db9779a41c728747ae84e539fd1e8989e802cf819a1e6c595b6170f09
+      carries all seven values. Runtime recomputes all seven before body validation,
+      then compares the body-bound manifest hash. No leaf schema embeds its own digest.
+    shared_definitions_sha256: 248a5926d0c080dd7a36adaa695482e9fb5a3b519e2e0de67c0ae5b9625c2f37
+    api_envelope_schema_sha256: 7574c85c30f37ca0fa969358683b47a9d40abae36c0dbbe61b65eac5961f67de
+    settings_authority_body_schema_sha256: 50bcce2789f3f20513c03a59f960bd8a2796b3b7d2815a619676ecba644b5337
+    act03_body_schema_sha256: e4f82b8d069463a4af8a3a96ac22e7ff59947b696402d324b7800360ee320e72
+    pr2_exact_review_body_schema_sha256: b1332adde35e0c06503edde6deaf21b8eee57c298d268dcab8bf5a62abbc22f1
     act04_authority_body_schema_sha256: ac2815ef550b26ce23ff25ad75e310cfbc22713c14ce8f2595e7e27267c0f372
     binder_review_body_schema_sha256: c70ae327b0e547d6e46df2ebaedcf7e30ce08b10575915fe8df9bf8503be1597
   raw_body_contract:
@@ -390,13 +420,20 @@ runtime_record_contract:
       A duplicate-key-detecting UTF-8 JSON parser must reject duplicate object member
       names before ordinary JSON parsing. Non-finite numbers, invalid Unicode/control
       characters, unknown keys, and values outside the closed schemas fail closed.
+    digest_recomputation: >-
+      PR1 tests and the exact-revision review independently recompute the prepared
+      tuple plus the shared-definitions, API-envelope, and five body-schema digests in
+      two independent RFC-8785 implementations: one ECMAScript runtime and one Python
+      runtime. All sixteen results (eight mappings times two runtimes) must equal each
+      other and the committed values. The implementations reject integers outside the
+      inclusive ECMAScript safe-integer range before canonicalization.
     self_reference_rule: >-
       No record body contains its own comment ID, URL, raw-body digest, created_at,
       updated_at, publisher, or author_association. Those values exist only in the API
       envelope after creation. A body may reference only already-created earlier
       records by URL and raw-body digest.
   shared_definitions:
-    schema_sha256: 3a8a53234a70ef3f36a3257f9211c804d12b6d74e21e0f662250d1e5d1e2d637
+    schema_sha256: 248a5926d0c080dd7a36adaa695482e9fb5a3b519e2e0de67c0ae5b9625c2f37
     sha256:
       type: string
       pattern: "^[0-9a-f]{64}$"
@@ -412,12 +449,10 @@ runtime_record_contract:
     canonical_comment_url:
       type: string
       pattern: "^https://github\\.com/KARSIFT/vocanova-platform/issues/158#issuecomment-[1-9][0-9]{0,19}$"
-      minLength: 80
       maxLength: 120
-    github_details_url:
+    check_run_details_url:
       type: string
-      pattern: "^https://github\\.com/KARSIFT/vocanova-platform/(actions/runs|pull)/[1-9][0-9]{0,19}(/job/[1-9][0-9]{0,19})?(#.*)?$"
-      minLength: 55
+      pattern: "^https://github\\.com/KARSIFT/vocanova-platform/actions/runs/[1-9][0-9]{0,19}/job/[1-9][0-9]{0,19}$"
       maxLength: 180
     record_reference:
       type: object
@@ -441,6 +476,7 @@ runtime_record_contract:
         role:
           type: string
           enum:
+            - settings-accountable-authority
             - github-settings-operator
             - merged-pr2-exact-reviewer
             - act04-accountable-actor
@@ -593,17 +629,41 @@ runtime_record_contract:
     hosted_check:
       type: object
       additionalProperties: false
-      required: [name, conclusion, details_url, completed_at]
+      required:
+        - name
+        - head_sha
+        - check_run_id
+        - check_suite_id
+        - app_id
+        - app_slug
+        - status
+        - conclusion
+        - details_url
+        - started_at
+        - completed_at
       properties:
         name:
+          enum: [ci required, security required, structure]
+        head_sha:
+          $ref: "#/$defs/git_sha"
+        check_run_id:
           type: string
-          pattern: "^[A-Za-z0-9][A-Za-z0-9 ./_()':-]{2,127}$"
-          minLength: 3
-          maxLength: 128
+          pattern: "^[1-9][0-9]{0,15}$"
+        check_suite_id:
+          type: string
+          pattern: "^[1-9][0-9]{0,15}$"
+        app_id:
+          const: 15368
+        app_slug:
+          const: github-actions
+        status:
+          const: completed
         conclusion:
           const: success
         details_url:
-          $ref: "#/$defs/github_details_url"
+          $ref: "#/$defs/check_run_details_url"
+        started_at:
+          $ref: "#/$defs/rfc3339_utc_second"
         completed_at:
           $ref: "#/$defs/rfc3339_utc_second"
     compilation_rule: >-
@@ -613,12 +673,13 @@ runtime_record_contract:
       after removing schema_id and schema_sha256. No other definition or keyword is
       injected. Schema compilation failure blocks delivery.
   api_envelope_schema:
-    schema_sha256: 5a4b65c711329b64f0c25bfdba9ea4d2fcae148b24b8b53a10ba6d7cc5c77e18
+    schema_sha256: 7574c85c30f37ca0fa969358683b47a9d40abae36c0dbbe61b65eac5961f67de
     type: object
     additionalProperties: false
     required:
       - comment_id
       - html_url
+      - issue_url
       - created_at
       - updated_at
       - raw_body_sha256
@@ -630,9 +691,11 @@ runtime_record_contract:
       comment_id:
         type: integer
         minimum: 1
-        maximum: 9999999999999999999
+        maximum: 9007199254740991
       html_url:
         $ref: "#/$defs/canonical_comment_url"
+      issue_url:
+        const: https://api.github.com/repos/KARSIFT/vocanova-platform/issues/158
       created_at:
         $ref: "#/$defs/rfc3339_utc_second"
       updated_at:
@@ -661,27 +724,256 @@ runtime_record_contract:
           site_admin:
             const: false
       author_association:
-        const: MEMBER
+        const: CONTRIBUTOR
     extraction_rule: >-
       This is the exact closed projection consumed from the GitHub response, not a
       claim that the upstream response has no other documented members. Map API id to
-      comment_id, user.id to publisher.numeric_id, and body byte length/digest to the
-      calculated fields; then validate this projection. Require status 200, JSON
-      content type, no redirect, canonical API host/repository/comment ID, and API
-      html_url equality to the dispatch input.
+      comment_id, issue_url directly, user.id to publisher.numeric_id, and body byte
+      length/digest to the calculated fields; then validate this projection. Require
+      status 200, JSON content type, no redirect, canonical API host/repository/comment
+      ID, exact issue_url equality, and html_url equality to the dispatch input. Parse
+      the URL suffix as unsigned
+      decimal and require exact numeric equality to comment_id and the inclusive
+      1..9007199254740991 safe-integer range before either RFC-8785 implementation.
     immutability_rule: created_at-must-equal-updated_at
     issuance_rule: >-
       For ACT-04 only, this fetched immutable created_at is the sole issuance time.
       No issued_at member exists in the ACT-04 body or any other record body.
   record_body_schemas:
-    act03:
-      schema_id: vocanova-voc094-act03-settings-v1
-      schema_sha256: a159b12f43941e0368fcb4a512ee9b372a7f8d078e4341c9e1957e87f5ad6923
+    settings_authority:
+      schema_id: vocanova-voc085-act03-settings-authority-v1
+      schema_sha256: 50bcce2789f3f20513c03a59f960bd8a2796b3b7d2815a619676ecba644b5337
       type: object
       additionalProperties: false
       required:
         - schema
         - actor
+        - authorized_settings_operator
+        - operation
+        - action
+        - pr1
+        - environment
+        - phase4_token
+        - rollback
+        - tuple_binding
+        - one_use
+        - expires_at
+        - drift_invalidates
+        - protections
+      properties:
+        schema:
+          const: vocanova-voc085-act03-settings-authority-v1
+        actor:
+          allOf:
+            - $ref: "#/$defs/actor"
+            - properties:
+                role:
+                  const: settings-accountable-authority
+        authorized_settings_operator:
+          allOf:
+            - $ref: "#/$defs/actor"
+            - properties:
+                role:
+                  const: github-settings-operator
+        operation:
+          enum:
+            - create-environment-and-two-secrets
+            - replace-expired-phase4-token
+        action:
+          type: object
+          additionalProperties: false
+          required:
+            - hold_id
+            - action_id
+            - environment_name
+            - maximum_settings_actions
+            - all_other_settings_held
+          properties:
+            hold_id:
+              const: VOC-085-HOLD-00
+            action_id:
+              const: VOC-094-ACT-03
+            environment_name:
+              const: cloudflare-staging
+            maximum_settings_actions:
+              const: 1
+            all_other_settings_held:
+              const: true
+        pr1:
+          $ref: "#/$defs/repository_revision"
+        environment:
+          type: object
+          additionalProperties: false
+          required:
+            - name
+            - pre_state
+            - post_state
+            - secret_names
+            - mutated_secret_names
+            - secret_values_recorded
+            - production_environment_changed
+          properties:
+            name:
+              const: cloudflare-staging
+            pre_state:
+              enum: [absent, existing-exact-contract]
+            post_state:
+              enum: [created, existing-exact-contract]
+            secret_names:
+              type: array
+              minItems: 2
+              maxItems: 2
+              prefixItems:
+                - const: CLOUDFLARE_ACCOUNT_ID
+                - const: CLOUDFLARE_API_TOKEN
+              items: false
+            mutated_secret_names:
+              type: array
+              minItems: 1
+              maxItems: 2
+              items:
+                enum: [CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN]
+              uniqueItems: true
+            secret_values_recorded:
+              const: false
+            production_environment_changed:
+              const: false
+        phase4_token:
+          type: object
+          additionalProperties: false
+          required:
+            - distinct_from_all_prior_tokens
+            - account_id
+            - permissions
+            - value_recorded
+            - expires_at
+          properties:
+            distinct_from_all_prior_tokens:
+              const: true
+            account_id:
+              const: 0a9eda28b96d77c24dcde74f3e074d47
+            permissions:
+              type: array
+              minItems: 2
+              maxItems: 2
+              prefixItems:
+                - const: Account.Workers Scripts.Edit
+                - const: Account.D1.Edit
+              items: false
+            value_recorded:
+              const: false
+            expires_at:
+              $ref: "#/$defs/rfc3339_utc_second"
+        rollback:
+          type: object
+          additionalProperties: false
+          required:
+            [plan_sha256, owner_actor_id, rehearsed, settings_truth_followup_required]
+          properties:
+            plan_sha256:
+              $ref: "#/$defs/sha256"
+            owner_actor_id:
+              type: string
+              pattern: "^[a-z0-9][a-z0-9._:-]{2,127}$"
+              minLength: 3
+              maxLength: 128
+            rehearsed:
+              const: true
+            settings_truth_followup_required:
+              const: true
+        tuple_binding:
+          $ref: "#/$defs/tuple_binding"
+        one_use:
+          type: object
+          additionalProperties: false
+          required: [maximum_settings_actions, nonce]
+          properties:
+            maximum_settings_actions:
+              const: 1
+            nonce:
+              type: string
+              pattern: "^[0-9a-f]{32,128}$"
+              minLength: 32
+              maxLength: 128
+        expires_at:
+          $ref: "#/$defs/rfc3339_utc_second"
+        drift_invalidates:
+          type: array
+          minItems: 8
+          maxItems: 8
+          prefixItems:
+            - const: authorized-operator
+            - const: pr1-revision
+            - const: operation
+            - const: environment-prestate
+            - const: secret-name-payload
+            - const: phase4-token-metadata
+            - const: rollback
+            - const: cost-or-production-holds
+          items: false
+        protections:
+          type: object
+          additionalProperties: false
+          required:
+            - incremental_vocanova_cost_cents
+            - production_state
+            - production_holds
+          properties:
+            incremental_vocanova_cost_cents:
+              const: 0
+            production_state:
+              const: no-worker-d1-domain-traffic-or-change
+            production_holds:
+              type: array
+              minItems: 2
+              maxItems: 2
+              prefixItems:
+                - const: VOC-080-HOLD-01
+                - const: VOC-080-HOLD-02
+              items: false
+      oneOf:
+        - properties:
+            operation:
+              const: create-environment-and-two-secrets
+            environment:
+              properties:
+                pre_state:
+                  const: absent
+                post_state:
+                  const: created
+                mutated_secret_names:
+                  type: array
+                  minItems: 2
+                  maxItems: 2
+                  prefixItems:
+                    - const: CLOUDFLARE_ACCOUNT_ID
+                    - const: CLOUDFLARE_API_TOKEN
+                  items: false
+        - properties:
+            operation:
+              const: replace-expired-phase4-token
+            environment:
+              properties:
+                pre_state:
+                  const: existing-exact-contract
+                post_state:
+                  const: existing-exact-contract
+                mutated_secret_names:
+                  type: array
+                  minItems: 1
+                  maxItems: 1
+                  prefixItems:
+                    - const: CLOUDFLARE_API_TOKEN
+                  items: false
+    act03:
+      schema_id: vocanova-voc094-act03-settings-v1
+      schema_sha256: e4f82b8d069463a4af8a3a96ac22e7ff59947b696402d324b7800360ee320e72
+      type: object
+      additionalProperties: false
+      required:
+        - schema
+        - actor
+        - operation
         - settings_authority
         - pr1
         - environment
@@ -697,6 +989,10 @@ runtime_record_contract:
             - properties:
                 role:
                   const: github-settings-operator
+        operation:
+          enum:
+            - create-environment-and-two-secrets
+            - replace-expired-phase4-token
         settings_authority:
           type: object
           additionalProperties: false
@@ -716,15 +1012,16 @@ runtime_record_contract:
             - pre_state
             - post_state
             - secret_names
+            - mutated_secret_names
             - secret_values_recorded
             - production_environment_changed
           properties:
             name:
               const: cloudflare-staging
             pre_state:
-              const: absent
+              enum: [absent, existing-exact-contract]
             post_state:
-              const: created
+              enum: [created, existing-exact-contract]
             secret_names:
               type: array
               minItems: 2
@@ -733,6 +1030,13 @@ runtime_record_contract:
                 - const: CLOUDFLARE_ACCOUNT_ID
                 - const: CLOUDFLARE_API_TOKEN
               items: false
+            mutated_secret_names:
+              type: array
+              minItems: 1
+              maxItems: 2
+              items:
+                enum: [CLOUDFLARE_ACCOUNT_ID, CLOUDFLARE_API_TOKEN]
+              uniqueItems: true
             secret_values_recorded:
               const: false
             production_environment_changed:
@@ -787,9 +1091,43 @@ runtime_record_contract:
               const: true
         tuple_binding:
           $ref: "#/$defs/tuple_binding"
+      oneOf:
+        - properties:
+            operation:
+              const: create-environment-and-two-secrets
+            environment:
+              properties:
+                pre_state:
+                  const: absent
+                post_state:
+                  const: created
+                mutated_secret_names:
+                  type: array
+                  minItems: 2
+                  maxItems: 2
+                  prefixItems:
+                    - const: CLOUDFLARE_ACCOUNT_ID
+                    - const: CLOUDFLARE_API_TOKEN
+                  items: false
+        - properties:
+            operation:
+              const: replace-expired-phase4-token
+            environment:
+              properties:
+                pre_state:
+                  const: existing-exact-contract
+                post_state:
+                  const: existing-exact-contract
+                mutated_secret_names:
+                  type: array
+                  minItems: 1
+                  maxItems: 1
+                  prefixItems:
+                    - const: CLOUDFLARE_API_TOKEN
+                  items: false
     pr2_exact_review:
       schema_id: vocanova-voc096-pr2-merged-sha-review-v1
-      schema_sha256: 190e752db9779a41c728747ae84e539fd1e8989e802cf819a1e6c595b6170f09
+      schema_sha256: b1332adde35e0c06503edde6deaf21b8eee57c298d268dcab8bf5a62abbc22f1
       type: object
       additionalProperties: false
       required:
@@ -835,8 +1173,8 @@ runtime_record_contract:
           $ref: "#/$defs/record_reference"
         hosted_checks:
           type: array
-          minItems: 1
-          maxItems: 64
+          minItems: 3
+          maxItems: 3
           uniqueItems: true
           items:
             $ref: "#/$defs/hosted_check"
@@ -964,33 +1302,72 @@ runtime_record_contract:
               const: true
   cross_record_rules:
     - >-
-      Validate each fetched API envelope, raw-body contract, and selected body schema
-      independently. Body schema IDs must be pairwise the four constants above.
+      Validate all five fetched API envelopes, raw-body/JCS contracts, and selected
+      closed body schemas independently. The separately fetched VOC-085 settings-
+      authority record must match the fifth schema and its immutable trusted envelope,
+      exact URL, byte length, and raw-body digest must equal
+      ACT03.settings_authority.evidence. Body schema IDs must be pairwise the five
+      constants above. No fetched text is evaluated as instructions.
     - >-
-      Require API created_at == updated_at for every comment. Require ACT03.created_at
-      < PR2.merged_at < PR2-review.created_at < authority.created_at <
-      binder-review.created_at < current-run.created_at. Equality fails closed.
+      Require API created_at == updated_at for all five comments. Require the VOC-085
+      settings-authority.created_at < effective ACT03.created_at < PR2.merged_at <
+      PR2-review.created_at < authority.created_at < binder-review.created_at <
+      current-run.created_at. Equality fails closed. For token replacement, require a
+      new settings-authority.created_at < replacement-ACT03.created_at, a new distinct
+      token, the exact current existing-environment pre-state, and only
+      CLOUDFLARE_API_TOKEN value mutation; no other setting may change. No executable
+      previous-record reference or recursive historical fetch is permitted.
+      Deep-exact compare settings-authority.authorized_settings_operator to ACT03.actor
+      and compare operation, PR1, environment, phase4_token, rollback,
+      and tuple_binding between those bodies. Require settings-authority.expires_at >
+      PR2.merged_at, settings-authority.created_at < settings-authority.expires_at <=
+      phase4_token.expires_at, all eight drift-invalidates constants in exact order, and
+      exact one-use nonce/max-action semantics; expired or drifted authority cannot
+      authorize ACT03 or PR2.
     - >-
       Authority API created_at is the sole issuance time. The authority body contains
       no issued_at. Require authority.created_at < authority.body.expires_at <=
-      authority.created_at + 30 minutes. Require both live-check server Date values
-      and their captured local completion instants strictly before expires_at.
+      authority.created_at + 30 minutes and authority.body.expires_at <= effective
+      ACT03.phase4_token.expires_at. Require both live-check server Date values and
+      their captured local completion instants strictly before the earlier deadline.
+    - >-
+      Treat effective ACT03.phase4_token.expires_at as a second independent hard
+      deadline. Require effective ACT03.created_at, PR2.merged_at,
+      PR2-review.created_at, authority.created_at, binder-review.created_at,
+      current-run.created_at, both live-check GitHub server Date values, both captured
+      local completion instants, every required check-run started_at/completed_at, and
+      the first secret-bearing step start instant all strictly before it. The first
+      secret-bearing step records runner UTC before its
+      first command reads a secret and rechecks both token and ACT-04 deadlines. If the
+      token expires while PR2 is open, stop: a new exact VOC-085 settings-authority
+      comment and replacement ACT03 record must precede the eventual PR2 merge and
+      authorize only the API-token secret replacement. If expiry occurs after PR2
+      merge, that exact PR2 transition is stale and no replacement is constructible
+      inside this two-PR package; stop for a newly governed correction. Never silently
+      reissue or replace a token, and preserve ACT-05 immediate revocation.
     - >-
       Compare every later record_reference URL/digest to the already-fetched earlier
       envelope html_url/raw_body_sha256. Compare PR2, executable_digests,
       tuple_binding, and staging_assertions for deep exact equality across every body
       where present and to independently fetched repository/Cloudflare evidence.
     - >-
-      Require the four actor IDs and four actor.provenance.session_reference values to
-      be pairwise distinct, each role to match its record schema, each assignment
+      Require the five accountable/operator/reviewer actor IDs and their five
+      actor.provenance.session_reference values to be pairwise distinct, each role to
+      match its record schema, each assignment
       revision to equal the reviewed PR1 or PR2 SHA applicable to that role, and every
       non-authorship flag to be true. GitHub publisher equality authenticates only the
       relay account and never satisfies actor separation.
     - >-
       hosted_checks must be sorted ascending by name using Unicode code-point order,
-      have unique names, equal the required-check set fetched for PR2 merge SHA, and
-      all conclude success. Any missing, duplicate, extra, pending, or stale check
-      fails closed.
+      have the exact names `ci required`, `security required`, and `structure`, and
+      deep-equal the required projection from the bounded check-runs response for PR2
+      merge SHA. Every projected head_sha equals that merge SHA, app ID/slug equal
+      15368/github-actions, status equals completed, and conclusion equals success.
+      Every normalized decimal run/suite ID is in 1..9007199254740991 and every
+      selected timestamp is inside the immutable
+      PR2-merge-to-review-envelope cutoff window. Any
+      missing, duplicate, extra-body, pending, stale, greatest-time-tied, or paginated
+      required evidence fails. Unrelated endpoint names are ignored as specified below.
     - >-
       All four dispatch URL/digest inputs must equal their fetched envelopes. The
       nonce input must equal authority.body.nonce. No API envelope metadata or digest
@@ -1004,21 +1381,81 @@ runtime_record_contract:
     per_page: 100
     run_scan_maximum_pages_per_check: 10
     checks_per_dispatch: 2
-    maximum_requests_per_check: 18
-    maximum_requests_per_dispatch: 36
+    maximum_requests_per_check: 20
+    maximum_requests_per_dispatch: 40
     request_allocation_per_check:
       rate_limit_preflight: 1
-      four_comment_gets: 4
+      five_comment_gets: 5
       pr_metadata_get: 1
       pr_files_get_pages: 1
+      pr2_merge_check_runs_get_pages: 1
       current_run_get: 1
       prior_run_scan_pages: 10
+    comment_endpoint: >-
+      GET https://api.github.com/repos/KARSIFT/vocanova-platform/issues/comments/{safe-integer-comment-id}
+    settings_authority_comment_rule: >-
+      Derive the fifth comment ID only from the already validated ACT03 body reference,
+      require its URL to be canonical issue #158, fetch it exactly once, build the same
+      closed API-envelope projection, and require trusted publisher, created_at ==
+      updated_at, exact URL/raw-body digest equality, exact JCS bytes, and the closed
+      settings-authority body schema. Never treat ACT03 as its own settings authority.
+    check_runs_endpoint: >-
+      GET https://api.github.com/repos/KARSIFT/vocanova-platform/commits/{exact-40-hex-PR2-merge-SHA}/check-runs?filter=all&per_page=100&page=1
+    check_runs_headers:
+      Accept: application/vnd.github+json
+      X-GitHub-Api-Version: 2022-11-28
+    check_runs_response_projection:
+      upstream_required_members: [total_count, check_runs]
+      total_count_rule: integer-equal-to-array-length-and-at-most-100
+      required_projection_names: [ci required, security required, structure]
+      selected_fields:
+        - id-as-check_run_id-decimal-string
+        - name
+        - head_sha
+        - check_suite.id-as-decimal-string
+        - app.id-as-app_id
+        - app.slug-as-app_slug
+        - status
+        - conclusion
+        - details_url
+        - started_at
+        - completed_at
+      ordering: required-projection-sorted-ascending-by-name-Unicode-code-point
+      exactness: >-
+        Require status 200, JSON content type, no redirect, `total_count` equal to the
+        check_runs array length and at most 100, no Link header with rel="next", and no
+        second page. `filter=all` is explicit. Ignore unrelated names. For each of the
+        three committed required names and only GitHub Actions app ID 15368/slug
+        github-actions, form the closed review window PR2.merged_at <= started_at <=
+        completed_at < PR2-review envelope.created_at. Ignore a candidate whose
+        non-null started_at is at or after the cutoff and exclude any candidate whose
+        canonical details URL names the already fetched current workflow run ID.
+        Reject a queued/in_progress candidate that cannot be proven post-cutoff, and
+        reject any run that starts before but completes at/after the cutoff. Among
+        eligible completed candidates, select the unique candidate with greatest
+        non-null completed_at; an absent candidate or greatest-time tie fails. Reject
+        a selected non-matching head_sha, unsafe/malformed run or suite ID,
+        non-completed/non-success result,
+        null/inverted timestamp or noncanonical URL, or completion after the effective
+        Phase-4 token expiry. Sort the three selected projections and require deep
+        exact equality with the PR2-review body. Unrelated check names are not hosted
+        evidence and neither authorize nor block this committed required projection.
+      committed_source: >-
+        The names are derived from the job `name` fields and push-to-develop triggers
+        committed in PR1's exact `.github/workflows/ci.yml`, `governance.yml`, and
+        `security.yml`. Governance `changed-path risk` and `merge eligibility` and all
+        Quality jobs are pull_request-only and therefore cannot exist on PR2 merge
+        SHA; PR2 must have passed its separate pre-merge checks before merge.
     remaining_budget_rule: >-
-      Before the first pass, X-RateLimit-Remaining must be at least 36; immediately
-      before the second pass, it must be at least 18. Every response's GitHub Date and
+      The `/rate_limit` preflight is one HTTP request but consumes zero core requests.
+      Before the first pass, its `resources.core.remaining` must be at least 38;
+      immediately before the second pass, it must be at least 19. Each pass has at most
+      20 HTTP requests and at most 19 core requests because prior-run scanning stops
+      when its bounded cutoff is proven. Every response's GitHub Date and
       rate-limit headers must parse consistently. A missing header, lower remaining
-      value, 403/429, extra page need, 1,000-result boundary, or any request beyond the
-      allocation blocks before secrets. No retry occurs inside either pass.
+      value, 403/429, fifth-comment mismatch, check-runs extra page or count mismatch,
+      1,000-result boundary, or any request beyond the allocation blocks before
+      secrets. No retry occurs inside either pass.
   authority_construction_rule:
     preflight_source: unauthenticated-GitHub-API-Date-header
     body_expires_at: preflight-Date-plus-exactly-25-minutes
@@ -1032,9 +1469,15 @@ runtime_record_contract:
       25 minutes and start the one create-comment request within the same bounded
       script. After creation, fetch the comment and require preflight Date <= API
       created_at <= preflight Date + 60 seconds and created_at < expires_at <=
-      created_at + 30 minutes. Any failure consumes no dispatch authority; do not edit
-      the comment. Reissue requires the unchanged ACT-04 actor to create a new body
-      only after current drift checks, not a new Cloudflare token by default.
+      created_at + 30 minutes and expires_at <= effective
+      ACT03.phase4_token.expires_at. Any failure consumes no dispatch authority; do not edit
+      the comment. An ACT-04-only expiry may be reissued by the unchanged ACT-04 actor
+      only after current drift checks. Effective Phase-4 token expiry is different:
+      while PR2 is open, stop and obtain a new exact VOC-085 settings-authority record
+      plus replacement ACT03 before replacing only the environment-scoped API-token
+      value and before PR2 merges. After PR2 merge, stop for a newly governed
+      correction because the exact transition is stale. Never reuse, silently reissue,
+      or mutate any other environment setting.
 
 affected_areas:
   - AGENTS.md

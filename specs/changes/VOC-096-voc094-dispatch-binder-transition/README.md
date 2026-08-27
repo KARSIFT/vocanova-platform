@@ -24,9 +24,10 @@ shape:
    merged-PR2-SHA review record. Only then does the accountable actor publish the
    strict ACT-04 authority record on canonical issue #158. A different non-author
    reviewer then publishes a strict binder-review record.
-4. The credential-free delivery gate retrieves ACT-03 and all three post-PR2 records
-   plus GitHub PR/run
-   metadata, verifies their bodies, hashes, actors, order, PR2 merge/file boundary,
+4. The credential-free delivery gate retrieves ACT-03, the separate VOC-085 settings-
+   authority comment referenced by ACT-03, and all three post-PR2 records plus GitHub
+   PR/run/check-run metadata. It verifies all five bodies and envelopes,
+   hashes, actors, order, PR2 merge/file/check boundary,
    exact dispatch SHA/ref, manifest/workflow/policy hashes, staging resources and
    baselines, zero-cost/Free-plan state, production holds, expiry, and one-use nonce.
    Missing, edited, stale, replayed, unreachable, or mismatched evidence blocks before
@@ -37,7 +38,21 @@ separate fetched GitHub API-envelope projection. Comment IDs/URLs, server timest
 publisher metadata, and raw-body SHA-256 are envelope facts computed only after fetch;
 no body contains its own URL/hash or predicts a server field. The ACT-04 envelope's
 immutable `created_at` is the sole issuance time, and its body contains only the later
-`expires_at` bound.
+`expires_at` bound. Comment IDs are restricted to the RFC-8785/ECMAScript safe-integer
+range and all seven mappings are recomputed by independent ECMAScript and Python JCS
+implementations.
+
+The exact PR2 merge-SHA check read is one bounded public `check-runs?filter=all` page.
+It ignores unrelated names, deterministically selects the unique latest completed
+GitHub-Actions candidate for each of the three committed required aggregate records
+(`ci required`, `security required`, and `structure`), and equality-binds them to the
+review body. Selection is confined to the immutable PR2-merge-to-review-envelope
+window, so later checks created by the dispatch itself cannot replace reviewed proof.
+The effective Phase-4 token expiry independently bounds PR2 merge,
+all subsequent records, both live checks, the run, and the first secret-bearing step;
+expiry while PR2 is open requires fresh exact VOC-085 authority and a replacement
+ACT-03 before merge, never silent token reissue. Expiry after PR2 merge makes that
+transition stale and requires a newly governed correction.
 
 The manifest commits the exact trusted GitHub publisher login/numeric ID/association.
 That authenticates only the account relaying issue comments; separately attributable

@@ -23,14 +23,19 @@ task or PR.
 
 PR1 binds the complete `prepared_staging_tuple`, preserves distinct original-execution
 and final-readback closure hashes, and regenerates/checks both locked-Wrangler Worker
-type files. The live transition fetches four strict records: ACT-03, merged-PR2 exact
-review, ACT-04 authority, and binder review. Each must match the committed GitHub API
+type files. The live transition fetches five strict records: the distinct VOC-085
+settings authority, ACT-03, merged-PR2 exact review, ACT-04 authority, and binder
+review. Each must match the committed unauthenticated GitHub API
 publisher trust root, while separately attributable actor/provenance records—not the
 shared publisher—carry governance independence. The closed body schemas are separate
 from fetched API-envelope metadata and forbid self URL/hash/timestamp fields. Server
-time is ordered exactly from PR2 merge through review/authority/binder/current run;
+time is ordered exactly from settings authority/ACT-03/PR2 merge through review/
+authority/binder/current run;
 authority API `created_at` alone is issuance, body `expires_at` is later by at most 30
-minutes, and both live checks precede expiry.
+minutes and no later than effective token expiry. PR2, both live checks, and first
+secret-bearing step also precede the applicable token/settings deadline. The bounded
+`filter=all` check-runs projection is cutoff at the review envelope so dispatch-created
+checks cannot replace recorded evidence; all eight binders are deterministic.
 
 VOC-096 authorizes zero external actions. The three remaining actions are the existing
 VOC-094-ACT-03, ACT-04, and ACT-05, each still requiring its own accountable actor and

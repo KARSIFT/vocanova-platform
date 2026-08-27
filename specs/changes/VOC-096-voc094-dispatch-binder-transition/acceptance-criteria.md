@@ -37,8 +37,9 @@ ineligible.
 - Evidence: `VOC-096-EV-02`, `EV-03`
 - Result: pending
 
-Strict live ACT-03, merged-PR2 exact-review, authority, and binder-review records plus
-PR metadata prove that exact order. The dispatched
+Strict live VOC-085 settings-authority, ACT-03, merged-PR2 exact-review, authority, and
+binder-review records plus PR/check-run metadata prove that exact order. The ACT-03
+operator exactly matches the settings-authority record's authorized operator. The dispatched
 SHA is the PR2 merge commit on `develop`; a valid-shaped record targeting PR1 fails.
 
 ## VOC-096-AC-03 — URL, digest, expiry, and replay controls fail closed
@@ -56,8 +57,19 @@ projection reject unknown/duplicate fields and forbid a record's own URL, digest
 server timestamp inside its body. It distinguishes publisher authentication from the
 exact nested actor-provenance records. The authority envelope's immutable API
 `created_at` is the sole issuance time; the body has no `issued_at`, and requires
-`created_at < expires_at <= created_at + 30 minutes`. Both live checks precede expiry,
-and the binder has never been dispatched. Edits, fetch failures, replay, run reruns,
+`created_at < expires_at <= created_at + 30 minutes`. ACT-04 expiry must also be no
+later than effective ACT-03 token expiry. PR2 merge, every later
+record/run, both live server Dates/completions, and the first secret-bearing step all
+precede token expiry; both live checks and that step precede the earlier deadline.
+The API envelope includes exact issue URL and safe-integer comment ID, and a real
+79-character ten-digit comment URL validates. The one-page `filter=all` check-runs
+projection deterministically selects exactly the three committed required names only
+inside the PR2-merge-to-review-envelope cutoff; later/current-dispatch checks cannot
+replace the recorded projection.
+If the token expires while PR2 is open, only fresh VOC-085 authority plus replacement
+ACT-03 before merge can replace the API-token secret; after merge, the transition is
+stale and needs a newly governed correction. Silent reissue fails. The binder has never been dispatched.
+Edits, fetch failures, replay, run reruns,
 actor collisions, and fixture fallback block before Cloudflare secrets or mutations.
 
 ## VOC-096-AC-04 — Existing delivery and production gates are not weakened

@@ -35,14 +35,18 @@ is created only after the exact PR2 merge SHA exists.
    Add workflow inputs for ACT-03, merged-PR2 exact-review, authority, and binder-review
    URLs/digests plus nonce; exact
    digest/nonce run naming; first-attempt and prior-run replay rejection; public
-   unauthenticated read-only comment/PR/files/run fetching; direct current-run
+   unauthenticated read-only five-comment/PR/files/check-runs/run fetching; direct current-run
    verification; strict pagination and a fail-closed 1,000-result ceiling; a second
    credential-free verification immediately before migration; and a network-free
    injected-fixture test path unavailable to workflow inputs. Never fetch or execute
    arbitrary URLs and never add GitHub-token permissions for these reads.
-   Implement the exact committed schema-bundle digests. Parse each RFC-8785 body with
+   Implement the exact seven schema-bundle digests plus prepared-tuple digest. Parse
+   each RFC-8785 body with
    duplicate-key rejection and separately project/validate fetched API envelope
-   metadata. A body never contains its own URL/digest/timestamps/publisher fields.
+   metadata, including exact API issue URL, safe-integer comment ID, and unauthenticated
+   `CONTRIBUTOR` association. A body never contains its own URL/digest/timestamps/
+   publisher fields. Prove all sixteen binder results with independent ECMAScript and
+   Python RFC-8785 implementations.
 4. Update all 27 declared package/living/executable/config/generated surfaces
    consistently. PR1 must say
    the GitHub staging environment remains absent/held/planned through its merge and
@@ -55,7 +59,12 @@ is created only after the exact PR2 merge SHA exists.
    complete current-gate parity matrix. Obtain separate
    exact-SHA Cloudflare, security/settings, and independent R4 PASS records. A distinct
    non-author actor merges normally and records post-merge checks/source-head recovery.
-6. Only after PR1 merge and separate unchanged VOC-094/VOC-085 authority, ACT-03 may
+6. Only after PR1 merge and separate unchanged VOC-094/VOC-085 authority, publish one
+   strict settings-authority JSON record naming its accountable authority actor and
+   exact authorized settings operator, PR1, absent pre-state, environment/two-secret-
+   name/no-value payload, Phase-4 token account/scope/expiry, rollback, one-use nonce,
+   `$0`/production holds, and expiry. Fetch and bind its immutable envelope. Only that
+   named operator may then execute ACT-03 to
    create/reconcile `cloudflare-staging`, set exactly `CLOUDFLARE_ACCOUNT_ID` and
    `CLOUDFLARE_API_TOKEN` with one distinct Phase-4 token, and record sanitized pre/
    post-state, rollback, scope, expiry, and no-production/cost drift. Relay the strict
@@ -69,8 +78,14 @@ is created only after the exact PR2 merge SHA exists.
    `docs/operations/cloudflare-delivery.md`. Record ACT-03 sanitized truth and the two
    secret names only. Any sixth path or executable change stops for package review.
    Run applicable checks, obtain different-actor exact review, and non-author merge.
+   If the settings authority or token expires while PR2 is open, stop. Replacement
+   requires a new strict VOC-085 authority and replacement ACT-03 that changes only the
+   `CLOUDFLARE_API_TOKEN` value; never silently create or swap a credential.
+   Expiry after PR2 merge stops this transition for a newly governed correction.
 8. After PR2 merge, independently verify its exact merged `develop` SHA, five-file
-   diff, hosted checks, ACT-03 truth, manifest/workflow/policy hashes, staging resources,
+   diff, the bounded `filter=all` check-runs page and its deterministic exact three-
+   required-name projection confined to PR2 merge through review-envelope creation,
+   settings-authority/ACT-03 truth, manifest/workflow/policy hashes, staging resources,
    baselines/probes, current smoke, zero application rows/seven sealed migrations, Free
    plans, exact incremental cost `0`, unchanged Basic Load Balancing, and production
    holds. Relay the dedicated strict exact-PR2-merged-SHA body with trusted API
@@ -85,13 +100,16 @@ is created only after the exact PR2 merge SHA exists.
    `expires_at` to exactly 25 minutes later, and create the comment once within 60
    seconds. Immediately fetch the created comment; its immutable API `created_at` is the sole
    issuance time and must satisfy `created_at < expires_at <= created_at + 30 minutes`
-   without an edit. A different non-author reviewer re-fetches ACT-03, PR2 review, authority, PR/
+   without an edit and must not exceed effective token expiry. A different non-author
+   reviewer re-fetches settings authority, ACT-03, PR2 review, authority, PR/
    run metadata, and the exact tuple, then relays the strict binder-review record.
    Never put a token value in any record. GitHub publisher equality authenticates the
    relayer only; separately reviewed actor/provenance records establish role separation.
 10. Dispatch only the exact PR2 merge SHA once with matching URL/digest/nonce/baseline/
     cost/confirmation inputs. The credential-free gate and pre-migration recheck must
-    both pass live and strictly before expiry; fixture mode is forbidden. Monitor the unchanged migration/upload/
+    both pass live and strictly before the earlier ACT-04/token expiry; fixture mode is
+    forbidden. Record and recheck the first secret-bearing step start instant before
+    reading a secret. Monitor the unchanged migration/upload/
     exact-promotion/smoke/outcome/rollback sequence. A failed attempt consumes the
     binder and never silently reuses it.
 11. Under unchanged ACT-05, immediately revoke/expire the Phase-4 token, retain

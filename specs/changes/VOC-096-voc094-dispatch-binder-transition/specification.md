@@ -45,22 +45,34 @@ the only dispatch revision. Those conditions have no fixed point.
   post-state claim. It commits the exact GitHub publisher trust root in `change.yaml`:
   repository owner `KARSIFT` numeric ID `304005580`, public repository
   `vocanova-platform`, issue `158`, and permitted publisher login `m-e-h-r-d-a-a-d`,
-  numeric ID `7955432`, type `User`, `site_admin=false`, association `MEMBER`.
+  numeric ID `7955432`, type `User`, `site_admin=false`, association `CONTRIBUTOR` as
+  returned by the required unauthenticated comment endpoint. Authenticated `gh api`
+  may report `MEMBER`; that credential-dependent value is not accepted by the live gate.
   Equality to that API publisher authenticates only the relaying GitHub account; it
   does not prove governance actor identity, independence, or action authority.
   `runtime_record_contract` is the exhaustive contract: a versioned closed API-envelope
-  projection, shared definitions, four closed body schemas, RFC-8785 raw-body rules,
+  projection (including exact API `issue_url`), shared definitions, five closed body schemas, RFC-8785 raw-body rules,
   schema/tuple digests whose digest field is excluded from its own hash, and exact
   cross-record comparisons. PR1 binds those committed schema/version digests in the
-  manifest; the three later bodies bind that manifest hash. Thus seven values are
-  unambiguous: one prepared-tuple digest plus six contract digests (shared definitions,
-  envelope, four bodies). An implementation may add no field, definition, or
+  manifest; the three later bodies bind that manifest hash. Thus eight values are
+  unambiguous: one prepared-tuple digest plus seven contract digests (shared definitions,
+  envelope, five bodies). Both ECMAScript and Python RFC-8785 implementations must
+  independently reproduce all sixteen results, and every integer is within
+  `1..9007199254740991` where positive. An implementation may add no field, definition, or
   alternative serialization.
 - `VOC-096-D04` — ACT-03 remains after PR1 and under VOC-085-HOLD-00. PR2 remains a
   documentation-only truth reconciliation of exactly the five declared files. It may
   record sanitized ACT-03 evidence and the two secret names, never values, but it may
   not change the manifest, workflow, policy, tests, Wrangler configuration, package,
   application code, or any input consumed from documentation by the delivery gate.
+  ACT-03 references, but cannot self-assert, a separately created strict
+  `vocanova-voc085-act03-settings-authority-v1` JSON record. The live gate fetches and
+  semantically validates its accountable authority actor/provenance, exact authorized
+  settings operator, PR1 revision, environment pre-state, exact two-secret-name/no-
+  value payload, Phase-4 token account/permissions/expiry metadata, rollback, nonce,
+  one-use limit, `$0`/production holds, and expiry. That authority actor precedes
+  ACT-03, the ACT-03 operator deep-equals its authorized operator, and both precede
+  PR2 merge, which must remain strictly before the settings-authority expiry.
 - `VOC-096-D05` — After PR2 normally merges, a different-actor exact reviewer of the
   merged `develop` SHA relays a dedicated strict
   `vocanova-voc096-pr2-merged-sha-review-v1` JSON comment on issue #158. The record has
@@ -100,19 +112,31 @@ the only dispatch revision. Those conditions have no fixed point.
   each live API `html_url` to equal its input. One generic issue/PR URL is never valid.
 - `VOC-096-D08` — In live mode the credential-free gate uses only public read-only
   unauthenticated GitHub REST requests and sends no `GITHUB_TOKEN` or authorization
-  header. It re-fetches the ACT-03, exact-PR2-review, authority, and binder-review comments;
+  header. It re-fetches the separate settings authority, ACT-03, exact-PR2-review,
+  authority, and binder-review comments;
   requires exact repository/issue association, duplicate-key rejection, exact
   RFC-8785 body bytes and closed body schema, a separately closed API-envelope
   projection, exact committed publisher equality, distinct governance actor/provenance
   metadata, `created_at == updated_at`, envelope-calculated raw-body digest, and the ordered GitHub server
-  timestamps ACT-03 < PR2 merge < exact-PR2 review < authority < binder review <
+  timestamps settings authority < ACT-03 < PR2 merge < exact-PR2 review < authority < binder review <
   current-run creation. It fails closed on redirect, timeout, rate limit, pagination gap,
   malformed response, edit, deletion, minimization, actor/role collision, or mismatch.
-  Each of the two checks has an exact 18-request maximum and uses `per_page=100`:
-  one rate-limit preflight, four comment GETs, one PR GET, one PR-files page, one
-  current-run GET, and at most ten prior-run pages. Require at least 36 unauthenticated
-  requests remaining before the first pass and 18 before the second; never retry a
-  request inside a pass.
+  Each of the two checks has at most 20 HTTP requests/at most 19 core requests and uses
+  `per_page=100`: one zero-core `/rate_limit` preflight, five comment GETs, one PR GET,
+  one PR-files page, one exact PR2-merge check-runs page, one current-run GET, and at
+  most ten prior-run pages. Require core remaining at least 38 before the first pass
+  and 19 before the second; never retry a request inside a pass. The check-runs GET is
+  exactly `/repos/KARSIFT/vocanova-platform/commits/{PR2-merge-SHA}/check-runs?filter=all&per_page=100&page=1`.
+  Require `total_count == check_runs.length <= 100` and no next page. Ignore unrelated
+  names; for exact required names `ci required`, `security required`, and `structure`
+  under GitHub Actions app ID/slug `15368`/`github-actions`, reject any pending candidate
+  that cannot be proven post-review, reject any run crossing the review cutoff, ignore
+  post-review/current-dispatch runs, and select the unique greatest non-null
+  `completed_at` candidate wholly inside
+  `PR2.merged_at <= started_at <= completed_at < PR2-review.created_at`. The selected record
+  binds safe normalized run/suite IDs, merge head SHA, completed/success status,
+  canonical details URL, and ordered started/completed times. Missing, extra body,
+  stale, greatest-time-tied, or next-page results block.
 - `VOC-096-D09` — The gate independently fetches PR2 metadata and every changed-file
   page. It requires merged state, `merge_commit_sha == event.sha == reviewed_sha`, base
   `develop`, required ref `refs/heads/develop`, the authority's exact PR2 number/head,
@@ -127,11 +151,18 @@ the only dispatch revision. Those conditions have no fixed point.
   with the same URL, digest, or nonce. Missing current-run data, incomplete or looping
   pagination, or a filtered result set at/over GitHub's documented 1,000-result cap is
   blocking. A failed or cancelled attempt consumes the binder; retry needs a fresh
-  ACT-04 authority/review record, not token reissue by default.
+  ACT-04 authority/review record. Phase-4 token expiry is not an ACT-04 retry: while
+  PR2 is open it requires a fresh exact VOC-085 authority plus a replacement ACT-03
+  before merge, authorizing only replacement of `CLOUDFLARE_API_TOKEN`. After PR2
+  merge, expiry makes the transition stale and requires a newly governed correction;
+  silent token reissue and every other settings mutation are forbidden.
 - `VOC-096-D11` — Re-run the same live binder verification as the final credential-free
   step immediately before the first secret-bearing migration step. Both the current
   run's GitHub server `created_at` and the actual time of each live check must be
-  strictly before authority body `expires_at`; the authority envelope `created_at` is
+  strictly before both authority body `expires_at` and effective
+  ACT03.phase4_token.expires_at`; ACT-04 expiry must not exceed token expiry. The
+  first secret-bearing step records its start before reading a secret and also occurs
+  before the earlier deadline. The authority envelope `created_at` is
   the sole issue time and body-selected issuance is forbidden. Credential
   references remain step-scoped to the existing migration/upload/promotion/rollback
   steps. Neither gate receives Cloudflare secrets, and no fetched text is evaluated as
@@ -166,12 +197,12 @@ Only secret names and sanitized hashes/identifiers are recorded. Public GitHub
 readbacks are untrusted input and pass strict schema, size, host, content-type, and
 field allowlists before comparison.
 
-The ACT-03, merged-PR2 exact review, ACT-04 authority, and binder-review body schemas,
+The settings-authority, ACT-03, merged-PR2 exact review, ACT-04 authority, and binder-review body schemas,
 shared definitions, separate API-envelope projection, raw-body canonicalization, and
 cross-record comparisons are exhaustively defined by `runtime_record_contract` in
 `change.yaml`; implementation may add no unreviewed record type or field. A body may
 reference an already-created earlier comment but never its own URL, digest, API
-timestamp, publisher, or association. All four fetched envelopes must match the
+timestamp, publisher, or association. All five fetched envelopes must match the
 committed GitHub login, numeric ID, type, site-admin flag, and association. Their
 governance actor IDs and exact nested provenance records remain separately attributable
 evidence reviewed under AGENTS.md, not identities derived from shared publisher fields.

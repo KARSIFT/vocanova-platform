@@ -15,7 +15,9 @@ type contracts and binds the complete prepared Cloudflare tuple. ACT-03 and PR2 
 VOC-094's truthful settings boundary. PR2
 is documentation-only and its merge SHA becomes the
 sole possible ACT-04 revision only after the strict ACT-03 record, fetched merged-PR2
-exact-review record, authority, and binder-review records pass. There is no `develop`
+exact-review record, authority, and binder-review records pass. ACT-03 itself is valid
+only after its separately fetched strict VOC-085 settings-authority record passes and
+its operator/scope/payload/deadline exactly match. There is no `develop`
 to `main` release in this package.
 
 ## External activation boundary
@@ -31,15 +33,19 @@ VOC-096 adoption, PR1, and PR2 authorize none of the following:
 Those effects remain exclusively under effective VOC-094-ACT-03/04/05 records. The
 runtime binder validates an authority; it does not create one.
 
-All four canonical records must match the committed GitHub publisher login/numeric ID/
-type/site-admin/association. This authenticates the relay account only. Distinct
+All five canonical records must match the committed unauthenticated GitHub publisher
+login/numeric ID/type/site-admin/`CONTRIBUTOR` association and exact API issue URL.
+An authenticated client's `MEMBER` observation is not substituted. This authenticates the relay account only. Distinct
 governance actors remain separately attributable through the exact nested provenance
 shape and independent review. The merged-PR2 review is created after merge; authority
 follows it. Each URL, digest, timestamp, and publisher is a fetched envelope fact, not
 a same-body self-reference. The authority body has no `issued_at`; immutable API
 `created_at` is the sole issuance time and must precede body `expires_at` by no more
 than 30 minutes. Binder review follows, and current-run creation plus both live checks
-remain strictly before expiry.
+and the first secret-bearing step remain strictly before the earlier ACT-04/effective
+Phase-4-token expiry. PR2 merge is also before settings-authority and token expiry.
+Required hosted checks are selected only from the PR2-merge-to-review-envelope window;
+current-dispatch checks on that same SHA cannot replace the reviewed projection.
 
 ## Rollback
 
@@ -52,7 +58,10 @@ remain strictly before expiry.
   recovery action exists.
 - A consumed, failed, expired, or edited binder is never repaired or reused. A new
   ACT-04 record/review may be issued only under unchanged authority and current drift
-  checks; this does not by itself require creating another Cloudflare token.
+  checks. If the Phase-4 token expires while PR2 is open, stop and obtain a fresh exact
+  VOC-085 authority plus replacement ACT-03 before merge and before replacing only the
+  API-token secret. After PR2 merge, stop for a newly governed correction. No silent
+  credential reissue or other settings change is permitted.
 - A missing/edited/reordered ACT-03 or merged-PR2-review record, publisher mismatch,
   actor-provenance collision, wrong tuple identifier/hash, probe-as-baseline selection,
   stale generated type, or timestamp equality/skew blocks dispatch and returns to the

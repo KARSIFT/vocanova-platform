@@ -16,6 +16,10 @@ same account; independence depends on distinct attributable actor/provenance rec
 non-authorship evidence, and review, never an inference from GitHub identity alone.
 The separately fetched merged-PR2 exact-review record prevents authority JSON from
 self-asserting that the required post-merge review happened.
+The separately fetched strict VOC-085 settings-authority record likewise prevents
+ACT-03 from selecting opaque text or self-asserting its operator/scope. Its actor,
+authorized operator, exact payload, one-use nonce, rollback, cost/production holds,
+and expiry are semantically validated and equality-bound to ACT-03.
 
 No GitHub environment or secret is changed by this package. ACT-03 remains separately
 held. Cloudflare secret values stay outside repository, comments, logs, fixtures, and
@@ -48,7 +52,12 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
   bound run name, first-attempt-only, environment concurrency, and exhaustive prior-run
   readback through the authority window. Every attempt consumes the record.
 - `VOC-096-R03`: public API failure or pagination could become fail-open. Mitigation:
-  bounded requests with strict pagination and no fixture fallback in workflow live mode.
+  bounded requests with strict pagination and no fixture fallback in workflow live
+  mode. The one check-runs page uses `filter=all`, rejects `total_count != length`,
+  length over 100 or a next page, ignores unrelated names, and selects a unique latest
+  completed candidate for each exact committed required name wholly inside the PR2-
+  merge-to-review-envelope window. Later/current-dispatch checks are excluded without
+  allowing a pending or cross-cutoff pre-review check.
 - `VOC-096-R04`: PR2 documentation could become executable input. Mitigation: gate
   reads no documentation content; it only verifies PR2's exact file-set boundary and
   separately verifies ACT-03 evidence.
@@ -59,14 +68,18 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
   secret/production check plus specialist exact-SHA review.
 - `VOC-096-R07`: a short 30-minute binder could expire during operator handling.
   Mitigation: prepare and review every script/check/readback first, publish binder last,
-  dispatch once promptly, and require a fresh record—not a fresh Cloudflare token by
-  default—if the binder expires before any attempt.
+  dispatch once promptly, and require a fresh ACT-04 record if only the binder expires.
+  A Phase-4 token expiry while PR2 is open instead requires fresh exact VOC-085
+  settings authority and a replacement ACT-03 before merge and before replacing only
+  the API-token secret; after PR2 merge, stop for a newly governed correction. No
+  silent reissue.
 - `VOC-096-R08`: VOC-096 could be implemented while the older VOC-094 files remain
   canonically contradictory. Mitigation: PR1 reconciles all nine package surfaces in
   the same exact-reviewed diff and deterministic tests reject any surviving old
   static-future-binder or PR2-executable instruction.
 - `VOC-096-R09`: one hostile comment could self-assert publisher or actor identity.
-  Mitigation: exact committed GitHub publisher equality for all four record types,
+  Mitigation: exact committed unauthenticated GitHub publisher equality for all five
+  record types (`CONTRIBUTOR`, not authenticated-client `MEMBER`),
   strict separate actor/provenance fields, pairwise role-collision rejection, and an
   explicit prohibition on treating publisher authentication as actor independence.
 - `VOC-096-R10`: an authority could self-assert that exact PR2 review occurred.
@@ -80,6 +93,14 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
   Cloudflare state. Mitigation: commit the full resource/domain/certificate/DNS/
   baseline/probe/evidence/hash tuple, include both generated type files, and reject
   probe-as-baseline, wrong identifiers, stale config hashes, or pre-migration state.
+- `VOC-096-R13`: a permissive integer or URL constraint could make JCS/runtime results
+  diverge. Mitigation: no contradictory URL length floor, exact API issue URL, numeric
+  URL suffix equality, inclusive safe-integer ceiling, a real ten-digit URL fixture,
+  and independent ECMAScript/Python recomputation of all eight binders.
+- `VOC-096-R14`: token expiry could occur while PR2 is open or before the first
+  secret-bearing step. Mitigation: settings authority, ACT-03, PR2, all later records,
+  run/check timestamps and both live checks are deadline-bound; ACT-04 expiry is no
+  later than token expiry and the first secret-bearing step rechecks their minimum.
 
 ## Privacy, accessibility, and analytics
 
