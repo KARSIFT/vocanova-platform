@@ -2,10 +2,13 @@
 
 ## Preconditions and exact shape
 
-Do not implement until this exact package revision has separate Cloudflare,
-security/settings, and independent R4 plan reviews, an accountable adoption decision,
-complete adoption bookkeeping, a genuine eligible result, and a normal non-author
-merge. Preserve the dirty VOC-090 worktree and every recovery ref.
+The exact approved candidate has separate Cloudflare, security/settings, and
+independent R4 PASS reviews plus an accountable adoption decision. Do not implement
+until this adoption-bookkeeping revision receives fresh exact-SHA review, a populated
+binder, a genuine `eligible: true` / `reasons: []` result, normal non-author PR #165
+merge, and applicable post-merge checks. Preserve the dirty VOC-090 worktree and every
+recovery ref. This repository implementation authority grants no ACT-03/04/05 or other
+external action.
 
 Use one minimum-sufficient task and exactly two implementation PRs. PR1 is the
 27-file package-reconciliation/generated-type/executable/resource/living-doc unit.

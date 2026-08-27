@@ -5,7 +5,7 @@ slug: voc094-dispatch-binder-transition
 title: Repair the VOC-094 fail-closed dispatch-binder transition
 
 type: governance-delivery-policy-correction
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because implementation changes the executable Cloudflare delivery authorization
@@ -17,16 +17,24 @@ canonical_path: specs/changes/VOC-096-voc094-dispatch-binder-transition
 authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/164
 related_activation_issue: https://github.com/KARSIFT/vocanova-platform/issues/158
-requirement_approval_status: pending-independent-plan-review-and-adoption
+requirement_approval_status: >-
+  exact-security-settings-cloudflare-wrangler-independent-R4-plan-review-pass-and-
+  accountable-adoption-decision-approved
 base_branch: develop
 base_sha: 0d5ccc1231edb0e652d5c883cb214b85bcc9635e
 plan_branch: plan/voc-096-voc094-dispatch-binder-transition
 target_branch: develop
 
-approval_status: not-approved
-approved_candidate_sha: null
-implementation_authorized: false
-implementation_authority_status: blocked-pending-exact-plan-review-adoption-and-bookkeeping
+approval_status: adopted
+approved_candidate_sha: dfe8f3d54829737a619a9ff37bd3222ac0e6b728
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-adoption-for-the-two-declared-repository-only-
+  implementation-PRs-but-effective-only-after-this-adoption-bookkeeping-revision-
+  receives-fresh-exact-SHA-review-a-populated-binder-genuine-eligible-true-reasons-
+  empty-normal-non-author-PR-165-merge-and-applicable-postmerge-checks; all-GitHub-
+  settings-secrets-credentials-dispatch-Cloudflare-DNS-D1-deployment-production-
+  spending-data-and-launch-actions-remain-outside-this-authority
 implementation_pull_request_count: 2
 multiple_pull_request_rationale: >-
   Preserve VOC-094's hard external-settings/truth boundary. PR1 makes the repository
@@ -149,6 +157,53 @@ plan_review_history:
       Preserved as immutable FAIL history. The next candidate corrects the README
       mapping counts and the canonical PR review-history classification. No verdict,
       approval, adoption, implementation, or action authority transfers.
+  - candidate_sha: dfe8f3d54829737a619a9ff37bd3222ac0e6b728
+    verdict: pass-security-settings-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440552113
+    resolution: >-
+      Exact approved-candidate security/settings review evidence. It authorizes no
+      external action and transfers to no changed SHA.
+  - candidate_sha: dfe8f3d54829737a619a9ff37bd3222ac0e6b728
+    verdict: pass-independent-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440587958
+    resolution: >-
+      Exact approved-candidate independent R4 review evidence. It authorizes no
+      external action and transfers to no changed SHA.
+  - candidate_sha: dfe8f3d54829737a619a9ff37bd3222ac0e6b728
+    verdict: pass-cloudflare-wrangler-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440624053
+    resolution: >-
+      Exact approved-candidate Cloudflare/Wrangler review evidence. It authorizes no
+      Cloudflare, credential, dispatch, settings, production, or other external action
+      and transfers to no changed SHA.
+
+approvals:
+  security_settings_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: dfe8f3d54829737a619a9ff37bd3222ac0e6b728
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440552113
+  independent_R4_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: dfe8f3d54829737a619a9ff37bd3222ac0e6b728
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440587958
+  cloudflare_wrangler_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: dfe8f3d54829737a619a9ff37bd3222ac0e6b728
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440624053
+  adoption_decision:
+    status: approved-for-adoption-and-repository-only-implementation-after-effectiveness-gates
+    decision_id: VOC-096-ADOPT-01
+    candidate_sha: dfe8f3d54829737a619a9ff37bd3222ac0e6b728
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440710886
+
+approved_candidate_hosted_evidence:
+  candidate_sha: dfe8f3d54829737a619a9ff37bd3222ac0e6b728
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/33081441348
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/33081441284
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33081545461
+    structure_and_changed_path_risk: pass
+    eligibility: blocked-as-expected-pending-adoption-bookkeeping-binder-and-review
 
 owners:
   decision: accountable-governance-decision-owner-after-independent-plan-review
@@ -1701,9 +1756,13 @@ protected_areas:
   - dirty-worktree-and-recovery-references
 
 implementation:
-  authorized: false
+  authorized: true
+  authority_effective: false
   required: true
-  status: planned-pending-adoption
+  status: >-
+    adopted-authorized-for-repository-only-implementation-but-effective-only-after-
+    bookkeeping-revision-exact-review-genuine-eligibility-normal-non-author-plan-
+    merge-and-applicable-postmerge-checks
   target_branch: develop
   pull_request_count: 2
   task: VOC-096-T00
@@ -1741,9 +1800,6 @@ release:
 
 ehr: not-triggered
 blocking_reasons:
-  - independent-plan-review-pending
-  - cloudflare-plan-specialist-review-pending
-  - security-settings-plan-specialist-review-pending
-  - accountable-adoption-decision-pending
-  - adoption-bookkeeping-and-normal-non-author-plan-merge-pending
-  - implementation-authority-not-effective
+  - adoption-bookkeeping-revision-exact-review-and-normal-non-author-plan-merge-pending
+  - repository-implementation-not-started-and-requires-separate-builder-exact-reviews-and-non-author-merges
+  - external-actions-remain-held-under-voc094-act03-act04-act05-and-are-not-authorized-by-voc096

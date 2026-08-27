@@ -13,7 +13,10 @@
   documentation-only settings reconciliation; distinct post-merge exact-PR2 review,
   ACT-04 authority, and different-actor binder review; one ACT-04 dispatch; ACT-05
   cleanup
-- Status: planned-pending-adoption
+- Status: adopted-authorized for repository-only implementation; effective only after
+  bookkeeping exact-SHA review, populated binder, genuine eligibility, normal
+  non-author PR #165 merge, and applicable post-merge checks. ACT-03/04/05 remain
+  separately held.
 
 This remains one task because the prepared state, live binder, PR2 truth boundary,
 replay defense, unchanged delivery gates, reviews, and rollback form one authorization

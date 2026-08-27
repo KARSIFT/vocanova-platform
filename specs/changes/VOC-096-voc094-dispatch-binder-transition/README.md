@@ -1,6 +1,15 @@
 # VOC-096 — Repair the VOC-094 dispatch-binder transition
 
-Status: draft, pending independent plan review and adoption.
+Status: adopted in bookkeeping. Exact candidate
+`dfe8f3d54829737a619a9ff37bd3222ac0e6b728` received security/settings,
+Cloudflare/Wrangler, and independent R4 PASS reviews plus accountable decision
+`VOC-096-ADOPT-01`. Repository-only implementation authorization is recorded but
+becomes effective only after this bookkeeping revision receives fresh exact-SHA
+review, a populated merge-eligibility binder, genuine `eligible: true` with
+`reasons: []`, normal non-author PR #165 merge, and applicable post-merge checks.
+No review or decision authorizes GitHub settings/secrets, credentials, dispatch,
+Cloudflare, DNS, D1, deployment, production, spending, data, or launch action;
+VOC-094-ACT-03/04/05 remain separately held.
 
 Issue [#164](https://github.com/KARSIFT/vocanova-platform/issues/164) records a
 blocking governance bug in adopted VOC-094. PR1 must be dispatch-ineligible, ACT-03

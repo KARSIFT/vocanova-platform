@@ -2,11 +2,15 @@
 
 ## Adoption and repository release
 
-This draft grants no implementation or external-action authority. After independent
-plan reviews and an accountable decision, adoption bookkeeping must bind the exact
-candidate SHA before a non-author plan merge. Implementation remains two PRs into
-`develop`; neither merge deploys or changes GitHub/Cloudflare settings. Both source
-heads and all existing worktrees/recovery refs remain recoverable while open.
+Adoption bookkeeping binds exact approved candidate
+`dfe8f3d54829737a619a9ff37bd3222ac0e6b728`, its three exact PASS reviews, and
+decision `VOC-096-ADOPT-01`. Repository-only implementation authority becomes
+effective only after this bookkeeping revision receives fresh exact-SHA review, a
+populated binder, genuine eligibility, normal non-author PR #165 merge, and applicable
+post-merge checks. Implementation remains two PRs into `develop`; neither merge
+deploys or changes GitHub/Cloudflare settings. Both source heads and all existing
+worktrees/recovery refs remain recoverable while open. Adoption grants no external
+action authority and leaves VOC-094-ACT-03/04/05 separately held.
 
 PR1's bounded amendment makes all nine VOC-094 package surfaces agree with the
 corrected transition while preserving immutable history; it is repository-ready but

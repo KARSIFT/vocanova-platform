@@ -176,3 +176,9 @@ from any failed candidate to the corrected SHA. Preserve the `4b6eabd...` R4 FAI
 `5439974737`; none transfers to the next candidate. Preserve the `47545f3...`
 Cloudflare FAIL `5440287060`, security FAIL `5440329271`, and R4 FAIL `5440332195`;
 none transfers review, approval, adoption, implementation, or action authority.
+Adoption bookkeeping additionally binds exact approved candidate `dfe8f3d...`,
+security/settings PASS `5440552113`, independent R4 PASS `5440587958`,
+Cloudflare/Wrangler PASS `5440624053`, and adoption decision `5440710886`. Each PASS
+remains approved-candidate evidence only; the changed bookkeeping SHA requires fresh
+exact review, genuine eligibility, and normal non-author merge. Implementation
+acceptance results remain pending, and ACT-03/04/05 remain separately held.
