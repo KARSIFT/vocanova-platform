@@ -47,7 +47,10 @@ multiple_pull_request_rationale: >-
   Both PRs remain one adopted package and task. This costs one extra branch, exact
   review, hosted-check cycle, merge, and lifecycle record once; it avoids false
   preclaims and replaces the recurring ACT-03/PR2/five-comment/token-expiry cycle for
-  every later dispatch. Token/context, coordination, repeated-check, and bookkeeping
+  every later dispatch. It adds one-time elapsed time for PR2 authoring, exact review,
+  hosted CI, merge queue, and lifecycle readback; that delay is accepted because the
+  settings post-state cannot truthfully exist before the external action. Token/
+  context, coordination, repeated-check, exact-review, bookkeeping, and elapsed-time
   overhead are lower after activation because ordinary dispatch and token rotation
   require no repository PR or plan.
 automatic_merge_allowed: true
@@ -123,9 +126,13 @@ requirements:
       sanitized current API and web deployment version IDs as rollback targets,
       verify both environment secrets are non-empty and the account ID is exact, and
       fail on drift. Each Worker must have exactly one deployed UUID at 100% traffic.
-      Pass
-      credentials only to the minimum individual Wrangler steps. Builds, tests,
-      policy evaluation, and smoke run without credential exposure where possible.
+      A credential-free no-help parser harness must execute the exact locked-Wrangler
+      migration, deployment-status, version-promotion, and rollback argv shapes in an
+      isolated CI process with outbound network denied: valid argv reaches only the
+      expected missing-auth boundary, while a deliberate unknown-option control fails
+      at argument parsing. Pass credentials only to the minimum individual Wrangler
+      steps. Builds, tests, policy evaluation, and smoke run without credential
+      exposure where possible.
   - id: VOC-100-D06
     statement: >-
       Simplify cloudflare-delivery-policy.mjs and its tests to deterministic event,
@@ -210,6 +217,24 @@ plan_review_history:
     resolution_status: >-
       superseded-by-changed-candidate-adding-required-reviewer-two-PR-truth-boundary-
       and-locked-Wrangler-command-parse-contract
+  - candidate_sha: 47dac33147cc4e47f2300f755d383eddb4308f31
+    verdict: pass-security-settings-zero-blockers-nontransferable-after-change
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5445991163
+    resolution_status: >-
+      immutable-pass-for-exact-old-candidate-only; fresh-review-required-because-
+      parser-risk-and-split-rationale-corrections-change-the-candidate
+  - candidate_sha: 47dac33147cc4e47f2300f755d383eddb4308f31
+    verdict: fail-cloudflare-wrangler-one-blocker
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446013416
+    resolution_status: >-
+      superseded-by-changed-candidate-replacing-help-short-circuit-with-no-help-
+      credential-free-network-denied-parser-harness-and-negative-controls
+  - candidate_sha: 47dac33147cc4e47f2300f755d383eddb4308f31
+    verdict: fail-independent-R4-three-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446033749
+    resolution_status: >-
+      superseded-by-changed-candidate-fixing-parser-proof-reviewer-substitution-
+      contingency-and-explicit-elapsed-time-overhead
 
 approvals:
   cloudflare_wrangler_plan_review:

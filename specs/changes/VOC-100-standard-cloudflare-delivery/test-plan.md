@@ -60,10 +60,13 @@
 
 - Covers: `VOC-100-AC-03`
 - Procedure: run delivery policy/smoke tests, all four Wrangler dry runs, generated
-  types, migration order, secret scan, and production comparison. Append `--help` to
-  the exact locked-Wrangler staging D1 migration, deployments-status, version-deploy,
-  and rollback argument shapes so parsing is credential-free; assert migration apply
-  omits unsupported experimental provisioning/auto-create flags.
+  types, migration order, secret scan, and production comparison. Run the exact
+  locked-Wrangler staging D1 migration, deployments-status, version-deploy, and
+  rollback argv without `--help` in isolated CI child processes with no credentials/
+  OAuth state, hard timeouts, and outbound network denied. Assert each valid argv
+  reaches only the expected missing-auth boundary; repeat each with a deliberate
+  unknown option and require a parser error. Assert migration apply omits unsupported
+  experimental provisioning/auto-create flags. A `--help` success is no evidence.
 - Expected: exact resources/bindings/routes/D1/eeur, immutable versions, smoke,
   synthetic privacy, Free/$0, and forward-corrective D1 behavior remain enforced.
 - Evidence: `VOC-100-EV-03`

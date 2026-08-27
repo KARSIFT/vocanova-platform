@@ -105,14 +105,18 @@ sanitized operational evidence only.
   Tests/evidence: TEST-00/01/07, EV-00/01/05. Contingency: roll settings back to the
   documented pre-state if PR2 cannot open or pass review.
 - `VOC-100-R07`: the named reviewer may be unavailable, slowing deployment.
-  Mitigation: availability is accepted in exchange for enforceable separation; a
-  reviewer change is a separately authorized settings action with immediate truth
-  update, never silent bypass. Owner: repository operator. Evidence: EV-01.
+  Mitigation: availability is accepted for enforceable separation; any replacement
+  requires a reviewed/adopted plan amendment before a settings action, followed by
+  exact environment-policy testing and immediate settings truth. Owner: accountable
+  plan decision role. Tests/evidence: TEST-01, EV-01. Contingency: stop without
+  environment mutation or dispatch; if partial settings exist, restore the documented
+  pre-state and revoke/remove any newly entered credential until the amendment lands.
 - `VOC-100-R08`: locked Wrangler command drift can fail after credentials are exposed.
   Mitigation: exact migration/status/promotion/rollback invocations parse without
-  authentication in CI and unsupported D1 flags are prohibited. Owner: Cloudflare
-  specialist. Tests/evidence: TEST-05, EV-03. Contingency: stop before write and
-  correct only through reviewed repository change.
+  authentication or network in a no-help CI harness, deliberate unknown-option
+  controls prove the parser is active, and unsupported D1 flags are prohibited.
+  Owner: Cloudflare specialist. Tests/evidence: TEST-05, EV-03. Contingency: stop
+  before write and correct only through reviewed repository change.
 - `VOC-100-DEP-00`: PR #168 merge `2b946024...` is the repository baseline; its
   successful CI/Security/Governance and three PASS reviews are historical evidence,
   not authority transferable to VOC-100.

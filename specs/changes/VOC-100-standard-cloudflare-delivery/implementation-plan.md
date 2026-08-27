@@ -32,9 +32,14 @@ remains prohibited.
    credentials off build, validation, smoke, and summary steps when not required.
 6. Update delivery manifest/policy tests and VOC-080 final-evidence validation so
    staging may be standard-ready while production remains held.
-7. Remove unsupported experimental provisioning flags from D1 migration apply. Add
-   credential-free locked-Wrangler parser checks for the exact staging migration,
-   deployments-status, version-promotion, and rollback command shapes.
+7. Remove unsupported experimental provisioning flags from D1 migration apply. In
+   `cloudflare-delivery-policy.test.mjs`, add a no-help locked-Wrangler child-process
+   parser harness with empty credentials/OAuth state, isolated temporary config,
+   `CI=1`, hard timeout, and a temporary Node preload that throws on fetch, net/TLS
+   connect, and HTTP(S) request attempts. Exact valid staging migration,
+   deployments-status, version-promotion, and rollback argv must reach only the
+   expected missing-auth guard; the same fixtures with a deliberate unknown option
+   must fail at parsing. `--help` is explicitly insufficient and prohibited as proof.
 8. Update every inventoried living operations, CI, architecture, governance, and
    planned-settings surface, including `AGENTS.md`. Do not edit historical records.
 9. Run all deterministic checks without secrets. Open PR1, obtain fresh exact-SHA
@@ -68,8 +73,7 @@ pnpm --filter @vocanova/api-worker run dry-run:staging
 pnpm --filter @vocanova/api-worker run dry-run:production
 pnpm --filter @vocanova/web run cloudflare:dry-run:staging
 pnpm --filter @vocanova/web run cloudflare:dry-run:production
-pnpm --filter @vocanova/api-worker exec wrangler d1 migrations apply DB --remote --env staging --help
-pnpm --filter @vocanova/api-worker exec wrangler deployments status --env staging --json --help
+node --test scripts/foundation/cloudflare-delivery-policy.test.mjs
 bash scripts/governance/validate-governance.sh
 bash scripts/governance/classify-change-risk.sh
 git diff --check

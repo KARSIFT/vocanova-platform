@@ -56,8 +56,9 @@ or enter a job that can evaluate either environment secret.
 All exact staging resources, D1 placement/migrations, immutable upload/promotion,
 smoke, synthetic-only data, privacy, and Free/$0 assertions pass. The exact locked
 Wrangler staging migration, deployment-status readback, version promotion, and
-rollback invocations parse without authentication; D1 migration apply contains no
-unsupported experimental provisioning flags. Negative tests prove wrong account,
+rollback invocations pass a no-help, no-credential, outbound-network-denied parser
+harness whose deliberate unknown-option control fails; D1 migration apply contains
+no unsupported experimental provisioning flags. Negative tests prove wrong account,
 resource, binding, route, migration order, deployment traffic, or cost fails first.
 
 ## VOC-100-AC-04 — Production remains separate and impossible to activate
