@@ -9,7 +9,7 @@
 | Decision/change records | Affected | VOC-100 prospectively supersedes conflicting future binder instructions; historical VOC-080/VOC-094–099 records remain immutable. |
 | Frontend | Not affected | Web code and UI are unchanged; only the existing Worker delivery step is controlled. |
 | Backend and API | Not affected | Hono/API behavior and contracts are unchanged; existing version upload/promotion is retained. |
-| Authentication/authorization | Affected | Delivery authorization moves from bespoke comments to a named dispatcher plus a fresh non-author, different-model AI reviewer using the same GitHub identity, attributable receipt, and live protection readback. Product auth is unchanged. |
+| Authentication/authorization | Affected | Delivery authorization moves from bespoke comments to a named dispatcher, fresh non-author AI decision-maker, mechanical same-account approval proxy, current-attempt receipt readback, and live protection checks. Product auth is unchanged. |
 | Security and privacy | Affected | Reusable credential lifetime, environment/repository/organization secret scope, redaction, reviewer, and synthetic-data boundaries change. |
 | Data and migrations | Affected | No schema changes now; future staging retains ordered D1 migrations and forward-only correction. |
 | Analytics | Not affected | No product analytics change; only sanitized workflow summaries remain. |
@@ -21,16 +21,16 @@
 | Support and operations | Affected | Operators use one manual dispatch plus one environment approval; rotation uses a no-write credential check, not a PR. |
 | Cost and billing | Not affected | Free plan and zero-paid-spend ceiling remain exact; any paid requirement stops work. |
 | Production and learner data | Not affected | Production environment, credentials, traffic, D1, data, and HOLD-01/HOLD-02 remain prohibited. |
-| Unknowns | One accepted platform limitation | GitHub cannot distinguish dispatcher and AI reviewer under their shared account identity. Exact receipt checks, non-authorship/model provenance, post-run audit, and incident revocation provide procedural detection but cannot technically prevent dispatcher self-approval. Locked Wrangler surfaces were read back. |
+| Unknowns | One platform limitation requiring separate acceptance | GitHub cannot prove the AI authored the comment posted by the shared account. Exact current-attempt receipt checks detect malformed/stale/conflicting records but not a forged valid receipt. The staging action owner must explicitly accept or reject that residual in the separate R4 delegation; rejection keeps delivery disabled. Locked Wrangler surfaces were read back. |
 
 ## Security and privacy
 
 The change removes unauditable operational complexity and reduces the number of
 places that describe authorization. Environment-scoped secrets plus a fresh
-non-author, different-model AI review, attributable approval receipt, disabled admin
-bypass, exact custom `develop` policy, live pre-environment readback, and sole
-dispatcher `m-e-h-r-d-a-a-d` prevent ordinary unrelated jobs from reaching staging
-credentials. Repository and
+non-author AI review, attributable approval receipt, first-step exact approval-history
+validation, disabled admin bypass, exact custom `develop` policy, live pre-environment
+readback, and sole dispatcher `m-e-h-r-d-a-a-d` prevent ordinary unrelated jobs from
+evaluating staging credentials. Repository and
 organization secrets with the same names are prohibited. Step-scoped variables reduce
 exposure duration. No token value is an input or stored in Git/evidence/agent context.
 
@@ -44,13 +44,14 @@ review, and exact manifest/resource checks.
 This intentionally expands durable staging authority relative to a one-use binder:
 the named dispatcher can request multiple deployments while the token/delegation is
 valid. It does not expand repository merge, production, DNS, billing, or data
-authority. A different non-author AI actor must approve every SHA-bound run, but
-GitHub records dispatcher and reviewer under the same account identity. The standing
-delegation expires with the token no later than 90 days and is revoked on actor,
-scope, receipt, or security drift. The repository administrator can change settings
-or self-approve, irreducible platform-owner capabilities; live preflight, sanitized
-settings truth, attributable receipts, and post-run audit make violations visible and
-fail closed where the workflow can detect them.
+authority. A different non-author AI actor must decide every SHA-bound run, while
+an authorized proxy posts that actor's exact PASS receipt under the dispatcher's GitHub
+identity. GitHub cannot prove receipt authorship. The standing delegation expires with
+the token no later than 90 days and is revoked on actor, scope, receipt, or security
+drift. The repository administrator can change settings or forge a receipt,
+irreducible platform-owner capabilities; live preflight, exact first-step readback,
+sanitized settings truth, and post-run audit make detectable violations visible but
+do not provide cryptographic provenance.
 
 Staging remains synthetic-only. Production learner data and all production effects
 remain held.
@@ -107,22 +108,33 @@ sanitized operational evidence only.
   Tests/evidence: TEST-00/01/07, EV-00/01/05. Contingency: roll settings back to the
   documented pre-state if PR2 cannot open or pass review.
 - `VOC-100-R07`: GitHub cannot distinguish the human dispatcher from the AI reviewer
-  because both use `m-e-h-r-d-a-a-d` and identity-layer self-review must be enabled.
-  A dispatcher could therefore bypass the intended actor separation. Mitigation:
-  instantiate a fresh task-scoped reviewer that did not author the exact SHA and uses
-  a different model; provide only sanitized run evidence; require its attributable
-  exact-run receipt before writes; audit the GitHub approval and receipt after every
-  run; disable admin bypass; prohibit dispatcher approval. Owner: staging dispatcher
-  and independent deployment-review actor. Tests/evidence: TEST-01/03/04, EV-01/02.
-  Contingency: reject or cancel the run; if any write occurred, stop delivery, revoke
-  the token, remove/disable the environment secrets, audit the run, and require a
-  reviewed corrective package before reactivation.
+  because approval is posted by a proxy using `m-e-h-r-d-a-a-d` and identity-layer
+  self-review must be enabled. A dispatcher could forge a valid receipt and bypass the
+  intended actor separation. Mitigation: instantiate a fresh task-scoped reviewer
+  with no exact-SHA authorship or authenticated approval credential; use model
+  diversity for agent-mediated dispatch; require a structured current-attempt receipt;
+  mechanically post it unchanged; validate the approval history as the first job step
+  before any secret expression; audit every run; disable admin bypass. These controls
+  do not prevent a valid forgery. Owner: staging action owner, approval proxy, and
+  independent deployment-review actor. Tests/evidence: TEST-01/03/04, EV-01/02.
+  Contingency: unless a separate R4 action record explicitly accepts the residual,
+  keep staging disabled. On detected fabrication, cancel the run; after any write,
+  stop delivery, revoke the token, remove/disable environment secrets, audit the run,
+  and require a reviewed corrective package before reactivation.
 - `VOC-100-R08`: locked Wrangler command drift can fail after credentials are exposed.
   Mitigation: exact migration/status/promotion/rollback invocations parse without
   authentication or network in a no-help CI harness, deliberate unknown-option
   controls prove the parser is active, and unsupported D1 flags are prohibited.
   Owner: Cloudflare specialist. Tests/evidence: TEST-05, EV-03. Contingency: stop
   before write and correct only through reviewed repository change.
+- `VOC-100-R09`: the approval proxy uses an authenticated GitHub session whose actual
+  capability may be broader than the one authorized endpoint. Mitigation: the AI
+  reviewer never receives the credential; action authority permits the named proxy
+  only to submit the unchanged receipt to the exact run/environment approval endpoint;
+  pre/post API readback records the bounded action. Owner: staging action owner and
+  approval proxy. Tests/evidence: TEST-01/03/04, EV-01/02. Contingency: cancel the
+  run, revoke/rotate the affected GitHub session or token, audit repository actions,
+  and keep staging disabled until the capability boundary is restored.
 - `VOC-100-DEP-00`: PR #168 merge `2b946024...` is the repository baseline; its
   successful CI/Security/Governance and three PASS reviews are historical evidence,
   not authority transferable to VOC-100.

@@ -10,10 +10,13 @@ branches, evidence, and historical packages.
 Settings/secret entry and the standing staging-dispatch delegation require separate
 exact action records. The proposed standing delegation names `m-e-h-r-d-a-a-d` as
 dispatcher and a fresh, non-author AI subagent using a different model as the per-run
-reviewer. It expires with the token within 90 days and is revoked on actor, receipt,
-scope, or protection drift. GitHub records both actors under `m-e-h-r-d-a-a-d`, so
-the dispatcher is procedurally prohibited from approving and the attributable receipt
-is mandatory. Production remains prohibited.
+review decision-maker, plus a named mechanical approval proxy. For agent-mediated
+dispatch the reviewer and coordinating agent model IDs differ; human-only dispatch
+uses an exact `human-not-applicable` coordinator sentinel. The delegation expires with
+the token within 90 days and is revoked on actor, receipt, scope, or protection drift.
+GitHub records the proxy under `m-e-h-r-d-a-a-d` and cannot prove receipt authorship,
+so the delegation must explicitly accept that forgeable procedural boundary or keep
+staging disabled. Production remains prohibited.
 
 ## One coherent implementation sequence
 
@@ -27,7 +30,9 @@ is mandatory. Production remains prohibited.
 4. Simplify `cloudflare-delivery-policy.mjs` to deterministic local/event/settings
    validation. Remove comment fetch, JCS/digest/nonce/replay/expiry logic and helpers.
    Add static job-graph tests proving PR/push/reusable/build/test/smoke/summary paths
-   cannot evaluate either Cloudflare secret or enter a secret-bearing job.
+   cannot evaluate either Cloudflare secret or enter a secret-bearing job. For the
+   environment job, require the approval-history check to be its first step and prove
+   neither secret appears in job-level env, conditions, expressions, or earlier steps.
 5. Add pre-write current-deployment readback for exact API/web rollback IDs, exact
    account check, and failure unless each Worker has one UUID at 100% traffic. Add a
    no-write, environment-reviewed credential-check operation for rotation. Keep
@@ -59,13 +64,17 @@ is mandatory. Production remains prohibited.
     PR lifecycles. Do not dispatch as part of either PR.
 12. Under the separately approved standing delegation, run the no-write credential
     check; on rotation revoke the prior token only after success. Then dispatch one
-    SHA-bound staging delivery. Instantiate a fresh different-model deployment-review
-    subagent with no authorship of the exact SHA and no secret access; give it only
-    sanitized run/SHA/environment/check evidence. It records a structured PASS/FAIL
-    receipt and, only on PASS, submits the environment approval using the shared
-    GitHub identity. The dispatcher never approves. Inspect migration/promotion/smoke/
-    rollback evidence, audit approval-to-receipt correspondence, and perform a bounded
-    soak.
+    SHA-bound staging delivery. Instantiate a fresh deployment-review subagent with no
+    authorship of the exact SHA, authenticated approval credential, or Cloudflare
+    secret access; give it only sanitized run ID/attempt/SHA/environment/check evidence.
+    For agent-mediated dispatch select a model different from the coordinating agent
+    and record both exact IDs. It emits a structured PASS/FAIL receipt. Only on PASS,
+    the separately authorized proxy posts the receipt bytes unchanged to the exact
+    pending-deployment approval endpoint using the operator's authenticated GitHub
+    session. The released job first GETs approval history with `actions: read` and
+    exact-validates one current-attempt record/comment before any secret reference.
+    Inspect migration/promotion/smoke/rollback evidence, audit approval-to-receipt
+    correspondence, and perform a bounded soak.
 
 ## Validation and independent verification
 
@@ -100,7 +109,9 @@ truth. If PR2 cannot open/pass, restore the documented settings pre-state. Crede
 rollback retains/reinstalls the valid old token until the new credential check passes
 and revokes the failed/affected token. Worker rollback uses
 the exact pre-promotion API/web versions captured by the workflow. D1 uses forward
-correction only. A dispatcher approval, missing/mismatched AI receipt, or reviewer
-authorship/model violation stops the run; after any write it also revokes the token,
-disables/removes the environment secrets, and requires reviewed correction before
-reactivation.
+correction only. A missing/mismatched AI receipt, reviewer authorship/model violation,
+or unauthorized/altered proxy submission stops the run; after any write it also
+revokes the token, disables/removes the environment secrets, revokes or rotates the
+affected GitHub session as applicable, and requires reviewed correction before
+reactivation. A valid forged receipt is not claimed detectable; later discovery invokes
+the same incident response.

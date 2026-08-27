@@ -116,11 +116,16 @@ requirements:
       DEPLOY staging followed by that exact 40-character event SHA. The environment
       requires GitHub reviewer identity m-e-h-r-d-a-a-d, allows self-review because
       GitHub cannot represent the separately instantiated AI participant, and disables
-      admin bypass. Only a fresh non-author AI deployment-review subagent may submit
-      that approval. Its approval comment records participant/task/model provenance,
-      exact run/SHA/environment/checks, PASS verdict, and no-secret boundary; model
-      provenance supports attribution but grants no authority. The human dispatcher
-      may not approve the run. Remove
+      admin bypass. Only a fresh non-author AI deployment-review subagent may make the
+      review decision. Its structured receipt records participant/task/model and
+      coordinator-model provenance, exact run ID/attempt/SHA/environment ID and name,
+      checks, PASS verdict, and no-Cloudflare-secret boundary. For agent-mediated
+      dispatch its model must differ from the coordinating agent model; human-only
+      dispatch records coordinator_model human-not-applicable. The reviewer receives
+      no authenticated approval credential. A separately authorized approval proxy
+      must post the receipt bytes unchanged as the pending-deployment approval comment
+      using the operator's authenticated GitHub session and may exercise no review
+      judgment. Model provenance supports attribution but grants no authority. Remove
       action-authority, ACT-03, PR2-review, binder-review, raw-body digest, nonce,
       reviewed-SHA, estimated-cost, and operator-supplied rollback-version inputs.
   - id: VOC-100-D05
@@ -129,10 +134,16 @@ requirements:
       live cloudflare-staging environment exists with sole reviewer identity
       m-e-h-r-d-a-a-d, self-review allowed, admin bypass disabled, and exactly one
       custom deployment branch policy for develop. Before the first Cloudflare write,
-      require the environment approval and attributable AI review receipt, then read and record
-      sanitized current API and web deployment version IDs as rollback targets,
-      verify both environment secrets are non-empty and the account ID is exact, and
-      fail on drift. Each Worker must have exactly one deployed UUID at 100% traffic.
+      the first environment-job step must use only an actions-read GitHub token to GET
+      the current run approval history and require exactly one matching approved
+      record whose user login/numeric ID, environment ID/name, and comment exactly
+      validate the AI receipt schema and current run ID/attempt/event SHA. Reject
+      malformed, stale, extra, or conflicting records. Static validation must prove no
+      job-level environment, expression, condition, or earlier step references either
+      Cloudflare secret. Only after that receipt gate may bounded steps evaluate the
+      secrets, record sanitized current API and web deployment version IDs as rollback
+      targets, verify non-empty values and exact account ID, and fail on drift. Each
+      Worker must have exactly one deployed UUID at 100% traffic.
       A credential-free no-help parser harness must execute the exact locked-Wrangler
       migration, deployment-status, version-promotion, and rollback argv shapes in an
       isolated CI process with outbound network denied: valid argv reaches only the
@@ -158,9 +169,13 @@ requirements:
       m-e-h-r-d-a-a-d, allow self-review at GitHub's identity layer, disable admin
       bypass, enable custom deployment branches with exactly one branch policy named
       develop, and enter exactly the two environment secrets. The setting does not
-      make the human dispatcher an authorized reviewer: the separate standing action
-      delegation grants pending-deployment approval only to a fresh non-author AI
-      subagent after its exact-run review. Sanitized pre-state, payload, rollback, post-state,
+      make the human dispatcher an authorized review decision-maker. The separate
+      standing action delegation grants review judgment only to a fresh non-author AI
+      subagent and grants a named approval proxy only mechanical submission of the
+      exact receipt. Because the shared account can forge a syntactically valid receipt,
+      that R4 action record must explicitly accept or reject this procedural-control
+      residual; rejection keeps staging disabled. Sanitized pre-state, payload,
+      rollback, post-state,
       reviewer/protection/branch policy, environment secret names, and absence of the
       same names from repository and organization Actions secrets must be recorded in
       one immediate documentation-only settings-truth PR authorized by this package.
@@ -203,8 +218,11 @@ owners:
   settings_and_secret_action: separately-explicitly-authorized-operator
   staging_dispatcher: m-e-h-r-d-a-a-d-after-separate-standing-staging-delegation
   staging_environment_reviewer: >-
-    fresh-non-author-AI-subagent-using-m-e-h-r-d-a-a-d-GitHub-identity-with-
-    self-review-allowed-admin-bypass-disabled-and-attributable-approval-comment
+    fresh-non-author-AI-subagent-producing-an-attributable-exact-run-attempt-receipt-
+    without-GitHub-approval-credentials-or-Cloudflare-secrets
+  staging_approval_proxy: >-
+    separately-authorized-operator-mechanically-posting-the-exact-AI-receipt-with-no-
+    review-judgment-and-explicit-acceptance-of-shared-identity-forgery-risk
   merge: separate-authorized-non-author-actor
 
 plan_review_history:
@@ -268,6 +286,24 @@ plan_review_history:
     resolution_status: >-
       exact-candidate-adoption-does-not-transfer; operator-amendment-evidence-is-
       https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446157004
+  - candidate_sha: 71a96ac8561c5cff014124c0ffcbae9a3192f2ca
+    verdict: fail-cloudflare-wrangler-two-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446246508
+    resolution_status: >-
+      superseded-by-changed-candidate-defining-exact-current-attempt-approval-readback-
+      before-secret-reference-and-mediated-authenticated-submission
+  - candidate_sha: 71a96ac8561c5cff014124c0ffcbae9a3192f2ca
+    verdict: fail-security-settings-one-blocker
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446246691
+    resolution_status: >-
+      superseded-by-changed-candidate-truthfully-classifying-shared-identity-as-
+      forgeable-procedural-control-requiring-separate-R4-action-risk-acceptance
+  - candidate_sha: 71a96ac8561c5cff014124c0ffcbae9a3192f2ca
+    verdict: pass-independent-R4-zero-blockers-nontransferable-after-change
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446246858
+    resolution_status: >-
+      immutable-pass-for-exact-old-candidate-only; fresh-review-required-because-
+      receipt-order-authenticated-proxy-and-residual-risk-acceptance-changed
 
 approvals:
   cloudflare_wrangler_plan_review:
@@ -415,8 +451,9 @@ external_actions:
     authorized_by_package_adoption: false
     required_record: >-
       exact-separate-maximum-90-day-standing-delegation-for-m-e-h-r-d-a-a-d-
-      dispatcher-and-fresh-non-author-AI-subagent-reviewer-with-per-run-SHA-bound-
-      attributable-environment-approval; human-dispatcher-self-approval-prohibited
+      dispatcher-fresh-non-author-AI-reviewer-and-mechanical-approval-proxy-with-per-
+      run-attempt-SHA-bound-receipt-and-explicit-shared-identity-forgery-risk-
+      acceptance; dispatcher-review-judgment-prohibited
   production:
     status: prohibited-and-held
     holds: [VOC-080-HOLD-01, VOC-080-HOLD-02]

@@ -20,8 +20,11 @@ The target operating model is:
   environment `cloudflare-staging` names that same GitHub identity as reviewer,
   allows identity-layer self-review, and disables admin bypass. The dispatcher may
   not approve: a fresh, non-author AI subagent using a different model performs the
-  exact-run review and submits an attributable approval receipt before the environment
-  exposes `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN`;
+  exact-run review and produces an attributable receipt. An authorized operator posts
+  that receipt unchanged as the approval comment. GitHub then makes environment
+  secrets available to the job, whose first step must validate the current-attempt
+  approval history before any workflow expression references
+  `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN`;
 - production: separate `cloudflare-production` environment and credential, `main`
   only, still disabled and held by `VOC-080-HOLD-01` and `VOC-080-HOLD-02`;
 - credentials: reusable across dispatches, least privilege, rotated independently
@@ -32,9 +35,11 @@ The target operating model is:
 
 GitHub cannot distinguish the dispatcher from that subagent because both use the
 same account. The separation is therefore a governed, auditable actor boundary rather
-than a native GitHub identity control: missing or mismatched AI-review provenance
-fails the run, and dispatcher self-approval is an incident requiring a stop and token
-revocation.
+than a native GitHub identity control. The workflow fails on missing, malformed,
+stale, or conflicting receipts, but a dispatcher can forge a syntactically valid one.
+Activation therefore requires a separate R4 action record explicitly accepting that
+residual risk; detected fabrication or dispatcher-authored review is an incident
+requiring a stop and token revocation.
 
 Adopting or merging this package authorizes repository implementation only. It does
 not authorize GitHub settings, secret entry, token creation, Cloudflare mutation,
@@ -47,4 +52,5 @@ Standards basis:
 
 - https://developers.cloudflare.com/workers/ci-cd/external-cicd/github-actions/
 - https://docs.github.com/en/actions/concepts/workflows-and-actions/deployment-environments
+- https://docs.github.com/en/rest/actions/workflow-runs
 - https://docs.github.com/en/code-security/reference/secret-security/secret-types

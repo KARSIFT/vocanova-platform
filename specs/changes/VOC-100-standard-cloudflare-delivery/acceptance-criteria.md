@@ -41,10 +41,15 @@ maximum-90-day expiry before secret entry.
 The workflow has no five-record binder inputs or comment fetch. A staging dispatch
 fails unless the actor is `m-e-h-r-d-a-a-d`, ref is `develop`, confirmation includes
 the exact event SHA, required same-run checks pass, live environment protections are
-exact, and a fresh non-author AI subagent using a different model submits a structured
-approval receipt for the exact run before approving under the shared GitHub identity.
-The dispatcher may not approve. Cost must be zero and account/resources/secrets must
-match.
+exact, and a fresh non-author AI subagent submits a structured review receipt for the
+exact run/attempt, using a different model from the coordinator for agent-mediated
+dispatch. A separately authorized proxy posts those
+bytes unchanged as the approval comment under the shared GitHub identity. After
+GitHub releases the job, its first step exact-validates the approval history using
+only `actions: read`; no earlier job-level expression, condition, or step references a
+Cloudflare secret. Cost must be zero and account/resources/secrets must match. The
+separate R4 staging delegation explicitly accepts the fact that GitHub cannot prove
+receipt authorship, or staging remains disabled.
 Current API/web deployment state must be one UUID at 100% each; those IDs are captured
 before promotion and used for Worker rollback. PR/push/validation paths cannot read
 or enter a job that can evaluate either environment secret.
