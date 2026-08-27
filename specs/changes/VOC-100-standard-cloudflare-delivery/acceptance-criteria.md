@@ -10,8 +10,8 @@
 
 Before plan merge, the exact reviewed candidate is recorded as adopted with both
 implementation authorization fields true. The adopted package contains no false
-future `authority_effective`, postmerge self-bookkeeping requirement, or planned
-second implementation PR.
+future `authority_effective` or postmerge self-bookkeeping requirement. It records
+exactly the two implementation PRs required by the one-time settings truth boundary.
 
 ## VOC-100-AC-01 — Staging uses only environment-scoped credentials
 
@@ -21,10 +21,13 @@ second implementation PR.
 - Evidence: `VOC-100-EV-01`
 - Result: pending
 
-Sanitized GitHub readback proves `cloudflare-staging` is selected-branch restricted
-to `develop` and contains exactly `CLOUDFLARE_ACCOUNT_ID` and
-`CLOUDFLARE_API_TOKEN` as environment secret names. Repository secret readback shows
-neither name. No secret value appears anywhere in evidence.
+Sanitized GitHub readback proves `cloudflare-staging` has required reviewer
+`NegarJafari`, self-review prevention, admin bypass disabled, exactly one custom
+deployment branch rule for `develop`, and exactly `CLOUDFLARE_ACCOUNT_ID` and
+`CLOUDFLARE_API_TOKEN` environment secret names. Repository and organization secret
+readback show neither name. The account ID is classified non-secret; no token value
+appears anywhere in evidence. Sanitized Cloudflare dashboard evidence proves the exact
+account, two permissions, status, and maximum-90-day expiry before secret entry.
 
 ## VOC-100-AC-02 — Manual staging delivery has a small deterministic gate
 
@@ -34,11 +37,13 @@ neither name. No secret value appears anywhere in evidence.
 - Evidence: `VOC-100-EV-02`
 - Result: pending
 
-The workflow has no five-record binder inputs or network comment fetch. A staging
-dispatch fails on any trigger other than manual, any ref other than `develop`, wrong
-confirmation, nonzero cost, account/resource drift, missing secrets, or held
-manifest. Required same-run validation finishes before the environment job. Current
-API/web deployment IDs are captured before promotion and used for Worker rollback.
+The workflow has no five-record binder inputs or comment fetch. A staging dispatch
+fails unless the actor is `m-e-h-r-d-a-a-d`, ref is `develop`, confirmation includes
+the exact event SHA, required same-run checks pass, live environment protections are
+exact, `NegarJafari` approves, cost is zero, and account/resources/secrets match.
+Current API/web deployment state must be one UUID at 100% each; those IDs are captured
+before promotion and used for Worker rollback. PR/push/validation paths cannot read
+or enter a job that can evaluate either environment secret.
 
 ## VOC-100-AC-03 — Existing staging safety remains intact
 
@@ -49,8 +54,11 @@ API/web deployment IDs are captured before promotion and used for Worker rollbac
 - Result: pending
 
 All exact staging resources, D1 placement/migrations, immutable upload/promotion,
-smoke, synthetic-only data, privacy, and Free/$0 assertions pass. Negative tests prove
-wrong account, resource, binding, route, migration order, or cost fails before write.
+smoke, synthetic-only data, privacy, and Free/$0 assertions pass. The exact locked
+Wrangler staging migration, deployment-status readback, version promotion, and
+rollback invocations parse without authentication; D1 migration apply contains no
+unsupported experimental provisioning flags. Negative tests prove wrong account,
+resource, binding, route, migration order, deployment traffic, or cost fails first.
 
 ## VOC-100-AC-04 — Production remains separate and impossible to activate
 
@@ -73,7 +81,8 @@ mutate production.
 - Evidence: `VOC-100-EV-05`
 - Result: pending
 
-One implementation PR updates every inventoried living surface, passes all local and
-hosted checks, and receives fresh exact-SHA Cloudflare, security/settings, and R4
-PASS reviews before a different actor merges it. Historical packages remain
+The ordered delivery-control PR and documentation-only settings-truth PR update every
+inventoried living surface, pass applicable local/hosted checks, and receive fresh
+exact-SHA reviews before different actors merge them. No new package or plan is
+created between them or for ordinary deployment. Historical packages remain
 unchanged.

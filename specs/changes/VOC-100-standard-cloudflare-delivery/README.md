@@ -4,7 +4,9 @@ Status: draft; implementation is not authorized.
 
 This package replaces the still-future operational parts of the VOC-094/VOC-096
 custom five-record runtime binder with standard GitHub environment controls. It is
-the only planned package for issue #173 and maps to one implementation pull request.
+the only planned package for issue #173 and maps to two ordered implementation pull
+requests under the same adopted authority: the delivery-control PR and the mandatory
+post-settings documentation-only reconciliation PR.
 
 The package preserves the useful Cloudflare work merged by PR #168: exact staging
 resources, Free/$0 limits, synthetic-only staging data, ordered D1 migrations,
@@ -14,15 +16,17 @@ ceremony, and future self-effectiveness bookkeeping.
 
 The target operating model is:
 
-- staging: manual dispatch from `develop`, GitHub environment
-  `cloudflare-staging`, and environment-scoped `CLOUDFLARE_ACCOUNT_ID` /
+- staging: only `m-e-h-r-d-a-a-d` may manually dispatch from `develop`; GitHub
+  environment `cloudflare-staging` requires `NegarJafari` review with self-review and
+  admin bypass disabled, then exposes environment-scoped `CLOUDFLARE_ACCOUNT_ID` /
   `CLOUDFLARE_API_TOKEN`;
 - production: separate `cloudflare-production` environment and credential, `main`
   only, still disabled and held by `VOC-080-HOLD-01` and `VOC-080-HOLD-02`;
 - credentials: reusable across dispatches, least privilege, rotated independently
   of deployment, and never stored as repository secrets or repository content;
-- repository delivery: one coherent implementation PR with the settings readback
-  recorded before final exact-revision review, avoiding a PR2.
+- repository delivery: one delivery-control PR, one separately authorized settings
+  action, and one immediate documentation-only settings-truth PR. This one-time split
+  follows current `AGENTS.md`; it is not a per-dispatch binder or a new plan.
 
 Adopting or merging this package authorizes repository implementation only. It does
 not authorize GitHub settings, secret entry, token creation, Cloudflare mutation,

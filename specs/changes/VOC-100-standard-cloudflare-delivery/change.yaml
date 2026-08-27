@@ -39,8 +39,17 @@ implementation_authority_status: >-
   reviewed-candidate-status-adopted-and-implementation-authorized-true; once-that-
   adopted-package-is-on-develop-its-declared-repository-only-authority-is-usable-
   without-a-future-self-effectiveness-package
-implementation_pull_request_count: 1
-multiple_pull_request_rationale: not-applicable-single-coherent-delivery-control-pr
+implementation_pull_request_count: 2
+multiple_pull_request_rationale: >-
+  A hard GitHub-settings action-authority and truth boundary requires the repository
+  delivery-control PR to merge before the external environment/secret mutation, while
+  current AGENTS.md requires an immediate documentation-only PR after that mutation.
+  Both PRs remain one adopted package and task. This costs one extra branch, exact
+  review, hosted-check cycle, merge, and lifecycle record once; it avoids false
+  preclaims and replaces the recurring ACT-03/PR2/five-comment/token-expiry cycle for
+  every later dispatch. Token/context, coordination, repeated-check, and bookkeeping
+  overhead are lower after activation because ordinary dispatch and token rotation
+  require no repository PR or plan.
 automatic_merge_allowed: true
 production_impact: prohibited-and-held
 rollback_required: true
@@ -71,49 +80,77 @@ requirements:
       Configure staging delivery around GitHub environment cloudflare-staging. Only
       jobs explicitly referencing that environment may read exactly environment
       secrets CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN. Neither value may be a
-      repository secret, repository file, workflow input, output, log, comment,
-      artifact, Ruflo record, or agent message. The account ID must equal
-      0a9eda28b96d77c24dcde74f3e074d47 at secret-bearing preflight.
+      repository or organization Actions secret. The account ID is a non-sensitive
+      canonical identifier and may appear in repository/evidence; its environment-
+      secret name is retained only for the Wrangler interface. The API token value is
+      secret and may never appear in a repository file, workflow input/output, log,
+      comment, artifact, Ruflo record, or agent message. Secret-bearing preflight must
+      require the account ID to equal 0a9eda28b96d77c24dcde74f3e074d47.
   - id: VOC-100-D03
     statement: >-
       The staging token is reusable across ordinary dispatches, scoped only to the
-      selected account, and has exactly Workers Scripts Edit and D1 Edit. It has no
+      selected account, and has exactly Workers Scripts Edit and D1 Edit. A separately
+      authorized account owner creates it through the Cloudflare dashboard with an
+      expiry no later than 90 days and records sanitized token-policy details proving
+      the one-account resource scope, exact two permission groups, status, and expiry;
+      the deployment token itself receives no API Tokens permission. The verify
+      endpoint proves only status/expiry and Wrangler account readback proves only the
+      selected account, so neither is misclaimed as permission-policy evidence. It has no
       DNS, billing, user, organization, Access, Pages, R2, AI, production-data, or
-      unrelated-product permission. Rotate at most every 90 days and immediately on
-      exposure, operator change, or scope drift by entering the replacement secret
-      before revoking the prior token. Token rotation is not coupled to a PR, review,
-      dispatch nonce, or deployment window.
+      unrelated-product permission. Rotation order is create, dashboard-verify,
+      locally verify status/account without logging, install, run the environment-
+      reviewed no-write credential check, then revoke the prior token. Roll back at
+      any failure by retaining/reinstalling the prior unrevoked token and revoking the
+      failed replacement. Rotate at most every 90 days and immediately on exposure,
+      operator change, or scope drift. Rotation is not coupled to a PR or deployment.
   - id: VOC-100-D04
     statement: >-
       Keep workflow_dispatch as the only live delivery trigger. Staging must require
-      github.ref_name develop, environment cloudflare-staging, the exact event SHA,
-      successful required validation in the same run, cost ceiling zero, exact
-      staging manifest/resources, and an explicit DEPLOY staging confirmation. Remove
+      github.actor m-e-h-r-d-a-a-d, github.ref_name develop, environment
+      cloudflare-staging, the exact event SHA, successful required validation in the
+      same run, cost ceiling zero, exact staging manifest/resources, and confirmation
+      DEPLOY staging followed by that exact 40-character event SHA. The environment
+      requires reviewer NegarJafari, prevents self-review, and disables admin bypass;
+      its approval is the standard per-run action record. Remove
       action-authority, ACT-03, PR2-review, binder-review, raw-body digest, nonce,
       reviewed-SHA, estimated-cost, and operator-supplied rollback-version inputs.
   - id: VOC-100-D05
     statement: >-
-      Before the first secret-bearing write, read and record sanitized current API
-      and web deployment version IDs as rollback targets, verify both secrets are
-      non-empty and the account ID is exact, and fail before mutation on drift. Pass
+      Before any environment job, use the read-only GitHub token to fail unless the
+      live cloudflare-staging environment exists with required reviewer NegarJafari,
+      self-review prevention, admin bypass disabled, and exactly one custom deployment
+      branch policy for develop. Before the first Cloudflare write, read and record
+      sanitized current API and web deployment version IDs as rollback targets,
+      verify both environment secrets are non-empty and the account ID is exact, and
+      fail on drift. Each Worker must have exactly one deployed UUID at 100% traffic.
+      Pass
       credentials only to the minimum individual Wrangler steps. Builds, tests,
       policy evaluation, and smoke run without credential exposure where possible.
   - id: VOC-100-D06
     statement: >-
       Simplify cloudflare-delivery-policy.mjs and its tests to deterministic event,
-      branch, environment, confirmation, manifest, resource, production-hold, and
-      zero-cost validation. Remove GitHub comment fetching, RFC-8785 binder
+      actor, branch, environment-protection readback, confirmation, manifest,
+      resource, production-hold, and zero-cost validation. No pull_request,
+      pull_request_target, push, reusable-workflow, validation, build, test, smoke, or
+      summary job may evaluate either Cloudflare secret or enter a secret-bearing job.
+      Remove GitHub comment fetching, RFC-8785 binder
       canonicalization, URL/identity/run-suite cross-record checks, expiry coupling,
       digest validation, nonce replay state, and secret-step deadline checks that
       exist only for the superseded protocol.
   - id: VOC-100-D07
     statement: >-
-      Configure cloudflare-staging once, under separately recorded settings and
-      secret authority, before the implementation PR's final exact-revision review.
-      Restrict selected deployment branches to develop, enter exactly the two
-      environment secret names, and record sanitized pre-state, payload, rollback,
-      post-state, branch policy, and secret names in the same implementation PR. No
-      PR2 or per-dispatch settings documentation is allowed.
+      After the delivery-control PR merges, configure cloudflare-staging once under
+      separately recorded settings/secret authority. Require reviewer NegarJafari,
+      prevent self-review, disable admin bypass, enable custom deployment branches
+      with exactly one branch policy named develop, and enter exactly the two
+      environment secrets. The action record must include the named reviewer's
+      confirmed willingness and availability; absent that, stop and amend the reviewed
+      plan rather than substitute an unreviewed actor. Sanitized pre-state, payload,
+      rollback, post-state,
+      reviewer/protection/branch policy, environment secret names, and absence of the
+      same names from repository and organization Actions secrets must be recorded in
+      one immediate documentation-only settings-truth PR authorized by this package.
+      This one-time PR is not required for dispatches or token rotations.
   - id: VOC-100-D08
     statement: >-
       Retain cloudflare-production as a separate main-only environment and separate
@@ -125,8 +162,9 @@ requirements:
     statement: >-
       Update all living workflow, policy, test, manifest, settings-truth, and
       operations documents that describe the superseded protocol in the one
-      implementation PR. Preserve VOC-094 through VOC-099 as immutable historical
-      records; this package supplies the explicit prospective supersession rule.
+      ordered two-PR implementation. Preserve VOC-094 through VOC-099 and point-in-
+      time VOC-080 records as immutable history; this package supplies the explicit
+      prospective supersession rule.
   - id: VOC-100-D10
     statement: >-
       Obtain fresh exact-revision Cloudflare/Wrangler, security/settings, and
@@ -135,10 +173,11 @@ requirements:
       never authorize settings, secrets, Cloudflare, dispatch, or production.
   - id: VOC-100-D11
     statement: >-
-      One implementation PR and one task contain workflow, validator, tests, living
-      docs, sanitized settings readback, and rollback evidence. Any proposed split
-      requires a new written hard-boundary rationale; component count, review
-      convenience, token lifetime, and post-state bookkeeping do not justify it.
+      One task maps to exactly two ordered PRs for the recorded action/truth boundary:
+      delivery control first and immediate documentation-only settings truth second.
+      No package, plan, or PR is created per dispatch or token rotation. Any further
+      split requires a new written hard-boundary rationale; component count, review
+      convenience, token lifetime, and ordinary bookkeeping do not justify it.
 
 owners:
   decision: accountable-repository-decision-owner-after-independent-plan-review
@@ -148,10 +187,29 @@ owners:
   security_settings_specialist: different-non-author-exact-revision-actor
   independent_verification: different-non-author-exact-revision-R4-actor
   settings_and_secret_action: separately-explicitly-authorized-operator
-  staging_dispatch: separately-explicitly-authorized-operator-after-implementation
+  staging_dispatcher: m-e-h-r-d-a-a-d-after-separate-standing-staging-delegation
+  staging_environment_reviewer: NegarJafari-per-run-with-self-review-and-admin-bypass-disabled
   merge: separate-authorized-non-author-actor
 
-plan_review_history: []
+plan_review_history:
+  - candidate_sha: 2f3a7b7e882bc6a60f63381518963c7c7fb41e76
+    verdict: fail-security-settings-five-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5445876406
+    resolution_status: >-
+      superseded-by-changed-candidate-addressing-broader-secret-scope-account-ID-
+      classification-token-order-living-inventory-and-hosted-metadata
+  - candidate_sha: 2f3a7b7e882bc6a60f63381518963c7c7fb41e76
+    verdict: fail-independent-R4-five-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5445886698
+    resolution_status: >-
+      superseded-by-changed-candidate-aligning-requirement-identities-enforcing-
+      dispatch-approval-completing-credential-proof-impact-matrix-and-path-inventory
+  - candidate_sha: 2f3a7b7e882bc6a60f63381518963c7c7fb41e76
+    verdict: fail-cloudflare-wrangler-three-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5445889406
+    resolution_status: >-
+      superseded-by-changed-candidate-adding-required-reviewer-two-PR-truth-boundary-
+      and-locked-Wrangler-command-parse-contract
 
 approvals:
   cloudflare_wrangler_plan_review:
@@ -187,28 +245,40 @@ delivery_shape:
     count: 1
     file_count: 9
   implementation_pull_requests:
-    count: 1
+    count: 2
     task: VOC-100-T00
+    order:
+      - PR1-delivery-controls-and-planned-living-docs
+      - settings-action-then-PR2-documentation-only-settings-truth
     authorized_paths:
+      - AGENTS.md
       - .github/README.md
       - .github/workflows/ci.yml
       - infrastructure/cloudflare/delivery-manifest.json
+      - scripts/foundation/agent-authority-policy.mjs
+      - scripts/foundation/agent-authority-policy.test.mjs
       - scripts/foundation/cloudflare-delivery-policy.mjs
       - scripts/foundation/cloudflare-delivery-policy.test.mjs
       - scripts/foundation/voc080-final-evidence-policy.mjs
       - scripts/foundation/voc080-final-evidence-policy.test.mjs
+      - docs/development.md
+      - docs/engineering/04-technical-architecture.md
       - docs/governance/16-autonomous-development-operating-model.md
       - docs/governance/repository-settings.md
       - docs/governance/repository-settings-current.yaml
+      - docs/operations/10-development-workflow.md
       - docs/operations/11-devops-and-ci-cd.md
       - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+      - docs/operations/README.md
       - docs/operations/cloudflare-delivery.md
+      - docs/operations/voc-080-architecture.html
       - docs/product/12-mvp-implementation-plan.md
     historical_package_editing: prohibited
     settings_order: >-
-      Draft repository changes; obtain separate settings/secret authority; create and
-      read back cloudflare-staging while the same implementation PR is open; record
-      sanitized truth in that PR; then obtain final exact-SHA reviews and merge.
+      Merge the reviewed delivery-control PR while live pre-environment checks keep
+      staging blocked; obtain separate settings/secret authority; create and read back
+      cloudflare-staging; immediately open the documentation-only settings-truth PR;
+      obtain fresh exact-SHA reviews and merge it; only then consider dispatch.
 
 protected_areas:
   - github-environment-secrets
@@ -251,8 +321,10 @@ required_r4_evidence:
     status: pending-exact-candidate-review
     evidence: null
   action_authority:
-    required: false
-    status: no-external-action-authority-in-this-draft-package
+    required: true
+    status: >-
+      separate-settings-secret-authority-and-standing-staging-dispatch-delegation-
+      pending; production-authority-prohibited
     evidence: specification.md
 
 affected_areas:
@@ -270,25 +342,29 @@ implementation:
     repository-implementation-authorized-status-with-no-future-self-effectiveness-
     condition
   target_branch: develop
-  pull_request_count: 1
+  pull_request_count: 2
   task: VOC-100-T00
 
 external_actions:
   github_environment_and_secret_setup:
     required_for_first_staging_dispatch: true
     authorized_by_package_adoption: false
-    required_record: exact-separate-settings-and-secret-action-authority
+    required_record: >-
+      exact-separate-settings-and-secret-action-authority-including-NegarJafari-
+      reviewer-participation-confirmation
   staging_dispatch:
     required_for_activation: true
     authorized_by_package_adoption: false
-    required_record: exact-separate-staging-dispatch-authority
+    required_record: >-
+      exact-separate-maximum-90-day-standing-delegation-for-m-e-h-r-d-a-a-d-
+      dispatcher-and-NegarJafari-required-reviewer-with-per-run-SHA-bound-approval
   production:
     status: prohibited-and-held
     holds: [VOC-080-HOLD-01, VOC-080-HOLD-02]
 
 release:
   required: false
-  mode: repository-only-delivery-control-implementation-into-develop
+  mode: ordered-repository-only-delivery-control-and-settings-truth-PRs-into-develop
   deployment: separately-held
   migration_required: false-for-repository-implementation
   rollback_required: true
