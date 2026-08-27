@@ -1,0 +1,50 @@
+# VOC-096 — Release and Rollback Plan
+
+## Adoption and repository release
+
+This draft grants no implementation or external-action authority. After independent
+plan reviews and an accountable decision, adoption bookkeeping must bind the exact
+candidate SHA before a non-author plan merge. Implementation remains two PRs into
+`develop`; neither merge deploys or changes GitHub/Cloudflare settings. Both source
+heads and all existing worktrees/recovery refs remain recoverable while open.
+
+PR1 is repository-ready but dispatch-ineligible. ACT-03 and PR2 retain VOC-094's
+truthful settings boundary. PR2 is documentation-only and its merge SHA becomes the
+sole possible ACT-04 revision only after live authority/review binders pass. There is
+no `develop` to `main` release in this package.
+
+## External activation boundary
+
+VOC-096 adoption, PR1, and PR2 authorize none of the following:
+
+- creating/reconciling `cloudflare-staging` or setting its secrets;
+- issuing, entering, reading, reusing, or revoking a Cloudflare token;
+- dispatching a workflow;
+- applying a migration, uploading/promoting/rolling back a Worker, or changing traffic;
+- changing DNS, cost, production, or learner data.
+
+Those effects remain exclusively under effective VOC-094-ACT-03/04/05 records. The
+runtime binder validates an authority; it does not create one.
+
+## Rollback
+
+- Before ACT-03, revert PR1 through a normal reviewed PR; no external rollback exists.
+- After ACT-03 but before dispatch, keep dispatch blocked, revoke the token if required
+  by its action record, and use a governed documentation correction for any setting
+  rollback truth. Never pretend a repository revert removed a secret.
+- After dispatch starts, preserve the immutable run record and use VOC-094's exact
+  Worker rollback/outcome path. D1 remains forward-only unless a separately authorized
+  recovery action exists.
+- A consumed, failed, expired, or edited binder is never repaired or reused. A new
+  ACT-04 record/review may be issued only under unchanged authority and current drift
+  checks; this does not by itself require creating another Cloudflare token.
+- Revert repository logic only through a separately reviewed PR. Never force-push or
+  weaken the prior gate.
+
+## Closure
+
+Close issue #164 only after both implementation PRs are normally merged with exact
+reviews and post-merge evidence proves the fixed point is removed while all legacy
+gates remain. Issue #158 remains canonical and open until full F3 staging activation,
+smoke/rollback, exact-zero-cost, production-hold, and token-revocation evidence is
+complete.

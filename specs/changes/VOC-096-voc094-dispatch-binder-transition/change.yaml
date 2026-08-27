@@ -1,0 +1,183 @@
+schema_version: 1
+
+id: VOC-096
+slug: voc094-dispatch-binder-transition
+title: Repair the VOC-094 fail-closed dispatch-binder transition
+
+type: governance-delivery-policy-correction
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because implementation changes the executable Cloudflare delivery authorization
+  gate and workflow while binding already-live staging resources. It must preserve
+  exact-SHA, action-authority, expiry, replay, rollback, cost, secret-isolation, and
+  production-hold controls and requires complete deterministic, security/settings,
+  Cloudflare, and independent exact-revision evidence.
+canonical_path: specs/changes/VOC-096-voc094-dispatch-binder-transition
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/164
+related_activation_issue: https://github.com/KARSIFT/vocanova-platform/issues/158
+requirement_approval_status: pending-independent-plan-review-and-adoption
+base_branch: develop
+base_sha: 0d5ccc1231edb0e652d5c883cb214b85bcc9635e
+plan_branch: plan/voc-096-voc094-dispatch-binder-transition
+target_branch: develop
+
+approval_status: not-approved
+approved_candidate_sha: null
+implementation_authorized: false
+implementation_authority_status: blocked-pending-exact-plan-review-adoption-and-bookkeeping
+implementation_pull_request_count: 2
+multiple_pull_request_rationale: >-
+  Preserve VOC-094's hard external-settings/truth boundary. PR1 makes the repository
+  prepared but dispatch-ineligible before ACT-03. ACT-03 then changes only the held
+  GitHub environment/two-secret setting, and PR2 immediately reconciles exactly five
+  settings documents without changing executable eligibility. Combining them would
+  preclaim external post-state; moving executable binders into PR2 would violate the
+  documentation-only boundary. The post-merge runtime binder supplies unknowable
+  values without a third PR. The extra PR retains VOC-094's accepted coordination,
+  review, elapsed-time, rollback, and truthful-state tradeoff.
+automatic_merge_allowed: true
+production_impact: prohibited
+rollback_required: true
+
+owners:
+  decision: accountable-governance-decision-owner-after-independent-plan-review
+  package_preparation: separate-VOC-096-plan-author-actor
+  implementation: different-builder-actor-only-after-adoption
+  cloudflare_specialist: different-non-author-exact-revision-actor
+  security_settings_specialist: different-non-author-exact-revision-actor
+  exact_revision_review: different-non-author-R4-reviewer-actor
+  binder_review: different-non-author-post-PR2-reviewer-actor
+  external_actions: unchanged-VOC-094-action-specific-operators
+  merge: separate-authorized-non-author-merge-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+delivery_shape:
+  plan_pull_request:
+    count: 1
+    file_count: 9
+    files:
+      - README.md
+      - change.yaml
+      - specification.md
+      - acceptance-criteria.md
+      - impact-analysis.md
+      - implementation-plan.md
+      - tasks.md
+      - test-plan.md
+      - release-plan.md
+  implementation_pull_requests:
+    count: 2
+    pr1_file_count: 16
+    pr1_files:
+      - AGENTS.md
+      - .github/README.md
+      - .github/workflows/ci.yml
+      - apps/api-worker/wrangler.jsonc
+      - apps/web/wrangler.jsonc
+      - infrastructure/cloudflare/delivery-manifest.json
+      - scripts/foundation/cloudflare-delivery-policy.mjs
+      - scripts/foundation/cloudflare-delivery-policy.test.mjs
+      - docs/governance/16-autonomous-development-operating-model.md
+      - docs/governance/repository-settings.md
+      - docs/governance/repository-settings-current.yaml
+      - docs/operations/11-devops-and-ci-cd.md
+      - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+      - docs/operations/cloudflare-delivery.md
+      - docs/operations/ruflo-external-orchestration.md
+      - docs/product/12-mvp-implementation-plan.md
+    pr2_file_count: 5
+    pr2_files:
+      - .github/README.md
+      - docs/governance/repository-settings.md
+      - docs/governance/repository-settings-current.yaml
+      - docs/operations/11-devops-and-ci-cd.md
+      - docs/operations/cloudflare-delivery.md
+  remaining_external_actions:
+    new_actions_authorized_by_VOC_096: 0
+    inherited_VOC_094_actions: 3
+    action_ids: [VOC-094-ACT-03, VOC-094-ACT-04, VOC-094-ACT-05]
+
+affected_areas:
+  - AGENTS.md
+  - .github/README.md
+  - .github/workflows/ci.yml
+  - apps/api-worker/wrangler.jsonc
+  - apps/web/wrangler.jsonc
+  - infrastructure/cloudflare/delivery-manifest.json
+  - scripts/foundation/cloudflare-delivery-policy.mjs
+  - scripts/foundation/cloudflare-delivery-policy.test.mjs
+  - docs/governance/16-autonomous-development-operating-model.md
+  - docs/governance/repository-settings.md
+  - docs/governance/repository-settings-current.yaml
+  - docs/operations/11-devops-and-ci-cd.md
+  - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+  - docs/operations/cloudflare-delivery.md
+  - docs/operations/ruflo-external-orchestration.md
+  - docs/product/12-mvp-implementation-plan.md
+  - specs/changes/VOC-096-voc094-dispatch-binder-transition
+protected_areas:
+  - cloudflare-delivery-authorization
+  - github-environment-and-secret-boundary
+  - exact-revision-independent-review
+  - production-holds-and-sentinels
+  - incremental-zero-cost-gate
+  - dirty-worktree-and-recovery-references
+
+implementation:
+  authorized: false
+  required: true
+  status: planned-pending-adoption
+  target_branch: develop
+  pull_request_count: 2
+  task: VOC-096-T00
+
+external_effects:
+  issue_record_publication: >-
+    canonical structured evidence may be relayed only under the unchanged VOC-094
+    action records; this package itself grants no external-action authority
+  github_settings: prohibited-by-this-package
+  github_secrets: prohibited-by-this-package
+  workflow_dispatch: prohibited-by-this-package
+  cloudflare: prohibited-by-this-package
+  dns: prohibited
+  deployment: prohibited-by-this-package
+  production: prohibited
+  production_data: prohibited
+  spending: prohibited
+  public_launch: prohibited
+
+action_specific_authority:
+  required: true
+  authorization_status: not-granted-by-VOC-096
+  source: >-
+    VOC-096 repairs repository logic only. VOC-094-ACT-03, ACT-04, and ACT-05 retain
+    their separate accountable actors, exact evidence, completion, rollback, drift,
+    and expiry requirements. Adoption or merge of VOC-096 satisfies none of them.
+
+release:
+  required: false
+  mode: repository-only-correction-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: issue-164-after-reviewed-implementation-merge-and-postmerge-evidence
+
+ehr: not-triggered
+blocking_reasons:
+  - independent-plan-review-pending
+  - cloudflare-plan-specialist-review-pending
+  - security-settings-plan-specialist-review-pending
+  - accountable-adoption-decision-pending
+  - adoption-bookkeeping-and-normal-non-author-plan-merge-pending
+  - implementation-authority-not-effective
