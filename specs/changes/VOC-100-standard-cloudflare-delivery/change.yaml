@@ -1,0 +1,531 @@
+schema_version: 1
+
+id: VOC-100
+slug: standard-cloudflare-delivery
+title: Standard Cloudflare Environment Delivery
+type: cloudflare-delivery-control-simplification
+status: adopted
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because implementation changes the first secret-bearing Cloudflare delivery
+  workflow, GitHub environment and credential policy, D1 migration and Worker
+  promotion gates, production holds, canonical operations guidance, and their
+  deterministic validators. Risk class creates no approval or external authority.
+canonical_path: specs/changes/VOC-100-standard-cloudflare-delivery
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/173
+related_activation_issue: https://github.com/KARSIFT/vocanova-platform/issues/158
+operator_reviewer_amendment: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446157004
+superseded_future_contracts:
+  - VOC-094-ACT-03-to-PR2-to-ACT-04-ceremony
+  - VOC-096-five-record-runtime-binder
+  - per-dispatch-or-per-review-window-token-recreation
+preserved_historical_packages:
+  - VOC-094
+  - VOC-095
+  - VOC-096
+  - VOC-097
+  - VOC-098
+  - VOC-099
+requirement_approval_status: >-
+  exact-cloudflare-wrangler-security-settings-and-independent-R4-plan-review-pass-
+  and-accountable-VOC-100-ADOPT-01-approved
+base_branch: develop
+base_sha: 2b946024cae036a494494665cd08f5243911e529
+plan_branch: plan/voc-100-simplify-cloudflare-delivery
+target_branch: develop
+approved_candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-the-three-exact-candidate-reviews-and-VOC-100-ADOPT-01-for-the-
+  declared-repository-only-two-PR-implementation; usable-once-this-adopted-package-
+  is-on-develop-without-a-future-self-effectiveness-package; fresh-exact-bookkeeping-
+  review-eligibility-and-normal-non-author-plan-merge-remain-required-process; all-
+  external-actions-remain-separately-held
+implementation_pull_request_count: 2
+multiple_pull_request_rationale: >-
+  A hard GitHub-settings action-authority and truth boundary requires the repository
+  delivery-control PR to merge before the external environment/secret mutation, while
+  current AGENTS.md requires an immediate documentation-only PR after that mutation.
+  Both PRs remain one adopted package and task. This costs one extra branch, exact
+  review, hosted-check cycle, merge, and lifecycle record once; it avoids false
+  preclaims and replaces the recurring ACT-03/PR2/five-comment/token-expiry cycle for
+  every later dispatch. It adds one-time elapsed time for PR2 authoring, exact review,
+  hosted CI, merge queue, and lifecycle readback; that delay is accepted because the
+  settings post-state cannot truthfully exist before the external action. Token/
+  context, coordination, repeated-check, exact-review, bookkeeping, and elapsed-time
+  overhead are lower after activation because ordinary dispatch and token rotation
+  require no repository PR or plan.
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Replace the custom five-comment Cloudflare dispatch binder with environment-scoped
+  credentials, branch-bound manual dispatch, normal required checks, a small
+  deterministic delivery policy, and independent credential rotation, while
+  preserving staging safety and every production hold.
+
+requirements:
+  - id: VOC-100-D00
+    statement: >-
+      Issue 173 and chat alone granted no repository implementation. Exact candidate
+      e5f908c88d15c41bae0f1b1306708f0df7751ae5 received three zero-blocker reviews
+      and VOC-100-ADOPT-01. This bookkeeping revision truthfully records status
+      adopted and implementation.authorized true. It does not encode authority_effective
+      false, a future self-referential bookkeeping dependency, or a follow-up plan
+      requirement. Fresh exact-bookkeeping review, eligibility, and normal non-author
+      merge remain required process and grant no external authority.
+  - id: VOC-100-D01
+    statement: >-
+      Preserve the merged PR-168 staging resources, hostnames, D1 identity and eeur
+      placement, service binding, Free plan and zero-paid-spend ceiling, synthetic-
+      only data, privacy-safe logs, ordered compatible migrations, immutable version
+      upload and exact promotion, health/config/contract/web smoke, and forward-only
+      D1 recovery. Preserve all production sentinels and HOLD-01/HOLD-02.
+  - id: VOC-100-D02
+    statement: >-
+      Configure staging delivery around GitHub environment cloudflare-staging. Only
+      jobs explicitly referencing that environment may read exactly environment
+      secrets CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN. Neither value may be a
+      repository or organization Actions secret. The account ID is a non-sensitive
+      canonical identifier and may appear in repository/evidence; its environment-
+      secret name is retained only for the Wrangler interface. The API token value is
+      secret and may never appear in a repository file, workflow input/output, log,
+      comment, artifact, Ruflo record, or agent message. Secret-bearing preflight must
+      require the account ID to equal 0a9eda28b96d77c24dcde74f3e074d47.
+  - id: VOC-100-D03
+    statement: >-
+      The staging token is reusable across ordinary dispatches, scoped only to the
+      selected account, and has exactly Workers Scripts Edit and D1 Edit. A separately
+      authorized account owner creates it through the Cloudflare dashboard with an
+      expiry no later than 90 days and records sanitized token-policy details proving
+      the one-account resource scope, exact two permission groups, status, and expiry;
+      the deployment token itself receives no API Tokens permission. The verify
+      endpoint proves only status/expiry and Wrangler account readback proves only the
+      selected account, so neither is misclaimed as permission-policy evidence. It has no
+      DNS, billing, user, organization, Access, Pages, R2, AI, production-data, or
+      unrelated-product permission. Rotation order is create, dashboard-verify,
+      locally verify status/account without logging, install, run the environment-
+      reviewed no-write credential check, then revoke the prior token. Roll back at
+      any failure by retaining/reinstalling the prior unrevoked token and revoking the
+      failed replacement. Rotate at most every 90 days and immediately on exposure,
+      operator change, or scope drift. Rotation is not coupled to a PR or deployment.
+  - id: VOC-100-D04
+    statement: >-
+      Keep workflow_dispatch as the only live delivery trigger. Staging must require
+      github.actor m-e-h-r-d-a-a-d, github.ref_name develop, environment
+      cloudflare-staging, the exact event SHA, successful required validation in the
+      same run, cost ceiling zero, exact staging manifest/resources, and confirmation
+      DEPLOY staging followed by that exact 40-character event SHA. The environment
+      requires GitHub reviewer identity m-e-h-r-d-a-a-d, allows self-review because
+      GitHub cannot represent the separately instantiated AI participant, and disables
+      admin bypass. Only a fresh non-author AI deployment-review subagent may make the
+      review decision. Its structured receipt records participant/task/model and
+      coordinator-model provenance, exact run ID/attempt/SHA/environment ID and name,
+      checks, PASS verdict, and no-Cloudflare-secret boundary. For agent-mediated
+      dispatch its model must differ from the coordinating agent model; human-only
+      dispatch records coordinator_model human-not-applicable. The reviewer receives
+      no authenticated approval credential. A separately authorized approval proxy
+      must post the receipt bytes unchanged as the pending-deployment approval comment
+      using the operator's authenticated GitHub session and may exercise no review
+      judgment. Model provenance supports attribution but grants no authority. Remove
+      action-authority, ACT-03, PR2-review, binder-review, raw-body digest, nonce,
+      reviewed-SHA, estimated-cost, and operator-supplied rollback-version inputs.
+  - id: VOC-100-D05
+    statement: >-
+      Before any environment job, use the read-only GitHub token to fail unless the
+      live cloudflare-staging environment exists with sole reviewer identity
+      m-e-h-r-d-a-a-d, self-review allowed, admin bypass disabled, and exactly one
+      custom deployment branch policy for develop. Before the first Cloudflare write,
+      the first environment-job step must use only an actions-read GitHub token to GET
+      the current run approval history and require exactly one matching approved
+      record whose user login/numeric ID, environment ID/name, and comment exactly
+      validate the AI receipt schema and current run ID/attempt/event SHA. Reject
+      malformed, stale, extra, or conflicting records. Static validation must prove no
+      job-level environment, expression, condition, or earlier step references either
+      Cloudflare secret. Only after that receipt gate may bounded steps evaluate the
+      secrets, record sanitized current API and web deployment version IDs as rollback
+      targets, verify non-empty values and exact account ID, and fail on drift. Each
+      Worker must have exactly one deployed UUID at 100% traffic.
+      A credential-free no-help parser harness must execute the exact locked-Wrangler
+      migration, deployment-status, version-promotion, and rollback argv shapes in an
+      isolated CI process with outbound network denied: valid argv reaches only the
+      expected missing-auth boundary, while a deliberate unknown-option control fails
+      at argument parsing. Pass credentials only to the minimum individual Wrangler
+      steps. Builds, tests, policy evaluation, and smoke run without credential
+      exposure where possible.
+  - id: VOC-100-D06
+    statement: >-
+      Simplify cloudflare-delivery-policy.mjs and its tests to deterministic event,
+      actor, branch, environment-protection readback, confirmation, manifest,
+      resource, production-hold, and zero-cost validation. No pull_request,
+      pull_request_target, push, reusable-workflow, validation, build, test, smoke, or
+      summary job may evaluate either Cloudflare secret or enter a secret-bearing job.
+      Remove GitHub comment fetching, RFC-8785 binder
+      canonicalization, URL/identity/run-suite cross-record checks, expiry coupling,
+      digest validation, nonce replay state, and secret-step deadline checks that
+      exist only for the superseded protocol.
+  - id: VOC-100-D07
+    statement: >-
+      After the delivery-control PR merges, configure cloudflare-staging once under
+      separately recorded settings/secret authority. Require sole reviewer identity
+      m-e-h-r-d-a-a-d, allow self-review at GitHub's identity layer, disable admin
+      bypass, enable custom deployment branches with exactly one branch policy named
+      develop, and enter exactly the two environment secrets. The setting does not
+      make the human dispatcher an authorized review decision-maker. The separate
+      standing action delegation grants review judgment only to a fresh non-author AI
+      subagent and grants a named approval proxy only mechanical submission of the
+      exact receipt. Because the shared account can forge a syntactically valid receipt,
+      that R4 action record must explicitly accept or reject this procedural-control
+      residual; rejection keeps staging disabled. Sanitized pre-state, payload,
+      rollback, post-state,
+      reviewer/protection/branch policy, environment secret names, and absence of the
+      same names from repository and organization Actions secrets must be recorded in
+      one immediate documentation-only settings-truth PR authorized by this package.
+      This one-time PR is not required for dispatches or token rotations.
+  - id: VOC-100-D08
+    statement: >-
+      Retain cloudflare-production as a separate main-only environment and separate
+      credential boundary. This package may document and test that design but must
+      not create the environment, enter production secrets, enable the production
+      manifest, dispatch production, migrate production D1, change traffic, access
+      learner data, or release HOLD-01/HOLD-02.
+  - id: VOC-100-D09
+    statement: >-
+      Update all living workflow, policy, test, manifest, settings-truth, and
+      operations documents that describe the superseded protocol in the one
+      ordered two-PR implementation. Preserve VOC-094 through VOC-099 and point-in-
+      time VOC-080 records as immutable history; this package supplies the explicit
+      prospective supersession rule.
+  - id: VOC-100-D10
+    statement: >-
+      Obtain fresh exact-revision Cloudflare/Wrangler, security/settings, and
+      independent R4 reviews for plan and implementation. Require normal hosted
+      checks and a different non-author merge actor. Reviews and merge eligibility
+      never authorize settings, secrets, Cloudflare, dispatch, or production.
+  - id: VOC-100-D11
+    statement: >-
+      One task maps to exactly two ordered PRs for the recorded action/truth boundary:
+      delivery control first and immediate documentation-only settings truth second.
+      No package, plan, or PR is created per dispatch or token rotation. Any further
+      split requires a new written hard-boundary rationale; component count, review
+      convenience, token lifetime, and ordinary bookkeeping do not justify it.
+
+owners:
+  decision: accountable-repository-decision-owner-after-independent-plan-review
+  package_preparation: Codex-VOC-100-plan-author
+  implementation: different-builder-actor-after-adoption
+  cloudflare_specialist: different-non-author-exact-revision-actor
+  security_settings_specialist: different-non-author-exact-revision-actor
+  independent_verification: different-non-author-exact-revision-R4-actor
+  settings_and_secret_action: separately-explicitly-authorized-operator
+  staging_dispatcher: m-e-h-r-d-a-a-d-after-separate-standing-staging-delegation
+  staging_environment_reviewer: >-
+    fresh-non-author-AI-subagent-producing-an-attributable-exact-run-attempt-receipt-
+    without-GitHub-approval-credentials-or-Cloudflare-secrets
+  staging_approval_proxy: >-
+    separately-authorized-operator-mechanically-posting-the-exact-AI-receipt-with-no-
+    review-judgment-and-explicit-acceptance-of-shared-identity-forgery-risk
+  merge: separate-authorized-non-author-actor
+
+plan_review_history:
+  - candidate_sha: 2f3a7b7e882bc6a60f63381518963c7c7fb41e76
+    verdict: fail-security-settings-five-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5445876406
+    resolution_status: >-
+      superseded-by-changed-candidate-addressing-broader-secret-scope-account-ID-
+      classification-token-order-living-inventory-and-hosted-metadata
+  - candidate_sha: 2f3a7b7e882bc6a60f63381518963c7c7fb41e76
+    verdict: fail-independent-R4-five-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5445886698
+    resolution_status: >-
+      superseded-by-changed-candidate-aligning-requirement-identities-enforcing-
+      dispatch-approval-completing-credential-proof-impact-matrix-and-path-inventory
+  - candidate_sha: 2f3a7b7e882bc6a60f63381518963c7c7fb41e76
+    verdict: fail-cloudflare-wrangler-three-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5445889406
+    resolution_status: >-
+      superseded-by-changed-candidate-adding-required-reviewer-two-PR-truth-boundary-
+      and-locked-Wrangler-command-parse-contract
+  - candidate_sha: 47dac33147cc4e47f2300f755d383eddb4308f31
+    verdict: pass-security-settings-zero-blockers-nontransferable-after-change
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5445991163
+    resolution_status: >-
+      immutable-pass-for-exact-old-candidate-only; fresh-review-required-because-
+      parser-risk-and-split-rationale-corrections-change-the-candidate
+  - candidate_sha: 47dac33147cc4e47f2300f755d383eddb4308f31
+    verdict: fail-cloudflare-wrangler-one-blocker
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446013416
+    resolution_status: >-
+      superseded-by-changed-candidate-replacing-help-short-circuit-with-no-help-
+      credential-free-network-denied-parser-harness-and-negative-controls
+  - candidate_sha: 47dac33147cc4e47f2300f755d383eddb4308f31
+    verdict: fail-independent-R4-three-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446033749
+    resolution_status: >-
+      superseded-by-changed-candidate-fixing-parser-proof-reviewer-substitution-
+      contingency-and-explicit-elapsed-time-overhead
+  - candidate_sha: 4909e3f762cdb1c64fa7766b855dd59cb28bda82
+    verdict: pass-security-settings-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446070579
+    resolution_status: >-
+      immutable-pass-and-nontransferable-after-operator-replaced-the-human-
+      environment-reviewer-with-a-separate-AI-reviewer
+  - candidate_sha: 4909e3f762cdb1c64fa7766b855dd59cb28bda82
+    verdict: pass-independent-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446119597
+    resolution_status: >-
+      immutable-pass-and-nontransferable-after-operator-replaced-the-human-
+      environment-reviewer-with-a-separate-AI-reviewer
+  - candidate_sha: 4909e3f762cdb1c64fa7766b855dd59cb28bda82
+    verdict: pass-cloudflare-wrangler-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446121815
+    resolution_status: >-
+      immutable-pass-and-nontransferable-after-operator-replaced-the-human-
+      environment-reviewer-with-a-separate-AI-reviewer
+  - candidate_sha: 4909e3f762cdb1c64fa7766b855dd59cb28bda82
+    verdict: adopted-then-materially-amended-before-bookkeeping-or-merge
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446148741
+    resolution_status: >-
+      exact-candidate-adoption-does-not-transfer; operator-amendment-evidence-is-
+      https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446157004
+  - candidate_sha: 71a96ac8561c5cff014124c0ffcbae9a3192f2ca
+    verdict: fail-cloudflare-wrangler-two-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446246508
+    resolution_status: >-
+      superseded-by-changed-candidate-defining-exact-current-attempt-approval-readback-
+      before-secret-reference-and-mediated-authenticated-submission
+  - candidate_sha: 71a96ac8561c5cff014124c0ffcbae9a3192f2ca
+    verdict: fail-security-settings-one-blocker
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446246691
+    resolution_status: >-
+      superseded-by-changed-candidate-truthfully-classifying-shared-identity-as-
+      forgeable-procedural-control-requiring-separate-R4-action-risk-acceptance
+  - candidate_sha: 71a96ac8561c5cff014124c0ffcbae9a3192f2ca
+    verdict: pass-independent-R4-zero-blockers-nontransferable-after-change
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446246858
+    resolution_status: >-
+      immutable-pass-for-exact-old-candidate-only; fresh-review-required-because-
+      receipt-order-authenticated-proxy-and-residual-risk-acceptance-changed
+  - candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    verdict: pass-cloudflare-wrangler-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312511
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-proxy-dispatch-
+      Cloudflare-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    verdict: pass-security-settings-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312667
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-proxy-dispatch-
+      Cloudflare-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    verdict: pass-independent-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312786
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-proxy-dispatch-
+      Cloudflare-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    verdict: adopted-for-declared-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446324840
+    resolution_status: >-
+      VOC-100-ADOPT-01-authorizes-only-the-declared-repository-implementation-once-
+      the-adopted-package-is-on-develop; every-external-action-remains-held
+
+approvals:
+  cloudflare_wrangler_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312511
+  security_settings_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312667
+  independent_R4_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312786
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-100-ADOPT-01
+    candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446324840
+
+approved_candidate_hosted_evidence:
+  candidate_sha: e5f908c88d15c41bae0f1b1306708f0df7751ae5
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/33125084264
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/33125084255
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33125113521
+    structure_and_changed_path_risk: pass
+    eligibility: fail-closed-before-adoption-bookkeeping-evidence
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+delivery_shape:
+  plan_pull_request:
+    count: 1
+    file_count: 9
+  implementation_pull_requests:
+    count: 2
+    task: VOC-100-T00
+    order:
+      - PR1-delivery-controls-and-planned-living-docs
+      - settings-action-then-PR2-documentation-only-settings-truth
+    authorized_paths:
+      - AGENTS.md
+      - .github/README.md
+      - .github/workflows/ci.yml
+      - infrastructure/cloudflare/delivery-manifest.json
+      - scripts/foundation/agent-authority-policy.mjs
+      - scripts/foundation/agent-authority-policy.test.mjs
+      - scripts/foundation/cloudflare-delivery-policy.mjs
+      - scripts/foundation/cloudflare-delivery-policy.test.mjs
+      - scripts/foundation/voc080-final-evidence-policy.mjs
+      - scripts/foundation/voc080-final-evidence-policy.test.mjs
+      - docs/development.md
+      - docs/engineering/04-technical-architecture.md
+      - docs/governance/16-autonomous-development-operating-model.md
+      - docs/governance/repository-settings.md
+      - docs/governance/repository-settings-current.yaml
+      - docs/operations/10-development-workflow.md
+      - docs/operations/11-devops-and-ci-cd.md
+      - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+      - docs/operations/README.md
+      - docs/operations/cloudflare-delivery.md
+      - docs/operations/voc-080-architecture.html
+      - docs/product/12-mvp-implementation-plan.md
+    historical_package_editing: prohibited
+    settings_order: >-
+      Merge the reviewed delivery-control PR while live pre-environment checks keep
+      staging blocked; obtain separate settings/secret authority; create and read back
+      cloudflare-staging; immediately open the documentation-only settings-truth PR;
+      obtain fresh exact-SHA reviews and merge it; only then consider dispatch.
+
+protected_areas:
+  - github-environment-secrets
+  - cloudflare-account-and-token-scope
+  - d1-migrations-and-worker-promotion
+  - production-holds-and-learner-data
+  - zero-cost-and-synthetic-staging
+  - exact-revision-independent-review
+  - canonical-governance-and-settings-truth
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    status: approved-candidate-reviewed-and-adopted
+    evidence: specification.md
+  impact_assessment:
+    required: true
+    status: pass-approved-candidate
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    status: pass-approved-candidate
+    evidence: release-plan.md
+  deterministic_evidence:
+    required: true
+    status: pass-approved-candidate-local-and-hosted-checks
+    evidence: test-plan.md
+  cloudflare_specialist_evidence:
+    required: true
+    status: pass-approved-candidate-zero-blockers
+    scope: Workers-Wrangler-D1-versions-token-scope-cost-and-production-holds
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312511
+  security_settings_specialist_evidence:
+    required: true
+    status: pass-approved-candidate-zero-blockers
+    scope: GitHub-environment-branch-policy-secret-lifetime-redaction-and-action-authority
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312667
+  independent_exact_revision_evidence:
+    required: true
+    status: >-
+      approved-candidate-pass-zero-blockers; fresh-changed-bookkeeping-SHA-review-
+      pending-before-merge
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446312786
+  action_authority:
+    required: true
+    status: >-
+      separate-settings-secret-authority-and-standing-staging-dispatch-delegation-
+      pending; production-authority-prohibited
+    evidence: specification.md
+
+affected_areas:
+  - github-actions-delivery
+  - cloudflare-delivery-policy-and-tests
+  - cloudflare-delivery-manifest
+  - repository-settings-truth
+  - living-governance-and-operations-documents
+
+implementation:
+  authorized: true
+  required: true
+  status: >-
+    adopted-and-authorized-for-the-declared-repository-only-two-PR-implementation-
+    usable-once-this-package-is-on-develop-with-no-future-self-effectiveness-
+    condition; all-external-actions-remain-separately-held
+  target_branch: develop
+  pull_request_count: 2
+  task: VOC-100-T00
+
+external_actions:
+  github_environment_and_secret_setup:
+    required_for_first_staging_dispatch: true
+    authorized_by_package_adoption: false
+    required_record: >-
+      exact-separate-settings-and-secret-action-authority-with-m-e-h-r-d-a-a-d-
+      reviewer-identity-self-review-allowed-admin-bypass-disabled-and-custom-develop
+  staging_dispatch:
+    required_for_activation: true
+    authorized_by_package_adoption: false
+    required_record: >-
+      exact-separate-maximum-90-day-standing-delegation-for-m-e-h-r-d-a-a-d-
+      dispatcher-fresh-non-author-AI-reviewer-and-mechanical-approval-proxy-with-per-
+      run-attempt-SHA-bound-receipt-and-explicit-shared-identity-forgery-risk-
+      acceptance; dispatcher-review-judgment-prohibited
+  production:
+    status: prohibited-and-held
+    holds: [VOC-080-HOLD-01, VOC-080-HOLD-02]
+
+release:
+  required: false
+  mode: ordered-repository-only-delivery-control-and-settings-truth-PRs-into-develop
+  deployment: separately-held
+  migration_required: false-for-repository-implementation
+  rollback_required: true
+  issue_closure: after-implementation-merge-settings-readback-and-first-successful-staging-dispatch
+
+external_effects:
+  cloudflare: prohibited-by-this-package-adoption-without-separate-exact-authority
+  dns: prohibited
+  github_settings_and_secrets: prohibited-without-separate-exact-authority
+  credentials: prohibited-without-separate-exact-authority
+  workflow_dispatch: prohibited-without-separate-exact-authority
+  staging_deployment_and_migration: prohibited-without-separate-exact-authority
+  spending_and_billing: prohibited
+  production_and_production_data: prohibited
+  public_launch: prohibited
+  main_promotion: prohibited
+
+ehr: not-triggered
+repository_adoption_status: adopted-repository-implementation-authorized
+adoption_pr: 174
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/174#issuecomment-5446324840
+remaining_process_and_scope_constraints:
+  - fresh-exact-bookkeeping-review-evidence-v1-genuine-eligibility-and-normal-non-author-plan-merge-required
+  - declared-repository-implementation-is-usable-only-once-this-package-is-on-develop
+  - all-settings-secrets-approval-proxy-dispatch-Cloudflare-and-production-actions-remain-separately-held
