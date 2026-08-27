@@ -20,6 +20,9 @@ const CANONICAL_ACTIVATION_COMMENT =
 const SHA256 = /^[0-9a-f]{64}$/;
 const SAFE_DECIMAL = /^[1-9][0-9]{0,15}$/;
 const GITHUB_API = "https://api.github.com";
+const LIVE_CONNECT_TIMEOUT_MS = 5_000;
+const LIVE_RESPONSE_TIMEOUT_MS = 15_000;
+const RFC3339_UTC = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
 const REQUIRED_PR2_FILES = [
   ".github/README.md",
   "docs/governance/repository-settings-current.yaml",
@@ -563,6 +566,11 @@ export function inspectDeliveryWorkflow(source) {
     "pnpm run ci:delivery",
     "name: cloudflare delivery gate",
     "Recheck live runtime binder before any secret-bearing step",
+    "id: pre-secret-recheck",
+    "--verify-secret-step-start",
+    "steps.pre-secret-recheck.outputs.act04_expires_at",
+    "steps.pre-secret-recheck.outputs.phase4_token_expires_at",
+    "steps.pre-secret-recheck.outputs.secret_deadline_binding_sha256",
     "name: cloudflare staging",
     "name: cloudflare production",
     "environment: cloudflare-staging",
@@ -648,6 +656,22 @@ export function inspectDeliveryWorkflow(source) {
   }
   const stagingJob = extractJob(source, "cloudflare-staging");
   const productionJob = extractJob(source, "cloudflare-production");
+  const secretBoundaryOrder = [
+    'secret_step_started_at="$(date -u',
+    "--verify-secret-step-start",
+    'test -n "$CLOUDFLARE_API_TOKEN"',
+    "wrangler d1 migrations apply DB --remote --env staging",
+  ].map((marker) => stagingJob.indexOf(marker));
+  if (
+    secretBoundaryOrder.some((index) => index === -1) ||
+    secretBoundaryOrder.some(
+      (value, index) => index > 0 && value <= secretBoundaryOrder[index - 1],
+    )
+  ) {
+    errors.push(
+      "staging first secret-bearing step must atomically verify both deadlines before any secret read",
+    );
+  }
   const outsideDeliveryJobs = source
     .replace(stagingJob, "")
     .replace(productionJob, "");
@@ -759,9 +783,11 @@ export async function evaluateDeliveryEvent(manifest, event, options = {}) {
       break;
     }
   }
+  let secretDeadlineHandoff = null;
   if (isPreparedStaging) {
     const runtime = await evaluateRuntimeBinder(manifest, event, options);
     reasons.push(...runtime.reasons);
+    secretDeadlineHandoff = runtime.secretDeadlineHandoff;
   } else {
     const now = options.now ?? new Date();
     const expiry = Date.parse(record.authorization_expires_at ?? "");
@@ -782,11 +808,15 @@ export async function evaluateDeliveryEvent(manifest, event, options = {}) {
       }
     }
   }
-  return { eligible: reasons.length === 0, environment, reasons };
+  const decision = { eligible: reasons.length === 0, environment, reasons };
+  if (options.includeSecretDeadlineHandoff)
+    decision.secretDeadlineHandoff = secretDeadlineHandoff;
+  return decision;
 }
 
 export async function evaluateRuntimeBinder(manifest, event, options = {}) {
   const reasons = [];
+  let secretDeadlineHandoff = null;
   const staging = manifest.environments?.staging;
   const binder = staging?.prepared_runtime_binder;
   if (!isRecord(binder) || !isRecord(binder.contract)) {
@@ -912,6 +942,7 @@ export async function evaluateRuntimeBinder(manifest, event, options = {}) {
 
     await rejectReplay(client, event, inputs, authority.envelope.created_at);
     validateRecordChain(records, binder, prProjection, current, event, inputs);
+    secretDeadlineHandoff = createSecretDeadlineHandoff(records, inputs);
     client.requireBudget();
     const completion = options.now ?? new Date();
     const deadline = Math.min(
@@ -929,11 +960,22 @@ export async function evaluateRuntimeBinder(manifest, event, options = {}) {
   } catch (error) {
     reasons.push(error instanceof Error ? error.message : String(error));
   }
-  return { eligible: reasons.length === 0, reasons };
+  return { eligible: reasons.length === 0, reasons, secretDeadlineHandoff };
 }
 
 function createRuntimeClient(options) {
   const http = options.http ?? fetch;
+  const connectTimeoutMs = options.connectTimeoutMs ?? LIVE_CONNECT_TIMEOUT_MS;
+  const responseTimeoutMs =
+    options.responseTimeoutMs ?? LIVE_RESPONSE_TIMEOUT_MS;
+  if (!(
+    Number.isSafeInteger(connectTimeoutMs) &&
+    connectTimeoutMs > 0 &&
+    Number.isSafeInteger(responseTimeoutMs) &&
+    responseTimeoutMs > connectTimeoutMs
+  )) {
+    throw new Error("runtime-binder HTTP deadlines are invalid");
+  }
   let requests = 0;
   let coreRequests = 0;
   let minimumRemaining = Number.POSITIVE_INFINITY;
@@ -949,7 +991,18 @@ function createRuntimeClient(options) {
         "runtime-binder request host is not canonical GitHub API",
       );
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15_000);
+    const connectTimeout = setTimeout(
+      () =>
+        controller.abort(new Error("GitHub API connection deadline exceeded")),
+      connectTimeoutMs,
+    );
+    const responseTimeout = setTimeout(
+      () =>
+        controller.abort(
+          new Error("GitHub API complete-response deadline exceeded"),
+        ),
+      responseTimeoutMs,
+    );
     let response;
     try {
       response = await http(url, {
@@ -962,46 +1015,57 @@ function createRuntimeClient(options) {
           "User-Agent": "vocanova-delivery-binder",
         },
       });
+      clearTimeout(connectTimeout);
+      if (response.status !== 200)
+        throw new Error(
+          `GitHub API request failed with HTTP ${response.status}`,
+        );
+      if (
+        !(response.headers.get("content-type") ?? "")
+          .toLowerCase()
+          .startsWith("application/json")
+      ) {
+        throw new Error("GitHub API response content type is not JSON");
+      }
+      const date = new Date(response.headers.get("date") ?? "");
+      const remaining = Number(response.headers.get("x-ratelimit-remaining"));
+      if (
+        !Number.isFinite(date.valueOf()) ||
+        !Number.isSafeInteger(remaining) ||
+        remaining < 0
+      ) {
+        throw new Error(
+          "GitHub API Date or rate-limit header is missing or invalid",
+        );
+      }
+      latestServerDate = date > latestServerDate ? date : latestServerDate;
+      minimumRemaining = Math.min(minimumRemaining, remaining);
+      const text = await response.text();
+      if (Buffer.byteLength(text) > 1_000_000)
+        throw new Error("GitHub API response exceeds one-megabyte bound");
+      let value;
+      try {
+        value = JSON.parse(text);
+      } catch {
+        throw new Error("GitHub API response is malformed JSON");
+      }
+      return {
+        value,
+        date,
+        remaining,
+        next: /rel="next"/.test(response.headers.get("link") ?? ""),
+      };
+    } catch (error) {
+      if (
+        controller.signal.aborted &&
+        controller.signal.reason instanceof Error
+      )
+        throw controller.signal.reason;
+      throw error;
     } finally {
-      clearTimeout(timeout);
+      clearTimeout(connectTimeout);
+      clearTimeout(responseTimeout);
     }
-    if (response.status !== 200)
-      throw new Error(`GitHub API request failed with HTTP ${response.status}`);
-    if (
-      !(response.headers.get("content-type") ?? "")
-        .toLowerCase()
-        .startsWith("application/json")
-    ) {
-      throw new Error("GitHub API response content type is not JSON");
-    }
-    const date = new Date(response.headers.get("date") ?? "");
-    const remaining = Number(response.headers.get("x-ratelimit-remaining"));
-    if (
-      !Number.isFinite(date.valueOf()) ||
-      !Number.isSafeInteger(remaining) ||
-      remaining < 0
-    ) {
-      throw new Error(
-        "GitHub API Date or rate-limit header is missing or invalid",
-      );
-    }
-    latestServerDate = date > latestServerDate ? date : latestServerDate;
-    minimumRemaining = Math.min(minimumRemaining, remaining);
-    const text = await response.text();
-    if (Buffer.byteLength(text) > 1_000_000)
-      throw new Error("GitHub API response exceeds one-megabyte bound");
-    let value;
-    try {
-      value = JSON.parse(text);
-    } catch {
-      throw new Error("GitHub API response is malformed JSON");
-    }
-    return {
-      value,
-      date,
-      remaining,
-      next: /rel="next"/.test(response.headers.get("link") ?? ""),
-    };
   }
   return {
     json,
@@ -1025,6 +1089,72 @@ function createRuntimeClient(options) {
       return latestServerDate;
     },
   };
+}
+
+function secretDeadlineHandoffPayload(inputs, deadlines) {
+  return {
+    schema: "vocanova-voc098-secret-deadline-handoff-v1",
+    act03_evidence_url: inputs.act03_evidence_url,
+    act03_evidence_sha256: inputs.act03_evidence_sha256,
+    pr2_review_url: inputs.pr2_review_url,
+    pr2_review_sha256: inputs.pr2_review_sha256,
+    action_authority_url: inputs.action_authority_url,
+    action_authority_sha256: inputs.action_authority_sha256,
+    binder_review_url: inputs.binder_review_url,
+    binder_review_sha256: inputs.binder_review_sha256,
+    dispatch_nonce: inputs.dispatch_nonce,
+    act04_expires_at: deadlines.act04_expires_at,
+    phase4_token_expires_at: deadlines.phase4_token_expires_at,
+  };
+}
+
+function createSecretDeadlineHandoff(records, inputs) {
+  const deadlines = {
+    act04_expires_at: records.act04_authority.body.expires_at,
+    phase4_token_expires_at: records.act03.body.phase4_token.expires_at,
+  };
+  return {
+    ...deadlines,
+    binding_sha256: sha256(
+      canonicalize(secretDeadlineHandoffPayload(inputs, deadlines)),
+    ),
+  };
+}
+
+export function verifySecretStepStart(startedAt, handoff, inputs) {
+  if (!RFC3339_UTC.test(startedAt ?? ""))
+    throw new Error("secret-bearing step start is not canonical runner UTC");
+  for (const [label, value] of [
+    ["ACT-04", handoff?.act04_expires_at],
+    ["Phase-4 token", handoff?.phase4_token_expires_at],
+  ]) {
+    if (!RFC3339_UTC.test(value ?? ""))
+      throw new Error(`${label} deadline handoff is invalid`);
+  }
+  if (!SHA256.test(handoff?.binding_sha256 ?? ""))
+    throw new Error("secret deadline handoff binding is invalid");
+  const expectedBinding = sha256(
+    canonicalize(secretDeadlineHandoffPayload(inputs, handoff)),
+  );
+  if (handoff.binding_sha256 !== expectedBinding)
+    throw new Error(
+      "secret deadline handoff does not bind the live evaluation",
+    );
+  const start = Date.parse(startedAt);
+  const act04Deadline = Date.parse(handoff.act04_expires_at);
+  const tokenDeadline = Date.parse(handoff.phase4_token_expires_at);
+  if (!(
+    Number.isFinite(start) &&
+    Number.isFinite(act04Deadline) &&
+    Number.isFinite(tokenDeadline) &&
+    start < act04Deadline &&
+    start < tokenDeadline
+  )) {
+    throw new Error(
+      "secret-bearing step started at or after ACT-04/token deadline",
+    );
+  }
+  return true;
 }
 
 async function fetchRecord(client, url, expectedDigest, schemaName, binder) {
@@ -1546,9 +1676,11 @@ export function parseStrictJson(source) {
       if (!escaped && code === 34) {
         index += 1;
         try {
-          return JSON.parse(source.slice(start, index));
+          const decoded = JSON.parse(source.slice(start, index));
+          assertPairedUnicodeSurrogates(decoded);
+          return decoded;
         } catch {
-          throw new Error("invalid JSON string");
+          throw new Error("invalid JSON string or lone Unicode surrogate");
         }
       }
       if (!escaped && code < 32)
@@ -1616,8 +1748,12 @@ export function parseStrictJson(source) {
 }
 
 export function canonicalize(value) {
-  if (value === null || typeof value === "boolean" || typeof value === "string")
+  if (value === null || typeof value === "boolean")
     return JSON.stringify(value);
+  if (typeof value === "string") {
+    assertPairedUnicodeSurrogates(value);
+    return JSON.stringify(value);
+  }
   if (typeof value === "number") {
     if (
       !Number.isFinite(value) ||
@@ -1630,9 +1766,26 @@ export function canonicalize(value) {
   if (isRecord(value))
     return `{${Object.keys(value)
       .sort()
-      .map((key) => `${JSON.stringify(key)}:${canonicalize(value[key])}`)
+      .map((key) => {
+        assertPairedUnicodeSurrogates(key);
+        return `${JSON.stringify(key)}:${canonicalize(value[key])}`;
+      })
       .join(",")}}`;
   throw new Error("JCS value is not JSON-compatible");
+}
+
+function assertPairedUnicodeSurrogates(value) {
+  for (let index = 0; index < value.length; index += 1) {
+    const code = value.charCodeAt(index);
+    if (code >= 0xd800 && code <= 0xdbff) {
+      const following = value.charCodeAt(index + 1);
+      if (!(following >= 0xdc00 && following <= 0xdfff))
+        throw new Error("string contains a lone high Unicode surrogate");
+      index += 1;
+    } else if (code >= 0xdc00 && code <= 0xdfff) {
+      throw new Error("string contains a lone low Unicode surrogate");
+    }
+  }
 }
 
 function sha256(value) {
@@ -1877,8 +2030,25 @@ async function main(argv) {
     return 0;
   }
   const eventIndex = argv.indexOf("--event-path");
+  if (argv.includes("--verify-secret-step-start")) {
+    if (eventIndex === -1)
+      throw new Error("secret-step verification requires --event-path");
+    const event = JSON.parse(readFileSync(argv[eventIndex + 1], "utf8"));
+    verifySecretStepStart(
+      process.env.SECRET_STEP_STARTED_AT,
+      {
+        act04_expires_at: process.env.ACT04_EXPIRES_AT,
+        phase4_token_expires_at: process.env.PHASE4_TOKEN_EXPIRES_AT,
+        binding_sha256: process.env.SECRET_DEADLINE_BINDING_SHA256,
+      },
+      event.inputs ?? {},
+    );
+    console.log("First secret-bearing step deadline verification passed.");
+    return 0;
+  }
   if (eventIndex !== -1) {
     const event = JSON.parse(readFileSync(argv[eventIndex + 1], "utf8"));
+    const preSecretRecheck = argv.includes("--pre-secret-recheck");
     const decision = await evaluateDeliveryEvent(
       loadDeliveryManifest(root),
       {
@@ -1889,7 +2059,8 @@ async function main(argv) {
         run_id: process.env.GITHUB_RUN_ID,
       },
       {
-        rateLimitMinimum: argv.includes("--pre-secret-recheck") ? 20 : 40,
+        rateLimitMinimum: preSecretRecheck ? 20 : 40,
+        includeSecretDeadlineHandoff: preSecretRecheck,
       },
     );
     if (process.env.GITHUB_OUTPUT) {
@@ -1903,6 +2074,13 @@ async function main(argv) {
           `web_url=${record?.routes?.web ?? ""}`,
           `max_smoke_attempts=${loadDeliveryManifest(root).limits.max_smoke_attempts}`,
           `max_smoke_seconds=${loadDeliveryManifest(root).limits.max_smoke_seconds}`,
+          ...(preSecretRecheck && decision.secretDeadlineHandoff
+            ? [
+                `act04_expires_at=${decision.secretDeadlineHandoff.act04_expires_at}`,
+                `phase4_token_expires_at=${decision.secretDeadlineHandoff.phase4_token_expires_at}`,
+                `secret_deadline_binding_sha256=${decision.secretDeadlineHandoff.binding_sha256}`,
+              ]
+            : []),
           "",
         ].join("\n"),
       );

@@ -280,10 +280,10 @@ test("VOC-097 reconciles every VOC-096 and VOC-094 package surface without rewri
         /38 authorized\s+paths|total_authorized_path_count: 38/,
         `${packageName}/${filename}`,
       );
-      if (
+      const preservedHistoricalCount =
         packageName === "VOC-096-voc094-dispatch-binder-transition" &&
-        filename !== "change.yaml"
-      ) {
+        filename === "change.yaml";
+      if (!preservedHistoricalCount) {
         assert.doesNotMatch(
           source,
           /(?:27-file|27 files|exactly 27|all 27)/,
@@ -309,6 +309,90 @@ test("VOC-097 reconciles every VOC-096 and VOC-094 package surface without rewri
   ]) {
     assert.match(change, new RegExp(path.replaceAll(".", "\\.")));
   }
+  for (const filename of [
+    "acceptance-criteria.md",
+    "implementation-plan.md",
+    "tasks.md",
+    "release-plan.md",
+  ]) {
+    const source = readFileSync(
+      resolve(
+        repositoryRoot,
+        "specs/changes/VOC-094-f3-staging-activation",
+        filename,
+      ),
+      "utf8",
+    );
+    assert.match(source, /29-path[\s\S]*38-authorized-path/, filename);
+    assert.doesNotMatch(source, /exact 27-file|27-file PR1/, filename);
+  }
+});
+
+test("VOC-099 reconciles every VOC-097 and VOC-098 lifecycle surface to completed repository-only authority", () => {
+  const lifecycles = {
+    "VOC-097-voc096-final-evidence-validator-closure": [
+      "814c31deb893c5c72b80f3075c0905fc8ba8c9c5",
+      "5443475414",
+      "33103467324",
+      "eligible: true",
+      "reasons: []",
+      "45590a0673937f4a9464b57393e026871678b3d4",
+      "33103648900",
+      "33103648876",
+      "33103648935",
+      "5443938338",
+    ],
+    "VOC-098-voc097-effectiveness-pr168-remediation": [
+      "6545cbb968a03a7630ccd63de3023c6e6da23ccd",
+      "5444345026",
+      "33109750265",
+      "eligible: true",
+      "reasons: []",
+      "10e9acf540b9af5ed85cc59a0e053900aec3c359",
+      "33109968598",
+      "33109968586",
+      "33109968546",
+      "5444428909",
+    ],
+  };
+  for (const [packageName, facts] of Object.entries(lifecycles)) {
+    for (const filename of packageFiles) {
+      const source = readFileSync(
+        resolve(repositoryRoot, "specs/changes", packageName, filename),
+        "utf8",
+      );
+      for (const fact of facts)
+        assert.ok(source.includes(fact), `${packageName}/${filename}: ${fact}`);
+      assert.match(
+        source,
+        /repository-only|repository implementation|repository-implementation/i,
+        `${packageName}/${filename}`,
+      );
+      assert.match(source, /external action|external-action/, filename);
+      if (filename === "tasks.md") assert.doesNotMatch(source, /Status: draft/);
+      if (filename === "change.yaml") {
+        assert.doesNotMatch(source, /authority_effective: false/);
+        assert.doesNotMatch(
+          source,
+          /repository_adoption_status: adopted-pending|^blocking_reasons:/m,
+        );
+      }
+    }
+  }
+  const voc098Change = readFileSync(
+    resolve(
+      repositoryRoot,
+      "specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/change.yaml",
+    ),
+    "utf8",
+  );
+  for (const evidence of [
+    "cde0f665031a212b51a45af541a4ebaff23e8f7a",
+    "5443876203",
+    "5443893558",
+    "5443923705",
+  ])
+    assert.ok(voc098Change.includes(evidence), evidence);
 });
 
 test("the architecture visual is self-contained and evidence-bound", () => {

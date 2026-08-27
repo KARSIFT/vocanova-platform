@@ -14,6 +14,7 @@ import {
   parseStrictJson,
   resolveVersionId,
   validateDeliveryRepository,
+  verifySecretStepStart,
 } from "./cloudflare-delivery-policy.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
@@ -34,7 +35,7 @@ test("JSONC parsing preserves URLs while removing comments and trailing commas",
   );
 });
 
-test("strict JSON/JCS rejects duplicate keys, unsafe integers, and non-canonical bytes", () => {
+test("strict JSON/JCS rejects duplicate keys, unsafe integers, non-canonical bytes, and lone surrogates", () => {
   assert.deepEqual(parseStrictJson('{"a":1,"b":[true,null]}'), {
     a: 1,
     b: [true, null],
@@ -42,6 +43,20 @@ test("strict JSON/JCS rejects duplicate keys, unsafe integers, and non-canonical
   assert.throws(() => parseStrictJson('{"a":1,"a":2}'), /duplicate JSON key/);
   assert.throws(() => parseStrictJson('{"a":9007199254740992}'), /safe range/);
   assert.notEqual(canonicalize({ b: 1, a: 2 }), '{"b":1,"a":2}');
+  for (const source of [
+    '{"x":"\\ud800"}',
+    '{"x":"\\udfff"}',
+    '{"\\ud800":1}',
+    '{"\\udfff":1}',
+    '{"nested":[{"x":"\\ud800"}]}',
+    '{"nested":[{"\\udfff":true}]}',
+  ]) {
+    assert.throws(() => parseStrictJson(source), /lone Unicode surrogate/);
+  }
+  assert.deepEqual(parseStrictJson('{"😀":"𝄞"}'), { "😀": "𝄞" });
+  assert.equal(canonicalize({ "😀": ["𝄞"] }), '{"😀":["𝄞"]}');
+  assert.throws(() => canonicalize({ x: "\ud800" }), /lone high/);
+  assert.throws(() => canonicalize({ "\udfff": true }), /lone low/);
 });
 
 test("Node and Python independently reproduce all sixteen locked tuple/schema digests", () => {
@@ -119,6 +134,142 @@ test("prepared staging accepts one exact offline runtime-binder chain", async ()
     environment: "staging",
     reasons: [],
   });
+});
+
+test("first secret-bearing step atomically enforces integrity-bound ACT-04 and token deadlines", async () => {
+  const fixture = runtimeBinderFixture();
+  const decision = await evaluateDeliveryEvent(
+    fixture.manifest,
+    fixture.event,
+    {
+      http: fixture.http,
+      now: new Date("2026-08-27T00:09:00Z"),
+      rateLimitMinimum: 40,
+      includeSecretDeadlineHandoff: true,
+    },
+  );
+  assert.equal(decision.eligible, true);
+  const handoff = decision.secretDeadlineHandoff;
+  assert.equal(
+    verifySecretStepStart(
+      "2026-08-27T00:25:59.999Z",
+      handoff,
+      fixture.event.inputs,
+    ),
+    true,
+  );
+  for (const startedAt of [
+    handoff.act04_expires_at,
+    handoff.phase4_token_expires_at,
+    "2026-08-27T01:00:00.001Z",
+  ]) {
+    assert.throws(
+      () => verifySecretStepStart(startedAt, handoff, fixture.event.inputs),
+      /started at or after/,
+    );
+  }
+  assert.throws(
+    () =>
+      verifySecretStepStart(
+        "2026-08-27T00:25:59Z",
+        { ...handoff, binding_sha256: "0".repeat(64) },
+        fixture.event.inputs,
+      ),
+    /does not bind/,
+  );
+});
+
+test("runtime client enforces distinct connection and complete-response deadlines without retry", async () => {
+  {
+    const fixture = runtimeBinderFixture();
+    let calls = 0;
+    const decision = await evaluateDeliveryEvent(
+      fixture.manifest,
+      fixture.event,
+      {
+        http: async (_url, init) => {
+          calls += 1;
+          return await new Promise((resolve, reject) => {
+            const delayed = setTimeout(
+              () => resolve(jsonResponse({ message: "too late" })),
+              100,
+            );
+            init.signal.addEventListener(
+              "abort",
+              () => {
+                clearTimeout(delayed);
+                reject(init.signal.reason);
+              },
+              { once: true },
+            );
+          });
+        },
+        now: new Date("2026-08-27T00:09:00Z"),
+        connectTimeoutMs: 10,
+        responseTimeoutMs: 60,
+      },
+    );
+    assert.equal(calls, 1);
+    assert.equal(decision.eligible, false);
+    assert.match(decision.reasons.join("\n"), /connection deadline exceeded/);
+  }
+
+  {
+    const fixture = runtimeBinderFixture();
+    let calls = 0;
+    const decision = await evaluateDeliveryEvent(
+      fixture.manifest,
+      fixture.event,
+      {
+        http: async (_url, init) => {
+          calls += 1;
+          const response = jsonResponse({ message: "headers only" });
+          return {
+            status: response.status,
+            headers: response.headers,
+            text: async () =>
+              await new Promise((_, reject) => {
+                init.signal.addEventListener(
+                  "abort",
+                  () => reject(init.signal.reason),
+                  { once: true },
+                );
+              }),
+          };
+        },
+        now: new Date("2026-08-27T00:09:00Z"),
+        connectTimeoutMs: 10,
+        responseTimeoutMs: 30,
+      },
+    );
+    assert.equal(calls, 1);
+    assert.equal(decision.eligible, false);
+    assert.match(
+      decision.reasons.join("\n"),
+      /complete-response deadline exceeded/,
+    );
+  }
+
+  {
+    const fixture = runtimeBinderFixture();
+    let lastSignal;
+    const decision = await evaluateDeliveryEvent(
+      fixture.manifest,
+      fixture.event,
+      {
+        http: async (url, init) => {
+          lastSignal = init.signal;
+          return fixture.http(url, init);
+        },
+        now: new Date("2026-08-27T00:09:00Z"),
+        connectTimeoutMs: 20,
+        responseTimeoutMs: 50,
+      },
+    );
+    assert.equal(decision.eligible, true);
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, 60));
+    assert.equal(lastSignal.aborted, false, "success timers must be cleared");
+  }
 });
 
 test("runtime binder rejects reruns, spoofed checks, network failure, and fixture-like inputs", async () => {
@@ -305,6 +456,25 @@ test("workflow policy rejects PR secret exposure, cancellation, and an unguarded
         "true",
       ),
       /staging delivery job missing/,
+    ],
+    [
+      source.replace(
+        "--verify-secret-step-start",
+        "--unreviewed-secret-step-bypass",
+      ),
+      /verify-secret-step-start|atomically verify/,
+    ],
+    [
+      source
+        .replace(
+          'test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"',
+          'test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"\n          # moved before deadline verification',
+        )
+        .replace(
+          'secret_step_started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"',
+          'secret_step_started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"\n          test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"',
+        ),
+      /atomically verify/,
     ],
   ]) {
     assert.ok(

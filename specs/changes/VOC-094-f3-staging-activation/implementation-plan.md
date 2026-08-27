@@ -12,8 +12,9 @@ external-action boundary remain unchanged.
 
 Steps 2–4 below are preserved execution history, but Phase 1 is now complete at exact
 activation revision `0d5ccc1231edb0e652d5c883cb214b85bcc9635e` and Phase 2 is
-independently closed. The operative remaining sequence is exact 27-file PR1 with the
-reviewed tuple and `prepared`/dispatch-ineligible runtime binder; independent exact-SHA
+independently closed. The operative remaining sequence uses VOC-097's exact 29-path
+core / 38-authorized-path PR1 boundary with the reviewed tuple and
+`prepared`/dispatch-ineligible runtime binder; independent exact-SHA
 reviews and non-author merge; ACT-03; exact five-file documentation-only PR2 and its
 independent merged-SHA verification; then ACT-04 using five closed canonical records,
 four supplied raw-body digests plus the ACT-03-bound settings record, live PR/push/check

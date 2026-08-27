@@ -10,8 +10,9 @@ held snapshot remains valid; prepared staging passes only through the complete
 VOC-096 delivery validator. Production, HOLD-01/HOLD-02, ACT-03/04/05, and every
 external-action boundary remain unchanged.
 
-Phase 1 and Phase 2 are complete. Under adopted VOC-096, the remaining single-task
-mapping is exact 27-file PR1 (prepared/ineligible binder), ACT-03, exact five-file PR2,
+Phase 1 and Phase 2 are complete. Under adopted VOC-097, the remaining single-task
+mapping uses the exact 29-path core / 38-authorized-path PR1 boundary
+(prepared/ineligible binder), ACT-03, exact five-file PR2,
 and ACT-04/05. ACT-04 uses five closed canonical records, exact raw-body digests, live
 PR2/push/check proof, a one-use nonce, maximum 30-minute validity, and two
 credential-free evaluations. This bounded amendment replaces the stale ACT-02-held

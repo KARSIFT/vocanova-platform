@@ -28,10 +28,9 @@ approved_candidate_sha: ebea716b65fc13df55f39d8b079b0355eb79a729
 approval_status: adopted
 implementation_authorized: true
 implementation_authority_status: >-
-  authorized-by-exact-candidate-adoption-for-the-declared-repository-only-
-  implementation-PR-but-effective-only-after-this-adoption-bookkeeping-revision-
-  receives-fresh-exact-SHA-review-a-populated-binder-genuine-eligible-true-reasons-
-  empty-normal-non-author-PR-167-merge-and-applicable-postmerge-checks; all-
+  effective-for-the-declared-repository-only-implementation-after-exact-bookkeeping-
+  review-eligible-true-reasons-empty-normal-non-author-PR-167-merge-and-successful-
+  postmerge-checks; all-
   Cloudflare-DNS-D1-GitHub-settings-secrets-credentials-dispatch-deployment-
   migration-traffic-spending-production-data-main-promotion-and-launch-actions-
   remain-outside-this-authority
@@ -317,14 +316,29 @@ affected_areas:
   - specs/changes/VOC-096-voc094-dispatch-binder-transition
   - specs/changes/VOC-097-voc096-final-evidence-validator-closure
 
+completed_plan_lifecycle:
+  reviewed_bookkeeping_head: 814c31deb893c5c72b80f3075c0905fc8ba8c9c5
+  bookkeeping_review: https://github.com/KARSIFT/vocanova-platform/pull/167#issuecomment-5443475414
+  premerge_eligibility:
+    run: 33103467324
+    eligible: true
+    reasons: []
+  merge_sha: 45590a0673937f4a9464b57393e026871678b3d4
+  merge_mode: normal-non-author-merge-commit
+  postmerge:
+    ci: 33103648900
+    security: 33103648876
+    governance: 33103648935
+  lifecycle_readback: https://github.com/KARSIFT/vocanova-platform/pull/167#issuecomment-5443938338
+  authority_effect: repository-implementation-only-no-external-action-authority
+
 implementation:
   authorized: true
-  authority_effective: false
+  authority_effective: true
   required: true
   status: >-
-    adopted-authorized-for-repository-only-implementation-but-effective-only-after-
-    bookkeeping-revision-exact-review-genuine-eligibility-normal-non-author-plan-
-    merge-and-applicable-postmerge-checks
+    adopted-effective-for-repository-only-implementation-after-completed-PR-167-
+    review-eligibility-normal-non-author-merge-and-postmerge-evidence
   target_branch: develop
   pull_request_count: 1
   task: VOC-097-T00
@@ -360,10 +374,10 @@ preserved_holds:
   production_data: VOC-080-HOLD-02
 
 ehr: not-triggered
-repository_adoption_status: adopted-pending-bookkeeping-review-eligibility-non-author-merge-postmerge
+repository_adoption_status: adopted-effective-repository-implementation-only
 adoption_pr: 167
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/167#issuecomment-5443394488
-blocking_reasons:
-  - adoption-bookkeeping-revision-exact-review-populated-binder-and-normal-non-author-plan-merge-pending
-  - preserved-VOC-096-PR1-resumes-only-after-plan-effectiveness
+remaining_implementation_constraints:
+  - corrected-PR168-requires-fresh-exact-SHA-checks-three-reviews-and-non-author-merge
+  - rejected-cde0f665-and-its-three-FAIL-reviews-remain-non-transferable-history
   - external-actions-remain-separately-held-and-are-not-authorized-by-VOC-097

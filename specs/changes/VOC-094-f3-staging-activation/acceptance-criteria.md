@@ -14,8 +14,9 @@ Phase 1 and Phase 2 are complete canonical evidence, not pending acceptance work
 Phase 1 binds activation revision `0d5ccc1231edb0e652d5c883cb214b85bcc9635e`,
 seven schema-only migrations, zero application rows, 100% traffic on API/web rollback
 baselines, 0% on all three probes, active staging Custom Domains, Free Workers/D1, and
-exactly $0 incremental cost. VOC-096 makes the remaining acceptance path: exact
-27-file PR1 with a prepared/ineligible runtime binder; ACT-03; exact five-file PR2;
+exactly $0 incremental cost. VOC-097 makes the remaining acceptance path: the exact
+29-path core / 38-authorized-path PR1 boundary with a prepared/ineligible runtime
+binder; ACT-03; exact five-file PR2;
 then a five-record, digest-bound, one-use, maximum-30-minute ACT-04 binder evaluated
 twice without credentials. These corrections supersede contradictory pending/static
 future-value clauses below; historical adoption and action evidence remain preserved.

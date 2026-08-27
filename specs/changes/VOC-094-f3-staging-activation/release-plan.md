@@ -11,8 +11,9 @@ VOC-096 delivery validator. Production, HOLD-01/HOLD-02, ACT-03/04/05, and every
 external-action boundary remain unchanged.
 
 Phase 1 and its token/overlay closure are complete; Phase 2 is independently closed.
-The remaining release path is exact 27-file PR1 in `prepared`/dispatch-ineligible
-state, ACT-03, exact five-file PR2, and only then ACT-04. The dispatch binder fetches
+The remaining release path uses VOC-097's exact 29-path core / 38-authorized-path PR1
+boundary in `prepared`/dispatch-ineligible state, ACT-03, exact five-file PR2, and only
+then ACT-04. The dispatch binder fetches
 five closed canonical records and live PR/push/check evidence, binds supplied raw-body
 digests and a one-use nonce, expires within 30 minutes with its token, and is evaluated
 twice without credentials. This replaces stale ACT-02-held and predicted future-value
