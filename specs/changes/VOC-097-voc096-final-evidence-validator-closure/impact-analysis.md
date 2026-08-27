@@ -7,16 +7,16 @@ resource or setting. Its implementation extends an already-adopted staging activ
 diff so the legacy VOC-080 closure validator understands the later, stronger VOC-096
 `prepared` state without confusing it with activation authority.
 
-| Area | Effect and boundary |
-| --- | --- |
-| Final-evidence policy | Adds a fail-closed held-or-fully-validated-prepared transition. |
-| Delivery policy | Remains the authoritative complete prepared-state validator; no gate is removed. |
-| VOC-096/VOC-094 | Reconciles exact PR1 scope/count and operative transition text while preserving history. |
-| Cloudflare | No request or mutation; retained resources/evidence remain unchanged. |
-| GitHub settings/secrets | No environment, secret, variable, or workflow dispatch action. |
-| Production/data | No effect; production is held and HOLD-01/HOLD-02 remain unchanged. |
-| Cost | No effect; Workers/D1 Free, incremental VocaNova cost 0, Basic LB unchanged. |
-| Worktrees/refs | Preserved; implementation resumes in the existing isolated worktree. |
+| Area                    | Effect and boundary                                                                      |
+| ----------------------- | ---------------------------------------------------------------------------------------- |
+| Final-evidence policy   | Adds a fail-closed held-or-fully-validated-prepared transition.                          |
+| Delivery policy         | Remains the authoritative complete prepared-state validator; no gate is removed.         |
+| VOC-096/VOC-094         | Reconciles exact PR1 scope/count and operative transition text while preserving history. |
+| Cloudflare              | No request or mutation; retained resources/evidence remain unchanged.                    |
+| GitHub settings/secrets | No environment, secret, variable, or workflow dispatch action.                           |
+| Production/data         | No effect; production is held and HOLD-01/HOLD-02 remain unchanged.                      |
+| Cost                    | No effect; Workers/D1 Free, incremental VocaNova cost 0, Basic LB unchanged.             |
+| Worktrees/refs          | Preserved; implementation resumes in the existing isolated worktree.                     |
 
 ## Risks and mitigations
 
