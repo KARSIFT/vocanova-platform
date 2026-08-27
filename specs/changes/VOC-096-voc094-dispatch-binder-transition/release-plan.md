@@ -10,10 +10,13 @@ heads and all existing worktrees/recovery refs remain recoverable while open.
 
 PR1's bounded amendment makes all nine VOC-094 package surfaces agree with the
 corrected transition while preserving immutable history; it is repository-ready but
-dispatch-ineligible. ACT-03 and PR2 retain VOC-094's truthful settings boundary. PR2
+dispatch-ineligible. Its exact 27-file scope also regenerates both locked-Wrangler
+type contracts and binds the complete prepared Cloudflare tuple. ACT-03 and PR2 retain
+VOC-094's truthful settings boundary. PR2
 is documentation-only and its merge SHA becomes the
-sole possible ACT-04 revision only after live authority/review binders pass. There is
-no `develop` to `main` release in this package.
+sole possible ACT-04 revision only after the strict ACT-03 record, fetched merged-PR2
+exact-review record, authority, and binder-review records pass. There is no `develop`
+to `main` release in this package.
 
 ## External activation boundary
 
@@ -28,6 +31,14 @@ VOC-096 adoption, PR1, and PR2 authorize none of the following:
 Those effects remain exclusively under effective VOC-094-ACT-03/04/05 records. The
 runtime binder validates an authority; it does not create one.
 
+All four canonical records must match the committed GitHub publisher login/numeric ID/
+type/site-admin/association. This authenticates the relay account only. Distinct
+governance actors remain separately attributable through actor/provenance records and
+independent review. The merged-PR2 review is created after merge; authority follows it;
+body `issued_at` equals authority-comment server `created_at`; binder review follows;
+and current-run creation plus both live checks remain strictly before the at-most-
+30-minute expiry.
+
 ## Rollback
 
 - Before ACT-03, revert PR1 through a normal reviewed PR; no external rollback exists.
@@ -40,6 +51,10 @@ runtime binder validates an authority; it does not create one.
 - A consumed, failed, expired, or edited binder is never repaired or reused. A new
   ACT-04 record/review may be issued only under unchanged authority and current drift
   checks; this does not by itself require creating another Cloudflare token.
+- A missing/edited/reordered ACT-03 or merged-PR2-review record, publisher mismatch,
+  actor-provenance collision, wrong tuple identifier/hash, probe-as-baseline selection,
+  stale generated type, or timestamp equality/skew blocks dispatch and returns to the
+  governed correction path; it is never bypassed by editing PR2 or weakening a gate.
 - Revert repository logic only through a separately reviewed PR. Never force-push or
   weaken the prior gate.
 

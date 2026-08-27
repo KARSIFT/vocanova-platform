@@ -41,6 +41,26 @@ automatic_merge_allowed: true
 production_impact: prohibited
 rollback_required: true
 
+plan_review_history:
+  - candidate_sha: d169aebd35b49743b928e38f4cd41d617136cfa2
+    verdict: fail-security-settings-five-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5438573316
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate adds both generated
+      Wrangler type surfaces; a distinct strict merged-PR2 exact-review record; a
+      committed GitHub publisher trust root separated from governance actor provenance;
+      the strict ACT-03 schema; zero-skew GitHub-server timestamp/expiry ordering; and
+      corrected exact-diff metadata. No verdict transfers to the next SHA.
+  - candidate_sha: d169aebd35b49743b928e38f4cd41d617136cfa2
+    verdict: fail-cloudflare-wrangler-three-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5438591398
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate makes PR1 exactly 27
+      files with locked-Wrangler regenerated types, makes the merged-PR2 exact review a
+      live fetchable binder, and commits the exact retained Cloudflare resource,
+      domain/certificate/DNS, migration/hash, baseline/probe, cost, and production
+      tuple with probe-as-baseline negatives. No verdict transfers to the next SHA.
+
 owners:
   decision: accountable-governance-decision-owner-after-independent-plan-review
   package_preparation: separate-VOC-096-plan-author-actor
@@ -48,6 +68,7 @@ owners:
   cloudflare_specialist: different-non-author-exact-revision-actor
   security_settings_specialist: different-non-author-exact-revision-actor
   exact_revision_review: different-non-author-R4-reviewer-actor
+  pr2_merged_sha_review: different-non-author-postmerge-exact-reviewer-actor
   binder_review: different-non-author-post-PR2-reviewer-actor
   external_actions: unchanged-VOC-094-action-specific-operators
   merge: separate-authorized-non-author-merge-actor
@@ -78,13 +99,15 @@ delivery_shape:
       - release-plan.md
   implementation_pull_requests:
     count: 2
-    pr1_file_count: 25
+    pr1_file_count: 27
     pr1_files:
       - AGENTS.md
       - .github/README.md
       - .github/workflows/ci.yml
       - apps/api-worker/wrangler.jsonc
+      - apps/api-worker/worker-configuration.d.ts
       - apps/web/wrangler.jsonc
+      - apps/web/worker-configuration.d.ts
       - infrastructure/cloudflare/delivery-manifest.json
       - scripts/foundation/cloudflare-delivery-policy.mjs
       - scripts/foundation/cloudflare-delivery-policy.test.mjs
@@ -117,12 +140,228 @@ delivery_shape:
     inherited_VOC_094_actions: 3
     action_ids: [VOC-094-ACT-03, VOC-094-ACT-04, VOC-094-ACT-05]
 
+publisher_trust_root:
+  repository_owner:
+    login: KARSIFT
+    numeric_id: 304005580
+  repository: vocanova-platform
+  repository_visibility: public
+  canonical_issue: 158
+  permitted_issue_comment_publisher:
+    login: m-e-h-r-d-a-a-d
+    numeric_id: 7955432
+    type: User
+    site_admin: false
+    author_association: MEMBER
+  interpretation: >-
+    These committed values authenticate only the GitHub account that publishes or
+    relays a canonical record. They do not prove that the governance actor named in a
+    record is a different human or separately instantiated AI participant. Governance
+    actor independence requires distinct attributable actor IDs and provenance records,
+    non-authorship evidence, and independent review under AGENTS.md; the shared trusted
+    publisher account is not actor identity or action authority.
+
+prepared_staging_tuple:
+  evidence:
+    original_successful_execution:
+      artifact_path: /tmp/vocanova-act02-0d5ccc/ACT02-EVIDENCE-2026-08-27T002626Z.json
+      artifact_sha256: 80c54181c91c194cfa37e7bd5bd00b2083d1ee9e9cada247d74275e74189d52f
+      reconciliation_url: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5435923878
+      reconciliation_raw_body_sha256: d95f0610908f9df0c34619ae2618dd664700b7493b2183cf547c3cf2f4859bb2
+      helper_sha256: 18a948ccd75119668942bd4bb245df01cf8a7b8fa4d1462669498184c5b42d18
+      runner_sha256: d44038d55ac0ee750f6781baf4bd5a4b9fe25a0144e5a9b0db131d48e5927e64
+      operator_attestation_sha256: b43a57bbf26bdb8c3344f0b3810aadbc0ee67a8cc62245303088394abe22fc2f
+    final_readback_and_closure:
+      artifact_path: /tmp/vocanova-act02-0d5ccc/ACT02-FINAL-READBACK-2026-08-27T090934Z.json
+      artifact_sha256: 713a830ea58df34c40c0e3075e28738cfef3d0b08c93702c2207fd79fa3a2558
+      helper_sha256: f5cd0e183656b63bc77734b6ba810599824839ec86b60f82703c0c372735d381
+      runner_sha256: e9661488c4a81364ad19e06f0e8bbbe66edf1f3f520f8730ae50baee86746a9c
+      operator_attestation_sha256: 09be2b22b727686a46a8e0ca3e1cdf16119cfdccc7783a87769413b0639fcd6c
+      sealed_schema_sha256: 08c846f068fdd40d123baf569de652ee8d6bdda4b3a9f0d39dfb1e4680e5455b
+      sealed_migrations_sha256: 2f1d82ce461ef608478a1d05062ba244f207ff9bc64e3011abbe4c718a6c04b0
+      evidence_reconciliation:
+        url: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5437898152
+        raw_body_sha256: 187a69932b47945fa21fed9090a40c9f584d184d9a5101d2bb8faed92a90a63f
+      dashboard_and_token_closure:
+        url: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5437982455
+        raw_body_sha256: a6f9f45fb7662be1203880a10080bff265bf90b13375b3837fc4ac9431326ec8
+      disposable_overlay_cleanup:
+        url: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438005803
+        raw_body_sha256: 8ebfaa4a87c8c7ad3ad71559c5ee77f6f5c203b13013ce60da49c92c38be41ec
+      independent_closure_verdict:
+        url: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438014817
+        raw_body_sha256: 0759f0a219cf95fb38c931057c5dff4c1741ac057fdbb5608222fa0da9d4b791
+    later_nonpromoted_probe:
+      url: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5432857370
+      raw_body_sha256: 315e0a62208fed80e3899807f76bf6f5fbd0f492a49f56545e530a2eaf5d6bf5
+    activation_revision: 0d5ccc1231edb0e652d5c883cb214b85bcc9635e
+    activation_manifest_sha256: 7c98c7a05679d10a182bcba66075d21802020acaa6cb9df38f86f2a52c280e92
+  account_id: 0a9eda28b96d77c24dcde74f3e074d47
+  zone:
+    id: 63286d93b5f32925ac7366b4e97908be
+    name: vocanova.site
+    status: active
+    plan: Free Website
+  workers:
+    api: vocanova-api-staging
+    web: vocanova-web-staging
+  bindings:
+    api_DB_d1_uuid: 22ae386f-e3f5-4d98-a3ad-18b39d3b8556
+    web_API_worker: vocanova-api-staging
+  d1:
+    name: vocanova-staging
+    uuid: 22ae386f-e3f5-4d98-a3ad-18b39d3b8556
+    requested_location_hint: eeur
+    primary_served_region: EEUR
+    jurisdiction: none-selected
+    application_rows: 0
+    applied_migration_count: 7
+    learner_or_user_import: false
+    sealed_schema_sha256: 08c846f068fdd40d123baf569de652ee8d6bdda4b3a9f0d39dfb1e4680e5455b
+    sealed_migrations_sha256: 2f1d82ce461ef608478a1d05062ba244f207ff9bc64e3011abbe4c718a6c04b0
+    migrations:
+      - file: 0001_foundation.sql
+        sha256: 298550648ca6426874c7edbd1e44706988b632049284f8316665aa0fea05d1ab
+      - file: 0002_identity_accounts.sql
+        sha256: 5ec6f1f14e422763121fb06cef42c1da4f6da489a40b89e90d520af18f53ced5
+      - file: 0003_content_learning_reviews.sql
+        sha256: 687ecd49abdeb0d42e404c84412d14c7c669859ebc8dbda6001767a20e364fce
+      - file: 0004_missions_gamification.sql
+        sha256: b4c6b1a0626e8852e69ee344658690df97044147e20420e872859c5ec8ecaef0
+      - file: 0005_ai_feedback.sql
+        sha256: eac51101d037a6a2521375c40f0a1edcf5ca026160c1af00be8a2b44841d73f7
+      - file: 0006_synthetic_test_account.sql
+        sha256: d2566bbd646502740814df9eb7c23684a4b5e4c47a21e488885cfc901ce4e33d
+      - file: 0007_reconciliation_write_guard.sql
+        sha256: fd32ed93bbf4854f032bac3b6b49e008ff44afe8541a398669cb2a955cd530dd
+  custom_domains:
+    api:
+      hostname: api-stag.vocanova.site
+      id: ef1a01985c6c6c44ad41866e971de9102b512573
+      certificate_id: 3f8c1968-c7ca-43fe-826f-3e8c8adc4d3f
+      certificate_status: active-required-at-Phase1-and-ACT04-readback
+      cloudflare_environment_label: production-platform-label-on-staging-resource
+      worker: vocanova-api-staging
+    web:
+      hostname: stag.vocanova.site
+      id: 8093eafcdaeb1277ee23ee9b21fcfe2fca411fb8
+      certificate_id: 90d0db5f-0e44-4d07-a40e-0fb3d86ad5ae
+      certificate_status: active-required-at-Phase1-and-ACT04-readback
+      cloudflare_environment_label: production-platform-label-on-staging-resource
+      worker: vocanova-web-staging
+  dns:
+    api:
+      id: 2e06544a621b40d2ea106f0afb892448
+      type: AAAA
+      name: api-stag.vocanova.site
+      content: "100::"
+      proxied: true
+      ttl: 1
+    web:
+      id: f845b012b9312da58898d91e9f80b950
+      type: AAAA
+      name: stag.vocanova.site
+      content: "100::"
+      proxied: true
+      ttl: 1
+  versions:
+    rollback_baselines:
+      api:
+        uuid: ace13c0b-c148-4ef1-ad9a-fdfdb07f264f
+        traffic_percentage: 100
+      web:
+        uuid: 5255e64d-872e-469f-90b6-bea49efd5e75
+        traffic_percentage: 100
+    evidence_only_zero_traffic_probes:
+      api_rollback_probe:
+        uuid: 858009b5-0840-499d-92f4-e0a0483e0b33
+        traffic_percentage: 0-required-at-Phase1-and-ACT04-readback
+      web_rollback_probe:
+        uuid: 0dc15f45-d178-480e-ba32-ca5279cc2c17
+        traffic_percentage: 0-required-at-Phase1-and-ACT04-readback
+      api_later_nonpromoted_probe:
+        uuid: 7b694392-8f38-4329-bd2f-af982c3c6a56
+        traffic_percentage: 0-required-at-Phase1-and-ACT04-readback
+  cost_and_protections:
+    workers_plan: Free
+    d1_plan: Free
+    incremental_vocanova_cost_cents: 0
+    unrelated_basic_load_balancing:
+      monthly_price_usd: 5
+      state: unchanged-unexpanded-not-attributed-to-vocanova
+    protected_unrelated_workers:
+      - patient-poetry-73ce
+      - telegram-mcp
+      - vergecloud-zoho-sprints-mcp
+    production_hostnames: [prod.vocanova.site, api-prod.vocanova.site]
+    production_state: no-worker-d1-domain-traffic-or-change
+    production_holds: [VOC-080-HOLD-01, VOC-080-HOLD-02]
+  public_smoke:
+    health:
+      url: https://api-stag.vocanova.site/healthz
+      http: 200
+      assertions: [status-ok, database-ok]
+      response_hash: time-varying-not-a-stable-binder
+    config:
+      url: https://api-stag.vocanova.site/configz
+      http: 200
+      release: 0d5ccc1231edb0e652d5c883cb214b85bcc9635e
+      sha256: 9619fe08f0e63ef80a136ef7a4d1baab869578034f415ce794ac7633bf007cfc
+    openapi:
+      url: https://api-stag.vocanova.site/openapi.json
+      http: 200
+      sha256: 44b97cf168a6acc0aa4dd8ff59e82a964e91f18e2ad06e037d6ac7b85ec11612
+    web:
+      url: https://stag.vocanova.site/
+      http: 200
+      content_type: HTML
+      sha256: f9d9a9d33c5b1606c979e4591fffd299353c680e3863223c9dbd98003d42d0fa
+
+runtime_record_contract:
+  api_publisher_equality: publisher_trust_root.permitted_issue_comment_publisher
+  actor_provenance: >-
+    Each record has a distinct governance actor ID, role, non-authorship declaration,
+    and canonical provenance URL. The gate compares required distinct IDs/URLs and the
+    binder reviewer attests to separation; GitHub publisher equality alone is never
+    reported as proof of actor independence.
+  act03:
+    schema: vocanova-voc094-act03-settings-v1
+    required: >-
+      exact canonical URL/raw-body SHA-256, trusted API publisher, actor/provenance,
+      VOC-085-HOLD-00 authority URL, PR1 merge SHA/ref, exact cloudflare-staging pre-
+      and post-state, exactly CLOUDFLARE_ACCOUNT_ID/CLOUDFLARE_API_TOKEN secret names
+      with no values, token scope/expiry metadata, rollback, no production/cost drift,
+      created_at=updated_at, and strict JSON with no unknown or duplicate keys
+  pr2_exact_review:
+    schema: vocanova-voc096-pr2-merged-sha-review-v1
+    required: >-
+      exact canonical URL/raw-body SHA-256, trusted API publisher, different reviewer
+      actor/provenance/non-authorship, PASS/zero blockers, exact PR2 number/head/merge
+      SHA/base/ref/five-file set, ACT-03 URL/digest, hosted checks, created_at=updated_at,
+      and strict JSON with no unknown or duplicate keys
+  act04_authority:
+    schema: vocanova-voc094-act04-authority-v1
+    required: >-
+      exact ACT-03 and PR2-review URLs/digests, full prepared tuple, exact artifact
+      hashes, one-use nonce, maximum_dispatches=1, issued_at exactly equal to the live
+      authority comment created_at, expires_at no later than created_at plus 30 minutes,
+      created_at=updated_at, and strict JSON with no unknown or duplicate keys
+  binder_review:
+    schema: vocanova-voc096-act04-binder-review-v1
+    required: >-
+      exact ACT-03, PR2-review, and authority URLs/digests; full prepared tuple and
+      artifact hash equality; different reviewer actor/provenance/non-authorship;
+      PASS/zero blockers; created_at=updated_at; and strict JSON with no unknown or
+      duplicate keys
+
 affected_areas:
   - AGENTS.md
   - .github/README.md
   - .github/workflows/ci.yml
   - apps/api-worker/wrangler.jsonc
+  - apps/api-worker/worker-configuration.d.ts
   - apps/web/wrangler.jsonc
+  - apps/web/worker-configuration.d.ts
   - infrastructure/cloudflare/delivery-manifest.json
   - scripts/foundation/cloudflare-delivery-policy.mjs
   - scripts/foundation/cloudflare-delivery-policy.test.mjs

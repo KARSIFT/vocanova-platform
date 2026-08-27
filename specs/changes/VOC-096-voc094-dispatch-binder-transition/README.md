@@ -16,18 +16,26 @@ shape:
 1. PR1 performs a bounded reconciliation of VOC-094's nine package files, preserving
    immutable adoption/review history while replacing the contradictory operative
    Phase-3/4 clauses. The same PR commits real staging resources and baselines plus a
-   **prepared**, never standing-authorized, runtime-binder contract.
+   **prepared**, never standing-authorized, runtime-binder contract. Both Wrangler
+   generated type files are regenerated and checked in the exact 27-file PR1 scope.
 2. ACT-03 occurs only after PR1. PR2 changes exactly the five declared settings
    documents and remains incapable of changing delivery eligibility.
-3. After PR2 merges and its exact merge SHA is independently reviewed, the accountable
-   actor publishes one strict ACT-04 authority record on canonical issue #158. A
-   different non-author reviewer then publishes a strict binder-review record.
-4. The credential-free delivery gate retrieves those exact records and GitHub PR/run
+3. After PR2 merges, a different-actor exact reviewer publishes a strict, fetchable
+   merged-PR2-SHA review record. Only then does the accountable actor publish the
+   strict ACT-04 authority record on canonical issue #158. A different non-author
+   reviewer then publishes a strict binder-review record.
+4. The credential-free delivery gate retrieves ACT-03 and all three post-PR2 records
+   plus GitHub PR/run
    metadata, verifies their bodies, hashes, actors, order, PR2 merge/file boundary,
    exact dispatch SHA/ref, manifest/workflow/policy hashes, staging resources and
    baselines, zero-cost/Free-plan state, production holds, expiry, and one-use nonce.
    Missing, edited, stale, replayed, unreachable, or mismatched evidence blocks before
    an environment job or Cloudflare secret is reached.
+
+The manifest commits the exact trusted GitHub publisher login/numeric ID/association.
+That authenticates only the account relaying issue comments; separately attributable
+actor/provenance records and reviews establish governance role separation. The package
+does not claim a shared GitHub publisher identity proves different human/AI actors.
 
 The plan PR adds exactly the nine files in this directory. It does not itself edit an
 adopted VOC-094 file, executable surface, configuration, or living documentation. It

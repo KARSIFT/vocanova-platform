@@ -8,6 +8,13 @@ size/schema/actor/time/digest checks, no dynamic evaluation, injected offline fi
 and fail-closed network handling constrain that risk. The post-binder reviewer prevents
 an authority record's self-asserted body digest from becoming its own proof.
 
+The committed GitHub login/numeric-ID/type/site-admin/association allowlist is a trust
+root only for the API publisher. Different governance actors may be relayed through the
+same account; independence depends on distinct attributable actor/provenance records,
+non-authorship evidence, and review, never an inference from GitHub identity alone.
+The separately fetched merged-PR2 exact-review record prevents authority JSON from
+self-asserting that the required post-merge review happened.
+
 No GitHub environment or secret is changed by this package. ACT-03 remains separately
 held. Cloudflare secret values stay outside repository, comments, logs, fixtures, and
 credential-free jobs.
@@ -18,6 +25,10 @@ The correction makes a future staging dispatch eligible only for one invocation 
 all adopted evidence exists. It does not recreate resources or promote traffic. Real
 resource IDs, baseline UUIDs, routes, Free-plan state, rollback, and exact zero cost are
 equality-bound. Production sentinels and holds are unchanged.
+
+Both generated Worker type contracts are in PR1 because Wrangler configuration hashes,
+bindings, and staging variables change. Locked regeneration/checks prevent a config/
+type mismatch while preserving production sentinels.
 
 The bounded VOC-094 package reconciliation is required to avoid two simultaneously
 adopted contradictory contracts. It preserves immutable adoption/review/completed
@@ -51,6 +62,20 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
   canonically contradictory. Mitigation: PR1 reconciles all nine package surfaces in
   the same exact-reviewed diff and deterministic tests reject any surviving old
   static-future-binder or PR2-executable instruction.
+- `VOC-096-R09`: one hostile comment could self-assert publisher or actor identity.
+  Mitigation: exact committed GitHub publisher equality for all four record types,
+  strict separate actor/provenance fields, pairwise role-collision rejection, and an
+  explicit prohibition on treating publisher authentication as actor independence.
+- `VOC-096-R10`: an authority could self-assert that exact PR2 review occurred.
+  Mitigation: require a distinct fetchable merged-PR2-review URL/digest/schema created
+  after merge and bound by the later authority, binder review, and dispatch inputs.
+- `VOC-096-R11`: body-selected issuance time could extend authority. Mitigation:
+  `issued_at == authority.created_at`, zero skew, `expires_at <= created_at + 30m`,
+  strict server-time ordering, and both live checks before expiry.
+- `VOC-096-R12`: generic issue history or stale generated types could select the wrong
+  Cloudflare state. Mitigation: commit the full resource/domain/certificate/DNS/
+  baseline/probe/evidence/hash tuple, include both generated type files, and reject
+  probe-as-baseline, wrong identifiers, stale config hashes, or pre-migration state.
 
 ## Privacy, accessibility, and analytics
 

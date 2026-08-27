@@ -8,7 +8,8 @@ complete adoption bookkeeping, a genuine eligible result, and a normal non-autho
 merge. Preserve the dirty VOC-090 worktree and every recovery ref.
 
 Use one minimum-sufficient task and exactly two implementation PRs. PR1 is the
-25-file package-reconciliation/executable/resource/living-doc unit. ACT-03 then creates or reconciles only the
+27-file package-reconciliation/generated-type/executable/resource/living-doc unit.
+ACT-03 then creates or reconciles only the
 held staging environment and two secret names. PR2 is the five-file documentation-only
 settings reconciliation. No third executable PR is needed because the runtime binder
 is created only after the exact PR2 merge SHA exists.
@@ -20,36 +21,44 @@ is created only after the exact PR2 merge SHA exists.
    current Cloudflare public readbacks. Stop on staging resource, baseline, cost, or
    production drift. Do not provision, redeploy, migrate, promote, or delete anything.
 2. A different builder creates isolated PR1 from current `origin/develop` and changes
-   exactly the 25 files declared in `change.yaml`. First reconcile all nine VOC-094
+   exactly the 27 files declared in `change.yaml`. First reconcile all nine VOC-094
    package surfaces: preserve adoption, amendment, review, approval, evidence, and
    completed Phase-1 history; label the VOC-096 amendment; and replace every
    contradictory still-unstarted Phase-3/4 static-binder/PR2 clause with the prepared
-   runtime-binder transition. Bind the exact existing staging account/zone/D1/routes/
-   Workers/baselines/evidence and zero-cost facts. Keep every production sentinel/hold
-   unchanged.
+   runtime-binder transition. Bind the exact `prepared_staging_tuple`, including the
+   distinct original-execution and final-readback/closure binders, sealed schema and
+   migrations, domain/certificate/DNS IDs, rollback baselines, three zero-traffic
+   evidence probes, Free/$0/LB state, and production holds. Regenerate both tracked
+   `worker-configuration.d.ts` files with locked Wrangler `4.125.0`. Keep every
+   production sentinel/hold unchanged.
 3. In PR1, implement `prepared` state and the strict runtime-binder schema/evaluator.
-   Add workflow inputs for authority/review URLs and digests plus nonce; exact
+   Add workflow inputs for ACT-03, merged-PR2 exact-review, authority, and binder-review
+   URLs/digests plus nonce; exact
    digest/nonce run naming; first-attempt and prior-run replay rejection; public
    unauthenticated read-only comment/PR/files/run fetching; direct current-run
    verification; strict pagination and a fail-closed 1,000-result ceiling; a second
    credential-free verification immediately before migration; and a network-free
    injected-fixture test path unavailable to workflow inputs. Never fetch or execute
    arbitrary URLs and never add GitHub-token permissions for these reads.
-4. Update all 25 declared package/living/executable/config surfaces consistently. PR1 must say
+4. Update all 27 declared package/living/executable/config/generated surfaces
+   consistently. PR1 must say
    the GitHub staging environment remains absent/held/planned through its merge and
    must not preclaim ACT-03 or ACT-04 post-state. Historical evidence within VOC-094
    remains preserved and all other adopted/completed packages remain unchanged.
 5. Run all applicable checks on the exact PR1 head, including governance, risk,
    diff-check, full workspace validation, delivery/foundation tests, Wrangler config
    validation/dry runs, production-sentinel hashes, secret-placement scans, strict
-   offline HTTP fixtures, and the complete current-gate parity matrix. Obtain separate
+   offline HTTP fixtures, API `types:check`, web `cloudflare:typecheck`, and the
+   complete current-gate parity matrix. Obtain separate
    exact-SHA Cloudflare, security/settings, and independent R4 PASS records. A distinct
    non-author actor merges normally and records post-merge checks/source-head recovery.
 6. Only after PR1 merge and separate unchanged VOC-094/VOC-085 authority, ACT-03 may
    create/reconcile `cloudflare-staging`, set exactly `CLOUDFLARE_ACCOUNT_ID` and
    `CLOUDFLARE_API_TOKEN` with one distinct Phase-4 token, and record sanitized pre/
-   post-state, rollback, scope, expiry, and no-production/cost drift. VOC-096 itself
-   authorizes none of this. Dispatch remains blocked.
+   post-state, rollback, scope, expiry, and no-production/cost drift. Relay the strict
+   ACT-03 record with committed API-publisher equality and separately attributable
+   settings-actor provenance. VOC-096 itself authorizes none of this. Dispatch remains
+   blocked.
 7. A different builder opens PR2 from current `develop` and changes exactly:
    `.github/README.md`, `docs/governance/repository-settings.md`,
    `docs/governance/repository-settings-current.yaml`,
@@ -59,15 +68,20 @@ is created only after the exact PR2 merge SHA exists.
    Run applicable checks, obtain different-actor exact review, and non-author merge.
 8. After PR2 merge, independently verify its exact merged `develop` SHA, five-file
    diff, hosted checks, ACT-03 truth, manifest/workflow/policy hashes, staging resources,
-   baselines/probes, current smoke, zero rows/seven migrations, Free plans, exact
-   incremental cost `0`, unchanged Basic Load Balancing, and production holds.
-9. Under the separately authorized VOC-094-ACT-04 only, relay the strict authority
-   record on issue #158 with a 30-minute maximum lifetime and one-use nonce. A different
-   non-author reviewer re-fetches everything and relays the strict binder-review record.
-   Never put a token value in either record.
+   baselines/probes, current smoke, zero application rows/seven sealed migrations, Free
+   plans, exact incremental cost `0`, unchanged Basic Load Balancing, and production
+   holds. Relay the dedicated strict exact-PR2-merged-SHA review record with trusted API
+   publisher equality, different governance actor provenance, PASS, and zero blockers.
+9. Under the separately authorized VOC-094-ACT-04 only and strictly after the PR2 review
+   record, relay the strict authority record on issue #158 with `issued_at` exactly
+   equal to GitHub comment `created_at`, expiry at most 30 minutes later, and a one-use
+   nonce. A different non-author reviewer re-fetches ACT-03, PR2 review, authority, PR/
+   run metadata, and the exact tuple, then relays the strict binder-review record.
+   Never put a token value in any record. GitHub publisher equality authenticates the
+   relayer only; separately reviewed actor/provenance records establish role separation.
 10. Dispatch only the exact PR2 merge SHA once with matching URL/digest/nonce/baseline/
     cost/confirmation inputs. The credential-free gate and pre-migration recheck must
-    both pass live; fixture mode is forbidden. Monitor the unchanged migration/upload/
+    both pass live and strictly before expiry; fixture mode is forbidden. Monitor the unchanged migration/upload/
     exact-promotion/smoke/outcome/rollback sequence. A failed attempt consumes the
     binder and never silently reuses it.
 11. Under unchanged ACT-05, immediately revoke/expire the Phase-4 token, retain
@@ -84,6 +98,8 @@ git diff --check <fresh-origin-develop> HEAD
 pnpm validate
 pnpm run ci:foundation
 pnpm run ci:delivery
+pnpm --dir apps/api-worker run types:check
+pnpm --dir apps/web run cloudflare:typecheck
 ```
 
 Use committed scripts and `docs/development.md` for exact additional commands. Do not

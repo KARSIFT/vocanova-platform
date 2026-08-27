@@ -9,7 +9,8 @@
 - Result: pending
 
 The plan PR contains exactly nine package files. Implementation uses exactly two PRs:
-PR1's 25-file set (including the complete nine-file VOC-094 bounded reconciliation)
+PR1's 27-file set (including the complete nine-file VOC-094 bounded reconciliation and
+both locked-Wrangler generated type files)
 and PR2's five-file documentation-only set. Review and merge actors
 are separate, all blockers are resolved, and no external action is attributed to
 VOC-096 adoption or merge.
@@ -22,8 +23,8 @@ VOC-096 adoption or merge.
 - Evidence: `VOC-096-EV-01`
 - Result: pending
 
-PR1 contains real reviewed staging resources and baselines but no future ACT-03/04 URL,
-expiry, nonce, or authorized post-state. PR2 cannot edit or influence executable gate
+PR1 contains the exact enumerated reviewed staging tuple but no future ACT-03,
+merged-PR2-review, or ACT-04 URL, expiry, nonce, or authorized post-state. PR2 cannot edit or influence executable gate
 inputs. All nine VOC-094 package files retain immutable completed/adoption evidence but
 state the corrected operative transition consistently. Missing runtime evidence remains
 ineligible.
@@ -36,8 +37,8 @@ ineligible.
 - Evidence: `VOC-096-EV-02`, `EV-03`
 - Result: pending
 
-Strict live records plus PR metadata prove ACT-03, exact five-file PR2 merge, exact
-merged-SHA review, authority, binder review, and dispatch in that order. The dispatched
+Strict live ACT-03, merged-PR2 exact-review, authority, and binder-review records plus
+PR metadata prove that exact order. The dispatched
 SHA is the PR2 merge commit on `develop`; a valid-shaped record targeting PR1 fails.
 
 ## VOC-096-AC-03 — URL, digest, expiry, and replay controls fail closed
@@ -48,14 +49,17 @@ SHA is the PR2 merge commit on `develop`; a valid-shaped record targeting PR1 fa
 - Evidence: `VOC-096-EV-03`, `EV-04`, `EV-05`
 - Result: pending
 
-The live gate accepts only exact current dedicated comments whose bodies match the
-input digests and the different-actor review, expires within 30 minutes, and has never
-been dispatched. Edits, fetch failures, replay, run reruns, and fixture fallback block
-before Cloudflare secrets or mutations.
+The live gate accepts only exact current dedicated comments whose API publishers match
+the committed login/numeric-ID/type/site-admin/association trust root and whose bodies
+match the input digests. It distinguishes that publisher authentication from separately
+reviewed actor provenance. Authority `issued_at` exactly equals server `created_at`,
+expiry is within 30 minutes, both live checks precede expiry, and the binder has never
+been dispatched. Edits, fetch failures, replay, run reruns, actor collisions, and
+fixture fallback block before Cloudflare secrets or mutations.
 
 ## VOC-096-AC-04 — Existing delivery and production gates are not weakened
 
-- Requirements: `VOC-096-D11`, `D13`
+- Requirements: `VOC-096-D11`, `D13`, `D13A`
 - Task: `VOC-096-T00`
 - Tests: `VOC-096-TEST-06`
 - Evidence: `VOC-096-EV-06`
@@ -65,6 +69,7 @@ Staging still requires every exact resource/baseline/rollback/smoke/cost/privacy
 and production remains held with original sentinels and HOLD-01/HOLD-02. Secret
 references remain limited to the existing four credentialed action steps per
 environment. Basic Load Balancing remains unchanged and excluded from VocaNova cost.
+Both generated type contracts and config hashes match locked Wrangler `4.125.0` output.
 
 ## VOC-096-AC-05 — Validation, rollback, and closure are evidence-backed
 
