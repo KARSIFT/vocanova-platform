@@ -58,6 +58,9 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
   completed candidate for each exact committed required name wholly inside the PR2-
   merge-to-review-envelope window. Later/current-dispatch checks are excluded without
   allowing a pending or cross-cutoff pre-review check.
+  A second bounded event-filtered workflow-runs page proves each selection is the exact
+  first-attempt CI/Security/Governance `push` run on `develop`, not a same-name manual
+  dispatch, and deep-binds run/check-suite IDs, workflow path/ID, SHA, and timestamps.
 - `VOC-096-R04`: PR2 documentation could become executable input. Mitigation: gate
   reads no documentation content; it only verifies PR2's exact file-set boundary and
   separately verifies ACT-03 evidence.
@@ -87,7 +90,8 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
   after merge and bound by the later authority, binder review, and dispatch inputs.
 - `VOC-096-R11`: body-selected issuance time could extend authority. Mitigation: the
   authority API envelope's immutable `created_at` is the only issuance time; the body
-  has no `issued_at`; `created_at < expires_at <= created_at + 30m`; strict server-time
+  has no `issued_at`; `created_at < actual expires_at <= min(created_at + 30m,
+  effective token expiry)` with no unused-window buffer; strict server-time
   ordering and both live checks before expiry remain mandatory.
 - `VOC-096-R12`: generic issue history or stale generated types could select the wrong
   Cloudflare state. Mitigation: commit the full resource/domain/certificate/DNS/
@@ -101,6 +105,12 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
   secret-bearing step. Mitigation: settings authority, ACT-03, PR2, all later records,
   run/check timestamps and both live checks are deadline-bound; ACT-04 expiry is no
   later than token expiry and the first secret-bearing step rechecks their minimum.
+- `VOC-096-R15`: a same-name manual dispatch could impersonate the post-merge push
+  check. Mitigation: one exact public `event=push` workflow-runs query per pass,
+  exact-three closed workflow projection, unique run/details/check-suite mapping, and
+  spoofed workflow-dispatch/missing/duplicate/pagination/stale negatives. The total
+  budget is at most 21 HTTP/20 core per pass and 42/40 for both passes, with 40 then 20
+  remaining-core thresholds.
 
 ## Privacy, accessibility, and analytics
 

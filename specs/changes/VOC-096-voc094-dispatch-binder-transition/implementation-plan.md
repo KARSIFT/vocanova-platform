@@ -35,11 +35,14 @@ is created only after the exact PR2 merge SHA exists.
    Add workflow inputs for ACT-03, merged-PR2 exact-review, authority, and binder-review
    URLs/digests plus nonce; exact
    digest/nonce run naming; first-attempt and prior-run replay rejection; public
-   unauthenticated read-only five-comment/PR/files/check-runs/run fetching; direct current-run
+   unauthenticated read-only five-comment/PR/files/check-runs/event-filtered-push-runs/
+   run fetching; direct current-run
    verification; strict pagination and a fail-closed 1,000-result ceiling; a second
    credential-free verification immediately before migration; and a network-free
    injected-fixture test path unavailable to workflow inputs. Never fetch or execute
    arbitrary URLs and never add GitHub-token permissions for these reads.
+   Bound each pass at 21 HTTP/20 core requests, both at 42/40, and require 40 then 20
+   remaining core requests at the zero-core preflights.
    Implement the exact seven schema-bundle digests plus prepared-tuple digest. Parse
    each RFC-8785 body with
    duplicate-key rejection and separately project/validate fetched API envelope
@@ -85,6 +88,8 @@ is created only after the exact PR2 merge SHA exists.
 8. After PR2 merge, independently verify its exact merged `develop` SHA, five-file
    diff, the bounded `filter=all` check-runs page and its deterministic exact three-
    required-name projection confined to PR2 merge through review-envelope creation,
+   each selection's exact first-attempt push workflow name/path/ID/head/branch/check
+   suite from the bounded workflow-runs page,
    settings-authority/ACT-03 truth, manifest/workflow/policy hashes, staging resources,
    baselines/probes, current smoke, zero application rows/seven sealed migrations, Free
    plans, exact incremental cost `0`, unchanged Basic Load Balancing, and production
@@ -99,8 +104,8 @@ is created only after the exact PR2 merge SHA exists.
    Use the already reviewed publisher script: fetch a GitHub API `Date`, set body
    `expires_at` to exactly 25 minutes later, and create the comment once within 60
    seconds. Immediately fetch the created comment; its immutable API `created_at` is the sole
-   issuance time and must satisfy `created_at < expires_at <= created_at + 30 minutes`
-   without an edit and must not exceed effective token expiry. A different non-author
+   issuance time and must satisfy `created_at < actual expires_at <= min(created_at +
+   30 minutes, effective token expiry)` without an edit. A different non-author
    reviewer re-fetches settings authority, ACT-03, PR2 review, authority, PR/
    run metadata, and the exact tuple, then relays the strict binder-review record.
    Never put a token value in any record. GitHub publisher equality authenticates the

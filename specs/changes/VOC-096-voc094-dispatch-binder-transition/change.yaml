@@ -106,6 +106,26 @@ plan_review_history:
       Preserved as immutable FAIL history. The next candidate accepts real canonical
       ten-digit comment URLs and requires two independent runtime implementations to
       recompute every affected RFC-8785 digest. No verdict transfers.
+  - candidate_sha: 4b6eabde851c499392c5be5193174e5d138525a1
+    verdict: fail-independent-R4-one-blocker
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5439930725
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate adds a bounded public
+      event-filtered workflow-runs read and proves that each selected required check
+      belongs to the exact post-merge push workflow. No verdict transfers.
+  - candidate_sha: 4b6eabde851c499392c5be5193174e5d138525a1
+    verdict: pass-security-settings-zero-blockers-superseded-on-next-sha
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5439937068
+    resolution: >-
+      Preserved as exact-SHA PASS history only. The verdict is superseded by the next
+      candidate and transfers no review, approval, adoption, or action authority.
+  - candidate_sha: 4b6eabde851c499392c5be5193174e5d138525a1
+    verdict: fail-cloudflare-wrangler-two-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5439974737
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate binds selected checks to
+      exact push workflow runs and normalizes expiry to the actual authority expiry
+      bounded independently by 30 minutes and token expiry. No verdict transfers.
 
 owners:
   decision: accountable-governance-decision-owner-after-independent-plan-review
@@ -399,7 +419,7 @@ runtime_record_contract:
       exact delivery manifest through executable_digests.manifest_sha256; that manifest
       carries all seven values. Runtime recomputes all seven before body validation,
       then compares the body-bound manifest hash. No leaf schema embeds its own digest.
-    shared_definitions_sha256: 248a5926d0c080dd7a36adaa695482e9fb5a3b519e2e0de67c0ae5b9625c2f37
+    shared_definitions_sha256: df6eaf623627972b085a3225badc506757b94019527c127cf7821e90dbdd0672
     api_envelope_schema_sha256: 7574c85c30f37ca0fa969358683b47a9d40abae36c0dbbe61b65eac5961f67de
     settings_authority_body_schema_sha256: 50bcce2789f3f20513c03a59f960bd8a2796b3b7d2815a619676ecba644b5337
     act03_body_schema_sha256: e4f82b8d069463a4af8a3a96ac22e7ff59947b696402d324b7800360ee320e72
@@ -433,7 +453,7 @@ runtime_record_contract:
       envelope after creation. A body may reference only already-created earlier
       records by URL and raw-body digest.
   shared_definitions:
-    schema_sha256: 248a5926d0c080dd7a36adaa695482e9fb5a3b519e2e0de67c0ae5b9625c2f37
+    schema_sha256: df6eaf623627972b085a3225badc506757b94019527c127cf7821e90dbdd0672
     sha256:
       type: string
       pattern: "^[0-9a-f]{64}$"
@@ -641,6 +661,7 @@ runtime_record_contract:
         - details_url
         - started_at
         - completed_at
+        - workflow_run
       properties:
         name:
           enum: [ci required, security required, structure]
@@ -666,6 +687,68 @@ runtime_record_contract:
           $ref: "#/$defs/rfc3339_utc_second"
         completed_at:
           $ref: "#/$defs/rfc3339_utc_second"
+        workflow_run:
+          type: object
+          additionalProperties: false
+          required:
+            - id
+            - name
+            - event
+            - path
+            - workflow_id
+            - check_suite_id
+            - head_branch
+            - head_sha
+            - status
+            - conclusion
+            - run_attempt
+            - created_at
+            - run_started_at
+            - updated_at
+            - url
+            - html_url
+          properties:
+            id:
+              type: string
+              pattern: "^[1-9][0-9]{0,15}$"
+            name:
+              enum: [CI, Security, Governance]
+            event:
+              const: push
+            path:
+              enum:
+                - .github/workflows/ci.yml
+                - .github/workflows/security.yml
+                - .github/workflows/governance.yml
+            workflow_id:
+              enum: [321329558, 337617927, 337617928]
+            check_suite_id:
+              type: string
+              pattern: "^[1-9][0-9]{0,15}$"
+            head_branch:
+              const: develop
+            head_sha:
+              $ref: "#/$defs/git_sha"
+            status:
+              const: completed
+            conclusion:
+              const: success
+            run_attempt:
+              const: 1
+            created_at:
+              $ref: "#/$defs/rfc3339_utc_second"
+            run_started_at:
+              $ref: "#/$defs/rfc3339_utc_second"
+            updated_at:
+              $ref: "#/$defs/rfc3339_utc_second"
+            url:
+              type: string
+              pattern: "^https://api\\.github\\.com/repos/KARSIFT/vocanova-platform/actions/runs/[1-9][0-9]{0,15}$"
+              maxLength: 180
+            html_url:
+              type: string
+              pattern: "^https://github\\.com/KARSIFT/vocanova-platform/actions/runs/[1-9][0-9]{0,15}$"
+              maxLength: 160
     compilation_rule: >-
       For each body validator, construct one in-memory JSON Schema root with $schema
       equal to https://json-schema.org/draft/2020-12/schema, $defs equal to this mapping
@@ -1326,9 +1409,9 @@ runtime_record_contract:
       authorize ACT03 or PR2.
     - >-
       Authority API created_at is the sole issuance time. The authority body contains
-      no issued_at. Require authority.created_at < authority.body.expires_at <=
-      authority.created_at + 30 minutes and authority.body.expires_at <= effective
-      ACT03.phase4_token.expires_at. Require both live-check server Date values and
+      no issued_at. Exhaustively require authority.created_at < actual
+      authority.body.expires_at <= min(authority.created_at + 30 minutes, effective
+      ACT03.phase4_token.expires_at). Require both live-check server Date values and
       their captured local completion instants strictly before the earlier deadline.
     - >-
       Treat effective ACT03.phase4_token.expires_at as a second independent hard
@@ -1368,6 +1451,20 @@ runtime_record_contract:
       PR2-merge-to-review-envelope cutoff window. Any
       missing, duplicate, extra-body, pending, stale, greatest-time-tied, or paginated
       required evidence fails. Unrelated endpoint names are ignored as specified below.
+      Parse the workflow run ID from each selected check details_url and require a
+      unique deep-equal workflow_run projection from the event-filtered push-run
+      response. Require exact check-name -> workflow-name/path/ID mapping:
+      `ci required` -> `CI` / `.github/workflows/ci.yml` / `321329558`;
+      `security required` -> `Security` / `.github/workflows/security.yml` /
+      `337617927`; and `structure` -> `Governance` /
+      `.github/workflows/governance.yml` / `337617928`. Require event push, head branch develop,
+      exact PR2 merge head SHA, completed/success, run_attempt 1, safe run ID,
+      canonical API/HTML URLs, and exact workflow/check-run check_suite_id equality.
+      Require
+      PR2.merged_at <= workflow.created_at <= workflow.run_started_at <=
+      check.started_at <= check.completed_at <= workflow.updated_at <
+      PR2-review.created_at. Any selected or body-recorded workflow_dispatch or
+      other-event run fails; unrelated non-push candidates cannot satisfy selection.
     - >-
       All four dispatch URL/digest inputs must equal their fetched envelopes. The
       nonce input must equal authority.body.nonce. No API envelope metadata or digest
@@ -1381,14 +1478,15 @@ runtime_record_contract:
     per_page: 100
     run_scan_maximum_pages_per_check: 10
     checks_per_dispatch: 2
-    maximum_requests_per_check: 20
-    maximum_requests_per_dispatch: 40
+    maximum_requests_per_check: 21
+    maximum_requests_per_dispatch: 42
     request_allocation_per_check:
       rate_limit_preflight: 1
       five_comment_gets: 5
       pr_metadata_get: 1
       pr_files_get_pages: 1
       pr2_merge_check_runs_get_pages: 1
+      pr2_merge_push_workflow_runs_get_pages: 1
       current_run_get: 1
       prior_run_scan_pages: 10
     comment_endpoint: >-
@@ -1426,12 +1524,15 @@ runtime_record_contract:
         check_runs array length and at most 100, no Link header with rel="next", and no
         second page. `filter=all` is explicit. Ignore unrelated names. For each of the
         three committed required names and only GitHub Actions app ID 15368/slug
-        github-actions, form the closed review window PR2.merged_at <= started_at <=
-        completed_at < PR2-review envelope.created_at. Ignore a candidate whose
+        github-actions, first require details-url run ID and check_suite_id membership
+        in the validated exact push-workflow-run response; nonmember checks, including
+        workflow_dispatch, are ineligible and ignored. Then form the closed review
+        window PR2.merged_at <= started_at <= completed_at < PR2-review
+        envelope.created_at. Ignore a candidate whose
         non-null started_at is at or after the cutoff and exclude any candidate whose
         canonical details URL names the already fetched current workflow run ID.
-        Reject a queued/in_progress candidate that cannot be proven post-cutoff, and
-        reject any run that starts before but completes at/after the cutoff. Among
+        Reject an eligible push queued/in_progress candidate that cannot be proven
+        post-cutoff, and reject any run that starts before but completes at/after the cutoff. Among
         eligible completed candidates, select the unique candidate with greatest
         non-null completed_at; an absent candidate or greatest-time tie fails. Reject
         a selected non-matching head_sha, unsafe/malformed run or suite ID,
@@ -1440,20 +1541,76 @@ runtime_record_contract:
         Phase-4 token expiry. Sort the three selected projections and require deep
         exact equality with the PR2-review body. Unrelated check names are not hosted
         evidence and neither authorize nor block this committed required projection.
+        A review-body check naming an ignored/non-push run is an extra/mismatch and
+        fails exact equality.
       committed_source: >-
         The names are derived from the job `name` fields and push-to-develop triggers
         committed in PR1's exact `.github/workflows/ci.yml`, `governance.yml`, and
         `security.yml`. Governance `changed-path risk` and `merge eligibility` and all
         Quality jobs are pull_request-only and therefore cannot exist on PR2 merge
         SHA; PR2 must have passed its separate pre-merge checks before merge.
+    push_workflow_runs_endpoint: >-
+      GET https://api.github.com/repos/KARSIFT/vocanova-platform/actions/runs?branch=develop&event=push&head_sha={exact-40-hex-PR2-merge-SHA}&per_page=100&page=1
+    push_workflow_runs_headers:
+      Accept: application/vnd.github+json
+      X-GitHub-Api-Version: 2022-11-28
+    push_workflow_runs_response_projection:
+      upstream_required_members: [total_count, workflow_runs]
+      exact_total_count: 3
+      exact_array_length: 3
+      exact_workflows:
+        - name: CI
+          path: .github/workflows/ci.yml
+          workflow_id: 321329558
+          required_check_name: ci required
+        - name: Security
+          path: .github/workflows/security.yml
+          workflow_id: 337617927
+          required_check_name: security required
+        - name: Governance
+          path: .github/workflows/governance.yml
+          workflow_id: 337617928
+          required_check_name: structure
+      selected_fields:
+        - id-as-decimal-string
+        - name
+        - path
+        - workflow_id
+        - check_suite_id-as-decimal-string
+        - event
+        - head_branch
+        - head_sha
+        - status
+        - conclusion
+        - run_attempt
+        - created_at
+        - run_started_at
+        - updated_at
+        - url
+        - html_url
+      exactness: >-
+        Require status 200, JSON content type, no redirect, total_count equal to array
+        length and exactly 3, no Link header with rel="next", and no second page. The
+        three workflow run IDs, check-suite IDs, workflow IDs, names, paths, API URLs,
+        and HTML URLs must be unique, canonical, and safe. Require the three exact
+        committed workflow tuples above, event push, head_branch develop, exact PR2
+        merge head_sha, completed/success, run_attempt 1, and non-null ordered
+        timestamps wholly inside the PR2-merge-to-review cutoff. Parse the run ID from
+        each selected check-run details_url and require a unique matching workflow run
+        with equal check_suite_id and exact name/path/ID mapping. Any missing,
+        duplicate, extra, paginated, stale, non-push, wrong-attempt, or mismatched run
+        blocks before secrets.
+      official_reference: >-
+        https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-repository
     remaining_budget_rule: >-
       The `/rate_limit` preflight is one HTTP request but consumes zero core requests.
-      Before the first pass, its `resources.core.remaining` must be at least 38;
-      immediately before the second pass, it must be at least 19. Each pass has at most
-      20 HTTP requests and at most 19 core requests because prior-run scanning stops
+      Before the first pass, its `resources.core.remaining` must be at least 40;
+      immediately before the second pass, it must be at least 20. Each pass has at most
+      21 HTTP requests and at most 20 core requests because prior-run scanning stops
       when its bounded cutoff is proven. Every response's GitHub Date and
       rate-limit headers must parse consistently. A missing header, lower remaining
-      value, 403/429, fifth-comment mismatch, check-runs extra page or count mismatch,
+      value, 403/429, fifth-comment mismatch, check-runs or push-runs extra page/count
+      mismatch,
       1,000-result boundary, or any request beyond the allocation blocks before
       secrets. No retry occurs inside either pass.
   authority_construction_rule:
@@ -1468,9 +1625,9 @@ runtime_record_contract:
       authority body. Set body expires_at to that response's server Date plus exactly
       25 minutes and start the one create-comment request within the same bounded
       script. After creation, fetch the comment and require preflight Date <= API
-      created_at <= preflight Date + 60 seconds and created_at < expires_at <=
-      created_at + 30 minutes and expires_at <= effective
-      ACT03.phase4_token.expires_at. Any failure consumes no dispatch authority; do not edit
+      created_at <= preflight Date + 60 seconds and created_at < actual expires_at <=
+      min(created_at + 30 minutes, effective ACT03.phase4_token.expires_at). Any
+      failure consumes no dispatch authority; do not edit
       the comment. An ACT-04-only expiry may be reissued by the unchanged ACT-04 actor
       only after current drift checks. Effective Phase-4 token expiry is different:
       while PR2 is open, stop and obtain a new exact VOC-085 settings-authority record

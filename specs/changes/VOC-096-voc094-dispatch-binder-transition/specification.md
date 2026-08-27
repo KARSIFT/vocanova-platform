@@ -90,10 +90,12 @@ the only dispatch revision. Those conditions have no fixed point.
   nonce, `maximum_dispatches: 1`, and `expires_at`, but contains no `issued_at`, own
   URL/digest, or API metadata. After creation, the immutable fetched API `created_at`
   is the sole issuance time and must satisfy
-  `created_at < expires_at <= created_at + 30 minutes` without an edit. The prepared
+  `created_at < actual expires_at <= min(created_at + 30 minutes, effective token
+  expiry)` without an edit. The prepared
   publisher script sets `expires_at` to a fresh unauthenticated GitHub API `Date` plus
   exactly 25 minutes, posts once, and requires comment `created_at` within 60 seconds
   after that preflight Date. It never predicts or copies `created_at` into the body.
+  No stronger unused-window token buffer is required.
 - `VOC-096-D06` — A different non-author binder reviewer, with no authorship of the
   reviewed exact revision or authority record, re-fetches PR2 and ACT-03/ACT-04
   evidence and posts a second dedicated strict JSON comment on #158. It binds `PASS`,
@@ -121,11 +123,12 @@ the only dispatch revision. Those conditions have no fixed point.
   timestamps settings authority < ACT-03 < PR2 merge < exact-PR2 review < authority < binder review <
   current-run creation. It fails closed on redirect, timeout, rate limit, pagination gap,
   malformed response, edit, deletion, minimization, actor/role collision, or mismatch.
-  Each of the two checks has at most 20 HTTP requests/at most 19 core requests and uses
+  Each of the two checks has at most 21 HTTP requests/at most 20 core requests and uses
   `per_page=100`: one zero-core `/rate_limit` preflight, five comment GETs, one PR GET,
-  one PR-files page, one exact PR2-merge check-runs page, one current-run GET, and at
-  most ten prior-run pages. Require core remaining at least 38 before the first pass
-  and 19 before the second; never retry a request inside a pass. The check-runs GET is
+  one PR-files page, one exact PR2-merge check-runs page, one exact event-filtered push
+  workflow-runs page, one current-run GET, and at most ten prior-run pages. Require core
+  remaining at least 40 before the first pass and 20 before the second; never retry a
+  request inside a pass. The check-runs GET is
   exactly `/repos/KARSIFT/vocanova-platform/commits/{PR2-merge-SHA}/check-runs?filter=all&per_page=100&page=1`.
   Require `total_count == check_runs.length <= 100` and no next page. Ignore unrelated
   names; for exact required names `ci required`, `security required`, and `structure`
@@ -137,6 +140,13 @@ the only dispatch revision. Those conditions have no fixed point.
   binds safe normalized run/suite IDs, merge head SHA, completed/success status,
   canonical details URL, and ordered started/completed times. Missing, extra body,
   stale, greatest-time-tied, or next-page results block.
+  The separately bounded
+  `/actions/runs?branch=develop&event=push&head_sha={PR2-merge-SHA}&per_page=100&page=1`
+  response must contain exactly the three committed CI/Security/Governance workflow
+  name/path/ID tuples. Each selected details-URL run ID/check-suite ID maps uniquely to
+  the matching completed/success first-attempt push run on `develop` and the exact merge
+  SHA. Missing, duplicate, extra, stale, paginated, wrong-event/path/ID, or spoofed
+  workflow-dispatch evidence blocks.
 - `VOC-096-D09` — The gate independently fetches PR2 metadata and every changed-file
   page. It requires merged state, `merge_commit_sha == event.sha == reviewed_sha`, base
   `develop`, required ref `refs/heads/develop`, the authority's exact PR2 number/head,
@@ -159,8 +169,9 @@ the only dispatch revision. Those conditions have no fixed point.
 - `VOC-096-D11` — Re-run the same live binder verification as the final credential-free
   step immediately before the first secret-bearing migration step. Both the current
   run's GitHub server `created_at` and the actual time of each live check must be
-  strictly before both authority body `expires_at` and effective
-  ACT03.phase4_token.expires_at`; ACT-04 expiry must not exceed token expiry. The
+  strictly before actual authority body `expires_at`, where `authority.created_at <
+  actual expires_at <= min(authority.created_at + 30 minutes, effective
+  ACT03.phase4_token.expires_at)`. The
   first secret-bearing step records its start before reading a secret and also occurs
   before the earlier deadline. The authority envelope `created_at` is
   the sole issue time and body-selected issuance is forbidden. Credential

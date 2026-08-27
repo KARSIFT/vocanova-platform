@@ -38,7 +38,9 @@ separate fetched GitHub API-envelope projection. Comment IDs/URLs, server timest
 publisher metadata, and raw-body SHA-256 are envelope facts computed only after fetch;
 no body contains its own URL/hash or predicts a server field. The ACT-04 envelope's
 immutable `created_at` is the sole issuance time, and its body contains only the later
-`expires_at` bound. Comment IDs are restricted to the RFC-8785/ECMAScript safe-integer
+`expires_at` bound. Exhaustively, `created_at < actual expires_at <= min(created_at +
+30 minutes, effective token expiry)`; no unused 30-minute token buffer is required.
+Comment IDs are restricted to the RFC-8785/ECMAScript safe-integer
 range and all seven mappings are recomputed by independent ECMAScript and Python JCS
 implementations.
 
@@ -47,7 +49,11 @@ It ignores unrelated names, deterministically selects the unique latest complete
 GitHub-Actions candidate for each of the three committed required aggregate records
 (`ci required`, `security required`, and `structure`), and equality-binds them to the
 review body. Selection is confined to the immutable PR2-merge-to-review-envelope
-window, so later checks created by the dispatch itself cannot replace reviewed proof.
+window. A second bounded public workflow-runs read maps each selected details URL to
+the exact successful first-attempt `push` workflow name/path/ID/head/branch/check suite,
+so an earlier manual dispatch cannot replace reviewed proof.
+The added read makes each pass at most 21 HTTP/20 core requests and both passes at most
+42/40, with remaining-core thresholds 40 then 20.
 The effective Phase-4 token expiry independently bounds PR2 merge,
 all subsequent records, both live checks, the run, and the first secret-bearing step;
 expiry while PR2 is open requires fresh exact VOC-085 authority and a replacement

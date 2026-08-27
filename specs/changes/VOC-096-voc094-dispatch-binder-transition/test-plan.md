@@ -24,7 +24,8 @@ readback binder conflation, pre-migration zero-table state, or a probe used as b
 
 ## VOC-096-TEST-02 — Exact PR2 sequencing and file boundary
 
-Mock the public PR/comments/files/check-runs endpoints and clock. Accept only a strict
+Mock the public PR/comments/files/check-runs/push-workflow-runs endpoints and clock.
+Accept only a strict
 VOC-085 settings authority before matching ACT-03 and then before a
 merged five-file PR2, a separately fetched strict merged-SHA review, later authority,
 later binder review, and later dispatch. Require the PR2-review URL/digest/schema/API
@@ -44,7 +45,8 @@ API `issue_url`, distinct governance actor IDs/exact nested provenance, nonce, a
 five body schemas. Require settings authority < ACT-03 < PR2 merge < PR2 review <
 authority < binder review < current-run creation; authority API `created_at` is the
 sole issuance time, the body contains no `issued_at`, and
-`created_at < expires_at <= created_at + 30 minutes <= token expiry`; settings-authority
+`created_at < actual expires_at <= min(created_at + 30 minutes, effective token
+expiry)`; settings-authority
 expiry is after PR2 merge and no later than token expiry. Both live checks and the
 first secret-bearing step occur before the earlier ACT-04/token deadline. Verify the
 settings authority's actor, authorized ACT-03 operator equality, PR1/environment/exact
@@ -66,7 +68,9 @@ Constructibility fixtures use a fetched server `Date`, set body `expires_at` to
 exactly 25 minutes later, post once within 60 seconds, and bind the returned envelope.
 Reject a second post, any edit, copied/predicted `created_at`, a preflight/comment gap
 over 60 seconds, and both exact expiry boundaries (`expires_at <= created_at` or
-`expires_at > created_at + 30 minutes`).
+actual `expires_at > created_at + 30 minutes`). Independently reject actual
+`expires_at > effective token expiry`; do not require the token to survive the unused
+remainder of the maximum 30-minute window.
 
 Use the actual ten-digit URL
 `https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5437982455`
@@ -90,12 +94,13 @@ nonce absent from exact run name; current-run GET mismatch/absence; a filtered r
 set at/over 1,000; and concurrent duplicate. Prove `cancel-in-progress: false` and
 environment-scoped concurrency remain. Evidence: `VOC-096-EV-04`.
 
-Verify the exact two-pass unauthenticated budget: at most 20 HTTP/19 core requests per
-pass, 40 HTTP/38 core total, `per_page=100`, no in-pass retry, zero-core `/rate_limit`
-preflight, core remaining at least 38 before pass one and 19 before pass two. The
-allocation is five comment GETs, PR, one PR-files page, one check-runs page, current
-run, and up to ten prior-run pages. Reject missing/inconsistent Date or rate-limit
-headers, absent/failing fifth authority fetch, a second PR-files/check-runs page, an
+Verify the exact two-pass unauthenticated budget: at most 21 HTTP/20 core requests per
+pass, 42 HTTP/40 core total, `per_page=100`, no in-pass retry, zero-core `/rate_limit`
+preflight, core remaining at least 40 before pass one and 20 before pass two. The
+allocation is five comment GETs, PR, one PR-files page, one check-runs page, one
+event-filtered push-workflow-runs page, current run, and up to ten prior-run pages.
+Reject missing/inconsistent Date or rate-limit headers, absent/failing fifth authority
+fetch, a second PR-files/check-runs/push-runs page, an
 eleventh run page, or any budget underflow before secrets.
 
 Check-runs positive fixtures use
@@ -110,6 +115,16 @@ candidates, stale head, wrong app, non-success, null/inverted timestamps, greate
 ties, unsafe IDs, total-count mismatch, length 101, and `Link: rel="next"`. Also reject
 a pre-review pending candidate and a run crossing the cutoff; ignore a candidate that
 starts after review and the exact current dispatch run even while it is queued.
+
+Push-workflow-run positive fixtures use the exact public repository endpoint filtered
+by `branch=develop`, `event=push`, and PR2 merge `head_sha`; require total/length 3, no
+next page, and exact first-attempt CI/Security/Governance name/path/workflow-ID tuples.
+Parse each selected check details URL and deep-bind its run ID and check-suite ID to the
+matching completed/success push run, exact merge SHA/branch, ordered timestamps, and
+canonical API/HTML URLs. Negatives cover a later successful pre-review
+`workflow_dispatch` check with the same name/app/head, missing/duplicate/extra runs,
+pagination, stale head/branch, wrong event/path/workflow ID/check suite, run_attempt 2,
+non-success, and timestamp drift.
 
 ## VOC-096-TEST-05 — Live/offline isolation and hostile input
 
@@ -152,4 +167,6 @@ Evidence: `VOC-096-EV-07`.
 
 Preserve all earlier exact FAILs, including the three `f73e7cb...` URLs
 `5439392123`, `5439400690`, and `5439446542`, and verify no PASS or authority transfers
-from any failed candidate to the corrected SHA.
+from any failed candidate to the corrected SHA. Preserve the `4b6eabd...` R4 FAIL
+`5439930725`, superseded exact-SHA-only security PASS `5439937068`, and Cloudflare FAIL
+`5439974737`; none transfers to the next candidate.

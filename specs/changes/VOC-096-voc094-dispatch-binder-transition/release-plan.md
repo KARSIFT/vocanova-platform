@@ -40,12 +40,15 @@ governance actors remain separately attributable through the exact nested proven
 shape and independent review. The merged-PR2 review is created after merge; authority
 follows it. Each URL, digest, timestamp, and publisher is a fetched envelope fact, not
 a same-body self-reference. The authority body has no `issued_at`; immutable API
-`created_at` is the sole issuance time and must precede body `expires_at` by no more
-than 30 minutes. Binder review follows, and current-run creation plus both live checks
-and the first secret-bearing step remain strictly before the earlier ACT-04/effective
-Phase-4-token expiry. PR2 merge is also before settings-authority and token expiry.
+`created_at` is the sole issuance time, and exhaustively `created_at < actual expires_at
+<= min(created_at + 30 minutes, effective token expiry)` with no unused maximum-window
+buffer. Binder review follows, and current-run creation plus both live checks and the
+first secret-bearing step remain strictly before the earlier ACT-04/effective Phase-4
+token expiry. PR2 merge is also before settings-authority and token expiry.
 Required hosted checks are selected only from the PR2-merge-to-review-envelope window;
-current-dispatch checks on that same SHA cannot replace the reviewed projection.
+current-dispatch checks on that same SHA cannot replace the reviewed projection. Each
+selection must additionally map to its exact first-attempt successful `push` workflow
+run/name/path/ID/head/branch/check suite; a same-name workflow dispatch is invalid.
 
 ## Rollback
 

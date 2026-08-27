@@ -57,15 +57,19 @@ projection reject unknown/duplicate fields and forbid a record's own URL, digest
 server timestamp inside its body. It distinguishes publisher authentication from the
 exact nested actor-provenance records. The authority envelope's immutable API
 `created_at` is the sole issuance time; the body has no `issued_at`, and requires
-`created_at < expires_at <= created_at + 30 minutes`. ACT-04 expiry must also be no
-later than effective ACT-03 token expiry. PR2 merge, every later
+`created_at < actual expires_at <= min(created_at + 30 minutes, effective ACT-03 token
+expiry)`. No unused maximum-window token buffer is imposed. PR2 merge, every later
 record/run, both live server Dates/completions, and the first secret-bearing step all
 precede token expiry; both live checks and that step precede the earlier deadline.
 The API envelope includes exact issue URL and safe-integer comment ID, and a real
 79-character ten-digit comment URL validates. The one-page `filter=all` check-runs
 projection deterministically selects exactly the three committed required names only
 inside the PR2-merge-to-review-envelope cutoff; later/current-dispatch checks cannot
-replace the recorded projection.
+replace the recorded projection. Each selected check must map uniquely to its exact
+successful first-attempt `push` workflow run/name/path/ID/head/branch/check suite;
+same-name workflow-dispatch evidence fails.
+The two live passes are bounded at 21 HTTP/20 core each (42/40 total), with zero-core
+preflight thresholds 40 then 20 and no retry.
 If the token expires while PR2 is open, only fresh VOC-085 authority plus replacement
 ACT-03 before merge can replace the API-token secret; after merge, the transition is
 stale and needs a newly governed correction. Silent reissue fails. The binder has never been dispatched.
