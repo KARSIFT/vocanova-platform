@@ -1,5 +1,15 @@
 # VOC-096 — Repair the VOC-094 dispatch-binder transition
 
+## VOC-097 operative validator closure
+
+Adopted VOC-097 preserves this package's immutable candidates, reviews, adoption,
+Phase-1/2 evidence, and action holds while correcting the implementation inventory.
+PR1 now has an exact 29-path core: the former 27 paths plus only the VOC-080
+final-evidence policy and its paired test. This PR also reconciles all nine VOC-096
+package surfaces, for 38 authorized paths total. Legacy held remains valid; prepared
+staging is accepted only through the complete VOC-096 delivery validator. Production
+stays held, prepared grants no standing authority, and ACT-03/04/05 remain separate.
+
 Status: adopted in bookkeeping. Exact candidate
 `dfe8f3d54829737a619a9ff37bd3222ac0e6b728` received security/settings,
 Cloudflare/Wrangler, and independent R4 PASS reviews plus accountable decision
@@ -26,7 +36,8 @@ shape:
    immutable adoption/review history while replacing the contradictory operative
    Phase-3/4 clauses. The same PR commits real staging resources and baselines plus a
    **prepared**, never standing-authorized, runtime-binder contract. Both Wrangler
-   generated type files are regenerated and checked in the exact 27-file PR1 scope.
+   generated type files are regenerated and checked in the exact 29-path PR1 core;
+   the nine VOC-096 reconciliation paths make 38 authorized paths total.
 2. ACT-03 occurs only after PR1. PR2 changes exactly the five declared settings
    documents and remains incapable of changing delivery eligibility.
 3. After PR2 merges, a different-actor exact reviewer publishes a strict, fetchable

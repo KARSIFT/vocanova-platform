@@ -235,14 +235,18 @@ executable workflow after VOC-078-T01. The required post-promotion history
 synchronization is likewise a separately reviewed repository-only pull request; it is
 part of branch finalization, not a second release or deployment.
 
-There is no active repository deployment, server-health polling, or scheduled
-Sentry-to-GitHub monitoring. VOC-080-T10 adds a held manual Cloudflare delivery state
-machine inside `ci.yml`; its committed manifest deliberately fails before environment
-jobs or secrets, while PRs run credential-free dry runs only. Merging a branch still
-changes repository history only. `VOC-080-HOLD-00` gates staging resources/secrets,
-`HOLD-01` gates production traffic and D1 migrations, and `HOLD-02` gates production
-learner data. See `docs/operations/cloudflare-delivery.md`. The repository makes no
-claim that Cloudflare or an already-running server was inspected, changed, or stopped.
+There is no automatic repository deployment, server-health polling, or scheduled
+Sentry-to-GitHub monitoring. VOC-094 Phase 1 provisioned and rollback-proved only the
+reviewed synthetic staging Workers, D1, and Custom Domains outside repository
+automation; Phase 2 separately verified external Ruflo. VOC-096 now permits the T10
+manual state machine to commit that exact staging tuple in `prepared` state while
+remaining ineligible until five strict post-PR1/PR2 runtime records, exact public
+GitHub readbacks, and one-use authority pass twice without credentials. Merging a
+branch still changes repository history only. `cloudflare-staging` and its two secret
+names remain absent/held/planned until separately authorized ACT-03 and its immediate
+documentation-only PR2. `VOC-080-HOLD-01` still gates all production traffic and D1
+migrations, and `HOLD-02` still gates production learner data. See
+`docs/operations/cloudflare-delivery.md`.
 
 ChatGPT may receive read-only access to KARSIFT/vocanova-platform for
 repository-grounded product analysis, architecture analysis, specification

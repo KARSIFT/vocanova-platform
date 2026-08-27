@@ -1,11 +1,29 @@
 # VOC-094 — Impact Analysis
 
+## VOC-096 operative transition
+
+### VOC-097 validator closure
+
+Adopted VOC-097 corrects only the repository validator/scope gap: PR1 has a 29-path
+core plus nine VOC-096 reconciliation paths, 38 authorized paths total. The legacy
+held snapshot remains valid; prepared staging passes only through the complete
+VOC-096 delivery validator. Production, HOLD-01/HOLD-02, ACT-03/04/05, and every
+external-action boundary remain unchanged.
+
+The Phase-1 Cloudflare effect described below is now completed and independently
+closed; Phase 2 is also closed. VOC-096 changes only the future repository/settings
+transition: PR1 records the exact staging tuple and a prepared/ineligible runtime
+binder, ACT-03 creates only the held environment/two secrets, exact five-file PR2
+records truth, and ACT-04 relies on five closed live records, raw-body digests,
+live PR/check proof, one-use nonce, 30-minute maximum validity, and two credential-free
+evaluations. It introduces no new external authority or production effect.
+
 ## Impact summary
 
 | Area                    | Effect and boundary                                                                                                                                                                                         |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Public staging          | Creates two Worker Custom Domains and exposes synthetic staging health/web behavior.                                                                                                                        |
-| Cloudflare account      | ACT-01 created only the empty VocaNova staging D1; fresh ACT-02 may create/update only two VocaNova Workers and use that D1. Account-wide write scope requires exact protection of three unrelated Workers. |
+| Public staging          | Phase 1 created two Worker Custom Domains and exposes only synthetic staging health/web behavior.                                                                                                           |
+| Cloudflare account      | ACT-02 created/verified only the two staging Workers and used the existing staging D1; three unrelated Workers and production remained unchanged.                                                           |
 | GitHub settings/secrets | After PR1, ACT-03 creates only `cloudflare-staging`; immediate PR2 records sanitized settings truth and two secret names without values.                                                                    |
 | CI/CD                   | Changes the held staging manifest/policy/workflow to a time-bounded authorized staging path; production remains fail closed.                                                                                |
 | Data/privacy            | Remote D1 has synthetic/non-personal data only; no production import or learner content logging.                                                                                                            |

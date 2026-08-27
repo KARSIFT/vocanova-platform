@@ -31,6 +31,8 @@ related_decisions:
   - ADR-0004
   - ADR-0005
 revision_note: >
+  VOC-096 records the bounded VOC-094 Phase-3/4 transition: exact 27-file PR1,
+  separately held ACT-03, exact five-file PR2, and a five-record live dispatch binder.
   VOC-090 clarifies coherent-outcome delivery. One approved package, one
   implementation pull request, and one minimum-sufficient task are the default safe
   unit for one outcome; future P3/AI six-step work remains ordered components rather
@@ -68,6 +70,15 @@ contract, evidence handoff, memory limits, and synthetic rehearsal live in the
 [Ruflo operator runbook](ruflo-external-orchestration.md). Ruflo's generated strict
 permissions are advisory and cannot substitute for repository guards, credential
 absence, exact-revision review, action authority, or OS-level isolation.
+
+**VOC-096 amendment (2026-08-27):** VOC-094 Phase 1 and Phase 2 are complete. PR1
+binds the reviewed real staging tuple in a `prepared` but dispatch-ineligible state;
+the GitHub staging environment remains absent/held/planned until ACT-03. Exact
+five-file PR2 must then record settings truth. ACT-04 requires five closed canonical
+records, exact raw-body digests, live PR/push/check proof, one-use nonce, maximum
+30-minute authority/token validity, and two credential-free evaluations. Ruflo has no
+credential, settings, dispatch, review, approval, or merge authority. Production and
+learner-data holds remain unchanged.
 
 **VOC-082 amendment (2026-08-23):** For current authority, a role is a responsibility
 and an actor is an attributable human or separately instantiated AI participant. A

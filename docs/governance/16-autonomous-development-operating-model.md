@@ -252,9 +252,13 @@ supporting provenance only, and the historical authority in the amendment record
 cannot activate absent machinery.
 
 `develop` is the integrated repository state. Merging to it does not deploy or poll
-any environment. T10's manual state machine is present but fail-closed in repository
-state; live staging remains held until `VOC-080-HOLD-00` is completed by a separate
-reviewed activation. See [repository-settings.md](repository-settings.md) and the
+any environment. VOC-094 Phase 1 separately created and rollback-proved the bounded
+synthetic staging resources. VOC-096 records their exact tuple in a `prepared`,
+dispatch-ineligible manifest and replaces unknowable future committed values with a
+strict post-PR2 runtime binder. `cloudflare-staging` remains absent/held/planned until
+ACT-03 and immediate documentation-only PR2; no merge creates it or dispatches.
+Production and learner-data holds remain unchanged. See
+[repository-settings.md](repository-settings.md) and the
 [Cloudflare delivery runbook](../operations/cloudflare-delivery.md).
 
 ## Release classes and production release authority
@@ -395,7 +399,7 @@ authority.
 | Preview status                                                                                  | Not built - per-PR Cloudflare previews remain genuinely unbuilt                                                                                                                                                                                                                                          |
 | Independent exact-revision verification                                                         | Live as a repository requirement; performed outside Actions and attached to the PR                                                                                                                                                                                                                       |
 | External Ruflo coordination                                                                     | Exact `3.38.16` operator-side installation and synthetic rehearsal recorded by VOC-080-T02; frozen patched graph, zero high/critical audit, advisory-permission limitation, and deny boundary are in the [runbook](../operations/ruflo-external-orchestration.md); never repository/production authority |
-| Staging deployment, health checks                                                               | Held T10 state machine and mocked smoke exist; no environment/resource/secret is configured and VOC-080-HOLD-00 blocks activation                                                                                                                                                                        |
+| Staging deployment, health checks                                                               | Exact Phase-1 Workers/D1/domains and rollback/public-smoke evidence exist; T10 is `prepared` but fails closed without strict post-PR2 runtime records. The GitHub environment/secrets and ordinary dispatch remain held and absent pending ACT-03/PR2/ACT-04.                                            |
 | Production deployment, health checks                                                            | Held T10 state machine and mocked smoke/rollback exist; no environment/resource/secret is configured and VOC-080-HOLD-01 blocks activation                                                                                                                                                               |
 | Production data migration                                                                       | Unavailable and prohibited without VOC-080-HOLD-02                                                                                                                                                                                                                                                       |
 | Rollback                                                                                        | Held exact prior-version rollback and forward-corrective D1 contract are installed and mocked; no live rehearsal or authority is claimed                                                                                                                                                                 |

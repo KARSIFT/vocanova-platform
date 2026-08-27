@@ -1,5 +1,25 @@
 # VOC-094 — Implementation Plan
 
+## VOC-096 operative transition
+
+### VOC-097 validator closure
+
+Adopted VOC-097 corrects only the repository validator/scope gap: PR1 has a 29-path
+core plus nine VOC-096 reconciliation paths, 38 authorized paths total. The legacy
+held snapshot remains valid; prepared staging passes only through the complete
+VOC-096 delivery validator. Production, HOLD-01/HOLD-02, ACT-03/04/05, and every
+external-action boundary remain unchanged.
+
+Steps 2–4 below are preserved execution history, but Phase 1 is now complete at exact
+activation revision `0d5ccc1231edb0e652d5c883cb214b85bcc9635e` and Phase 2 is
+independently closed. The operative remaining sequence is exact 27-file PR1 with the
+reviewed tuple and `prepared`/dispatch-ineligible runtime binder; independent exact-SHA
+reviews and non-author merge; ACT-03; exact five-file documentation-only PR2 and its
+independent merged-SHA verification; then ACT-04 using five closed canonical records,
+four supplied raw-body digests plus the ACT-03-bound settings record, live PR/push/check
+evidence, a one-use nonce, maximum 30-minute validity, and two credential-free live
+evaluations. Static equality to future timestamps or a future PR2 SHA is retired.
+
 ## Preconditions and delivery shape
 
 The package is adopted and AM-01 reviewed bookkeeping now records both

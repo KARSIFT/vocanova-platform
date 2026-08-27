@@ -1,5 +1,23 @@
 # VOC-094 — Tasks
 
+## VOC-096 operative transition
+
+### VOC-097 validator closure
+
+Adopted VOC-097 corrects only the repository validator/scope gap: PR1 has a 29-path
+core plus nine VOC-096 reconciliation paths, 38 authorized paths total. The legacy
+held snapshot remains valid; prepared staging passes only through the complete
+VOC-096 delivery validator. Production, HOLD-01/HOLD-02, ACT-03/04/05, and every
+external-action boundary remain unchanged.
+
+Phase 1 and Phase 2 are complete. Under adopted VOC-096, the remaining single-task
+mapping is exact 27-file PR1 (prepared/ineligible binder), ACT-03, exact five-file PR2,
+and ACT-04/05. ACT-04 uses five closed canonical records, exact raw-body digests, live
+PR2/push/check proof, a one-use nonce, maximum 30-minute validity, and two
+credential-free evaluations. This bounded amendment replaces the stale ACT-02-held
+and static future-value clauses below without changing immutable completed history or
+production holds.
+
 ## VOC-094-T00 — Activate and verify the bounded synthetic F3 staging outcome
 
 - Requirements: `VOC-094-D00` through `VOC-094-D16` (as amended by `VOC-094-AM-01`)
@@ -24,12 +42,10 @@ ACT-01 then created only D1 `vocanova-staging` UUID
 `22ae386f-e3f5-4d98-a3ad-18b39d3b8556`, with zero tables, no user data or migrations,
 and zero incremental cost. The sequencing incident is recorded in issue #161.
 
-ACT-02 remains held. Before any further Cloudflare command, re-review the corrected
-merged SHA, exact resource manifest and overlays, current Workers Free/D1 Free and USD
-0 incremental evidence, and obtain a fresh time-bounded action record. Only then may
-the reviewed route-free API-first/web-second baseline, route-bearing domain triggers,
-version UUID readbacks, rollback rehearsal, evidence capture, and token/overlay cleanup proceed.
-Then execute Phase 2 external sanitized Ruflo verification/coordination.
+ACT-02 completed its reviewed route-free API-first/web-second baseline,
+route-bearing domain triggers, version UUID readbacks, rollback rehearsal, evidence
+capture, token closure, and overlay cleanup. Phase 2 then completed pinned external
+Ruflo verification/sanitized coordination and independent closure.
 
 Only in Phase 3 does a different builder use isolated main PR1 to bind the real IDs/
 routes/baseline into the staging manifest, Wrangler configuration, delivery workflow/

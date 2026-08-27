@@ -1,5 +1,25 @@
 # VOC-094 — Acceptance Criteria
 
+## VOC-096 operative transition
+
+### VOC-097 validator closure
+
+Adopted VOC-097 corrects only the repository validator/scope gap: PR1 has a 29-path
+core plus nine VOC-096 reconciliation paths, 38 authorized paths total. The legacy
+held snapshot remains valid; prepared staging passes only through the complete
+VOC-096 delivery validator. Production, HOLD-01/HOLD-02, ACT-03/04/05, and every
+external-action boundary remain unchanged.
+
+Phase 1 and Phase 2 are complete canonical evidence, not pending acceptance work.
+Phase 1 binds activation revision `0d5ccc1231edb0e652d5c883cb214b85bcc9635e`,
+seven schema-only migrations, zero application rows, 100% traffic on API/web rollback
+baselines, 0% on all three probes, active staging Custom Domains, Free Workers/D1, and
+exactly $0 incremental cost. VOC-096 makes the remaining acceptance path: exact
+27-file PR1 with a prepared/ineligible runtime binder; ACT-03; exact five-file PR2;
+then a five-record, digest-bound, one-use, maximum-30-minute ACT-04 binder evaluated
+twice without credentials. These corrections supersede contradictory pending/static
+future-value clauses below; historical adoption and action evidence remain preserved.
+
 AM-01 repository bookkeeping is complete and effective: exact final revision
 `aad884a6d53c5e0f13b94f8042774b14a07015af`, independent/specialist PASS evidence,
 Governance `eligible: true` with `reasons: []`, normal PR #160 merge
@@ -13,7 +33,7 @@ not for AM-01 adoption. External actions remain independently held.
 - Task: `VOC-094-T00`
 - Tests: `VOC-094-TEST-00`, `TEST-06`
 - Evidence: `VOC-094-EV-00`, `EV-06`
-- Result: pending
+- Result: Phase-1 portion complete; Phase-3/4 evidence pending
 
 One adopted package, one task, and two implementation PRs show exact-SHA builder,
 specialist, independent-reviewer, merge-actor, and action-operator separation with no
@@ -28,14 +48,14 @@ worktree/recovery ref remains preserved and no manual branch/worktree deletion o
 - Task: `VOC-094-T00`
 - Tests: `VOC-094-TEST-01`
 - Evidence: `VOC-094-EV-01`
-- Result: pending
+- Result: complete — canonical Phase-1 closure on issue #158
 
 Readback binds account `0a9eda28b96d77c24dcde74f3e074d47`, Active Free Website zone
 `vocanova.site` (`63286d93b5f32925ac7366b4e97908be`), its three existing Workers, and
 the inventory-time absence of D1/Workers Custom Domain/Workers route/selected DNS
 record/staging collision. ACT-01 subsequently created only D1 `vocanova-staging` UUID
-`22ae386f-e3f5-4d98-a3ad-18b39d3b8556`; it remains empty, unmigrated, and unusable
-until a fresh corrected-SHA ACT-02 record passes. The
+`22ae386f-e3f5-4d98-a3ad-18b39d3b8556`; ACT-02 subsequently applied seven reviewed
+schema-only migrations while preserving zero application rows. The
 unrelated existing USD 5/month Basic Load Balancing subscription is preserved unchanged
 and excluded from VocaNova attribution. Workers Free and D1 Free with USD 0 incremental
 VocaNova staging cost are verified; any paid Workers/D1 feature, add-on, upgrade,
@@ -58,7 +78,7 @@ environment or secret exists yet because of this package.
 - Task: `VOC-094-T00`
 - Tests: `VOC-094-TEST-02`
 - Evidence: `VOC-094-EV-02`
-- Result: pending
+- Result: complete — canonical Phase-1 closure on issue #158
 
 Cloudflare readbacks prove only the two named staging Workers, `vocanova-staging` with
 a real UUID, requested `eeur` location hint, no jurisdiction, and recorded actual
@@ -75,7 +95,7 @@ and `HOLD-02` remain unchanged.
 - Task: `VOC-094-T00`
 - Tests: `VOC-094-TEST-03`
 - Evidence: `VOC-094-EV-03`
-- Result: pending
+- Result: complete — canonical Phase-1 closure on issue #158
 
 Separate Phase 1 action evidence binds a clean exact reviewed repository SHA and the
 hash of a sanitized untracked disposable external Wrangler overlay containing only

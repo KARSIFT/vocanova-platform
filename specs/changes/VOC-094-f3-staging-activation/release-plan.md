@@ -1,5 +1,24 @@
 # VOC-094 — Release and Rollback Plan
 
+## VOC-096 operative transition
+
+### VOC-097 validator closure
+
+Adopted VOC-097 corrects only the repository validator/scope gap: PR1 has a 29-path
+core plus nine VOC-096 reconciliation paths, 38 authorized paths total. The legacy
+held snapshot remains valid; prepared staging passes only through the complete
+VOC-096 delivery validator. Production, HOLD-01/HOLD-02, ACT-03/04/05, and every
+external-action boundary remain unchanged.
+
+Phase 1 and its token/overlay closure are complete; Phase 2 is independently closed.
+The remaining release path is exact 27-file PR1 in `prepared`/dispatch-ineligible
+state, ACT-03, exact five-file PR2, and only then ACT-04. The dispatch binder fetches
+five closed canonical records and live PR/push/check evidence, binds supplied raw-body
+digests and a one-use nonce, expires within 30 minutes with its token, and is evaluated
+twice without credentials. This replaces stale ACT-02-held and predicted future-value
+language while preserving all historical evidence. Production remains prohibited by
+`VOC-080-HOLD-01` and production data by `VOC-080-HOLD-02`.
+
 ## Repository merge and external action authority
 
 Plan adoption authorizes no implementation or external action by itself. Main PR1 and
@@ -12,8 +31,9 @@ AM-01 repository bookkeeping is complete: final revision
 eligibility, PR #160 merged normally as
 `75e5c9909fe105a9af3e6e8a3600fec27fcbd593`, and applicable post-merge checks passed.
 This makes repository implementation authority effective but grants no external action.
-Issue #161 preserves the pre-correction ACT-01 creation of only empty D1
-`vocanova-staging` UUID `22ae386f-e3f5-4d98-a3ad-18b39d3b8556`; ACT-02 remains held.
+Issue #161 preserves the pre-correction ACT-01 creation of D1 `vocanova-staging` UUID
+`22ae386f-e3f5-4d98-a3ad-18b39d3b8556`; ACT-02 subsequently completed and is closed
+by the canonical issue #158 evidence.
 
 Separate attributable `VOC-094-ACT-00` through `ACT-05` records govern account/token
 selection/inventory, Cloudflare resources, external baseline/rollback evidence,

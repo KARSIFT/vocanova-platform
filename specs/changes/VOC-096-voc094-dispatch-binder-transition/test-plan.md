@@ -1,9 +1,19 @@
 # VOC-096 — Test Plan
 
+## VOC-097 operative validator closure
+
+Verify the exact 29-path core and nine VOC-096 reconciliation paths (38 authorized
+paths total), then run the legacy final-evidence suite against both held/held and the
+exact fully validated prepared/prepared repository. Reject mismatched/authorized/
+active states, missing binder, tuple/schema/digest/resource/cost drift, generic URLs,
+self-asserted envelope facts, production/sentinel/hold weakening, and premature
+dispatch eligibility. A byte-identical generated type is recorded as checked and is
+not fabricated as a diff.
+
 ## VOC-096-TEST-00 — Package, PR, file, action, and role shape
 
 Validate one nine-file plan PR, one task, exactly two implementation PRs, PR1's exact
-27 files including all nine VOC-094 package surfaces and both generated Worker type
+29 core paths including all nine VOC-094 package surfaces and both generated Worker type
 files, PR2's exact five documentation files, zero new external actions, the three
 unchanged VOC-094 actions, explicit `automatic_merge_allowed: true`, and separate
 builder/reviewer/merge/action actors. Evidence: `VOC-096-EV-00`.

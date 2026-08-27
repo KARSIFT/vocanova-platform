@@ -243,7 +243,7 @@ delivery_shape:
       - release-plan.md
   implementation_pull_requests:
     count: 2
-    pr1_file_count: 27
+    pr1_file_count: 29
     pr1_files:
       - AGENTS.md
       - .github/README.md
@@ -255,6 +255,8 @@ delivery_shape:
       - infrastructure/cloudflare/delivery-manifest.json
       - scripts/foundation/cloudflare-delivery-policy.mjs
       - scripts/foundation/cloudflare-delivery-policy.test.mjs
+      - scripts/foundation/voc080-final-evidence-policy.mjs
+      - scripts/foundation/voc080-final-evidence-policy.test.mjs
       - docs/governance/16-autonomous-development-operating-model.md
       - docs/governance/repository-settings.md
       - docs/governance/repository-settings-current.yaml
@@ -279,6 +281,18 @@ delivery_shape:
       - docs/governance/repository-settings-current.yaml
       - docs/operations/11-devops-and-ci-cd.md
       - docs/operations/cloudflare-delivery.md
+    voc097_reconciliation_file_count: 9
+    voc097_reconciliation_files:
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/README.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/change.yaml
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/specification.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/acceptance-criteria.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/impact-analysis.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/implementation-plan.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/tasks.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/test-plan.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/release-plan.md
+    total_authorized_path_count: 38
   remaining_external_actions:
     new_actions_authorized_by_VOC_096: 0
     inherited_VOC_094_actions: 3
@@ -1029,7 +1043,12 @@ runtime_record_contract:
           type: object
           additionalProperties: false
           required:
-            [plan_sha256, owner_actor_id, rehearsed, settings_truth_followup_required]
+            [
+              plan_sha256,
+              owner_actor_id,
+              rehearsed,
+              settings_truth_followup_required,
+            ]
           properties:
             plan_sha256:
               $ref: "#/$defs/sha256"
@@ -1737,6 +1756,8 @@ affected_areas:
   - infrastructure/cloudflare/delivery-manifest.json
   - scripts/foundation/cloudflare-delivery-policy.mjs
   - scripts/foundation/cloudflare-delivery-policy.test.mjs
+  - scripts/foundation/voc080-final-evidence-policy.mjs
+  - scripts/foundation/voc080-final-evidence-policy.test.mjs
   - docs/governance/16-autonomous-development-operating-model.md
   - docs/governance/repository-settings.md
   - docs/governance/repository-settings-current.yaml

@@ -115,10 +115,15 @@ PostgreSQL-to-D1 conversion and exact reconciliation. T10 keeps the four-file
 invariant and adds the held delivery state machine only to `ci.yml`: PR/push jobs
 dry-run local/staging/production configurations without credentials; a manual event
 must pass all CI plus the exact-SHA/action-hold gate before either named environment
-can read its own Cloudflare token. The committed manifest is held, uses non-resource
-D1 sentinels and `.invalid` routes, and therefore blocks every live environment job.
-No GitHub environment, secret, Cloudflare resource, migration, route, or deployment
-was created by T10. See the
+can read its own Cloudflare token. T10 originally committed only non-resource
+sentinels. VOC-094 Phase 1 later created and rollback-proved the exact synthetic
+staging Workers, seven-migration D1, and two Custom Domains without using this
+workflow. VOC-096 binds those reviewed values in `prepared` state. Staging still
+blocks before secrets unless a credential-free live evaluator validates five strict
+canonical issue records, exact PR2 merge/files/push checks, one-use nonce, Free/$0
+state, baselines, expiry, and replay twice. `cloudflare-staging` and both secret names
+remain absent/held/planned until ACT-03 and immediate PR2; production retains all
+sentinels and holds. See the
 [delivery runbook](../docs/operations/cloudflare-delivery.md).
 
 T11 removes the active Go/PostgreSQL runtime, Dockerfiles, Compose/Nginx/host assets,

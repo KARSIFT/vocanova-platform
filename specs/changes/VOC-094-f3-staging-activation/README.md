@@ -1,5 +1,35 @@
 # VOC-094 — F3 staging activation
 
+## VOC-096 operative transition (2026-08-27)
+
+### VOC-097 validator closure
+
+Adopted VOC-097 corrects only the repository validator/scope gap: PR1 has a 29-path
+core plus nine VOC-096 reconciliation paths, 38 authorized paths total. The legacy
+held snapshot remains valid; prepared staging passes only through the complete
+VOC-096 delivery validator. Production, HOLD-01/HOLD-02, ACT-03/04/05, and every
+external-action boundary remain unchanged.
+
+Adopted VOC-096 is the bounded correction for the still-future Phase 3/4 dispatch
+binder. It does not rewrite VOC-094 adoption, AM-01, ACT-00/01, the ACT-02 execution,
+or their review evidence. Phase 1 is complete at activation revision
+`0d5ccc1231edb0e652d5c883cb214b85bcc9635e`: the two staging Workers, D1, and Custom
+Domains exist; seven schema-only migrations and zero application rows are confirmed;
+both rollback baselines receive 100% traffic and all three probes receive 0%; Workers
+and D1 remain Free with exactly $0 incremental VocaNova cost. Canonical closure is
+[recorded on issue #158](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438014817).
+Phase 2 pinned external Ruflo verification and sanitized coordination are also
+[closed independently](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438136312).
+
+PR1 now binds that exact tuple and commits a `prepared`, dispatch-ineligible runtime
+binder. ACT-03 still follows the independently reviewed/non-author merged PR1. PR2
+still changes exactly the five living-document surfaces, but its exact merge SHA and
+hosted push evidence are fetched live rather than predicted in PR1. ACT-04 requires
+five closed canonical records, their raw-body digests, one-use nonce, maximum
+30-minute authority/token lifetime, and two credential-free live evaluations. The
+GitHub environment is still absent/held/planned until ACT-03; production and
+`VOC-080-HOLD-01`/`HOLD-02` remain unchanged.
+
 Status: adopted planning package with effective `VOC-094-AM-01` cost-gate amendment.
 The original candidate/adoption record remains preserved and effective after PR #159.
 AM-01 final bookkeeping revision
@@ -16,8 +46,8 @@ merge, or package field cannot authorize Cloudflare, DNS, deployment, settings,
 secrets, spending, production, or launch action. ACT-02 through ACT-05 remain
 separately held, and `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain unchanged.
 
-The proposed coherent outcome is one package, one minimum-sufficient task, and two
-future implementation pull requests into `develop`. It would activate only the named
+The coherent outcome is one package, one minimum-sufficient task, and two
+implementation pull requests into `develop`. Phase 1 activated only the named
 synthetic Cloudflare staging boundary:
 
 - web Custom Domain `stag.vocanova.site` on `vocanova-web-staging`;

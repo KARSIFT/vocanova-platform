@@ -1,5 +1,14 @@
 # VOC-096 — Implementation Plan
 
+## VOC-097 operative validator closure
+
+Resume the preserved worktree with a corrected exact 29-path core, adding only the
+VOC-080 final-evidence policy and paired test, and reconcile all nine VOC-096 package
+files for 38 authorized paths total. The compatibility rule accepts legacy held/held
+or fully validated prepared/prepared only. Prepared validation composes with the
+complete delivery repository validator; production and every external-action boundary
+remain held.
+
 ## Preconditions and exact shape
 
 The exact approved candidate has separate Cloudflare, security/settings, and
@@ -11,7 +20,8 @@ recovery ref. This repository implementation authority grants no ACT-03/04/05 or
 external action.
 
 Use one minimum-sufficient task and exactly two implementation PRs. PR1 is the
-27-file package-reconciliation/generated-type/executable/resource/living-doc unit.
+29-path core package-reconciliation/generated-type/executable/resource/living-doc
+unit, plus nine VOC-096 reconciliation paths for 38 authorized paths total.
 ACT-03 then creates or reconciles only the
 held staging environment and two secret names. PR2 is the five-file documentation-only
 settings reconciliation. No third executable PR is needed because the runtime binder
@@ -24,7 +34,7 @@ is created only after the exact PR2 merge SHA exists.
    current Cloudflare public readbacks. Stop on staging resource, baseline, cost, or
    production drift. Do not provision, redeploy, migrate, promote, or delete anything.
 2. A different builder creates isolated PR1 from current `origin/develop` and changes
-   exactly the 27 files declared in `change.yaml`. First reconcile all nine VOC-094
+   exactly the 29 core paths declared in `change.yaml`. First reconcile all nine VOC-094
    package surfaces: preserve adoption, amendment, review, approval, evidence, and
    completed Phase-1 history; label the VOC-096 amendment; and replace every
    contradictory still-unstarted Phase-3/4 static-binder/PR2 clause with the prepared
@@ -53,7 +63,7 @@ is created only after the exact PR2 merge SHA exists.
    `CONTRIBUTOR` association. A body never contains its own URL/digest/timestamps/
    publisher fields. Prove all sixteen binder results with independent ECMAScript and
    Python RFC-8785 implementations.
-4. Update all 27 declared package/living/executable/config/generated surfaces
+4. Update all 29 core and nine VOC-096 package-reconciliation surfaces
    consistently. PR1 must say
    the GitHub staging environment remains absent/held/planned through its merge and
    must not preclaim ACT-03 or ACT-04 post-state. Historical evidence within VOC-094
@@ -112,7 +122,7 @@ is created only after the exact PR2 merge SHA exists.
    `expires_at` to exactly 25 minutes later, and create the comment once within 60
    seconds. Immediately fetch the created comment; its immutable API `created_at` is the sole
    issuance time and must satisfy `created_at < actual expires_at <= min(created_at +
-   30 minutes, effective token expiry)` without an edit. A different non-author
+30 minutes, effective token expiry)` without an edit. A different non-author
    reviewer re-fetches settings authority, ACT-03, PR2 review, authority, PR/
    run metadata, and the exact tuple, then relays the strict binder-review record.
    Never put a token value in any record. GitHub publisher equality authenticates the

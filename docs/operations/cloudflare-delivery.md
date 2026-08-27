@@ -1,69 +1,97 @@
-# Held Cloudflare delivery and rollback
+# Prepared staging and held production Cloudflare delivery
 
-Status: active repository-only design for `VOC-080-T10`. Staging and production are
-both **held**. This revision creates no Cloudflare resource, GitHub environment,
-credential, route, deployment, remote migration, DNS record, or production-data
-access.
+Status: VOC-096 PR1 repository transition. Phase 1 created and independently verified
+only the exact synthetic staging resources below. This revision performs no live
+Cloudflare, GitHub settings, secret, dispatch, migration, promotion, rollback, DNS,
+production-data, or spending action. Staging ordinary delivery remains
+dispatch-ineligible until ACT-03, exact five-file PR2, and an unexpired runtime binder
+pass. Production remains held by `VOC-080-HOLD-01`; learner data remains held by
+`VOC-080-HOLD-02`.
 
 ## What exists now
 
-The repository still has exactly four workflow files. `ci.yml` now has three kinds
+The repository has exactly four workflow files. `ci.yml` now has three kinds
 of Cloudflare delivery behavior:
 
 1. Pull requests and protected-branch pushes run credential-free dry runs for the
    local, staging, and production configuration of both Workers. Every dry run uses
    `--experimental-provision=false` and `--experimental-auto-create=false`.
-2. A credential-free policy job validates the manifest, distinct environment names,
-   D1 bindings, service bindings, placeholder routes, migration ceiling, workflow
-   sequence, secret placement, non-cancellation rule, and active holds.
+2. A credential-free policy job validates the manifest, exact staging tuple and
+   schema digests, bindings/routes, migration ceiling, workflow sequence, secret
+   placement, non-cancellation rule, and production holds.
 3. A manual delivery event first runs the complete CI graph and then the
-   credential-free gate. The committed manifest is `held`, uses non-resource D1 IDs
-   and `.invalid` routes, and has no authority URLs, so the gate must fail before
-   either environment job can start or read a secret.
+   credential-free gate. Staging is `prepared`, but its runtime evidence is `null`
+   and the required live records do not exist yet, so PR1 remains dispatch-ineligible.
+   Production retains non-resource sentinels and fails before its environment job.
 
 The canonical machine-readable record is
-`infrastructure/cloudflare/delivery-manifest.json`. The `held-*` D1 identifiers and
-`.invalid` routes are deliberate non-resource sentinels. They are not Cloudflare IDs,
-DNS names, credentials, or deployable production configuration.
+`infrastructure/cloudflare/delivery-manifest.json`. Real values exist only under
+staging. Production's `held-*` identifiers and `.invalid` routes remain deliberate
+non-resource sentinels.
+
+The prepared tuple binds account `0a9eda28b96d77c24dcde74f3e074d47`, zone
+`63286d93b5f32925ac7366b4e97908be`, D1
+`22ae386f-e3f5-4d98-a3ad-18b39d3b8556`, API Worker
+`vocanova-api-staging` at `api-stag.vocanova.site`, and web Worker
+`vocanova-web-staging` at `stag.vocanova.site`. API baseline
+`ace13c0b-c148-4ef1-ad9a-fdfdb07f264f` and web baseline
+`5255e64d-872e-469f-90b6-bea49efd5e75` each receive 100% traffic. Probes
+`858009b5-0840-499d-92f4-e0a0483e0b33`,
+`0dc15f45-d178-480e-ba32-ca5279cc2c17`, and
+`7b694392-8f38-4329-bd2f-af982c3c6a56` receive 0%. Seven schema-only migrations,
+zero application rows, active Custom Domains, Free Workers/D1, and exactly $0
+incremental VocaNova cost are closed by
+[Phase-1 evidence](https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438014817).
 
 ## Environment isolation
 
-| Surface                       | Staging                  | Production                  |
-| ----------------------------- | ------------------------ | --------------------------- |
-| Action hold                   | `VOC-080-HOLD-00`        | `VOC-080-HOLD-01`           |
-| Required branch at activation | `develop`                | `main`                      |
-| GitHub environment name       | `cloudflare-staging`     | `cloudflare-production`     |
-| API Worker                    | `vocanova-api-staging`   | `vocanova-api-production`   |
-| Web Worker                    | `vocanova-web-staging`   | `vocanova-web-production`   |
-| D1 database                   | `vocanova-staging`       | `vocanova-production`       |
-| D1 ID in this held revision   | `held-staging-d1`        | `held-production-d1`        |
-| Route in this held revision   | `.invalid` staging names | `.invalid` production names |
-| GitHub/Worker secret scope    | staging only             | production only             |
+| Surface                       | Staging                                    | Production                |
+| ----------------------------- | ------------------------------------------ | ------------------------- |
+| State                         | `prepared`, dispatch-ineligible            | `held`                    |
+| Required branch at activation | `develop`                                  | `main`                    |
+| GitHub environment name       | `cloudflare-staging` (absent/held/planned) | `cloudflare-production`   |
+| API Worker                    | `vocanova-api-staging`                     | `vocanova-api-production` |
+| Web Worker                    | `vocanova-web-staging`                     | `vocanova-web-production` |
+| D1 database                   | `vocanova-staging`                         | `vocanova-production`     |
+| D1 ID                         | `22ae386f-e3f5-4d98-a3ad-18b39d3b8556`     | `held-production-d1`      |
+| Routes                        | exact active `stag` / `api-stag` hostnames | `.invalid` sentinels      |
+| GitHub/Worker secret scope    | staging only after held ACT-03             | production only; held     |
 
 The two environment jobs use the same _secret names_ because Wrangler recognizes
 them, but GitHub resolves their values from different named environments. Those jobs
 do not exist in pull-request execution, and credentials are attached only to the
 remote migration, version upload, exact promotion, and rollback steps—not checkout,
-dependency installation, build, gate, policy, or smoke steps. No environment or
-secret has been created by T10; activation must verify that the real settings match
-this contract.
+dependency installation, build, gate, policy, or smoke steps. No staging environment
+or secret is claimed by PR1. ACT-03 is the separately held
+settings action that must create/read back only that environment and its two names.
 
-## Fail-closed activation contract
+## Fail-closed staging runtime binder
 
-The current revision cannot activate. A future separately reviewed activation change
-must replace the sentinels, change the manifest/policy from `held` to an exact
-authorized state, and record all evidence required by the named hold. Merely adding a
-secret or manually running the workflow is insufficient.
+PR1 cannot dispatch staging. It commits the complete prepared tuple (digest
+`25ac2748678adb7d41c8a525bf05443154ba8ac1678ce6647a75e6ceeca45871`) and closed
+record/envelope schemas, but no runtime evidence. After PR1 merge, ACT-03 and exact
+five-file PR2 remain required. Merely adding a secret or manually running the workflow
+is insufficient.
 
-For either environment, the gate requires:
+For staging, the gate fetches five closed canonical issue-comment records: settings
+authority, ACT-03 result, exact merged-PR2 review, ACT-04 authority, and independent
+binder review. It validates raw-body digests, trusted publisher identity, closed JSON
+schemas and cross-record equality, exact five-file PR2 metadata, three successful
+event-filtered `push` workflow runs and GitHub-hosted checks, the current first-attempt
+dispatch revision/title, rate/request/page/size bounds, time bounds, and replay
+absence. The nonce/authority are one-use and validity is at most 1,800 seconds. The
+complete evaluator runs once in the gate and again immediately before the first
+secret-bearing staging step.
+
+Common gate requirements include:
 
 - `workflow_dispatch`, never a PR, push, issue, comment, Ruflo decision, or local
   agent command;
 - the dispatched ref required by that environment;
 - a 40-character `reviewed_sha` exactly equal to the workflow revision;
 - an exact `DEPLOY <environment> <sha>` acknowledgement;
-- matching action-authority, resource-manifest, and rollback-rehearsal evidence;
-- an unexpired authorization record;
+- matching runtime authority, resource tuple, and rollback evidence;
+- an unexpired five-record authorization chain;
 - real, distinct D1 IDs and non-placeholder HTTPS routes;
 - exact previous API and web version UUIDs for rollback; and
 - an integer release-cost estimate at or below the reviewed ceiling.

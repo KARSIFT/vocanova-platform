@@ -1,5 +1,13 @@
 # VOC-096 — Release and Rollback Plan
 
+## VOC-097 operative validator closure
+
+PR1's corrected repository inventory is 29 core paths plus nine VOC-096 package
+reconciliation paths, 38 authorized paths total. The compatibility change is
+repository-only: legacy held remains accepted, prepared requires complete delivery
+validation, production remains held, and neither merge nor prepared state grants
+ACT-03/04/05 or any external authority.
+
 ## Adoption and repository release
 
 Adoption bookkeeping binds exact approved candidate
@@ -14,7 +22,7 @@ action authority and leaves VOC-094-ACT-03/04/05 separately held.
 
 PR1's bounded amendment makes all nine VOC-094 package surfaces agree with the
 corrected transition while preserving immutable history; it is repository-ready but
-dispatch-ineligible. Its exact 27-file scope also regenerates both locked-Wrangler
+dispatch-ineligible. Its exact 29-path core also regenerates both locked-Wrangler
 type contracts and binds the complete prepared Cloudflare tuple. ACT-03 and PR2 retain
 VOC-094's truthful settings boundary. PR2
 is documentation-only and its merge SHA becomes the
