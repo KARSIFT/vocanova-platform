@@ -1,0 +1,433 @@
+schema_version: 1
+
+id: VOC-099
+slug: voc098-authority-closure
+title: Close recursive VOC-098 authority and complete PR 168
+type: repository-governance-delivery-policy-correction
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because implementation corrects canonical repository-authority bookkeeping and
+  retains changes to the first secret-bearing workflow boundary, public evidence
+  fetch timeouts, strict RFC-8785 validation, delivery-package scope enforcement,
+  prepared runtime binders, production holds, zero-cost controls, and exact-revision
+  review. It grants repository correction authority only.
+canonical_path: specs/changes/VOC-099-voc098-authority-closure
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/171
+related_activation_issue: https://github.com/KARSIFT/vocanova-platform/issues/158
+related_governance_bugs:
+  - https://github.com/KARSIFT/vocanova-platform/issues/164
+  - https://github.com/KARSIFT/vocanova-platform/issues/166
+  - https://github.com/KARSIFT/vocanova-platform/issues/169
+related_implementation_pr: https://github.com/KARSIFT/vocanova-platform/pull/168
+requirement_approval_status: pending-independent-plan-review-and-accountable-adoption
+base_branch: develop
+base_sha: 10e9acf540b9af5ed85cc59a0e053900aec3c359
+plan_branch: plan/voc-099-voc098-authority-closure
+target_branch: develop
+approved_candidate_sha: null
+approval_status: pending
+implementation_authorized: false
+implementation_authority_status: >-
+  prohibited-while-this-package-is-draft; before-plan-merge-bookkeeping-must-record-
+  exact-reviewed-candidate-status-adopted-and-implementation-authorized-true; once-
+  that-adopted-package-is-on-develop-its-declared-repository-only-authority-is-usable-
+  without-a-future-self-effectiveness-plan; all-external-actions-remain-held
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-resumes-the-single-preserved-PR-168
+automatic_merge_allowed: true
+production_impact: prohibited
+rollback_required: true
+
+objective: >-
+  Through the preserved PR 168, bind the completed PR 170 lifecycle into all nine
+  VOC-098 package surfaces, remove the invented recursive repository-authority fixed
+  point, expand the authorized union from 47 to 56 paths, and retain every VOC-098-
+  authorized reconciliation and remediation without weakening any delivery, secret,
+  cost, resource, production, review, or action-authority gate.
+
+completed_voc098_plan_lifecycle:
+  adoption_pull_request: 170
+  approved_plan_candidate_sha: 280183753e4a06c465caff0c4903438d2015418c
+  reviewed_bookkeeping_head: 6545cbb968a03a7630ccd63de3023c6e6da23ccd
+  bookkeeping_review:
+    status: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444345026
+  premerge_eligibility:
+    run: 33109750265
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33109750265
+    eligible: true
+    reasons: []
+  merge:
+    source_branch: plan/voc-098-voc097-factual-reconciliation
+    source_sha: 6545cbb968a03a7630ccd63de3023c6e6da23ccd
+    prior_target_sha: 45590a0673937f4a9464b57393e026871678b3d4
+    merge_sha: 10e9acf540b9af5ed85cc59a0e053900aec3c359
+    mode: normal-non-author-merge-commit
+    merged_at: 2026-08-27T19:45:17Z
+  postmerge:
+    ci:
+      run: 33109968598
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33109968598
+      result: success
+    security:
+      run: 33109968586
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33109968586
+      result: success
+    governance:
+      run: 33109968546
+      url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33109968546
+      result: success
+    delivery_effect: skipped-held-no-environment-or-production-job
+  lifecycle_readback: https://github.com/KARSIFT/vocanova-platform/pull/170#issuecomment-5444428909
+  authority_effect: repository-implementation-only-no-external-action-authority
+
+recursive_gate_correction:
+  governing_rule: >-
+    AGENTS.md requires adopted status and implementation.authorized true before plan
+    merge. It does not require a permanently false authority_effective field or a new
+    plan after every completed plan merge.
+  draft_state: >-
+    This candidate is not adopted and grants no implementation authority.
+  required_premerge_adoption_state:
+    status: adopted
+    implementation_authorized: true
+    implementation_authorized_nested: true
+    approved_candidate_sha: exact-reviewed-candidate-sha
+    review_and_adoption_evidence: required
+    task_status: adopted-repository-implementation-authorized
+  prohibited_adopted_state:
+    - authority_effective-false
+    - draft-or-pending-implementation-language
+    - future-self-referential-plan-or-postmerge-bookkeeping-dependency
+    - any-external-action-authority
+  operational_rule: >-
+    Once the truthfully adopted package is merged to develop, the existing builder may
+    rely on its declared repository-only PR-168 authority. Review, eligibility,
+    non-author merge, and postmerge checks remain required evidence and process.
+
+rejected_implementation_candidate:
+  pull_request: 168
+  base_sha: 45590a0673937f4a9464b57393e026871678b3d4
+  candidate_sha: cde0f665031a212b51a45af541a4ebaff23e8f7a
+  state: open-unmerged-rejected-no-post-review-edits-at-planning-intake
+  reviews:
+    security_settings:
+      verdict: fail-three-blockers
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/168#issuecomment-5443876203
+    cloudflare_wrangler:
+      verdict: fail-two-blockers
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/168#issuecomment-5443893558
+    independent_R4:
+      verdict: fail-five-blockers
+      evidence: https://github.com/KARSIFT/vocanova-platform/pull/168#issuecomment-5443923705
+  transfer_rule: >-
+    No PASS, review, approval, adoption, eligibility, implementation, merge, or
+    external-action authority transfers from this rejected SHA. Preserve all three
+    FAILs and require three fresh reviews on the corrected SHA.
+  retained_voc098_remediations:
+    - reconcile-all-nine-VOC097-lifecycle-and-effectiveness-surfaces
+    - atomic-first-secret-step-ACT04-and-token-deadline-enforcement
+    - actual-five-second-connect-and-fifteen-second-whole-response-timeout
+    - recursive-lone-surrogate-rejection-and-valid-pair-tests
+    - stale-VOC094-27-path-operative-text-and-test-false-positive-closure
+  newly_added_reconciliation:
+    - all-nine-VOC098-package-lifecycle-authority-and-task-surfaces
+
+plan_review_history: []
+
+approvals:
+  cloudflare_wrangler_plan_review:
+    status: pending
+    candidate_sha: null
+    evidence: null
+  security_settings_plan_review:
+    status: pending
+    candidate_sha: null
+    evidence: null
+  independent_R4_plan_review:
+    status: pending
+    candidate_sha: null
+    evidence: null
+  adoption_decision:
+    status: pending
+    decision_id: null
+    candidate_sha: null
+    evidence: null
+
+requirements:
+  - id: VOC-099-D00
+    statement: >-
+      Issue 171 and all prior evidence grant nothing. While draft, implementation is
+      prohibited. Before plan merge, exact review and adoption bookkeeping must record
+      status adopted and implementation.authorized true, followed by fresh bookkeeping
+      review, genuine eligibility, and normal non-author merge.
+  - id: VOC-099-D01
+    statement: >-
+      Do not encode another recursive gate. The adopted package omits
+      authority_effective false and any draft, future-plan, or self-bookkeeping
+      dependency. Once on develop its repository-only PR-168 authority is usable;
+      mandatory review, eligibility, merge, and postmerge evidence remain intact.
+  - id: VOC-099-D02
+    statement: >-
+      Reconcile all nine VOC-098 files with exact PR-170 bookkeeping head/review,
+      eligible true and empty reasons, merge SHA, successful CI/Security/Governance,
+      and lifecycle comment. Make repository authority and task status truthful while
+      preserving candidate/adoption history and every external hold.
+  - id: VOC-099-D03
+    statement: >-
+      Add only the nine VOC-098 package files to the prior 47-path union, producing 56
+      authorized paths and 55 expected actual diffs because the web generated type is
+      byte-identical. A 57th path, missing required path, or fabricated diff is drift.
+  - id: VOC-099-D04
+    statement: >-
+      Retain VOC-098 authority to reconcile all VOC-097 surfaces and implement atomic
+      secret-step expiry, distinct connect/whole-response deadlines, recursive lone-
+      surrogate rejection, and exact VOC-094/VOC-096 scope-text/test closure.
+  - id: VOC-099-D05
+    statement: >-
+      Preserve cde0f665 and comments 5443876203, 5443893558, and 5443923705 as
+      immutable FAIL evidence. Require fresh complete checks and all three reviews on
+      the new exact candidate; no evidence or authority transfers.
+  - id: VOC-099-D06
+    statement: >-
+      Preserve every prepared-binder, exact-SHA/ref/URL/ID/run/suite/job, replay,
+      budget, expiry, resource, baseline, schema, migration, smoke, Wrangler type,
+      Free-zero-cost, Basic-LB, secret, rollback, production-sentinel, and hold gate.
+  - id: VOC-099-D07
+    statement: >-
+      Run complete PR-168 validation, hosted checks, secret scans, production
+      comparisons, both generated type checks, and all four Wrangler dry runs on the
+      fresh corrected SHA.
+  - id: VOC-099-D08
+    statement: >-
+      Obtain fresh separate Cloudflare/Wrangler, security/settings, and independent R4
+      exact-SHA PASS reviews. A distinct non-author merges only after genuine
+      eligibility and records postmerge/source-head/ref evidence.
+  - id: VOC-099-D09
+    statement: >-
+      Resume the same PR-168 branch and /tmp/vocanova-voc094-pr1 worktree. Preserve
+      commits, dirty VOC-090, all worktrees, branches, recovery refs, and rejected-SHA
+      history without reset, discard, recreation, force-push, or deletion.
+  - id: VOC-099-D10
+    statement: >-
+      Authorize repository correction only. Settings, secrets, credentials,
+      Cloudflare, DNS, D1, dispatch, deployment, migration, traffic, spending,
+      production, data, launch, and main actions remain prohibited and held.
+
+owners:
+  decision: accountable-governance-decision-owner-after-independent-plan-review
+  package_preparation: separate-VOC-099-plan-author-actor
+  implementation: existing-different-PR-168-builder-after-adopted-plan-on-develop
+  cloudflare_specialist: different-non-author-exact-revision-actor
+  security_settings_specialist: different-non-author-exact-revision-actor
+  independent_verification: different-non-author-exact-revision-R4-reviewer
+  merge: separate-authorized-non-author-merge-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+delivery_shape:
+  plan_pull_request:
+    count: 1
+    file_count: 9
+    files:
+      - README.md
+      - change.yaml
+      - specification.md
+      - acceptance-criteria.md
+      - impact-analysis.md
+      - implementation-plan.md
+      - tasks.md
+      - test-plan.md
+      - release-plan.md
+  implementation_pull_requests:
+    count: 1
+    mapping: resume-existing-PR-168
+    branch: impl/voc-094-f3-staging-activation-pr1
+    worktree: /tmp/vocanova-voc094-pr1
+    prior_authorized_path_count: 47
+    added_VOC098_reconciliation_path_count: 9
+    corrected_authorized_path_count: 56
+    expected_actual_diff_count: 55
+    authorized_byte_identical_path: apps/web/worker-configuration.d.ts
+    authorized_paths:
+      - AGENTS.md
+      - .github/README.md
+      - .github/workflows/ci.yml
+      - apps/api-worker/wrangler.jsonc
+      - apps/api-worker/worker-configuration.d.ts
+      - apps/web/wrangler.jsonc
+      - apps/web/worker-configuration.d.ts
+      - infrastructure/cloudflare/delivery-manifest.json
+      - scripts/foundation/cloudflare-delivery-policy.mjs
+      - scripts/foundation/cloudflare-delivery-policy.test.mjs
+      - scripts/foundation/voc080-final-evidence-policy.mjs
+      - scripts/foundation/voc080-final-evidence-policy.test.mjs
+      - docs/governance/16-autonomous-development-operating-model.md
+      - docs/governance/repository-settings.md
+      - docs/governance/repository-settings-current.yaml
+      - docs/operations/11-devops-and-ci-cd.md
+      - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+      - docs/operations/cloudflare-delivery.md
+      - docs/operations/ruflo-external-orchestration.md
+      - docs/product/12-mvp-implementation-plan.md
+      - specs/changes/VOC-094-f3-staging-activation/README.md
+      - specs/changes/VOC-094-f3-staging-activation/change.yaml
+      - specs/changes/VOC-094-f3-staging-activation/specification.md
+      - specs/changes/VOC-094-f3-staging-activation/acceptance-criteria.md
+      - specs/changes/VOC-094-f3-staging-activation/impact-analysis.md
+      - specs/changes/VOC-094-f3-staging-activation/implementation-plan.md
+      - specs/changes/VOC-094-f3-staging-activation/tasks.md
+      - specs/changes/VOC-094-f3-staging-activation/test-plan.md
+      - specs/changes/VOC-094-f3-staging-activation/release-plan.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/README.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/change.yaml
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/specification.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/acceptance-criteria.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/impact-analysis.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/implementation-plan.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/tasks.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/test-plan.md
+      - specs/changes/VOC-096-voc094-dispatch-binder-transition/release-plan.md
+      - specs/changes/VOC-097-voc096-final-evidence-validator-closure/README.md
+      - specs/changes/VOC-097-voc096-final-evidence-validator-closure/change.yaml
+      - specs/changes/VOC-097-voc096-final-evidence-validator-closure/specification.md
+      - specs/changes/VOC-097-voc096-final-evidence-validator-closure/acceptance-criteria.md
+      - specs/changes/VOC-097-voc096-final-evidence-validator-closure/impact-analysis.md
+      - specs/changes/VOC-097-voc096-final-evidence-validator-closure/implementation-plan.md
+      - specs/changes/VOC-097-voc096-final-evidence-validator-closure/tasks.md
+      - specs/changes/VOC-097-voc096-final-evidence-validator-closure/test-plan.md
+      - specs/changes/VOC-097-voc096-final-evidence-validator-closure/release-plan.md
+      - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/README.md
+      - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/change.yaml
+      - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/specification.md
+      - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/acceptance-criteria.md
+      - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/impact-analysis.md
+      - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/implementation-plan.md
+      - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/tasks.md
+      - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/test-plan.md
+      - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation/release-plan.md
+    generated_type_rule: >-
+      Both generated type paths remain authorized and must be regenerated/checked with
+      locked Wrangler 4.125.0. The expected byte-identical web result is evidence and
+      must not be turned into a fabricated diff.
+
+protected_areas:
+  - canonical-adoption-and-implementation-authority
+  - cloudflare-delivery-authorization
+  - first-secret-bearing-expiry-boundary
+  - strict-public-evidence-fetch-and-RFC8785-validation
+  - exact-revision-independent-review
+  - github-environment-and-secret-boundary
+  - production-holds-and-sentinels
+  - incremental-zero-cost-gate
+  - dirty-worktree-and-recovery-references
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    status: pending-independent-exact-candidate-review-and-adoption
+    evidence: null
+  impact_assessment:
+    required: true
+    status: pending-independent-exact-candidate-review
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    status: pending-independent-exact-candidate-review
+    evidence: release-plan.md
+  deterministic_evidence:
+    required: true
+    status: pending-plan-candidate-local-and-hosted-checks
+    evidence: null
+  cloudflare_specialist_evidence:
+    required: true
+    status: pending-exact-candidate-review
+    scope: Workers-Wrangler-generated-types-resource-cost-production-and-retained-VOC098-gates
+    evidence: null
+  security_settings_specialist_evidence:
+    required: true
+    status: pending-exact-candidate-review
+    scope: non-recursive-authority-secret-boundary-settings-and-external-action-holds
+    evidence: null
+  independent_exact_revision_evidence:
+    required: true
+    status: pending-exact-candidate-review
+    evidence: null
+  action_authority:
+    required: false
+    status: no-external-action-authority-in-this-package
+    evidence: specification.md
+
+affected_areas:
+  - specs/changes/VOC-094-f3-staging-activation
+  - specs/changes/VOC-096-voc094-dispatch-binder-transition
+  - specs/changes/VOC-097-voc096-final-evidence-validator-closure
+  - specs/changes/VOC-098-voc097-effectiveness-pr168-remediation
+  - specs/changes/VOC-099-voc098-authority-closure
+  - .github/workflows/ci.yml
+  - scripts/foundation/cloudflare-delivery-policy.mjs
+  - scripts/foundation/cloudflare-delivery-policy.test.mjs
+  - scripts/foundation/voc080-final-evidence-policy.mjs
+  - scripts/foundation/voc080-final-evidence-policy.test.mjs
+
+implementation:
+  authorized: false
+  required: true
+  status: >-
+    prohibited-while-draft; before-plan-merge-this-must-be-replaced-by-a-truthful-
+    adopted-repository-implementation-authorized-status-with-no-future-self-
+    effectiveness-condition
+  target_branch: develop
+  pull_request_count: 1
+  pull_request: 168
+  task: VOC-099-T00
+  resume_worktree: /tmp/vocanova-voc094-pr1
+  resume_branch: impl/voc-094-f3-staging-activation-pr1
+
+release:
+  required: false
+  mode: repository-only-correction-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: issue-171-after-corrected-PR168-merge-and-postmerge-evidence
+
+external_effects:
+  cloudflare: prohibited
+  dns: prohibited
+  github_settings_and_secrets: prohibited
+  credentials: prohibited
+  workflow_dispatch: prohibited
+  deployment_and_traffic: prohibited
+  migrations_and_data: prohibited
+  spending_and_billing: prohibited
+  production_and_production_data: prohibited
+  public_launch: prohibited
+  main_promotion: prohibited
+  branch_worktree_or_recovery_ref_deletion: prohibited
+
+preserved_holds:
+  github_settings: VOC-085-HOLD-00
+  remaining_actions: [VOC-094-ACT-03, VOC-094-ACT-04, VOC-094-ACT-05]
+  production: VOC-080-HOLD-01
+  production_data: VOC-080-HOLD-02
+
+ehr: not-triggered
+repository_adoption_status: draft-not-adopted
+adoption_pr: null
+adoption_evidence: null
+blocking_reasons:
+  - exact-plan-cloudflare-security-settings-and-independent-R4-reviews-pending
+  - accountable-adoption-and-final-premerge-bookkeeping-pending
+  - preserved-PR168-remains-rejected-and-unmerged-until-fresh-corrected-SHA-reviews
+  - all-external-actions-remain-separately-held-and-are-not-authorized-by-VOC-099
