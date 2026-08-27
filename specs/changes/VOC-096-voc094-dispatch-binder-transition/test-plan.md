@@ -121,7 +121,11 @@ by `branch=develop`, `event=push`, and PR2 merge `head_sha`; require total/lengt
 next page, and exact first-attempt CI/Security/Governance name/path/workflow-ID tuples.
 Parse each selected check details URL and deep-bind its run ID and check-suite ID to the
 matching completed/success push run, exact merge SHA/branch, ordered timestamps, and
-canonical API/HTML URLs. Negatives cover a later successful pre-review
+canonical API/HTML URLs. Parse both workflow URL suffixes and the details run/job
+suffixes as safe canonical decimals; require all three run values to equal normalized
+`workflow_run.id`, job to equal `check_run_id`, and both suite IDs to match. Negatives
+cover individually canonical but mismatched API-run URL, HTML-run URL, details-run URL,
+details-job/check-run ID, and suite IDs, plus a later successful pre-review
 `workflow_dispatch` check with the same name/app/head, missing/duplicate/extra runs,
 pagination, stale head/branch, wrong event/path/workflow ID/check suite, run_attempt 2,
 non-success, and timestamp drift.
@@ -169,4 +173,6 @@ Preserve all earlier exact FAILs, including the three `f73e7cb...` URLs
 `5439392123`, `5439400690`, and `5439446542`, and verify no PASS or authority transfers
 from any failed candidate to the corrected SHA. Preserve the `4b6eabd...` R4 FAIL
 `5439930725`, superseded exact-SHA-only security PASS `5439937068`, and Cloudflare FAIL
-`5439974737`; none transfers to the next candidate.
+`5439974737`; none transfers to the next candidate. Preserve the `47545f3...`
+Cloudflare FAIL `5440287060`, security FAIL `5440329271`, and R4 FAIL `5440332195`;
+none transfers review, approval, adoption, implementation, or action authority.

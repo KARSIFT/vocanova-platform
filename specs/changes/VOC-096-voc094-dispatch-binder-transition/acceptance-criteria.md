@@ -67,7 +67,10 @@ projection deterministically selects exactly the three committed required names 
 inside the PR2-merge-to-review-envelope cutoff; later/current-dispatch checks cannot
 replace the recorded projection. Each selected check must map uniquely to its exact
 successful first-attempt `push` workflow run/name/path/ID/head/branch/check suite;
-same-name workflow-dispatch evidence fails.
+same-name workflow-dispatch evidence fails. Safe-decimal parsing requires both
+workflow-run URL suffixes and the details-URL run suffix to equal the normalized
+workflow-run ID, the details-URL job suffix to equal `check_run_id`, and the selected
+check/workflow suite IDs to be equal; canonical-but-mismatched values fail.
 The two live passes are bounded at 21 HTTP/20 core each (42/40 total), with zero-core
 preflight thresholds 40 then 20 and no retry.
 If the token expires while PR2 is open, only fresh VOC-085 authority plus replacement

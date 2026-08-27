@@ -33,16 +33,19 @@ shape:
    Missing, edited, stale, replayed, unreachable, or mismatched evidence blocks before
    an environment job or Cloudflare secret is reached.
 
-The package commits a versioned closed schema bundle for the four JSON bodies and a
+The package commits a versioned closed schema bundle for five JSON bodies and a
 separate fetched GitHub API-envelope projection. Comment IDs/URLs, server timestamps,
 publisher metadata, and raw-body SHA-256 are envelope facts computed only after fetch;
 no body contains its own URL/hash or predicts a server field. The ACT-04 envelope's
 immutable `created_at` is the sole issuance time, and its body contains only the later
 `expires_at` bound. Exhaustively, `created_at < actual expires_at <= min(created_at +
 30 minutes, effective token expiry)`; no unused 30-minute token buffer is required.
-Comment IDs are restricted to the RFC-8785/ECMAScript safe-integer
-range and all seven mappings are recomputed by independent ECMAScript and Python JCS
-implementations.
+Comment IDs are restricted to the RFC-8785/ECMAScript safe-integer range. The prepared
+tuple plus seven contract digests (shared definitions, envelope, and five bodies) make
+eight total binders; all eight mappings are recomputed by independent ECMAScript and
+Python JCS implementations. The URL/ID equality correction is an executable
+cross-field rule outside those mappings; fresh two-runtime recomputation proves all
+eight committed binder values remain unchanged.
 
 The exact PR2 merge-SHA check read is one bounded public `check-runs?filter=all` page.
 It ignores unrelated names, deterministically selects the unique latest completed
@@ -51,7 +54,10 @@ GitHub-Actions candidate for each of the three committed required aggregate reco
 review body. Selection is confined to the immutable PR2-merge-to-review-envelope
 window. A second bounded public workflow-runs read maps each selected details URL to
 the exact successful first-attempt `push` workflow name/path/ID/head/branch/check suite,
-so an earlier manual dispatch cannot replace reviewed proof.
+so an earlier manual dispatch cannot replace reviewed proof. Both workflow-run URL
+suffixes must equal the normalized run ID; the details-URL run suffix must equal that
+same ID, its job suffix must equal the selected check-run ID, and both suite IDs must
+be equal. Canonical but mismatched identifiers fail closed.
 The added read makes each pass at most 21 HTTP/20 core requests and both passes at most
 42/40, with remaining-core thresholds 40 then 20.
 The effective Phase-4 token expiry independently bounds PR2 merge,

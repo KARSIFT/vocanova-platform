@@ -61,6 +61,9 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
   A second bounded event-filtered workflow-runs page proves each selection is the exact
   first-attempt CI/Security/Governance `push` run on `develop`, not a same-name manual
   dispatch, and deep-binds run/check-suite IDs, workflow path/ID, SHA, and timestamps.
+  Safe-decimal parsing equality-binds both run-URL suffixes and the details-URL run
+  suffix to the normalized run ID, the job suffix to the check-run ID, and both suite
+  IDs; canonical but mismatched identifiers fail closed.
 - `VOC-096-R04`: PR2 documentation could become executable input. Mitigation: gate
   reads no documentation content; it only verifies PR2's exact file-set boundary and
   separately verifies ACT-03 evidence.
@@ -99,8 +102,9 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
   probe-as-baseline, wrong identifiers, stale config hashes, or pre-migration state.
 - `VOC-096-R13`: a permissive integer or URL constraint could make JCS/runtime results
   diverge. Mitigation: no contradictory URL length floor, exact API issue URL, numeric
-  URL suffix equality, inclusive safe-integer ceiling, a real ten-digit URL fixture,
-  and independent ECMAScript/Python recomputation of all eight binders.
+  comment suffix equality, inclusive safe-integer ceiling, a real ten-digit URL
+  fixture, exact run-ID equality across API/HTML/details URLs, exact job/check-run and
+  suite-ID equality, and independent ECMAScript/Python recomputation of all eight binders.
 - `VOC-096-R14`: token expiry could occur while PR2 is open or before the first
   secret-bearing step. Mitigation: settings authority, ACT-03, PR2, all later records,
   run/check timestamps and both live checks are deadline-bound; ACT-04 expiry is no
@@ -108,7 +112,8 @@ Phase-1 history and changes only the still-unstarted operative Phase-3/4 transit
 - `VOC-096-R15`: a same-name manual dispatch could impersonate the post-merge push
   check. Mitigation: one exact public `event=push` workflow-runs query per pass,
   exact-three closed workflow projection, unique run/details/check-suite mapping, and
-  spoofed workflow-dispatch/missing/duplicate/pagination/stale negatives. The total
+  spoofed workflow-dispatch/missing/duplicate/pagination/stale plus canonical-mismatch
+  URL/job/check-ID negatives. The total
   budget is at most 21 HTTP/20 core per pass and 42/40 for both passes, with 40 then 20
   remaining-core thresholds.
 

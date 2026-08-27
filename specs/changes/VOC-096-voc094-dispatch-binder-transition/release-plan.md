@@ -49,6 +49,9 @@ Required hosted checks are selected only from the PR2-merge-to-review-envelope w
 current-dispatch checks on that same SHA cannot replace the reviewed projection. Each
 selection must additionally map to its exact first-attempt successful `push` workflow
 run/name/path/ID/head/branch/check suite; a same-name workflow dispatch is invalid.
+Both workflow-run URL suffixes and the details-URL run suffix must parse as the same
+safe normalized run ID, while the details-URL job suffix equals `check_run_id` and the
+check/workflow suite IDs are equal. Canonical mismatches block before secrets.
 
 ## Rollback
 

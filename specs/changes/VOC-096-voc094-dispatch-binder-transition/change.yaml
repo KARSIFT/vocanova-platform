@@ -126,6 +126,29 @@ plan_review_history:
       Preserved as immutable FAIL history. The next candidate binds selected checks to
       exact push workflow runs and normalizes expiry to the actual authority expiry
       bounded independently by 30 minutes and token expiry. No verdict transfers.
+  - candidate_sha: 47545f393369f35675659f8f44b17984b7769925
+    verdict: fail-cloudflare-wrangler-one-blocker
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440287060
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate corrects the canonical
+      PR record so f73 security comment 5439400690 remains a three-blocker FAIL while
+      the actual 4b6 security PASS remains exact-SHA-only and superseded. No verdict
+      transfers.
+  - candidate_sha: 47545f393369f35675659f8f44b17984b7769925
+    verdict: fail-security-settings-two-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440329271
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate corrects the five-body/
+      eight-binder README count and requires exact cross-field equality among every
+      canonical workflow/check URL suffix and its normalized run/job/check ID. No
+      verdict transfers.
+  - candidate_sha: 47545f393369f35675659f8f44b17984b7769925
+    verdict: fail-independent-R4-two-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/165#issuecomment-5440332195
+    resolution: >-
+      Preserved as immutable FAIL history. The next candidate corrects the README
+      mapping counts and the canonical PR review-history classification. No verdict,
+      approval, adoption, implementation, or action authority transfers.
 
 owners:
   decision: accountable-governance-decision-owner-after-independent-plan-review
@@ -1451,15 +1474,21 @@ runtime_record_contract:
       PR2-merge-to-review-envelope cutoff window. Any
       missing, duplicate, extra-body, pending, stale, greatest-time-tied, or paginated
       required evidence fails. Unrelated endpoint names are ignored as specified below.
-      Parse the workflow run ID from each selected check details_url and require a
-      unique deep-equal workflow_run projection from the event-filtered push-run
-      response. Require exact check-name -> workflow-name/path/ID mapping:
+      Parse the workflow run and job suffixes from each selected check details_url and
+      parse the decimal suffixes from workflow_run.url and workflow_run.html_url.
+      Require all three run suffixes to be canonical safe decimals and exactly equal
+      normalized workflow_run.id; require the details job suffix to be a canonical
+      safe decimal exactly equal to check_run_id; and require check_run.check_suite_id
+      to exactly equal workflow_run.check_suite_id. Then require a unique deep-equal
+      workflow_run projection from the event-filtered push-run response. Require exact
+      check-name -> workflow-name/path/ID mapping:
       `ci required` -> `CI` / `.github/workflows/ci.yml` / `321329558`;
       `security required` -> `Security` / `.github/workflows/security.yml` /
       `337617927`; and `structure` -> `Governance` /
       `.github/workflows/governance.yml` / `337617928`. Require event push, head branch develop,
       exact PR2 merge head SHA, completed/success, run_attempt 1, safe run ID,
       canonical API/HTML URLs, and exact workflow/check-run check_suite_id equality.
+      A canonical URL whose run/job suffix differs from its projected ID fails closed.
       Require
       PR2.merged_at <= workflow.created_at <= workflow.run_started_at <=
       check.started_at <= check.completed_at <= workflow.updated_at <
@@ -1524,8 +1553,10 @@ runtime_record_contract:
         check_runs array length and at most 100, no Link header with rel="next", and no
         second page. `filter=all` is explicit. Ignore unrelated names. For each of the
         three committed required names and only GitHub Actions app ID 15368/slug
-        github-actions, first require details-url run ID and check_suite_id membership
-        in the validated exact push-workflow-run response; nonmember checks, including
+        github-actions, parse the details URL's run/job suffixes as canonical safe
+        decimals, require job suffix equality to check_run_id, and first require run
+        suffix and check_suite_id membership in the validated exact push-workflow-run
+        response; nonmember checks, including
         workflow_dispatch, are ineligible and ignored. Then form the closed review
         window PR2.merged_at <= started_at <= completed_at < PR2-review
         envelope.created_at. Ignore a candidate whose
@@ -1541,8 +1572,9 @@ runtime_record_contract:
         Phase-4 token expiry. Sort the three selected projections and require deep
         exact equality with the PR2-review body. Unrelated check names are not hosted
         evidence and neither authorize nor block this committed required projection.
-        A review-body check naming an ignored/non-push run is an extra/mismatch and
-        fails exact equality.
+        A review-body check naming an ignored/non-push run or carrying any canonical
+        but unequal details run/job/check ID is an extra/mismatch and fails exact
+        equality.
       committed_source: >-
         The names are derived from the job `name` fields and push-to-develop triggers
         committed in PR1's exact `.github/workflows/ci.yml`, `governance.yml`, and
@@ -1595,11 +1627,14 @@ runtime_record_contract:
         and HTML URLs must be unique, canonical, and safe. Require the three exact
         committed workflow tuples above, event push, head_branch develop, exact PR2
         merge head_sha, completed/success, run_attempt 1, and non-null ordered
-        timestamps wholly inside the PR2-merge-to-review cutoff. Parse the run ID from
-        each selected check-run details_url and require a unique matching workflow run
-        with equal check_suite_id and exact name/path/ID mapping. Any missing,
-        duplicate, extra, paginated, stale, non-push, wrong-attempt, or mismatched run
-        blocks before secrets.
+        timestamps wholly inside the PR2-merge-to-review cutoff. Parse each workflow
+        API/HTML URL suffix as a canonical safe decimal and require both to equal the
+        normalized workflow-run ID. Parse the run/job suffixes from each selected
+        check-run details_url and require run equality to that same workflow ID, job
+        equality to check_run_id, and exact check/workflow check_suite_id equality.
+        Then require a unique matching workflow run with exact name/path/ID mapping.
+        Any missing, duplicate, extra, paginated, stale, non-push, wrong-attempt, or
+        canonical-but-mismatched URL/run/job/check/suite ID blocks before secrets.
       official_reference: >-
         https://docs.github.com/en/rest/actions/workflow-runs#list-workflow-runs-for-a-repository
     remaining_budget_rule: >-

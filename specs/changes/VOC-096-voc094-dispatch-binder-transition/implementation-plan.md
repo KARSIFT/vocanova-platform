@@ -90,6 +90,10 @@ is created only after the exact PR2 merge SHA exists.
    required-name projection confined to PR2 merge through review-envelope creation,
    each selection's exact first-attempt push workflow name/path/ID/head/branch/check
    suite from the bounded workflow-runs page,
+   parse both workflow-run URL suffixes and the selected details-URL run/job suffixes
+   as safe canonical decimals, require the three run representations to equal the
+   normalized workflow-run ID, require the job suffix to equal `check_run_id`, and
+   require exact check/workflow suite-ID equality,
    settings-authority/ACT-03 truth, manifest/workflow/policy hashes, staging resources,
    baselines/probes, current smoke, zero application rows/seven sealed migrations, Free
    plans, exact incremental cost `0`, unchanged Basic Load Balancing, and production

@@ -37,7 +37,10 @@ secret-bearing step also precede the applicable token/settings deadline. The bou
 `filter=all` check-runs projection is cutoff at the review envelope so dispatch-created
 checks cannot replace recorded evidence. A second bounded push-workflow-runs projection
 proves exact event/name/path/ID/head/branch/check-suite provenance and rejects same-name
-manual dispatches. The exhaustive expiry rule is `created_at < actual expires_at <=
+manual dispatches. Safe-decimal equality binds both workflow URL suffixes and the
+details run suffix to the normalized run ID, the details job suffix to `check_run_id`,
+and both suite IDs; canonical mismatches fail. The exhaustive expiry rule is
+`created_at < actual expires_at <=
 min(created_at + 30 minutes, effective token expiry)`; all eight binders are deterministic.
 
 VOC-096 authorizes zero external actions. The three remaining actions are the existing

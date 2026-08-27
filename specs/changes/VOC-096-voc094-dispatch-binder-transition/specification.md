@@ -145,8 +145,12 @@ the only dispatch revision. Those conditions have no fixed point.
   response must contain exactly the three committed CI/Security/Governance workflow
   name/path/ID tuples. Each selected details-URL run ID/check-suite ID maps uniquely to
   the matching completed/success first-attempt push run on `develop` and the exact merge
-  SHA. Missing, duplicate, extra, stale, paginated, wrong-event/path/ID, or spoofed
-  workflow-dispatch evidence blocks.
+  SHA. Parse the workflow API-URL suffix, workflow HTML-URL suffix, and details-URL run
+  suffix as canonical safe decimals and require all three to equal normalized
+  `workflow_run.id`; parse the details-URL job suffix and require equality to
+  `check_run_id`; require exact check/workflow `check_suite_id` equality. Missing,
+  duplicate, extra, stale, paginated, canonical-but-mismatched URL/job/check IDs,
+  wrong-event/path/ID, or spoofed workflow-dispatch evidence blocks.
 - `VOC-096-D09` — The gate independently fetches PR2 metadata and every changed-file
   page. It requires merged state, `merge_commit_sha == event.sha == reviewed_sha`, base
   `develop`, required ref `refs/heads/develop`, the authority's exact PR2 number/head,
