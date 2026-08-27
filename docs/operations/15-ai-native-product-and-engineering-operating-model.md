@@ -31,8 +31,11 @@ related_decisions:
   - ADR-0004
   - ADR-0005
 revision_note: >
-  VOC-096 records the bounded VOC-094 Phase-3/4 transition: exact 27-file PR1,
-  separately held ACT-03, exact five-file PR2, and a five-record live dispatch binder.
+  VOC-100 prospectively replaces the VOC-096 custom binder with a standard protected
+  GitHub environment: manual SHA-bound dispatch, fresh non-author AI review receipt,
+  mechanical approval proxy, first-step approval-history validation, and independent
+  maximum-90-day token rotation. PR1 keeps staging environment/secrets absent and
+  fail-closed; separately authorized settings action and immediate PR2 remain required.
   VOC-090 clarifies coherent-outcome delivery. One approved package, one
   implementation pull request, and one minimum-sufficient task are the default safe
   unit for one outcome; future P3/AI six-step work remains ordered components rather
@@ -71,14 +74,16 @@ contract, evidence handoff, memory limits, and synthetic rehearsal live in the
 permissions are advisory and cannot substitute for repository guards, credential
 absence, exact-revision review, action authority, or OS-level isolation.
 
-**VOC-096 amendment (2026-08-27):** VOC-094 Phase 1 and Phase 2 are complete. PR1
-binds the reviewed real staging tuple in a `prepared` but dispatch-ineligible state;
-the GitHub staging environment remains absent/held/planned until ACT-03. Exact
-five-file PR2 must then record settings truth. ACT-04 requires five closed canonical
-records, exact raw-body digests, live PR/push/check proof, one-use nonce, maximum
-30-minute authority/token validity, and two credential-free evaluations. Ruflo has no
-credential, settings, dispatch, review, approval, or merge authority. Production and
-learner-data holds remain unchanged.
+**VOC-100 amendment (2026-08-28):** VOC-094 Phase 1 and Phase 2 evidence remains
+complete and the reviewed real staging tuple is retained. VOC-100 prospectively
+supersedes the custom binder: once separately authorized settings exist, only a
+manual SHA-bound `develop` dispatch with required checks, a fresh non-author AI review
+receipt, unchanged mechanical approval proxy, and first environment-step approval-
+history validation may proceed. The staging environment and secrets are absent in PR1,
+so staging fails closed; a settings action and immediate doc-only PR2 are required.
+The reusable least-privilege token rotates independently at most every 90 days. Ruflo
+has no credential, settings, dispatch, review, approval, or merge authority.
+Production and learner-data holds remain unchanged.
 
 **VOC-082 amendment (2026-08-23):** For current authority, a role is a responsibility
 and an actor is an attributable human or separately instantiated AI participant. A
@@ -1498,7 +1503,8 @@ Rules:
 - Protected.
 - No direct pushes.
 - Decision, implementation, maintenance, and governance pull requests normally target `develop`.
-- Approved merges deploy automatically to staging.
+- Historical/superseded: approved merges deployed automatically to staging. Current
+  staging is manual, SHA-bound, and fail-closed until VOC-100 settings action and PR2.
 - Founder approval is not required for merges into `develop`.
 
 ## 16.2 Working branches
@@ -2596,19 +2602,19 @@ Automation Level 1 — Assisted execution with Claude-approved develop merges
 
 This means:
 
-| Activity                 | Authority           |
-| ------------------------ | ------------------- |
-| Product decision         | Founder             |
-| Specification drafting   | ChatGPT-assisted    |
-| Repository updates       | Codex-assisted      |
-| Implementation           | Codex               |
-| Deterministic validation | GitHub Actions      |
-| Technical review         | Claude              |
-| Merge into `develop`     | CI + Claude         |
-| Staging deployment       | Automatic           |
-| Release PR               | Automation-assisted |
-| Merge into `main`        | Founder             |
-| Production publication   | Founder             |
+| Activity                 | Authority                                  |
+| ------------------------ | ------------------------------------------ |
+| Product decision         | Founder                                    |
+| Specification drafting   | ChatGPT-assisted                           |
+| Repository updates       | Codex-assisted                             |
+| Implementation           | Codex                                      |
+| Deterministic validation | GitHub Actions                             |
+| Technical review         | Claude                                     |
+| Merge into `develop`     | CI + Claude                                |
+| Staging deployment       | Historical/superseded; see §17 and VOC-100 |
+| Release PR               | Automation-assisted                        |
+| Merge into `main`        | Founder                                    |
+| Production publication   | Founder                                    |
 
 Future automation may expand only with evidence.
 
@@ -3081,10 +3087,11 @@ rule._
 
 Successful merges into `develop` automatically deploy to staging.
 
-_Correction 2026-08-19: staging deployment was built and historically proven, then
-VOC-078-T03 removed its GitHub workflow. ADR-0003 now selects Cloudflare, but a merge to
-`develop` still does not deploy; T10's held replacement exists, while `HOLD-00` and
-live activation remain pending. See §17.
+_Correction 2026-08-28: staging deployment was built and historically proven, then
+VOC-078-T03 removed its GitHub workflow. ADR-0003 selects Cloudflare, but a merge to
+`develop` does not deploy. VOC-100's prospective replacement is manual, SHA-bound,
+environment-protected and remains fail-closed in PR1 until separately authorized
+settings and immediate PR2; production holds remain pending. See §17.
 Preserved as historical record._
 
 ### DG5-10 — Protected production
@@ -3405,8 +3412,9 @@ historical record._
 
 Every approved merge into `develop` deploys automatically to staging and runs required verification.
 
-_Correction 2026-08-19: see DG5-09's correction. Staging deployment was built and is
-scheduled for removal in VOC-078-T03. Preserved as historical record._
+_Correction 2026-08-28: see DG5-09's correction. Automatic staging is historical.
+VOC-100 defines the prospective manual protected-environment model, still fail-closed
+until separately authorized settings and PR2. Preserved as historical record._
 
 ### DG10-07 — Founder-controlled main and production
 

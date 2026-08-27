@@ -65,10 +65,13 @@ product acceptance, production, deployment, live activation, and
 `VOC-080-HOLD-00` through `HOLD-02` remain unresolved/held. VOC-094 Phase-1 resource
 and rollback proof is the bounded exception described next.
 VOC-094 Phase 1 has separately created and rollback-proved the bounded synthetic
-staging resources, and Phase 2 external Ruflo verification is complete. VOC-096 PR1
-binds that exact tuple in a dispatch-ineligible `prepared` state. The staging GitHub
-environment/secrets and ACT-04 dispatch remain held; `VOC-080-HOLD-01` and `HOLD-02`
-remain fully unresolved and unchanged.
+staging resources, and Phase 2 external Ruflo verification is complete. VOC-100
+retains that tuple but prospectively replaces the custom binder with a standard
+protected-environment staging path. In this PR1 state the staging environment and
+secrets are absent, so dispatch fails closed. A separately authorized settings action,
+immediate settings-truth PR2, and an explicitly accepted shared-identity residual are
+required before the first staging dispatch. `VOC-080-HOLD-01` and `HOLD-02` remain
+fully unresolved and unchanged.
 
 ## 1. Product outcome
 

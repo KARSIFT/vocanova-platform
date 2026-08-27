@@ -3,8 +3,6 @@ import { relative, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-import { inspectDeliveryWorkflow } from "./cloudflare-delivery-policy.mjs";
-
 export const PROHIBITED_AGENT_PATHS = [
   ".claude/agents",
   ".karsift",
@@ -66,7 +64,7 @@ const AUTONOMOUS_WRITE_PATTERNS = [
 const PROHIBITED_EXTERNAL_EFFECT_PATTERNS = [
   [
     /\b(?:CLOUDFLARE_API_TOKEN|CLOUDFLARE_ACCOUNT_ID|CF_API_TOKEN|CF_ACCOUNT_ID)\b/,
-    "Cloudflare credential",
+    "Cloudflare credential interface",
   ],
   [/api\.cloudflare\.com\/client\/v4/i, "Cloudflare API access"],
   [
@@ -172,6 +170,37 @@ function hasIssueTrigger(source) {
   return false;
 }
 
+function inspectDeliveryWorkflow(source) {
+  const errors = [];
+  for (const marker of [
+    "workflow_dispatch:",
+    "name: cloudflare delivery",
+    "environment: cloudflare-staging",
+    "CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}",
+    "CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}",
+    "VOC-080-HOLD-01",
+  ]) {
+    if (!source.includes(marker)) {
+      errors.push(`ci.yml missing Cloudflare delivery marker: ${marker}`);
+    }
+  }
+  if (
+    !source.includes(
+      "cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}",
+    )
+  ) {
+    errors.push(
+      "manual delivery runs must not be cancelled after migration can start",
+    );
+  }
+  if (
+    /^\s{2}(issues|issue_comment|pull_request_target|schedule):/m.test(source)
+  ) {
+    errors.push("delivery workflow contains an unsafe trigger");
+  }
+  return errors;
+}
+
 export function validateAgentAuthority(repositoryRoot) {
   const errors = [];
 
@@ -228,17 +257,17 @@ export function validateAgentAuthority(repositoryRoot) {
   }
 
   const workflowDirectory = resolve(repositoryRoot, ".github/workflows");
-  const heldDeliveryWorkflow = resolve(workflowDirectory, "ci.yml");
-  let heldDeliveryWorkflowValid = false;
-  if (existsSync(heldDeliveryWorkflow)) {
+  const deliveryWorkflow = resolve(workflowDirectory, "ci.yml");
+  let deliveryWorkflowValid = false;
+  if (existsSync(deliveryWorkflow)) {
     const deliveryErrors = inspectDeliveryWorkflow(
-      readFileSync(heldDeliveryWorkflow, "utf8"),
+      readFileSync(deliveryWorkflow, "utf8"),
     );
-    heldDeliveryWorkflowValid = deliveryErrors.length === 0;
+    deliveryWorkflowValid = deliveryErrors.length === 0;
     errors.push(
       ...deliveryErrors.map(
         (error) =>
-          `${heldDeliveryWorkflow}: unsafe held delivery policy: ${error}`,
+          `${deliveryWorkflow}: unsafe Cloudflare delivery policy: ${error}`,
       ),
     );
   }
@@ -278,7 +307,14 @@ export function validateAgentAuthority(repositoryRoot) {
       }
     }
     for (const [pattern, capability] of PROHIBITED_EXTERNAL_EFFECT_PATTERNS) {
-      if (path === heldDeliveryWorkflow && heldDeliveryWorkflowValid) continue;
+      const isDeliveryWorkflow = path === deliveryWorkflow;
+      if (
+        isDeliveryWorkflow &&
+        capability === "Cloudflare credential interface"
+      ) {
+        continue;
+      }
+      if (isDeliveryWorkflow && deliveryWorkflowValid) continue;
       if (pattern.test(source)) {
         errors.push(`${path}: prohibited external effect: ${capability}`);
         break;

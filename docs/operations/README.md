@@ -7,7 +7,7 @@
 | DOC-15  | [AI-Native Product and Engineering Operating Model](15-ai-native-product-and-engineering-operating-model.md) | approved                              | founder  | DOC-16                          |
 | RUNBOOK | [External Ruflo orchestration](ruflo-external-orchestration.md)                                              | active                                | operator | ADR-0004, VOC-080-T02           |
 | RUNBOOK | [PostgreSQL-to-D1 conversion rehearsal](postgresql-to-d1-conversion.md)                                      | active                                | operator | ADR-0003, VOC-080-T09           |
-| RUNBOOK | [Held Cloudflare delivery and rollback](cloudflare-delivery.md)                                              | active                                | operator | ADR-0003, VOC-080-T10           |
+| RUNBOOK | [Standard staging delivery and held production](cloudflare-delivery.md)                                      | active; PR1 fail-closed               | operator | ADR-0003, VOC-100               |
 | RECORD  | [Server-runtime retirement and repository rollback](server-runtime-retirement.md)                            | active                                | operator | ADR-0003, VOC-080-T11           |
 | RECORD  | [VOC-080 repository transition](voc-080-transition-record.md)                                                | historical point-in-time evidence     | operator | ADR-0003, ADR-0004, VOC-080-T12 |
 | RECORD  | [VOC-081 F2 repository/local evidence](voc-081-f2-evidence.md)                                               | active (repository/local F2 complete) | operator | ADR-0003, VOC-081-T04           |
@@ -22,6 +22,11 @@ VOC-081's complete stack was integrated by PR #108 and passed post-merge
 revalidation, so repository/local F2 is complete and effective. The record preserves
 its earlier integration-pending candidate state as history and does not claim F3,
 A1/P1+ acceptance, staging, production, deployment, or live activation.
+
+VOC-100 replaces the prospective custom staging binder with a standard GitHub
+environment design. In the current repository-only PR1 state, `cloudflare-staging`
+and its secrets are absent and staging fails closed. Settings action, settings-truth
+PR2, and all production activity remain separately held.
 
 DOC-13 (F1 execution package, historical) and DOC-19 (governance reconciliation
 notes, historical since DOC-16 v2.0 folded its role in directly) have moved to

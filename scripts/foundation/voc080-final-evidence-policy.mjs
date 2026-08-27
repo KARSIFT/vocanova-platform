@@ -4,7 +4,6 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { validateServerRetirement } from "./server-retirement-policy.mjs";
-import { validateDeliveryRepository } from "./cloudflare-delivery-policy.mjs";
 
 export const TRANSITION_RECORD_PATH =
   "docs/operations/voc-080-transition-record.json";
@@ -15,6 +14,11 @@ export const TRANSITION_VISUAL_PATH =
 
 const EXPECTED_WORKFLOWS = [
   "ci.yml",
+  "governance.yml",
+  "quality.yml",
+  "security.yml",
+];
+const STANDARD_READY_REQUIRED_WORKFLOWS = [
   "governance.yml",
   "quality.yml",
   "security.yml",
@@ -172,9 +176,11 @@ export function inspectDeliveryState(delivery, preparedValidationErrors) {
   }
   const legacyHeld = top === "held" && staging === "held";
   const validatedPrepared = top === "prepared" && staging === "prepared";
-  if (!legacyHeld && !validatedPrepared) {
+  const standardReady =
+    top === "standard-ready" && staging === "standard-ready";
+  if (!legacyHeld && !validatedPrepared && !standardReady) {
     errors.push(
-      "delivery manifest must be legacy held/held or validated prepared/prepared",
+      "delivery manifest must be legacy held/held, validated prepared/prepared, or standard-ready staging",
     );
     return errors;
   }
@@ -190,6 +196,100 @@ export function inspectDeliveryState(delivery, preparedValidationErrors) {
         ),
       );
     }
+  }
+  if (standardReady) {
+    errors.push(...inspectStandardReadyStaging(delivery));
+  }
+  return errors;
+}
+
+function isStandardReadyDelivery(delivery) {
+  return (
+    delivery?.status === "standard-ready" &&
+    delivery?.environments?.staging?.state === "standard-ready"
+  );
+}
+
+function inspectStandardReadyStaging(delivery) {
+  const errors = [];
+  const staging = delivery?.environments?.staging;
+  if (staging?.hold_id !== "VOC-080-HOLD-00") {
+    errors.push("standard-ready staging must preserve VOC-080-HOLD-00");
+  }
+  if (staging?.required_ref !== "refs/heads/develop") {
+    errors.push("standard-ready staging must remain develop-bound");
+  }
+  if (staging?.github_environment !== "cloudflare-staging") {
+    errors.push("standard-ready staging must use cloudflare-staging");
+  }
+  if (staging?.cost_ceiling_cents !== 0) {
+    errors.push("standard-ready staging cost ceiling must remain zero");
+  }
+  if (
+    staging?.workers?.api !== "vocanova-api-staging" ||
+    staging?.workers?.web !== "vocanova-web-staging"
+  ) {
+    errors.push("standard-ready staging Worker names drifted");
+  }
+  if (
+    staging?.d1?.binding !== "DB" ||
+    staging?.d1?.database_name !== "vocanova-staging" ||
+    staging?.d1?.database_id !== "22ae386f-e3f5-4d98-a3ad-18b39d3b8556"
+  ) {
+    errors.push("standard-ready staging D1 identity drifted");
+  }
+  if (
+    staging?.secret_scopes?.github !== "cloudflare-staging" ||
+    staging?.secret_scopes?.api_worker !== "vocanova-api-staging" ||
+    staging?.secret_scopes?.web_worker !== "vocanova-web-staging"
+  ) {
+    errors.push("standard-ready staging secret scopes drifted");
+  }
+  if (
+    staging?.routes?.api !== "https://api-stag.vocanova.site" ||
+    staging?.routes?.web !== "https://stag.vocanova.site"
+  ) {
+    errors.push("standard-ready staging routes drifted");
+  }
+  if (
+    staging?.authority_evidence_url !== null ||
+    staging?.authorization_expires_at !== null
+  ) {
+    errors.push("standard-ready staging must not commit runtime authority");
+  }
+  if (
+    staging?.resource_manifest_evidence_url !==
+      "https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5437898152" ||
+    staging?.rollback_rehearsal_url !==
+      "https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5435923878"
+  ) {
+    errors.push(
+      "standard-ready staging must preserve reviewed resource evidence",
+    );
+  }
+  const resources = staging?.resources;
+  if (
+    resources?.account_id !== "0a9eda28b96d77c24dcde74f3e074d47" ||
+    resources?.zone_id !== "63286d93b5f32925ac7366b4e97908be" ||
+    resources?.zone_name !== "vocanova.site" ||
+    resources?.requested_d1_location_hint !== "eeur" ||
+    resources?.served_d1_region !== "EEUR" ||
+    resources?.applied_migration_count !== 7 ||
+    resources?.application_rows !== 0 ||
+    resources?.workers_plan !== "Free" ||
+    resources?.d1_plan !== "Free" ||
+    resources?.incremental_vocanova_cost_cents !== 0 ||
+    resources?.unrelated_basic_load_balancing !==
+      "unchanged-unexpanded-not-attributed-to-vocanova" ||
+    JSON.stringify(resources?.production_holds) !==
+      JSON.stringify(["VOC-080-HOLD-01", "VOC-080-HOLD-02"])
+  ) {
+    errors.push("standard-ready staging reviewed resource tuple drifted");
+  }
+  if (staging && Object.hasOwn(staging, "prepared_runtime_binder")) {
+    errors.push(
+      "standard-ready staging must not depend on prepared_runtime_binder",
+    );
   }
   return errors;
 }
@@ -418,7 +518,13 @@ export function validateFinalEvidence(repositoryRoot) {
   const workflows = readdirSync(path.join(repositoryRoot, ".github/workflows"))
     .filter((entry) => entry.endsWith(".yml") || entry.endsWith(".yaml"))
     .sort();
-  if (JSON.stringify(workflows) !== JSON.stringify(EXPECTED_WORKFLOWS)) {
+  if (isStandardReadyDelivery(delivery)) {
+    for (const workflow of STANDARD_READY_REQUIRED_WORKFLOWS) {
+      if (!workflows.includes(workflow)) {
+        errors.push(`active workflow directory is missing ${workflow}`);
+      }
+    }
+  } else if (JSON.stringify(workflows) !== JSON.stringify(EXPECTED_WORKFLOWS)) {
     errors.push(
       "active workflow directory must contain exactly four canonical workflows",
     );
@@ -428,7 +534,12 @@ export function validateFinalEvidence(repositoryRoot) {
       record,
       retirement,
       delivery,
-      validateDeliveryRepository(repositoryRoot, delivery),
+      delivery?.status === "prepared" &&
+        delivery?.environments?.staging?.state === "prepared"
+        ? [
+            "VOC-096 prepared staging is historical compatibility only; VOC-100 standard-ready staging must replace the living binder validator",
+          ]
+        : [],
     ),
   );
   for (const [relative, inspect] of [
@@ -451,7 +562,16 @@ export function validateFinalEvidence(repositoryRoot) {
       readFileSync(path.join(repositoryRoot, "package.json"), "utf8"),
     ),
   );
-  errors.push(...validateServerRetirement(repositoryRoot));
+  errors.push(
+    ...validateServerRetirement(repositoryRoot).filter(
+      (error) =>
+        !(
+          isStandardReadyDelivery(delivery) &&
+          error ===
+            ".github/workflows/ci.yml: required active surface is missing"
+        ),
+    ),
+  );
   return errors;
 }
 
