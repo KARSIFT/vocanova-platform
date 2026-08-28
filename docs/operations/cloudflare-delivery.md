@@ -120,10 +120,12 @@ migration ledger, upload immutable SHA-prefix/run-ID/attempt-tagged Worker versi
 promote the exact UUIDs, and run bounded staging smoke. The workflow uses the locked
 Wrangler commands; no credential-free test or `--help` result is treated as live
 deployment evidence.
-The delivery policy treats each staging and production Wrangler environment as a
-closed tuple: Worker names, routes, the sole D1 and service bindings, migration
-settings, disabled preview surfaces, and every safety/feature variable must match
-exactly; extra bindings or enabled signup/provider features fail validation.
+The delivery policy treats the complete Wrangler files—including every inheritable
+top-level setting—and each staging and production environment as closed tuples.
+Worker names, routes, the sole D1 and service bindings, assets, compatibility,
+migration settings, disabled preview surfaces, and every safety/feature variable must
+match exactly; unknown root capabilities, extra bindings, or enabled signup/provider
+features fail validation.
 
 ## Ordered implementation and truth boundary
 

@@ -259,6 +259,29 @@ test("exact Wrangler environments and the ordered D1 migration ledger fail close
     mutate(candidate);
     assert.notDeepEqual(inspectDeliveryManifest(manifest, candidate), []);
   }
+  const inheritedRootCases = [
+    (candidate) => (candidate.api.account_id = "0".repeat(32)),
+    (candidate) =>
+      (candidate.api.routes = [
+        { pattern: "inherited-api.example.invalid", custom_domain: true },
+      ]),
+    (candidate) =>
+      (candidate.web.routes = [
+        { pattern: "inherited-web.example.invalid", custom_domain: true },
+      ]),
+    (candidate) => (candidate.api.triggers = { crons: ["0 * * * *"] }),
+    (candidate) => (candidate.web.assets.run_worker_first = true),
+    (candidate) => (candidate.api.placement = { mode: "smart" }),
+    (candidate) => (candidate.api.compatibility_flags = ["nodejs_compat"]),
+    (candidate) => (candidate.api.logpush = true),
+    (candidate) => (candidate.web.limits = { cpu_ms: 10 }),
+    (candidate) => (candidate.api.env.unreviewed = {}),
+  ];
+  for (const mutate of inheritedRootCases) {
+    const candidate = clone(configs);
+    mutate(candidate);
+    assert.notDeepEqual(inspectDeliveryManifest(manifest, candidate), []);
+  }
 
   const changedLedger = clone(manifest);
   changedLedger.migration_ledger.ordered_files[0] = "0001_rewritten.sql";

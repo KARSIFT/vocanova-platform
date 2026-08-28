@@ -36,6 +36,66 @@ const MIGRATION_LEDGER = {
     "0007_reconciliation_write_guard.sql",
   ],
 };
+const OBSERVABILITY = {
+  enabled: true,
+  logs: { enabled: true, invocation_logs: true },
+};
+const EXPECTED_WRANGLER_ROOTS = {
+  api: {
+    $schema: "./node_modules/wrangler/config-schema.json",
+    name: "vocanova-api-local",
+    main: "src/index.ts",
+    compatibility_date: "2026-08-22",
+    workers_dev: false,
+    preview_urls: false,
+    d1_databases: [
+      {
+        binding: "DB",
+        database_name: "vocanova-local",
+        database_id: "local",
+        migrations_dir: "migrations",
+        migrations_table: "d1_migrations",
+      },
+    ],
+    vars: {
+      ENVIRONMENT: "local",
+      RELEASE: "local",
+      CORS_ALLOWED_ORIGINS: "http://127.0.0.1:3000",
+      AUTH_BASE_URL: "http://127.0.0.1:3000",
+      OAUTH_REDIRECT_URI:
+        "http://127.0.0.1:8080/api/v1/auth/oauth/google/callback",
+      OAUTH_RETURN_ALLOWLIST:
+        "http://127.0.0.1:3000/home,http://127.0.0.1:3000/onboarding",
+      MAGIC_LINK_ENABLED: "true",
+      GOOGLE_OAUTH_ENABLED: "false",
+      NEW_USER_SIGNUP_ENABLED: "true",
+      NEW_USER_SIGNUP_ALLOWLIST: "",
+      RESERVED_SYNTHETIC_EMAIL: "",
+      AI_GENERATION_ENABLED: "false",
+      AI_PER_MINUTE: "5",
+      AI_PER_DAY: "30",
+      AI_GLOBAL_PER_DAY: "1000",
+      AI_MONTHLY_COST_HARD_STOP_CENTS: "0",
+      AI_REQUEST_COST_CENTS: "0",
+      AI_GENERATION_LEASE_SECONDS: "15",
+      AI_PROVIDER_TIMEOUT_MS: "10000",
+    },
+    observability: OBSERVABILITY,
+  },
+  web: {
+    $schema: "./node_modules/wrangler/config-schema.json",
+    name: "vocanova-web-local",
+    main: "sentry.edge.config.ts",
+    compatibility_date: "2026-08-22",
+    compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"],
+    workers_dev: false,
+    preview_urls: false,
+    assets: { directory: ".open-next/assets", binding: "ASSETS" },
+    services: [{ binding: "API", service: "vocanova-api-local" }],
+    vars: { ENVIRONMENT: "local" },
+    observability: OBSERVABILITY,
+  },
+};
 const STAGING_RESOURCES = {
   account_id: STAGING_ACCOUNT_ID,
   zone_id: "63286d93b5f32925ac7366b4e97908be",
@@ -160,6 +220,7 @@ export function inspectDeliveryManifest(manifest, configs) {
   if (!deepEqual(manifest?.environments?.production, PRODUCTION_SENTINEL))
     errors.push("production held environment or sentinel set drifted");
   if (configs) {
+    inspectWranglerRoots(configs, errors);
     for (const environment of DELIVERY_ENVIRONMENTS)
       inspectWranglerEnvironment(
         environment,
@@ -169,6 +230,33 @@ export function inspectDeliveryManifest(manifest, configs) {
       );
   }
   return errors;
+}
+
+function inspectWranglerRoots(configs, errors) {
+  for (const component of ["api", "web"]) {
+    const config = configs?.[component];
+    if (!isRecord(config)) {
+      errors.push(`${component} Wrangler configuration must exist`);
+      continue;
+    }
+    const root = Object.fromEntries(
+      Object.entries(config).filter(([key]) => key !== "env"),
+    );
+    if (!deepEqual(root, EXPECTED_WRANGLER_ROOTS[component]))
+      errors.push(
+        `${component} Wrangler root differs from the exact inherited configuration`,
+      );
+    if (
+      !isRecord(config.env) ||
+      !deepEqual(
+        Object.keys(config.env).sort(),
+        [...DELIVERY_ENVIRONMENTS].sort(),
+      )
+    )
+      errors.push(
+        `${component} Wrangler environment names must be exactly staging and production`,
+      );
+  }
 }
 
 function inspectLimits(limits, errors) {
