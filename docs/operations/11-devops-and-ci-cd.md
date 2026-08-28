@@ -18,13 +18,13 @@ related_decisions:
   - ADR-0003
 adoption_change: VOC-008
 amendments:
-  - id: VOC-096-staging-runtime-binder-amendment
-    title: "Prepared staging tuple and live dispatch binder"
-    adopted_in: VOC-096
-    adopted_at: 2026-08-27
-    approving_owner: approved-voc-096-package
-    resolution_recorded_in: specs/changes/VOC-096-voc094-dispatch-binder-transition/change.yaml
-    notes: "Phase 1 and Phase 2 are complete; PR1 binds real staging resources in a prepared but dispatch-ineligible state while production remains held."
+  - id: VOC-100-standard-cloudflare-delivery-amendment
+    title: "Standard protected-environment staging delivery"
+    adopted_in: VOC-100
+    adopted_at: 2026-08-28
+    approving_owner: approved-voc-100-package
+    resolution_recorded_in: specs/changes/VOC-100-standard-cloudflare-delivery/change.yaml
+    notes: "Prospectively replaces the custom runtime binder with a manual SHA-bound dispatch, fresh AI review receipt, mechanical approval proxy, first-step approval-history validation, and independent token rotation. PR1 keeps the environment and secrets absent; production remains held."
   - id: VOC-083-workerd-compatibility-amendment
     title: "Generated Worker inventory and fail-closed workerd diagnostics"
     adopted_in: VOC-083
@@ -88,31 +88,34 @@ Staging (from `develop`), Production (from `main`).
 > the active tree. None of those repository changes inspected, mutated, or stopped a
 > live server or created Cloudflare, DNS, secret, data, or deployment state.
 
-> **Active amendment (`VOC-096-staging-runtime-binder-amendment`, adopted
-> 2026-08-27).** Phase 1 has since created and independently closed only the exact
-> synthetic staging Workers, D1, routes, seven schema-only migrations, rollback
-> baselines, and public smoke at $0 incremental cost; Phase 2 external Ruflo evidence
-> is also closed. VOC-096 PR1 records those staging IDs/routes as `prepared` but remains
-> dispatch-ineligible. The `cloudflare-staging` GitHub environment is still
-> absent/held/planned until ACT-03; exact five-file PR2 and a five-record live binder
-> are required before ACT-04. Production and learner-data holds remain unchanged.
+> **Active amendment (`VOC-100-standard-cloudflare-delivery-amendment`, adopted
+> 2026-08-28).** The exact synthetic staging Workers, D1, routes, seven schema-only
+> migrations, rollback baselines, and public smoke remain retained historical evidence.
+> VOC-100 prospectively replaces the custom binder with one protected GitHub
+> environment: a manual SHA-bound `develop` dispatch, required checks, fresh
+> non-author AI review receipt, mechanical approval proxy, and first-step approval-
+> history validation before secrets. In PR1 the `cloudflare-staging` environment and
+> both secrets are absent, so staging fails closed. A separately authorized settings
+> action and immediate doc-only PR2 are required before dispatch. Production and
+> learner-data holds remain unchanged.
 
-| Capability   | Current repository state                                                                            | Separately held live state                                                       |
-| ------------ | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Web          | Next.js 16 transformed by OpenNext and tested in local workerd as a Cloudflare Web Worker           | Cloudflare Worker version upload, route, and traffic activation                  |
-| API          | TypeScript/Hono Module Worker with generated bindings and complete local workerd contract parity    | Cloudflare Worker version upload, service binding, route, and traffic activation |
-| Data         | Forward-only D1 migrations, local D1 tests, and compact retired PostgreSQL conversion fixtures      | Separate staging/production D1 creation and any remote migration                 |
-| Web-to-API   | Local workerd service binding plus preserved HTTPS `/api/v1` contract                               | Environment-specific service binding and route activation                        |
-| Assets/async | Workers Static Assets; Queue/Workflow/DO/R2 remain absent until a measured requirement              | Any separately reviewed product binding or resource                              |
-| CI/CD        | Four deterministic workflows; credential-free three-environment dry runs and held T10 state machine | Environment-scoped version/migration/promotion activation inside `ci.yml`        |
-| Secrets      | No deployment secrets in PRs or agents                                                              | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo           |
-| Rollback     | Repository reverts plus mocked prior-Worker-version and forward-corrective D1 contracts             | Authorized version traffic restoration or separately authorized D1 recovery      |
+| Capability   | Current repository state                                                                         | Separately held live state                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Web          | Next.js 16 transformed by OpenNext and tested in local workerd as a Cloudflare Web Worker        | Cloudflare Worker version upload, route, and traffic activation                  |
+| API          | TypeScript/Hono Module Worker with generated bindings and complete local workerd contract parity | Cloudflare Worker version upload, service binding, route, and traffic activation |
+| Data         | Forward-only D1 migrations, local D1 tests, and compact retired PostgreSQL conversion fixtures   | Separate staging/production D1 creation and any remote migration                 |
+| Web-to-API   | Local workerd service binding plus preserved HTTPS `/api/v1` contract                            | Environment-specific service binding and route activation                        |
+| Assets/async | Workers Static Assets; Queue/Workflow/DO/R2 remain absent until a measured requirement           | Any separately reviewed product binding or resource                              |
+| CI/CD        | Four deterministic workflows; credential-free dry runs and fail-closed VOC-100 staging controls  | Environment-scoped version/migration/promotion after settings action and PR2     |
+| Secrets      | No deployment secrets in PRs or agents                                                           | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo           |
+| Rollback     | Repository reverts plus mocked prior-Worker-version and forward-corrective D1 contracts          | Authorized version traffic restoration or separately authorized D1 recovery      |
 
-No current workflow run can deploy to Preview, Staging, or Production. T10's manual
-jobs exist after Worker/D1 parity, but the committed manifest, D1/route sentinels, and
-missing authority evidence block before secrets. Live staging requires
-`VOC-080-HOLD-00`, production traffic or D1 migration requires `HOLD-01`, and
-production learner data requires `HOLD-02`.
+No current workflow run can deploy to Preview, Staging, or Production. The manual
+staging job remains fail-closed because `cloudflare-staging` and its secrets are
+absent. A separate R4 settings/action record must accept the shared-account receipt
+forgery residual, then create exact environment protections/secrets; immediate PR2
+records the sanitized truth. Production traffic or D1 migration remains held by
+`HOLD-01`, and production learner data by `HOLD-02`.
 
 ### 1.1 Deterministic GitHub Actions foundation
 

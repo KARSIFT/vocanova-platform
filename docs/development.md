@@ -159,10 +159,14 @@ including persistent D1 limits, mocked provider/email boundaries, and privacy-sa
 `waitUntil` telemetry. The committed runtime AI kill switch remains off; normal CI
 uses no paid provider or provider secret.
 Email and OAuth providers remain injected boundaries in tests; no local command sends
-email or contacts a provider. T10 now owns the held staging/production manifest,
-placeholder D1/routes, environment names, dry runs, and delivery state machine. Real
-identifiers, environment secrets, routes, authority, and live actions remain absent;
-see the [delivery runbook](operations/cloudflare-delivery.md).
+email or contacts a provider. T10 owns the held staging/production manifest,
+placeholder production D1/routes, environment names, dry runs, and delivery state
+machine. Under VOC-100, staging uses a standard GitHub environment only after a
+separately authorized settings action: manual SHA-bound `develop` dispatch, fresh
+non-author AI review receipt, mechanical approval proxy, and first-step approval-
+history validation before secrets. In the present PR1 state the staging environment
+and secrets are absent and the workflow fails closed; local commands never create,
+read, or require them. See the [delivery runbook](operations/cloudflare-delivery.md).
 
 The active repository contains no Go module, Dockerfile, Compose/Nginx configuration,
 host operation script, or remote staging-server test. `pnpm ci:retirement` validates

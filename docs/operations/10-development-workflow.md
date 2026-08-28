@@ -105,12 +105,15 @@ automatic merge, and production deployment are not technically active as of 2026
 [the A-003 transition state](../governance/a003-transition-state.yaml) rather than inferring
 activation from this topology.
 
-**Current operational note (2026-08-22):** VOC-078-T03 removed server deployment and
-monitoring workflows. VOC-080 selected Cloudflare Workers and D1, and T10 now supplies
-a held manual delivery state machine after parity. Its manifest blocks before
-environment jobs/secrets, so `develop` and `main` remain integration and
-production-history branches with no live effect until the applicable action hold and
-separate activation change complete.
+**Current operational note (VOC-100 PR1):** VOC-078-T03 removed server deployment and
+monitoring workflows. VOC-080 selected Cloudflare Workers and D1, and T10 supplies a
+manual delivery state machine after parity. VOC-100 replaces the superseded runtime
+binder with a manual, SHA-bound `develop` dispatch through `cloudflare-staging`, a
+fresh non-author AI review decision, unchanged mechanical approval proxy, and first-
+step approval-history validation before a secret is evaluated. The environment and
+secrets are absent in this PR1 state, so staging fails closed pending separately
+authorized settings and immediate documentation-only PR2. `main` and production retain
+no live effect and all production holds.
 
 ```text
 feature/* ──PR──► develop ──release PR──► main
@@ -164,8 +167,9 @@ contract/migration/e2e as applicable), security/authorization correct, migration
 OpenAPI/generated types synchronized, documentation updated, no secrets exposed, required review
 resolved, and merged through a PR. Staging/production deployment evidence is required only when an
 active, separately authorized Cloudflare delivery task provides that capability. T10's
-mocked/held mechanism exists, but live evidence remains unavailable until the applicable hold and
-activation change complete.
+mocked/held mechanism exists, but live evidence remains unavailable until the separately
+authorized settings/action boundary and applicable hold complete. Ordinary staging
+dispatches and token rotations do not create new plans or pull requests.
 
 ## 6. Pull-request standards
 

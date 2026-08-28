@@ -211,11 +211,15 @@ commands, distinct logical Worker/D1/environment names, credential-free dry runs
 ordered version/migration/promotion/smoke/rollback behavior, cost ceilings, exact-SHA
 gating, and evidence format. The committed D1 IDs/routes are non-resource sentinels and
 VOC-094 Phase 1 later created only its exact reviewed synthetic staging resources and
-proved baseline/probe/rollback/public smoke at zero incremental VocaNova cost. VOC-096
-records that tuple as `prepared`, not standing-authorized. The GitHub environment and
-two secret names remain absent, held, and planned through PR1; ACT-03 plus immediate
-documentation-only PR2 are still required before a one-use runtime-bound dispatch.
-Production activation remains held.
+proved baseline/probe/rollback/public smoke at zero incremental VocaNova cost. VOC-100
+prospectively replaces the superseded binder with a standard manual `develop` dispatch
+through `cloudflare-staging`: required checks, a fresh non-author AI review decision,
+an unchanged mechanical approval proxy, and approval-history validation as the first
+environment-job step before secrets are evaluated. In this PR1 state the environment
+and its two secrets remain absent, so delivery fails closed. A separately authorized
+settings action followed by an immediate documentation-only PR2 is required before
+staging can run. The reusable least-privilege staging token rotates at most every 90
+days and is not coupled to PR or dispatch creation. Production activation remains held.
 
 Before a future activation change can authorize either environment, record and validate:
 

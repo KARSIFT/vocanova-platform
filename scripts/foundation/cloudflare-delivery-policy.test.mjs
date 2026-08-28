@@ -1,1004 +1,753 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import { createHash } from "node:crypto";
-import { resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { resolve } from "node:path";
 import test from "node:test";
 
 import {
+  APPROVAL_RECEIPT_SCHEMA,
+  STAGING_ACCOUNT_ID,
+  canonicalize,
   evaluateDeliveryEvent,
+  inspectDeliveryManifest,
+  inspectMigrationLedger,
+  inspectWranglerConfigSelection,
   inspectDeliveryWorkflow,
   loadDeliveryManifest,
   parseJsonc,
-  canonicalize,
   parseStrictJson,
+  resolveCurrentDeployment,
   resolveVersionId,
+  validateApprovalHistory,
   validateDeliveryRepository,
-  verifySecretStepStart,
+  validateEnvironmentProtection,
+  verifyAccountIdentity,
 } from "./cloudflare-delivery-policy.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+const workflowPath = resolve(repositoryRoot, ".github/workflows/ci.yml");
+const workflow = readFileSync(workflowPath, "utf8");
+const manifest = loadDeliveryManifest(repositoryRoot);
+const configs = {
+  api: parseJsonc(
+    readFileSync(
+      resolve(repositoryRoot, "apps/api-worker/wrangler.jsonc"),
+      "utf8",
+    ),
+  ),
+  web: parseJsonc(
+    readFileSync(resolve(repositoryRoot, "apps/web/wrangler.jsonc"), "utf8"),
+  ),
+};
 const exactSha = "a".repeat(40);
-const apiVersion = "11111111-1111-4111-8111-111111111111";
-const webVersion = "22222222-2222-4222-8222-222222222222";
-const evidence =
-  "https://github.com/KARSIFT/vocanova-platform/pull/123#issuecomment-456";
+const versionId = "11111111-1111-4111-8111-111111111111";
 
-test("held delivery manifest, Wrangler environments, workflow, and migration ceiling agree", () => {
+function clone(value) {
+  return structuredClone(value);
+}
+
+function exactProtection() {
+  return {
+    environment: {
+      id: 987654,
+      name: "cloudflare-staging",
+      can_admins_bypass: false,
+      protection_rules: [
+        {
+          type: "required_reviewers",
+          prevent_self_review: false,
+          reviewers: [
+            {
+              type: "User",
+              reviewer: { login: "m-e-h-r-d-a-a-d", id: 7955432 },
+            },
+          ],
+        },
+      ],
+      deployment_branch_policy: {
+        protected_branches: false,
+        custom_branch_policies: true,
+      },
+    },
+    branchPolicies: {
+      total_count: 1,
+      branch_policies: [{ id: 1234, name: "develop", type: "branch" }],
+    },
+  };
+}
+
+function dispatchEvent(overrides = {}) {
+  return {
+    event_name: "workflow_dispatch",
+    actor: "m-e-h-r-d-a-a-d",
+    actor_id: 7955432,
+    triggering_actor: "m-e-h-r-d-a-a-d",
+    ref: "refs/heads/develop",
+    sha: exactSha,
+    required_result: "success",
+    inputs: {
+      delivery_environment: "staging",
+      delivery_operation: "deploy",
+      confirmation: `DEPLOY staging ${exactSha}`,
+    },
+    ...overrides,
+  };
+}
+
+function approvalFixture() {
+  const receipt = {
+    checks_reviewed: ["ci required"],
+    coordinator_model: "gpt-5.6-terra",
+    environment_id: 987654,
+    environment_name: "cloudflare-staging",
+    exact_sha_author: false,
+    no_cloudflare_secret_access: true,
+    participant_id: "/root/voc100_deployment_review",
+    reviewer_model: "gpt-5.6-sol",
+    reviewer_received_approval_credentials: false,
+    run_attempt: 2,
+    run_id: "123456789",
+    schema_version: APPROVAL_RECEIPT_SCHEMA,
+    sha: exactSha,
+    task_id: "VOC-100-staging-review",
+    verdict: "PASS",
+  };
+  return {
+    context: { runId: "123456789", runAttempt: 2, sha: exactSha },
+    receipt,
+    history: [
+      {
+        state: "approved",
+        user: { login: "m-e-h-r-d-a-a-d", id: 7955432 },
+        environments: [{ id: 987654, name: "cloudflare-staging" }],
+        comment: canonicalize(receipt),
+      },
+    ],
+  };
+}
+
+function runWorkflowApprovalGate(history, context) {
+  const match = workflow.match(
+    /--arg sha "\$GITHUB_SHA" '\n([\s\S]*?)\n            ' "\$response_file"/,
+  );
+  assert.ok(match, "approval-history jq predicate must be extractable");
+  return spawnSync(
+    "jq",
+    [
+      "-e",
+      "--arg",
+      "login",
+      "m-e-h-r-d-a-a-d",
+      "--argjson",
+      "login_id",
+      "7955432",
+      "--arg",
+      "run_id",
+      context.runId,
+      "--argjson",
+      "run_attempt",
+      String(context.runAttempt),
+      "--arg",
+      "sha",
+      context.sha,
+      match[1],
+    ],
+    { input: JSON.stringify(history), encoding: "utf8" },
+  );
+}
+
+test("standard-ready staging, held production, Wrangler configs, workflow, and migration ceiling agree", () => {
   assert.deepEqual(validateDeliveryRepository(repositoryRoot), []);
+  assert.equal(manifest.status, "standard-ready");
+  assert.equal(manifest.environments.staging.state, "standard-ready");
+  assert.equal(manifest.environments.production.state, "held");
+  assert.equal(
+    Object.hasOwn(manifest.environments.staging, "prepared_runtime_binder"),
+    false,
+  );
 });
 
-test("JSONC parsing preserves URLs while removing comments and trailing commas", () => {
+test("manifest preserves the exact staging account/resources, zero cost, and production holds", () => {
+  const cases = [
+    [
+      "account",
+      (candidate) =>
+        (candidate.environments.staging.resources.account_id = "0".repeat(32)),
+    ],
+    [
+      "D1",
+      (candidate) =>
+        (candidate.environments.staging.d1.database_id = versionId),
+    ],
+    [
+      "cost",
+      (candidate) => (candidate.environments.staging.cost_ceiling_cents = 1),
+    ],
+    [
+      "paid plan",
+      (candidate) =>
+        (candidate.environments.staging.resources.workers_plan = "Paid"),
+    ],
+    [
+      "production",
+      (candidate) =>
+        (candidate.environments.production.state = "standard-ready"),
+    ],
+  ];
+  for (const [name, mutate] of cases) {
+    const candidate = clone(manifest);
+    mutate(candidate);
+    assert.notDeepEqual(inspectDeliveryManifest(candidate), [], name);
+  }
+  assert.equal(
+    manifest.environments.staging.resources.account_id,
+    STAGING_ACCOUNT_ID,
+  );
+  assert.deepEqual(manifest.environments.staging.resources.production_holds, [
+    "VOC-080-HOLD-01",
+    "VOC-080-HOLD-02",
+  ]);
+});
+
+test("exact Wrangler environments and the ordered D1 migration ledger fail closed on drift", () => {
+  assert.deepEqual(inspectDeliveryManifest(manifest, configs), []);
+  const routeCases = [
+    (candidate) =>
+      (candidate.api.env.staging.routes[0].pattern =
+        "wrong-staging.example.invalid"),
+    (candidate) =>
+      candidate.web.env.staging.routes.push({
+        pattern: "extra-staging.example.invalid",
+        custom_domain: true,
+      }),
+    (candidate) =>
+      (candidate.api.env.production.routes = [
+        { pattern: "production.example.invalid", custom_domain: true },
+      ]),
+    (candidate) => (candidate.web.env.staging.preview_urls = true),
+    (candidate) =>
+      (candidate.api.env.staging.d1_databases[0].migrations_pattern =
+        "migrations/0001_foundation.sql"),
+    (candidate) =>
+      candidate.api.env.staging.d1_databases.push({
+        binding: "UNREVIEWED_DB",
+        database_name: "unreviewed",
+        database_id: "44444444-4444-4444-8444-444444444444",
+        migrations_dir: "migrations",
+        migrations_table: "d1_migrations",
+      }),
+    (candidate) =>
+      candidate.web.env.staging.services.push({
+        binding: "UNREVIEWED_SERVICE",
+        service: "unreviewed-worker",
+      }),
+    (candidate) =>
+      (candidate.api.env.staging.vars.NEW_USER_SIGNUP_ENABLED = "true"),
+    (candidate) =>
+      (candidate.api.env.staging.kv_namespaces = [
+        { binding: "UNREVIEWED_KV", id: "unreviewed" },
+      ]),
+  ];
+  for (const mutate of routeCases) {
+    const candidate = clone(configs);
+    mutate(candidate);
+    assert.notDeepEqual(inspectDeliveryManifest(manifest, candidate), []);
+  }
+  const inheritedRootCases = [
+    (candidate) => (candidate.api.account_id = "0".repeat(32)),
+    (candidate) =>
+      (candidate.api.routes = [
+        { pattern: "inherited-api.example.invalid", custom_domain: true },
+      ]),
+    (candidate) =>
+      (candidate.web.routes = [
+        { pattern: "inherited-web.example.invalid", custom_domain: true },
+      ]),
+    (candidate) => (candidate.api.triggers = { crons: ["0 * * * *"] }),
+    (candidate) => (candidate.web.assets.run_worker_first = true),
+    (candidate) => (candidate.api.placement = { mode: "smart" }),
+    (candidate) => (candidate.api.compatibility_flags = ["nodejs_compat"]),
+    (candidate) => (candidate.api.logpush = true),
+    (candidate) => (candidate.web.limits = { cpu_ms: 10 }),
+    (candidate) => (candidate.api.env.unreviewed = {}),
+  ];
+  for (const mutate of inheritedRootCases) {
+    const candidate = clone(configs);
+    mutate(candidate);
+    assert.notDeepEqual(inspectDeliveryManifest(manifest, candidate), []);
+  }
+
+  const changedLedger = clone(manifest);
+  changedLedger.migration_ledger.ordered_files[0] = "0001_rewritten.sql";
+  assert.notDeepEqual(inspectDeliveryManifest(changedLedger), []);
+
+  const directory = mkdtempSync(resolve(tmpdir(), "vocanova-migrations-"));
+  try {
+    const migrations = resolve(directory, manifest.migration_ledger.directory);
+    mkdirSync(migrations, { recursive: true });
+    for (const name of manifest.migration_ledger.ordered_files)
+      writeFileSync(resolve(migrations, name), "-- fixture\n");
+    assert.deepEqual(
+      inspectMigrationLedger(
+        directory,
+        manifest.migration_ledger,
+        manifest.limits.max_migrations_per_release,
+      ),
+      [],
+    );
+    writeFileSync(resolve(migrations, "unreviewed.sql"), "-- drift\n");
+    assert.notDeepEqual(
+      inspectMigrationLedger(
+        directory,
+        manifest.migration_ledger,
+        manifest.limits.max_migrations_per_release,
+      ),
+      [],
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("JSONC and strict canonical JSON parsing reject ambiguous receipt bytes", () => {
   assert.deepEqual(
     parseJsonc('{"url":"https://example.invalid/a//b",/* x */"items":[1,],}'),
     { url: "https://example.invalid/a//b", items: [1] },
   );
-});
-
-test("strict JSON/JCS rejects duplicate keys, unsafe integers, non-canonical bytes, and lone surrogates", () => {
   assert.deepEqual(parseStrictJson('{"a":1,"b":[true,null]}'), {
     a: 1,
     b: [true, null],
   });
   assert.throws(() => parseStrictJson('{"a":1,"a":2}'), /duplicate JSON key/);
   assert.throws(() => parseStrictJson('{"a":9007199254740992}'), /safe range/);
-  assert.notEqual(canonicalize({ b: 1, a: 2 }), '{"b":1,"a":2}');
-  for (const source of [
-    '{"x":"\\ud800"}',
-    '{"x":"\\udfff"}',
-    '{"\\ud800":1}',
-    '{"\\udfff":1}',
-    '{"nested":[{"x":"\\ud800"}]}',
-    '{"nested":[{"\\udfff":true}]}',
+  assert.throws(
+    () => parseStrictJson('{"x":"\\ud800"}'),
+    /lone Unicode surrogate/,
+  );
+  assert.equal(canonicalize({ b: 1, a: 2 }), '{"a":2,"b":1}');
+});
+
+test("workflow removes binder inputs and isolates secrets after the first approval-history step", () => {
+  assert.deepEqual(inspectDeliveryWorkflow(workflow), []);
+  for (const removed of [
+    "action_authority_url",
+    "act03_evidence_url",
+    "pr2_review_url",
+    "binder_review_url",
+    "dispatch_nonce",
+    "previous_api_version_id",
+    "previous_web_version_id",
+    "experimental-provision",
+    "experimental-auto-create",
   ]) {
-    assert.throws(() => parseStrictJson(source), /lone Unicode surrogate/);
+    assert.equal(workflow.includes(removed), false, removed);
   }
-  assert.deepEqual(parseStrictJson('{"😀":"𝄞"}'), { "😀": "𝄞" });
-  assert.equal(canonicalize({ "😀": ["𝄞"] }), '{"😀":["𝄞"]}');
-  assert.throws(() => canonicalize({ x: "\ud800" }), /lone high/);
-  assert.throws(() => canonicalize({ "\udfff": true }), /lone low/);
+  const stagingStart = workflow.indexOf("\n  cloudflare-staging:\n");
+  const productionStart = workflow.indexOf("\n  cloudflare-production:\n");
+  const staging = workflow.slice(stagingStart, productionStart);
+  const approval = staging.indexOf(
+    "- name: Validate exact current-attempt AI approval receipt",
+  );
+  const firstSecret = staging.indexOf("secrets.CLOUDFLARE_API_TOKEN");
+  assert.ok(approval !== -1 && firstSecret > approval);
+  assert.doesNotMatch(
+    staging.slice(0, firstSecret),
+    /secrets\.CLOUDFLARE_ACCOUNT_ID/,
+  );
 });
 
-test("Node and Python independently reproduce all sixteen locked tuple/schema digests", () => {
-  const manifest = loadDeliveryManifest(repositoryRoot);
-  const binder = manifest.environments.staging.prepared_runtime_binder;
-  const contract = binder.contract;
-  const mappings = {
-    prepared_staging_tuple_sha256: binder.prepared_staging_tuple,
-    shared_definitions_sha256: contract.shared_definitions,
-    api_envelope_schema_sha256: contract.api_envelope_schema,
-    settings_authority_body_schema_sha256:
-      contract.record_body_schemas.settings_authority,
-    act03_body_schema_sha256: contract.record_body_schemas.act03,
-    pr2_exact_review_body_schema_sha256:
-      contract.record_body_schemas.pr2_exact_review,
-    act04_authority_body_schema_sha256:
-      contract.record_body_schemas.act04_authority,
-    binder_review_body_schema_sha256:
-      contract.record_body_schemas.binder_review,
-  };
-  const expected = {
-    prepared_staging_tuple_sha256: binder.prepared_staging_tuple_sha256,
-    ...binder.contract_digests,
-  };
-  const nodeDigests = Object.fromEntries(
-    Object.entries(mappings).map(([name, mapping]) => {
-      const value = structuredClone(mapping);
-      if (name !== "prepared_staging_tuple_sha256") delete value.schema_sha256;
-      return [name, shaText(canonicalize(value))];
-    }),
-  );
-  assert.deepEqual(nodeDigests, expected);
-
-  const python = spawnSync(
-    "python3",
-    [
-      "-c",
-      [
-        "import hashlib,json,sys",
-        "m=json.load(open(sys.argv[1],encoding='utf-8'))",
-        "b=m['environments']['staging']['prepared_runtime_binder']",
-        "c=b['contract']",
-        "maps={'prepared_staging_tuple_sha256':b['prepared_staging_tuple'],'shared_definitions_sha256':c['shared_definitions'],'api_envelope_schema_sha256':c['api_envelope_schema'],'settings_authority_body_schema_sha256':c['record_body_schemas']['settings_authority'],'act03_body_schema_sha256':c['record_body_schemas']['act03'],'pr2_exact_review_body_schema_sha256':c['record_body_schemas']['pr2_exact_review'],'act04_authority_body_schema_sha256':c['record_body_schemas']['act04_authority'],'binder_review_body_schema_sha256':c['record_body_schemas']['binder_review']}",
-        "out={} ",
-        "for n,v in maps.items():",
-        " v=dict(v); v.pop('schema_sha256',None) if n!='prepared_staging_tuple_sha256' else None",
-        " raw=json.dumps(v,ensure_ascii=False,separators=(',',':'),sort_keys=True).encode()",
-        " out[n]=hashlib.sha256(raw).hexdigest()",
-        "print(json.dumps(out,sort_keys=True))",
-      ].join("\n"),
-      resolve(
-        repositoryRoot,
-        "infrastructure/cloudflare/delivery-manifest.json",
-      ),
-    ],
-    { encoding: "utf8" },
-  );
-  assert.equal(python.status, 0, python.stderr);
-  assert.deepEqual(JSON.parse(python.stdout), expected);
+test("workflow graph mutations fail closed before Cloudflare credentials", () => {
+  const mutations = [
+    workflow.replace(
+      "Validate exact current-attempt AI approval receipt",
+      "Skip approval receipt",
+    ),
+    workflow.replace(
+      "needs: [required, delivery-gate]",
+      "needs: [delivery-gate]",
+    ),
+    workflow.replace(
+      "GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}",
+      "GITHUB_TRIGGERING_ACTOR: m-e-h-r-d-a-a-d",
+    ),
+    workflow.replace(
+      "environment: cloudflare-staging",
+      "environment: cloudflare-staging\n    env:\n      TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}",
+    ),
+    workflow.replace(
+      "name: Validate foundation",
+      "name: Validate foundation\n        env:\n          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}",
+    ),
+    workflow.replace(
+      "name: Validate foundation",
+      "name: Validate foundation\n        env:\n          TOKEN: ${{ secrets['CLOUDFLARE_API_TOKEN'] }}",
+    ),
+    workflow.replace(
+      "GITHUB_TOKEN: ${{ github.token }}",
+      "TOKEN: ${{ fromJSON(toJSON(secrets))['CLOUDFLARE_API_TOKEN'] }}",
+    ),
+    workflow.replace(
+      'echo "VOC-080-HOLD-01 and VOC-080-HOLD-02 remain active." >&2',
+      "pnpm exec wrangler deploy",
+    ),
+    workflow.replace("set +e", "set -e"),
+    workflow.replace("|| api_rollback_status=$?", "&& api_rollback_status=0"),
+    workflow.replace(
+      'tag="sha-${GITHUB_SHA:0:12}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"',
+      'tag="sha-${GITHUB_SHA}"',
+    ),
+    workflow.replace(" --config wrangler.jsonc", ""),
+  ];
+  for (const candidate of mutations)
+    assert.notDeepEqual(inspectDeliveryWorkflow(candidate), []);
 });
 
-test("prepared staging accepts one exact offline runtime-binder chain", async () => {
-  const fixture = runtimeBinderFixture();
-  const decision = await evaluateDeliveryEvent(
-    fixture.manifest,
-    fixture.event,
-    {
-      http: fixture.http,
-      now: new Date("2026-08-27T00:09:00Z"),
-      rateLimitMinimum: 40,
-    },
-  );
-  assert.deepEqual(decision, {
+test("Wrangler configuration selection rejects precedence and deploy redirects", () => {
+  const directory = mkdtempSync(resolve(tmpdir(), "vocanova-wrangler-config-"));
+  try {
+    for (const packageDirectory of ["apps/api-worker", "apps/web"]) {
+      const root = resolve(directory, packageDirectory);
+      mkdirSync(root, { recursive: true });
+      writeFileSync(resolve(root, "wrangler.jsonc"), "{}\n");
+    }
+    assert.deepEqual(inspectWranglerConfigSelection(directory), []);
+
+    const alternatives = [
+      ["apps/api-worker", "wrangler.json"],
+      ["apps/api-worker", "wrangler.toml"],
+      ["apps/api-worker", ".wrangler/deploy/config.json"],
+      ["apps/web", "wrangler.json"],
+      ["apps/web", "wrangler.toml"],
+      ["apps/web", ".wrangler/deploy/config.json"],
+    ];
+    for (const [packageDirectory, alternative] of alternatives) {
+      const path = resolve(directory, packageDirectory, alternative);
+      mkdirSync(resolve(path, ".."), { recursive: true });
+      writeFileSync(path, "{}\n");
+      assert.notDeepEqual(inspectWranglerConfigSelection(directory), []);
+      rmSync(path);
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("manual develop staging dispatch and no-write credential check pass exact deterministic gates", async () => {
+  const deploy = await evaluateDeliveryEvent(manifest, dispatchEvent(), {
+    environmentProtection: exactProtection(),
+    requiredResult: "success",
+  });
+  assert.deepEqual(deploy, {
     eligible: true,
     environment: "staging",
+    operation: "deploy",
     reasons: [],
   });
-});
-
-test("first secret-bearing step atomically enforces integrity-bound ACT-04 and token deadlines", async () => {
-  const fixture = runtimeBinderFixture();
-  const decision = await evaluateDeliveryEvent(
-    fixture.manifest,
-    fixture.event,
-    {
-      http: fixture.http,
-      now: new Date("2026-08-27T00:09:00Z"),
-      rateLimitMinimum: 40,
-      includeSecretDeadlineHandoff: true,
+  const credentialCheck = dispatchEvent({
+    inputs: {
+      delivery_environment: "staging",
+      delivery_operation: "credential-check",
+      confirmation: `CHECK staging ${exactSha}`,
     },
-  );
-  assert.equal(decision.eligible, true);
-  const handoff = decision.secretDeadlineHandoff;
+  });
   assert.equal(
-    verifySecretStepStart(
-      "2026-08-27T00:25:59.999Z",
-      handoff,
-      fixture.event.inputs,
-    ),
+    (
+      await evaluateDeliveryEvent(manifest, credentialCheck, {
+        environmentProtection: exactProtection(),
+        requiredResult: "success",
+      })
+    ).eligible,
     true,
   );
-  for (const startedAt of [
-    handoff.act04_expires_at,
-    handoff.phase4_token_expires_at,
-    "2026-08-27T01:00:00.001Z",
-  ]) {
-    assert.throws(
-      () => verifySecretStepStart(startedAt, handoff, fixture.event.inputs),
-      /started at or after/,
+});
+
+test("wrong event, actor, ref, SHA, confirmation, checks, or production target fails", async () => {
+  const cases = [
+    { event_name: "push" },
+    { actor: "someone-else" },
+    { actor_id: 1 },
+    { triggering_actor: "unauthorized-rerunner" },
+    { ref: "refs/heads/main" },
+    { sha: "not-a-sha" },
+    { required_result: "failure" },
+    {
+      inputs: {
+        ...dispatchEvent().inputs,
+        confirmation: `DEPLOY staging ${"b".repeat(40)}`,
+      },
+    },
+    {
+      inputs: { ...dispatchEvent().inputs, delivery_environment: "production" },
+    },
+  ];
+  for (const override of cases) {
+    const decision = await evaluateDeliveryEvent(
+      manifest,
+      dispatchEvent(override),
+      { environmentProtection: exactProtection() },
+    );
+    assert.equal(decision.eligible, false, JSON.stringify(override));
+  }
+});
+
+test("live environment protection requires one exact reviewer and one develop policy", () => {
+  assert.deepEqual(validateEnvironmentProtection(exactProtection()), []);
+  const cases = [
+    (value) => (value.environment.can_admins_bypass = true),
+    (value) =>
+      (value.environment.protection_rules[0].prevent_self_review = true),
+    (value) =>
+      (value.environment.protection_rules[0].reviewers[0].reviewer.login =
+        "other"),
+    (value) => value.environment.protection_rules.push({ type: "wait_timer" }),
+    (value) => (value.branchPolicies.branch_policies[0].name = "main"),
+    (value) =>
+      value.branchPolicies.branch_policies.push({ id: 2, name: "release" }),
+  ];
+  for (const mutate of cases) {
+    const candidate = exactProtection();
+    mutate(candidate);
+    assert.notDeepEqual(validateEnvironmentProtection(candidate), []);
+  }
+});
+
+test("approval history accepts one canonical current-attempt non-author AI PASS receipt", () => {
+  const fixture = approvalFixture();
+  assert.deepEqual(
+    validateApprovalHistory(fixture.history, fixture.context),
+    [],
+  );
+  assert.equal(
+    runWorkflowApprovalGate(fixture.history, fixture.context).status,
+    0,
+  );
+});
+
+test("approval history rejects stale, extra, conflicting, forged-schema, author, and same-model records", () => {
+  const cases = [
+    (fixture) => fixture.history.push(clone(fixture.history[0])),
+    (fixture) => (fixture.context.runAttempt = 3),
+    (fixture) => (fixture.history[0].state = "rejected"),
+    (fixture) => (fixture.history[0].user.id = 1),
+    (fixture) => (fixture.receipt.environment_id = 1),
+    (fixture) => (fixture.receipt.exact_sha_author = true),
+    (fixture) =>
+      (fixture.receipt.coordinator_model = fixture.receipt.reviewer_model),
+    (fixture) => (fixture.receipt.no_cloudflare_secret_access = false),
+    (fixture) => (fixture.receipt.extra = "forbidden"),
+  ];
+  for (const mutate of cases) {
+    const fixture = approvalFixture();
+    mutate(fixture);
+    if (
+      fixture.history.length === 1 &&
+      fixture.history[0].comment === canonicalize(approvalFixture().receipt)
+    )
+      fixture.history[0].comment = canonicalize(fixture.receipt);
+    assert.notDeepEqual(
+      validateApprovalHistory(fixture.history, fixture.context),
+      [],
     );
   }
+  const noncanonical = approvalFixture();
+  noncanonical.history[0].comment = JSON.stringify(
+    noncanonical.receipt,
+    null,
+    2,
+  );
+  assert.match(
+    validateApprovalHistory(noncanonical.history, noncanonical.context).join(
+      "\n",
+    ),
+    /canonical/,
+  );
+  for (const suffix of ["\n", "\r\n"]) {
+    const altered = approvalFixture();
+    altered.history[0].comment += suffix;
+    assert.match(
+      validateApprovalHistory(altered.history, altered.context).join("\n"),
+      /canonical/,
+    );
+    assert.notEqual(
+      runWorkflowApprovalGate(altered.history, altered.context).status,
+      0,
+      `workflow gate accepted altered receipt suffix ${JSON.stringify(suffix)}`,
+    );
+  }
+});
+
+test("Wrangler identity and current deployment readback fail on account or traffic ambiguity", () => {
+  assert.equal(
+    verifyAccountIdentity({
+      loggedIn: true,
+      authType: "Account API Token",
+      accounts: [{ id: STAGING_ACCOUNT_ID, name: "selected account" }],
+    }),
+    true,
+  );
   assert.throws(
     () =>
-      verifySecretStepStart(
-        "2026-08-27T00:25:59Z",
-        { ...handoff, binding_sha256: "0".repeat(64) },
-        fixture.event.inputs,
-      ),
-    /does not bind/,
+      verifyAccountIdentity({
+        loggedIn: true,
+        authType: "Account API Token",
+        accounts: [{ id: "wrong", name: "wrong" }],
+      }),
+    /exactly the staging account/,
   );
-});
-
-test("runtime client enforces distinct connection and complete-response deadlines without retry", async () => {
-  {
-    const fixture = runtimeBinderFixture();
-    let calls = 0;
-    const decision = await evaluateDeliveryEvent(
-      fixture.manifest,
-      fixture.event,
-      {
-        http: async (_url, init) => {
-          calls += 1;
-          return await new Promise((resolve, reject) => {
-            const delayed = setTimeout(
-              () => resolve(jsonResponse({ message: "too late" })),
-              100,
-            );
-            init.signal.addEventListener(
-              "abort",
-              () => {
-                clearTimeout(delayed);
-                reject(init.signal.reason);
-              },
-              { once: true },
-            );
-          });
-        },
-        now: new Date("2026-08-27T00:09:00Z"),
-        connectTimeoutMs: 10,
-        responseTimeoutMs: 60,
-      },
-    );
-    assert.equal(calls, 1);
-    assert.equal(decision.eligible, false);
-    assert.match(decision.reasons.join("\n"), /connection deadline exceeded/);
-  }
-
-  {
-    const fixture = runtimeBinderFixture();
-    let calls = 0;
-    const decision = await evaluateDeliveryEvent(
-      fixture.manifest,
-      fixture.event,
-      {
-        http: async (_url, init) => {
-          calls += 1;
-          const response = jsonResponse({ message: "headers only" });
-          return {
-            status: response.status,
-            headers: response.headers,
-            text: async () =>
-              await new Promise((_, reject) => {
-                init.signal.addEventListener(
-                  "abort",
-                  () => reject(init.signal.reason),
-                  { once: true },
-                );
-              }),
-          };
-        },
-        now: new Date("2026-08-27T00:09:00Z"),
-        connectTimeoutMs: 10,
-        responseTimeoutMs: 30,
-      },
-    );
-    assert.equal(calls, 1);
-    assert.equal(decision.eligible, false);
-    assert.match(
-      decision.reasons.join("\n"),
-      /complete-response deadline exceeded/,
-    );
-  }
-
-  {
-    const fixture = runtimeBinderFixture();
-    let lastSignal;
-    const decision = await evaluateDeliveryEvent(
-      fixture.manifest,
-      fixture.event,
-      {
-        http: async (url, init) => {
-          lastSignal = init.signal;
-          return fixture.http(url, init);
-        },
-        now: new Date("2026-08-27T00:09:00Z"),
-        connectTimeoutMs: 20,
-        responseTimeoutMs: 50,
-      },
-    );
-    assert.equal(decision.eligible, true);
-    await new Promise((resolvePromise) => setTimeout(resolvePromise, 60));
-    assert.equal(lastSignal.aborted, false, "success timers must be cleared");
-  }
-});
-
-test("runtime binder rejects reruns, spoofed checks, network failure, and fixture-like inputs", async () => {
-  for (const [name, mutate, pattern] of [
-    [
-      "rerun",
-      (fixture) => {
-        fixture.responses.get(
-          `/repos/KARSIFT/vocanova-platform/actions/runs/${fixture.event.run_id}`,
-        ).run_attempt = 2;
-      },
-      /first binder attempt/,
-    ],
-    [
-      "spoofed check",
-      (fixture) => {
-        fixture.responses.get(
-          `/repos/KARSIFT/vocanova-platform/commits/${fixture.event.sha}/check-runs?filter=all&per_page=100&page=1`,
-        ).check_runs[0].details_url =
-          "https://github.com/KARSIFT/vocanova-platform/actions/runs/101/job/9999";
-      },
-      /required check|hosted check/,
-    ],
-    [
-      "non-canonical push URL",
-      (fixture) => {
-        fixture.responses.get(
-          `/repos/KARSIFT/vocanova-platform/actions/runs?branch=develop&event=push&head_sha=${fixture.event.sha}&per_page=100&page=1`,
-        ).workflow_runs[0].url =
-          "https://attacker.invalid/repos/KARSIFT/vocanova-platform/actions/runs/101";
-      },
-      /run URL is not canonical/,
-    ],
-    [
-      "pending pre-review check",
-      (fixture) => {
-        const check = fixture.responses.get(
-          `/repos/KARSIFT/vocanova-platform/commits/${fixture.event.sha}/check-runs?filter=all&per_page=100&page=1`,
-        ).check_runs[0];
-        check.status = "in_progress";
-        check.conclusion = null;
-        check.completed_at = null;
-      },
-      /pending pre-review candidate/,
-    ],
-    [
-      "fixture-mode input",
-      (fixture) => {
-        fixture.event.inputs.fixture_mode = "true";
-        fixture.failAllRequests = true;
-      },
-      /GitHub API request failed/,
-    ],
-  ]) {
-    const fixture = runtimeBinderFixture();
-    mutate(fixture);
-    const decision = await evaluateDeliveryEvent(
-      fixture.manifest,
-      fixture.event,
-      {
-        http: async (...args) =>
-          fixture.failAllRequests
-            ? jsonResponse({ message: "offline" }, 503)
-            : fixture.http(...args),
-        now: new Date("2026-08-27T00:09:00Z"),
-        rateLimitMinimum: 40,
-      },
-    );
-    assert.equal(decision.eligible, false, name);
-    assert.match(decision.reasons.join("\n"), pattern, name);
-  }
-});
-
-test("pull requests and prepared staging without a runtime binder cannot deploy", async () => {
-  const manifest = loadDeliveryManifest(repositoryRoot);
-  const pullRequest = await evaluateDeliveryEvent(manifest, {
-    event_name: "pull_request",
-    ref: "refs/pull/1/merge",
-    sha: exactSha,
-    inputs: {},
-  });
-  assert.equal(pullRequest.eligible, false);
-  assert.match(pullRequest.reasons.join("\n"), /explicit workflow_dispatch/);
-
-  const manual = await evaluateDeliveryEvent(manifest, eventFor("staging"));
-  assert.equal(manual.eligible, false);
-  assert.match(
-    manual.reasons.join("\n"),
-    /URL is not canonical|digest is invalid/,
-  );
-});
-
-test("the legacy production evaluator remains structurally held but passes a complete synthetic authorized record", async () => {
-  const manifest = authorizedManifest("production");
-  assert.deepEqual(
-    await evaluateDeliveryEvent(manifest, eventFor("production"), {
-      now: new Date("2026-08-22T00:00:00Z"),
+  assert.equal(
+    resolveCurrentDeployment({
+      versions: [{ version_id: versionId, percentage: 100 }],
     }),
-    { eligible: true, environment: "production", reasons: [] },
+    versionId,
   );
-});
-
-test("stale SHA, missing authority, wrong ref, environment mix-up, and cost fail closed", async () => {
-  const cases = [
-    ["stale SHA", { reviewed_sha: "b".repeat(40) }, /reviewed_sha/],
-    ["missing authority", { action_authority_url: "" }, /action authority/],
-    ["wrong ref", {}, /requires refs\/heads\/main/, "refs/heads/develop"],
-    [
-      "environment mix-up",
-      { delivery_environment: "staging" },
-      /VOC-080-HOLD-00|runtime binder|canonical issue|digest is invalid/,
-    ],
-    ["cost", { estimated_cost_cents: "1" }, /cost exceeds/],
-    [
-      "bad rollback ID",
-      { previous_api_version_id: "latest" },
-      /version ID is invalid/,
-    ],
-    ["bad confirmation", { confirmation: "yes" }, /manual confirmation/],
-  ];
-  for (const [name, inputChanges, pattern, ref = "refs/heads/main"] of cases) {
-    const decision = await evaluateDeliveryEvent(
-      authorizedManifest("production"),
-      {
-        ...eventFor("production"),
-        ref,
-        inputs: { ...eventFor("production").inputs, ...inputChanges },
-      },
-      { now: new Date("2026-08-22T00:00:00Z") },
+  for (const deployment of [
+    { versions: [] },
+    { versions: [{ version_id: versionId, percentage: 99 }] },
+    {
+      versions: [
+        { version_id: versionId, percentage: 50 },
+        { version_id: "22222222-2222-4222-8222-222222222222", percentage: 50 },
+      ],
+    },
+  ])
+    assert.throws(
+      () => resolveCurrentDeployment(deployment),
+      /one version UUID/,
     );
-    assert.equal(decision.eligible, false, name);
-    assert.match(decision.reasons.join("\n"), pattern, name);
-  }
 });
 
-test("production additionally requires matching staging and backup evidence", async () => {
-  const manifest = authorizedManifest("production");
-  const passing = await evaluateDeliveryEvent(
-    manifest,
-    eventFor("production"),
-    { now: new Date("2026-08-22T00:00:00Z") },
-  );
-  assert.equal(passing.eligible, true);
-
-  const missing = eventFor("production");
-  missing.inputs.backup_evidence_url = "";
-  const blocked = await evaluateDeliveryEvent(manifest, missing, {
-    now: new Date("2026-08-22T00:00:00Z"),
-  });
-  assert.equal(blocked.eligible, false);
-  assert.match(blocked.reasons.join("\n"), /backup\/Time Travel evidence/);
-});
-
-test("workflow policy rejects PR secret exposure, cancellation, and an unguarded production job", () => {
-  const source = readFileSync(
-    resolve(repositoryRoot, ".github/workflows/ci.yml"),
-    "utf8",
-  );
-  for (const [changed, pattern] of [
-    [
-      source.replace(
-        "cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}",
-        "cancel-in-progress: true",
-      ),
-      /must not be cancelled/,
-    ],
-    [
-      source.replace(
-        "needs.delivery-gate.outputs.environment == 'production'",
-        "github.ref == 'refs/heads/main'",
-      ),
-      /production delivery job missing/,
-    ],
-    [
-      source.replace(
-        "run: pnpm run ci:delivery",
-        "env:\n          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}\n        run: pnpm run ci:delivery",
-      ),
-      /delivery policy job must be credential-free/,
-    ],
-    [
-      source.replace(
-        'test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"',
-        "true",
-      ),
-      /staging delivery job missing/,
-    ],
-    [
-      source.replace(
-        "--verify-secret-step-start",
-        "--unreviewed-secret-step-bypass",
-      ),
-      /verify-secret-step-start|atomically verify/,
-    ],
-    [
-      source
-        .replace(
-          'test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"',
-          'test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"\n          # moved before deadline verification',
-        )
-        .replace(
-          'secret_step_started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"',
-          'secret_step_started_at="$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)"\n          test -n "$CLOUDFLARE_API_TOKEN" && test -n "$CLOUDFLARE_ACCOUNT_ID"',
-        ),
-      /atomically verify/,
-    ],
-  ]) {
-    assert.ok(
-      inspectDeliveryWorkflow(changed).some((error) => pattern.test(error)),
-    );
-  }
-});
-
-test("version evidence resolves one exact tagged UUID and rejects missing or ambiguous tags", () => {
+test("version tag resolution remains exact and unambiguous", () => {
   const versions = [
-    { id: apiVersion, annotations: { "workers/tag": `sha-${exactSha}` } },
-    { id: webVersion, annotations: { "workers/tag": "other" } },
+    { id: versionId, annotations: { "workers/tag": `sha-${exactSha}` } },
   ];
-  assert.equal(resolveVersionId(versions, `sha-${exactSha}`), apiVersion);
-  assert.throws(() => resolveVersionId(versions, "missing"), /exactly one/);
+  assert.equal(resolveVersionId(versions, `sha-${exactSha}`), versionId);
   assert.throws(
-    () => resolveVersionId([...versions, versions[0]], `sha-${exactSha}`),
+    () =>
+      resolveVersionId([...versions, clone(versions[0])], `sha-${exactSha}`),
     /exactly one/,
   );
 });
 
-function eventFor(environment) {
-  const production = environment === "production";
-  return {
-    event_name: "workflow_dispatch",
-    ref: production ? "refs/heads/main" : "refs/heads/develop",
-    sha: exactSha,
-    inputs: {
-      delivery_environment: environment,
-      reviewed_sha: exactSha,
-      action_authority_url: evidence,
-      estimated_cost_cents: "0",
-      previous_api_version_id: apiVersion,
-      previous_web_version_id: webVersion,
-      confirmation: `DEPLOY ${environment} ${exactSha}`,
-      staging_evidence_url: production ? evidence : "",
-      backup_evidence_url: production ? evidence : "",
-    },
-  };
-}
-
-function authorizedManifest(environment) {
-  const manifest = structuredClone(loadDeliveryManifest(repositoryRoot));
-  manifest.status = "authorized";
-  const record = manifest.environments[environment];
-  record.state = "authorized";
-  record.cost_ceiling_cents = 0;
-  record.d1.database_id =
-    environment === "staging"
-      ? "33333333-3333-4333-8333-333333333333"
-      : "44444444-4444-4444-8444-444444444444";
-  record.routes.api = `https://api-${environment}.example.com`;
-  record.routes.web = `https://web-${environment}.example.com`;
-  record.authority_evidence_url = evidence;
-  record.resource_manifest_evidence_url = evidence;
-  record.rollback_rehearsal_url = evidence;
-  record.authorization_expires_at = "2026-08-23T00:00:00Z";
-  if (environment === "production") {
-    record.staging_evidence_url = evidence;
-    record.backup_evidence_url = evidence;
-  }
-  return manifest;
-}
-
-function runtimeBinderFixture() {
-  const manifest = loadDeliveryManifest(repositoryRoot);
-  const binder = manifest.environments.staging.prepared_runtime_binder;
-  const definitions = binder.contract.shared_definitions;
-  const bodies = {};
-  for (const [name, schema] of Object.entries(
-    binder.contract.record_body_schemas,
-  )) {
-    bodies[name] = exampleForSchema(schema, definitions);
-  }
-
-  const pr1Sha = "1".repeat(40);
-  const pr2Head = "2".repeat(40);
-  const pr2Merge = exactSha;
-  const pr2 = {
-    pull_request_number: 166,
-    head_sha: pr2Head,
-    merge_sha: pr2Merge,
-    base: "develop",
-    ref: "refs/heads/develop",
-    merged_at: "2026-08-27T00:02:00Z",
-  };
-  const executableDigests = {
-    manifest_sha256: fileSha(
-      "infrastructure/cloudflare/delivery-manifest.json",
-    ),
-    workflow_sha256: fileSha(".github/workflows/ci.yml"),
-    policy_sha256: fileSha("scripts/foundation/cloudflare-delivery-policy.mjs"),
-  };
-  const tupleBinding = {
-    schema: "vocanova-voc096-prepared-staging-tuple-v1",
-    canonicalization: "RFC-8785-JCS",
-    sha256: binder.prepared_staging_tuple_sha256,
-  };
-  const actor = (id, role, revision) => ({
-    actor_id: id,
-    role,
-    provenance: {
-      schema: "vocanova-voc096-actor-provenance-v1",
-      participant_kind: "separately-instantiated-ai",
-      assignment_scope: "KARSIFT/vocanova-platform#158/VOC-096",
-      assignment_revision: revision,
-      session_reference: `session-${id}`,
-      provider: "OpenAI",
-      model: "test-fixture",
-      non_authorship_of_reviewed_revision: true,
-    },
-  });
-  const settingsActor = actor(
-    "settings-authority",
-    "settings-accountable-authority",
-    pr1Sha,
-  );
-  const operator = actor(
-    "settings-operator",
-    "github-settings-operator",
-    pr1Sha,
-  );
-  const pr2Reviewer = actor(
-    "pr2-reviewer",
-    "merged-pr2-exact-reviewer",
-    pr2Merge,
-  );
-  const authorityActor = actor(
-    "act04-authority",
-    "act04-accountable-actor",
-    pr2Merge,
-  );
-  const binderReviewer = actor(
-    "binder-reviewer",
-    "act04-binder-reviewer",
-    pr2Merge,
-  );
-
-  Object.assign(bodies.settings_authority, {
-    actor: settingsActor,
-    authorized_settings_operator: operator,
-    pr1: { ...bodies.settings_authority.pr1, head_sha: pr1Sha },
-    tuple_binding: tupleBinding,
-    expires_at: "2026-08-27T00:30:00Z",
-  });
-  bodies.settings_authority.environment.mutated_secret_names = [
-    "CLOUDFLARE_ACCOUNT_ID",
-    "CLOUDFLARE_API_TOKEN",
-  ];
-  Object.assign(bodies.act03, {
-    actor: operator,
-    operation: bodies.settings_authority.operation,
-    pr1: bodies.settings_authority.pr1,
-    environment: bodies.settings_authority.environment,
-    phase4_token: bodies.settings_authority.phase4_token,
-    rollback: bodies.settings_authority.rollback,
-    tuple_binding: tupleBinding,
-  });
-  bodies.act03.phase4_token.expires_at = "2026-08-27T01:00:00Z";
-
-  const pushRuns = REQUIRED_WORKFLOW_FIXTURES.map((fixture, index) => {
-    const runId = String(101 + index);
-    const suiteId = String(301 + index);
-    return {
-      id: Number(runId),
-      name: fixture.workflow,
-      path: fixture.path,
-      workflow_id: fixture.workflowId,
-      check_suite_id: Number(suiteId),
-      event: "push",
-      head_branch: "develop",
-      head_sha: pr2Merge,
-      status: "completed",
-      conclusion: "success",
-      run_attempt: 1,
-      created_at: "2026-08-27T00:03:00Z",
-      run_started_at: "2026-08-27T00:03:10Z",
-      updated_at: "2026-08-27T00:03:40Z",
-      url: `https://api.github.com/repos/KARSIFT/vocanova-platform/actions/runs/${runId}`,
-      html_url: `https://github.com/KARSIFT/vocanova-platform/actions/runs/${runId}`,
-    };
-  });
-  const checkRuns = REQUIRED_WORKFLOW_FIXTURES.map((fixture, index) => ({
-    id: 201 + index,
-    name: fixture.check,
-    head_sha: pr2Merge,
-    check_suite: { id: 301 + index },
-    app: { id: 15368, slug: "github-actions" },
-    status: "completed",
-    conclusion: "success",
-    details_url: `https://github.com/KARSIFT/vocanova-platform/actions/runs/${101 + index}/job/${201 + index}`,
-    started_at: "2026-08-27T00:03:20Z",
-    completed_at: "2026-08-27T00:03:30Z",
-  }));
-  const hostedChecks = checkRuns
-    .map((check, index) => ({
-      name: check.name,
-      head_sha: check.head_sha,
-      check_run_id: String(check.id),
-      check_suite_id: String(check.check_suite.id),
-      app_id: check.app.id,
-      app_slug: check.app.slug,
-      status: check.status,
-      conclusion: check.conclusion,
-      details_url: check.details_url,
-      started_at: check.started_at,
-      completed_at: check.completed_at,
-      workflow_run: {
-        ...pushRuns[index],
-        id: String(pushRuns[index].id),
-        check_suite_id: String(pushRuns[index].check_suite_id),
-      },
-    }))
-    .sort((left, right) => left.name.localeCompare(right.name));
-
-  Object.assign(bodies.pr2_exact_review, {
-    actor: pr2Reviewer,
-    verdict: "PASS",
-    blocking_findings: [],
-    pr2,
-    changed_files: [
-      ".github/README.md",
-      "docs/governance/repository-settings.md",
-      "docs/governance/repository-settings-current.yaml",
-      "docs/operations/11-devops-and-ci-cd.md",
-      "docs/operations/cloudflare-delivery.md",
-    ],
-    hosted_checks: hostedChecks,
-    executable_digests: executableDigests,
-    tuple_binding: tupleBinding,
-  });
-  Object.assign(bodies.act04_authority, {
-    actor: authorityActor,
-    pr2,
-    executable_digests: executableDigests,
-    tuple_binding: tupleBinding,
-    staging_assertions: bodies.pr2_exact_review.staging_assertions,
-    nonce: "0123456789abcdef0123456789abcdef",
-    maximum_dispatches: 1,
-    expires_at: "2026-08-27T00:26:00Z",
-  });
-  Object.assign(bodies.binder_review, {
-    actor: binderReviewer,
-    verdict: "PASS",
-    blocking_findings: [],
-    pr2,
-    executable_digests: executableDigests,
-    tuple_binding: tupleBinding,
-    staging_assertions: bodies.pr2_exact_review.staging_assertions,
-  });
-
-  const records = {
-    settings_authority: recordFixture(
-      501,
-      bodies.settings_authority,
-      "2026-08-27T00:00:00Z",
-    ),
-    act03: recordFixture(502, bodies.act03, "2026-08-27T00:01:00Z"),
-    pr2_exact_review: recordFixture(
-      503,
-      bodies.pr2_exact_review,
-      "2026-08-27T00:05:00Z",
-    ),
-    act04_authority: recordFixture(
-      504,
-      bodies.act04_authority,
-      "2026-08-27T00:06:00Z",
-    ),
-    binder_review: recordFixture(
-      505,
-      bodies.binder_review,
-      "2026-08-27T00:07:00Z",
-    ),
-  };
-  const reference = (record) => ({
-    url: record.html_url,
-    raw_body_sha256: shaText(record.body),
-  });
-  bodies.act03.settings_authority = {
-    hold_id: "VOC-085-HOLD-00",
-    evidence: reference(records.settings_authority),
-  };
-  records.act03 = recordFixture(502, bodies.act03, "2026-08-27T00:01:00Z");
-  bodies.pr2_exact_review.act03 = reference(records.act03);
-  records.pr2_exact_review = recordFixture(
-    503,
-    bodies.pr2_exact_review,
-    "2026-08-27T00:05:00Z",
-  );
-  bodies.act04_authority.act03 = reference(records.act03);
-  bodies.act04_authority.pr2_exact_review = reference(records.pr2_exact_review);
-  records.act04_authority = recordFixture(
-    504,
-    bodies.act04_authority,
-    "2026-08-27T00:06:00Z",
-  );
-  bodies.binder_review.act03 = reference(records.act03);
-  bodies.binder_review.pr2_exact_review = reference(records.pr2_exact_review);
-  bodies.binder_review.authority = reference(records.act04_authority);
-  records.binder_review = recordFixture(
-    505,
-    bodies.binder_review,
-    "2026-08-27T00:07:00Z",
-  );
-
-  const inputs = {
-    delivery_environment: "staging",
-    reviewed_sha: pr2Merge,
-    act03_evidence_url: records.act03.html_url,
-    act03_evidence_sha256: shaText(records.act03.body),
-    pr2_review_url: records.pr2_exact_review.html_url,
-    pr2_review_sha256: shaText(records.pr2_exact_review.body),
-    action_authority_url: records.act04_authority.html_url,
-    action_authority_sha256: shaText(records.act04_authority.body),
-    binder_review_url: records.binder_review.html_url,
-    binder_review_sha256: shaText(records.binder_review.body),
-    dispatch_nonce: bodies.act04_authority.nonce,
-    estimated_cost_cents: "0",
-    previous_api_version_id: apiVersion
-      .replace(/^11111111/, "ace13c0b")
-      .replace(/1111-4111-8111-111111111111$/, "c148-4ef1-ad9a-fdfdb07f264f"),
-    previous_web_version_id: "5255e64d-872e-469f-90b6-bea49efd5e75",
-    confirmation: `DEPLOY staging ${pr2Merge}`,
-    staging_evidence_url: "",
-    backup_evidence_url: "",
-  };
-  const runId = "999";
-  const responses = new Map();
-  responses.set("/rate_limit", {
-    resources: { core: { remaining: 500 } },
-  });
-  for (const record of Object.values(records)) {
-    responses.set(
-      `/repos/KARSIFT/vocanova-platform/issues/comments/${record.id}`,
-      record,
+test(
+  "locked Wrangler no-help parser harness reaches missing-auth and rejects unknown options with network denied",
+  { timeout: 60_000 },
+  () => {
+    const directory = mkdtempSync(
+      resolve(tmpdir(), "vocanova-wrangler-parser-"),
     );
-  }
-  responses.set("/repos/KARSIFT/vocanova-platform/pulls/166", {
-    number: 166,
-    state: "closed",
-    merged: true,
-    merged_at: pr2.merged_at,
-    merge_commit_sha: pr2Merge,
-    head: { sha: pr2Head },
-    base: { ref: "develop" },
-  });
-  responses.set(
-    "/repos/KARSIFT/vocanova-platform/pulls/166/files?per_page=100&page=1",
-    REQUIRED_PR2_FILES_FIXTURE.map((filename) => ({ filename })),
-  );
-  responses.set(`/repos/KARSIFT/vocanova-platform/actions/runs/${runId}`, {
-    id: Number(runId),
-    event: "workflow_dispatch",
-    head_sha: pr2Merge,
-    head_branch: "develop",
-    run_attempt: 1,
-    created_at: "2026-08-27T00:08:00Z",
-    display_title: `CI staging authority=${inputs.action_authority_sha256}-${inputs.dispatch_nonce}`,
-  });
-  responses.set(
-    `/repos/KARSIFT/vocanova-platform/actions/runs?branch=develop&event=push&head_sha=${pr2Merge}&per_page=100&page=1`,
-    { total_count: 3, workflow_runs: pushRuns },
-  );
-  responses.set(
-    `/repos/KARSIFT/vocanova-platform/commits/${pr2Merge}/check-runs?filter=all&per_page=100&page=1`,
-    { total_count: 3, check_runs: checkRuns },
-  );
-  responses.set(
-    `/repos/KARSIFT/vocanova-platform/actions/workflows/ci.yml/runs?branch=develop&event=workflow_dispatch&head_sha=${pr2Merge}&per_page=100&page=1`,
-    {
-      total_count: 1,
-      workflow_runs: [
-        {
-          id: Number(runId),
-          created_at: "2026-08-27T00:08:00Z",
-          display_title: `CI staging authority=${inputs.action_authority_sha256}-${inputs.dispatch_nonce}`,
-        },
-      ],
-    },
-  );
-  return {
-    manifest,
-    event: {
-      event_name: "workflow_dispatch",
-      ref: "refs/heads/develop",
-      sha: pr2Merge,
-      run_id: runId,
-      inputs,
-    },
-    http: async (url, init) => {
-      assert.equal(init.headers.Authorization, undefined);
-      const path = new URL(url).pathname + new URL(url).search;
-      if (!responses.has(path))
-        return jsonResponse({ message: `missing fixture ${path}` }, 404);
-      return jsonResponse(responses.get(path));
-    },
-    responses,
-  };
-}
-
-const REQUIRED_WORKFLOW_FIXTURES = [
-  {
-    check: "ci required",
-    workflow: "CI",
-    path: ".github/workflows/ci.yml",
-    workflowId: 321329558,
-  },
-  {
-    check: "security required",
-    workflow: "Security",
-    path: ".github/workflows/security.yml",
-    workflowId: 337617927,
-  },
-  {
-    check: "structure",
-    workflow: "Governance",
-    path: ".github/workflows/governance.yml",
-    workflowId: 337617928,
-  },
-];
-const REQUIRED_PR2_FILES_FIXTURE = [
-  ".github/README.md",
-  "docs/governance/repository-settings-current.yaml",
-  "docs/governance/repository-settings.md",
-  "docs/operations/11-devops-and-ci-cd.md",
-  "docs/operations/cloudflare-delivery.md",
-];
-
-function exampleForSchema(schema, definitions) {
-  if (schema.$ref)
-    return exampleForSchema(
-      definitions[schema.$ref.split("/").at(-1)],
-      definitions,
-    );
-  if (schema.allOf) {
-    let result = {};
-    for (const branch of schema.allOf) {
-      if (branch.$ref)
-        result = {
-          ...result,
-          ...exampleForSchema(
-            definitions[branch.$ref.split("/").at(-1)],
-            definitions,
-          ),
-        };
-      for (const [key, child] of Object.entries(branch.properties ?? {}))
-        result[key] = exampleForSchema(child, definitions);
-    }
-    return result;
-  }
-  if (Object.hasOwn(schema, "const")) return structuredClone(schema.const);
-  if (schema.enum) return structuredClone(schema.enum[0]);
-  const type = Array.isArray(schema.type) ? schema.type[0] : schema.type;
-  if (type === "object") {
-    const result = {};
-    for (const key of schema.required ?? [])
-      result[key] = exampleForSchema(schema.properties[key], definitions);
-    return result;
-  }
-  if (type === "array") {
-    if (schema.prefixItems)
-      return schema.prefixItems.map((item) =>
-        exampleForSchema(item, definitions),
+    try {
+      const worker = resolve(directory, "worker.mjs");
+      const migrations = resolve(directory, "migrations");
+      const config = resolve(directory, "wrangler.jsonc");
+      const preload = resolve(directory, "deny-network.cjs");
+      mkdirSync(migrations);
+      writeFileSync(
+        worker,
+        "export default { fetch() { return new Response('ok'); } };\n",
       );
-    return Array.from({ length: schema.minItems ?? 0 }, () =>
-      exampleForSchema(schema.items, definitions),
-    );
-  }
-  if (type === "integer") return schema.minimum ?? 1;
-  if (type === "null") return null;
-  if (type === "string") return patternValue(schema.pattern, schema.minLength);
-  throw new Error(
-    `fixture cannot instantiate schema ${JSON.stringify(schema)}`,
-  );
-}
+      writeFileSync(
+        resolve(migrations, "0001_parser.sql"),
+        "CREATE TABLE parser_test (id INTEGER PRIMARY KEY);\n",
+      );
+      writeFileSync(
+        config,
+        JSON.stringify({
+          name: "vocanova-parser-harness",
+          main: worker,
+          compatibility_date: "2026-08-01",
+          send_metrics: false,
+          d1_databases: [
+            {
+              binding: "DB",
+              database_name: "vocanova-parser-harness",
+              database_id: "33333333-3333-4333-8333-333333333333",
+              migrations_dir: migrations,
+            },
+          ],
+        }),
+      );
+      writeFileSync(
+        preload,
+        [
+          "const deny=()=>{throw new Error('VOCANOVA_OUTBOUND_NETWORK_DENIED')};",
+          "global.fetch=deny;",
+          "for(const name of ['node:net','node:tls']){const mod=require(name);mod.connect=deny;mod.createConnection=deny;}",
+          "for(const name of ['node:http','node:https']){const mod=require(name);mod.request=deny;mod.get=deny;}",
+        ].join("\n"),
+      );
+      const wrangler = resolve(
+        repositoryRoot,
+        "apps/api-worker/node_modules/wrangler/bin/wrangler.js",
+      );
+      const commands = [
+        ["d1", "migrations", "apply", "DB", "--remote", "--env", "staging"],
+        ["deployments", "status", "--env", "staging", "--json"],
+        [
+          "versions",
+          "deploy",
+          `${versionId}@100%`,
+          "--env",
+          "staging",
+          "--yes",
+          "--message",
+          "parser harness promotion",
+        ],
+        [
+          "rollback",
+          versionId,
+          "--env",
+          "staging",
+          "--yes",
+          "--message",
+          "parser harness rollback",
+        ],
+      ];
+      const env = {
+        CI: "1",
+        HOME: directory,
+        PATH: process.env.PATH,
+        NODE_OPTIONS: `--require=${preload}`,
+        WRANGLER_SEND_METRICS: "false",
+        XDG_CONFIG_HOME: resolve(directory, "xdg"),
+      };
+      for (const argv of commands) {
+        assert.equal(argv.includes("--help"), false);
+        const valid = spawnSync(
+          process.execPath,
+          [wrangler, ...argv, "--config", config],
+          { cwd: directory, encoding: "utf8", env, timeout: 8_000 },
+        );
+        const validOutput = `${valid.stdout}\n${valid.stderr}`;
+        assert.notEqual(
+          valid.status,
+          0,
+          `${argv.join(" ")} unexpectedly succeeded`,
+        );
+        assert.match(
+          validOutput,
+          /not authenticated|CLOUDFLARE_API_TOKEN|wrangler login|non-interactive environment/i,
+          `${argv.join(" ")} did not reach the missing-auth guard:\n${validOutput}`,
+        );
+        assert.doesNotMatch(validOutput, /Unknown argument|Unknown option/i);
 
-function patternValue(pattern = "", minimum = 1) {
-  if (pattern.includes("{64}")) return "a".repeat(64);
-  if (pattern.includes("{40}")) return "a".repeat(40);
-  if (pattern.includes("issuecomment"))
-    return "https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-500";
-  if (pattern.includes("actions/runs"))
-    return "https://github.com/KARSIFT/vocanova-platform/actions/runs/101/job/201";
-  if (pattern.includes("T(")) return "2026-08-27T00:00:00Z";
-  if (pattern.includes("[0-9a-f]{8}-"))
-    return "11111111-1111-4111-8111-111111111111";
-  if (pattern.includes("[0-9a-f]{32")) return "0".repeat(32);
-  return "fixture-value".padEnd(minimum, "x");
-}
-
-function recordFixture(id, body, timestamp) {
-  return {
-    id,
-    html_url: `https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-${id}`,
-    issue_url:
-      "https://api.github.com/repos/KARSIFT/vocanova-platform/issues/158",
-    created_at: timestamp,
-    updated_at: timestamp,
-    body: canonicalize(body),
-    user: {
-      login: "m-e-h-r-d-a-a-d",
-      id: 7955432,
-      type: "User",
-      site_admin: false,
-    },
-    author_association: "CONTRIBUTOR",
-  };
-}
-
-function jsonResponse(value, status = 200) {
-  return new Response(JSON.stringify(value), {
-    status,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      date: "Wed, 27 Aug 2026 00:08:30 GMT",
-      "x-ratelimit-remaining": "500",
-    },
-  });
-}
-
-function shaText(value) {
-  return createHash("sha256").update(value).digest("hex");
-}
-
-function fileSha(path) {
-  return shaText(readFileSync(resolve(repositoryRoot, path)));
-}
+        const invalid = spawnSync(
+          process.execPath,
+          [wrangler, ...argv, "--vocanova-unknown-option", "--config", config],
+          { cwd: directory, encoding: "utf8", env, timeout: 8_000 },
+        );
+        const invalidOutput = `${invalid.stdout}\n${invalid.stderr}`;
+        assert.notEqual(invalid.status, 0);
+        assert.match(invalidOutput, /Unknown argument|Unknown option/i);
+      }
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  },
+);

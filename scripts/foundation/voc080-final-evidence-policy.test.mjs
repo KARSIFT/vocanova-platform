@@ -10,10 +10,6 @@ import {
   inspectTransitionVisual,
   validateFinalEvidence,
 } from "./voc080-final-evidence-policy.mjs";
-import {
-  inspectDeliveryWorkflow,
-  validateDeliveryRepository,
-} from "./cloudflare-delivery-policy.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 const readJson = (relative) =>
@@ -29,6 +25,22 @@ const visual = readFileSync(
 );
 
 const clone = (value) => structuredClone(value);
+const standardReadyDelivery = () => {
+  const candidate = clone(delivery);
+  candidate.status = "standard-ready";
+  candidate.environments.staging.state = "standard-ready";
+  delete candidate.environments.staging.prepared_runtime_binder;
+  return candidate;
+};
+const preparedDelivery = () => {
+  const candidate = clone(delivery);
+  candidate.status = "prepared";
+  candidate.environments.staging.state = "prepared";
+  candidate.environments.staging.prepared_runtime_binder = {
+    runtime_evidence: null,
+  };
+  return candidate;
+};
 const packageFiles = [
   "README.md",
   "change.yaml",
@@ -41,19 +53,14 @@ const packageFiles = [
   "release-plan.md",
 ];
 const inspect = (candidateRecord = record, candidateDelivery = delivery) =>
-  inspectTransitionRecord(
-    candidateRecord,
-    retirement,
-    candidateDelivery,
-    validateDeliveryRepository(repositoryRoot, candidateDelivery),
-  );
+  inspectTransitionRecord(candidateRecord, retirement, candidateDelivery, []);
 
 test("the complete VOC-080 repository transition evidence is internally consistent", () => {
   assert.deepEqual(validateFinalEvidence(repositoryRoot), []);
 });
 
-test("legacy held evidence and only fully validated prepared staging are accepted", () => {
-  assert.deepEqual(inspect(), []);
+test("legacy held, validated prepared, and standard-ready staging are accepted", () => {
+  assert.deepEqual(inspect(record, standardReadyDelivery()), []);
   const legacy = clone(delivery);
   legacy.status = "held";
   legacy.environments.staging.state = "held";
@@ -63,8 +70,13 @@ test("legacy held evidence and only fully validated prepared staging are accepte
     ]),
     [],
   );
+  const prepared = preparedDelivery();
+  assert.deepEqual(
+    inspectTransitionRecord(record, retirement, prepared, []),
+    [],
+  );
   assert.match(
-    inspectTransitionRecord(record, retirement, delivery).join("\n"),
+    inspectTransitionRecord(record, retirement, prepared).join("\n"),
     /complete Cloudflare delivery validator/,
   );
 });
@@ -128,123 +140,85 @@ test("every unreviewed top-level/staging state combination fails closed", () => 
     candidate.status = top;
     candidate.environments.staging.state = staging;
     assert.match(
-      inspectDeliveryState(
-        candidate,
-        validateDeliveryRepository(repositoryRoot, candidate),
-      ).join("\n"),
-      /legacy held\/held or validated prepared\/prepared/,
+      inspectDeliveryState(candidate, []).join("\n"),
+      /legacy held\/held, validated prepared\/prepared, or standard-ready staging/,
       `${top}/${staging}`,
     );
   }
 });
 
-test("prepared staging composes with the complete manifest/config/workflow validator", () => {
+test("standard-ready staging removes binder dependence but preserves resource and production holds", () => {
   for (const [name, mutate, pattern] of [
     [
-      "missing runtime binder",
-      (candidate) =>
-        delete candidate.environments.staging.prepared_runtime_binder,
-      /runtime binder/,
+      "runtime binder is still present",
+      (candidate) => {
+        candidate.environments.staging.prepared_runtime_binder = {};
+      },
+      /prepared_runtime_binder/,
     ],
     [
-      "tuple digest drift",
+      "wrong branch",
       (candidate) => {
-        candidate.environments.staging.prepared_runtime_binder.prepared_staging_tuple_sha256 =
-          "0".repeat(64);
+        candidate.environments.staging.required_ref = "refs/heads/main";
       },
-      /tuple digest|canonicalization|manifest binding/,
-    ],
-    [
-      "schema digest drift",
-      (candidate) => {
-        candidate.environments.staging.prepared_runtime_binder.contract_digests.api_envelope_schema_sha256 =
-          "0".repeat(64);
-      },
-      /contract digest|manifest binding/,
-    ],
-    [
-      "generic issue URL fallback",
-      (candidate) => {
-        candidate.environments.staging.resource_manifest_evidence_url =
-          "https://github.com/KARSIFT/vocanova-platform/issues/158";
-      },
-      /dedicated canonical comments/,
-    ],
-    [
-      "publisher self assertion",
-      (candidate) => {
-        candidate.environments.staging.prepared_runtime_binder.publisher_trust_root.login =
-          "self-asserted";
-      },
-      /identity, registry, or limits/,
-    ],
-    [
-      "body/envelope conflation",
-      (candidate) => {
-        candidate.environments.staging.prepared_runtime_binder.contract.record_body_schemas.act04_authority.properties.html_url =
-          {
-            type: "string",
-          };
-      },
-      /self-asserted envelope|contract digest/,
-    ],
-    [
-      "standing runtime evidence",
-      (candidate) => {
-        candidate.environments.staging.prepared_runtime_binder.runtime_evidence =
-          {};
-      },
-      /without future evidence/,
+      /develop-bound/,
     ],
     [
       "nonzero cost",
       (candidate) => {
-        candidate.environments.staging.resources.incremental_vocanova_cost_cents = 1;
+        candidate.environments.staging.cost_ceiling_cents = 1;
       },
-      /resource, baseline, cost, privacy, or hold tuple/,
+      /cost ceiling/,
     ],
     [
-      "paid plan",
+      "wrong D1 resource",
       (candidate) => {
-        candidate.environments.staging.resources.workers_plan = "Paid";
+        candidate.environments.staging.d1.database_id =
+          "00000000-0000-4000-8000-000000000000";
       },
-      /resource, baseline, cost, privacy, or hold tuple/,
+      /D1 identity/,
     ],
     [
-      "production sentinel drift",
+      "wrong account resource",
       (candidate) => {
-        candidate.environments.production.routes.api =
-          "https://api-prod.vocanova.site";
+        candidate.environments.staging.resources.account_id =
+          "00000000000000000000000000000000";
       },
-      /production held environment or sentinel set/,
+      /resource tuple/,
+    ],
+    [
+      "runtime authority committed",
+      (candidate) => {
+        candidate.environments.staging.authority_evidence_url =
+          "https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5437898152";
+      },
+      /runtime authority/,
+    ],
+    [
+      "production activation",
+      (candidate) => {
+        candidate.environments.production.state = "active";
+      },
+      /production delivery/,
     ],
   ]) {
-    const candidate = clone(delivery);
+    const candidate = standardReadyDelivery();
     mutate(candidate);
-    const errors = inspect(record, candidate);
-    assert.match(errors.join("\n"), pattern, name);
-    assert.ok(
-      errors.some((error) =>
-        error.startsWith("prepared staging validation failed:"),
-      ),
-      `${name} bypassed complete-validator composition`,
-    );
+    assert.match(inspect(record, candidate).join("\n"), pattern, name);
   }
 });
 
-test("prepared compatibility cannot conceal workflow or production-hold weakening", () => {
-  const workflow = readFileSync(
-    resolve(repositoryRoot, ".github/workflows/ci.yml"),
-    "utf8",
+test("prepared compatibility composes with caller-provided validator errors", () => {
+  const prepared = preparedDelivery();
+  assert.match(
+    inspectTransitionRecord(record, retirement, prepared, [
+      "legacy prepared binder drift",
+    ]).join("\n"),
+    /prepared staging validation failed: legacy prepared binder drift/,
   );
-  assert.ok(
-    inspectDeliveryWorkflow(
-      workflow.replace(
-        "Recheck live runtime binder before any secret-bearing step",
-        "Skipped runtime binder recheck",
-      ),
-    ).some((error) => error.includes("Recheck live runtime binder")),
-  );
+});
+
+test("prepared compatibility cannot conceal production-hold weakening", () => {
   for (const hold of ["VOC-080-HOLD-01", "VOC-080-HOLD-02"]) {
     const weakened = clone(record);
     weakened.action_holds[hold].status = "released";

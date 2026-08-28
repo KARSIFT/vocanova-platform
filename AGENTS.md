@@ -236,17 +236,16 @@ synchronization is likewise a separately reviewed repository-only pull request; 
 part of branch finalization, not a second release or deployment.
 
 There is no automatic repository deployment, server-health polling, or scheduled
-Sentry-to-GitHub monitoring. VOC-094 Phase 1 provisioned and rollback-proved only the
-reviewed synthetic staging Workers, D1, and Custom Domains outside repository
-automation; Phase 2 separately verified external Ruflo. VOC-096 now permits the T10
-manual state machine to commit that exact staging tuple in `prepared` state while
-remaining ineligible until five strict post-PR1/PR2 runtime records, exact public
-GitHub readbacks, and one-use authority pass twice without credentials. Merging a
-branch still changes repository history only. `cloudflare-staging` and its two secret
-names remain absent/held/planned until separately authorized ACT-03 and its immediate
-documentation-only PR2. `VOC-080-HOLD-01` still gates all production traffic and D1
-migrations, and `HOLD-02` still gates production learner data. See
-`docs/operations/cloudflare-delivery.md`.
+Sentry-to-GitHub monitoring. VOC-094 through VOC-099 remain immutable historical
+evidence, but VOC-100 prospectively supersedes their future five-record binder,
+per-dispatch token-recreation, and per-dispatch PR/package requirements. Standard
+staging delivery is repository-ready only through the `cloudflare-staging` GitHub
+environment, branch-bound `workflow_dispatch`, exact same-run checks, and the
+separately authorized environment/secrets/delegation record. Merging a branch still
+changes repository history only and does not create settings, enter secrets, dispatch,
+deploy, or accept the shared-identity receipt risk. `VOC-080-HOLD-01` still gates all
+production traffic and D1 migrations, and `HOLD-02` still gates production learner
+data. See `docs/operations/cloudflare-delivery.md`.
 
 ChatGPT may receive read-only access to KARSIFT/vocanova-platform for
 repository-grounded product analysis, architecture analysis, specification

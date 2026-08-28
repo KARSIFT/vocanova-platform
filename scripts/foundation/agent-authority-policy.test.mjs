@@ -12,6 +12,58 @@ test("the repository has no executable local agent authority", () => {
   assert.deepEqual(validateAgentAuthority(repositoryRoot), []);
 });
 
+test("Cloudflare credential interface names are scoped to the canonical delivery workflow", () => {
+  const temporary = mkdtempSync(resolve(tmpdir(), "vocanova-agent-policy-"));
+  try {
+    mkdirSync(resolve(temporary, ".github/workflows"), { recursive: true });
+    mkdirSync(resolve(temporary, "scripts"), { recursive: true });
+    writeFileSync(resolve(temporary, "package.json"), JSON.stringify({}));
+    writeFileSync(
+      resolve(temporary, ".github/workflows/ci.yml"),
+      [
+        "on:",
+        "  workflow_dispatch:",
+        "jobs:",
+        "  unsafe:",
+        "    runs-on: ubuntu-24.04",
+        "    steps:",
+        '      - run: test -n "$CLOUDFLARE_API_TOKEN"',
+        "",
+      ].join("\n"),
+    );
+    writeFileSync(
+      resolve(temporary, "scripts/cloudflare-token.sh"),
+      'test -n "$CLOUDFLARE_API_TOKEN"\n',
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(
+      errors.some((error) =>
+        error.includes("unsafe Cloudflare delivery policy"),
+      ),
+    );
+    assert.ok(
+      errors.some(
+        (error) =>
+          error.includes("scripts/cloudflare-token.sh") &&
+          error.includes("Cloudflare credential interface"),
+      ),
+    );
+    assert.ok(
+      errors.every(
+        (error) =>
+          !(
+            error.includes(".github/workflows/ci.yml") &&
+            error.includes("prohibited external effect") &&
+            error.includes("Cloudflare credential interface")
+          ),
+      ),
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
 test("local orchestration, authority replacement, and external effects fail closed", () => {
   const temporary = mkdtempSync(resolve(tmpdir(), "vocanova-agent-policy-"));
   try {
