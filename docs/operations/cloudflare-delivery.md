@@ -80,8 +80,8 @@ Rotation is independent of a deployment, plan, or pull request.
 
 ## Standard manual staging delivery after settings action
 
-Only `workflow_dispatch` may request staging. It must be started by
-`m-e-h-r-d-a-a-d` on `develop`, name the exact event SHA in the confirmation
+Only `workflow_dispatch` may request staging. It must be started—and any attempt
+rerun—by `m-e-h-r-d-a-a-d` on `develop`, name the exact event SHA in the confirmation
 `DEPLOY staging <sha>`, and pass all required validation in that same run. The
 manifest/resource tuple, zero-cost ceiling, branch, actor, confirmation, and
 production holds are deterministic gates.
@@ -115,9 +115,9 @@ evaluated. No job-level environment expression, condition, or earlier step may
 reference either secret.
 
 Only then do bounded credential steps check the exact account, capture the unique
-100%-traffic API/web deployment UUIDs as rollback targets, run ordered compatible D1
-migrations, upload immutable SHA-tagged Worker versions, promote the exact UUIDs,
-and run bounded staging smoke. The workflow uses the locked Wrangler commands and no
+100%-traffic API/web deployment UUIDs as rollback targets, run the exact ordered D1
+migration ledger, upload immutable SHA-and-run-attempt-tagged Worker versions, promote
+the exact UUIDs, and run bounded staging smoke. The workflow uses the locked Wrangler commands and no
 credential-free test or `--help` result is treated as live deployment evidence.
 
 ## Ordered implementation and truth boundary
@@ -133,8 +133,9 @@ truthfully preclaimed. It is not repeated for ordinary dispatches or token rotat
 ## Cancellation, failure, and rollback
 
 Manual delivery runs cannot be automatically cancelled after migration starts.
-Failures before promotion leave traffic unchanged. Promotion or smoke failure restores
-the exact pre-promotion Worker version UUIDs. Worker rollback does not reverse D1:
+Failures before promotion leave traffic unchanged. Promotion or smoke failure attempts
+both API and web restoration independently and fails visibly if either exact
+pre-promotion Worker version cannot be restored. Worker rollback does not reverse D1:
 migrations remain expand-compatible and database recovery is forward correction.
 Missing settings, account/resource/cost drift, receipt defects, or production drift
 stop before writes. A compromised or over-scoped token is revoked immediately.

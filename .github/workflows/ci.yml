@@ -206,6 +206,7 @@ jobs:
         id: gate
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}
           REQUIRED_RESULT: ${{ needs.required.result }}
         run: >-
           node scripts/foundation/cloudflare-delivery-policy.mjs
@@ -238,22 +239,21 @@ jobs:
             --header "X-GitHub-Api-Version: 2022-11-28" \
             "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/approvals" \
             --output "$response_file"
-          receipt="$(jq -er 'if length == 1 then .[0].comment else error("expected exactly one approval record") end' "$response_file")"
-          canonical_receipt="$(printf '%s' "$receipt" | jq -cS .)"
-          test "$receipt" = "$canonical_receipt"
           jq -e \
             --arg login "m-e-h-r-d-a-a-d" \
             --argjson login_id 7955432 \
             --arg run_id "$GITHUB_RUN_ID" \
             --argjson run_attempt "$GITHUB_RUN_ATTEMPT" \
-            --arg sha "$GITHUB_SHA" \
-            --arg receipt "$receipt" '
-              length == 1 and
-              .[0].state == "approved" and
-              .[0].user.login == $login and .[0].user.id == $login_id and
-              (.[0].environments | length) == 1 and
-              .[0].environments[0].name == "cloudflare-staging" and
+            --arg sha "$GITHUB_SHA" '
+              if length != 1 then false else
+              .[0] as $approval |
+              $approval.comment as $receipt |
               ($receipt | fromjson) as $r |
+              $receipt == ($r | to_entries | sort_by(.key) | from_entries | tojson) and
+              $approval.state == "approved" and
+              $approval.user.login == $login and $approval.user.id == $login_id and
+              ($approval.environments | length) == 1 and
+              $approval.environments[0].name == "cloudflare-staging" and
               ($r | keys | sort) == ([
                 "checks_reviewed", "coordinator_model", "environment_id",
                 "environment_name", "exact_sha_author",
@@ -271,12 +271,13 @@ jobs:
                 $r.coordinator_model != $r.reviewer_model) and
               $r.run_id == $run_id and $r.run_attempt == $run_attempt and
               $r.sha == $sha and
-              $r.environment_id == .[0].environments[0].id and
+              $r.environment_id == $approval.environments[0].id and
               $r.environment_name == "cloudflare-staging" and
               $r.checks_reviewed == ["ci required"] and
               $r.verdict == "PASS" and $r.exact_sha_author == false and
               $r.no_cloudflare_secret_access == true and
               $r.reviewer_received_approval_credentials == false
+              end
             ' "$response_file" >/dev/null
           echo "Exact current-attempt AI approval receipt validated."
 
@@ -332,7 +333,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          tag="sha-${GITHUB_SHA}"
+          tag="sha-${GITHUB_SHA}-attempt-${GITHUB_RUN_ATTEMPT}"
           pnpm --filter @vocanova/api-worker exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging API ${GITHUB_SHA}" --var "RELEASE:${GITHUB_SHA}"
           pnpm --filter @vocanova/web exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging web ${GITHUB_SHA}"
           api_version_id="$(pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag")"
@@ -368,8 +369,15 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          pnpm --filter @vocanova/api-worker exec wrangler rollback "${{ steps.prewrite.outputs.api_rollback_version_id }}" --env staging --yes --message "Rollback failed staging API ${GITHUB_SHA}"
-          pnpm --filter @vocanova/web exec wrangler rollback "${{ steps.prewrite.outputs.web_rollback_version_id }}" --env staging --yes --message "Rollback failed staging web ${GITHUB_SHA}"
+          set +e
+          api_rollback_status=0
+          web_rollback_status=0
+          pnpm --filter @vocanova/api-worker exec wrangler rollback "${{ steps.prewrite.outputs.api_rollback_version_id }}" --env staging --yes --message "Rollback failed staging API ${GITHUB_SHA}" || api_rollback_status=$?
+          pnpm --filter @vocanova/web exec wrangler rollback "${{ steps.prewrite.outputs.web_rollback_version_id }}" --env staging --yes --message "Rollback failed staging web ${GITHUB_SHA}" || web_rollback_status=$?
+          if ((api_rollback_status != 0 || web_rollback_status != 0)); then
+            echo "One or more staging Worker rollbacks failed; both were attempted." >&2
+            exit 1
+          fi
 
       - name: Record sanitized delivery outcome
         if: always()

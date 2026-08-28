@@ -23,6 +23,19 @@ const SAFE_DECIMAL = /^[1-9][0-9]{0,15}$/;
 const PARTICIPANT = /^[A-Za-z0-9_./:@-]{1,160}$/;
 const REQUIRED_CHECKS = ["ci required"];
 const SECRET_NAMES = ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN"];
+const MIGRATION_LEDGER = {
+  directory: "apps/api-worker/migrations",
+  table: "d1_migrations",
+  ordered_files: [
+    "0001_foundation.sql",
+    "0002_identity_accounts.sql",
+    "0003_content_learning_reviews.sql",
+    "0004_missions_gamification.sql",
+    "0005_ai_feedback.sql",
+    "0006_synthetic_test_account.sql",
+    "0007_reconciliation_write_guard.sql",
+  ],
+};
 const STAGING_RESOURCES = {
   account_id: STAGING_ACCOUNT_ID,
   zone_id: "63286d93b5f32925ac7366b4e97908be",
@@ -141,6 +154,8 @@ export function inspectDeliveryManifest(manifest, configs) {
   if (manifest?.workflow !== ".github/workflows/ci.yml")
     errors.push("Cloudflare delivery must remain inside ci.yml");
   inspectLimits(manifest?.limits, errors);
+  if (!deepEqual(manifest?.migration_ledger, MIGRATION_LEDGER))
+    errors.push("ordered D1 migration ledger drifted");
   inspectStaging(manifest?.environments?.staging, errors);
   if (!deepEqual(manifest?.environments?.production, PRODUCTION_SENTINEL))
     errors.push("production held environment or sentinel set drifted");
@@ -204,6 +219,11 @@ function inspectStaging(staging, errors) {
   if (!deepEqual(staging.resources, STAGING_RESOURCES))
     errors.push("staging resource, cost, privacy, or hold tuple drifted");
   if (
+    staging.resources?.applied_migration_count !==
+    MIGRATION_LEDGER.ordered_files.length
+  )
+    errors.push("staging applied migration count differs from the ledger");
+  if (
     staging.resource_manifest_evidence_url !==
       "https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5437898152" ||
     staging.rollback_rehearsal_url !==
@@ -254,7 +274,9 @@ function inspectWranglerEnvironment(environment, record, configs, errors) {
   );
   if (
     database?.database_name !== record?.d1?.database_name ||
-    database?.database_id !== record?.d1?.database_id
+    database?.database_id !== record?.d1?.database_id ||
+    database?.migrations_dir !== "migrations" ||
+    database?.migrations_table !== MIGRATION_LEDGER.table
   )
     errors.push(`${environment} D1 binding differs from the manifest`);
   const service = web.services?.find?.(
@@ -267,6 +289,43 @@ function inspectWranglerEnvironment(environment, record, configs, errors) {
     web.vars?.ENVIRONMENT !== environment
   )
     errors.push(`${environment} Wrangler markers are inconsistent`);
+  const expectedRoutes =
+    environment === "staging"
+      ? {
+          api: [
+            {
+              pattern: String(record.routes.api ?? "").replace(
+                /^https:\/\//,
+                "",
+              ),
+              custom_domain: true,
+            },
+          ],
+          web: [
+            {
+              pattern: String(record.routes.web ?? "").replace(
+                /^https:\/\//,
+                "",
+              ),
+              custom_domain: true,
+            },
+          ],
+        }
+      : { api: [], web: [] };
+  if (
+    !deepEqual(api.routes ?? [], expectedRoutes.api) ||
+    !deepEqual(web.routes ?? [], expectedRoutes.web)
+  )
+    errors.push(`${environment} custom-domain routes differ from the manifest`);
+  if (
+    api.workers_dev !== false ||
+    api.preview_urls !== false ||
+    web.workers_dev !== false ||
+    web.preview_urls !== false
+  )
+    errors.push(
+      `${environment} workers.dev or preview URLs must remain disabled`,
+    );
 }
 
 export function inspectDeliveryWorkflow(source) {
@@ -284,10 +343,17 @@ export function inspectDeliveryWorkflow(source) {
     "environment: cloudflare-staging",
     "Validate exact current-attempt AI approval receipt",
     "/actions/runs/${GITHUB_RUN_ID}/approvals",
+    "GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}",
+    "$approval.comment as $receipt",
+    "$receipt == ($r | to_entries | sort_by(.key) | from_entries | tojson)",
     "Read exact current deployments before any write",
     "wrangler deployments status --env staging --json",
     "wrangler whoami --json",
     "--resolve-current-deployment",
+    'tag="sha-${GITHUB_SHA}-attempt-${GITHUB_RUN_ATTEMPT}"',
+    "api_rollback_status=0",
+    "web_rollback_status=0",
+    "both were attempted",
     "VOC-080-HOLD-01 and VOC-080-HOLD-02 remain active",
   ]) {
     if (!source.includes(marker)) errors.push(`workflow missing: ${marker}`);
@@ -346,14 +412,15 @@ export function inspectDeliveryWorkflow(source) {
     );
   const firstStepEnd = staging.indexOf("\n      - name:", stepsIndex + 20);
   const beforeSecondStep = staging.slice(0, firstStepEnd);
-  if (/secrets\.CLOUDFLARE_(?:API_TOKEN|ACCOUNT_ID)/.test(beforeSecondStep))
+  if (secretExpressions(beforeSecondStep).length !== 0)
     errors.push(
       "a Cloudflare secret is referenced before approval-history validation",
     );
   for (const marker of [
     "GITHUB_TOKEN: ${{ github.token }}",
-    "expected exactly one approval record",
-    "canonical_receipt",
+    "if length != 1 then false else",
+    "$approval.comment as $receipt",
+    "$receipt == ($r | to_entries | sort_by(.key) | from_entries | tojson)",
     "vocanova-cloudflare-ai-deployment-review-v1",
     "checks_reviewed",
     "coordinator_model",
@@ -372,17 +439,15 @@ export function inspectDeliveryWorkflow(source) {
     if (!beforeSecondStep.includes(marker))
       errors.push(`approval-history first step is missing: ${marker}`);
   }
-  if (/\bsecrets\./.test(beforeSecondStep))
+  if (secretExpressions(beforeSecondStep).length !== 0)
     errors.push("approval-history first step may use no Actions secret");
-  if (
-    /^    env:[\s\S]*secrets\.CLOUDFLARE_/m.test(staging.slice(0, stepsIndex))
-  )
+  if (secretExpressions(staging.slice(0, stepsIndex)).length !== 0)
     errors.push(
       "staging job-level environment must not reference Cloudflare secrets",
     );
 
   const outsideStaging = source.replace(staging, "");
-  if (/secrets\.CLOUDFLARE_(?:API_TOKEN|ACCOUNT_ID)/.test(outsideStaging))
+  if (secretExpressions(outsideStaging).length !== 0)
     errors.push(
       "Cloudflare secrets may be referenced only by staging environment steps",
     );
@@ -394,17 +459,17 @@ export function inspectDeliveryWorkflow(source) {
     "Roll back exact staging Worker versions after promotion failure",
   ]);
   for (const step of extractSteps(staging)) {
-    if (
-      /secrets\.CLOUDFLARE_(?:API_TOKEN|ACCOUNT_ID)/.test(step.body) &&
-      !allowedSecretSteps.has(step.name)
-    )
+    const expressions = secretExpressions(step.body);
+    if (expressions.length !== 0 && !allowedSecretSteps.has(step.name))
       errors.push(
         `unbounded Cloudflare secret reference in step: ${step.name}`,
       );
     if (
-      /secrets\.CLOUDFLARE_(?:API_TOKEN|ACCOUNT_ID)/.test(step.body) &&
-      (!step.body.includes("secrets.CLOUDFLARE_API_TOKEN") ||
-        !step.body.includes("secrets.CLOUDFLARE_ACCOUNT_ID"))
+      expressions.length !== 0 &&
+      !deepEqual(expressions.sort(), [
+        "secrets.CLOUDFLARE_ACCOUNT_ID",
+        "secrets.CLOUDFLARE_API_TOKEN",
+      ])
     )
       errors.push(
         `incomplete Cloudflare credential pair in step: ${step.name}`,
@@ -423,6 +488,21 @@ export function inspectDeliveryWorkflow(source) {
     !staging.includes("steps.prewrite.outputs.web_rollback_version_id")
   )
     errors.push("rollback must consume the exact current deployment outputs");
+  const rollback = extractSteps(staging).find((step) =>
+    step.name.startsWith("Roll back exact staging Worker versions"),
+  );
+  for (const marker of [
+    "set +e",
+    "api_rollback_status=0",
+    "web_rollback_status=0",
+    "|| api_rollback_status=$?",
+    "|| web_rollback_status=$?",
+    "api_rollback_status != 0 || web_rollback_status != 0",
+    "both were attempted",
+  ]) {
+    if (!rollback?.body.includes(marker))
+      errors.push(`independent dual-Worker rollback is missing: ${marker}`);
+  }
   if (/environment:\s*cloudflare-production/.test(production))
     errors.push("held production must fail before entering an environment");
   if (/secrets\.|\bwrangler\b/.test(production))
@@ -448,6 +528,12 @@ function extractSteps(job) {
   }));
 }
 
+function secretExpressions(source) {
+  return [...source.matchAll(/\$\{\{([\s\S]*?)\}\}/g)]
+    .map((match) => match[1].trim())
+    .filter((expression) => /\bsecrets\b/i.test(expression));
+}
+
 export async function evaluateDeliveryEvent(manifest, event, options = {}) {
   const reasons = inspectDeliveryManifest(manifest);
   const inputs = event?.inputs ?? {};
@@ -460,6 +546,8 @@ export async function evaluateDeliveryEvent(manifest, event, options = {}) {
     reasons.push(
       `dispatcher numeric ID must be ${STAGING_DISPATCHER.numeric_id}`,
     );
+  if (event?.triggering_actor !== STAGING_DISPATCHER.login)
+    reasons.push(`rerun initiator must be ${STAGING_DISPATCHER.login}`);
   if (event?.ref !== "refs/heads/develop")
     reasons.push("staging dispatch must use refs/heads/develop");
   if (!CANONICAL_SHA.test(event?.sha ?? ""))
@@ -715,15 +803,20 @@ export function resolveVersionId(versions, tag) {
   return matches[0].id;
 }
 
-export function inspectMigrationCount(repositoryRoot, maximum) {
-  const migrations = readdirSync(
-    resolve(repositoryRoot, "apps/api-worker/migrations"),
-  ).filter((name) => /^\d{4}_.+\.sql$/.test(name));
-  return migrations.length <= maximum
-    ? []
-    : [
-        `D1 migration count ${migrations.length} exceeds release ceiling ${maximum}`,
-      ];
+export function inspectMigrationLedger(repositoryRoot, ledger, maximum) {
+  const errors = [];
+  if (!isRecord(ledger) || typeof ledger.directory !== "string")
+    return ["D1 migration ledger is invalid"];
+  const migrations = readdirSync(resolve(repositoryRoot, ledger.directory))
+    .filter((name) => /^\d{4}_.+\.sql$/.test(name))
+    .sort();
+  if (!deepEqual(migrations, ledger.ordered_files))
+    errors.push("D1 migration files differ from the exact ordered ledger");
+  if (migrations.length > maximum)
+    errors.push(
+      `D1 migration count ${migrations.length} exceeds release ceiling ${maximum}`,
+    );
+  return errors;
 }
 
 export function validateDeliveryRepository(repositoryRoot, manifestOverride) {
@@ -744,8 +837,9 @@ export function validateDeliveryRepository(repositoryRoot, manifestOverride) {
     ...inspectDeliveryWorkflow(
       readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"),
     ),
-    ...inspectMigrationCount(
+    ...inspectMigrationLedger(
       repositoryRoot,
+      MIGRATION_LEDGER,
       manifest.limits?.max_migrations_per_release,
     ),
   ];
@@ -967,6 +1061,7 @@ async function main(argv) {
         event_name: process.env.GITHUB_EVENT_NAME,
         actor: process.env.GITHUB_ACTOR,
         actor_id: eventPayload.sender?.id,
+        triggering_actor: process.env.GITHUB_TRIGGERING_ACTOR,
         inputs: eventPayload.inputs ?? {},
         ref: process.env.GITHUB_REF,
         sha: process.env.GITHUB_SHA,

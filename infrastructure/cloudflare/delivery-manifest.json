@@ -10,6 +10,19 @@
     "max_api_gzip_bytes": 1048576,
     "max_web_gzip_bytes": 3145728
   },
+  "migration_ledger": {
+    "directory": "apps/api-worker/migrations",
+    "table": "d1_migrations",
+    "ordered_files": [
+      "0001_foundation.sql",
+      "0002_identity_accounts.sql",
+      "0003_content_learning_reviews.sql",
+      "0004_missions_gamification.sql",
+      "0005_ai_feedback.sql",
+      "0006_synthetic_test_account.sql",
+      "0007_reconciliation_write_guard.sql"
+    ]
+  },
   "environments": {
     "staging": {
       "state": "standard-ready",

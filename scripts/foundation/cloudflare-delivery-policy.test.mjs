@@ -17,6 +17,7 @@ import {
   canonicalize,
   evaluateDeliveryEvent,
   inspectDeliveryManifest,
+  inspectMigrationLedger,
   inspectDeliveryWorkflow,
   loadDeliveryManifest,
   parseJsonc,
@@ -33,6 +34,17 @@ const repositoryRoot = resolve(import.meta.dirname, "../..");
 const workflowPath = resolve(repositoryRoot, ".github/workflows/ci.yml");
 const workflow = readFileSync(workflowPath, "utf8");
 const manifest = loadDeliveryManifest(repositoryRoot);
+const configs = {
+  api: parseJsonc(
+    readFileSync(
+      resolve(repositoryRoot, "apps/api-worker/wrangler.jsonc"),
+      "utf8",
+    ),
+  ),
+  web: parseJsonc(
+    readFileSync(resolve(repositoryRoot, "apps/web/wrangler.jsonc"), "utf8"),
+  ),
+};
 const exactSha = "a".repeat(40);
 const versionId = "11111111-1111-4111-8111-111111111111";
 
@@ -75,6 +87,7 @@ function dispatchEvent(overrides = {}) {
     event_name: "workflow_dispatch",
     actor: "m-e-h-r-d-a-a-d",
     actor_id: 7955432,
+    triggering_actor: "m-e-h-r-d-a-a-d",
     ref: "refs/heads/develop",
     sha: exactSha,
     required_result: "success",
@@ -117,6 +130,36 @@ function approvalFixture() {
       },
     ],
   };
+}
+
+function runWorkflowApprovalGate(history, context) {
+  const match = workflow.match(
+    /--arg sha "\$GITHUB_SHA" '\n([\s\S]*?)\n            ' "\$response_file"/,
+  );
+  assert.ok(match, "approval-history jq predicate must be extractable");
+  return spawnSync(
+    "jq",
+    [
+      "-e",
+      "--arg",
+      "login",
+      "m-e-h-r-d-a-a-d",
+      "--argjson",
+      "login_id",
+      "7955432",
+      "--arg",
+      "run_id",
+      context.runId,
+      "--argjson",
+      "run_attempt",
+      String(context.runAttempt),
+      "--arg",
+      "sha",
+      context.sha,
+      match[1],
+    ],
+    { input: JSON.stringify(history), encoding: "utf8" },
+  );
 }
 
 test("standard-ready staging, held production, Wrangler configs, workflow, and migration ceiling agree", () => {
@@ -170,6 +213,61 @@ test("manifest preserves the exact staging account/resources, zero cost, and pro
     "VOC-080-HOLD-01",
     "VOC-080-HOLD-02",
   ]);
+});
+
+test("Wrangler custom domains and the exact ordered D1 migration ledger fail closed on drift", () => {
+  assert.deepEqual(inspectDeliveryManifest(manifest, configs), []);
+  const routeCases = [
+    (candidate) =>
+      (candidate.api.env.staging.routes[0].pattern =
+        "wrong-staging.example.invalid"),
+    (candidate) =>
+      candidate.web.env.staging.routes.push({
+        pattern: "extra-staging.example.invalid",
+        custom_domain: true,
+      }),
+    (candidate) =>
+      (candidate.api.env.production.routes = [
+        { pattern: "production.example.invalid", custom_domain: true },
+      ]),
+    (candidate) => (candidate.web.env.staging.preview_urls = true),
+  ];
+  for (const mutate of routeCases) {
+    const candidate = clone(configs);
+    mutate(candidate);
+    assert.notDeepEqual(inspectDeliveryManifest(manifest, candidate), []);
+  }
+
+  const changedLedger = clone(manifest);
+  changedLedger.migration_ledger.ordered_files[0] = "0001_rewritten.sql";
+  assert.notDeepEqual(inspectDeliveryManifest(changedLedger), []);
+
+  const directory = mkdtempSync(resolve(tmpdir(), "vocanova-migrations-"));
+  try {
+    const migrations = resolve(directory, manifest.migration_ledger.directory);
+    mkdirSync(migrations, { recursive: true });
+    for (const name of manifest.migration_ledger.ordered_files)
+      writeFileSync(resolve(migrations, name), "-- fixture\n");
+    assert.deepEqual(
+      inspectMigrationLedger(
+        directory,
+        manifest.migration_ledger,
+        manifest.limits.max_migrations_per_release,
+      ),
+      [],
+    );
+    writeFileSync(resolve(migrations, "0008_unreviewed.sql"), "-- drift\n");
+    assert.notDeepEqual(
+      inspectMigrationLedger(
+        directory,
+        manifest.migration_ledger,
+        manifest.limits.max_migrations_per_release,
+      ),
+      [],
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test("JSONC and strict canonical JSON parsing reject ambiguous receipt bytes", () => {
@@ -230,6 +328,10 @@ test("workflow graph mutations fail closed before Cloudflare credentials", () =>
       "needs: [delivery-gate]",
     ),
     workflow.replace(
+      "GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}",
+      "GITHUB_TRIGGERING_ACTOR: m-e-h-r-d-a-a-d",
+    ),
+    workflow.replace(
       "environment: cloudflare-staging",
       "environment: cloudflare-staging\n    env:\n      TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}",
     ),
@@ -238,8 +340,22 @@ test("workflow graph mutations fail closed before Cloudflare credentials", () =>
       "name: Validate foundation\n        env:\n          TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}",
     ),
     workflow.replace(
+      "name: Validate foundation",
+      "name: Validate foundation\n        env:\n          TOKEN: ${{ secrets['CLOUDFLARE_API_TOKEN'] }}",
+    ),
+    workflow.replace(
+      "GITHUB_TOKEN: ${{ github.token }}",
+      "TOKEN: ${{ fromJSON(toJSON(secrets))['CLOUDFLARE_API_TOKEN'] }}",
+    ),
+    workflow.replace(
       'echo "VOC-080-HOLD-01 and VOC-080-HOLD-02 remain active." >&2',
       "pnpm exec wrangler deploy",
+    ),
+    workflow.replace("set +e", "set -e"),
+    workflow.replace("|| api_rollback_status=$?", "&& api_rollback_status=0"),
+    workflow.replace(
+      'tag="sha-${GITHUB_SHA}-attempt-${GITHUB_RUN_ATTEMPT}"',
+      'tag="sha-${GITHUB_SHA}"',
     ),
   ];
   for (const candidate of mutations)
@@ -280,6 +396,7 @@ test("wrong event, actor, ref, SHA, confirmation, checks, or production target f
     { event_name: "push" },
     { actor: "someone-else" },
     { actor_id: 1 },
+    { triggering_actor: "unauthorized-rerunner" },
     { ref: "refs/heads/main" },
     { sha: "not-a-sha" },
     { required_result: "failure" },
@@ -330,6 +447,10 @@ test("approval history accepts one canonical current-attempt non-author AI PASS 
     validateApprovalHistory(fixture.history, fixture.context),
     [],
   );
+  assert.equal(
+    runWorkflowApprovalGate(fixture.history, fixture.context).status,
+    0,
+  );
 });
 
 test("approval history rejects stale, extra, conflicting, forged-schema, author, and same-model records", () => {
@@ -370,6 +491,19 @@ test("approval history rejects stale, extra, conflicting, forged-schema, author,
     ),
     /canonical/,
   );
+  for (const suffix of ["\n", "\r\n"]) {
+    const altered = approvalFixture();
+    altered.history[0].comment += suffix;
+    assert.match(
+      validateApprovalHistory(altered.history, altered.context).join("\n"),
+      /canonical/,
+    );
+    assert.notEqual(
+      runWorkflowApprovalGate(altered.history, altered.context).status,
+      0,
+      `workflow gate accepted altered receipt suffix ${JSON.stringify(suffix)}`,
+    );
+  }
 });
 
 test("Wrangler identity and current deployment readback fail on account or traffic ambiguity", () => {
