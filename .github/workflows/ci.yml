@@ -302,14 +302,14 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_API_TOKEN"
           test "$CLOUDFLARE_ACCOUNT_ID" = "0a9eda28b96d77c24dcde74f3e074d47"
-          identity="$(pnpm --filter @vocanova/api-worker exec wrangler whoami --json)"
+          identity="$(pnpm --filter @vocanova/api-worker exec wrangler whoami --json --config wrangler.jsonc)"
           printf '%s' "$identity" | node scripts/foundation/cloudflare-delivery-policy.mjs --verify-account-id "0a9eda28b96d77c24dcde74f3e074d47" >/dev/null
           if test "${{ inputs.delivery_operation }}" = "credential-check"; then
             echo "No-write staging credential check passed."
             exit 0
           fi
-          api_deployment="$(pnpm --filter @vocanova/api-worker exec wrangler deployments status --env staging --json)"
-          web_deployment="$(pnpm --filter @vocanova/web exec wrangler deployments status --env staging --json)"
+          api_deployment="$(pnpm --filter @vocanova/api-worker exec wrangler deployments status --env staging --json --config wrangler.jsonc)"
+          web_deployment="$(pnpm --filter @vocanova/web exec wrangler deployments status --env staging --json --config wrangler.jsonc)"
           api_rollback_version_id="$(printf '%s' "$api_deployment" | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-current-deployment)"
           web_rollback_version_id="$(printf '%s' "$web_deployment" | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-current-deployment)"
           echo "api_rollback_version_id=$api_rollback_version_id" >> "$GITHUB_OUTPUT"
@@ -323,8 +323,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: >-
-          pnpm --filter @vocanova/api-worker exec wrangler
-          d1 migrations apply DB --remote --env staging
+          pnpm --filter @vocanova/api-worker exec wrangler d1 migrations apply DB --remote --env staging --config wrangler.jsonc
 
       - name: Upload immutable staging Worker versions
         if: inputs.delivery_operation == 'deploy'
@@ -334,10 +333,10 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           tag="sha-${GITHUB_SHA:0:12}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"
-          pnpm --filter @vocanova/api-worker exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging API ${GITHUB_SHA}" --var "RELEASE:${GITHUB_SHA}"
-          pnpm --filter @vocanova/web exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging web ${GITHUB_SHA}"
-          api_version_id="$(pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag")"
-          web_version_id="$(pnpm --filter @vocanova/web exec wrangler versions list --env staging --json | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag")"
+          pnpm --filter @vocanova/api-worker exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging API ${GITHUB_SHA}" --var "RELEASE:${GITHUB_SHA}" --config wrangler.jsonc
+          pnpm --filter @vocanova/web exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging web ${GITHUB_SHA}" --config wrangler.jsonc
+          api_version_id="$(pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json --config wrangler.jsonc | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag")"
+          web_version_id="$(pnpm --filter @vocanova/web exec wrangler versions list --env staging --json --config wrangler.jsonc | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag")"
           echo "api_version_id=$api_version_id" >> "$GITHUB_OUTPUT"
           echo "web_version_id=$web_version_id" >> "$GITHUB_OUTPUT"
 
@@ -348,8 +347,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          pnpm --filter @vocanova/api-worker exec wrangler versions deploy "${{ steps.versions.outputs.api_version_id }}@100%" --env staging --yes --message "Promote reviewed API ${GITHUB_SHA}"
-          pnpm --filter @vocanova/web exec wrangler versions deploy "${{ steps.versions.outputs.web_version_id }}@100%" --env staging --yes --message "Promote reviewed web ${GITHUB_SHA}"
+          pnpm --filter @vocanova/api-worker exec wrangler versions deploy "${{ steps.versions.outputs.api_version_id }}@100%" --env staging --yes --message "Promote reviewed API ${GITHUB_SHA}" --config wrangler.jsonc
+          pnpm --filter @vocanova/web exec wrangler versions deploy "${{ steps.versions.outputs.web_version_id }}@100%" --env staging --yes --message "Promote reviewed web ${GITHUB_SHA}" --config wrangler.jsonc
 
       - name: Smoke exact promoted versions
         if: inputs.delivery_operation == 'deploy'
@@ -372,8 +371,8 @@ jobs:
           set +e
           api_rollback_status=0
           web_rollback_status=0
-          pnpm --filter @vocanova/api-worker exec wrangler rollback "${{ steps.prewrite.outputs.api_rollback_version_id }}" --env staging --yes --message "Rollback failed staging API ${GITHUB_SHA}" || api_rollback_status=$?
-          pnpm --filter @vocanova/web exec wrangler rollback "${{ steps.prewrite.outputs.web_rollback_version_id }}" --env staging --yes --message "Rollback failed staging web ${GITHUB_SHA}" || web_rollback_status=$?
+          pnpm --filter @vocanova/api-worker exec wrangler rollback "${{ steps.prewrite.outputs.api_rollback_version_id }}" --env staging --yes --message "Rollback failed staging API ${GITHUB_SHA}" --config wrangler.jsonc || api_rollback_status=$?
+          pnpm --filter @vocanova/web exec wrangler rollback "${{ steps.prewrite.outputs.web_rollback_version_id }}" --env staging --yes --message "Rollback failed staging web ${GITHUB_SHA}" --config wrangler.jsonc || web_rollback_status=$?
           if ((api_rollback_status != 0 || web_rollback_status != 0)); then
             echo "One or more staging Worker rollbacks failed; both were attempted." >&2
             exit 1

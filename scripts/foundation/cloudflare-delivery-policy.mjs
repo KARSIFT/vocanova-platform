@@ -1,4 +1,10 @@
-import { appendFileSync, readFileSync, readdirSync } from "node:fs";
+import {
+  appendFileSync,
+  existsSync,
+  lstatSync,
+  readFileSync,
+  readdirSync,
+} from "node:fs";
 import { resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
@@ -491,6 +497,14 @@ export function inspectDeliveryWorkflow(source) {
   const staging = extractJob(source, "cloudflare-staging");
   const production = extractJob(source, "cloudflare-production");
   if (!gate || !staging || !production) return errors;
+  for (const line of staging
+    .split("\n")
+    .filter((entry) => entry.includes("exec wrangler"))) {
+    if (!line.includes("--config wrangler.jsonc"))
+      errors.push(
+        "every staging Wrangler command must pin the reviewed wrangler.jsonc",
+      );
+  }
   if (/environment:\s*cloudflare-/m.test(gate))
     errors.push("credential-free delivery gate must not enter an environment");
   if (!gate.includes("needs: [required]") || !gate.includes("actions: read"))
@@ -929,6 +943,31 @@ export function inspectMigrationLedger(repositoryRoot, ledger, maximum) {
   return errors;
 }
 
+export function inspectWranglerConfigSelection(repositoryRoot) {
+  const errors = [];
+  for (const packageDirectory of ["apps/api-worker", "apps/web"]) {
+    const root = resolve(repositoryRoot, packageDirectory);
+    const canonical = resolve(root, "wrangler.jsonc");
+    if (
+      !existsSync(canonical) ||
+      !lstatSync(canonical).isFile() ||
+      lstatSync(canonical).isSymbolicLink()
+    )
+      errors.push(`${packageDirectory}/wrangler.jsonc must be a regular file`);
+    for (const alternative of [
+      "wrangler.json",
+      "wrangler.toml",
+      ".wrangler/deploy/config.json",
+    ]) {
+      if (existsSync(resolve(root, alternative)))
+        errors.push(
+          `${packageDirectory}/${alternative} may redirect Wrangler away from the reviewed config`,
+        );
+    }
+  }
+  return errors;
+}
+
 export function validateDeliveryRepository(repositoryRoot, manifestOverride) {
   const manifest = manifestOverride ?? loadDeliveryManifest(repositoryRoot);
   const configs = {
@@ -947,6 +986,7 @@ export function validateDeliveryRepository(repositoryRoot, manifestOverride) {
     ...inspectDeliveryWorkflow(
       readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"),
     ),
+    ...inspectWranglerConfigSelection(repositoryRoot),
     ...inspectMigrationLedger(
       repositoryRoot,
       MIGRATION_LEDGER,

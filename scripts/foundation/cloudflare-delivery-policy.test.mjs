@@ -18,6 +18,7 @@ import {
   evaluateDeliveryEvent,
   inspectDeliveryManifest,
   inspectMigrationLedger,
+  inspectWranglerConfigSelection,
   inspectDeliveryWorkflow,
   loadDeliveryManifest,
   parseJsonc,
@@ -402,9 +403,40 @@ test("workflow graph mutations fail closed before Cloudflare credentials", () =>
       'tag="sha-${GITHUB_SHA:0:12}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"',
       'tag="sha-${GITHUB_SHA}"',
     ),
+    workflow.replace(" --config wrangler.jsonc", ""),
   ];
   for (const candidate of mutations)
     assert.notDeepEqual(inspectDeliveryWorkflow(candidate), []);
+});
+
+test("Wrangler configuration selection rejects precedence and deploy redirects", () => {
+  const directory = mkdtempSync(resolve(tmpdir(), "vocanova-wrangler-config-"));
+  try {
+    for (const packageDirectory of ["apps/api-worker", "apps/web"]) {
+      const root = resolve(directory, packageDirectory);
+      mkdirSync(root, { recursive: true });
+      writeFileSync(resolve(root, "wrangler.jsonc"), "{}\n");
+    }
+    assert.deepEqual(inspectWranglerConfigSelection(directory), []);
+
+    const alternatives = [
+      ["apps/api-worker", "wrangler.json"],
+      ["apps/api-worker", "wrangler.toml"],
+      ["apps/api-worker", ".wrangler/deploy/config.json"],
+      ["apps/web", "wrangler.json"],
+      ["apps/web", "wrangler.toml"],
+      ["apps/web", ".wrangler/deploy/config.json"],
+    ];
+    for (const [packageDirectory, alternative] of alternatives) {
+      const path = resolve(directory, packageDirectory, alternative);
+      mkdirSync(resolve(path, ".."), { recursive: true });
+      writeFileSync(path, "{}\n");
+      assert.notDeepEqual(inspectWranglerConfigSelection(directory), []);
+      rmSync(path);
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test("manual develop staging dispatch and no-write credential check pass exact deterministic gates", async () => {
