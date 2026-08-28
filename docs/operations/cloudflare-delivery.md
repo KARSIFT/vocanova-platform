@@ -118,8 +118,12 @@ Only then do bounded credential steps check the exact account, capture the uniqu
 100%-traffic API/web deployment UUIDs as rollback targets, run the exact ordered D1
 migration ledger, upload immutable SHA-prefix/run-ID/attempt-tagged Worker versions,
 promote the exact UUIDs, and run bounded staging smoke. The workflow uses the locked
-Wrangler commands and no
-credential-free test or `--help` result is treated as live deployment evidence.
+Wrangler commands; no credential-free test or `--help` result is treated as live
+deployment evidence.
+The delivery policy treats each staging and production Wrangler environment as a
+closed tuple: Worker names, routes, the sole D1 and service bindings, migration
+settings, disabled preview surfaces, and every safety/feature variable must match
+exactly; extra bindings or enabled signup/provider features fail validation.
 
 ## Ordered implementation and truth boundary
 

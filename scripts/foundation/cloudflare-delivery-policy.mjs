@@ -267,65 +267,82 @@ function inspectWranglerEnvironment(environment, record, configs, errors) {
     errors.push(`${environment} Wrangler environments must exist`);
     return;
   }
-  if (api.name !== record?.workers?.api || web.name !== record?.workers?.web)
-    errors.push(`${environment} Worker names differ from the manifest`);
-  const database = api.d1_databases?.find?.(
-    (candidate) => candidate.binding === record?.d1?.binding,
-  );
-  if (
-    database?.database_name !== record?.d1?.database_name ||
-    database?.database_id !== record?.d1?.database_id ||
-    database?.migrations_dir !== "migrations" ||
-    database?.migrations_table !== MIGRATION_LEDGER.table ||
-    Object.hasOwn(database ?? {}, "migrations_pattern")
-  )
-    errors.push(`${environment} D1 binding differs from the manifest`);
-  const service = web.services?.find?.(
-    (candidate) => candidate.binding === "API",
-  );
-  if (service?.service !== record?.workers?.api)
-    errors.push(`${environment} web API service binding is not isolated`);
-  if (
-    api.vars?.ENVIRONMENT !== environment ||
-    web.vars?.ENVIRONMENT !== environment
-  )
-    errors.push(`${environment} Wrangler markers are inconsistent`);
-  const expectedRoutes =
-    environment === "staging"
+  const isStaging = environment === "staging";
+  const webUrl = isStaging
+    ? "https://stag.vocanova.site"
+    : "https://web-production.invalid";
+  const apiUrl = isStaging
+    ? "https://api-stag.vocanova.site"
+    : "https://api-production.invalid";
+  const expectedApi = {
+    name: record.workers.api,
+    workers_dev: false,
+    preview_urls: false,
+    ...(isStaging
       ? {
-          api: [
+          routes: [
             {
-              pattern: String(record.routes.api ?? "").replace(
-                /^https:\/\//,
-                "",
-              ),
-              custom_domain: true,
-            },
-          ],
-          web: [
-            {
-              pattern: String(record.routes.web ?? "").replace(
-                /^https:\/\//,
-                "",
-              ),
+              pattern: String(record.routes.api).replace(/^https:\/\//, ""),
               custom_domain: true,
             },
           ],
         }
-      : { api: [], web: [] };
-  if (
-    !deepEqual(api.routes ?? [], expectedRoutes.api) ||
-    !deepEqual(web.routes ?? [], expectedRoutes.web)
-  )
-    errors.push(`${environment} custom-domain routes differ from the manifest`);
-  if (
-    api.workers_dev !== false ||
-    api.preview_urls !== false ||
-    web.workers_dev !== false ||
-    web.preview_urls !== false
-  )
+      : {}),
+    d1_databases: [
+      {
+        binding: record.d1.binding,
+        database_name: record.d1.database_name,
+        database_id: record.d1.database_id,
+        migrations_dir: "migrations",
+        migrations_table: MIGRATION_LEDGER.table,
+      },
+    ],
+    vars: {
+      ENVIRONMENT: environment,
+      RELEASE: isStaging ? "prepared" : "held",
+      CORS_ALLOWED_ORIGINS: webUrl,
+      AUTH_BASE_URL: webUrl,
+      OAUTH_REDIRECT_URI: `${apiUrl}/api/v1/auth/oauth/google/callback`,
+      OAUTH_RETURN_ALLOWLIST: `${webUrl}/home,${webUrl}/onboarding`,
+      MAGIC_LINK_ENABLED: "false",
+      GOOGLE_OAUTH_ENABLED: "false",
+      NEW_USER_SIGNUP_ENABLED: "false",
+      NEW_USER_SIGNUP_ALLOWLIST: "",
+      RESERVED_SYNTHETIC_EMAIL: "",
+      AI_GENERATION_ENABLED: "false",
+      AI_PER_MINUTE: "5",
+      AI_PER_DAY: "30",
+      AI_GLOBAL_PER_DAY: "1000",
+      AI_MONTHLY_COST_HARD_STOP_CENTS: "0",
+      AI_REQUEST_COST_CENTS: "0",
+      AI_GENERATION_LEASE_SECONDS: "15",
+      AI_PROVIDER_TIMEOUT_MS: "10000",
+    },
+  };
+  const expectedWeb = {
+    name: record.workers.web,
+    workers_dev: false,
+    preview_urls: false,
+    ...(isStaging
+      ? {
+          routes: [
+            {
+              pattern: String(record.routes.web).replace(/^https:\/\//, ""),
+              custom_domain: true,
+            },
+          ],
+        }
+      : {}),
+    services: [{ binding: "API", service: record.workers.api }],
+    vars: { ENVIRONMENT: environment },
+  };
+  if (!deepEqual(api, expectedApi))
     errors.push(
-      `${environment} workers.dev or preview URLs must remain disabled`,
+      `${environment} API Worker environment differs from the exact binding and safety tuple`,
+    );
+  if (!deepEqual(web, expectedWeb))
+    errors.push(
+      `${environment} web Worker environment differs from the exact binding and safety tuple`,
     );
 }
 

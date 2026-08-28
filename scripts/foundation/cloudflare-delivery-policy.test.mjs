@@ -215,7 +215,7 @@ test("manifest preserves the exact staging account/resources, zero cost, and pro
   ]);
 });
 
-test("Wrangler custom domains and the exact ordered D1 migration ledger fail closed on drift", () => {
+test("exact Wrangler environments and the ordered D1 migration ledger fail closed on drift", () => {
   assert.deepEqual(inspectDeliveryManifest(manifest, configs), []);
   const routeCases = [
     (candidate) =>
@@ -234,6 +234,25 @@ test("Wrangler custom domains and the exact ordered D1 migration ledger fail clo
     (candidate) =>
       (candidate.api.env.staging.d1_databases[0].migrations_pattern =
         "migrations/0001_foundation.sql"),
+    (candidate) =>
+      candidate.api.env.staging.d1_databases.push({
+        binding: "UNREVIEWED_DB",
+        database_name: "unreviewed",
+        database_id: "44444444-4444-4444-8444-444444444444",
+        migrations_dir: "migrations",
+        migrations_table: "d1_migrations",
+      }),
+    (candidate) =>
+      candidate.web.env.staging.services.push({
+        binding: "UNREVIEWED_SERVICE",
+        service: "unreviewed-worker",
+      }),
+    (candidate) =>
+      (candidate.api.env.staging.vars.NEW_USER_SIGNUP_ENABLED = "true"),
+    (candidate) =>
+      (candidate.api.env.staging.kv_namespaces = [
+        { binding: "UNREVIEWED_KV", id: "unreviewed" },
+      ]),
   ];
   for (const mutate of routeCases) {
     const candidate = clone(configs);
