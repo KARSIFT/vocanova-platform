@@ -333,7 +333,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          tag="sha-${GITHUB_SHA}-attempt-${GITHUB_RUN_ATTEMPT}"
+          tag="sha-${GITHUB_SHA:0:12}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"
           pnpm --filter @vocanova/api-worker exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging API ${GITHUB_SHA}" --var "RELEASE:${GITHUB_SHA}"
           pnpm --filter @vocanova/web exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging web ${GITHUB_SHA}"
           api_version_id="$(pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag")"

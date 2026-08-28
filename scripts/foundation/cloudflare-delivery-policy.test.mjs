@@ -231,6 +231,9 @@ test("Wrangler custom domains and the exact ordered D1 migration ledger fail clo
         { pattern: "production.example.invalid", custom_domain: true },
       ]),
     (candidate) => (candidate.web.env.staging.preview_urls = true),
+    (candidate) =>
+      (candidate.api.env.staging.d1_databases[0].migrations_pattern =
+        "migrations/0001_foundation.sql"),
   ];
   for (const mutate of routeCases) {
     const candidate = clone(configs);
@@ -256,7 +259,7 @@ test("Wrangler custom domains and the exact ordered D1 migration ledger fail clo
       ),
       [],
     );
-    writeFileSync(resolve(migrations, "0008_unreviewed.sql"), "-- drift\n");
+    writeFileSync(resolve(migrations, "unreviewed.sql"), "-- drift\n");
     assert.notDeepEqual(
       inspectMigrationLedger(
         directory,
@@ -354,7 +357,7 @@ test("workflow graph mutations fail closed before Cloudflare credentials", () =>
     workflow.replace("set +e", "set -e"),
     workflow.replace("|| api_rollback_status=$?", "&& api_rollback_status=0"),
     workflow.replace(
-      'tag="sha-${GITHUB_SHA}-attempt-${GITHUB_RUN_ATTEMPT}"',
+      'tag="sha-${GITHUB_SHA:0:12}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"',
       'tag="sha-${GITHUB_SHA}"',
     ),
   ];

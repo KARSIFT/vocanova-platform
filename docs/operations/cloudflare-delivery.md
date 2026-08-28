@@ -116,8 +116,9 @@ reference either secret.
 
 Only then do bounded credential steps check the exact account, capture the unique
 100%-traffic API/web deployment UUIDs as rollback targets, run the exact ordered D1
-migration ledger, upload immutable SHA-and-run-attempt-tagged Worker versions, promote
-the exact UUIDs, and run bounded staging smoke. The workflow uses the locked Wrangler commands and no
+migration ledger, upload immutable SHA-prefix/run-ID/attempt-tagged Worker versions,
+promote the exact UUIDs, and run bounded staging smoke. The workflow uses the locked
+Wrangler commands and no
 credential-free test or `--help` result is treated as live deployment evidence.
 
 ## Ordered implementation and truth boundary

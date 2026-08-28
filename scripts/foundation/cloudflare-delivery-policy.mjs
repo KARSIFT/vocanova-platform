@@ -276,7 +276,8 @@ function inspectWranglerEnvironment(environment, record, configs, errors) {
     database?.database_name !== record?.d1?.database_name ||
     database?.database_id !== record?.d1?.database_id ||
     database?.migrations_dir !== "migrations" ||
-    database?.migrations_table !== MIGRATION_LEDGER.table
+    database?.migrations_table !== MIGRATION_LEDGER.table ||
+    Object.hasOwn(database ?? {}, "migrations_pattern")
   )
     errors.push(`${environment} D1 binding differs from the manifest`);
   const service = web.services?.find?.(
@@ -350,7 +351,7 @@ export function inspectDeliveryWorkflow(source) {
     "wrangler deployments status --env staging --json",
     "wrangler whoami --json",
     "--resolve-current-deployment",
-    'tag="sha-${GITHUB_SHA}-attempt-${GITHUB_RUN_ATTEMPT}"',
+    'tag="sha-${GITHUB_SHA:0:12}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"',
     "api_rollback_status=0",
     "web_rollback_status=0",
     "both were attempted",
@@ -807,10 +808,14 @@ export function inspectMigrationLedger(repositoryRoot, ledger, maximum) {
   const errors = [];
   if (!isRecord(ledger) || typeof ledger.directory !== "string")
     return ["D1 migration ledger is invalid"];
-  const migrations = readdirSync(resolve(repositoryRoot, ledger.directory))
-    .filter((name) => /^\d{4}_.+\.sql$/.test(name))
-    .sort();
-  if (!deepEqual(migrations, ledger.ordered_files))
+  const entries = readdirSync(resolve(repositoryRoot, ledger.directory), {
+    withFileTypes: true,
+  });
+  const migrations = entries.map((entry) => entry.name).sort();
+  if (
+    entries.some((entry) => !entry.isFile()) ||
+    !deepEqual(migrations, ledger.ordered_files)
+  )
     errors.push("D1 migration files differ from the exact ordered ledger");
   if (migrations.length > maximum)
     errors.push(
