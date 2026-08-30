@@ -219,7 +219,7 @@ test("standing staging-token policy covers the exact living inventory and reject
       "\nThe staging token expires after " + "90 days and then rotates.\n";
     assert.match(
       inspectStagingCredentialPolicySources(candidate).join("\n"),
-      /stale staging credential lifecycle claim/,
+      /must remain standing and valid until revoked/,
       path,
     );
   }
@@ -241,6 +241,87 @@ test("standing staging-token policy covers the exact living inventory and reject
     inspectStagingCredentialPolicySources(broadened).join("\n"),
     /incomplete/,
   );
+});
+
+test("standing staging-token policy rejects direct contradictions without matching unrelated credentials", () => {
+  const humanPolicyPaths = STAGING_CREDENTIAL_POLICY_PATHS.filter(
+    (candidate) => !candidate.endsWith(".mjs"),
+  );
+  const contradictionClasses = [
+    {
+      expected: /cannot require a package, plan, or pull request/,
+      claims: [
+        "Each staging-token revocation requires a new change package and pull request.",
+        "A pull request is mandatory before every Cloudflare staging credential replacement.",
+        "The staging API token may be dispatched only after a governed plan is approved.",
+        "For every use of the token for staging, create a change package and open a PR.",
+        "A new change package gates each use of the staging environment token.",
+      ],
+    },
+    {
+      expected:
+        /possession cannot grant dispatch, review, or approval authority/,
+      claims: [
+        "Possession of the staging token grants dispatch approval authority.",
+        "Holding the Cloudflare staging credential authorizes review judgment.",
+        "Access to the token for staging confers approval rights on its holder.",
+        "Whoever possesses the staging API token may approve a dispatch.",
+        "The Cloudflare staging token itself constitutes review authority.",
+      ],
+    },
+    {
+      expected: /must remain standing and valid until revoked/,
+      claims: [
+        "The staging credential is reissued on a calendar cadence.",
+        "Rotate the Cloudflare staging token every 30 days.",
+        "The token for staging is renewed quarterly.",
+        "The staging token is short-lived and expires after six weeks.",
+        "Scheduled monthly replacement of the staging credential is mandatory.",
+        "A 30-day Cloudflare staging token is used for each delivery window.",
+        "The token for staging is replaced after every dispatch.",
+        "The staging environment credential has a finite lifetime.",
+        "The staging token will be reissued after use.",
+      ],
+    },
+  ];
+
+  for (const path of humanPolicyPaths)
+    for (const { expected, claims } of contradictionClasses)
+      for (const claim of claims) {
+        const candidate = clone(credentialPolicySources);
+        candidate[path] += `\n${claim}\n`;
+        assert.match(
+          inspectStagingCredentialPolicySources(candidate).join("\n"),
+          expected,
+          `${path}: ${claim}`,
+        );
+      }
+
+  const unrelatedClaims = [
+    "Application session tokens expire after 30 days and are renewed monthly.",
+    "Possessing an OAuth session token grants approval to access the signed-in account.",
+    "A pull request is required before changing application-session credential behavior.",
+    "The staging environment review calendar is updated monthly.",
+    "A release credential for production is rotated after every deployment.",
+  ];
+  const validStagingClaims = [
+    "The staging token has no calendar reissue cadence and grants no dispatch authority.",
+    "During voluntary replacement, the staging token will be replaced after its protected check.",
+    "The staging token expires only when revoked.",
+    "Staging-token revocation does not require a new change package or pull request.",
+    "Possession of the staging API token does not grant review or approval authority.",
+  ];
+
+  for (const path of humanPolicyPaths)
+    for (const claim of [...unrelatedClaims, ...validStagingClaims]) {
+      const candidate = clone(credentialPolicySources);
+      candidate[path] += `\n${claim}\n`;
+      assert.deepEqual(
+        inspectStagingCredentialPolicySources(candidate),
+        [],
+        `${path}: ${claim}`,
+      );
+    }
 });
 
 test("every mandatory staging-token trigger revokes first and re-enables only after protected replacement checks", () => {

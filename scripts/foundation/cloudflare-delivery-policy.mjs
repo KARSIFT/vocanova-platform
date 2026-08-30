@@ -131,11 +131,28 @@ export const STAGING_CREDENTIAL_POLICY_SURFACES = [
 export const STAGING_CREDENTIAL_POLICY_PATHS =
   STAGING_CREDENTIAL_POLICY_SURFACES.map(({ path }) => path);
 
-const STALE_HUMAN_STAGING_CREDENTIAL_CLAIMS = [
-  /\b(?:maximum-)?90[- ]day\b/i,
-  /\bstaging token\b[^.\n]{0,120}\b(?:expires?|expiry|rotates?|rotation)\b/i,
-  /\b(?:token|credential) rotations?\b/i,
+const STAGING_CREDENTIAL_CONTEXT = [
+  /\b(?:cloudflare[-\s]+)?staging(?:[-\s]+environment)?[-\s]+(?:api[-\s]+)?(?:token|credential)\b/i,
+  /\b(?:token|credential)\s+(?:for|used\s+(?:for|by|in)|stored\s+in|scoped\s+to)\s+(?:the\s+)?(?:cloudflare[-\s]+)?staging(?:[-\s]+environment)?\b/i,
 ];
+const STAGING_CREDENTIAL_ACTION =
+  /\b(?:dispatch(?:es|ed|ing)?|use[ds]?|using|revok(?:e|es|ed|ing)|revocation(?:s)?|replac(?:e|es|ed|ing)|replacement(?:s)?|reissu(?:e|es|ed|ing|ance)|issu(?:e|es|ed|ing|ance)|rotat(?:e|es|ed|ing|ion)|renew(?:s|ed|ing|al)?|provision(?:s|ed|ing)?|install(?:s|ed|ing)?)\b/i;
+const GOVERNED_CHANGE_ARTIFACT =
+  /\b(?:change[-\s]+package|pull[-\s]+request|PR|(?:new|change|governed)\s+plan)\b/i;
+const TOKEN_AUTHORITY_TARGET =
+  /\b(?:dispatch(?:es|ed|ing)?|review(?:s|ed|ing)?|approval|approv(?:e|es|ed|ing)|review[-\s]+judgment)\b/i;
+const TOKEN_POSSESSION =
+  /\b(?:possession|possess(?:es|ed|ing)?|holder|holding|using|presenting|access\s+to|control|ownership)\b/i;
+const CREDENTIAL_LIFECYCLE_ACTION =
+  /\b(?:reissu(?:e|es|ed|ing|ance)|rotat(?:e|es|ed|ing|ion)|renew(?:s|ed|ing|al)?|recreat(?:e|es|ed|ing|ion)|regenerat(?:e|es|ed|ing|ion)|replac(?:e|es|ed|ing)|replacement)\b/i;
+const CALENDAR_CADENCE =
+  /\b(?:calendar|cadence|schedule(?:d)?|daily|weekly|biweekly|monthly|quarterly|semiannually|annually|annual|yearly|periodic(?:ally)?|regular(?:ly|\s+intervals?)|(?:every|each)\s+(?:(?:[1-9][0-9]*)\s+)?(?:day|days|week|weeks|month|months|quarter|quarters|year|years)|once\s+per\s+(?:day|week|month|quarter|year))\b/i;
+const OPERATIONAL_CADENCE =
+  /\b(?:per|after|before|on|upon|for)\s+(?:each|every)\s+(?:dispatch|use|run|deployment|release|review|approval)\b|\bper[-\s]+(?:dispatch|use|run|deployment|release)\b/i;
+const NEGATED_LIFECYCLE =
+  /\b(?:no|never|without)\b[^.;]{0,50}\b(?:expiry|expiration|calendar|cadence|schedule|reissu(?:e|ed|ance)|rotat(?:e|ed|ion)|renew(?:ed|al)|replac(?:e|ed|ement))\b|\b(?:do(?:es)?|must|shall|will|is|are)\s+not\s+(?:be\s+)?(?:expire[ds]?|reissu(?:e|ed)|rotat(?:e|ed)|renew(?:ed)?|replac(?:e|ed))\b/i;
+const REVOCATION_TRIGGER_CONTEXT =
+  /\b(?:after|on|upon|during|for|following|because\s+of|if|when|in\s+response\s+to|triggered\s+by)\b[^.;]{0,80}\b(?:revok(?:e|ed|ing)|revocation|mandatory\s+trigger|disclosure|permission\s+drift|account\s+drift|fabrication|loss\s+of\s+operator\s+control|operator\s+revocation\s+request|voluntary\s+replacement)\b/i;
 
 const CANONICAL_SHA = /^[0-9a-f]{40}$/;
 const VERSION_ID =
@@ -769,6 +786,108 @@ function secretExpressions(source) {
     .filter((expression) => /\bsecrets\b/i.test(expression));
 }
 
+function stagingCredentialAssertions(source) {
+  return source
+    .replace(/<!--.*?-->/gs, "\n\n")
+    .replace(/^(?=[A-Za-z_][A-Za-z0-9_-]*:\s)/gm, "\n\n")
+    .split(/[.!?;]+|\n\s*\n+/)
+    .map((assertion) => assertion.replace(/\s+/g, " ").trim())
+    .filter(
+      (assertion) =>
+        assertion !== "" &&
+        STAGING_CREDENTIAL_CONTEXT.some((pattern) => pattern.test(assertion)),
+    );
+}
+
+function requiresPerActionGovernedChange(assertion) {
+  if (
+    !STAGING_CREDENTIAL_ACTION.test(assertion) ||
+    !GOVERNED_CHANGE_ARTIFACT.test(assertion)
+  )
+    return false;
+  if (
+    [
+      /\b(?:do(?:es)?|did|must|shall|will|can|may)\s+not\s+(?:require|need|create|open|await|use)\b/i,
+      /\b(?:requires?|needs?)\s+(?:no|neither)\b/i,
+      /\b(?:no|neither)\b[^.;]{0,80}\b(?:change[-\s]+package|pull[-\s]+request|PR|(?:new|change|governed)\s+plan)\b[^.;]{0,40}\b(?:is|are|be)?\s*(?:required|needed|mandatory)\b/i,
+      /\b(?:change[-\s]+package|pull[-\s]+request|PR|(?:new|change|governed)\s+plan)\b\s+(?:is|are)\s+(?:not|never)\s+(?:required|needed|mandatory)\b/i,
+    ].some((pattern) => pattern.test(assertion))
+  )
+    return false;
+  return [
+    /\b(?:requires?|needs?)\s+(?!(?:no|neither|not)\b)/i,
+    /\b(?:must|shall)\s+(?:create|open|use|have|receive|await|follow|precede|be\s+(?:preceded|gated|conditioned))/i,
+    /\b(?:is|are)\s+(?:required|mandatory|needed|gated|conditioned|dependent)\b/i,
+    /\bonly\s+(?:after|with|through)\b/i,
+    /\bfor\s+(?:each|every|any)\b[^.;]{0,120}\b(?:create|open|adopt|approve)\b/i,
+    /\b(?:cannot|can't|may\s+not)\b[^.;]{0,100}\bwithout\b/i,
+    /\b(?:subject|conditioned|contingent|dependent)\s+(?:to|on|upon)\b/i,
+    /\b(?:change[-\s]+package|pull[-\s]+request|PR|(?:new|change|governed)\s+plan)\b[^.;]{0,100}\b(?:gates?|precedes?|authorizes?|approves?)\b/i,
+  ].some((pattern) => pattern.test(assertion));
+}
+
+function grantsTokenPossessionAuthority(assertion) {
+  if (!TOKEN_AUTHORITY_TARGET.test(assertion)) return false;
+  if (
+    [
+      /\b(?:do(?:es)?|did|can|may|must|shall|will)\s+not\s+(?:grant|confer|authorize|entitle|permit|allow|provide|give|create|carry)\b/i,
+      /\b(?:grants?|confers?|authorizes?|entitles?|permits?|allows?|provides?|gives?|creates?|carries?)\s+(?:no|neither)\b/i,
+      /\b(?:no|neither)\b[^.;]{0,80}\b(?:dispatch|review|approval)\s+(?:authority|permission|right|judgment)\b/i,
+      /\bnever\s+(?:grants?|confers?|authorizes?|entitles?|permits?|allows?|provides?|gives?|creates?|carries?)\b/i,
+    ].some((pattern) => pattern.test(assertion))
+  )
+    return false;
+  const positiveGrant = [
+    /\b(?:grants?|confers?|authorizes?|entitles?|permits?|allows?|provides?|gives?|creates?|carries?)\s+(?!(?:no|neither|not)\b)/i,
+    /\b(?:is|serves\s+as|counts\s+as|constitutes?)\s+(?!(?:no|not|never)\b)[^.;]{0,60}\b(?:dispatch|review|approval)\s+(?:authority|permission|right|judgment)\b/i,
+    /\b(?:suffices?|qualifies?)\s+(?:as|for)\b[^.;]{0,60}\b(?:dispatch|review|approval)\b/i,
+    /\b(?:may|can|is\s+allowed\s+to|has\s+the\s+right\s+to)\s+(?:directly\s+)?(?:dispatch|review|approve)\b/i,
+  ].some((pattern) => pattern.test(assertion));
+  if (!positiveGrant) return false;
+  return (
+    TOKEN_POSSESSION.test(assertion) ||
+    STAGING_CREDENTIAL_CONTEXT.some((pattern) => pattern.test(assertion))
+  );
+}
+
+function imposesNonStandingLifecycle(assertion) {
+  if (NEGATED_LIFECYCLE.test(assertion)) return false;
+  if (
+    /\b(?:is|are|remains?|becomes?|must\s+be|shall\s+be|will\s+be)\s+(?:a\s+)?(?:short[-\s]+lived|time[-\s]+bound|temporary|ephemeral|single[-\s]+use|one[-\s]+time)\b/i.test(
+      assertion,
+    ) ||
+    (/\b(?:expires?|expiry|expiration|ceases?\s+to\s+be\s+valid)\b/i.test(
+      assertion,
+    ) &&
+      !REVOCATION_TRIGGER_CONTEXT.test(assertion)) ||
+    /\b(?:has|carries?|uses?)\s+(?:a\s+)?(?:fixed[-\s]+)?(?:expiry|expiration|lifetime|maximum\b[^.;]{0,24}\bage)\b/i.test(
+      assertion,
+    ) ||
+    /\b(?:finite|fixed|bounded|maximum)[-\s]+(?:validity|lifetime|age)\b/i.test(
+      assertion,
+    ) ||
+    (/\bvalid\s+(?:for|through)\s+(?!revok(?:e|ed|ation)\b)/i.test(assertion) &&
+      !/\bvalid\s+until\s+revoked\b/i.test(assertion)) ||
+    /\b[1-9][0-9]*[-\s]+(?:day|week|month|quarter|year)s?[-\s]+(?:cloudflare[-\s]+)?staging(?:[-\s]+environment)?[-\s]+(?:api[-\s]+)?(?:token|credential)\b/i.test(
+      assertion,
+    )
+  )
+    return true;
+  if (
+    CREDENTIAL_LIFECYCLE_ACTION.test(assertion) &&
+    (CALENDAR_CADENCE.test(assertion) || OPERATIONAL_CADENCE.test(assertion))
+  )
+    return true;
+  if (
+    /\b(?:must|shall|will|automatically)\s+(?:be\s+)?(?:reissued|rotate[ds]?|rotated|renewed|recreated|regenerated|replaced)\b/i.test(
+      assertion,
+    ) &&
+    !REVOCATION_TRIGGER_CONTEXT.test(assertion)
+  )
+    return true;
+  return false;
+}
+
 export function inspectStagingCredentialPolicySources(sources) {
   const errors = [];
   if (!isRecord(sources))
@@ -791,11 +910,20 @@ export function inspectStagingCredentialPolicySources(sources) {
           `staging credential policy is incomplete in ${path}: ${marker}`,
         );
     if (path.endsWith(".mjs")) continue;
-    for (const stale of STALE_HUMAN_STAGING_CREDENTIAL_CLAIMS)
-      if (stale.test(source))
+    for (const assertion of stagingCredentialAssertions(source)) {
+      if (requiresPerActionGovernedChange(assertion))
         errors.push(
-          `stale staging credential lifecycle claim remains in ${path}: ${stale.source}`,
+          `${path}: staging-token action cannot require a package, plan, or pull request`,
         );
+      if (grantsTokenPossessionAuthority(assertion))
+        errors.push(
+          `${path}: staging-token possession cannot grant dispatch, review, or approval authority`,
+        );
+      if (imposesNonStandingLifecycle(assertion))
+        errors.push(
+          `${path}: staging token must remain standing and valid until revoked without calendar or cadence reissue`,
+        );
+    }
   }
   return errors;
 }
