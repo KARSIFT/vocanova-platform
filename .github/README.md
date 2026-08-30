@@ -122,9 +122,20 @@ decision; an unchanged mechanical approval proxy; and first-step approval-histor
 validation before a Cloudflare secret is evaluated. In this PR1 state,
 `cloudflare-staging` and both environment secrets are absent, so staging fails closed.
 A separate settings action and immediate doc-only PR2 are required before the first
-dispatch. A reusable least-privilege staging token may be rotated independently, at
-most every 90 days; no per-dispatch binder, PR, or token recreation is used. Production
-retains all sentinels and holds. See the
+dispatch.
+
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+The operator-revoked standing least-privilege staging token is valid until revoked.
+Its exact account, two permissions, environment-only secret placement, redaction,
+delivery controls, and production holds remain unchanged; the
+[delivery runbook](../docs/operations/cloudflare-delivery.md) owns fail-closed
+revocation and replacement ordering. Ordinary dispatches, revocations, and
+replacements need no package or pull request, but any later meaningful policy or
+behavior change still requires governed intake and adoption. Credential lifecycle
+never grants dispatch or review judgment.
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->
+
+Production retains all sentinels and holds. See the
 [delivery runbook](../docs/operations/cloudflare-delivery.md).
 
 T11 removes the active Go/PostgreSQL runtime, Dockerfiles, Compose/Nginx/host assets,

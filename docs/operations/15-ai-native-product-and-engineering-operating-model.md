@@ -31,10 +31,12 @@ related_decisions:
   - ADR-0004
   - ADR-0005
 revision_note: >
-  VOC-100 prospectively replaces the VOC-096 custom binder with a standard protected
+  VOC-101 makes the unchanged least-privilege staging token an operator-revoked
+  standing credential valid until revoked, with fail-closed revocation and replacement
+  handling. VOC-100 prospectively replaces the VOC-096 custom binder with a standard protected
   GitHub environment: manual SHA-bound dispatch, fresh non-author AI review receipt,
   mechanical approval proxy, first-step approval-history validation, and independent
-  maximum-90-day token rotation. PR1 keeps staging environment/secrets absent and
+  operator-controlled token replacement. PR1 keeps staging environment/secrets absent and
   fail-closed; separately authorized settings action and immediate PR2 remain required.
   VOC-090 clarifies coherent-outcome delivery. One approved package, one
   implementation pull request, and one minimum-sufficient task are the default safe
@@ -81,9 +83,19 @@ manual SHA-bound `develop` dispatch with required checks, a fresh non-author AI 
 receipt, unchanged mechanical approval proxy, and first environment-step approval-
 history validation may proceed. The staging environment and secrets are absent in PR1,
 so staging fails closed; a settings action and immediate doc-only PR2 are required.
-The reusable least-privilege token rotates independently at most every 90 days. Ruflo
-has no credential, settings, dispatch, review, approval, or merge authority.
+The least-privilege staging token is operator-controlled and valid until revoked.
+Ruflo has no credential, settings, dispatch, review, approval, or merge authority.
 Production and learner-data holds remain unchanged.
+
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+VOC-101 changes only the token lifecycle: the least-privilege staging token is an
+operator-revoked standing credential valid until revoked. Mandatory triggers revoke
+first and keep staging disabled; voluntary replacement alone may preserve the prior
+token through protected checks. Failure and unconfirmed-revocation handling is
+fail-closed under the delivery runbook. An ordinary dispatch, revocation, or
+replacement requires no package or pull request and is independent of deployment;
+later meaningful policy changes remain governed.
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->
 
 **VOC-082 amendment (2026-08-23):** For current authority, a role is a responsibility
 and an actor is an attributable human or separately instantiated AI participant. A

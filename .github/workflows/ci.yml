@@ -5,6 +5,13 @@ run-name: >-
 
 # Repository checks are credential-free. Manual staging delivery is separately
 # protected by exact event, live environment, approval-receipt, and resource gates.
+# VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN
+# The operator-revoked standing staging token is valid until revoked.
+# Mandatory triggers revoke first and keep staging disabled until inactive-token
+# verification and a protected replacement check pass. Voluntary replacement may
+# retain the prior token only through those checks. This comment changes no dispatch
+# or secret access.
+# VOC-101-STAGING-CREDENTIAL-POLICY-END
 on:
   pull_request:
     branches: [develop, main]
@@ -18,7 +25,7 @@ on:
         type: choice
         options: [staging, production]
       delivery_operation:
-        description: Deploy or run the no-write credential check used during rotation
+        description: Deploy or run the protected no-write check for standing-token replacement
         required: true
         type: choice
         options: [deploy, credential-check]

@@ -115,6 +115,15 @@ secrets are absent in this PR1 state, so staging fails closed pending separately
 authorized settings and immediate documentation-only PR2. `main` and production retain
 no live effect and all production holds.
 
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+The operator-revoked standing staging token remains valid until revoked. Its
+revocation/replacement procedure is an operator-controlled action independent of
+deployment. Ordinary staging dispatches, token revocations, and token replacements
+under the stable policy need neither a new plan nor a pull request. Later meaningful
+policy or behavior changes still use governed intake and adoption; the credential
+lifecycle grants no dispatch or review judgment.
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->
+
 ```text
 feature/* ──PR──► develop ──release PR──► main
                     ▲                       │
@@ -169,7 +178,8 @@ resolved, and merged through a PR. Staging/production deployment evidence is req
 active, separately authorized Cloudflare delivery task provides that capability. T10's
 mocked/held mechanism exists, but live evidence remains unavailable until the separately
 authorized settings/action boundary and applicable hold complete. Ordinary staging
-dispatches and token rotations do not create new plans or pull requests.
+dispatches and token revocations or replacements do not create new plans or pull
+requests.
 
 ## 6. Pull-request standards
 

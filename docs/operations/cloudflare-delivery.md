@@ -68,15 +68,38 @@ non-sensitive canonical identifier retained in this secret interface for Wrangle
 the API-token value is confidential and is never placed in a repository file, input,
 output, log, comment, artifact, or agent record.
 
-The staging token is reusable for ordinary dispatches but expires no later than 90
-days. It is restricted to account `0a9eda28b96d77c24dcde74f3e074d47` with exactly
-Workers Scripts Edit and D1 Edit. It has no DNS, billing, user, organization, Access,
-Pages, R2, AI, production-data, or token-management permission. The Cloudflare
-dashboard policy readback, sanitized before recording, proves scope, permissions,
-status, and expiry; a verify endpoint and Wrangler account readback do not prove its
-permission policy. Rotation is create, dashboard verify, local status/account verify,
-install, environment-reviewed no-write credential check, then revoke the old token.
-Rotation is independent of a deployment, plan, or pull request.
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+The operator-revoked standing Cloudflare staging token is valid until revoked. It
+is restricted to account `0a9eda28b96d77c24dcde74f3e074d47` with exactly Workers
+Scripts Edit and D1 Edit; it has no DNS, billing, user, organization, Access, Pages,
+R2, AI, production-data, token-management, or unrelated-product permission. When
+separately authorized and installed, `CLOUDFLARE_ACCOUNT_ID` and
+`CLOUDFLARE_API_TOKEN` may exist only as `cloudflare-staging` environment secrets,
+never at repository or organization scope; values never enter the repository, logs,
+comments, artifacts, or agent records.
+
+Mandatory revocation triggers are suspected disclosure, account or permission drift,
+shared-identity fabrication, loss of operator control, and an explicit operator
+revocation request. A trigger requires revocation first and leaves staging disabled
+until a replacement passes sanitized dashboard policy readback, local status/account
+verification without logging, installation, and the protected no-write credential
+check. Only voluntary replacement when no mandatory trigger exists may retain the
+prior token through those checks and revoke it afterward. A failed voluntary
+replacement restores the prior environment secret, passes the protected no-write
+check, and revokes the failed replacement. A failed trigger-driven replacement is
+revoked and removed while staging stays disabled.
+
+If required revocation cannot be confirmed, remove the environment API-token secret,
+reject new approvals, cancel in-flight staging runs, open an incident, retry
+revocation, and verify the affected token is inactive without logging it. Staging
+cannot resume until that verification succeeds and a valid credential passes the
+protected no-write check.
+
+Ordinary dispatch, revocation, and replacement under this stable policy require
+neither a change package nor a pull request and are not coupled to deployment; any
+later meaningful policy or behavior change requires governed intake, adoption, and
+implementation. The credential lifecycle grants no dispatch or review judgment.
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->
 
 ## Standard manual staging delivery after settings action
 
@@ -135,7 +158,8 @@ may then create/read back the exact environment, two secret names, protections, 
 policy, and sanitized token policy while proving those secret names are absent from
 repository and organization scope. An immediate documentation-only PR2 records that
 sanitized post-state. This two-PR boundary occurs once because settings cannot be
-truthfully preclaimed. It is not repeated for ordinary dispatches or token rotations.
+truthfully preclaimed. It is not repeated for ordinary dispatches, token revocations,
+or token replacements.
 
 ## Cancellation, failure, and rollback
 

@@ -18,13 +18,20 @@ related_decisions:
   - ADR-0003
 adoption_change: VOC-008
 amendments:
+  - id: VOC-101-standing-staging-token-amendment
+    title: "Operator-revoked standing Cloudflare staging token"
+    adopted_in: VOC-101
+    adopted_at: 2026-08-30
+    approving_owner: approved-voc-101-package
+    resolution_recorded_in: specs/changes/VOC-101-standing-staging-token/change.yaml
+    notes: "Makes the unchanged least-privilege staging token valid until revoked, with fail-closed mandatory revocation, replacement, and incident handling."
   - id: VOC-100-standard-cloudflare-delivery-amendment
     title: "Standard protected-environment staging delivery"
     adopted_in: VOC-100
     adopted_at: 2026-08-28
     approving_owner: approved-voc-100-package
     resolution_recorded_in: specs/changes/VOC-100-standard-cloudflare-delivery/change.yaml
-    notes: "Prospectively replaces the custom runtime binder with a manual SHA-bound dispatch, fresh AI review receipt, mechanical approval proxy, first-step approval-history validation, and independent token rotation. PR1 keeps the environment and secrets absent; production remains held."
+    notes: "Prospectively replaces the custom runtime binder with a manual SHA-bound dispatch, fresh AI review receipt, mechanical approval proxy, first-step approval-history validation, and independent operator-controlled token replacement. PR1 keeps the environment and secrets absent; production remains held."
   - id: VOC-083-workerd-compatibility-amendment
     title: "Generated Worker inventory and fail-closed workerd diagnostics"
     adopted_in: VOC-083
@@ -98,6 +105,16 @@ Staging (from `develop`), Production (from `main`).
 > both secrets are absent, so staging fails closed. A separately authorized settings
 > action and immediate doc-only PR2 are required before dispatch. Production and
 > learner-data holds remain unchanged.
+
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+VOC-101 makes the unchanged least-privilege token an operator-revoked standing
+Cloudflare staging token valid until revoked. Mandatory triggers revoke first and
+keep staging disabled until inactive-token verification and a valid replacement's
+protected check pass; only voluntary replacement with no trigger may retain the prior
+token through checks. The delivery runbook owns failure and incident handling.
+Ordinary dispatch, revocation, and replacement need no package or PR and remain
+independent of deployment.
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->
 
 | Capability   | Current repository state                                                                         | Separately held live state                                                       |
 | ------------ | ------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
