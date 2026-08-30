@@ -1148,13 +1148,47 @@ async function requestJson(http, url, headers) {
     headers,
     redirect: "error",
   });
-  if (isRecord(response) && !Object.hasOwn(response, "ok")) return response;
-  if (!response?.ok)
-    throw new Error(`GitHub API returned ${response?.status ?? "no status"}`);
-  const contentType = response.headers?.get?.("content-type") ?? "";
+  if (isPlainDecodedRecord(response) && !hasFetchResponseShape(response))
+    return response;
+  if (!isFetchResponseLike(response))
+    throw new Error("GitHub API response shape is invalid");
+  if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+  const contentType = response.headers.get("content-type") ?? "";
   if (!/^application\/json\b/i.test(contentType))
     throw new Error("GitHub API response is not JSON");
-  return await response.json();
+  try {
+    return await response.json();
+  } catch {
+    throw new Error("GitHub API response JSON is malformed");
+  }
+}
+
+function hasFetchResponseShape(value) {
+  return (
+    isRecord(value) &&
+    ("ok" in value ||
+      "status" in value ||
+      typeof value.headers?.get === "function" ||
+      typeof value.json === "function")
+  );
+}
+
+function isFetchResponseLike(value) {
+  return (
+    hasFetchResponseShape(value) &&
+    typeof value.ok === "boolean" &&
+    Number.isInteger(value.status) &&
+    value.status >= 100 &&
+    value.status <= 599 &&
+    typeof value.headers?.get === "function" &&
+    typeof value.json === "function"
+  );
+}
+
+function isPlainDecodedRecord(value) {
+  if (!isRecord(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
 }
 
 export function validateEnvironmentProtection(protection) {
