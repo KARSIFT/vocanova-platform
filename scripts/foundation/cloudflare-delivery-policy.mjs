@@ -1152,7 +1152,8 @@ async function requestJson(http, url, headers) {
     return response;
   if (!isFetchResponseLike(response))
     throw new Error("GitHub API response shape is invalid");
-  if (!response.ok) throw new Error(`GitHub API returned ${response.status}`);
+  if (response.ok !== true || response.status < 200 || response.status > 299)
+    throw new Error(`GitHub API returned ${response.status}`);
   const contentType = response.headers.get("content-type") ?? "";
   if (!/^application\/json\b/i.test(contentType))
     throw new Error("GitHub API response is not JSON");

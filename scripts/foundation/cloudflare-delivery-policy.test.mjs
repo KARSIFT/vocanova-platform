@@ -790,6 +790,26 @@ test("native Fetch response failures stay fail-closed and redact request and bod
       expected: /GitHub API returned 403/,
     },
     {
+      name: "inherited ok true with non-2xx status",
+      response: () => {
+        const response = Object.assign(
+          Object.create({
+            get ok() {
+              return true;
+            },
+          }),
+          {
+            status: 403,
+            headers: new Headers({ "content-type": "application/json" }),
+            json: async () => ({ "body-secret-inconsistent": true }),
+          },
+        );
+        assert.equal(Object.hasOwn(response, "ok"), false);
+        return response;
+      },
+      expected: /GitHub API returned 403/,
+    },
+    {
       name: "non-JSON",
       response: () =>
         new Response("body-secret-non-json", {
