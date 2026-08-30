@@ -109,6 +109,16 @@ function dispatchEvent(overrides = {}) {
   };
 }
 
+function credentialCheckEvent() {
+  return dispatchEvent({
+    inputs: {
+      delivery_environment: "staging",
+      delivery_operation: "credential-check",
+      confirmation: `CHECK staging ${exactSha}`,
+    },
+  });
+}
+
 function approvalFixture() {
   const receipt = {
     checks_reviewed: ["ci required"],
@@ -722,13 +732,7 @@ test("manual develop staging dispatch and no-write credential check pass exact d
     operation: "deploy",
     reasons: [],
   });
-  const credentialCheck = dispatchEvent({
-    inputs: {
-      delivery_environment: "staging",
-      delivery_operation: "credential-check",
-      confirmation: `CHECK staging ${exactSha}`,
-    },
-  });
+  const credentialCheck = credentialCheckEvent();
   assert.equal(
     (
       await evaluateDeliveryEvent(manifest, credentialCheck, {
@@ -738,6 +742,148 @@ test("manual develop staging dispatch and no-write credential check pass exact d
     ).eligible,
     true,
   );
+});
+
+test("native Fetch responses decode into the exact eligible credential-check decision", async () => {
+  const protection = exactProtection();
+  const responses = [protection.environment, protection.branchPolicies].map(
+    (body) =>
+      new Response(JSON.stringify(body), {
+        status: 200,
+        headers: { "content-type": "application/json; charset=utf-8" },
+      }),
+  );
+  assert.equal(Object.hasOwn(responses[0], "ok"), false);
+  assert.equal(responses[0].ok, true);
+
+  let responseIndex = 0;
+  const decision = await evaluateDeliveryEvent(
+    manifest,
+    credentialCheckEvent(),
+    {
+      githubToken: "injected-http-no-network",
+      requiredResult: "success",
+      http: async () => responses[responseIndex++],
+    },
+  );
+
+  assert.deepEqual(decision, {
+    eligible: true,
+    environment: "staging",
+    operation: "credential-check",
+    reasons: [],
+  });
+  assert.equal(responseIndex, 2);
+  assert.equal(responses[0].bodyUsed, true);
+  assert.equal(responses[1].bodyUsed, true);
+});
+
+test("native Fetch response failures stay fail-closed and redact request and body values", async () => {
+  const cases = [
+    {
+      name: "non-2xx",
+      response: () =>
+        new Response('{"body-secret-non-2xx":true}', {
+          status: 403,
+          headers: { "content-type": "application/json" },
+        }),
+      expected: /GitHub API returned 403/,
+    },
+    {
+      name: "inherited ok true with non-2xx status",
+      response: () => {
+        const response = Object.assign(
+          Object.create({
+            get ok() {
+              return true;
+            },
+          }),
+          {
+            status: 403,
+            headers: new Headers({ "content-type": "application/json" }),
+            json: async () => ({ "body-secret-inconsistent": true }),
+          },
+        );
+        assert.equal(Object.hasOwn(response, "ok"), false);
+        return response;
+      },
+      expected: /GitHub API returned 403/,
+    },
+    {
+      name: "non-JSON",
+      response: () =>
+        new Response("body-secret-non-json", {
+          status: 200,
+          headers: { "content-type": "text/plain" },
+        }),
+      expected: /GitHub API response is not JSON/,
+    },
+    {
+      name: "malformed JSON",
+      response: () =>
+        new Response('{"body-secret-malformed":', {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+      expected: /GitHub API response JSON is malformed/,
+    },
+  ];
+
+  for (const { name, response, expected } of cases) {
+    let calls = 0;
+    const decision = await evaluateDeliveryEvent(
+      manifest,
+      credentialCheckEvent(),
+      {
+        githubToken: "token-secret-sentinel",
+        requiredResult: "success",
+        http: async () => {
+          calls += 1;
+          return response();
+        },
+      },
+    );
+    assert.equal(decision.eligible, false, name);
+    assert.equal(decision.environment, null, name);
+    assert.equal(decision.operation, null, name);
+    assert.equal(decision.reasons.length, 1, name);
+    assert.match(
+      decision.reasons[0],
+      /^live environment protection readback failed:/,
+      name,
+    );
+    assert.match(decision.reasons[0], expected, name);
+    assert.doesNotMatch(
+      decision.reasons.join("\n"),
+      /token-secret-sentinel|authorization|bearer|body-secret/i,
+      name,
+    );
+    assert.equal(calls, 1, name);
+  }
+});
+
+test("plain decoded protection records retain the explicit injected HTTP fixture path", async () => {
+  const protection = exactProtection();
+  const responses = [protection.environment, protection.branchPolicies];
+  let responseIndex = 0;
+
+  const decision = await evaluateDeliveryEvent(
+    manifest,
+    credentialCheckEvent(),
+    {
+      githubToken: "injected-http-no-network",
+      requiredResult: "success",
+      http: async () => responses[responseIndex++],
+    },
+  );
+
+  assert.deepEqual(decision, {
+    eligible: true,
+    environment: "staging",
+    operation: "credential-check",
+    reasons: [],
+  });
+  assert.equal(responseIndex, 2);
 });
 
 test("wrong event, actor, ref, SHA, confirmation, checks, or production target fails", async () => {
