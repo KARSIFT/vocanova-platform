@@ -1,0 +1,164 @@
+schema_version: 1
+
+id: VOC-101
+slug: standing-staging-token
+title: Operator-revoked standing Cloudflare staging token
+type: cloudflare-credential-lifecycle-policy
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because implementation changes the policy for the first secret-bearing
+  Cloudflare staging credential and its deterministic controls, while preserving
+  all resource, permission, review, cost, data, and production boundaries.
+canonical_path: specs/changes/VOC-101-standing-staging-token
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/176
+related_activation_issue: https://github.com/KARSIFT/vocanova-platform/issues/158
+related_delivery_issue: https://github.com/KARSIFT/vocanova-platform/issues/173
+base_branch: develop
+base_sha: 39cd13c2ca4bde386e084c02720e97b60975637e
+plan_branch: plan/voc-101-standing-staging-token
+target_branch: develop
+approved_candidate_sha: null
+approval_status: not-approved
+implementation_authorized: false
+implementation_authority_status: pending-exact-candidate-review-and-adoption
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Define the staging credential as a standing token valid until revoked, without
+  broadening its account, permissions, placement, use, or any staging or production
+  authority.
+
+requirements:
+  - id: VOC-101-D00
+    statement: >-
+      Issue 176 and chat are intake only. Repository implementation requires an
+      exact reviewed and adopted candidate. Adoption grants repository-only
+      implementation authority and no GitHub settings, secret, Cloudflare,
+      dispatch, deployment, DNS, spending, data, production, or launch authority.
+  - id: VOC-101-D01
+    statement: >-
+      Future living policy describes the staging credential only as an
+      operator-revoked standing token valid until revoked. Token changes remain
+      accountable operator actions.
+  - id: VOC-101-D02
+    statement: >-
+      Preserve account 0a9eda28b96d77c24dcde74f3e074d47, exactly Workers Scripts
+      Edit and D1 Edit, environment-only CLOUDFLARE_ACCOUNT_ID and
+      CLOUDFLARE_API_TOKEN, broader-scope secret-name absence, redaction, and the
+      prohibition on DNS, billing, user, organization, Access, Pages, R2, AI,
+      production-data, token-management, and unrelated-product permissions.
+  - id: VOC-101-D03
+    statement: >-
+      Require immediate revocation on suspected disclosure, account or permission
+      drift, shared-identity fabrication, loss of operator control, or explicit
+      operator revocation request; staging then remains disabled unless and until a
+      replacement passes dashboard policy readback, local status/account verification
+      without logging, environment-secret installation, and the protected no-write
+      credential check. Only a voluntary replacement with no mandatory trigger may
+      retain the prior token through those checks and revoke it afterward. If that
+      voluntary replacement fails, restore the prior environment secret, pass the
+      protected no-write check, and revoke the failed replacement. If a replacement
+      after a mandatory trigger fails, revoke and remove the failed replacement and
+      keep staging disabled. Revocation or replacement is not coupled to a deployment,
+      plan, or pull request.
+  - id: VOC-101-D04
+    statement: >-
+      Reconcile every inventoried living workflow, settings, governance, and
+      operations surface plus deterministic validators/tests. Preserve VOC-100 and
+      VOC-094 through VOC-099 as immutable historical records.
+  - id: VOC-101-D05
+    statement: >-
+      Preserve manual develop-only SHA/attempt-bound staging review, environment
+      protection, shared-identity residual acceptance, synthetic-only staging,
+      Free/$0 ceiling, exact D1/Worker safety, and every production hold. Credential
+      lifecycle never grants dispatch or review judgment.
+  - id: VOC-101-D06
+    statement: >-
+      Plan and implementation each receive fresh exact-revision Cloudflare,
+      security/governance, and independent R4 PASS evidence from distinct non-author
+      actors, hosted checks, and a merge by a separate non-author actor.
+  - id: VOC-101-D07
+    statement: >-
+      Use one minimum-sufficient task and one coherent implementation pull request.
+      No package is required per dispatch, revocation, or replacement. Any later
+      meaningful policy or behavior change still follows the normal governed intake
+      and adoption workflow.
+
+owners:
+  decision: accountable-repository-owner-operator-m-e-h-r-d-a-a-d
+  package_preparation: Codex-root-VOC-101-plan-author
+  implementation: different-builder-actor-after-adoption
+  cloudflare_specialist: different-non-author-exact-revision-actor
+  security_governance_reviewer: different-non-author-exact-revision-actor
+  independent_r4_verifier: different-non-author-exact-revision-actor
+  merge: separate-non-author-non-reviewer-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - .github/README.md
+  - .github/workflows/ci.yml
+  - docs/governance/16-autonomous-development-operating-model.md
+  - docs/governance/repository-settings.md
+  - docs/operations/10-development-workflow.md
+  - docs/operations/11-devops-and-ci-cd.md
+  - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+  - docs/operations/cloudflare-delivery.md
+  - scripts/foundation/cloudflare-delivery-policy.mjs
+  - scripts/foundation/cloudflare-delivery-policy.test.mjs
+
+protected_areas:
+  - github-environment-secrets
+  - cloudflare-account-credential
+  - staging-delivery-governance
+  - production-holds
+
+implementation:
+  authorized: false
+  required: true
+  status: pending-adoption
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-101-T00
+
+action_specific_authority:
+  required_for_settings_or_secret_action: true
+  status: held-not-authorized-by-plan-or-adoption
+  required_record: >-
+    separate exact staging-settings and credential authority consistent with the
+    adopted standing-token policy and all preserved VOC-100 controls
+
+external_effects:
+  github_settings_and_secrets: prohibited
+  cloudflare: prohibited
+  workflow_dispatch: prohibited
+  staging_deployment: prohibited
+  production: prohibited
+  dns: prohibited
+  spending_and_billing: prohibited
+  learner_data: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-policy-only-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-implementation-merge-and-postmerge-validation
+
+ehr: not-triggered
