@@ -90,6 +90,23 @@ const PROHIBITED_EXTERNAL_EFFECT_PATTERNS = [
   [/\b(?:RUFLO_)?SPENDING_AUTHORITY\b/, "spending authority"],
 ];
 
+const SETTINGS_TRUTH_VALIDATOR_PATH =
+  "scripts/foundation/voc085-settings-truthfulness-policy.mjs";
+
+const SETTINGS_TRUTH_ALLOWED_CREDENTIAL_LITERAL_LINES = [
+  /^\s*"CLOUDFLARE_ACCOUNT_ID",$/gm,
+  /^\s*"CLOUDFLARE_API_TOKEN",$/gm,
+  /^          "`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` may exist only as `cloudflare-staging` environment secrets",$/gm,
+];
+
+const SETTINGS_TRUTH_FORBIDDEN_CAPABILITY_PATTERNS = [
+  [/\b(?:process|Deno|Bun)\s*\.\s*env\b/, "runtime environment access"],
+  [
+    /\b(?:fetch\s*\(|(?:http|https)\s*\.\s*(?:request|get)\s*\(|(?:net|tls)\s*\.\s*(?:connect|createConnection)\s*\()|(?:import\s+[^;\n]*\s+from\s+|import\s*\(\s*|require\s*\(\s*)["'](?:node:)?(?:http|https|net|tls|dns|undici)["']/,
+    "network access",
+  ],
+];
+
 function filesBelow(directory) {
   if (!existsSync(directory)) return [];
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -201,6 +218,14 @@ function inspectDeliveryWorkflow(source) {
   return errors;
 }
 
+function stripAllowedSettingsTruthCredentialLiterals(source) {
+  let sanitized = source;
+  for (const pattern of SETTINGS_TRUTH_ALLOWED_CREDENTIAL_LITERAL_LINES) {
+    sanitized = sanitized.replace(pattern, "");
+  }
+  return sanitized;
+}
+
 export function validateAgentAuthority(repositoryRoot) {
   const errors = [];
 
@@ -292,6 +317,7 @@ export function validateAgentAuthority(repositoryRoot) {
   );
 
   for (const path of executableFiles) {
+    const filename = relative(repositoryRoot, path).replaceAll("\\", "/");
     const source = readFileSync(path, "utf8");
     if (LOCAL_ORCHESTRATOR_LAUNCH_PATTERN.test(source)) {
       errors.push(
@@ -306,11 +332,21 @@ export function validateAgentAuthority(repositoryRoot) {
         break;
       }
     }
+    if (filename === SETTINGS_TRUTH_VALIDATOR_PATH) {
+      for (const [
+        pattern,
+        capability,
+      ] of SETTINGS_TRUTH_FORBIDDEN_CAPABILITY_PATTERNS) {
+        if (pattern.test(source)) {
+          errors.push(`${path}: prohibited external effect: ${capability}`);
+          break;
+        }
+      }
+    }
     for (const [pattern, capability] of PROHIBITED_EXTERNAL_EFFECT_PATTERNS) {
       const isDeliveryWorkflow = path === deliveryWorkflow;
-      const isSettingsTruthValidator = path.endsWith(
-        "voc085-settings-truthfulness-policy.mjs",
-      );
+      const isSettingsTruthValidator =
+        filename === SETTINGS_TRUTH_VALIDATOR_PATH;
       if (
         isDeliveryWorkflow &&
         capability === "Cloudflare credential interface"
@@ -319,7 +355,8 @@ export function validateAgentAuthority(repositoryRoot) {
       }
       if (
         isSettingsTruthValidator &&
-        capability === "Cloudflare credential interface"
+        capability === "Cloudflare credential interface" &&
+        !pattern.test(stripAllowedSettingsTruthCredentialLiterals(source))
       ) {
         continue;
       }

@@ -14,6 +14,28 @@ import { validateAgentAuthority } from "./agent-authority-policy.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
 
+function agentPolicyFixture() {
+  const temporary = mkdtempSync(resolve(tmpdir(), "vocanova-agent-policy-"));
+  mkdirSync(resolve(temporary, ".github/workflows"), { recursive: true });
+  mkdirSync(resolve(temporary, "scripts/foundation"), { recursive: true });
+  writeFileSync(resolve(temporary, "package.json"), JSON.stringify({}));
+  writeFileSync(
+    resolve(temporary, ".github/workflows/ci.yml"),
+    readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"),
+  );
+  return temporary;
+}
+
+function writeSettingsTruthValidator(temporary, source) {
+  writeFileSync(
+    resolve(
+      temporary,
+      "scripts/foundation/voc085-settings-truthfulness-policy.mjs",
+    ),
+    source,
+  );
+}
+
 test("the repository has no executable local agent authority", () => {
   assert.deepEqual(validateAgentAuthority(repositoryRoot), []);
 });
@@ -70,24 +92,81 @@ test("Cloudflare credential interface names are scoped to the canonical delivery
   }
 });
 
-test("settings truth validator exception only allows literal credential names", () => {
-  const temporary = mkdtempSync(resolve(tmpdir(), "vocanova-agent-policy-"));
+test("settings truth validator allows only exact static credential-name literals", () => {
+  const temporary = agentPolicyFixture();
   try {
-    mkdirSync(resolve(temporary, ".github/workflows"), { recursive: true });
-    mkdirSync(resolve(temporary, "scripts/foundation"), { recursive: true });
-    writeFileSync(resolve(temporary, "package.json"), JSON.stringify({}));
-    writeFileSync(
-      resolve(temporary, ".github/workflows/ci.yml"),
-      readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"),
-    );
-    writeFileSync(
-      resolve(
-        temporary,
-        "scripts/foundation/voc085-settings-truthfulness-policy.mjs",
-      ),
+    writeSettingsTruthValidator(
+      temporary,
       [
-        'const names = ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN"];',
-        "void names;",
+        "const EXPECTED = {",
+        "  environment_secret_names: [",
+        '    "CLOUDFLARE_ACCOUNT_ID",',
+        '    "CLOUDFLARE_API_TOKEN",',
+        "  ],",
+        "  required: [",
+        '          "`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` may exist only as `cloudflare-staging` environment secrets",',
+        "  ],",
+        "};",
+        "void EXPECTED;",
+        "",
+      ].join("\n"),
+    );
+
+    assert.deepEqual(validateAgentAuthority(temporary), []);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator rejects credential environment access", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      "const token = process.env.CLOUDFLARE_API_TOKEN;\nvoid token;\n",
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(
+      errors.some((error) => error.includes("runtime environment access")),
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator rejects network capability", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      'const response = await fetch("https://api.github.com/rate_limit");\nvoid response;\n',
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(
+      errors.some((error) =>
+        error.includes("prohibited external effect: network access"),
+      ),
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator still rejects autonomous GitHub writes", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      [
+        "const EXPECTED = {",
+        "  environment_secret_names: [",
+        '    "CLOUDFLARE_ACCOUNT_ID",',
+        '    "CLOUDFLARE_API_TOKEN",',
+        "  ],",
+        "};",
+        "void EXPECTED;",
         "const unsafe = 'gh workflow run ci.yml';",
         "void unsafe;",
         "",
@@ -98,14 +177,6 @@ test("settings truth validator exception only allows literal credential names", 
     assert.ok(
       errors.some((error) =>
         error.includes("autonomous GitHub write/completion command"),
-      ),
-    );
-    assert.ok(
-      errors.every(
-        (error) =>
-          !error.includes(
-            "prohibited external effect: Cloudflare credential interface",
-          ),
       ),
     );
   } finally {
