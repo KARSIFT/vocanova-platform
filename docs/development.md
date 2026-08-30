@@ -164,9 +164,11 @@ placeholder production D1/routes, environment names, dry runs, and delivery stat
 machine. Under VOC-100, staging uses a standard GitHub environment only after a
 separately authorized settings action: manual SHA-bound `develop` dispatch, fresh
 non-author AI review receipt, mechanical approval proxy, and first-step approval-
-history validation before secrets. In the present PR1 state the staging environment
-and secrets are absent and the workflow fails closed; local commands never create,
-read, or require them. See the [delivery runbook](operations/cloudflare-delivery.md).
+history validation before secrets. VOC-100 PR2 records that the separately authorized
+settings action created `cloudflare-staging` with exactly the two environment secret
+names and no matching repository or organization Actions secret names; local commands
+never create, read, or require them. See the
+[delivery runbook](operations/cloudflare-delivery.md).
 
 The active repository contains no Go module, Dockerfile, Compose/Nginx configuration,
 host operation script, or remote staging-server test. `pnpm ci:retirement` validates

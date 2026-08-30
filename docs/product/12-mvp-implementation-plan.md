@@ -67,11 +67,11 @@ and rollback proof is the bounded exception described next.
 VOC-094 Phase 1 has separately created and rollback-proved the bounded synthetic
 staging resources, and Phase 2 external Ruflo verification is complete. VOC-100
 retains that tuple but prospectively replaces the custom binder with a standard
-protected-environment staging path. In this PR1 state the staging environment and
-secrets are absent, so dispatch fails closed. A separately authorized settings action,
-immediate settings-truth PR2, and an explicitly accepted shared-identity residual are
-required before the first staging dispatch. `VOC-080-HOLD-01` and `HOLD-02` remain
-fully unresolved and unchanged.
+protected-environment staging path. VOC-100 PR2 records that the separately authorized
+settings action created `cloudflare-staging` with exactly the two environment secret
+names, no matching repository or organization Actions secret names, and an explicitly
+accepted shared-identity residual. No dispatch or deployment occurred.
+`VOC-080-HOLD-01` and `HOLD-02` remain fully unresolved and unchanged.
 
 ## 1. Product outcome
 

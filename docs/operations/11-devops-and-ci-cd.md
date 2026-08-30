@@ -31,7 +31,7 @@ amendments:
     adopted_at: 2026-08-28
     approving_owner: approved-voc-100-package
     resolution_recorded_in: specs/changes/VOC-100-standard-cloudflare-delivery/change.yaml
-    notes: "Prospectively replaces the custom runtime binder with a manual SHA-bound dispatch, fresh AI review receipt, mechanical approval proxy, first-step approval-history validation, and independent operator-controlled token replacement. PR1 keeps the environment and secrets absent; production remains held."
+    notes: "Prospectively replaces the custom runtime binder with a manual SHA-bound dispatch, fresh AI review receipt, mechanical approval proxy, first-step approval-history validation, and independent operator-controlled token replacement. PR2 records the separately authorized exact staging environment and environment secret names; production remains held."
   - id: VOC-083-workerd-compatibility-amendment
     title: "Generated Worker inventory and fail-closed workerd diagnostics"
     adopted_in: VOC-083
@@ -101,10 +101,11 @@ Staging (from `develop`), Production (from `main`).
 > VOC-100 prospectively replaces the custom binder with one protected GitHub
 > environment: a manual SHA-bound `develop` dispatch, required checks, fresh
 > non-author AI review receipt, mechanical approval proxy, and first-step approval-
-> history validation before secrets. In PR1 the `cloudflare-staging` environment and
-> both secrets are absent, so staging fails closed. A separately authorized settings
-> action and immediate doc-only PR2 are required before dispatch. Production and
-> learner-data holds remain unchanged.
+> history validation before secrets. VOC-100 PR2 records that the separately
+> authorized settings action created `cloudflare-staging` with exactly the two
+> environment secret names and no matching repository or organization Actions secret
+> names. No dispatch or deployment occurred. Production and learner-data holds remain
+> unchanged.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
 VOC-101 makes the unchanged least-privilege token an operator-revoked standing
@@ -123,16 +124,18 @@ independent of deployment.
 | Data         | Forward-only D1 migrations, local D1 tests, and compact retired PostgreSQL conversion fixtures   | Separate staging/production D1 creation and any remote migration                 |
 | Web-to-API   | Local workerd service binding plus preserved HTTPS `/api/v1` contract                            | Environment-specific service binding and route activation                        |
 | Assets/async | Workers Static Assets; Queue/Workflow/DO/R2 remain absent until a measured requirement           | Any separately reviewed product binding or resource                              |
-| CI/CD        | Four deterministic workflows; credential-free dry runs and fail-closed VOC-100 staging controls  | Environment-scoped version/migration/promotion after settings action and PR2     |
+| CI/CD        | Four deterministic workflows; credential-free dry runs and VOC-100 protected staging controls    | Environment-scoped version/migration/promotion after approved dispatch           |
 | Secrets      | No deployment secrets in PRs or agents                                                           | Environment-scoped Cloudflare secret bindings unavailable to PRs/Ruflo           |
 | Rollback     | Repository reverts plus mocked prior-Worker-version and forward-corrective D1 contracts          | Authorized version traffic restoration or separately authorized D1 recovery      |
 
-No current workflow run can deploy to Preview, Staging, or Production. The manual
-staging job remains fail-closed because `cloudflare-staging` and its secrets are
-absent. A separate R4 settings/action record must accept the shared-account receipt
-forgery residual, then create exact environment protections/secrets; immediate PR2
-records the sanitized truth. Production traffic or D1 migration remains held by
-`HOLD-01`, and production learner data by `HOLD-02`.
+No current workflow run can deploy to Preview or Production. Staging requires manual
+`develop` dispatch, exact SHA confirmation, same-run checks, the fresh AI review
+receipt, approval-history validation before any secret is evaluated, exact account
+and resource checks, and the protected `cloudflare-staging` environment. VOC-100 PR2
+records the separately authorized environment/secrets truth and explicit acceptance
+of the shared-account receipt-forgery residual; it does not dispatch or deploy.
+Production traffic or D1 migration remains held by `HOLD-01`, and production learner
+data by `HOLD-02`.
 
 ### 1.1 Deterministic GitHub Actions foundation
 
@@ -201,7 +204,10 @@ migration applied from empty and replayed in workerd, static safety rules, build
 credential-free Wrangler dry-run. T10 adds distinct staging/production environments
 with non-resource D1/route sentinels, credential-free dry runs, and held
 migration/version/promotion/rollback behavior. Real IDs, routes, environment secrets,
-and activation evidence remain absent.
+and activation evidence remained absent in T10. Later, VOC-094 created the bounded
+synthetic staging resource tuple, and VOC-100 PR2 records the separately authorized
+`cloudflare-staging` environment and environment secret names. No dispatch or
+deployment occurred.
 
 VOC-080-T05 extends that existing job rather than adding a workflow. The second
 forward migration and workerd fixtures cover 13 identity/account operations, secure

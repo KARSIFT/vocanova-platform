@@ -308,8 +308,17 @@ export function validateAgentAuthority(repositoryRoot) {
     }
     for (const [pattern, capability] of PROHIBITED_EXTERNAL_EFFECT_PATTERNS) {
       const isDeliveryWorkflow = path === deliveryWorkflow;
+      const isSettingsTruthValidator = path.endsWith(
+        "voc085-settings-truthfulness-policy.mjs",
+      );
       if (
         isDeliveryWorkflow &&
+        capability === "Cloudflare credential interface"
+      ) {
+        continue;
+      }
+      if (
+        isSettingsTruthValidator &&
         capability === "Cloudflare credential interface"
       ) {
         continue;

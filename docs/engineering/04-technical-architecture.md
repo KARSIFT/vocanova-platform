@@ -204,10 +204,10 @@ Backend/frontend tests, type checks, security checks, generated-code checks, Wor
 D1 migration/parity checks belong in CI. VOC-100 standardizes the future staging path
 as a manual, SHA-bound `develop` dispatch through a protected GitHub environment,
 with a fresh non-author AI review decision, mechanical approval proxy, and first-step
-approval-history validation before credentials. PR1 remains fail-closed because that
-environment and its secrets do not exist; a separately authorized settings action and
-immediate documentation-only PR2 precede any staging delivery. Production remains
-held. See [10](../operations/10-development-workflow.md) for the full pipeline and
+approval-history validation before credentials. PR2 records the separately authorized
+`cloudflare-staging` environment and its two environment secret names; no dispatch or
+deployment occurred. Production remains held. See
+[10](../operations/10-development-workflow.md) for the full pipeline and
 the [canonical governance index](../governance/README.md) for merge/deploy authority, with
 [DOC-19](../archive/19-governance-reconciliation-notes.md) available as historical orientation.
 

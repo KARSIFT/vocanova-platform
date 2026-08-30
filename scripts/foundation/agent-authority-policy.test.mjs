@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import test from "node:test";
@@ -56,6 +62,49 @@ test("Cloudflare credential interface names are scoped to the canonical delivery
             error.includes(".github/workflows/ci.yml") &&
             error.includes("prohibited external effect") &&
             error.includes("Cloudflare credential interface")
+          ),
+      ),
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator exception only allows literal credential names", () => {
+  const temporary = mkdtempSync(resolve(tmpdir(), "vocanova-agent-policy-"));
+  try {
+    mkdirSync(resolve(temporary, ".github/workflows"), { recursive: true });
+    mkdirSync(resolve(temporary, "scripts/foundation"), { recursive: true });
+    writeFileSync(resolve(temporary, "package.json"), JSON.stringify({}));
+    writeFileSync(
+      resolve(temporary, ".github/workflows/ci.yml"),
+      readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"),
+    );
+    writeFileSync(
+      resolve(
+        temporary,
+        "scripts/foundation/voc085-settings-truthfulness-policy.mjs",
+      ),
+      [
+        'const names = ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN"];',
+        "void names;",
+        "const unsafe = 'gh workflow run ci.yml';",
+        "void unsafe;",
+        "",
+      ].join("\n"),
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(
+      errors.some((error) =>
+        error.includes("autonomous GitHub write/completion command"),
+      ),
+    );
+    assert.ok(
+      errors.every(
+        (error) =>
+          !error.includes(
+            "prohibited external effect: Cloudflare credential interface",
           ),
       ),
     );
