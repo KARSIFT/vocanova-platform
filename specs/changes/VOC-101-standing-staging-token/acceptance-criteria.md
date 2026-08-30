@@ -48,5 +48,6 @@ Historical packages have zero diff.
 One implementation PR updates exactly the approved living inventory, passes local
 and hosted checks, receives exact-SHA Cloudflare, security/governance, and independent
 R4 PASS evidence from distinct non-author actors, and is normally merged by a separate
-non-author actor without any external action. No package is required for an ordinary
-dispatch or credential action; later meaningful changes remain governed.
+non-author actor without any external action. No recurring or automatic package is
+required for an ordinary dispatch or credential action; later meaningful changes
+remain governed.

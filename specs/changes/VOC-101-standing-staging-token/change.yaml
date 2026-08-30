@@ -86,9 +86,9 @@ requirements:
   - id: VOC-101-D07
     statement: >-
       Use one minimum-sufficient task and one coherent implementation pull request.
-      No package is required per dispatch, revocation, or replacement. Any later
-      meaningful policy or behavior change still follows the normal governed intake
-      and adoption workflow.
+      No recurring or automatic package is required per dispatch, revocation, or
+      replacement. Any later meaningful policy or behavior change still follows the
+      normal governed intake and adoption workflow.
 
 owners:
   decision: accountable-repository-owner-operator-m-e-h-r-d-a-a-d
