@@ -62,9 +62,90 @@ failed`; status/content-type/parse failure is distinguishable enough to diagnose
 At `0f336eff3f614c8ea6a19350e4c1dc32d59867b0`, run this credential-free diagnostic
 with a real native response and the gate's injected HTTP seam:
 
-```text
+```bash
 node --version
-node --input-type=module <native-response-reproduction-script>
+node --input-type=module <<'NODE'
+import {
+  evaluateDeliveryEvent,
+  loadDeliveryManifest,
+} from "./scripts/foundation/cloudflare-delivery-policy.mjs";
+
+const sha = "0f336eff3f614c8ea6a19350e4c1dc32d59867b0";
+const environment = {
+  id: 20890778457,
+  name: "cloudflare-staging",
+  wait_timer: 0,
+  can_admins_bypass: false,
+  protection_rules: [
+    {
+      type: "required_reviewers",
+      prevent_self_review: false,
+      reviewers: [
+        {
+          type: "User",
+          reviewer: { login: "m-e-h-r-d-a-a-d", id: 7955432 },
+        },
+      ],
+    },
+  ],
+  deployment_branch_policy: {
+    protected_branches: false,
+    custom_branch_policies: true,
+  },
+};
+const branchPolicies = {
+  total_count: 1,
+  branch_policies: [{ name: "develop", type: "branch" }],
+};
+const responses = [environment, branchPolicies].map(
+  (body) =>
+    new Response(JSON.stringify(body), {
+      status: 200,
+      headers: { "content-type": "application/json; charset=utf-8" },
+    }),
+);
+
+console.log(
+  JSON.stringify({
+    hasOwnOk: Object.hasOwn(responses[0], "ok"),
+    ok: responses[0].ok,
+    status: responses[0].status,
+    hasJson: typeof responses[0].json === "function",
+  }),
+);
+
+let responseIndex = 0;
+const result = await evaluateDeliveryEvent(
+  loadDeliveryManifest(process.cwd()),
+  {
+    event_name: "workflow_dispatch",
+    actor: "m-e-h-r-d-a-a-d",
+    actor_id: 7955432,
+    triggering_actor: "m-e-h-r-d-a-a-d",
+    ref: "refs/heads/develop",
+    sha,
+    inputs: {
+      delivery_environment: "staging",
+      delivery_operation: "credential-check",
+      confirmation: `CHECK staging ${sha}`,
+    },
+  },
+  {
+    requiredResult: "success",
+    // Non-secret sentinel only: injected HTTP below performs no network request.
+    githubToken: "injected-http-no-network",
+    http: async () => {
+      const response = responses[responseIndex];
+      responseIndex += 1;
+      if (!response) throw new Error("unexpected injected HTTP call");
+      return response;
+    },
+  },
+);
+
+console.log(`eligible=${result.eligible}`);
+for (const reason of result.reasons) console.log(reason);
+NODE
 ```
 
 Recorded result on Node `v24.18.0`:
