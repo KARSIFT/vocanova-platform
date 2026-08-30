@@ -5,7 +5,8 @@ credential lifecycle introduced by VOC-100: the staging token is standing and va
 until revoked. Exact account, two permissions, environment-only placement, review
 gates, staging safety, and production prohibitions remain unchanged.
 
-This draft grants no repository implementation or external-action authority.
+VOC-101-ADOPT-01 authorizes the declared repository-only implementation once this
+adopted package is on `develop`. It grants no external-action authority.
 
 ## Artifacts
 

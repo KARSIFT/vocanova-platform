@@ -2,10 +2,11 @@
 
 ## Repository delivery
 
-After exact plan adoption, a different builder prepares one implementation PR into
-`develop`. Distinct non-author Cloudflare, security/governance, and independent R4
-reviewers verify the exact final SHA; a separate non-author/non-reviewer actor performs
-the normal merge only when hosted checks and merge eligibility pass.
+After this adopted package merges into `develop`, a different builder prepares one
+implementation PR into `develop`. Distinct non-author Cloudflare,
+security/governance, and independent R4 reviewers verify the exact final SHA; a
+separate non-author/non-reviewer actor performs the normal merge only when hosted
+checks and merge eligibility pass.
 
 ## External-action boundary
 

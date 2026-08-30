@@ -4,7 +4,7 @@ id: VOC-101
 slug: standing-staging-token
 title: Operator-revoked standing Cloudflare staging token
 type: cloudflare-credential-lifecycle-policy
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because implementation changes the policy for the first secret-bearing
@@ -15,14 +15,21 @@ authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/176
 related_activation_issue: https://github.com/KARSIFT/vocanova-platform/issues/158
 related_delivery_issue: https://github.com/KARSIFT/vocanova-platform/issues/173
+requirement_approval_status: >-
+  exact-cloudflare-security-governance-and-independent-R4-plan-review-pass-and-
+  accountable-VOC-101-ADOPT-01-approved
 base_branch: develop
 base_sha: 39cd13c2ca4bde386e084c02720e97b60975637e
 plan_branch: plan/voc-101-standing-staging-token
 target_branch: develop
-approved_candidate_sha: null
-approval_status: not-approved
-implementation_authorized: false
-implementation_authority_status: pending-exact-candidate-review-and-adoption
+approved_candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-three-exact-candidate-PASS-reviews-and-VOC-101-ADOPT-01-for-the-
+  declared-repository-only-single-PR-implementation-once-this-adopted-package-is-on-
+  develop; fresh-exact-bookkeeping-review-eligibility-and-normal-non-author-plan-
+  merge-remain-required-process; all-external-actions-remain-separately-held
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
 automatic_merge_allowed: true
@@ -37,10 +44,12 @@ objective: >-
 requirements:
   - id: VOC-101-D00
     statement: >-
-      Issue 176 and chat are intake only. Repository implementation requires an
-      exact reviewed and adopted candidate. Adoption grants repository-only
-      implementation authority and no GitHub settings, secret, Cloudflare,
-      dispatch, deployment, DNS, spending, data, production, or launch authority.
+      Candidate 7a9558ba9f71605fac477455c19c5ef41433e6cd received exact
+      Cloudflare, security/governance, and independent R4 PASS reviews plus
+      VOC-101-ADOPT-01. This bookkeeping revision truthfully records adoption and
+      repository-only implementation authority effective once the adopted package
+      is on develop. It grants no GitHub settings, secret, Cloudflare, dispatch,
+      deployment, DNS, spending, data, production, or launch authority.
   - id: VOC-101-D01
     statement: >-
       Future living policy describes the staging credential only as an
@@ -104,6 +113,63 @@ owners:
   independent_r4_verifier: different-non-author-exact-revision-actor
   merge: separate-non-author-non-reviewer-actor
 
+plan_review_history:
+  - candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+    verdict: pass-cloudflare-security-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/177#issuecomment-5470871223
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-Cloudflare-dispatch-
+      deployment-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+    verdict: pass-security-governance-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/177#issuecomment-5470871344
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-Cloudflare-dispatch-
+      deployment-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+    verdict: pass-independent-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/177#issuecomment-5470871447
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-Cloudflare-dispatch-
+      deployment-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+    verdict: adopted-for-declared-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/177#issuecomment-5470881364
+    resolution_status: >-
+      VOC-101-ADOPT-01-authorizes-only-the-declared-repository-implementation-once-
+      the-adopted-package-is-on-develop; every-external-action-remains-held
+
+approvals:
+  cloudflare_security_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/177#issuecomment-5470871223
+  security_governance_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/177#issuecomment-5470871344
+  independent_R4_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/177#issuecomment-5470871447
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-101-ADOPT-01
+    candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/177#issuecomment-5470881364
+
+approved_candidate_hosted_evidence:
+  candidate_sha: 7a9558ba9f71605fac477455c19c5ef41433e6cd
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/33331619705
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/33331619766
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33331626243
+    structure_and_changed_path_risk: pass
+    eligibility: fail-closed-before-adoption-bookkeeping-evidence
+
 artifacts:
   readme: README.md
   specification: specification.md
@@ -133,9 +199,9 @@ protected_areas:
   - production-holds
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: pending-adoption
+  status: authorized-pending-adopted-plan-merge
   target_branch: develop
   pull_request_count: 1
   task: VOC-101-T00

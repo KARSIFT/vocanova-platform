@@ -9,9 +9,11 @@ revoked, without changing what it can access or who may use staging delivery.
 
 ### VOC-101-D00 — Adoption precedes implementation
 
-Issue #176 and chat establish intent only. The exact candidate needs independent
-review and accountable adoption. Neither the plan nor adoption authorizes settings,
-secrets, Cloudflare, dispatch, deployment, or production action.
+Candidate `7a9558ba9f71605fac477455c19c5ef41433e6cd` received exact Cloudflare,
+security/governance, and independent R4 PASS reviews and VOC-101-ADOPT-01. The
+adoption authorizes only the declared repository implementation once this package is
+on `develop`; it authorizes no settings, secrets, Cloudflare, dispatch, deployment,
+or production action.
 
 ### VOC-101-D01 — Standing credential
 

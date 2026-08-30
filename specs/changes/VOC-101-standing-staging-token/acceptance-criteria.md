@@ -7,9 +7,10 @@
 - Tests: `VOC-101-TEST-00`
 - Evidence: `VOC-101-EV-00`
 
-The exact plan candidate receives Cloudflare, security/governance, and independent R4
-PASS reviews from distinct non-author actors, records accountable adoption, and
-authorizes only the declared repository change.
+Candidate `7a9558ba9f71605fac477455c19c5ef41433e6cd` has Cloudflare,
+security/governance, and independent R4 PASS reviews from distinct non-author actors.
+VOC-101-ADOPT-01 records accountable adoption and authorizes only the declared
+repository implementation once this package is on `develop`.
 
 ## VOC-101-AC-01 — Standing least-privilege credential
 
