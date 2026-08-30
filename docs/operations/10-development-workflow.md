@@ -105,15 +105,16 @@ automatic merge, and production deployment are not technically active as of 2026
 [the A-003 transition state](../governance/a003-transition-state.yaml) rather than inferring
 activation from this topology.
 
-**Current operational note (VOC-100 PR1):** VOC-078-T03 removed server deployment and
+**Current operational note (VOC-100 PR2):** VOC-078-T03 removed server deployment and
 monitoring workflows. VOC-080 selected Cloudflare Workers and D1, and T10 supplies a
 manual delivery state machine after parity. VOC-100 replaces the superseded runtime
 binder with a manual, SHA-bound `develop` dispatch through `cloudflare-staging`, a
 fresh non-author AI review decision, unchanged mechanical approval proxy, and first-
-step approval-history validation before a secret is evaluated. The environment and
-secrets are absent in this PR1 state, so staging fails closed pending separately
-authorized settings and immediate documentation-only PR2. `main` and production retain
-no live effect and all production holds.
+step approval-history validation before a secret is evaluated. VOC-100 PR2 records
+that the separately authorized settings action created the exact staging environment,
+two environment secret names, and sole `develop` branch policy while leaving matching
+repo/org secret names absent. `main` and production retain no live effect and all
+production holds.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
 The operator-revoked standing staging token remains valid until revoked. Its

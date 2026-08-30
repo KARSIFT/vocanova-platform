@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 import test from "node:test";
@@ -7,6 +13,91 @@ import test from "node:test";
 import { validateAgentAuthority } from "./agent-authority-policy.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
+
+function agentPolicyFixture() {
+  const temporary = mkdtempSync(resolve(tmpdir(), "vocanova-agent-policy-"));
+  mkdirSync(resolve(temporary, ".github/workflows"), { recursive: true });
+  mkdirSync(resolve(temporary, "scripts/foundation"), { recursive: true });
+  writeFileSync(resolve(temporary, "package.json"), JSON.stringify({}));
+  writeFileSync(
+    resolve(temporary, ".github/workflows/ci.yml"),
+    readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"),
+  );
+  return temporary;
+}
+
+function writeSettingsTruthValidator(temporary, source) {
+  writeFileSync(
+    resolve(
+      temporary,
+      "scripts/foundation/voc085-settings-truthfulness-policy.mjs",
+    ),
+    source,
+  );
+}
+
+const EXACT_PAYLOAD_CREDENTIAL_BLOCK = [
+  "    exact_payload: {",
+  '      environment_name: "cloudflare-staging",',
+  "      wait_timer: 0,",
+  "      can_admins_bypass: false,",
+  '      required_reviewer_type: "User",',
+  '      required_reviewer_login: "m-e-h-r-d-a-a-d",',
+  "      required_reviewer_id: 7955432,",
+  "      prevent_self_review: false,",
+  "      protected_branches: false,",
+  "      custom_branch_policies: true,",
+  '      deployment_branch_policy_name: "develop",',
+  '      deployment_branch_policy_type: "branch",',
+  "      environment_secret_names: [",
+  '        "CLOUDFLARE_ACCOUNT_ID",',
+  '        "CLOUDFLARE_API_TOKEN",',
+  "      ],",
+  "      secret_values_recorded: false,",
+  "    },",
+].join("\n");
+
+const POST_STATE_CREDENTIAL_BLOCK = [
+  "    post_state: {",
+  "      environment_id: 20890778457,",
+  '      environment_name: "cloudflare-staging",',
+  "      wait_timer: 0,",
+  "      can_admins_bypass: false,",
+  '      required_reviewer_type: "User",',
+  '      required_reviewer_login: "m-e-h-r-d-a-a-d",',
+  "      required_reviewer_id: 7955432,",
+  "      prevent_self_review: false,",
+  "      protected_branches: false,",
+  "      custom_branch_policies: true,",
+  '      deployment_branch_policy_name: "develop",',
+  '      deployment_branch_policy_type: "branch",',
+  "      environment_secret_names: [",
+  '        "CLOUDFLARE_ACCOUNT_ID",',
+  '        "CLOUDFLARE_API_TOKEN",',
+  "      ],",
+  "      repository_matching_secret_names: [],",
+  "      organization_matching_secret_names: [],",
+  "      secret_values_recorded: false,",
+  "    },",
+].join("\n");
+
+function canonicalSettingsTruthValidator(extraLines = []) {
+  return [
+    "const EXPECTED = {",
+    "  cloudflare_staging_environment_observation: {",
+    EXACT_PAYLOAD_CREDENTIAL_BLOCK,
+    POST_STATE_CREDENTIAL_BLOCK,
+    "  },",
+    "};",
+    "const names =",
+    "  EXPECTED.cloudflare_staging_environment_observation.exact_payload",
+    "    .environment_secret_names;",
+    "void EXPECTED;",
+    "void names;",
+    ...extraLines,
+    "",
+  ].join("\n");
+}
 
 test("the repository has no executable local agent authority", () => {
   assert.deepEqual(validateAgentAuthority(repositoryRoot), []);
@@ -57,6 +148,192 @@ test("Cloudflare credential interface names are scoped to the canonical delivery
             error.includes("prohibited external effect") &&
             error.includes("Cloudflare credential interface")
           ),
+      ),
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator allows only exact static credential-name literals", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(temporary, canonicalSettingsTruthValidator());
+
+    assert.deepEqual(validateAgentAuthority(temporary), []);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator rejects process.env credential access", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      canonicalSettingsTruthValidator([
+        "const token = process.env[names[0]];",
+        "void token;",
+      ]),
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(errors.some((error) => error.includes("standalone env token")));
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator rejects process bracket env credential access", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      canonicalSettingsTruthValidator([
+        'const token = process["env"][names[0]];',
+        "void token;",
+      ]),
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(errors.some((error) => error.includes("standalone env token")));
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator rejects Deno bracket env credential access", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      canonicalSettingsTruthValidator([
+        'const token = Deno["env"].get(names[0]);',
+        "void token;",
+      ]),
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(errors.some((error) => error.includes("standalone env token")));
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator rejects destructured env credential access", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      canonicalSettingsTruthValidator([
+        "const { env } = process;",
+        "const token = env[names[0]];",
+        "void token;",
+      ]),
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(errors.some((error) => error.includes("standalone env token")));
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator rejects relocated credential-name arrays", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      [
+        "const relocated = {",
+        "  environment_secret_names: [",
+        '    "CLOUDFLARE_ACCOUNT_ID",',
+        '    "CLOUDFLARE_API_TOKEN",',
+        "  ],",
+        "};",
+        "void relocated;",
+        "",
+      ].join("\n"),
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(
+      errors.some((error) =>
+        error.includes("expected exactly 2 canonical static"),
+      ),
+    );
+    assert.ok(
+      errors.some((error) => error.includes("Cloudflare credential interface")),
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator rejects the wrong canonical static-block count", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      [
+        "const EXPECTED = {",
+        "  cloudflare_staging_environment_observation: {",
+        EXACT_PAYLOAD_CREDENTIAL_BLOCK,
+        "  },",
+        "};",
+        "void EXPECTED;",
+        "",
+      ].join("\n"),
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(
+      errors.some((error) =>
+        error.includes("expected exactly 2 canonical static"),
+      ),
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator rejects network capability", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      canonicalSettingsTruthValidator([
+        'const response = await fetch("https://api.github.com/rate_limit");',
+        "void response;",
+      ]),
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(
+      errors.some((error) =>
+        error.includes("prohibited external effect: network access"),
+      ),
+    );
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
+  }
+});
+
+test("settings truth validator still rejects autonomous GitHub writes", () => {
+  const temporary = agentPolicyFixture();
+  try {
+    writeSettingsTruthValidator(
+      temporary,
+      canonicalSettingsTruthValidator([
+        "const unsafe = 'gh workflow run ci.yml';",
+        "void unsafe;",
+      ]),
+    );
+
+    const errors = validateAgentAuthority(temporary);
+    assert.ok(
+      errors.some((error) =>
+        error.includes("autonomous GitHub write/completion command"),
       ),
     );
   } finally {

@@ -90,6 +90,69 @@ const PROHIBITED_EXTERNAL_EFFECT_PATTERNS = [
   [/\b(?:RUFLO_)?SPENDING_AUTHORITY\b/, "spending authority"],
 ];
 
+const SETTINGS_TRUTH_VALIDATOR_PATH =
+  "scripts/foundation/voc085-settings-truthfulness-policy.mjs";
+
+const SETTINGS_TRUTH_ALLOWED_CREDENTIAL_BLOCKS = [
+  {
+    label: "exact_payload",
+    source: [
+      "    exact_payload: {",
+      '      environment_name: "cloudflare-staging",',
+      "      wait_timer: 0,",
+      "      can_admins_bypass: false,",
+      '      required_reviewer_type: "User",',
+      '      required_reviewer_login: "m-e-h-r-d-a-a-d",',
+      "      required_reviewer_id: 7955432,",
+      "      prevent_self_review: false,",
+      "      protected_branches: false,",
+      "      custom_branch_policies: true,",
+      '      deployment_branch_policy_name: "develop",',
+      '      deployment_branch_policy_type: "branch",',
+      "      environment_secret_names: [",
+      '        "CLOUDFLARE_ACCOUNT_ID",',
+      '        "CLOUDFLARE_API_TOKEN",',
+      "      ],",
+      "      secret_values_recorded: false,",
+      "    },",
+    ].join("\n"),
+  },
+  {
+    label: "post_state",
+    source: [
+      "    post_state: {",
+      "      environment_id: 20890778457,",
+      '      environment_name: "cloudflare-staging",',
+      "      wait_timer: 0,",
+      "      can_admins_bypass: false,",
+      '      required_reviewer_type: "User",',
+      '      required_reviewer_login: "m-e-h-r-d-a-a-d",',
+      "      required_reviewer_id: 7955432,",
+      "      prevent_self_review: false,",
+      "      protected_branches: false,",
+      "      custom_branch_policies: true,",
+      '      deployment_branch_policy_name: "develop",',
+      '      deployment_branch_policy_type: "branch",',
+      "      environment_secret_names: [",
+      '        "CLOUDFLARE_ACCOUNT_ID",',
+      '        "CLOUDFLARE_API_TOKEN",',
+      "      ],",
+      "      repository_matching_secret_names: [],",
+      "      organization_matching_secret_names: [],",
+      "      secret_values_recorded: false,",
+      "    },",
+    ].join("\n"),
+  },
+];
+
+const SETTINGS_TRUTH_FORBIDDEN_CAPABILITY_PATTERNS = [
+  [/\benv\b/, "standalone env token"],
+  [
+    /\b(?:fetch\s*\(|(?:http|https)\s*\.\s*(?:request|get)\s*\(|(?:net|tls)\s*\.\s*(?:connect|createConnection)\s*\()|(?:import\s+[^;\n]*\s+from\s+|import\s*\(\s*|require\s*\(\s*)["'](?:node:)?(?:http|https|net|tls|dns|undici)["']/,
+    "network access",
+  ],
+];
+
 function filesBelow(directory) {
   if (!existsSync(directory)) return [];
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -201,6 +264,41 @@ function inspectDeliveryWorkflow(source) {
   return errors;
 }
 
+function countOccurrences(source, search) {
+  let count = 0;
+  let index = source.indexOf(search);
+  while (index !== -1) {
+    count += 1;
+    index = source.indexOf(search, index + search.length);
+  }
+  return count;
+}
+
+function stripAllowedSettingsTruthCredentialBlocks(source) {
+  let sanitized = source;
+  let allowedBlockCount = 0;
+  const errors = [];
+
+  for (const block of SETTINGS_TRUTH_ALLOWED_CREDENTIAL_BLOCKS) {
+    const blockCount = countOccurrences(source, block.source);
+    allowedBlockCount += blockCount;
+    if (blockCount !== 1) {
+      errors.push(
+        `${SETTINGS_TRUTH_VALIDATOR_PATH}: expected exactly one canonical ${block.label} credential-name block; found ${blockCount}`,
+      );
+    }
+    sanitized = sanitized.split(block.source).join("");
+  }
+
+  if (allowedBlockCount !== SETTINGS_TRUTH_ALLOWED_CREDENTIAL_BLOCKS.length) {
+    errors.unshift(
+      `${SETTINGS_TRUTH_VALIDATOR_PATH}: expected exactly ${SETTINGS_TRUTH_ALLOWED_CREDENTIAL_BLOCKS.length} canonical static environment_secret_names blocks; found ${allowedBlockCount}`,
+    );
+  }
+
+  return { errors, sanitized };
+}
+
 export function validateAgentAuthority(repositoryRoot) {
   const errors = [];
 
@@ -292,7 +390,19 @@ export function validateAgentAuthority(repositoryRoot) {
   );
 
   for (const path of executableFiles) {
+    const filename = relative(repositoryRoot, path).replaceAll("\\", "/");
+    const isSettingsTruthValidator = filename === SETTINGS_TRUTH_VALIDATOR_PATH;
     const source = readFileSync(path, "utf8");
+    const settingsTruthCredentialScan = isSettingsTruthValidator
+      ? stripAllowedSettingsTruthCredentialBlocks(source)
+      : null;
+    if (settingsTruthCredentialScan) {
+      errors.push(
+        ...settingsTruthCredentialScan.errors.map(
+          (error) => `${path}: ${error}`,
+        ),
+      );
+    }
     if (LOCAL_ORCHESTRATOR_LAUNCH_PATTERN.test(source)) {
       errors.push(
         `${path}: tracked external-orchestrator launcher is prohibited`,
@@ -306,8 +416,24 @@ export function validateAgentAuthority(repositoryRoot) {
         break;
       }
     }
+    if (isSettingsTruthValidator) {
+      for (const [
+        pattern,
+        capability,
+      ] of SETTINGS_TRUTH_FORBIDDEN_CAPABILITY_PATTERNS) {
+        if (pattern.test(source)) {
+          errors.push(`${path}: prohibited external effect: ${capability}`);
+          break;
+        }
+      }
+    }
     for (const [pattern, capability] of PROHIBITED_EXTERNAL_EFFECT_PATTERNS) {
       const isDeliveryWorkflow = path === deliveryWorkflow;
+      const sourceToScan =
+        isSettingsTruthValidator &&
+        capability === "Cloudflare credential interface"
+          ? settingsTruthCredentialScan.sanitized
+          : source;
       if (
         isDeliveryWorkflow &&
         capability === "Cloudflare credential interface"
@@ -315,7 +441,7 @@ export function validateAgentAuthority(repositoryRoot) {
         continue;
       }
       if (isDeliveryWorkflow && deliveryWorkflowValid) continue;
-      if (pattern.test(source)) {
+      if (pattern.test(sourceToScan)) {
         errors.push(`${path}: prohibited external effect: ${capability}`);
         break;
       }

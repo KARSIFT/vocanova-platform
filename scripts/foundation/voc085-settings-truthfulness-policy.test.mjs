@@ -334,8 +334,8 @@ test("appended contradictory current and held claims fail even when the safe sni
   const appendedCurrentHostedPrivate = errorsFor((root) => {
     mutate(root, "docs/governance/repository-settings.md", (text) =>
       text.replace(
-        "VOC-092's completed one-field settings mutation.\n\n## VOC-080 historical transition snapshot",
-        "VOC-092's completed one-field settings mutation.\nThe repository is private.\n\n## VOC-080 historical transition snapshot",
+        "VOC-092's completed one-field settings mutation.\n\n## VOC-100 Cloudflare staging environment truth",
+        "VOC-092's completed one-field settings mutation.\nThe repository is private.\n\n## VOC-100 Cloudflare staging environment truth",
       ),
     );
   });
@@ -350,8 +350,8 @@ test("appended contradictory current and held claims fail even when the safe sni
   const appendedSettingsMutation = errorsFor((root) => {
     mutate(root, "docs/governance/repository-settings.md", (text) =>
       text.replace(
-        "VOC-092's completed one-field settings mutation.\n\n## VOC-080 historical transition snapshot",
-        "VOC-092's completed one-field settings mutation.\n\nThis package and this guide perform settings mutation to activate the current hosted posture.\n\n## VOC-080 historical transition snapshot",
+        "VOC-092's completed one-field settings mutation.\n\n## VOC-100 Cloudflare staging environment truth",
+        "VOC-092's completed one-field settings mutation.\n\nThis package and this guide perform settings mutation to activate the current hosted posture.\n\n## VOC-100 Cloudflare staging environment truth",
       ),
     );
   });
@@ -432,6 +432,22 @@ test("appended contradictory current and held claims fail even when the safe sni
 });
 
 test("current-record API schema, normalized values, duplicates, and comments fail with concrete reasons", () => {
+  const missingStagingObservation = errorsFor((root) => {
+    mutate(root, "docs/governance/repository-settings-current.yaml", (text) =>
+      text.replace(
+        /cloudflare_staging_environment_observation:\n[\s\S]*?\nspecialist_review:/,
+        "specialist_review:",
+      ),
+    );
+  });
+  assert.ok(
+    missingStagingObservation.some((message) =>
+      /repository-settings-current\.yaml: missing current_record\.cloudflare_staging_environment_observation/.test(
+        message,
+      ),
+    ),
+  );
+
   const missingEndpoint = errorsFor((root) => {
     mutate(root, "docs/governance/repository-settings-current.yaml", (text) =>
       text.replace("  - GET /repos/KARSIFT/vocanova-platform/rulesets\n", ""),

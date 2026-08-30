@@ -119,10 +119,14 @@ D1, and two Custom Domains without using this workflow. VOC-100 prospectively re
 the superseded custom binder with a standard GitHub environment model: a manual,
 SHA-bound `develop` dispatch; required validation; a fresh non-author AI review
 decision; an unchanged mechanical approval proxy; and first-step approval-history
-validation before a Cloudflare secret is evaluated. In this PR1 state,
-`cloudflare-staging` and both environment secrets are absent, so staging fails closed.
-A separate settings action and immediate doc-only PR2 are required before the first
-dispatch.
+validation before a Cloudflare secret is evaluated. VOC-100 PR2 records the separately
+authorized settings action: `cloudflare-staging` now exists with ID `20890778457`,
+required reviewer `m-e-h-r-d-a-a-d` (`7955432`), admin bypass disabled,
+identity-layer self-review allowed, sole custom branch policy `develop`, and exactly
+`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` as environment secret names.
+Matching repository and organization Actions secret names remain absent. No secret
+values, dispatch, deployment, production, DNS, billing, spending, learner-data,
+launch, or unrelated settings action occurred.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
 The operator-revoked standing least-privilege staging token is valid until revoked.

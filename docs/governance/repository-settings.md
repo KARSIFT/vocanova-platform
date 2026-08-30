@@ -67,6 +67,51 @@ cannot be independently reverified. Any future settings mutation requires an imm
 governed documentation-only follow-up. This guide records but does not itself perform
 VOC-092's completed one-field settings mutation.
 
+## VOC-100 Cloudflare staging environment truth (observed 2026-08-30 UTC)
+
+The VOC-100 PR2 settings-truth record is a later Cloudflare delivery-environment
+observation and does not replace the 2026-08-24 repository-settings snapshot above.
+Under the separately authorized operator action recorded in
+<https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5471341449>,
+the operator accepted the shared GitHub identity receipt-forgery residual and created
+only the `cloudflare-staging` GitHub environment and its two environment secret names.
+Production, DNS, billing, spending, learner-data, launch, and unrelated settings
+actions remained prohibited. The sanitized completion receipt is
+<https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5471376705>.
+
+Sanitized pre-state evidence recorded `GET cloudflare-staging` as HTTP 404. Matching
+`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` names at repository and
+organization Actions secret scope were absent.
+
+Sanitized post-state readback records GitHub environment ID `20890778457`; wait timer
+`0`; admin bypass disabled; sole required reviewer user `m-e-h-r-d-a-a-d`, numeric ID
+`7955432`; GitHub identity-layer self-review allowed; deployment branch policy with
+protected branches disabled and custom branch policies enabled; and sole branch policy
+`develop` of type `branch`. The environment secret names are exactly
+`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`; matching names remain absent from
+repository and organization Actions secret scope. No secret values were read or
+recorded.
+
+The exact payload was: environment name `cloudflare-staging`; wait timer `0`;
+`can_admins_bypass: false`; required reviewer type `User`, login `m-e-h-r-d-a-a-d`,
+ID `7955432`; `prevent_self_review: false`; deployment branch policy
+`protected_branches: false` and `custom_branch_policies: true`; one branch policy
+named `develop` of type `branch`; and exactly the two environment secret names above,
+without values.
+
+The standing Cloudflare token was created by the operator for account
+`0a9eda28b96d77c24dcde74f3e074d47` with exactly `Workers Scripts Edit` and `D1 Edit`,
+valid until operator revocation, and entered directly into GitHub without disclosure
+to any agent, chat, log, comment, artifact, or repository file. No workflow dispatch,
+deployment, migration, production, DNS, billing, spending, learner-data, launch, or
+unrelated settings action occurred.
+
+Settings rollback deletes the two environment secret names and the
+`cloudflare-staging` environment, or otherwise restores the documented pre-state. No
+rollback step requires or records a secret value. If token scope or disclosure
+evidence is wrong, revoke the token and remove the environment API-token secret before
+staging can resume.
+
 ## VOC-080 historical transition snapshot
 
 [`voc-080-transition-record.md`](../operations/voc-080-transition-record.md) and its
@@ -215,17 +260,18 @@ proved baseline/probe/rollback/public smoke at zero incremental VocaNova cost. V
 prospectively replaces the superseded binder with a standard manual `develop` dispatch
 through `cloudflare-staging`: required checks, a fresh non-author AI review decision,
 an unchanged mechanical approval proxy, and approval-history validation as the first
-environment-job step before secrets are evaluated. In this PR1 state the environment
-and its two secrets remain absent, so delivery fails closed. A separately authorized
-settings action followed by an immediate documentation-only PR2 is required before
-staging can run.
+environment-job step before secrets are evaluated. The separately authorized VOC-100
+settings action has created the exact staging environment and two environment secret
+names recorded above; staging still requires a valid SHA-bound dispatch, AI receipt,
+environment approval, first-step approval-history validation, exact account/resource
+checks, and all production holds to remain intact before any live delivery claim.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
 The account `0a9eda28b96d77c24dcde74f3e074d47` credential retains exactly
 `Workers Scripts Edit` and `D1 Edit` and no broader Cloudflare permission. This
-operator-revoked standing token is valid until revoked. When separately authorized
-and installed, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` may exist only as
-`cloudflare-staging` environment secrets, never at repository or organization scope.
+operator-revoked standing token is valid until revoked. `CLOUDFLARE_ACCOUNT_ID` and
+`CLOUDFLARE_API_TOKEN` may exist only as `cloudflare-staging` environment secrets,
+never at repository or organization scope.
 No token value enters repository evidence, logs, comments, artifacts, or agent
 records. Mandatory triggers, replacement order, and failure containment are governed
 by the [delivery runbook](../operations/cloudflare-delivery.md); none grants dispatch

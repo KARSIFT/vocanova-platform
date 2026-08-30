@@ -36,8 +36,8 @@ revision_note: >
   handling. VOC-100 prospectively replaces the VOC-096 custom binder with a standard protected
   GitHub environment: manual SHA-bound dispatch, fresh non-author AI review receipt,
   mechanical approval proxy, first-step approval-history validation, and independent
-  operator-controlled token replacement. PR1 keeps staging environment/secrets absent and
-  fail-closed; separately authorized settings action and immediate PR2 remain required.
+  operator-controlled token replacement. PR2 records the separately authorized exact
+  staging environment and environment secret names; no dispatch or deployment occurred.
   VOC-090 clarifies coherent-outcome delivery. One approved package, one
   implementation pull request, and one minimum-sufficient task are the default safe
   unit for one outcome; future P3/AI six-step work remains ordered components rather
@@ -81,8 +81,8 @@ complete and the reviewed real staging tuple is retained. VOC-100 prospectively
 supersedes the custom binder: once separately authorized settings exist, only a
 manual SHA-bound `develop` dispatch with required checks, a fresh non-author AI review
 receipt, unchanged mechanical approval proxy, and first environment-step approval-
-history validation may proceed. The staging environment and secrets are absent in PR1,
-so staging fails closed; a settings action and immediate doc-only PR2 are required.
+history validation may proceed. VOC-100 PR2 records the separately authorized staging
+environment and environment secret names; no dispatch or deployment occurred.
 The least-privilege staging token is operator-controlled and valid until revoked.
 Ruflo has no credential, settings, dispatch, review, approval, or merge authority.
 Production and learner-data holds remain unchanged.
@@ -1516,7 +1516,8 @@ Rules:
 - No direct pushes.
 - Decision, implementation, maintenance, and governance pull requests normally target `develop`.
 - Historical/superseded: approved merges deployed automatically to staging. Current
-  staging is manual, SHA-bound, and fail-closed until VOC-100 settings action and PR2.
+  staging is manual, SHA-bound, and gated by VOC-100 environment approval and
+  approval-history validation after the PR2 settings-truth record.
 - Founder approval is not required for merges into `develop`.
 
 ## 16.2 Working branches
@@ -3102,8 +3103,8 @@ Successful merges into `develop` automatically deploy to staging.
 _Correction 2026-08-28: staging deployment was built and historically proven, then
 VOC-078-T03 removed its GitHub workflow. ADR-0003 selects Cloudflare, but a merge to
 `develop` does not deploy. VOC-100's prospective replacement is manual, SHA-bound,
-environment-protected and remains fail-closed in PR1 until separately authorized
-settings and immediate PR2; production holds remain pending. See §17.
+environment-protected, and PR2 records the separately authorized staging environment
+and environment secret names; production holds remain pending. See §17.
 Preserved as historical record._
 
 ### DG5-10 — Protected production
@@ -3425,8 +3426,9 @@ historical record._
 Every approved merge into `develop` deploys automatically to staging and runs required verification.
 
 _Correction 2026-08-28: see DG5-09's correction. Automatic staging is historical.
-VOC-100 defines the prospective manual protected-environment model, still fail-closed
-until separately authorized settings and PR2. Preserved as historical record._
+VOC-100 defines the manual protected-environment model; PR2 records the separately
+authorized staging settings truth and dispatch remains gated by exact SHA, checks,
+AI receipt, and environment approval. Preserved as historical record._
 
 ### DG10-07 — Founder-controlled main and production
 

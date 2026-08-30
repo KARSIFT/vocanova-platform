@@ -241,9 +241,11 @@ evidence, but VOC-100 prospectively supersedes their future five-record binder,
 per-dispatch token-recreation, and per-dispatch PR/package requirements. Standard
 staging delivery is repository-ready only through the `cloudflare-staging` GitHub
 environment, branch-bound `workflow_dispatch`, exact same-run checks, and the
-separately authorized environment/secrets/delegation record. Merging a branch still
-changes repository history only and does not create settings, enter secrets, dispatch,
-deploy, or accept the shared-identity receipt risk. `VOC-080-HOLD-01` still gates all
+separately authorized environment/secrets/delegation record. VOC-100 PR2 records that
+`cloudflare-staging` now exists with exactly the two environment secret names and no
+matching repository or organization Actions secret names. Merging a branch still
+changes repository history only and does not dispatch, deploy, or change production.
+`VOC-080-HOLD-01` still gates all
 production traffic and D1 migrations, and `HOLD-02` still gates production learner
 data. See `docs/operations/cloudflare-delivery.md`.
 
