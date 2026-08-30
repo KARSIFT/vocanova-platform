@@ -22,9 +22,11 @@ therefore validated as if it were the GitHub JSON body.
 
 ### VOC-102-D00 — Adoption precedes implementation
 
-Issue #180, its evidence, and this draft do not authorize implementation. A reviewed
-candidate must be adopted on `develop` before a different builder changes the two
-approved files. Adoption authorizes repository work only and no external action.
+Candidate `e6b102441ec6fdcf6c6e9f49c6172e49d9745276` received exact
+Cloudflare/CI-security and independent R3 PASS reviews plus VOC-102-ADOPT-01. The
+adoption authorizes only the declared two-file repository implementation once this
+package is on `develop`; it authorizes no settings, secrets, Cloudflare, dispatch,
+deployment, migration, traffic, production, or other external action.
 
 ### VOC-102-D01 — Decode Fetch-compatible responses
 

@@ -20,7 +20,9 @@ skipped. A local Node `v24.18.0` reproduction at the same source revision produc
 
 No environment secret was evaluated and no Cloudflare, settings, dispatch,
 deployment, migration, traffic, DNS, production, spending, or data action is in
-scope. This draft grants no repository implementation or external-action authority.
+scope. VOC-102-ADOPT-01 authorizes only the declared two-file repository
+implementation once this adopted package is on `develop`. It grants no external-
+action authority.
 
 ## Artifacts
 

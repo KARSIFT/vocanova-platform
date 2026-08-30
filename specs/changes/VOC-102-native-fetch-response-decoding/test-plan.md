@@ -6,9 +6,12 @@
 - Procedure: run governance validation and risk classification; inspect package
   lifecycle, exact path inventory, one-task/one-PR mapping, authority exclusions, and
   the implementation diff.
-- Expected: the plan is draft until exact-candidate review/adoption; plan and
-  implementation automated path floor is R1 and semantic implementation risk is R3;
-  exactly two implementation paths are allowed; no external action is authorized.
+- Expected: approved candidate
+  `e6b102441ec6fdcf6c6e9f49c6172e49d9745276` has exact-candidate reviews and
+  VOC-102-ADOPT-01; the adopted bookkeeping revision still requires fresh exact-SHA
+  review and normal merge. Plan and implementation automated path floor is R1 and
+  semantic implementation risk is R3; exactly two implementation paths are allowed;
+  no external action is authorized.
 - Evidence: `VOC-102-EV-00`
 
 ## VOC-102-TEST-01 — Native Fetch JSON success

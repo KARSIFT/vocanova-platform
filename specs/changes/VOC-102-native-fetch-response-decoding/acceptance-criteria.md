@@ -7,9 +7,10 @@
 - Tests: `VOC-102-TEST-00`
 - Evidence: `VOC-102-EV-00`
 
-The exact plan candidate is independently reviewed and adopted before implementation.
-The implementation changes exactly the two approved paths in one PR and grants no
-external action.
+Candidate `e6b102441ec6fdcf6c6e9f49c6172e49d9745276` has exact
+Cloudflare/CI-security and independent R3 PASS reviews from distinct non-author
+actors. VOC-102-ADOPT-01 records accountable adoption and authorizes only the
+declared two-file repository implementation once this package is on `develop`.
 
 ## VOC-102-AC-01 — Native Fetch success is decoded
 
