@@ -1,0 +1,164 @@
+schema_version: 1
+
+id: VOC-102
+slug: native-fetch-response-decoding
+title: Decode native Fetch responses in the delivery gate
+type: cloudflare-delivery-gate-defect-remediation
+status: draft
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the implementation changes fail-closed CI/CD delivery-gate behavior
+  that validates live GitHub environment protections. The implementation paths have
+  an automated R1 path floor, but semantic CI/CD and security-enforcement effects
+  require escalation to R3. The plan-only specs/changes paths also classify as R1.
+canonical_path: specs/changes/VOC-102-native-fetch-response-decoding
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/180
+failing_run: https://github.com/KARSIFT/vocanova-platform/actions/runs/33339035431
+failing_event_sha: 0f336eff3f614c8ea6a19350e4c1dc32d59867b0
+base_branch: develop
+base_sha: 0f336eff3f614c8ea6a19350e4c1dc32d59867b0
+plan_branch: plan/voc-102-native-fetch-response
+target_branch: develop
+approved_candidate_sha: null
+approval_status: not-approved
+implementation_authorized: false
+implementation_authority_status: pending-exact-candidate-review-and-adoption
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Make the credential-free Cloudflare delivery gate decode native Fetch Response
+  JSON before validating GitHub environment protections, while preserving decoded
+  test-fixture compatibility and every existing fail-closed delivery boundary.
+
+requirements:
+  - id: VOC-102-D00
+    statement: >-
+      Issue 180 and run 33339035431 are defect intake and evidence only. Repository
+      implementation requires this exact package to receive independent review and
+      adoption on develop. Adoption grants only the declared two-file repository
+      implementation and no settings, secret, Cloudflare, dispatch, deployment,
+      migration, traffic, DNS, spending, production, learner-data, or launch action.
+  - id: VOC-102-D01
+    statement: >-
+      requestJson must recognize a native or Fetch-compatible response by response
+      capability and shape, including inherited accessors, rather than requiring ok
+      to be an own property. A successful JSON response must be status-checked,
+      content-type-checked, awaited through json(), and passed to environment
+      protection validation only after decoding.
+  - id: VOC-102-D02
+    statement: >-
+      Response-like non-2xx, non-JSON-content-type, and malformed-JSON results must
+      fail closed through the existing sanitized live-readback failure path. They
+      must never become an eligible delivery decision or expose token/header/body
+      values in reasons or evidence.
+  - id: VOC-102-D03
+    statement: >-
+      Preserve the deliberate injected decoded-object fixture path only for an
+      explicit plain record that does not present Fetch-response capabilities.
+      Response-like objects must not bypass status, content type, or JSON decoding.
+  - id: VOC-102-D04
+    statement: >-
+      Add focused tests using real native Response instances for successful
+      environment and branch-policy decoding, exact eligible credential-check
+      projection, non-2xx failure, non-JSON failure, malformed JSON failure, and
+      retained plain decoded-object behavior.
+  - id: VOC-102-D05
+    statement: >-
+      Preserve every event, actor, ref, SHA, confirmation, same-run check,
+      environment-protection, reviewer, branch-policy, cost, secret-isolation,
+      staging, and production control outside the response-decoding defect. Do not
+      edit workflows, manifests, runbooks, settings truth, application code, or any
+      historical change package.
+  - id: VOC-102-D06
+    statement: >-
+      Use one minimum-sufficient task and one coherent implementation pull request.
+      Plan and implementation each require applicable deterministic checks, fresh
+      exact-revision Cloudflare/CI-security specialist review, independent R3
+      verification by distinct non-author actors, and merge by a separate non-author
+      actor. No risk label creates standing founder or technical-steward approval.
+
+owners:
+  decision: accountable-repository-change-owner-at-adoption
+  package_preparation: /root/voc102_plan_builder
+  implementation: different-builder-actor-after-adoption
+  cloudflare_ci_security_specialist: different-non-author-exact-revision-actor
+  independent_r3_verifier: different-non-author-exact-revision-actor
+  merge: separate-non-author-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - scripts/foundation/cloudflare-delivery-policy.mjs
+  - scripts/foundation/cloudflare-delivery-policy.test.mjs
+
+protected_areas:
+  - ci-cd-delivery-gate
+  - github-environment-protection-readback
+  - cloudflare-staging-delivery-eligibility
+  - production-holds
+
+observed_evidence:
+  failing_run:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33339035431
+    event_sha: 0f336eff3f614c8ea6a19350e4c1dc32d59867b0
+    prerequisite_jobs: passed
+    delivery_gate: failed-before-environment-job
+    staging_environment_job: skipped
+    production_environment_job: skipped
+  local_reproduction:
+    runtime: node-v24.18.0
+    native_response_has_own_ok: false
+    native_response_ok: true
+    native_response_status: 200
+    native_response_has_json: true
+    result: ineligible-with-six-missing-environment-projection-reasons
+
+implementation:
+  authorized: false
+  required: true
+  status: pending-adoption
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-102-T00
+
+required_r3_evidence:
+  deterministic_checks: pending-implementation
+  cloudflare_ci_security_specialist: pending-exact-revision-review
+  independent_exact_revision_verification: pending
+  blocking_findings: must-be-zero-before-merge
+  ehr: not-triggered
+
+external_effects:
+  github_settings_and_secrets: prohibited
+  cloudflare: prohibited
+  workflow_dispatch: prohibited
+  staging_deployment: prohibited
+  d1_migration: prohibited
+  traffic_and_dns: prohibited
+  production: prohibited
+  spending_and_billing: prohibited
+  learner_data: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-defect-remediation-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-implementation-merge-and-repository-validation
+
+ehr: not-triggered
