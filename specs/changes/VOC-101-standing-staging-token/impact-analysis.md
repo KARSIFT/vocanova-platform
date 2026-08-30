@@ -10,6 +10,9 @@ operator control; accountable adoption must accept that tradeoff.
 
 After a mandatory trigger, revocation happens before replacement and staging remains
 disabled unless and until the replacement passes every protected check.
+Unconfirmed revocation is an incident: remove the environment API-token secret,
+reject approvals, cancel in-flight runs, and keep staging disabled until the token is
+verified inactive and a valid credential passes the protected check.
 
 ## Operations
 

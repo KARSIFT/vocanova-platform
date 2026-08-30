@@ -29,6 +29,11 @@ environment secret, pass the protected no-write check, and revoke the failed tok
 After a mandatory revocation trigger, the prior credential is never restored; revoke
 and remove any failed replacement and keep staging disabled.
 
+If any required revocation cannot be confirmed, remove the environment API-token
+secret, reject new approvals, cancel in-flight staging runs, and record an incident.
+Retry and verify the token is inactive without logging it. Staging remains disabled
+until that verification succeeds and a valid credential passes the protected check.
+
 ## Rollback
 
 Before merge, close the PR without effect. After merge, use a separately reviewed

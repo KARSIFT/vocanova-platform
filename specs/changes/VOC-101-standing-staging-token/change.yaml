@@ -65,8 +65,12 @@ requirements:
       voluntary replacement fails, restore the prior environment secret, pass the
       protected no-write check, and revoke the failed replacement. If a replacement
       after a mandatory trigger fails, revoke and remove the failed replacement and
-      keep staging disabled. Revocation or replacement is not coupled to a deployment,
-      plan, or pull request.
+      keep staging disabled. If any required revocation cannot be confirmed, remove
+      the GitHub environment API-token secret, reject new approvals, cancel in-flight
+      staging runs, record an incident, retry revocation, and verify the affected token
+      is inactive without logging it. Staging cannot resume until that verification
+      succeeds and a valid credential passes the protected check. Revocation or
+      replacement is not coupled to a deployment, plan, or pull request.
   - id: VOC-101-D04
     statement: >-
       Reconcile every inventoried living workflow, settings, governance, and
@@ -86,9 +90,10 @@ requirements:
   - id: VOC-101-D07
     statement: >-
       Use one minimum-sufficient task and one coherent implementation pull request.
-      No recurring or automatic package is required per dispatch, revocation, or
-      replacement. Any later meaningful policy or behavior change still follows the
-      normal governed intake and adoption workflow.
+      An ordinary dispatch, revocation, or replacement performed under the adopted
+      stable policy requires neither a change package nor a pull request. Any later
+      meaningful policy or behavior change still follows the normal governed intake
+      and adoption workflow.
 
 owners:
   decision: accountable-repository-owner-operator-m-e-h-r-d-a-a-d

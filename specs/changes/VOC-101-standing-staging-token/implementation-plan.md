@@ -11,7 +11,8 @@ One task maps to one coherent implementation PR into `develop`.
 2. Replace future staging-token lifecycle language with the standing,
    operator-revoked contract and mandatory revocation triggers.
 3. Extend `cloudflare-delivery-policy.mjs` and its tests to validate the complete
-   living-document contract and reject stale or contradictory claims.
+   living-document contract, fail-closed unconfirmed-revocation response, and
+   rejection of stale or contradictory claims.
 4. Prove the exact account, two permissions, environment-only secret boundary,
    staging controls, and production holds remain unchanged.
 5. Run governance validation, R4 classification, delivery/foundation tests,

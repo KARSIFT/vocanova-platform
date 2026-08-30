@@ -4,6 +4,8 @@
 
 - Requirements: `VOC-101-D00` through `VOC-101-D07`
 - Acceptance: `VOC-101-AC-00` through `VOC-101-AC-04`
+- Tests: `VOC-101-TEST-00` through `VOC-101-TEST-04`
+- Evidence: `VOC-101-EV-00` through `VOC-101-EV-04`
 - Risk: R4
 - Pull requests: exactly one implementation PR after adoption
 - Dependencies: exact plan adoption on `develop`

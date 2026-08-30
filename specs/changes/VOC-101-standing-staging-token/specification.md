@@ -41,6 +41,12 @@ replacement fails, restore the prior environment secret, pass the protected no-w
 check, and revoke the failed replacement. If a replacement after a mandatory trigger
 fails, revoke and remove the failed replacement and keep staging disabled.
 
+If any required revocation cannot be confirmed, remove the GitHub environment
+API-token secret, reject new staging approvals, cancel in-flight staging runs, record
+an incident, retry revocation, and verify without logging the affected token that it
+is inactive. Staging cannot resume until that verification succeeds and a valid
+credential passes the protected no-write check.
+
 ### VOC-101-D04 — Delivery authority is unchanged
 
 VOC-100's manual event, actor, branch, SHA/attempt receipt, approval-history-first
