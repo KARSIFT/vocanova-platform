@@ -263,6 +263,17 @@ shared-identity receipt risk. Production and learner-data holds remain unchanged
 [repository-settings.md](repository-settings.md) and the
 [Cloudflare delivery runbook](../operations/cloudflare-delivery.md).
 
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+The operator-revoked standing staging token is valid until revoked. Mandatory
+revocation, voluntary replacement, failure containment, exact least privilege,
+environment-only secret placement, staging review, cost, and production boundaries
+are defined in the delivery runbook and deterministically checked. Under this stable
+policy ordinary dispatches, revocations, and replacements need no package or PR and
+are not coupled to deployment; a meaningful lifecycle policy or behavior change still
+requires governed intake and adoption. Credential lifecycle grants no dispatch or
+review authority.
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->
+
 ## Release classes and production release authority
 
 Release class is independent of change risk - a small R1 change can still ship
@@ -401,7 +412,7 @@ authority.
 | Preview status                                                                                  | Not built - per-PR Cloudflare previews remain genuinely unbuilt                                                                                                                                                                                                                                                                                         |
 | Independent exact-revision verification                                                         | Live as a repository requirement; performed outside Actions and attached to the PR                                                                                                                                                                                                                                                                      |
 | External Ruflo coordination                                                                     | Exact `3.38.16` operator-side installation and synthetic rehearsal recorded by VOC-080-T02; frozen patched graph, zero high/critical audit, advisory-permission limitation, and deny boundary are in the [runbook](../operations/ruflo-external-orchestration.md); never repository/production authority                                                |
-| Staging deployment, health checks                                                               | Exact Phase-1 Workers/D1/domains and rollback/public-smoke evidence exist. VOC-100 supersedes the future five-record binder and makes staging standard-ready once separately authorized `cloudflare-staging` settings/secrets/delegation are recorded in the one-time settings-truth PR; ordinary dispatches and token rotations need no package or PR. |
+| Staging deployment, health checks                                                               | Exact Phase-1 Workers/D1/domains and rollback/public-smoke evidence exist. VOC-100 supersedes the future five-record binder and makes staging standard-ready once separately authorized `cloudflare-staging` settings/secrets/delegation are recorded in the one-time settings-truth PR; ordinary dispatches and token revocations or replacements need no package or PR. |
 | Production deployment, health checks                                                            | Held T10 state machine and mocked smoke/rollback exist; no environment/resource/secret is configured and VOC-080-HOLD-01 blocks activation                                                                                                                                                                                                              |
 | Production data migration                                                                       | Unavailable and prohibited without VOC-080-HOLD-02                                                                                                                                                                                                                                                                                                      |
 | Rollback                                                                                        | Held exact prior-version rollback and forward-corrective D1 contract are installed and mocked; no live rehearsal or authority is claimed                                                                                                                                                                                                                |

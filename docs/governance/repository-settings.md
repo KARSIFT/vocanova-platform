@@ -218,8 +218,21 @@ an unchanged mechanical approval proxy, and approval-history validation as the f
 environment-job step before secrets are evaluated. In this PR1 state the environment
 and its two secrets remain absent, so delivery fails closed. A separately authorized
 settings action followed by an immediate documentation-only PR2 is required before
-staging can run. The reusable least-privilege staging token rotates at most every 90
-days and is not coupled to PR or dispatch creation. Production activation remains held.
+staging can run.
+
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+The account `0a9eda28b96d77c24dcde74f3e074d47` credential retains exactly
+`Workers Scripts Edit` and `D1 Edit` and no broader Cloudflare permission. This
+operator-revoked standing token is valid until revoked. When separately authorized
+and installed, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` may exist only as
+`cloudflare-staging` environment secrets, never at repository or organization scope.
+No token value enters repository evidence, logs, comments, artifacts, or agent
+records. Mandatory triggers, replacement order, and failure containment are governed
+by the [delivery runbook](../operations/cloudflare-delivery.md); none grants dispatch
+or deployment authority.
+<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->
+
+Production activation remains held.
 
 Before a future activation change can authorize either environment, record and validate:
 

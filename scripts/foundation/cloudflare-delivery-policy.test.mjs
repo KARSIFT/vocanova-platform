@@ -13,16 +13,22 @@ import test from "node:test";
 
 import {
   APPROVAL_RECEIPT_SCHEMA,
+  MANDATORY_STAGING_TOKEN_REVOCATION_TRIGGERS,
   STAGING_ACCOUNT_ID,
+  STAGING_CREDENTIAL_POLICY_PATHS,
+  STAGING_CREDENTIAL_POLICY_SURFACES,
   canonicalize,
   evaluateDeliveryEvent,
   inspectDeliveryManifest,
   inspectMigrationLedger,
+  inspectStagingCredentialPolicySources,
   inspectWranglerConfigSelection,
   inspectDeliveryWorkflow,
   loadDeliveryManifest,
+  loadStagingCredentialPolicySources,
   parseJsonc,
   parseStrictJson,
+  planStagingCredentialLifecycle,
   resolveCurrentDeployment,
   resolveVersionId,
   validateApprovalHistory,
@@ -35,6 +41,8 @@ const repositoryRoot = resolve(import.meta.dirname, "../..");
 const workflowPath = resolve(repositoryRoot, ".github/workflows/ci.yml");
 const workflow = readFileSync(workflowPath, "utf8");
 const manifest = loadDeliveryManifest(repositoryRoot);
+const credentialPolicySources =
+  loadStagingCredentialPolicySources(repositoryRoot);
 const configs = {
   api: parseJsonc(
     readFileSync(
@@ -171,6 +179,270 @@ test("standard-ready staging, held production, Wrangler configs, workflow, and m
   assert.equal(
     Object.hasOwn(manifest.environments.staging, "prepared_runtime_binder"),
     false,
+  );
+});
+
+test("standing staging-token policy covers the exact living inventory and rejects stale lifecycle claims", () => {
+  assert.deepEqual(
+    Object.keys(credentialPolicySources).sort(),
+    [...STAGING_CREDENTIAL_POLICY_PATHS].sort(),
+  );
+  assert.deepEqual(
+    inspectStagingCredentialPolicySources(credentialPolicySources),
+    [],
+  );
+
+  for (const { path, required } of STAGING_CREDENTIAL_POLICY_SURFACES) {
+    const candidate = clone(credentialPolicySources);
+    const requiredPattern = new RegExp(
+      required[0]
+        .trim()
+        .split(/\s+/)
+        .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+        .join("\\s+"),
+      "g",
+    );
+    candidate[path] = candidate[path].replace(requiredPattern, "[removed]");
+    assert.notEqual(candidate[path], credentialPolicySources[path], path);
+    assert.match(
+      inspectStagingCredentialPolicySources(candidate).join("\n"),
+      new RegExp(path.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+      path,
+    );
+  }
+
+  for (const path of STAGING_CREDENTIAL_POLICY_PATHS.filter(
+    (candidate) => !candidate.endsWith(".mjs"),
+  )) {
+    const candidate = clone(credentialPolicySources);
+    candidate[path] +=
+      "\nThe staging token expires after " + "90 days and then rotates.\n";
+    assert.match(
+      inspectStagingCredentialPolicySources(candidate).join("\n"),
+      /must remain standing and valid until revoked/,
+      path,
+    );
+  }
+
+  const missing = clone(credentialPolicySources);
+  delete missing[STAGING_CREDENTIAL_POLICY_PATHS[0]];
+  assert.match(
+    inspectStagingCredentialPolicySources(missing).join("\n"),
+    /living-path inventory drifted/,
+  );
+
+  const broadened = clone(credentialPolicySources);
+  const runbook = "docs/operations/cloudflare-delivery.md";
+  broadened[runbook] = broadened[runbook].replace(
+    "it has no DNS, billing",
+    "it has DNS and billing",
+  );
+  assert.match(
+    inspectStagingCredentialPolicySources(broadened).join("\n"),
+    /incomplete/,
+  );
+});
+
+test("standing staging-token policy rejects direct contradictions without matching unrelated credentials", () => {
+  const humanPolicyPaths = STAGING_CREDENTIAL_POLICY_PATHS.filter(
+    (candidate) => !candidate.endsWith(".mjs"),
+  );
+  const contradictionClasses = [
+    {
+      expected: /cannot require a package, plan, or pull request/,
+      claims: [
+        "Each staging-token revocation requires a new change package and pull request.",
+        "A pull request is mandatory before every Cloudflare staging credential replacement.",
+        "The staging API token may be dispatched only after a governed plan is approved.",
+        "For every use of the token for staging, create a change package and open a PR.",
+        "A new change package gates each use of the staging environment token.",
+      ],
+    },
+    {
+      expected:
+        /possession cannot grant dispatch, review, or approval authority/,
+      claims: [
+        "Possession of the staging token grants dispatch approval authority.",
+        "Holding the Cloudflare staging credential authorizes review judgment.",
+        "Access to the token for staging confers approval rights on its holder.",
+        "Whoever possesses the staging API token may approve a dispatch.",
+        "The Cloudflare staging token itself constitutes review authority.",
+      ],
+    },
+    {
+      expected: /must remain standing and valid until revoked/,
+      claims: [
+        "The staging credential is reissued on a calendar cadence.",
+        "Rotate the Cloudflare staging token every 30 days.",
+        "The token for staging is renewed quarterly.",
+        "The staging token is short-lived and expires after six weeks.",
+        "Scheduled monthly replacement of the staging credential is mandatory.",
+        "A 30-day Cloudflare staging token is used for each delivery window.",
+        "The token for staging is replaced after every dispatch.",
+        "The staging environment credential has a finite lifetime.",
+        "The staging token will be reissued after use.",
+      ],
+    },
+  ];
+
+  for (const path of humanPolicyPaths)
+    for (const { expected, claims } of contradictionClasses)
+      for (const claim of claims) {
+        const candidate = clone(credentialPolicySources);
+        candidate[path] += `\n${claim}\n`;
+        assert.match(
+          inspectStagingCredentialPolicySources(candidate).join("\n"),
+          expected,
+          `${path}: ${claim}`,
+        );
+      }
+
+  const unrelatedClaims = [
+    "Application session tokens expire after 30 days and are renewed monthly.",
+    "Possessing an OAuth session token grants approval to access the signed-in account.",
+    "A pull request is required before changing application-session credential behavior.",
+    "The staging environment review calendar is updated monthly.",
+    "A release credential for production is rotated after every deployment.",
+  ];
+  const validStagingClaims = [
+    "The staging token has no calendar reissue cadence and grants no dispatch authority.",
+    "During voluntary replacement, the staging token will be replaced after its protected check.",
+    "The staging token expires only when revoked.",
+    "Staging-token revocation does not require a new change package or pull request.",
+    "Possession of the staging API token does not grant review or approval authority.",
+  ];
+
+  for (const path of humanPolicyPaths)
+    for (const claim of [...unrelatedClaims, ...validStagingClaims]) {
+      const candidate = clone(credentialPolicySources);
+      candidate[path] += `\n${claim}\n`;
+      assert.deepEqual(
+        inspectStagingCredentialPolicySources(candidate),
+        [],
+        `${path}: ${claim}`,
+      );
+    }
+});
+
+test("every mandatory staging-token trigger revokes first and re-enables only after protected replacement checks", () => {
+  for (const trigger of MANDATORY_STAGING_TOKEN_REVOCATION_TRIGGERS) {
+    const plan = planStagingCredentialLifecycle({ trigger });
+    assert.equal(plan.operations[0], "revoke-affected-token", trigger);
+    assert.ok(
+      plan.operations.indexOf("disable-staging") <
+        plan.operations.indexOf("create-replacement-token"),
+      trigger,
+    );
+    assert.ok(
+      plan.operations.indexOf("protected-no-write-credential-check") <
+        plan.operations.indexOf("enable-staging-after-protected-check"),
+      trigger,
+    );
+    assert.equal(plan.priorTokenRetainedThroughReplacementChecks, false);
+    assert.equal(
+      plan.environmentApiTokenSecret,
+      "verified-replacement-credential",
+    );
+    assert.equal(plan.staging, "enabled");
+    assert.equal(plan.tokenValueLogged, false);
+    assert.equal(plan.requiresChangePackageOrPullRequest, false);
+    assert.equal(plan.coupledToDeployment, false);
+  }
+});
+
+test("voluntary replacement retains the prior token only through successful checks and then revokes it", () => {
+  const plan = planStagingCredentialLifecycle();
+  assert.deepEqual(plan.operations, [
+    "retain-prior-token",
+    "create-replacement-token",
+    "sanitized-dashboard-policy-readback",
+    "local-status-and-account-verification-without-logging",
+    "install-replacement-environment-api-token-secret",
+    "protected-no-write-credential-check",
+    "revoke-prior-token",
+  ]);
+  assert.equal(plan.priorTokenRetainedThroughReplacementChecks, true);
+  assert.equal(
+    plan.environmentApiTokenSecret,
+    "verified-replacement-credential",
+  );
+  assert.equal(plan.staging, "enabled");
+});
+
+test("failed voluntary replacement restores and verifies the prior token before revoking the failed replacement", () => {
+  const plan = planStagingCredentialLifecycle({ replacementStatus: "failed" });
+  assert.ok(
+    plan.operations.indexOf("restore-prior-environment-api-token-secret") <
+      plan.operations.indexOf("protected-no-write-check-for-prior-credential"),
+  );
+  assert.ok(
+    plan.operations.indexOf("protected-no-write-check-for-prior-credential") <
+      plan.operations.indexOf("revoke-failed-replacement"),
+  );
+  assert.equal(plan.environmentApiTokenSecret, "verified-prior-credential");
+  assert.equal(plan.newApprovals, "allowed");
+  assert.equal(plan.staging, "enabled");
+});
+
+test("failed trigger-driven replacement removes the failed credential and leaves staging disabled", () => {
+  const plan = planStagingCredentialLifecycle({
+    trigger: "suspected-disclosure",
+    replacementStatus: "failed",
+  });
+  assert.equal(plan.operations[0], "revoke-affected-token");
+  assert.ok(
+    plan.operations.indexOf("revoke-failed-replacement") <
+      plan.operations.indexOf("remove-failed-replacement"),
+  );
+  assert.equal(plan.environmentApiTokenSecret, "absent");
+  assert.equal(plan.newApprovals, "rejected");
+  assert.equal(plan.staging, "disabled");
+  assert.equal(plan.priorTokenRetainedThroughReplacementChecks, false);
+});
+
+test("unconfirmed mandatory revocation removes the secret, stops staging, and blocks resumption", () => {
+  const plan = planStagingCredentialLifecycle({
+    trigger: "loss-of-operator-control",
+    revocationConfirmed: false,
+  });
+  assert.deepEqual(plan.operations, [
+    "revoke-affected-token",
+    "disable-staging",
+    "remove-environment-api-token-secret",
+    "reject-new-staging-approvals",
+    "cancel-in-flight-staging-runs",
+    "open-incident",
+    "retry-revocation",
+    "verify-affected-token-inactive-without-logging",
+  ]);
+  assert.equal(plan.environmentApiTokenSecret, "absent");
+  assert.equal(plan.newApprovals, "rejected");
+  assert.equal(plan.inFlightStagingRuns, "cancelled");
+  assert.equal(plan.incident, "opened");
+  assert.equal(plan.staging, "disabled");
+  assert.equal(
+    plan.resumptionCondition,
+    "affected-token-verified-inactive-and-valid-credential-protected-check-passed",
+  );
+  assert.equal(plan.tokenValueLogged, false);
+});
+
+test("staging-token lifecycle planner rejects invalid or contradictory scenarios", () => {
+  assert.throws(
+    () => planStagingCredentialLifecycle({ trigger: "periodic-expiry" }),
+    /trigger is invalid/,
+  );
+  assert.throws(
+    () =>
+      planStagingCredentialLifecycle({
+        trigger: null,
+        revocationConfirmed: false,
+      }),
+    /requires a mandatory trigger/,
+  );
+  assert.throws(
+    () => planStagingCredentialLifecycle({ replacementStatus: "unchecked" }),
+    /replacement status is invalid/,
   );
 });
 

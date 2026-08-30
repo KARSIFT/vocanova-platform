@@ -21,6 +21,138 @@ export const STAGING_DISPATCHER = {
 };
 export const APPROVAL_RECEIPT_SCHEMA =
   "vocanova-cloudflare-ai-deployment-review-v1";
+export const MANDATORY_STAGING_TOKEN_REVOCATION_TRIGGERS = [
+  "suspected-disclosure",
+  "account-or-permission-drift",
+  "shared-identity-fabrication",
+  "loss-of-operator-control",
+  "explicit-operator-revocation-request",
+];
+export const STAGING_CREDENTIAL_POLICY_SURFACES = [
+  {
+    path: ".github/README.md",
+    required: [
+      "operator-revoked standing least-privilege staging token is valid until revoked",
+      "Ordinary dispatches, revocations, and replacements need no package or pull request",
+      "later meaningful policy or behavior change still requires governed intake and adoption",
+    ],
+  },
+  {
+    path: ".github/workflows/ci.yml",
+    required: [
+      "standing staging token is valid until revoked",
+      "Mandatory triggers revoke first and keep staging disabled",
+      "protected no-write check for standing-token replacement",
+    ],
+  },
+  {
+    path: "docs/governance/16-autonomous-development-operating-model.md",
+    required: [
+      "operator-revoked standing staging token is valid until revoked",
+      "ordinary dispatches, revocations, and replacements need no package or PR",
+      "meaningful lifecycle policy or behavior change still requires governed intake and adoption",
+    ],
+  },
+  {
+    path: "docs/governance/repository-settings.md",
+    required: [
+      `account \`${STAGING_ACCOUNT_ID}\` credential`,
+      "exactly `Workers Scripts Edit` and `D1 Edit`",
+      "operator-revoked standing token is valid until revoked",
+      "`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` may exist only as `cloudflare-staging` environment secrets",
+      "never at repository or organization scope",
+      "No token value enters repository evidence, logs, comments, artifacts, or agent records",
+    ],
+  },
+  {
+    path: "docs/operations/10-development-workflow.md",
+    required: [
+      "operator-revoked standing staging token remains valid until revoked",
+      "Ordinary staging dispatches, token revocations, and token replacements under the stable policy need neither a new plan nor a pull request",
+      "Later meaningful policy or behavior changes still use governed intake and adoption",
+    ],
+  },
+  {
+    path: "docs/operations/11-devops-and-ci-cd.md",
+    required: [
+      "VOC-101-standing-staging-token-amendment",
+      "operator-revoked standing Cloudflare staging token",
+      "valid until revoked",
+      "Mandatory triggers revoke first and keep staging disabled",
+    ],
+  },
+  {
+    path: "docs/operations/15-ai-native-product-and-engineering-operating-model.md",
+    required: [
+      "operator-revoked standing credential valid until revoked",
+      "Mandatory triggers revoke first and keep staging disabled",
+      "ordinary dispatch, revocation, or replacement requires no package or pull request",
+    ],
+  },
+  {
+    path: "docs/operations/cloudflare-delivery.md",
+    required: [
+      "operator-revoked standing Cloudflare staging token is valid until revoked",
+      `account \`${STAGING_ACCOUNT_ID}\` with exactly Workers Scripts Edit and D1 Edit`,
+      "no DNS, billing, user, organization, Access, Pages, R2, AI, production-data, token-management, or unrelated-product permission",
+      "Mandatory revocation triggers are suspected disclosure, account or permission drift, shared-identity fabrication, loss of operator control, and an explicit operator revocation request",
+      "A trigger requires revocation first and leaves staging disabled",
+      "Only voluntary replacement when no mandatory trigger exists may retain the prior token",
+      "failed voluntary replacement restores the prior environment secret",
+      "failed trigger-driven replacement is revoked and removed while staging stays disabled",
+      "remove the environment API-token secret, reject new approvals, cancel in-flight staging runs, open an incident",
+      "verify the affected token is inactive without logging it",
+      "Staging cannot resume until that verification succeeds and a valid credential passes the protected no-write check",
+      "Ordinary dispatch, revocation, and replacement under this stable policy require neither a change package nor a pull request and are not coupled to deployment",
+    ],
+  },
+  {
+    path: "scripts/foundation/cloudflare-delivery-policy.mjs",
+    required: [
+      "MANDATORY_STAGING_TOKEN_REVOCATION_TRIGGERS",
+      "inspectStagingCredentialPolicySources",
+      "planStagingCredentialLifecycle",
+      "verify-affected-token-inactive-without-logging",
+      "requiresChangePackageOrPullRequest: false",
+      "coupledToDeployment: false",
+    ],
+  },
+  {
+    path: "scripts/foundation/cloudflare-delivery-policy.test.mjs",
+    required: [
+      "every mandatory staging-token trigger revokes first",
+      "failed voluntary replacement restores and verifies the prior token",
+      "failed trigger-driven replacement removes the failed credential",
+      "unconfirmed mandatory revocation removes the secret",
+      "staging-token lifecycle planner rejects invalid or contradictory scenarios",
+    ],
+  },
+];
+export const STAGING_CREDENTIAL_POLICY_PATHS =
+  STAGING_CREDENTIAL_POLICY_SURFACES.map(({ path }) => path);
+
+const STAGING_CREDENTIAL_CONTEXT = [
+  /\b(?:cloudflare[-\s]+)?staging(?:[-\s]+environment)?[-\s]+(?:api[-\s]+)?(?:token|credential)\b/i,
+  /\b(?:token|credential)\s+(?:for|used\s+(?:for|by|in)|stored\s+in|scoped\s+to)\s+(?:the\s+)?(?:cloudflare[-\s]+)?staging(?:[-\s]+environment)?\b/i,
+];
+const STAGING_CREDENTIAL_ACTION =
+  /\b(?:dispatch(?:es|ed|ing)?|use[ds]?|using|revok(?:e|es|ed|ing)|revocation(?:s)?|replac(?:e|es|ed|ing)|replacement(?:s)?|reissu(?:e|es|ed|ing|ance)|issu(?:e|es|ed|ing|ance)|rotat(?:e|es|ed|ing|ion)|renew(?:s|ed|ing|al)?|provision(?:s|ed|ing)?|install(?:s|ed|ing)?)\b/i;
+const GOVERNED_CHANGE_ARTIFACT =
+  /\b(?:change[-\s]+package|pull[-\s]+request|PR|(?:new|change|governed)\s+plan)\b/i;
+const TOKEN_AUTHORITY_TARGET =
+  /\b(?:dispatch(?:es|ed|ing)?|review(?:s|ed|ing)?|approval|approv(?:e|es|ed|ing)|review[-\s]+judgment)\b/i;
+const TOKEN_POSSESSION =
+  /\b(?:possession|possess(?:es|ed|ing)?|holder|holding|using|presenting|access\s+to|control|ownership)\b/i;
+const CREDENTIAL_LIFECYCLE_ACTION =
+  /\b(?:reissu(?:e|es|ed|ing|ance)|rotat(?:e|es|ed|ing|ion)|renew(?:s|ed|ing|al)?|recreat(?:e|es|ed|ing|ion)|regenerat(?:e|es|ed|ing|ion)|replac(?:e|es|ed|ing)|replacement)\b/i;
+const CALENDAR_CADENCE =
+  /\b(?:calendar|cadence|schedule(?:d)?|daily|weekly|biweekly|monthly|quarterly|semiannually|annually|annual|yearly|periodic(?:ally)?|regular(?:ly|\s+intervals?)|(?:every|each)\s+(?:(?:[1-9][0-9]*)\s+)?(?:day|days|week|weeks|month|months|quarter|quarters|year|years)|once\s+per\s+(?:day|week|month|quarter|year))\b/i;
+const OPERATIONAL_CADENCE =
+  /\b(?:per|after|before|on|upon|for)\s+(?:each|every)\s+(?:dispatch|use|run|deployment|release|review|approval)\b|\bper[-\s]+(?:dispatch|use|run|deployment|release)\b/i;
+const NEGATED_LIFECYCLE =
+  /\b(?:no|never|without)\b[^.;]{0,50}\b(?:expiry|expiration|calendar|cadence|schedule|reissu(?:e|ed|ance)|rotat(?:e|ed|ion)|renew(?:ed|al)|replac(?:e|ed|ement))\b|\b(?:do(?:es)?|must|shall|will|is|are)\s+not\s+(?:be\s+)?(?:expire[ds]?|reissu(?:e|ed)|rotat(?:e|ed)|renew(?:ed)?|replac(?:e|ed))\b/i;
+const REVOCATION_TRIGGER_CONTEXT =
+  /\b(?:after|on|upon|during|for|following|because\s+of|if|when|in\s+response\s+to|triggered\s+by)\b[^.;]{0,80}\b(?:revok(?:e|ed|ing)|revocation|mandatory\s+trigger|disclosure|permission\s+drift|account\s+drift|fabrication|loss\s+of\s+operator\s+control|operator\s+revocation\s+request|voluntary\s+replacement)\b/i;
 
 const CANONICAL_SHA = /^[0-9a-f]{40}$/;
 const VERSION_ID =
@@ -654,6 +786,291 @@ function secretExpressions(source) {
     .filter((expression) => /\bsecrets\b/i.test(expression));
 }
 
+function stagingCredentialAssertions(source) {
+  return source
+    .replace(/<!--.*?-->/gs, "\n\n")
+    .replace(/^(?=[A-Za-z_][A-Za-z0-9_-]*:\s)/gm, "\n\n")
+    .split(/[.!?;]+|\n\s*\n+/)
+    .map((assertion) => assertion.replace(/\s+/g, " ").trim())
+    .filter(
+      (assertion) =>
+        assertion !== "" &&
+        STAGING_CREDENTIAL_CONTEXT.some((pattern) => pattern.test(assertion)),
+    );
+}
+
+function requiresPerActionGovernedChange(assertion) {
+  if (
+    !STAGING_CREDENTIAL_ACTION.test(assertion) ||
+    !GOVERNED_CHANGE_ARTIFACT.test(assertion)
+  )
+    return false;
+  if (
+    [
+      /\b(?:do(?:es)?|did|must|shall|will|can|may)\s+not\s+(?:require|need|create|open|await|use)\b/i,
+      /\b(?:requires?|needs?)\s+(?:no|neither)\b/i,
+      /\b(?:no|neither)\b[^.;]{0,80}\b(?:change[-\s]+package|pull[-\s]+request|PR|(?:new|change|governed)\s+plan)\b[^.;]{0,40}\b(?:is|are|be)?\s*(?:required|needed|mandatory)\b/i,
+      /\b(?:change[-\s]+package|pull[-\s]+request|PR|(?:new|change|governed)\s+plan)\b\s+(?:is|are)\s+(?:not|never)\s+(?:required|needed|mandatory)\b/i,
+    ].some((pattern) => pattern.test(assertion))
+  )
+    return false;
+  return [
+    /\b(?:requires?|needs?)\s+(?!(?:no|neither|not)\b)/i,
+    /\b(?:must|shall)\s+(?:create|open|use|have|receive|await|follow|precede|be\s+(?:preceded|gated|conditioned))/i,
+    /\b(?:is|are)\s+(?:required|mandatory|needed|gated|conditioned|dependent)\b/i,
+    /\bonly\s+(?:after|with|through)\b/i,
+    /\bfor\s+(?:each|every|any)\b[^.;]{0,120}\b(?:create|open|adopt|approve)\b/i,
+    /\b(?:cannot|can't|may\s+not)\b[^.;]{0,100}\bwithout\b/i,
+    /\b(?:subject|conditioned|contingent|dependent)\s+(?:to|on|upon)\b/i,
+    /\b(?:change[-\s]+package|pull[-\s]+request|PR|(?:new|change|governed)\s+plan)\b[^.;]{0,100}\b(?:gates?|precedes?|authorizes?|approves?)\b/i,
+  ].some((pattern) => pattern.test(assertion));
+}
+
+function grantsTokenPossessionAuthority(assertion) {
+  if (!TOKEN_AUTHORITY_TARGET.test(assertion)) return false;
+  if (
+    [
+      /\b(?:do(?:es)?|did|can|may|must|shall|will)\s+not\s+(?:grant|confer|authorize|entitle|permit|allow|provide|give|create|carry)\b/i,
+      /\b(?:grants?|confers?|authorizes?|entitles?|permits?|allows?|provides?|gives?|creates?|carries?)\s+(?:no|neither)\b/i,
+      /\b(?:no|neither)\b[^.;]{0,80}\b(?:dispatch|review|approval)\s+(?:authority|permission|right|judgment)\b/i,
+      /\bnever\s+(?:grants?|confers?|authorizes?|entitles?|permits?|allows?|provides?|gives?|creates?|carries?)\b/i,
+    ].some((pattern) => pattern.test(assertion))
+  )
+    return false;
+  const positiveGrant = [
+    /\b(?:grants?|confers?|authorizes?|entitles?|permits?|allows?|provides?|gives?|creates?|carries?)\s+(?!(?:no|neither|not)\b)/i,
+    /\b(?:is|serves\s+as|counts\s+as|constitutes?)\s+(?!(?:no|not|never)\b)[^.;]{0,60}\b(?:dispatch|review|approval)\s+(?:authority|permission|right|judgment)\b/i,
+    /\b(?:suffices?|qualifies?)\s+(?:as|for)\b[^.;]{0,60}\b(?:dispatch|review|approval)\b/i,
+    /\b(?:may|can|is\s+allowed\s+to|has\s+the\s+right\s+to)\s+(?:directly\s+)?(?:dispatch|review|approve)\b/i,
+  ].some((pattern) => pattern.test(assertion));
+  if (!positiveGrant) return false;
+  return (
+    TOKEN_POSSESSION.test(assertion) ||
+    STAGING_CREDENTIAL_CONTEXT.some((pattern) => pattern.test(assertion))
+  );
+}
+
+function imposesNonStandingLifecycle(assertion) {
+  if (NEGATED_LIFECYCLE.test(assertion)) return false;
+  if (
+    /\b(?:is|are|remains?|becomes?|must\s+be|shall\s+be|will\s+be)\s+(?:a\s+)?(?:short[-\s]+lived|time[-\s]+bound|temporary|ephemeral|single[-\s]+use|one[-\s]+time)\b/i.test(
+      assertion,
+    ) ||
+    (/\b(?:expires?|expiry|expiration|ceases?\s+to\s+be\s+valid)\b/i.test(
+      assertion,
+    ) &&
+      !REVOCATION_TRIGGER_CONTEXT.test(assertion)) ||
+    /\b(?:has|carries?|uses?)\s+(?:a\s+)?(?:fixed[-\s]+)?(?:expiry|expiration|lifetime|maximum\b[^.;]{0,24}\bage)\b/i.test(
+      assertion,
+    ) ||
+    /\b(?:finite|fixed|bounded|maximum)[-\s]+(?:validity|lifetime|age)\b/i.test(
+      assertion,
+    ) ||
+    (/\bvalid\s+(?:for|through)\s+(?!revok(?:e|ed|ation)\b)/i.test(assertion) &&
+      !/\bvalid\s+until\s+revoked\b/i.test(assertion)) ||
+    /\b[1-9][0-9]*[-\s]+(?:day|week|month|quarter|year)s?[-\s]+(?:cloudflare[-\s]+)?staging(?:[-\s]+environment)?[-\s]+(?:api[-\s]+)?(?:token|credential)\b/i.test(
+      assertion,
+    )
+  )
+    return true;
+  if (
+    CREDENTIAL_LIFECYCLE_ACTION.test(assertion) &&
+    (CALENDAR_CADENCE.test(assertion) || OPERATIONAL_CADENCE.test(assertion))
+  )
+    return true;
+  if (
+    /\b(?:must|shall|will|automatically)\s+(?:be\s+)?(?:reissued|rotate[ds]?|rotated|renewed|recreated|regenerated|replaced)\b/i.test(
+      assertion,
+    ) &&
+    !REVOCATION_TRIGGER_CONTEXT.test(assertion)
+  )
+    return true;
+  return false;
+}
+
+export function inspectStagingCredentialPolicySources(sources) {
+  const errors = [];
+  if (!isRecord(sources))
+    return ["staging credential policy sources are invalid"];
+  const actualPaths = Object.keys(sources).sort();
+  const expectedPaths = [...STAGING_CREDENTIAL_POLICY_PATHS].sort();
+  if (!deepEqual(actualPaths, expectedPaths))
+    errors.push("staging credential living-path inventory drifted");
+
+  for (const { path, required } of STAGING_CREDENTIAL_POLICY_SURFACES) {
+    const source = sources[path];
+    if (typeof source !== "string") {
+      errors.push(`staging credential policy source is missing: ${path}`);
+      continue;
+    }
+    const normalizedSource = source.replace(/\s+/g, " ");
+    for (const marker of required)
+      if (!normalizedSource.includes(marker.replace(/\s+/g, " ")))
+        errors.push(
+          `staging credential policy is incomplete in ${path}: ${marker}`,
+        );
+    if (path.endsWith(".mjs")) continue;
+    for (const assertion of stagingCredentialAssertions(source)) {
+      if (requiresPerActionGovernedChange(assertion))
+        errors.push(
+          `${path}: staging-token action cannot require a package, plan, or pull request`,
+        );
+      if (grantsTokenPossessionAuthority(assertion))
+        errors.push(
+          `${path}: staging-token possession cannot grant dispatch, review, or approval authority`,
+        );
+      if (imposesNonStandingLifecycle(assertion))
+        errors.push(
+          `${path}: staging token must remain standing and valid until revoked without calendar or cadence reissue`,
+        );
+    }
+  }
+  return errors;
+}
+
+export function planStagingCredentialLifecycle({
+  trigger = null,
+  revocationConfirmed = true,
+  replacementStatus = "passed",
+} = {}) {
+  if (
+    trigger !== null &&
+    !MANDATORY_STAGING_TOKEN_REVOCATION_TRIGGERS.includes(trigger)
+  )
+    throw new Error("mandatory staging-token revocation trigger is invalid");
+  if (!["passed", "failed"].includes(replacementStatus))
+    throw new Error("staging-token replacement status is invalid");
+  if (typeof revocationConfirmed !== "boolean")
+    throw new Error("staging-token revocation confirmation must be boolean");
+  if (trigger === null && !revocationConfirmed)
+    throw new Error(
+      "unconfirmed revocation containment requires a mandatory trigger",
+    );
+
+  const common = {
+    trigger,
+    tokenValueLogged: false,
+    requiresChangePackageOrPullRequest: false,
+    coupledToDeployment: false,
+  };
+  if (trigger === null) {
+    const operations = [
+      "retain-prior-token",
+      "create-replacement-token",
+      "sanitized-dashboard-policy-readback",
+      "local-status-and-account-verification-without-logging",
+      "install-replacement-environment-api-token-secret",
+    ];
+    if (replacementStatus === "passed") {
+      operations.push(
+        "protected-no-write-credential-check",
+        "revoke-prior-token",
+      );
+      return {
+        ...common,
+        mode: "voluntary-replacement",
+        operations,
+        priorTokenRetainedThroughReplacementChecks: true,
+        environmentApiTokenSecret: "verified-replacement-credential",
+        newApprovals: "allowed",
+        inFlightStagingRuns: "unchanged",
+        incident: "none",
+        staging: "enabled",
+        resumptionCondition: "already-satisfied-by-protected-check",
+      };
+    }
+    operations.push(
+      "replacement-check-failed",
+      "restore-prior-environment-api-token-secret",
+      "protected-no-write-check-for-prior-credential",
+      "revoke-failed-replacement",
+      "remove-failed-replacement",
+    );
+    return {
+      ...common,
+      mode: "voluntary-replacement",
+      operations,
+      priorTokenRetainedThroughReplacementChecks: true,
+      environmentApiTokenSecret: "verified-prior-credential",
+      newApprovals: "allowed",
+      inFlightStagingRuns: "unchanged",
+      incident: "none",
+      staging: "enabled",
+      resumptionCondition: "already-satisfied-by-restored-protected-check",
+    };
+  }
+
+  const operations = ["revoke-affected-token", "disable-staging"];
+  if (!revocationConfirmed) {
+    operations.push(
+      "remove-environment-api-token-secret",
+      "reject-new-staging-approvals",
+      "cancel-in-flight-staging-runs",
+      "open-incident",
+      "retry-revocation",
+      "verify-affected-token-inactive-without-logging",
+    );
+    return {
+      ...common,
+      mode: "mandatory-trigger",
+      operations,
+      priorTokenRetainedThroughReplacementChecks: false,
+      environmentApiTokenSecret: "absent",
+      newApprovals: "rejected",
+      inFlightStagingRuns: "cancelled",
+      incident: "opened",
+      staging: "disabled",
+      resumptionCondition:
+        "affected-token-verified-inactive-and-valid-credential-protected-check-passed",
+    };
+  }
+
+  operations.push(
+    "verify-affected-token-inactive-without-logging",
+    "create-replacement-token",
+    "sanitized-dashboard-policy-readback",
+    "local-status-and-account-verification-without-logging",
+    "install-replacement-environment-api-token-secret",
+  );
+  if (replacementStatus === "passed") {
+    operations.push(
+      "protected-no-write-credential-check",
+      "enable-staging-after-protected-check",
+    );
+    return {
+      ...common,
+      mode: "mandatory-trigger",
+      operations,
+      priorTokenRetainedThroughReplacementChecks: false,
+      environmentApiTokenSecret: "verified-replacement-credential",
+      newApprovals: "allowed",
+      inFlightStagingRuns: "unchanged",
+      incident: "none",
+      staging: "enabled",
+      resumptionCondition: "already-satisfied-by-protected-check",
+    };
+  }
+  operations.push(
+    "replacement-check-failed",
+    "revoke-failed-replacement",
+    "remove-failed-replacement",
+    "remove-environment-api-token-secret",
+  );
+  return {
+    ...common,
+    mode: "mandatory-trigger",
+    operations,
+    priorTokenRetainedThroughReplacementChecks: false,
+    environmentApiTokenSecret: "absent",
+    newApprovals: "rejected",
+    inFlightStagingRuns: "unchanged",
+    incident: "none",
+    staging: "disabled",
+    resumptionCondition:
+      "valid-replacement-credential-protected-check-must-pass",
+  };
+}
+
 export async function evaluateDeliveryEvent(manifest, event, options = {}) {
   const reasons = inspectDeliveryManifest(manifest);
   const inputs = event?.inputs ?? {};
@@ -968,6 +1385,15 @@ export function inspectWranglerConfigSelection(repositoryRoot) {
   return errors;
 }
 
+export function loadStagingCredentialPolicySources(repositoryRoot) {
+  return Object.fromEntries(
+    STAGING_CREDENTIAL_POLICY_PATHS.map((path) => [
+      path,
+      readFileSync(resolve(repositoryRoot, path), "utf8"),
+    ]),
+  );
+}
+
 export function validateDeliveryRepository(repositoryRoot, manifestOverride) {
   const manifest = manifestOverride ?? loadDeliveryManifest(repositoryRoot);
   const configs = {
@@ -985,6 +1411,9 @@ export function validateDeliveryRepository(repositoryRoot, manifestOverride) {
     ...inspectDeliveryManifest(manifest, configs),
     ...inspectDeliveryWorkflow(
       readFileSync(resolve(repositoryRoot, ".github/workflows/ci.yml"), "utf8"),
+    ),
+    ...inspectStagingCredentialPolicySources(
+      loadStagingCredentialPolicySources(repositoryRoot),
     ),
     ...inspectWranglerConfigSelection(repositoryRoot),
     ...inspectMigrationLedger(
