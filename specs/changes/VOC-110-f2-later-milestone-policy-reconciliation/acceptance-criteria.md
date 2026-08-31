@@ -41,7 +41,10 @@ fixture matching the preserved adopted VOC-105 candidate also passes: F2 remains
 complete-effective; F3 points exactly to the VOC-105 evidence as complete-effective;
 A1/P1+ remain unresolved; production remains held; live remains unresolved-held; and
 HOLD-01/HOLD-02 remain exact. The accepted profile does not independently attest
-VOC-105's evidence or weaken its separate validator.
+VOC-105's evidence or weaken its separate validator. Each of the five human surfaces
+matches the literal plan-owned required markers after the exact specified whitespace
+normalization and contains none of its literal prohibited markers; fixtures derive
+only from those strings and the exact JSON profile, not from a worktree.
 
 ## VOC-110-AC-03 — Hybrids and false later claims fail closed
 
@@ -52,10 +55,13 @@ VOC-105's evidence or weaken its separate validator.
 - Result: pending exact implementation evidence
 
 One-at-a-time fixtures reject every mixed-profile direction and every missing, extra,
-renamed, or wrong milestone key/value or evidence pointer. Generic F3
-claims; false A1/P1-P5/R1/R2/L1, product, production, traffic, data, launch,
-deployment, or live claims; HOLD-01/02 omission or release; false F2 current claims;
-and F2 external-effect drift all fail without shell or network execution.
+renamed, or wrong milestone key/value or evidence pointer. The full current prohibited
+subject/verb union plus `effective`/`resolved` rejects F3 passed/accepted; A1, P1 and
+P1+ passed/accepted; false P2-P5/R1/R2/L1/product claims; every production/deployment
+variant; live verified; aggregate or individual HOLD-00/01/02 passed/completed and
+other release forms; and active F2-pending forms. Only exact required VOC-105 F3
+sentences at their canonical locations pass. HOLD-01/02 omission and F2 external-
+effect drift also fail without shell or network execution.
 
 ## VOC-110-AC-04 — VOC-109 extension behavior is unchanged
 

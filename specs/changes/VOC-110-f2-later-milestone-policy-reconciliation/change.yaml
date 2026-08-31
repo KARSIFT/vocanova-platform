@@ -71,19 +71,26 @@ requirements:
       f3_current_evidence docs/operations/voc-105-f3-evidence.json, A1 and P1+
       unresolved, production held, live activation unresolved-held, exactly
       VOC-080-HOLD-01 and VOC-080-HOLD-02, and matching exact current markers across
-      every existing designated F2 surface. It must not treat the F2 record itself as
-      F3 decision evidence or duplicate VOC-105's separate R4 validator.
+      every existing designated F2 surface. The implementation must use the literal
+      per-surface required/prohibited strings and exact whitespace normalization in
+      specification.md; synthetic expected strings must be plan-owned and never
+      derived from the dirty VOC-105 worktree or another runtime source. It must not
+      treat the F2 record itself as F3 decision evidence or duplicate VOC-105's
+      separate R4 validator.
   - id: VOC-110-D03
     statement: >-
       Fail closed one invariant at a time on mixed pre-F3/F3 profiles; missing, extra,
       or wrong current-state keys and values; missing or wrong VOC-105
-      evidence pointer; an unbounded/generic F3 or staging claim; false A1, P1-P5, R1,
-      R2, L1, product, production-readiness/traffic, learner-data, public-launch,
-      deployment, or live-activation claims; release or omission of HOLD-01 or HOLD-02;
-      stale F2-pending text outside history; current/history conflation; malformed JSON;
-      missing designated surfaces; or any F2 external-effect field changed from false.
-      Diagnostics must identify the violated profile or invariant without shell or
-      network execution.
+      evidence pointer; or any prohibited claim. The claim matrix must preserve the
+      union of every current PROHIBITED_ACTIVE_TEXT_CLAIMS subject and verb, explicitly
+      including F3 passed/accepted, A1 plus P1 and P1+ passed/accepted, all production/
+      deployment and live-verified variants, aggregate and individual HOLD-00/01/02
+      passed/completed variants, and F2 pending forms, then add effective/resolved and
+      the later R1/R2/L1 classes. Test one generated claim/invariant at a time and
+      allowlist only the exact evidence-bound VOC-105 marker sentences. Also reject
+      stale F2 text outside history, current/history conflation, malformed JSON,
+      missing surfaces, HOLD-01/02 omission, or any F2 external-effect field changed
+      from false, without shell or network execution.
   - id: VOC-110-D04
     statement: >-
       Preserve the complete adopted-and-implemented VOC-109 foundation-chain contract

@@ -15,6 +15,14 @@ learner data held; public launch unresolved-held; and `VOC-080-HOLD-01` plus
 `VOC-080-HOLD-02` retained. Mixed profiles and broader product, production, live, or
 hold-release claims fail closed.
 
+The future profile is implementation-deterministic: `specification.md` owns literal
+required and prohibited normalized marker strings for each of the five human F2-owned
+surfaces, an exact whitespace-normalization algorithm, and the exact JSON profile.
+Fixtures may use only those plan-canonical strings, never the preserved dirty
+worktree. The negative corpus preserves every current F3, A1/P1+, production/
+deployment, live, hold, and F2-pending subject/verb class and adds `effective` and
+`resolved`; only the exact evidence-bound VOC-105 wording is allowlisted.
+
 This package does not decide F3, change documentation, add the VOC-105 command, or
 replace VOC-105's R4 evidence validator. It remains draft and implementation-
 unauthorized until exact review, adoption, and plan merge. It authorizes no settings,

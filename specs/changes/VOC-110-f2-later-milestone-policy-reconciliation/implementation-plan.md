@@ -33,15 +33,19 @@ nine-artifact VOC-110 package.
    member order as non-semantic. Select one repository-wide profile; reject partial
    matches, hybrids, unknown keys, missing keys, and wrong values.
 4. Define paired required/prohibited current markers for every existing designated F2
-   surface under each profile. Preserve all F2 integration, history, local/no-live,
-   limitation, and rollback markers. Permit only exact evidence-bound VOC-105 F3
-   wording; keep generic F3/staging claims prohibited.
-5. Extend the independent fixture corpus for false F2, A1, P1-P5, R1, R2, L1,
-   product, production/readiness/traffic, learner-data, launch, deployment, live, and
-   HOLD-01/02 claims. Add every-surface hybrid tests in both directions, every current-
-   key/value/pointer mutation, every external-effect true mutation, history/current
-   conflation, malformed record, and missing-surface cases. Assert concrete
-   diagnostics and prove no shell/network execution.
+   surface using only the literal strings and exact ASCII-whitespace normalization in
+   the specification. Preserve all F2 integration, history, local/no-live, limitation,
+   and rollback markers. Permit only the listed evidence-bound VOC-105 F3 sentences.
+   Do not load expected strings from the preserved worktree, another branch/PR, or a
+   runtime diff.
+5. Generate one-claim-at-a-time fixtures from the complete specified subject/copula/
+   verb matrices. Preserve every current F3, A1/P1+, production/deployment, live,
+   aggregate/individual hold, and F2-pending class/verb, including passed, accepted,
+   completed, and verified cases, and add effective/resolved plus R1/R2/L1. Add every-
+   surface hybrid tests in both directions, every current-key/value/pointer mutation,
+   every external-effect true mutation, history/current conflation, malformed record,
+   and missing-surface cases. Assert concrete diagnostics and no shell/network
+   execution.
 6. Retain and run all VOC-109 script tests: zero/one/two positives and every exact
    prefix, F2 execution, extension grammar/declaration/uniqueness/collision/placement,
    terminal, malformed-input, and shell-control negative.

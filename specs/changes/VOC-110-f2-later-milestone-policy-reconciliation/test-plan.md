@@ -32,8 +32,12 @@
 
 - Covers: `VOC-110-AC-02`
 - Procedure: validate the exact current pre-VOC-105 tree. Then construct a synthetic
-  repository fixture matching the preserved VOC-105 candidate's changes to every
-  existing designated F2 surface and the exact milestone JSON object: F2
+  repository fixture from only the specification's literal plan-canonical required/
+  prohibited marker strings, unchanged baseline immutable-F2 strings, exact CR/LF and
+  ASCII-whitespace normalization rules, and exact milestone JSON object; never read
+  expected text from the preserved VOC-105 worktree or another mutable source. Require
+  each required normalized marker exactly once and each prohibited marker zero times
+  on every existing designated F2 surface. The JSON profile is: F2
   complete-effective; F3 complete-effective under the exact VOC-105 evidence path;
   A1/P1+ unresolved; production held; live unresolved-held; HOLD-01/02 exact. Repeat
   the two JSON positives with object members reordered while retaining exact keys,
@@ -52,12 +56,31 @@
     pointer;
   - for every existing designated F2 surface, combine that surface's pre-F3 form with
     all other VOC-105 surfaces, then its VOC-105 form with all other pre-F3 surfaces;
-  - append independent text variants for generic F3/staging complete/active/released/
-    enabled, F2 pending, A1, each P1-P5, R1, R2, L1, product acceptance, production
-    readiness/traffic, learner-data access, public launch, deployment, and live
-    activation/verification;
-  - independently omit HOLD-01 then HOLD-02 and claim each is released, cleared,
-    lifted, resolved, complete, accepted, active, or enabled; and
+  - generate separate F3 fixtures for `F3`, `F3 staging`, and `staging`, with and
+    without `is`, crossed with complete/completed/passed/accepted/active/released/
+    enabled/effective/resolved;
+  - generate separate acceptance fixtures for A1, A1/P1, A1/P1+, authenticated A1,
+    P1, P1+, each P2-P5, and every current optional-`-P5` expansion (P1-P5 through
+    P5-P5), each with both acceptance and product-acceptance forms, plus R1/R2/L1;
+    use with/without `is` and cross with complete/completed/passed/accepted/active/
+    effective/resolved;
+  - generate separate deployment/production fixtures for deployment, production
+    deployment, and production, with and without `is`, crossed with every existing
+    complete/completed/passed/accepted/active/enabled/released verb plus effective/
+    resolved;
+  - generate separate live fixtures for activation, verification, system, and service,
+    with and without `is`, crossed with every existing complete/completed/passed/
+    accepted/active/enabled/released/verified verb plus effective/resolved;
+  - generate separate singular/plural aggregate/all VOC-080 hold(s) and individual
+    HOLD-00/01/02 fixtures with absent, `are`, and `is` aggregate copulas and absent/
+    `is` individual copulas, crossed with
+    released/cleared/lifted/complete/completed/passed/accepted/active/enabled/
+    effective/resolved;
+  - generate current `Repository/local F2` pending/pending-integration/incomplete/
+    candidate fixtures across is/remains and absent/still, add one mixed/lower-case fixture per claim
+    class, and assert that only exact canonical VOC-105 required F3 strings at exact
+    locations are masked;
+  - independently omit HOLD-01 then HOLD-02; and
   - independently flip every F2 external-effect field to true.
 - Expected: every mutation fails with a profile-, surface-, pointer-, claim-, hold-, or
   external-effect-specific diagnostic; historical candidate wording remains allowed
@@ -110,9 +133,11 @@
   plan reviews, adoption, and normal non-author plan merge.
 - `VOC-110-EV-01`: immutable F2/history/surface/external-effect positive and one-at-a-
   time negative results.
-- `VOC-110-EV-02`: exact pre-VOC-105 and full adopted VOC-105 profile positives.
-- `VOC-110-EV-03`: exact profile key/value/pointer, every-surface hybrid, false later-
-  gate, hold, no-live, and no-execution negatives.
+- `VOC-110-EV-02`: exact pre-VOC-105 and full adopted VOC-105 profile positives built
+  only from literal plan-canonical normalized markers and the exact JSON object.
+- `VOC-110-EV-03`: exact profile key/value/pointer, every-surface normalized marker and
+  hybrid, lossless current-plus-effective/resolved claim matrix, hold, no-live, and
+  no-execution negatives, each injected one invariant at a time.
 - `VOC-110-EV-04`: complete unchanged-in-effect VOC-109 command-chain matrix results.
 - `VOC-110-EV-05`: focused/full/hosted checks, exact two-file diff, rollback proof,
   specialist and independent exact-SHA verdicts, merge, and post-merge readback.

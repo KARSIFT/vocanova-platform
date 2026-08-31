@@ -14,8 +14,10 @@ deterministic checks, exact-SHA foundation-policy/CI-integrity specialist review
 separate independent cross-model R3 PASS, zero unresolved blockers, truthful merge
 eligibility, and a separate non-author merge actor. Post-merge validation must prove
 the current pre-VOC-105 tree passes, the exact synthetic VOC-105 profile passes, and
-all immutable F2 and VOC-109 regressions remain fail closed. Only then may issue #203
-close and a different builder refresh VOC-105.
+all literal normalized per-surface markers, the full current-plus-effective/resolved
+prohibited-claim matrix, immutable F2 invariants, and VOC-109 regressions remain fail
+closed. Synthetic expected strings must come only from the committed plan contract.
+Only then may issue #203 close and a different builder refresh VOC-105.
 
 ## Bounded observation contract
 

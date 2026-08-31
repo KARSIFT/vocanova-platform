@@ -75,21 +75,109 @@ F3 pointer plus A1/P1+, production/traffic, learner-data, launch, and HOLD-01/02
 boundaries. `voc-081-f2-evidence.md` may truthfully say no F2 deployment occurred and
 later evidence establishes F3; it must not rewrite the historical F2 facts.
 
-The canonical VOC-105-profile marker contract is:
+The implementation must use this exact normalization before literal marker matching:
 
-| Existing designated F2 surface               | Required current markers                                                                                                                                                                                                   |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/README.md`                             | `[VOC-105 record](operations/voc-105-f3-evidence.md)`, `F3 staging foundation complete-effective`, A1/P1+ unresolved, production/traffic/data/launch unresolved or held, and both inherited holds                          |
-| `docs/operations/README.md`                  | the VOC-105 evidence link and active `F3 complete-effective` record row, F3 complete-effective, A1/P1+ unresolved/separate, production/traffic/data/launch unresolved or held, and both inherited holds                    |
-| `docs/operations/voc-081-f2-evidence.md`     | `[VOC-105 record](voc-105-f3-evidence.md)`, F3 complete-effective, `## No-live evidence and current later-gate state`, `No F2 deployment occurred`, `no F2 deployment URL was expected`, A1/P1+ unresolved, and both holds |
-| `docs/product/README.md`                     | `[VOC-105 evidence record](../operations/voc-105-f3-evidence.md)`, F3 complete-effective, A1/P1+ unresolved/separate, production/traffic/data/launch unresolved or held, and both inherited holds                          |
-| `docs/product/12-mvp-implementation-plan.md` | the VOC-105 evidence link, F3 complete-effective, successful delivery not sufficient by itself, A1/P1+ unresolved/separate, production/traffic/data/launch unresolved or held, and both inherited holds                    |
-| `docs/operations/voc-081-f2-evidence.json`   | the exact current-state object above                                                                                                                                                                                       |
+1. convert CRLF and lone CR to LF;
+2. replace every nonempty run matching ASCII whitespace `[ \t\n\f\v]+` with one
+   U+0020 space;
+3. remove leading and trailing ASCII whitespace; and
+4. perform no case folding, Unicode normalization, punctuation removal, Markdown/link
+   rewriting, or other transformation.
 
-The marker matcher may account for Markdown line wrapping but must not accept synonyms
-that broaden status. `docs/operations/cloudflare-delivery.md` and the new VOC-105
-record remain in VOC-105's seven-surface validator, not VOC-110's F2-owned surface
-set.
+Required markers must occur exactly once in the normalized surface unless a count is
+stated otherwise. Prohibited markers must occur zero times. For active-claim checks on
+`voc-081-f2-evidence.md`, remove only the raw section beginning with exact H2
+`## Historical candidate state` and ending immediately before the next raw H2, then
+normalize; no other prose is excluded.
+
+The following literal strings—not the dirty worktree—are the plan-canonical VOC-105
+profile contract.
+
+#### `docs/README.md`
+
+Required:
+
+- `The current [VOC-105 record](operations/voc-105-f3-evidence.md) validates every DOC-12 gate item and reports F3 staging foundation complete-effective.`
+- ``A1/P1+ acceptance, production readiness and traffic, learner-data access, and public launch remain unresolved or held; `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.``
+
+Prohibited:
+
+- `F3/staging, A1/P1+ acceptance, production, deployment, live activation, and every inherited live-action hold remain unresolved.`
+
+#### `docs/operations/README.md`
+
+Required:
+
+- `| RECORD | [VOC-105 F3 staging-foundation evidence](voc-105-f3-evidence.md) | active (F3 complete-effective) | operator | DOC-12, VOC-105 |`
+- `The separate VOC-105 record validates every DOC-12 gate item and reports F3 staging foundation complete-effective.`
+- `A1/P1+ acceptance remains unresolved and separate.`
+- ``Production readiness and traffic, learner-data access, and public launch remain unresolved or held; `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.``
+- `VOC-105 later records the exact successful delivery event as one input to the complete F3 gate decision; it performs no new live action.`
+
+Prohibited:
+
+- `The record preserves its earlier integration-pending candidate state as history and does not claim F3, A1/P1+ acceptance, staging, production, deployment, or live activation.`
+
+#### `docs/operations/voc-081-f2-evidence.md`
+
+Required:
+
+- `This F2 record does **not by itself** claim F3 staging, A1 authenticated-product acceptance, any P1+ product milestone, production readiness, or a public launch.`
+- `The later [VOC-105 record](voc-105-f3-evidence.md) validates the separate F3 gate and reports F3 staging foundation complete-effective.`
+- ``A1/P1+ acceptance remains unresolved; production, learner data, and launch remain held or unresolved under `VOC-080-HOLD-01` and `VOC-080-HOLD-02`.``
+- `## No-live evidence and current later-gate state`
+- `No command or evidence step in this F2 record queried or mutated Cloudflare, DNS, a server, Sentry, repository settings, a secret, or production learner data.`
+- `No F2 deployment occurred and no F2 deployment URL was expected.`
+- `Later exact evidence in VOC-105 reports F3 staging foundation complete-effective.`
+- ``A1/P1+ acceptance remains unresolved; production readiness and traffic, learner-data access, and public launch remain unresolved or held under `VOC-080-HOLD-01` and `VOC-080-HOLD-02`.``
+
+Prohibited:
+
+- `This record does **not** claim F3 staging, A1 authenticated-product acceptance, any P1+ product milestone, production readiness, a public launch, or a deployment.`
+- `` `VOC-080-HOLD-00`, `VOC-080-HOLD-01`, and `VOC-080-HOLD-02` remain held. ``
+- `## No-live and later-gate state`
+- `No command or evidence step queries or mutates Cloudflare, DNS, a server, Sentry, repository settings, a secret, or production learner data.`
+- `No deployment occurred and no deployment URL is expected.`
+- `F3/staging, A1/P1+ acceptance, production, live activation, and every inherited VOC-080 hold remain unresolved/held.`
+
+#### `docs/product/README.md`
+
+Required:
+
+- `The [VOC-105 evidence record](../operations/voc-105-f3-evidence.md) separately validates every DOC-12 F3 gate item and reports the F3 staging foundation complete-effective.`
+- `A1/P1+ acceptance remains unresolved and is a separate future outcome.`
+- ``Production readiness and traffic, learner-data access, and public launch remain unresolved or held; `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.``
+
+Prohibited:
+
+- `F3, A1/P1+ acceptance, staging, production, deployment, and live activation remain unresolved and are not implied.`
+
+#### `docs/product/12-mvp-implementation-plan.md`
+
+Required:
+
+- `The current [VOC-105 evidence record](../operations/voc-105-f3-evidence.md) validates every F3 gate item and reports the F3 staging foundation complete-effective.`
+- `A1/P1+ product acceptance remains unresolved and is a separate future outcome.`
+- ``Production readiness and traffic, learner-data access, and public launch remain unresolved or held; `VOC-080-HOLD-01` and `HOLD-02` remain held.``
+- `The later exact successful delivery event is recorded separately by VOC-105 and is only one input to its F3 gate decision.`
+- `` `VOC-080-HOLD-01` and `HOLD-02` remain fully unresolved and unchanged. ``
+- `VOC-105's separate gate evaluation reports F3 staging foundation complete-effective; the successful delivery run alone did not establish that result.`
+- `A1/P1+ acceptance remains unresolved.`
+- ``Production readiness and traffic, learner-data access, and public launch remain unresolved or held under `VOC-080-HOLD-01` and `VOC-080-HOLD-02`.``
+
+Prohibited:
+
+- ``At their remaining action boundaries, F3 staging, A1/P1+ product acceptance, production, deployment, live activation, and `VOC-080-HOLD-00` through `HOLD-02` remain unresolved/held.``
+- `F3, A1/P1+ acceptance beyond the Phase-1 resource/rollback proof, ordinary staging workflow delivery, production, and live product activation remain unresolved.`
+
+The exact JSON profile remains the object specified above. Synthetic future-profile
+fixtures must be assembled only from these plan-canonical normalized strings, the
+exact JSON object, and unchanged baseline immutable-F2 strings; they must not read,
+copy, import, or derive expected strings from `/tmp/vocanova-voc105-impl`, another
+worktree, a branch, a pull request, or runtime repository diff. The preserved worktree
+was inspection evidence only. `docs/operations/cloudflare-delivery.md` and the new
+VOC-105 record remain in VOC-105's seven-surface validator, not VOC-110's F2-owned
+surface set.
 
 The profile choice is repository-wide and atomic. A pre-F3 JSON object with one F3
 surface, a VOC-105 JSON object with any stale pre-F3 surface, or a partial marker set
@@ -99,18 +187,50 @@ delivery event, all seven living surfaces, redaction, and the R4 milestone decis
 
 ### VOC-110-D03 — Reject false and over-broad current claims
 
-Independent fixtures must reject one invariant at a time:
+Independent fixtures must reject one invariant at a time. The prohibited-claim corpus
+is the lossless union of the current `PROHIBITED_ACTIVE_TEXT_CLAIMS` classes/verbs and
+the new `effective`/`resolved` forms:
+
+- F3 subjects `F3`, `F3 staging`, and `staging`, each with and without `is`, crossed
+  independently with `complete`, `completed`, `passed`, `accepted`, `active`,
+  `released`, `enabled`, `effective`, and `resolved`;
+- acceptance base identifiers `A1`, `A1/P1`, `A1/P1+`, `A1
+authenticated-product`, `P1`, the newly explicit `P1+`, each of `P2` through `P5`,
+  and every current optional-`-P5` expansion (`P1-P5`, `P2-P5`, `P3-P5`, `P4-P5`,
+  and `P5-P5`), each independently followed by both `acceptance` and `product
+acceptance`, then with and without `is`, crossed independently with `complete`,
+  `completed`, `passed`, `accepted`, `active`, `effective`, and `resolved`;
+- later-gate subjects `R1`, `R2`, and `L1` acceptance, with the same acceptance verbs;
+- production subjects `deployment`, `production deployment`, and `production`, each
+  with and without `is`, crossed independently with `complete`, `completed`, `passed`,
+  `accepted`, `active`, `enabled`, `released`, `effective`, and `resolved`;
+- live subjects `live activation`, `live verification`, `live system`, and `live
+service`, each with and without `is`, crossed independently with `complete`,
+  `completed`, `passed`, `accepted`, `active`, `enabled`, `released`, `verified`,
+  `effective`, and `resolved`;
+- aggregate subjects `VOC-080 hold`, `VOC-080 holds`, `all VOC-080 hold`, and `all
+VOC-080 holds`, with absent copula, `are`, or `is`, and individual
+  `VOC-080-HOLD-00`, `VOC-080-HOLD-01`, and
+  `VOC-080-HOLD-02`, with and without `is`, crossed independently with `released`,
+  `cleared`, `lifted`, `complete`, `completed`, `passed`, `accepted`, `active`,
+  `enabled`, `effective`, and `resolved`; and
+- the current `Repository/local F2` pending class generated across `is`/`remains`,
+  absent/`still`, and `pending`/`pending integration`/`incomplete`/`candidate`.
+
+At least one lower- or mixed-case subject/verb fixture per class must prove matching
+remains case-insensitive. Each generated fixture contains exactly one injected false
+claim. Before applying this corpus, the implementation may mask only the exact
+evidence-bound F3 required-marker strings listed above at their required locations;
+no substring, synonym, generic `complete-effective` phrase, additional occurrence, or
+worktree-derived text is allowlisted.
+
+The remaining structural fixtures are:
 
 - missing, extra, renamed, or wrong current milestone keys or values;
 - absent, duplicated, or wrong `f3_current_evidence` pointer;
 - every one-surface-at-a-time pre-F3/F3 hybrid in both directions;
-- generic F3/staging `complete`, `active`, `released`, or `enabled` claims that are not
-  the exact VOC-105 evidence-bound statement;
-- active F2 pending/incomplete/candidate claims outside candidate history;
-- A1, P1 through P5, R1, R2, or L1 accepted/complete/effective/active claims;
-- false product acceptance, production readiness or traffic, learner-data access,
-  public launch, deployment, or live activation/verification claims;
-- omission or release/clear/lift/resolve of HOLD-01 or HOLD-02; and
+- active F2 pending/incomplete/candidate wording moved outside candidate history;
+- omission of HOLD-01 or HOLD-02 from the exact current profile; and
 - any F2 external-effect field changed from `false`.
 
 Historical candidate wording must remain accepted only in its designated historical
