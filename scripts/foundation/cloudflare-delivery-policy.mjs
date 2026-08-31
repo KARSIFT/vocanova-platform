@@ -710,7 +710,8 @@ export function inspectDeliveryWorkflow(source) {
     "Promote exact staging Worker versions",
     "Roll back exact staging Worker versions after promotion failure",
   ]);
-  for (const step of extractSteps(staging)) {
+  const stagingSteps = extractSteps(staging);
+  for (const step of stagingSteps) {
     const expressions = secretExpressions(step.body);
     if (expressions.length !== 0 && !allowedSecretSteps.has(step.name))
       errors.push(
@@ -740,9 +741,124 @@ export function inspectDeliveryWorkflow(source) {
     !staging.includes("steps.prewrite.outputs.web_rollback_version_id")
   )
     errors.push("rollback must consume the exact current deployment outputs");
-  const rollback = extractSteps(staging).find((step) =>
+  const versions = stagingSteps.find(
+    (step) => step.name === "Upload immutable staging Worker versions",
+  );
+  const promote = stagingSteps.find(
+    (step) => step.name === "Promote exact staging Worker versions",
+  );
+  const smoke = stagingSteps.find(
+    (step) => step.name === "Smoke exact promoted versions",
+  );
+  const versionBody = versions?.body ?? "";
+  for (const marker of [
+    'api_versions_file=""',
+    'web_versions_file=""',
+    "cleanup_version_files() {",
+    'test -n "$api_versions_file"',
+    'rm -f -- "$api_versions_file" || true',
+    'test -n "$web_versions_file"',
+    'rm -f -- "$web_versions_file" || true',
+    "trap cleanup_version_files EXIT",
+    'api_versions_file="$(mktemp "$RUNNER_TEMP/vocanova-api-versions.XXXXXX")"',
+    'web_versions_file="$(mktemp "$RUNNER_TEMP/vocanova-web-versions.XXXXXX")"',
+    'pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json --config wrangler.jsonc > "$api_versions_file"',
+    'api_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag" < "$api_versions_file")"',
+    'pnpm --filter @vocanova/web exec wrangler versions list --env staging --json --config wrangler.jsonc > "$web_versions_file"',
+    'web_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag" < "$web_versions_file")"',
+    'echo "api_version_id=$api_version_id" >> "$GITHUB_OUTPUT"',
+    'echo "web_version_id=$web_version_id" >> "$GITHUB_OUTPUT"',
+  ]) {
+    if (!versionBody.includes(marker))
+      errors.push(`complete version JSON handoff is missing: ${marker}`);
+  }
+  const versionHandoffLines = versionBody
+    .split("\n")
+    .filter(
+      (line) =>
+        line.includes("wrangler versions list") ||
+        line.includes("--resolve-version-tag"),
+    );
+  if (versionHandoffLines.some((line) => line.includes("|")))
+    errors.push("version JSON must not use a direct producer-resolver pipe");
+  if (/[<>]\([^\n]*(?:versions list|resolve-version-tag)/.test(versionBody))
+    errors.push("version JSON must not use a concurrent process substitution");
+  if (
+    /\bcoproc\b/.test(versionBody) ||
+    versionHandoffLines.some((line) => /&\s*$/.test(line))
+  )
+    errors.push("version JSON must not use a concurrent background handoff");
+  if (
+    (versionBody.match(/wrangler versions list/g) ?? []).length !== 2 ||
+    (versionBody.match(/--resolve-version-tag/g) ?? []).length !== 2
+  )
+    errors.push(
+      "version JSON must have exactly two matched list/resolver pairs",
+    );
+  if (
+    /\b(?:cat|tee|cp|mv|echo|printf)\b[^\n]*\$(?:api|web)_versions_file/.test(
+      versionBody,
+    )
+  )
+    errors.push(
+      "version JSON files and paths must not be printed or persisted",
+    );
+
+  const orderedVersionMarkers = [
+    "trap cleanup_version_files EXIT",
+    'api_versions_file="$(mktemp',
+    'web_versions_file="$(mktemp',
+    "@vocanova/api-worker exec wrangler versions upload",
+    "@vocanova/web exec wrangler versions upload",
+    "@vocanova/api-worker exec wrangler versions list",
+    'api_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag',
+    "@vocanova/web exec wrangler versions list",
+    'web_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag',
+    'echo "api_version_id=$api_version_id" >> "$GITHUB_OUTPUT"',
+    'echo "web_version_id=$web_version_id" >> "$GITHUB_OUTPUT"',
+  ];
+  let previousVersionMarker = -1;
+  for (const marker of orderedVersionMarkers) {
+    const index = versionBody.indexOf(marker);
+    if (index === -1 || index <= previousVersionMarker) {
+      errors.push(`version capture and resolution order is invalid: ${marker}`);
+      break;
+    }
+    previousVersionMarker = index;
+  }
+  for (const marker of [
+    'wrangler versions deploy "${{ steps.versions.outputs.api_version_id }}@100%"',
+    'wrangler versions deploy "${{ steps.versions.outputs.web_version_id }}@100%"',
+  ]) {
+    if (!promote?.body.includes(marker))
+      errors.push(`promotion must consume an exact resolved output: ${marker}`);
+  }
+  const orderedSteps = [
+    "Read exact current deployments before any write",
+    "Apply ordered compatible staging D1 migrations",
+    "Upload immutable staging Worker versions",
+    "Promote exact staging Worker versions",
+    "Smoke exact promoted versions",
+  ].map((name) => stagingSteps.findIndex((step) => step.name === name));
+  if (
+    orderedSteps.some((index) => index === -1) ||
+    orderedSteps.slice(1).some((index, offset) => index <= orderedSteps[offset])
+  )
+    errors.push(
+      "current deployment, migration, upload/resolution, promotion, and smoke order drifted",
+    );
+
+  const rollback = stagingSteps.find((step) =>
     step.name.startsWith("Roll back exact staging Worker versions"),
   );
+  if (
+    !rollback?.body.includes(
+      "if: failure() && inputs.delivery_operation == 'deploy' && steps.promote.outcome != 'skipped'",
+    )
+  )
+    errors.push(
+      "rollback must remain disabled until exact-version promotion begins",
+    );
   for (const marker of [
     "set +e",
     "api_rollback_status=0",

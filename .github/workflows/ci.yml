@@ -339,11 +339,26 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
+          api_versions_file=""
+          web_versions_file=""
+          cleanup_version_files() {
+            if test -n "$api_versions_file"; then
+              rm -f -- "$api_versions_file" || true
+            fi
+            if test -n "$web_versions_file"; then
+              rm -f -- "$web_versions_file" || true
+            fi
+          }
+          trap cleanup_version_files EXIT
+          api_versions_file="$(mktemp "$RUNNER_TEMP/vocanova-api-versions.XXXXXX")"
+          web_versions_file="$(mktemp "$RUNNER_TEMP/vocanova-web-versions.XXXXXX")"
           tag="sha-${GITHUB_SHA:0:12}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"
           pnpm --filter @vocanova/api-worker exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging API ${GITHUB_SHA}" --var "RELEASE:${GITHUB_SHA}" --config wrangler.jsonc
           pnpm --filter @vocanova/web exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging web ${GITHUB_SHA}" --config wrangler.jsonc
-          api_version_id="$(pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json --config wrangler.jsonc | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag")"
-          web_version_id="$(pnpm --filter @vocanova/web exec wrangler versions list --env staging --json --config wrangler.jsonc | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag")"
+          pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json --config wrangler.jsonc > "$api_versions_file"
+          api_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag" < "$api_versions_file")"
+          pnpm --filter @vocanova/web exec wrangler versions list --env staging --json --config wrangler.jsonc > "$web_versions_file"
+          web_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag" < "$web_versions_file")"
           echo "api_version_id=$api_version_id" >> "$GITHUB_OUTPUT"
           echo "web_version_id=$web_version_id" >> "$GITHUB_OUTPUT"
 
