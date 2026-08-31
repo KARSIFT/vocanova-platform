@@ -4,7 +4,7 @@ id: VOC-106
 slug: release-promotion-sync
 title: Promote the current develop release and synchronize branch history
 type: repository-release-promotion-and-history-finalization
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because the one repository-only outcome moves the protected canonical `main`
@@ -15,7 +15,7 @@ planned_implementation_risk_floor: >-
 canonical_path: specs/changes/VOC-106-release-promotion-sync
 authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/191
-requirement_approval_status: issue-open-plan-review-and-adoption-pending
+requirement_approval_status: exact-plan-review-and-operator-adoption-recorded
 base_branch: develop
 base_sha: 03528a84988ebe664207c6a439e133070627c92a
 initial_release_base_branch: main
@@ -30,11 +30,13 @@ initial_observation_status: >-
 plan_branch: plan/voc-106-release-promotion-sync
 target_branch: develop
 
-approval_status: not-approved
-implementation_authorized: false
+approved_candidate_sha: 54c671d801b518b87f969f16bbe495082fc2679e
+approval_status: adopted
+implementation_authorized: true
 implementation_authority_status: >-
-  no-promotion-or-synchronization-authority-until-exact-plan-candidate-independent-
-  review-adoption-bookkeeping-normal-plan-merge-and-fresh-implementation-evidence
+  authorized-by-exact-plan-candidate-review-and-operator-adoption-only-for-the-
+  declared-repository-history-pr-sequence; effective-after-this-bookkeeping-revision-
+  exact-review-normal-plan-merge-and-fresh-per-pr-exact-evidence
 implementation_pull_request_count: 2
 multiple_pull_request_rationale: >-
   The release promotion and the post-promotion synchronization are one coherent
@@ -119,6 +121,25 @@ owners:
   git_history_specialist: different-non-author-exact-revision-reviewer-actor
   merge: separate-authorized-non-author-merge-actor
 
+plan_review_history:
+  - candidate_sha: 54c671d801b518b87f969f16bbe495082fc2679e
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/192#issuecomment-5479247179
+    reviewer: /root/voc106_plan_review
+    resolution_status: >-
+      independent plan review bound to the adopted candidate; it grants no merge,
+      settings, Cloudflare, deployment, secret, data, spending, or launch authority
+
+approvals:
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 54c671d801b518b87f969f16bbe495082fc2679e
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/192#issuecomment-5479247179
+  adoption_decision:
+    status: adopted-for-declared-repository-only-history-pr-sequence
+    candidate_sha: 54c671d801b518b87f969f16bbe495082fc2679e
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/192#issuecomment-5480127406
+
 artifacts:
   readme: README.md
   specification: specification.md
@@ -142,9 +163,11 @@ protected_areas:
   - cloudflare-and-production-holds
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: pending-plan-adoption-and-fresh-exact-release-freeze
+  status: >-
+    authorized-pending-bookkeeping-revision-exact-review-normal-plan-merge-and-fresh-
+    exact-release-freeze
   target_branches:
     - main
     - develop
@@ -155,7 +178,9 @@ implementation:
 
 action_specific_authority:
   required: true
-  authorization_status: pending-adoption-and-per-pr-exact-evidence
+  authorization_status: >-
+    adopted-for-the-declared-repository-history-sequence-but-pending-this-bookkeeping-
+    revision-exact-review-normal-plan-merge-and-per-pr-exact-evidence
   actions:
     - id: VOC-106-AUTH-RELEASE-00
       action: reviewed-merge-commit-promotion-of-fresh-frozen-develop-into-main
@@ -207,10 +232,16 @@ release:
   rollback_required: true
   issue_closure: after-promotion-sync-final-readback-and-complete-evidence
 
+repository_adoption_status: >-
+  adopted-pending-bookkeeping-revision-exact-review-normal-plan-merge-and-applicable-
+  postmerge-checks
+adoption_pr: 192
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/192#issuecomment-5480127406
+
 ehr: not-triggered
 blocking_reasons:
-  - plan-review-and-adoption-pending
-  - implementation-authority-not-yet-effective
+  - adoption-bookkeeping-revision-exact-review-pending
+  - normal-plan-merge-and-applicable-postmerge-checks-pending
   - fresh-release-freeze-and-exact-review-pending
   - separately-reviewed-promotion-pending
   - fresh-synchronization-freeze-and-exact-review-pending
