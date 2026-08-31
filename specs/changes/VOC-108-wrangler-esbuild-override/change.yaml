@@ -1,0 +1,199 @@
+schema_version: 1
+
+id: VOC-108
+slug: wrangler-esbuild-override
+title: Pin Wrangler's esbuild edge to the upstream deadlock remediation
+type: scoped-local-stack-remediation-correction
+status: draft
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because this narrowly extends the adopted VOC-107 remediation for the required
+  local-stack CI integrity boundary. The pnpm workspace and lockfile paths have a
+  lower automated path floor, but an intentional resolution change to Wrangler's
+  esbuild subprocess changes the toolchain that executes the fail-closed control.
+  The plan package itself is documentation-only and does not affect any runtime,
+  delivery, deployment, or external system.
+canonical_path: specs/changes/VOC-108-wrangler-esbuild-override
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/196
+related_adopted_package: VOC-107
+related_adopted_package_path: specs/changes/VOC-107-local-stack-esbuild-workerd-deadlock
+base_branch: develop
+base_sha: 669e419385dc8a4b8cfb007238dbaac017139238
+plan_branch: plan/voc-108-wrangler-esbuild-override
+target_branch: develop
+approval_status: not-approved
+implementation_authorized: false
+implementation_authority_status: >-
+  not-authorized-until-this-exact-package-receives-distinct-independent-R3-review,
+  accountable-adoption, and is merged-to-develop; issue-196-and-VOC-107-do-not-
+  independently-authorize-a-workspace-manifest-or-lockfile-edit
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: >-
+  One repository-only dependency-resolution change keeps the exact override,
+  regenerated lockfile, deterministic resolution evidence, local-stack validation,
+  and one reversible rollback point coherent. Splitting the manifest from its lock
+  result would create an invalid frozen-install intermediate state and add branch,
+  review, exact-SHA, coordination, elapsed-time, repeated-check, and bookkeeping
+  overhead without a releasable or rollback-safe boundary.
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Extend the VOC-107 remediation scope only enough to force Wrangler's esbuild
+  dependency edge to the upstream 0.28.2 deadlock fix through pnpm's canonical
+  workspace override mechanism, retain a reproducible frozen lockfile, and prove
+  the exact resolved edge deterministically without weakening local-stack controls.
+
+requirements:
+  - id: VOC-108-D00
+    statement: >-
+      Treat issue #196 as intake and causal evidence only. It identifies upstream
+      esbuild 0.28.2 as the fix for the all-goroutines-asleep deadlock and identifies
+      pnpm-workspace.yaml as the active override location. Before implementation,
+      record the reviewed revision's exact Wrangler and esbuild resolution. If the
+      current Wrangler version differs from the issue narrative, reconcile the
+      evidence without changing Wrangler itself; this package authorizes only the
+      specified transitive edge.
+  - id: VOC-108-D01
+    statement: >-
+      Add exactly the pnpm workspace override `wrangler>esbuild: 0.28.2` under the
+      existing root overrides map in pnpm-workspace.yaml. Do not add a direct esbuild
+      dependency, change a Wrangler version/range, alter another override, or move
+      override policy into package.json.
+  - id: VOC-108-D02
+    statement: >-
+      Regenerate only pnpm-lock.yaml as required by the exact override and retain a
+      frozen install. The final lockfile must resolve the esbuild dependency reached
+      from Wrangler to exactly 0.28.2. No unrelated dependency refresh, manifest
+      edit, package-manager configuration change, or lockfile churn is permitted.
+  - id: VOC-108-D03
+    statement: >-
+      Produce deterministic, no-network regression evidence that reads the final
+      installed dependency graph from each local Wrangler consumer and proves the
+      esbuild package resolved through its Wrangler context is exactly 0.28.2. The
+      evidence must also fail before the override at the reviewed baseline and fail
+      closed for a missing, malformed, or different version; it must not infer
+      success from a top-level esbuild copy or text-only lockfile search.
+  - id: VOC-108-D04
+    statement: >-
+      Preserve every VOC-107 local-stack safety boundary and all existing failure
+      classification. In particular, do not alter process lifecycle, timeouts,
+      retries, ports, D1 state, credential stripping, remote-mode protections,
+      service-binding probes, output classification, workflow definitions, or
+      application behavior. The upstream deadlock diagnostic remains terminal.
+  - id: VOC-108-D05
+    statement: >-
+      Deliver one minimum-sufficient repository-only implementation PR. It may edit
+      only pnpm-workspace.yaml and pnpm-lock.yaml; deterministic evidence is command
+      output attached to the implementation record, not a new test harness or source
+      change. Do not edit historical change packages, settings/secrets, Cloudflare
+      configuration or APIs, dispatch/deploy, D1 migration, traffic/DNS, production,
+      learner data, spending, or launch state.
+  - id: VOC-108-D06
+    statement: >-
+      Plan and implementation require applicable deterministic checks, exact-SHA
+      dependency/local-runtime specialist review, independent R3 verification by
+      distinct non-author actors, resolution of all blockers, and merge by a
+      separate non-author actor. Risk classification creates no standing founder or
+      technical-steward approval.
+
+owners:
+  decision: accountable-repository-change-owner-at-adoption
+  package_preparation: /root/voc108_plan_builder
+  implementation: different-builder-actor-after-adoption
+  dependency_local_runtime_specialist: different-non-author-exact-revision-actor
+  independent_r3_verifier: different-non-author-exact-revision-actor
+  merge: separate-non-author-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - pnpm-workspace.yaml
+  - pnpm-lock.yaml
+
+protected_areas:
+  - ci-required-local-stack-integrity
+  - pinned-Wrangler-esbuild-toolchain
+  - credential-free-loopback-only-local-stack
+  - Cloudflare-delivery-and-production-holds
+
+dependencies:
+  - id: VOC-108-DEP-00
+    status: issue-intake-only
+    description: >-
+      Issue #196 identifies the upstream remediation and required pnpm override
+      location; it is not implementation, external-action, merge, or deployment
+      authority.
+  - id: VOC-108-DEP-01
+    status: adopted-scope-predecessor
+    description: >-
+      VOC-107 is adopted for its declared local-stack remediation but its authorized
+      candidate file inventory excludes pnpm-workspace.yaml. This package supplies
+      no retroactive modification to VOC-107.
+  - id: VOC-108-DEP-02
+    status: upstream-remediation-evidence
+    description: >-
+      The issue records esbuild upstream issue 4503, pull request 4506, and the
+      0.28.2 release as evidence for the deadlock remediation. Implementation must
+      retain a concise version-and-provenance record without committing third-party
+      source or changing any upstream package beyond the declared resolution edge.
+
+implementation:
+  authorized: false
+  required: true
+  status: pending-independent-review-and-adoption
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-108-T00
+
+required_r3_evidence:
+  deterministic_resolution_regression: pending-after-adoption
+  dependency_local_runtime_specialist: pending-distinct-non-author-exact-candidate-review
+  independent_exact_revision_verification: pending-distinct-non-author-exact-candidate-review
+  blocking_findings: must-be-resolved-before-merge
+  ehr: not-triggered
+
+scope_boundary:
+  plan_package: allowed-now
+  pnpm_workspace_override: allowed-only-after-adoption
+  pnpm_lockfile_reconciliation: allowed-only-after-adoption
+  deterministic_command_evidence: required-after-adoption
+  other_source_or_test_harness_changes: prohibited
+  workflow_definitions: prohibited
+  github_settings_or_secrets: prohibited
+  cloudflare_dns_dispatch_deployment: prohibited
+  production_or_learner_data: prohibited
+  application_product_behavior: prohibited
+  historical_change_packages: prohibited
+
+external_effects:
+  github_settings_and_secrets: prohibited
+  cloudflare: prohibited
+  workflow_dispatch: prohibited
+  staging_deployment: prohibited
+  d1_migration: prohibited
+  traffic_and_dns: prohibited
+  production: prohibited
+  spending_and_billing: prohibited
+  learner_data: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-dependency-resolution-remediation-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-merged-exact-implementation-and-hosted-validation
+
+ehr: not-triggered
