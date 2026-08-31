@@ -1,0 +1,290 @@
+schema_version: 1
+
+id: VOC-110
+slug: f2-later-milestone-policy-reconciliation
+title: Separate immutable F2 evidence from current later-milestone pointers
+type: foundation-policy-defect-remediation
+status: adopted
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the change modifies a fail-closed foundation validator that protects
+  accepted F2 evidence and current milestone boundaries. It does not decide or record
+  F3, weaken VOC-105's separate R4 evidence validator, change workflow or merge
+  authority, or authorize a live action, so R4 is not triggered.
+canonical_path: specs/changes/VOC-110-f2-later-milestone-policy-reconciliation
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/203
+related_adopted_packages:
+  - VOC-105
+  - VOC-109
+base_branch: develop
+base_sha: 309f1058baa041f7915fb334148d7d5b3d9b3c14
+plan_branch: plan/voc-110-f2-later-milestone-policy-reconciliation
+target_branch: develop
+approved_candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-foundation-policy-specialist-and-independent-cross-
+  model-R3-reviews-and-VOC-110-ADOPT-2026-09-01-for-the-declared-two-file-repository-
+  only-implementation; usable-after-this-adopted-package-is-freshly-reviewed-and-
+  normally-merged-to-develop-by-a-non-author; all-external-actions-and-VOC-105-
+  implementation-remain-held
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: >-
+  One repository-only validator correction keeps immutable-F2 protection, the exact
+  pre-F3 and VOC-105 current-state profiles, all negative fixtures, regression checks,
+  and one rollback point atomic. Splitting the validator from its focused proof would
+  expose an unproved fail-open or fail-closed state and duplicate branch, review,
+  exact-SHA, coordination, elapsed-time, repeated-check, and bookkeeping overhead.
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Reconcile the active VOC-081 validator so immutable F2 facts and historical
+  candidate evidence remain exact while living later-milestone pointers may move
+  atomically from the current pre-F3 profile to the exact adopted VOC-105 F3
+  complete-effective, A1/P1+-pending, HOLD-01/HOLD-02-held profile.
+
+requirements:
+  - id: VOC-110-D00
+    statement: >-
+      Treat issue #203 as defect intake and reproduction evidence only. Bind exact
+      develop SHA 309f1058baa041f7915fb334148d7d5b3d9b3c14, the passing current
+      validator/focused tests, and the preserved VOC-105 candidate's nonempty
+      rejection. No implementation begins until this package is independently
+      reviewed, adopted, and merged to develop.
+  - id: VOC-110-D01
+    statement: >-
+      Preserve every immutable VOC-081 F2 record fact and historical candidate fact:
+      schema and dates; package, task, revision, PR, review, hosted and rollback
+      identifiers; workflow inventory; local contract; exact task sequence; validated
+      commands; repository integration and rollback evidence; external-effects false
+      fields; F2 complete-effective status; and candidate-era pending history. Preserve
+      all false-F2, history-as-current, missing-surface, malformed-record, and external-
+      effect negatives.
+  - id: VOC-110-D02
+    statement: >-
+      Separate immutable F2 assertions from current later-milestone assertions and
+      accept exactly two atomic repository profiles during the dependency transition:
+      the exact current pre-VOC-105 profile, or the exact adopted VOC-105 profile.
+      The latter requires f3_staging complete-effective-under-voc-105-evidence,
+      f3_current_evidence docs/operations/voc-105-f3-evidence.json, A1 and P1+
+      unresolved, production held, live activation unresolved-held, exactly
+      VOC-080-HOLD-01 and VOC-080-HOLD-02, and matching exact current markers across
+      every existing designated F2 surface. The implementation must use the literal
+      per-surface required/prohibited strings and exact whitespace normalization in
+      specification.md; synthetic expected strings must be plan-owned and never
+      derived from the dirty VOC-105 worktree or another runtime source. It must not
+      treat the F2 record itself as F3 decision evidence or duplicate VOC-105's
+      separate R4 validator.
+  - id: VOC-110-D03
+    statement: >-
+      Fail closed one invariant at a time on mixed pre-F3/F3 profiles; missing, extra,
+      or wrong current-state keys and values; missing or wrong VOC-105
+      evidence pointer; or any prohibited claim. The claim matrix must preserve the
+      union of every current PROHIBITED_ACTIVE_TEXT_CLAIMS subject and verb, explicitly
+      including F3 passed/accepted, A1 plus P1 and P1+ passed/accepted, all production/
+      deployment and live-verified variants, aggregate and individual HOLD-00/01/02
+      passed/completed variants, and F2 pending forms, then add effective/resolved and
+      the later R1/R2/L1 classes. Additionally reject the canonical generic product
+      acceptance, production readiness, production traffic, learner-data access, and
+      public launch subjects, each with absent or `is` copula and every applicable
+      complete/completed/passed/accepted/active/enabled/released/verified/effective/
+      resolved verb. Test one appended claim/invariant at a time on every human F2
+      surface and allowlist only the exact evidence-bound VOC-105 marker sentences. Also reject
+      stale F2 text outside history, current/history conflation, malformed JSON,
+      missing surfaces, HOLD-01/02 omission, or any F2 external-effect field changed
+      from false, without shell or network execution.
+  - id: VOC-110-D04
+    statement: >-
+      Preserve the complete adopted-and-implemented VOC-109 foundation-chain contract
+      and focused matrix unchanged in effect: exact eight-segment prefix, exact F2
+      command and entry point, sole extension slot, exact terminal test, zero/one/two
+      extension positives including the exact VOC-105 pair, and every omission,
+      duplication, order, name, entry-point, alias, collision, placement, malformed-
+      input, and shell-control negative.
+  - id: VOC-110-D05
+    statement: >-
+      Implement one minimum-sufficient repository-only PR changing exactly
+      scripts/foundation/voc081-f2-evidence-policy.mjs and
+      scripts/foundation/voc081-f2-evidence-policy.test.mjs. Do not edit package.json,
+      documentation, F2/F3 evidence, change-package history, workflows, application or
+      runtime code, settings/secrets, resources, dispatch/deployment, D1, traffic/DNS,
+      production or learner data, spending, or launch state.
+  - id: VOC-110-D06
+    statement: >-
+      Require deterministic focused/foundation/workspace/governance evidence, exact-SHA
+      foundation-policy/CI-integrity specialist review, and separate independent
+      cross-model R3 verification by distinct non-authors. Resolve every blocker on a
+      new SHA with fresh checks and review; require a separate non-author merge actor.
+  - id: VOC-110-D07
+    statement: >-
+      Completion only removes the active F2-validator prerequisite for unchanged
+      adopted VOC-105. A different VOC-105 builder must refresh the preserved
+      candidate on corrected develop and obtain VOC-105's own R4 validator, evidence,
+      specialist, independent-review, merge, and closure proof. VOC-110 does not
+      implement, amend, adopt, review, merge, or close VOC-105.
+  - id: VOC-110-D08
+    statement: >-
+      The accountable VOC-110 repository change owner recorded at adoption owns a
+      bounded observation period from implementation merge through the first refreshed
+      real VOC-105 candidate's focused VOC-081 and VOC-105 validators, ci:foundation,
+      and hosted required-check results, or through a recorded governed VOC-105
+      abandonment or supersession. Exact-profile rejection, hybrid/false-profile
+      acceptance, F2 regression, or VOC-109 extension regression stops VOC-105 merge
+      and VOC-110 closure and requires linked failure evidence plus separately governed
+      remediation or dependency-ordered revert.
+
+owners:
+  decision: /root
+  package_preparation: /root/voc108_plan_builder
+  implementation: different-builder-actor-after-adoption
+  foundation_policy_ci_specialist: /root/voc107_specialist
+  independent_cross_model_r3_verifier: /root/voc109_cross_model
+  merge: separate-non-author-actor
+  post_merge_observation: /root
+
+plan_review_history:
+  - candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    reviewer: /root/voc107_specialist
+    verdict: pass-foundation-policy-ci-specialist-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486186625
+    resolution: >-
+      Exact approved-candidate specialist review. It grants no implementation before
+      the adopted package merges and no external-action or VOC-105 authority.
+  - candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    reviewer: /root/voc109_cross_model
+    model_provenance: explicitly-configured-gpt-5.6-sol
+    verdict: pass-independent-cross-model-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486186901
+    resolution: >-
+      Exact approved-candidate independent R3 review. It grants no implementation
+      before the adopted package merges and no external-action or VOC-105 authority.
+
+approvals:
+  foundation_policy_ci_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486186625
+  independent_cross_model_R3_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486186901
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-110-ADOPT-2026-09-01
+    candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486189007
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - scripts/foundation/voc081-f2-evidence-policy.mjs
+  - scripts/foundation/voc081-f2-evidence-policy.test.mjs
+
+protected_areas:
+  - immutable-VOC-081-F2-evidence-and-history
+  - current-F3-and-later-milestone-boundaries
+  - VOC-109-foundation-chain-integrity
+  - validator-self-modification-and-independent-verification
+  - adopted-VOC-105-scope-and-R4-evidence-boundary
+
+dependencies:
+  - id: VOC-110-DEP-00
+    status: issue-intake-only
+    description: >-
+      Issue #203 records the exact baseline, root cause, and preserved-candidate
+      diagnostics. It grants no implementation, merge, review, adoption, or external-
+      action authority.
+  - id: VOC-110-DEP-01
+    status: active-VOC-081-control
+    description: >-
+      The active VOC-081 validator and focused test define immutable F2 facts/history,
+      current milestone pointers, no-live evidence, and the foundation command policy.
+  - id: VOC-110-DEP-02
+    status: implemented-VOC-109-extension-contract
+    description: >-
+      VOC-109 implementation c44b704b16721f658ef308ca9313c809dee81631
+      supplies the current guarded extension parser and exhaustive regression matrix;
+      VOC-110 must preserve it unchanged in effect.
+  - id: VOC-110-DEP-03
+    status: adopted-VOC-105-blocked-downstream
+    description: >-
+      Adopted VOC-105 owns the seven living documents, F3 evidence/validator, and exact
+      package command addition. Its preserved real candidate demonstrates the current
+      rejection but does not authorize edits to the VOC-081 validator or test.
+
+implementation:
+  authorized: true
+  required: true
+  status: authorized-after-adopted-package-merges-to-develop
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-110-T00
+
+required_r3_evidence:
+  deterministic_policy_regression: pending-exact-implementation-SHA
+  foundation_policy_ci_specialist: pass-exact-approved-plan-candidate
+  independent_cross_model_exact_revision_verification: pass-exact-approved-plan-candidate
+  blocking_findings: resolved-at-approved-candidate-fresh-bookkeeping-review-pending
+  ehr: not-triggered
+
+scope_boundary:
+  plan_package: adopted-pending-fresh-bookkeeping-review-and-non-author-merge
+  voc081_validator_and_focused_test: authorized-only-after-adopted-plan-merges-to-develop
+  package_json_or_documentation: prohibited
+  F2_or_F3_evidence_files: prohibited
+  historical_change_packages: prohibited
+  application_runtime_or_workflows: prohibited
+  github_settings_or_secrets: prohibited
+  cloudflare_dns_dispatch_deployment: prohibited
+  production_or_learner_data: prohibited
+  voc105_implementation_or_closure: prohibited
+
+external_effects:
+  github_settings_and_secrets: prohibited
+  cloudflare: prohibited
+  workflow_dispatch: prohibited
+  staging_deployment: prohibited
+  d1_migration: prohibited
+  traffic_and_dns: prohibited
+  production: prohibited
+  spending_and_billing: prohibited
+  learner_data: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-foundation-policy-correction-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-merged-exact-implementation-and-post-merge-validation
+
+post_merge_observation:
+  owner: /root
+  window_start: merged-VOC-110-implementation
+  window_end: >-
+    recorded-first-refreshed-real-VOC-105-candidate-focused-foundation-and-hosted-
+    results-or-recorded-governed-VOC-105-abandonment-or-supersession
+  monitored_signal: >-
+    exact-VOC-105-profile-accepted-while-immutable-F2-false-profile-and-VOC-109-
+    extension-protections-pass
+  failure_trigger: >-
+    exact-profile-rejected-or-hybrid-false-profile-accepted-or-F2-or-extension-
+    regression
+  disposition: >-
+    stop-VOC-105-merge-and-VOC-110-closure-record-linked-failure-evidence-and-route-
+    separately-governed-remediation-or-dependency-ordered-revert
+
+ehr: not-triggered
