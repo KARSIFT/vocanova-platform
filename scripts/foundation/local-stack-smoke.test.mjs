@@ -199,6 +199,7 @@ test("workerd log fixtures fail closed independently of HTTP success", () => {
     "CompileError: WebAssembly.compile() rejected",
     "RuntimeError: generic runtime error",
     "GET / 200\nError: HTTP succeeded but the Worker rejected a promise",
+    "GET / 200\nfatal error: all goroutines are asleep - deadlock!",
   ]) {
     const result = classifyWorkerdOutput(diagnostic);
     assert.equal(result.pass, false);
