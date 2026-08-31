@@ -4,7 +4,7 @@ id: VOC-105
 slug: f3-current-documentation-reconciliation
 title: Reconcile current F3 staging-foundation documentation
 type: canonical-milestone-evidence-reconciliation
-status: proposed
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because active F3 milestone truth controls dependency-ordered product eligibility
@@ -14,18 +14,26 @@ planned_implementation_risk_floor: >-
 canonical_path: specs/changes/VOC-105-f3-current-documentation-reconciliation
 authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/189
-requirement_approval_status: planning-intake-only-no-implementation-authority
+requirement_approval_status: >-
+  exact-independent-R4-plan-review-pass-and-accountable-VOC-105-ADOPT-01-approved;
+  required-distinct-canonical-documentation-milestone-specialist-review-remains-
+  pending-before-plan-merge
 base_branch: develop
 base_sha: 03528a84988ebe664207c6a439e133070627c92a
 plan_branch: plan/voc-105-f3-current-documentation
 target_branch: develop
-approved_candidate_sha: null
-approval_status: pending-independent-plan-review-and-adoption
-implementation_authorized: false
+approved_candidate_sha: de48efb97bbabe483e1c5a45074d762126f99c02
+approval_status: >-
+  adopted-for-declared-repository-only-implementation; required-distinct-plan-
+  specialist-and-fresh-bookkeeping-reviews-remain-pending-before-plan-merge
+implementation_authorized: true
 implementation_authority_status: >-
-  not-authorized; issue #189 and this candidate grant no implementation, settings,
-  secret, Cloudflare, dispatch, deployment, production, data, spending, DNS, or launch
-  authority; adoption and normal merge remain required before implementation
+  authorized-by-exact-candidate-independent-R4-PASS-and-VOC-105-ADOPT-01-for-the-
+  declared-repository-only-single-PR-implementation-once-this-adopted-package-is-on-
+  develop; required-distinct-canonical-documentation-milestone-specialist-and-fresh-
+  bookkeeping-reviews-plus-normal-non-author-plan-merge-remain-required; issue-189-
+  closure-and-all-settings-secret-Cloudflare-dispatch-deployment-production-data-
+  spending-DNS-and-launch-actions-remain-prohibited
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-single-coherent-documentation-boundary
 automatic_merge_allowed: true
@@ -85,6 +93,40 @@ owners:
   canonical_documentation_milestone_specialist: different-non-author-exact-revision-actor
   independent_R4_verifier: different-non-author-exact-revision-actor
   merge: separate-non-author-actor
+
+plan_review_history:
+  - candidate_sha: de48efb97bbabe483e1c5a45074d762126f99c02
+    verdict: pass-independent-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/193#issuecomment-5479341376
+    resolution_status: >-
+      exact-approved-candidate-independent-review; grants-no-settings-secrets-
+      Cloudflare-dispatch-deployment-production-data-spending-DNS-launch-or-other-
+      external-action-authority-and-does-not-transfer-to-the-changed-adoption-
+      bookkeeping-SHA
+  - candidate_sha: de48efb97bbabe483e1c5a45074d762126f99c02
+    verdict: adopted-for-declared-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/193#issuecomment-5480127024
+    resolution_status: >-
+      VOC-105-ADOPT-01-authorizes-only-the-declared-repository-only-single-PR-
+      implementation-once-the-adopted-package-is-on-develop; the-package-required-
+      distinct-plan-specialist-review-and-fresh-bookkeeping-review-remain-pending-
+      before-plan-merge; every-external-action-and-issue-189-closure-remains-
+      prohibited
+
+approvals:
+  independent_R4_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: de48efb97bbabe483e1c5a45074d762126f99c02
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/193#issuecomment-5479341376
+  canonical_documentation_milestone_plan_review:
+    status: pending-distinct-non-author-exact-candidate-review-before-plan-merge
+    candidate_sha: de48efb97bbabe483e1c5a45074d762126f99c02
+    evidence: pending
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-105-ADOPT-01
+    candidate_sha: de48efb97bbabe483e1c5a45074d762126f99c02
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/193#issuecomment-5480127024
 
 artifacts:
   readme: README.md
@@ -166,11 +208,13 @@ required_r4_evidence:
   specialist_evidence:
     required: true
     role: canonical-documentation-milestone-evidence-specialist
-    status: pending-exact-revision-review
+    status: pending-distinct-exact-candidate-plan-review-before-plan-merge
   independent_exact_revision_evidence:
     required: true
     role: independent-R4-verifier
-    status: pending-exact-revision-review
+    status: pass-exact-approved-candidate-plan-review
+    candidate_sha: de48efb97bbabe483e1c5a45074d762126f99c02
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/193#issuecomment-5479341376
   ehr: not-triggered
 
 scope_boundary:
@@ -226,9 +270,11 @@ observed_evidence:
     final_delivery: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5477915272
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: pending-plan-review-adoption
+  status: >-
+    authorized-pending-adopted-plan-merge-and-required-distinct-plan-specialist-
+    review
   target_branch: develop
   pull_request_count: 1
   task: VOC-105-T00
