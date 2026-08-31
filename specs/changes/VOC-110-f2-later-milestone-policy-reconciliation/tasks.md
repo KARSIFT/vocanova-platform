@@ -8,7 +8,7 @@
 - Evidence: `VOC-110-EV-00` through `VOC-110-EV-06`
 - Implementation pull-request mapping: one coherent implementation PR
 - Risk: R3
-- Status: pending review and adoption
+- Status: adopted; repository implementation authorized after normal plan merge
 
 Change only the VOC-081 validator and focused test. Preserve every immutable F2 fact,
 historical boundary, false-claim/external-effect negative, and VOC-109 command-chain

@@ -4,7 +4,7 @@ id: VOC-110
 slug: f2-later-milestone-policy-reconciliation
 title: Separate immutable F2 evidence from current later-milestone pointers
 type: foundation-policy-defect-remediation
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because the change modifies a fail-closed foundation validator that protects
@@ -21,13 +21,15 @@ base_branch: develop
 base_sha: 309f1058baa041f7915fb334148d7d5b3d9b3c14
 plan_branch: plan/voc-110-f2-later-milestone-policy-reconciliation
 target_branch: develop
-approval_status: not-approved
-implementation_authorized: false
+approved_candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+approval_status: adopted
+implementation_authorized: true
 implementation_authority_status: >-
-  not-authorized-until-this-exact-package-receives-distinct-foundation-policy-
-  specialist-review-independent-cross-model-R3-review-accountable-adoption-and-
-  normal-non-author-plan-merge; issue-203-and-adopted-VOC-105-or-VOC-109-do-not-
-  authorize-these-validator-edits
+  authorized-by-exact-candidate-foundation-policy-specialist-and-independent-cross-
+  model-R3-reviews-and-VOC-110-ADOPT-2026-09-01-for-the-declared-two-file-repository-
+  only-implementation; usable-after-this-adopted-package-is-freshly-reviewed-and-
+  normally-merged-to-develop-by-a-non-author; all-external-actions-and-VOC-105-
+  implementation-remain-held
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: >-
   One repository-only validator correction keeps immutable-F2 protection, the exact
@@ -136,30 +138,45 @@ requirements:
       remediation or dependency-ordered revert.
 
 owners:
-  decision: accountable-repository-change-owner-at-adoption
+  decision: /root
   package_preparation: /root/voc108_plan_builder
   implementation: different-builder-actor-after-adoption
-  foundation_policy_ci_specialist: different-non-author-exact-revision-actor
-  independent_cross_model_r3_verifier: different-non-author-exact-revision-actor
+  foundation_policy_ci_specialist: /root/voc107_specialist
+  independent_cross_model_r3_verifier: /root/voc109_cross_model
   merge: separate-non-author-actor
-  post_merge_observation: accountable-repository-change-owner-at-adoption
+  post_merge_observation: /root
 
-plan_review_history: []
+plan_review_history:
+  - candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    reviewer: /root/voc107_specialist
+    verdict: pass-foundation-policy-ci-specialist-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486186625
+    resolution: >-
+      Exact approved-candidate specialist review. It grants no implementation before
+      the adopted package merges and no external-action or VOC-105 authority.
+  - candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    reviewer: /root/voc109_cross_model
+    model_provenance: explicitly-configured-gpt-5.6-sol
+    verdict: pass-independent-cross-model-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486186901
+    resolution: >-
+      Exact approved-candidate independent R3 review. It grants no implementation
+      before the adopted package merges and no external-action or VOC-105 authority.
 
 approvals:
   foundation_policy_ci_plan_review:
-    status: pending-distinct-non-author-exact-candidate-review
-    candidate_sha: null
-    evidence: null
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486186625
   independent_cross_model_R3_plan_review:
-    status: pending-distinct-non-author-exact-candidate-review
-    candidate_sha: null
-    evidence: null
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486186901
   adoption_decision:
-    status: pending-after-required-plan-reviews
-    decision_id: null
-    candidate_sha: null
-    evidence: null
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-110-ADOPT-2026-09-01
+    candidate_sha: 2f72651d86f56a579368205d1e9b0e075c54c206
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/204#issuecomment-5486189007
 
 artifacts:
   readme: README.md
@@ -208,23 +225,23 @@ dependencies:
       rejection but does not authorize edits to the VOC-081 validator or test.
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: pending-independent-reviews-adoption-and-plan-merge
+  status: authorized-after-adopted-package-merges-to-develop
   target_branch: develop
   pull_request_count: 1
   task: VOC-110-T00
 
 required_r3_evidence:
-  deterministic_policy_regression: pending-after-adoption
-  foundation_policy_ci_specialist: pending-distinct-non-author-exact-candidate-review
-  independent_cross_model_exact_revision_verification: pending-distinct-non-author-exact-candidate-review
-  blocking_findings: must-be-resolved-before-merge
+  deterministic_policy_regression: pending-exact-implementation-SHA
+  foundation_policy_ci_specialist: pass-exact-approved-plan-candidate
+  independent_cross_model_exact_revision_verification: pass-exact-approved-plan-candidate
+  blocking_findings: resolved-at-approved-candidate-fresh-bookkeeping-review-pending
   ehr: not-triggered
 
 scope_boundary:
-  plan_package: allowed-now
-  voc081_validator_and_focused_test: allowed-only-after-adoption-and-plan-merge
+  plan_package: adopted-pending-fresh-bookkeeping-review-and-non-author-merge
+  voc081_validator_and_focused_test: authorized-only-after-adopted-plan-merges-to-develop
   package_json_or_documentation: prohibited
   F2_or_F3_evidence_files: prohibited
   historical_change_packages: prohibited
@@ -255,7 +272,7 @@ release:
   issue_closure: after-merged-exact-implementation-and-post-merge-validation
 
 post_merge_observation:
-  owner: accountable-repository-change-owner-at-adoption
+  owner: /root
   window_start: merged-VOC-110-implementation
   window_end: >-
     recorded-first-refreshed-real-VOC-105-candidate-focused-foundation-and-hosted-
