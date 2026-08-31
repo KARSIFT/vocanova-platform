@@ -4,7 +4,7 @@ id: VOC-107
 slug: local-stack-esbuild-workerd-deadlock
 title: Diagnose and deterministically remediate local-stack esbuild/workerd deadlock
 type: ci-required-local-stack-defect-remediation
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because the change repairs the fail-closed required local-stack CI control that
@@ -22,8 +22,20 @@ base_branch: develop
 base_sha: abf35db76d8182e82aebd4ee78773a09528153d6
 plan_branch: plan/voc-107-local-stack-deadlock
 target_branch: develop
-approval_status: not-approved
-implementation_authorized: false
+approved_candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+requirement_approval_status: >-
+  exact-independent-R3-plan-review-pass-and-accountable-VOC-107-adoption-recorded;
+  required-distinct-CI-local-runtime-specialist-and-fresh-bookkeeping-reviews-remain-
+  pending-before-plan-merge
+approval_status: adopted-for-declared-repository-only-implementation
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-independent-R3-PASS-and-operator-adoption-for-the-
+  declared-repository-only-single-PR-implementation-once-this-adopted-package-is-on-
+  develop; required-distinct-CI-local-runtime-specialist-and-fresh-bookkeeping-
+  reviews-plus-normal-non-author-plan-merge-remain-required; all-settings-secrets-
+  Cloudflare-dispatch-deployment-production-data-spending-DNS-launch-and-other-
+  external-actions-remain-prohibited
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: >-
   One diagnosis-to-remediation task and one implementation PR keep the observed
@@ -107,6 +119,38 @@ owners:
   independent_r3_verifier: different-non-author-exact-revision-actor
   merge: separate-non-author-actor
 
+plan_review_history:
+  - candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    verdict: pass-independent-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/195#issuecomment-5480457988
+    resolution_status: >-
+      exact-candidate-independent-review; grants-no-settings-secrets-Cloudflare-
+      dispatch-deployment-production-data-spending-DNS-launch-or-other-external-
+      action-authority-and-does-not-transfer-to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    verdict: adopted-for-declared-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/195#issuecomment-5482796846
+    resolution_status: >-
+      operator-adoption-authorizes-only-the-declared-repository-only-single-PR-
+      implementation-once-the-adopted-package-is-on-develop; required-distinct-CI-
+      local-runtime-specialist-and-fresh-bookkeeping-reviews-plus-normal-non-author-
+      plan-merge-remain-required; every-external-action-remains-prohibited
+
+approvals:
+  independent_R3_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/195#issuecomment-5480457988
+  ci_local_runtime_plan_review:
+    status: pending-distinct-non-author-exact-candidate-review-before-plan-merge
+    candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    evidence: pending
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-107-ADOPT-01
+    candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/195#issuecomment-5482796846
+
 artifacts:
   readme: README.md
   specification: specification.md
@@ -172,17 +216,19 @@ observed_evidence:
   root_cause: unknown
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: draft-plan-not-implementation-authority
+  status: >-
+    authorized-pending-adopted-plan-merge-and-required-distinct-CI-local-runtime-
+    specialist-review
   target_branch: develop
   pull_request_count: 1
   task: VOC-107-T00
 
 required_r3_evidence:
   deterministic_diagnosis_and_regression: pending-after-adoption
-  ci_local_runtime_specialist: pending-distinct-non-author-exact-candidate-review
-  independent_exact_revision_verification: pending-distinct-non-author-exact-candidate-review
+  ci_local_runtime_specialist: pending-distinct-non-author-exact-candidate-review-before-plan-merge
+  independent_exact_revision_verification: pass-exact-approved-candidate-plan-review
   blocking_findings: must-be-resolved-before-merge
   ehr: not-triggered
 
