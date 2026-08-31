@@ -1,0 +1,248 @@
+schema_version: 1
+
+id: VOC-106
+slug: release-promotion-sync
+title: Promote the current develop release and synchronize branch history
+type: repository-release-promotion-and-history-finalization
+status: adopted
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because the one repository-only outcome moves the protected canonical `main`
+  ref and then intentionally merge-commits its ancestry back into protected `develop`.
+  It carries the highest risk of the integrated release set and requires complete
+  decision, impact, contingency, deterministic, specialist, and exact-revision
+  independent-review evidence; no risk label supplies merge authority.
+canonical_path: specs/changes/VOC-106-release-promotion-sync
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/191
+requirement_approval_status: exact-plan-review-and-operator-adoption-recorded
+base_branch: develop
+base_sha: 03528a84988ebe664207c6a439e133070627c92a
+initial_release_base_branch: main
+initial_release_base_sha: 718ea9d9d5ff3476de9db9439414c2a6e07a6f4a
+initial_release_source_branch: develop
+initial_release_source_sha: 03528a84988ebe664207c6a439e133070627c92a
+initial_merge_base_sha: 718ea9d9d5ff3476de9db9439414c2a6e07a6f4a
+initial_divergence: 0-main-only-84-develop-only-commits
+initial_observation_status: >-
+  observed-for-plan-traceability-only-on-2026-08-31; not-an-implementation-freeze,
+  not-review-transferable, and superseded by the required fresh freeze after adoption
+plan_branch: plan/voc-106-release-promotion-sync
+target_branch: develop
+
+approved_candidate_sha: 54c671d801b518b87f969f16bbe495082fc2679e
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-plan-candidate-review-and-operator-adoption-only-for-the-
+  declared-repository-history-pr-sequence; effective-after-this-bookkeeping-revision-
+  exact-review-normal-plan-merge-and-fresh-per-pr-exact-evidence
+implementation_pull_request_count: 2
+multiple_pull_request_rationale: >-
+  The release promotion and the post-promotion synchronization are one coherent
+  branch-finalization outcome, but DOC-16 requires two separately reviewed protected-
+  branch PRs in a hard order: current `main` does not exist until the release merge,
+  and the synchronization head must be short-lived and based on current `develop`.
+  The release is rollback-safe before synchronization, whereas synchronization cannot
+  be prepared truthfully beforehand. This fixed protected-history/action boundary,
+  not component count or convenience, justifies the second PR despite the added
+  coordination, elapsed-time, repeated checks, exact-review, and evidence overhead.
+automatic_merge_allowed: true
+production_impact: none-repository-history-only
+rollback_required: true
+
+objective: >-
+  Make the then-current independently verified integrated `develop` history canonical
+  on `main` through a reviewed merge commit, then close the required repository-history
+  loop by merging that exact current `main` ancestry through a reviewed short-lived
+  synchronization branch into `develop`, without any settings or live-system action.
+
+requirements:
+  - id: VOC-106-D00
+    statement: >-
+      Issue #191 is the canonical intake for a new release package because closed PR
+      #190 correctly identified the source/base and validations but failed closed:
+      its release body could not truthfully name one canonical change-package path.
+      VOC-092/PR #154 is historical evidence for a different adopted release set and
+      cannot authorize this later promotion.
+  - id: VOC-106-D01
+    statement: >-
+      The initial plan observation is `origin/main`
+      718ea9d9d5ff3476de9db9439414c2a6e07a6f4a and `origin/develop`
+      03528a84988ebe664207c6a439e133070627c92a, with main as merge base and 0/84
+      main-only/develop-only commits. It is only traceability evidence. After this
+      plan is adopted and before release review, a new release preparer must fetch
+      both refs and freeze their exact SHAs, tree IDs, merge base, divergence, and
+      aggregate compare in the release PR.
+  - id: VOC-106-D02
+    statement: >-
+      A separately reviewed `develop` to `main` PR must use an identifiable merge
+      commit. Its exact frozen source/base, checks, reviewer verdicts, R4 decision,
+      impact, contingency, and rollback evidence must be recorded. Any movement of
+      either protected ref, PR head/base, merge base, compared tree, or required
+      governance/workflow evidence invalidates the freeze and every exact-SHA review;
+      the release must return to a fresh freeze and fresh evidence.
+  - id: VOC-106-D03
+    statement: >-
+      Release finalization is incomplete until a short-lived branch from the then-
+      current `develop` merges the then-current `main` ancestry and its separately
+      reviewed PR merge-commits into `develop`. Permanent `main` is never the PR
+      head. Its own fresh freeze and exact review are required; movement after the
+      release invalidates its synchronization evidence.
+  - id: VOC-106-D04
+    statement: >-
+      Before closure, read back the final refs and prove `main` is an ancestor of
+      `develop` and `develop` is zero commits behind `main`. Record the exact
+      release merge SHA, synchronization branch tip, synchronization merge SHA,
+      post-merge refs, validation/check results, distinct reviewer and merger actors,
+      and the recreation command for an automatically deleted short-lived head.
+  - id: VOC-106-D05
+    statement: >-
+      This package authorizes no repository-settings mutation, manual branch deletion,
+      Cloudflare or DNS action, workflow dispatch, deployment, production/data/secret
+      access, migration, traffic change, spending, or launch. If GitHub would delete
+      permanent `develop` as a release PR head, the release is blocked; this package
+      does not authorize a setting workaround. Existing automatic deletion may affect
+      only an already-merged short-lived synchronization head with recorded recovery.
+  - id: VOC-106-D06
+    statement: >-
+      Plan, promotion, and synchronization each require different non-author exact-
+      revision reviewers, resolution of every blocker, and a separately authorized
+      non-author merger. The planner or PR builder cannot approve or merge its own
+      revision. `automatic_merge_allowed: true` is read-only package policy metadata,
+      never an executor or a substitute for these gates.
+
+owners:
+  decision: accountable-repository-owner-operator-at-adoption
+  package_preparation: /root/voc106_plan_restart
+  release_preparation: different-builder-actor-after-adoption
+  synchronization_preparation: different-builder-actor-after-release
+  independent_r4_verification: different-non-author-exact-revision-reviewer-actor
+  git_history_specialist: different-non-author-exact-revision-reviewer-actor
+  merge: separate-authorized-non-author-merge-actor
+
+plan_review_history:
+  - candidate_sha: 54c671d801b518b87f969f16bbe495082fc2679e
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/192#issuecomment-5479247179
+    reviewer: /root/voc106_plan_review
+    resolution_status: >-
+      independent plan review bound to the adopted candidate; it grants no merge,
+      settings, Cloudflare, deployment, secret, data, spending, or launch authority
+
+approvals:
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 54c671d801b518b87f969f16bbe495082fc2679e
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/192#issuecomment-5479247179
+  adoption_decision:
+    status: adopted-for-declared-repository-only-history-pr-sequence
+    candidate_sha: 54c671d801b518b87f969f16bbe495082fc2679e
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/192#issuecomment-5480127406
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - protected-main-history
+  - protected-develop-history
+  - specs/changes/VOC-106-release-promotion-sync
+  - pull-request-evidence-and-github-history
+protected_areas:
+  - permanent-branch-history
+  - release-and-finalization-governance
+  - integrated-release-tree
+  - repository-settings-boundary
+  - cloudflare-and-production-holds
+
+implementation:
+  authorized: true
+  required: true
+  status: >-
+    authorized-pending-bookkeeping-revision-exact-review-normal-plan-merge-and-fresh-
+    exact-release-freeze
+  target_branches:
+    - main
+    - develop
+  pull_request_count: 2
+  tasks:
+    - VOC-106-T00
+    - VOC-106-T01
+
+action_specific_authority:
+  required: true
+  authorization_status: >-
+    adopted-for-the-declared-repository-history-sequence-but-pending-this-bookkeeping-
+    revision-exact-review-normal-plan-merge-and-per-pr-exact-evidence
+  actions:
+    - id: VOC-106-AUTH-RELEASE-00
+      action: reviewed-merge-commit-promotion-of-fresh-frozen-develop-into-main
+      accountable_role: separate-authorized-non-author-merge-actor
+      required_evidence: >-
+        adopted package, exact current base/source freeze, required checks, R4 and
+        specialist reviews bound to the exact release head, resolved blockers,
+        eligible readback where applicable, and proof that permanent develop remains
+        safe without settings mutation
+      completion_condition: >-
+        identifiable release merge commit exists and current main points to it with
+        no repository-settings or live-system action
+      expiry_condition: >-
+        any source/base/PR/tree/merge-base/governance evidence movement, failed check,
+        unresolved blocker, missing authority, or permanent-branch deletion risk
+    - id: VOC-106-AUTH-SYNC-00
+      action: reviewed-merge-commit-of-current-main-ancestry-into-develop-via-short-lived-head
+      accountable_role: separate-authorized-non-author-merge-actor
+      required_evidence: >-
+        post-release fresh refs, exact synchronization branch tip, required checks,
+        exact-SHA review, merge-commit method, post-merge ancestry/behind proof, and
+        recovery evidence if GitHub automatically deletes the short-lived head
+      completion_condition: >-
+        main is an ancestor of develop and develop is zero commits behind main
+      expiry_condition: >-
+        any post-release ref movement, head/base drift, failed check, unresolved
+        blocker, permanent-head use, or action beyond the short-lived source head
+
+external_effects:
+  product_behavior: prohibited
+  workflow_changes: prohibited
+  repository_settings: prohibited
+  manual_branch_deletion: prohibited
+  cloudflare: prohibited
+  dns: prohibited
+  deployment: prohibited
+  workflow_dispatch: prohibited
+  live_systems: prohibited
+  production_data: prohibited
+  secrets: prohibited
+  spending: prohibited
+  public_launch: prohibited
+
+release:
+  required: true
+  mode: separately-reviewed-repository-only-develop-to-main-promotion-then-history-sync
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-promotion-sync-final-readback-and-complete-evidence
+
+repository_adoption_status: >-
+  adopted-pending-bookkeeping-revision-exact-review-normal-plan-merge-and-applicable-
+  postmerge-checks
+adoption_pr: 192
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/192#issuecomment-5480127406
+
+ehr: not-triggered
+blocking_reasons:
+  - adoption-bookkeeping-revision-exact-review-pending
+  - normal-plan-merge-and-applicable-postmerge-checks-pending
+  - fresh-release-freeze-and-exact-review-pending
+  - separately-reviewed-promotion-pending
+  - fresh-synchronization-freeze-and-exact-review-pending
+  - post-synchronization-ancestry-and-zero-behind-proof-pending
