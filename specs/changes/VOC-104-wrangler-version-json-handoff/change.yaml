@@ -1,0 +1,245 @@
+schema_version: 1
+
+id: VOC-104
+slug: wrangler-version-json-handoff
+title: Complete Wrangler version JSON before resolving uploads
+type: cloudflare-staging-delivery-defect-remediation
+status: adopted
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the implementation changes a protected GitHub Actions staging-delivery
+  workflow and its fail-closed promotion boundary. The .github/workflows path has an
+  automated R3 floor; the focused foundation policy and test paths have an automated
+  R1 floor; the plan-only specs/changes paths also classify as R1.
+canonical_path: specs/changes/VOC-104-wrangler-version-json-handoff
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/186
+failing_run: https://github.com/KARSIFT/vocanova-platform/actions/runs/33372680216
+failing_job: https://github.com/KARSIFT/vocanova-platform/actions/runs/33372680216/job/99427604608
+failing_event_sha: 53be9f7aa7aada15faedd0588686b26a4c652ecb
+requirement_approval_status: >-
+  exact-cloudflare-ci-security-and-independent-R3-plan-review-pass-and-accountable-
+  VOC-104-ADOPT-01-approved
+base_branch: develop
+base_sha: 53be9f7aa7aada15faedd0588686b26a4c652ecb
+plan_branch: plan/voc-104-wrangler-version-json
+target_branch: develop
+approved_candidate_sha: cf6e097d01c16f84a12c9b709494a8cf72022b29
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-two-exact-candidate-PASS-reviews-and-VOC-104-ADOPT-01-for-the-
+  declared-repository-only-single-PR-implementation-once-this-adopted-package-is-
+  on-develop; fresh-exact-bookkeeping-review-eligibility-and-normal-non-author-
+  plan-merge-remain-required; all-external-actions-remain-prohibited
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Make each locked Wrangler version-list command finish writing a complete JSON
+  document before the separate exact-tag resolver starts, preventing the observed
+  post-upload pipe failure without weakening migration, promotion, smoke, rollback,
+  secret-isolation, or production controls.
+
+requirements:
+  - id: VOC-104-D00
+    statement: >-
+      Candidate cf6e097d01c16f84a12c9b709494a8cf72022b29 received exact
+      Cloudflare/CI-security and independent R3 PASS reviews plus VOC-104-ADOPT-01.
+      This bookkeeping revision records adoption and repository implementation
+      authority effective once the adopted package is on develop. It grants only the
+      declared three-file repository implementation and no settings, secret,
+      Cloudflare, workflow-dispatch, deployment, migration, traffic, DNS, spending,
+      production, learner-data, or launch action.
+  - id: VOC-104-D01
+    statement: >-
+      In the immutable-version upload step, each locked wrangler versions list
+      --json command must write stdout to its own securely created runner-local
+      temporary file and exit successfully before the corresponding resolver process
+      starts. The workflow must not directly pipe, use process substitution, or use
+      another concurrent producer-consumer handoff between versions list and
+      --resolve-version-tag. Temporary paths and JSON bodies must not be logged,
+      exported, persisted as artifacts, or committed, and cleanup must run on both
+      success and failure without masking the primary failure.
+  - id: VOC-104-D02
+    statement: >-
+      The existing tag sha-<12>-run-<run-id>-attempt-<attempt> remains exact. Each
+      resolver must read only its matching complete API or web JSON file, require
+      exactly one entry with that exact tag and a valid version UUID, and publish
+      only the validated UUID to the existing step output. No earlier unpromoted
+      version, ambiguous match, truncated JSON, command failure, or invalid UUID may
+      reach promotion.
+  - id: VOC-104-D03
+    statement: >-
+      Preserve the ordered boundary: exact current 100%-traffic rollback discovery,
+      compatible D1 migrations, both immutable uploads, complete file-backed version
+      listing and exact resolution, exact UUID promotion, bounded smoke, and
+      rollback after promotion failure. A list, capture, parse, or resolution failure
+      must stop before promotion and smoke, leave traffic unchanged, and not trigger
+      the promotion rollback because promotion did not begin. Once promotion begins,
+      the existing independent dual-Worker rollback guard remains unchanged.
+  - id: VOC-104-D04
+    statement: >-
+      Treat the observed staging state as a safe pre-promotion partial state: the
+      ordered D1 migration ledger was applied and immutable unpromoted API and web
+      versions exist, but traffic was not promoted. A later separately authorized
+      run must rediscover the current serving rollback targets, reapply only pending
+      entries through the same ordered compatible migration command, upload newly
+      run/attempt-tagged versions, and ignore earlier unpromoted versions through
+      exact tag matching. Do not record the existing unpromoted version UUIDs in any
+      repository file, issue, comment, artifact, test fixture, or plan evidence.
+  - id: VOC-104-D05
+    statement: >-
+      Extend inspectDeliveryWorkflow and its focused tests to require the complete
+      file-backed handoff and reject the current direct versions-list-to-resolver
+      pipe, missing or shared captures, mismatched resolver input, resolver-before-
+      list completion, missing cleanup, and any promotion path that can consume an
+      unresolved value. Add an isolated no-network child-process regression proving
+      that the resolver receives and parses a complete synthetic JSON document and
+      that truncated JSON or an ambiguous exact tag fails closed.
+  - id: VOC-104-D06
+    statement: >-
+      Preserve locked Wrangler/config selection, exact tag and UUID validation,
+      no-secret output, approval-history-first ordering, account and rollback
+      readback, compatible migration ordering, immutable uploads, exact promotion,
+      bounded smoke, independent dual-Worker rollback, environment-only secret
+      references, cost/resource gates, and VOC-080-HOLD-01/VOC-080-HOLD-02. Do not
+      edit manifests, runbooks, settings truth, application code, resolver semantics,
+      dependency versions, or historical change packages.
+  - id: VOC-104-D07
+    statement: >-
+      Use one minimum-sufficient task and one coherent implementation pull request.
+      Plan and implementation each require applicable deterministic checks, fresh
+      exact-revision Cloudflare/CI-security specialist review, independent R3
+      verification by distinct non-author actors, and merge by a separate non-author
+      actor. No risk label creates standing founder or technical-steward approval.
+
+owners:
+  decision: accountable-repository-change-owner-at-adoption
+  package_preparation: /root/voc104_plan_builder
+  implementation: different-builder-actor-after-adoption
+  cloudflare_ci_security_specialist: different-non-author-exact-revision-actor
+  independent_r3_verifier: different-non-author-exact-revision-actor
+  merge: separate-non-author-actor
+
+plan_review_history:
+  - candidate_sha: cf6e097d01c16f84a12c9b709494a8cf72022b29
+    verdict: pass-cloudflare-ci-security-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/187#issuecomment-5476063252
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-Cloudflare-dispatch-
+      deployment-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: cf6e097d01c16f84a12c9b709494a8cf72022b29
+    verdict: pass-independent-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/187#issuecomment-5476046705
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-Cloudflare-dispatch-
+      deployment-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: cf6e097d01c16f84a12c9b709494a8cf72022b29
+    verdict: adopted-for-declared-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/187#issuecomment-5476151637
+    resolution_status: >-
+      VOC-104-ADOPT-01-authorizes-only-the-declared-three-file-repository-
+      implementation-once-the-adopted-package-is-on-develop; every-external-action-
+      remains-prohibited
+
+approvals:
+  cloudflare_ci_security_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: cf6e097d01c16f84a12c9b709494a8cf72022b29
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/187#issuecomment-5476063252
+  independent_R3_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: cf6e097d01c16f84a12c9b709494a8cf72022b29
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/187#issuecomment-5476046705
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-104-ADOPT-01
+    candidate_sha: cf6e097d01c16f84a12c9b709494a8cf72022b29
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/187#issuecomment-5476151637
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - .github/workflows/ci.yml
+  - scripts/foundation/cloudflare-delivery-policy.mjs
+  - scripts/foundation/cloudflare-delivery-policy.test.mjs
+
+protected_areas:
+  - ci-cd-staging-delivery
+  - cloudflare-worker-version-resolution
+  - d1-migration-and-promotion-ordering
+  - staging-smoke-and-rollback
+  - secret-isolation
+  - production-holds
+
+observed_evidence:
+  failing_run:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33372680216
+    job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33372680216/job/99427604608
+    event_sha: 53be9f7aa7aada15faedd0588686b26a4c652ecb
+    run_attempt: 1
+    operation: staging-deploy
+    environment_receipt: passed
+    ci_required: passed
+    delivery_gate: passed
+    ordered_staging_d1_migrations: completed
+    immutable_api_upload: completed-unpromoted
+    immutable_web_upload: completed-unpromoted
+    version_resolution: failed-with-EAGAIN-and-EPIPE
+    parser_diagnostic: absent-from-sanitized-log
+    promotion: skipped
+    smoke: skipped
+    rollback_after_promotion: skipped-because-promotion-never-began
+    production: skipped
+    protected_version_ids: exist-but-deliberately-not-recorded
+
+implementation:
+  authorized: true
+  required: true
+  status: authorized-pending-adopted-plan-merge
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-104-T00
+
+required_r3_evidence:
+  deterministic_checks: pass-approved-candidate-evidence-implementation-pending
+  cloudflare_ci_security_specialist: pass-approved-candidate-fresh-bookkeeping-review-pending
+  independent_exact_revision_verification: pass-approved-candidate-fresh-bookkeeping-review-pending
+  blocking_findings: zero-on-approved-candidate-fresh-bookkeeping-review-pending
+  ehr: not-triggered
+
+external_effects:
+  github_settings_and_secrets: prohibited
+  cloudflare: prohibited
+  workflow_dispatch: prohibited
+  staging_deployment: prohibited
+  d1_migration: prohibited
+  traffic_and_dns: prohibited
+  production: prohibited
+  spending_and_billing: prohibited
+  learner_data: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-defect-remediation-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-implementation-merge-and-separately-authorized-staging-outcome
+
+ehr: not-triggered
