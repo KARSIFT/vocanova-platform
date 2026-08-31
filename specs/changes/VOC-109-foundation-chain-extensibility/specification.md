@@ -50,17 +50,25 @@ not satisfy this requirement and must not create a second execution path.
 ### VOC-109-D02 — Define one narrow extension slot
 
 The only permitted additions are unique exact segments of the form
-`pnpm run ci:<lowercase-hyphen-name>` between `pnpm run ci:settings-truth` and the
-terminal foundation test glob. The referenced name and script must:
+`pnpm run ci:<lowercase-alphanumeric-single-hyphen-name>` between
+`pnpm run ci:settings-truth` and the terminal foundation test glob. The referenced
+name and script must:
 
 - match `ci:` followed only by lowercase alphanumeric hyphen-separated words;
 - exist in the same `package.json` scripts map;
 - contain exactly one direct
-  `node scripts/foundation/<lowercase-hyphen-policy-file>.mjs` command with no
-  arguments, alias, compound command, comment, or metacharacter;
+  `node scripts/foundation/<lowercase-alphanumeric-single-hyphen-name>-policy.mjs`
+  command with no arguments, alias, compound command, comment, or metacharacter;
 - be distinct by both package-script name and direct Node entry point; and
-- not duplicate, invoke, or mention a baseline script, the canonical F2 package
-  command, or the F2 validator entry point.
+- not duplicate, invoke, or mention any of the eight baseline package-script names or
+  entry points, including the canonical F2 package command and validator entry point.
+
+Both the extension name after `ci:` and the target basename before `-policy.mjs` use
+one or more lowercase alphanumeric tokens separated by exactly one hyphen. Uppercase,
+underscore, empty names/tokens, leading or trailing hyphens, and doubled hyphens fail.
+The target must remain directly under `scripts/foundation` and end exactly
+`-policy.mjs`; a nested/outside path, `.js` or other suffix, missing `-policy`, or
+otherwise noncanonical filename fails.
 
 Zero extensions remains valid for the current repository. One synthetic declared
 `ci:f3-evidence` segment in the slot must validate, proving the exact adopted VOC-105
@@ -76,6 +84,12 @@ substitution, backgrounding, prefixes/suffixes, extension-script arguments or co
 commands, or any noncanonical segment fail with a concrete diagnostic. Changing any
 of the exact eight prefix positions, drifting the terminal segment, or moving an
 extension outside its one slot also fails.
+
+The focused matrix must mutate one invariant at a time. It independently duplicates
+each original prefix segment—not only F2—and separately exercises every malformed
+extension-name class, wrong target directory/suffix/filename class, and reuse of each
+non-F2 baseline package-script name or entry point. A failure caused by one grammar
+check cannot stand in as evidence for an untested collision or uniqueness invariant.
 
 ### VOC-109-D04 — Keep implementation scope exact
 

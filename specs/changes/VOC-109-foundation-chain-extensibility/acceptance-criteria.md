@@ -36,10 +36,11 @@ foundation-policy entry point. The adopted VOC-105 shape with one direct declare
 - Evidence: `VOC-109-EV-02`
 - Result: pending exact implementation evidence
 
-One-at-a-time fixtures for a missing or duplicate F2 segment, drifted F2 entry point,
-F2 alias, comment/echo substitution, `||` fallback, and prefix/suffix or shell-control
-injection all fail. A textual or transitive reference never satisfies or duplicates
-the required direct F2 execution.
+One-at-a-time fixtures omit and duplicate each of the eight original prefix segments,
+including all seven non-F2 segments, and reject a drifted F2 entry point, F2 alias,
+comment/echo substitution, `||` fallback, and prefix/suffix or shell-control
+injection. A textual or transitive reference never satisfies or duplicates the
+required direct F2 execution.
 
 ## VOC-109-AC-03 — Extension and order errors fail closed
 
@@ -50,11 +51,14 @@ the required direct F2 execution.
 - Result: pending exact implementation evidence
 
 Missing, altered, or reordered prefix segments; a drifted/non-terminal foundation test
-glob; unknown or duplicate extension names or entry points; aliased, compound,
-commented, argument-bearing, or metacharacter-bearing extension definitions;
+glob; unknown or duplicate extension names or entry points; uppercase, underscore,
+empty, leading/trailing-hyphen, and doubled-hyphen name forms; targets outside
+`scripts/foundation`, with a wrong suffix, missing `-policy`, or noncanonical
+filename; reuse of each non-F2 baseline package-script name or entry point; aliased,
+compound, commented, argument-bearing, or metacharacter-bearing definitions;
 extensions before or after the sole slot; malformed JSON; empty segments; and
-prohibited shell controls each fail with an invariant-specific diagnostic. The
-validator performs no shell or network execution.
+prohibited shell controls each fail one invariant at a time with a specific
+diagnostic. The validator performs no shell or network execution.
 
 ## VOC-109-AC-04 — Exact revision is independently verified and reversible
 

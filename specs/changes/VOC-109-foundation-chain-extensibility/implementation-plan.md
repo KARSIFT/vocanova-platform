@@ -8,11 +8,11 @@ branch/worktree, one minimum-sufficient task, and one coherent implementation PR
 
 ## Exact implementation path inventory
 
-| Path                                                           | Classification               | Planned reconciliation                                                                                                                                                                                                                                                                 |
-| -------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scripts/foundation/voc081-f2-evidence-policy.mjs`             | present-needs-reconciliation | Replace frozen whole-chain equality with an exact eight-segment prefix, exact terminal test, and one slot for unique declared lowercase-hyphen `ci:*` scripts whose values are distinct single direct Node foundation-policy entry points; preserve all other F2 record/surface logic. |
-| `scripts/foundation/voc081-f2-evidence-policy.test.mjs`        | present-needs-reconciliation | Add positive zero/one/two-extension fixtures and independent omission, duplication/name/entrypoint collision, bypass, alias, compound/comment/metacharacter, unknown-extension, placement, terminal-drift, and prefix-order negatives.                                                 |
-| `package.json`, workflows, docs, evidence, and package history | present-compatible-protected | Do not edit. VOC-105 owns its later `package.json` segment after this prerequisite is merged and validated.                                                                                                                                                                            |
+| Path                                                           | Classification               | Planned reconciliation                                                                                                                                                                                                                                                                                    |
+| -------------------------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/foundation/voc081-f2-evidence-policy.mjs`             | present-needs-reconciliation | Replace frozen whole-chain equality with an exact eight-segment prefix, exact terminal test, and one slot for unique declared canonical lowercase-single-hyphen `ci:*` scripts whose values are distinct single direct Node foundation-policy entry points; preserve all other F2 record/surface logic.   |
+| `scripts/foundation/voc081-f2-evidence-policy.test.mjs`        | present-needs-reconciliation | Add positive zero/one/two-extension fixtures and one-at-a-time negatives for every prefix omission/duplication, malformed name and target class, every baseline name/entrypoint collision, bypass, alias, compound/comment/metacharacter, unknown extension, placement, terminal drift, and prefix order. |
+| `package.json`, workflows, docs, evidence, and package history | present-compatible-protected | Do not edit. VOC-105 owns its later `package.json` segment after this prerequisite is merged and validated.                                                                                                                                                                                               |
 
 The implementation diff is exactly the first two files. The plan package itself is
 the only content added by the plan PR.
@@ -27,16 +27,22 @@ the only content added by the plan PR.
 3. Parse only exact `&&` segments without execution. Require every prefix command at
    its current index exactly once, the exact terminal command last, and the exact
    `ci:f2-evidence` entry point plus one direct F2 segment.
-4. Permit unique declared non-baseline `ci:<lowercase-hyphen-name>` package-script
-   segments only inside the post-settings/pre-test slot. Require each value to be one
-   direct argument-free
-   `node scripts/foundation/<lowercase-hyphen-policy-file>.mjs` command and each entry
-   point to be distinct. Reject missing declarations, duplicate names or entry points,
-   aliases or references to baseline/F2 scripts, compound/commented definitions, and
-   every noncanonical or shell-control segment.
+4. Permit unique declared non-baseline
+   `ci:<lowercase-alphanumeric-single-hyphen-name>` package-script segments only
+   inside the post-settings/pre-test slot. Require each value to be one direct
+   argument-free
+   `node scripts/foundation/<lowercase-alphanumeric-single-hyphen-name>-policy.mjs`
+   command and each entry point to be distinct. Reject uppercase, underscore, empty,
+   leading/trailing/doubled-hyphen names; wrong-directory, wrong-suffix,
+   missing-policy, or noncanonical targets; missing declarations; duplicate names or
+   entry points; aliases or references to every baseline/F2 script name and entry
+   point; compound/commented definitions; and every noncanonical or shell-control
+   segment.
 5. Rework focused fixtures so the current chain and synthetic VOC-105 extension pass.
-   Mutate one invariant at a time for omission, duplicate F2/extension, `||`, echo,
-   comment, alias, compound extension, duplicate entry point, exit/prefix/suffix,
+   Mutate one invariant at a time for omission and duplication of each of the eight
+   prefix segments; every malformed-name class; wrong-directory/suffix/noncanonical
+   targets; reuse of each non-F2 baseline name/entry point; duplicate extension name/
+   entry point; `||`, echo, comment, alias, compound extension, exit/prefix/suffix,
    semicolon/newline/control syntax, unknown script, extension misplacement, exact
    prefix drift/reordering, and terminal test drift.
 6. Run focused, foundation, workspace, governance, risk, path, whitespace, and rollback

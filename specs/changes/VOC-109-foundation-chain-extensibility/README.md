@@ -8,9 +8,9 @@ comparison rejects the exact later evidence command required by adopted VOC-105.
 
 VOC-109 defines the minimum prerequisite correction: keep the original eight-command
 foundation prefix and terminal test exact, keep the canonical F2 command direct and
-non-bypassable, and permit unique lowercase-hyphen `ci:*` checks only in one explicit
-extension slot when each maps to a distinct single direct Node foundation-policy
-entry point.
+non-bypassable, and permit unique canonical lowercase-single-hyphen `ci:*` checks only
+in one explicit extension slot when each maps to a distinct single direct Node
+foundation-policy entry point.
 
 This package changes no package command, workflow, F2 acceptance fact, historical
 VOC-081 package, or adopted VOC-105 scope. It authorizes no implementation until exact

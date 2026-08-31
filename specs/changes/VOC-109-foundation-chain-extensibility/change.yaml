@@ -66,24 +66,31 @@ requirements:
       Permit zero or more unique later governed extension segments only after
       `pnpm run ci:settings-truth` and before
       `node --test scripts/foundation/*.test.mjs`. Each extension segment must be
-      exactly `pnpm run ci:<lowercase-hyphen-name>`, and its declared package script
-      must be exactly one direct
-      `node scripts/foundation/<lowercase-hyphen-policy-file>.mjs` command with no
-      argument, alias, compound command, comment, or metacharacter.
+      exactly `pnpm run ci:<lowercase-alphanumeric-single-hyphen-name>`, and its
+      declared package script must be exactly one direct
+      `node scripts/foundation/<lowercase-alphanumeric-single-hyphen-name>-policy.mjs`
+      command with no argument, alias, compound command, comment, or metacharacter.
+      Names and target basenames must reject uppercase, underscore, empty token,
+      leading/trailing hyphen, and doubled-hyphen forms; targets outside
+      scripts/foundation, without the exact -policy.mjs suffix, or otherwise
+      noncanonical must fail.
       Extension names and entry points must be distinct and must not duplicate or
-      alias a baseline or canonical F2 command. The current unextended package.json
-      must continue to pass, and a synthetic declared ci:f3-evidence segment in that
-      slot must pass.
+      alias any of the eight baseline package-script names or entry points, including
+      the canonical F2 command. The current unextended package.json must continue to
+      pass, and a synthetic declared ci:f3-evidence segment in that slot must pass.
   - id: VOC-109-D03
     statement: >-
-      Fail closed on malformed package JSON; missing or duplicate original/F2
-      segments; duplicate/unknown extension names or duplicate entry points; extension
-      definitions that are aliases, compound commands, comments, or contain arguments
-      or metacharacters; extension placement outside the declared slot; any original-
-      segment reordering; `||`, semicolon, newline, comment, echo, exit,
-      prefix/suffix, or shell-control bypass; and direct or package-script aliasing of
-      the F2 validator. Diagnostics must identify the violated invariant without
-      evaluating or executing a shell command.
+      Fail closed with one-at-a-time evidence for omission and duplication of every
+      original prefix segment, including each of the seven non-F2 segments; malformed
+      package JSON; duplicate/unknown or malformed extension names; duplicate,
+      noncanonical, wrong-directory, or wrong-suffix entry points; extension reuse of
+      any non-F2 baseline package-script name or entry point; definitions that are
+      aliases, compound commands, comments, or contain arguments or metacharacters;
+      extension placement outside the declared slot; any original-segment reordering;
+      `||`, semicolon, newline, comment, echo, exit, prefix/suffix, or shell-control
+      bypass; and direct or package-script aliasing of the F2 validator. Diagnostics
+      must identify the violated invariant without evaluating or executing a shell
+      command.
   - id: VOC-109-D04
     statement: >-
       Implement one minimum-sufficient repository-only PR changing exactly

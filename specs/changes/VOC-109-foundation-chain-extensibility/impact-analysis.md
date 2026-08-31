@@ -18,9 +18,10 @@ not change.
 The validator reads repository JSON and strings only. It must not invoke a shell,
 resolve credentials, access the network, or inspect environment values. The exact
 eight-segment prefix, terminal test, single-direct-Node extension grammar, unique
-entry points, declaration checks, alias rejection, and shell-control negatives prevent
-an extension label from disguising F2 omission or bypass. No secret or personal data
-is used.
+entry points, exhaustive baseline-name/entrypoint collision checks, canonical target
+path/suffix, declaration checks, alias rejection, and one-at-a-time shell-control and
+prefix-duplication negatives prevent an extension label from disguising F2 omission
+or bypass. No secret or personal data is used.
 
 ## Product, data, migration, analytics, and accessibility
 
@@ -42,8 +43,8 @@ make `ci:foundation` invalid.
 
 - `VOC-109-R00`: an overly broad extension parser accepts a bypass or arbitrary shell
   segment. Mitigation: one exact slot, exact eight-segment prefix and terminal,
-  lowercase-hyphen names, single-direct-Node entry points, and independent negative
-  fixtures.
+  canonical lowercase-single-hyphen names/targets, single-direct-Node entry points,
+  and exhaustive independent negative fixtures.
 - `VOC-109-R01`: an alias runs F2 zero or multiple times while the visible segment
   appears valid. Mitigation: direct exact F2 segment, exact entry point, alias scan,
   and one-at-a-time alias/duplication negatives.
