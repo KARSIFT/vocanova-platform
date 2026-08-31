@@ -8,7 +8,7 @@
 - Evidence: `VOC-109-EV-00` through `VOC-109-EV-05`
 - Implementation pull-request mapping: one coherent implementation PR
 - Risk: R3
-- Status: pending review and adoption
+- Status: adopted; repository implementation authorized after normal plan merge
 
 Change only the active VOC-081 validator and focused test so the exact original
 eight-command prefix and terminal test remain unique, direct, ordered, and non-

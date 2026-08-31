@@ -4,7 +4,7 @@ id: VOC-109
 slug: foundation-chain-extensibility
 title: Restore governed foundation-chain extensibility
 type: foundation-policy-defect-remediation
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because the change modifies a fail-closed foundation validator that protects
@@ -20,13 +20,14 @@ base_branch: develop
 base_sha: 669e419385dc8a4b8cfb007238dbaac017139238
 plan_branch: plan/voc-109-foundation-chain-extensibility
 target_branch: develop
-approval_status: not-approved
-implementation_authorized: false
+approved_candidate_sha: ad5902364b0b9f084d448120c06dae4761a32e2c
+approval_status: adopted
+implementation_authorized: true
 implementation_authority_status: >-
-  not-authorized-until-this-exact-package-receives-distinct-foundation-policy-
-  specialist-review, independent-cross-model-R3-review, accountable-adoption, and-
-  normal-non-author-plan-merge; issue-198-and-adopted-VOC-105-do-not-authorize-
-  validator-edits-by-themselves
+  authorized-by-exact-candidate-specialist-and-cross-model-R3-reviews-and-
+  VOC-109-ADOPT-2026-09-01-for-the-declared-two-file-repository-only-implementation;
+  usable-after-this-adopted-package-is-freshly-reviewed-and-normally-merged-to-develop-
+  by-a-non-author; all-external-actions-and-VOC-105-implementation-remain-held
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: >-
   One repository-only validator correction keeps the parser/invariant change,
@@ -130,30 +131,45 @@ requirements:
       separately governed remediation or dependency-ordered revert.
 
 owners:
-  decision: accountable-repository-change-owner-at-adoption
-  package_preparation: /root/voc105_builder
+  decision: /root
+  package_preparation: initial-/root/voc105_builder-and-remediation-/root/voc108_plan_builder
   implementation: different-builder-actor-after-adoption
-  foundation_policy_ci_specialist: different-non-author-exact-revision-actor
-  independent_cross_model_r3_verifier: different-non-author-exact-revision-actor
+  foundation_policy_ci_specialist: /root/voc107_specialist
+  independent_cross_model_r3_verifier: /root/voc109_cross_model
   merge: separate-non-author-actor
-  post_merge_observation: accountable-repository-change-owner-at-adoption
+  post_merge_observation: /root
 
-plan_review_history: []
+plan_review_history:
+  - candidate_sha: ad5902364b0b9f084d448120c06dae4761a32e2c
+    reviewer: /root/voc107_specialist
+    verdict: pass-foundation-policy-ci-specialist-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/199#issuecomment-5485311021
+    resolution: >-
+      Exact approved-candidate specialist review. It grants no implementation before
+      the adopted package merges and no external-action or VOC-105 authority.
+  - candidate_sha: ad5902364b0b9f084d448120c06dae4761a32e2c
+    reviewer: /root/voc109_cross_model
+    model_provenance: explicitly-configured-gpt-5.6-sol
+    verdict: pass-independent-cross-model-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/199#issuecomment-5485311254
+    resolution: >-
+      Exact approved-candidate independent R3 review. It grants no implementation
+      before the adopted package merges and no external-action or VOC-105 authority.
 
 approvals:
   foundation_policy_ci_plan_review:
-    status: pending-distinct-non-author-exact-candidate-review
-    candidate_sha: null
-    evidence: null
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: ad5902364b0b9f084d448120c06dae4761a32e2c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/199#issuecomment-5485311021
   independent_cross_model_R3_plan_review:
-    status: pending-distinct-non-author-exact-candidate-review
-    candidate_sha: null
-    evidence: null
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: ad5902364b0b9f084d448120c06dae4761a32e2c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/199#issuecomment-5485311254
   adoption_decision:
-    status: pending-after-required-plan-reviews
-    decision_id: null
-    candidate_sha: null
-    evidence: null
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-109-ADOPT-2026-09-01
+    candidate_sha: ad5902364b0b9f084d448120c06dae4761a32e2c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/199#issuecomment-5485315578
 
 artifacts:
   readme: README.md
@@ -197,23 +213,23 @@ dependencies:
       before a different builder resumes VOC-105 unchanged.
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: pending-independent-reviews-adoption-and-plan-merge
+  status: authorized-after-adopted-package-merges-to-develop
   target_branch: develop
   pull_request_count: 1
   task: VOC-109-T00
 
 required_r3_evidence:
-  deterministic_policy_regression: pending-after-adoption
-  foundation_policy_ci_specialist: pending-distinct-non-author-exact-candidate-review
-  independent_cross_model_exact_revision_verification: pending-distinct-non-author-exact-candidate-review
-  blocking_findings: must-be-resolved-before-merge
+  deterministic_policy_regression: pending-exact-implementation-SHA
+  foundation_policy_ci_specialist: pass-exact-approved-plan-candidate
+  independent_cross_model_exact_revision_verification: pass-exact-approved-plan-candidate
+  blocking_findings: resolved-at-approved-candidate-fresh-bookkeeping-review-pending
   ehr: not-triggered
 
 scope_boundary:
-  plan_package: allowed-now
-  voc081_validator_and_focused_test: allowed-only-after-adoption
+  plan_package: adopted-pending-fresh-bookkeeping-review-and-non-author-merge
+  voc081_validator_and_focused_test: authorized-only-after-adopted-plan-merges-to-develop
   package_json_or_workflows: prohibited
   historical_change_packages_or_milestone_evidence: prohibited
   github_settings_or_secrets: prohibited
@@ -243,7 +259,7 @@ release:
   issue_closure: after-merged-exact-implementation-and-post-merge-validation
 
 post_merge_observation:
-  owner: accountable-repository-change-owner-at-adoption
+  owner: /root
   window_start: merged-VOC-109-implementation
   window_end: >-
     recorded-first-real-VOC-105-integration-focused-foundation-and-hosted-check-results-
