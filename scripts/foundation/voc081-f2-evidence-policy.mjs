@@ -39,7 +39,7 @@ const EXPECTED_POST_MERGE_RUNS = {
   security: 32634654343,
 };
 
-const EXPECTED_FOUNDATION_CHAIN = [
+const EXPECTED_FOUNDATION_PREFIX = [
   "pnpm run validate:workspace",
   "pnpm run format:check",
   "pnpm run build:packages",
@@ -48,8 +48,43 @@ const EXPECTED_FOUNDATION_CHAIN = [
   "pnpm run ci:f2-evidence",
   "pnpm run ci:closure-consistency",
   "pnpm run ci:settings-truth",
-  "node --test scripts/foundation/*.test.mjs",
 ];
+
+const EXPECTED_FOUNDATION_TEST = "node --test scripts/foundation/*.test.mjs";
+const F2_SCRIPT_NAME = "ci:f2-evidence";
+const F2_ENTRY_POINT = "node scripts/foundation/voc081-f2-evidence-policy.mjs";
+const EXPECTED_BASELINE_SCRIPTS = new Map([
+  ["validate:workspace", "node scripts/foundation/validate-workspace.mjs"],
+  [
+    "format:check",
+    "prettier --check package.json pnpm-workspace.yaml eslint.config.js apps/web apps/api-worker packages scripts/foundation infrastructure docs/development.md",
+  ],
+  [
+    "build:packages",
+    "tsc -b packages/api-client packages/design-tokens --pretty false",
+  ],
+  ["ci:retirement", "node scripts/foundation/server-retirement-policy.mjs"],
+  [
+    "ci:final-evidence",
+    "node scripts/foundation/voc080-final-evidence-policy.mjs",
+  ],
+  [F2_SCRIPT_NAME, F2_ENTRY_POINT],
+  [
+    "ci:closure-consistency",
+    "node scripts/foundation/voc084-closure-consistency-policy.mjs",
+  ],
+  [
+    "ci:settings-truth",
+    "node scripts/foundation/voc085-settings-truthfulness-policy.mjs",
+  ],
+]);
+const CANONICAL_IDENTIFIER = "[a-z0-9]+(?:-[a-z0-9]+)*";
+const EXTENSION_SEGMENT = new RegExp(`^pnpm run ci:(${CANONICAL_IDENTIFIER})$`);
+const EXTENSION_ENTRY_POINT = new RegExp(
+  `^node scripts/foundation/(${CANONICAL_IDENTIFIER})-policy\\.mjs$`,
+);
+const PROHIBITED_FOUNDATION_SYNTAX =
+  /\|\||[;\n\r<>#`]|\$\(|(?:^|[^&])&(?:[^&]|$)/;
 
 export const PROHIBITED_ACTIVE_TEXT_CLAIMS = [
   {
@@ -485,44 +520,191 @@ export function inspectF2Document(source, record) {
 }
 
 export function inspectF2Scripts(source) {
-  let scripts;
+  let packageDocument;
   try {
-    scripts = JSON.parse(source).scripts;
+    packageDocument = JSON.parse(source);
   } catch {
     return ["package.json: cannot parse F2 evidence script contract"];
   }
+  const scripts = packageDocument?.scripts;
   const errors = [];
-  if (
-    scripts?.["ci:f2-evidence"] !==
-    "node scripts/foundation/voc081-f2-evidence-policy.mjs"
-  ) {
+  if (!scripts || typeof scripts !== "object" || Array.isArray(scripts)) {
+    return ["package.json: scripts must be an object"];
+  }
+  for (const [name, command] of Object.entries(scripts)) {
+    if (typeof command !== "string")
+      errors.push(`package.json: script ${name} must be a string`);
+  }
+  if (scripts[F2_SCRIPT_NAME] !== F2_ENTRY_POINT) {
     errors.push(
       "package.json: ci:f2-evidence entry point is missing or drifted",
     );
   }
   const foundationCommand = scripts?.["ci:foundation"];
-  const targetCommand = "pnpm run ci:f2-evidence";
   if (typeof foundationCommand !== "string") {
     errors.push("package.json: ci:foundation must be a command chain");
-  } else {
-    const segments = foundationCommand
-      .split("&&")
-      .map((segment) => segment.trim());
-    const targetCount = segments.filter(
-      (segment) => segment === targetCommand,
-    ).length;
-    if (foundationCommand.includes("||"))
+    return errors;
+  }
+
+  if (foundationCommand.includes("||")) {
+    errors.push(
+      "package.json: ci:foundation must not bypass F2 evidence with || fallback",
+    );
+  }
+  if (PROHIBITED_FOUNDATION_SYNTAX.test(foundationCommand)) {
+    errors.push(
+      "package.json: ci:foundation contains prohibited shell-control syntax",
+    );
+  }
+
+  const segments = foundationCommand
+    .split("&&")
+    .map((segment) => segment.trim());
+  if (segments.some((segment) => segment.length === 0)) {
+    errors.push(
+      "package.json: ci:foundation contains an empty command segment",
+    );
+  }
+
+  for (const [index, required] of EXPECTED_FOUNDATION_PREFIX.entries()) {
+    if (segments[index] !== required) {
       errors.push(
-        "package.json: ci:foundation must not bypass F2 evidence with || fallback",
+        `package.json: ci:foundation prefix position ${index + 1} must be exactly ${required}`,
       );
-    if (JSON.stringify(segments) !== JSON.stringify(EXPECTED_FOUNDATION_CHAIN))
+    }
+    const count = segments.filter((segment) => segment === required).length;
+    if (count !== 1) {
       errors.push(
-        "package.json: ci:foundation must exactly match the canonical ordered command chain",
+        `package.json: ci:foundation prefix segment ${required} must occur exactly once`,
       );
-    if (targetCount !== 1)
+    }
+  }
+  if (segments.at(-1) !== EXPECTED_FOUNDATION_TEST) {
+    errors.push(
+      "package.json: foundation test command must be exact and terminal",
+    );
+  }
+  if (
+    segments.filter((segment) => segment === EXPECTED_FOUNDATION_TEST)
+      .length !== 1
+  ) {
+    errors.push(
+      "package.json: foundation test command must occur exactly once",
+    );
+  }
+
+  const f2Segment = "pnpm run ci:f2-evidence";
+  if (segments.filter((segment) => segment === f2Segment).length !== 1) {
+    errors.push(
+      "package.json: ci:foundation must contain exactly one executable F2 evidence command segment",
+    );
+  }
+
+  const baselineNames = new Set(EXPECTED_BASELINE_SCRIPTS.keys());
+  const baselineEntryPoints = new Map(
+    [...EXPECTED_BASELINE_SCRIPTS].map(([name, definition]) => [
+      definition,
+      name,
+    ]),
+  );
+  const extensionSegments = segments.slice(
+    EXPECTED_FOUNDATION_PREFIX.length,
+    Math.max(EXPECTED_FOUNDATION_PREFIX.length, segments.length - 1),
+  );
+  const extensionNames = new Set();
+  const extensionEntryPoints = new Set();
+
+  for (const segment of extensionSegments) {
+    const baselineSegmentName = [...baselineNames].find(
+      (name) => segment === `pnpm run ${name}`,
+    );
+    if (baselineSegmentName) {
       errors.push(
-        "package.json: ci:foundation must contain exactly one executable F2 evidence command segment",
+        `package.json: extension name collides with baseline script ${baselineSegmentName}`,
       );
+    }
+    const broadMatch = /^pnpm run ci:(.*)$/.exec(segment);
+    if (!broadMatch) {
+      errors.push(
+        `package.json: extension segment is not a direct declared ci:* command: ${segment}`,
+      );
+      continue;
+    }
+    const fullName = `ci:${broadMatch[1]}`;
+    if (baselineNames.has(fullName)) {
+      errors.push(
+        `package.json: extension name collides with baseline script ${fullName}`,
+      );
+    }
+    const canonicalMatch = EXTENSION_SEGMENT.exec(segment);
+    if (!canonicalMatch) {
+      errors.push(
+        `package.json: extension name must use lowercase alphanumeric single-hyphen tokens: ${fullName}`,
+      );
+      continue;
+    }
+    if (extensionNames.has(fullName)) {
+      errors.push(`package.json: duplicate extension name ${fullName}`);
+    }
+    extensionNames.add(fullName);
+
+    if (!Object.hasOwn(scripts, fullName)) {
+      errors.push(`package.json: extension ${fullName} is not declared`);
+      continue;
+    }
+    const definition = scripts[fullName];
+    if (typeof definition !== "string") continue;
+    const collidedBaseline = baselineEntryPoints.get(definition);
+    if (collidedBaseline) {
+      errors.push(
+        `package.json: extension ${fullName} entry point collides with baseline script ${collidedBaseline}`,
+      );
+    }
+    for (const baselineName of baselineNames) {
+      if (definition.includes(`pnpm run ${baselineName}`)) {
+        errors.push(
+          `package.json: extension ${fullName} must not invoke or mention baseline script ${baselineName}`,
+        );
+      }
+    }
+    for (const [baselineDefinition, baselineName] of baselineEntryPoints) {
+      if (
+        typeof baselineDefinition === "string" &&
+        baselineDefinition.length > 0 &&
+        definition.includes(baselineDefinition)
+      ) {
+        errors.push(
+          `package.json: extension ${fullName} must not invoke or mention baseline entry point ${baselineName}`,
+        );
+      }
+    }
+    const entryPointMatch = EXTENSION_ENTRY_POINT.exec(definition);
+    if (!entryPointMatch) {
+      errors.push(
+        `package.json: extension ${fullName} must be one direct canonical foundation policy entry point`,
+      );
+      continue;
+    }
+    if (extensionEntryPoints.has(definition)) {
+      errors.push(
+        `package.json: extension entry point must be unique: ${definition}`,
+      );
+    }
+    extensionEntryPoints.add(definition);
+  }
+
+  for (const [name, command] of Object.entries(scripts)) {
+    if (
+      name !== "ci:foundation" &&
+      name !== F2_SCRIPT_NAME &&
+      typeof command === "string" &&
+      (command.includes("pnpm run ci:f2-evidence") ||
+        command.includes("scripts/foundation/voc081-f2-evidence-policy.mjs"))
+    ) {
+      errors.push(
+        `package.json: script ${name} must not alias or mention the F2 validator`,
+      );
+    }
   }
   return errors;
 }

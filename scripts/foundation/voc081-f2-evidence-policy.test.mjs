@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   cpSync,
+  existsSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -314,104 +315,316 @@ test("current and historical status conflation fails independently", () => {
   );
 });
 
-test("the foundation aggregate cannot omit F2 evidence validation", () => {
-  const foundationChain = [
-    "pnpm run validate:workspace",
-    "pnpm run format:check",
-    "pnpm run build:packages",
-    "pnpm run ci:retirement",
-    "pnpm run ci:final-evidence",
-    "pnpm run ci:f2-evidence",
-    "pnpm run ci:closure-consistency",
-    "pnpm run ci:settings-truth",
-    "node --test scripts/foundation/*.test.mjs",
-  ];
-  const foundation = foundationChain.join(" && ");
-  const valid = JSON.stringify({
+const foundationPrefix = [
+  "pnpm run validate:workspace",
+  "pnpm run format:check",
+  "pnpm run build:packages",
+  "pnpm run ci:retirement",
+  "pnpm run ci:final-evidence",
+  "pnpm run ci:f2-evidence",
+  "pnpm run ci:closure-consistency",
+  "pnpm run ci:settings-truth",
+];
+const foundationTest = "node --test scripts/foundation/*.test.mjs";
+const baselineDefinitions = {
+  "validate:workspace": "node scripts/foundation/validate-workspace.mjs",
+  "format:check":
+    "prettier --check package.json pnpm-workspace.yaml eslint.config.js apps/web apps/api-worker packages scripts/foundation infrastructure docs/development.md",
+  "build:packages":
+    "tsc -b packages/api-client packages/design-tokens --pretty false",
+  "ci:retirement": "node scripts/foundation/server-retirement-policy.mjs",
+  "ci:final-evidence":
+    "node scripts/foundation/voc080-final-evidence-policy.mjs",
+  "ci:f2-evidence": "node scripts/foundation/voc081-f2-evidence-policy.mjs",
+  "ci:closure-consistency":
+    "node scripts/foundation/voc084-closure-consistency-policy.mjs",
+  "ci:settings-truth":
+    "node scripts/foundation/voc085-settings-truthfulness-policy.mjs",
+};
+
+function scriptFixture({ segments = foundationPrefix, scripts = {} } = {}) {
+  return JSON.stringify({
     scripts: {
-      "ci:foundation": foundation,
-      "ci:f2-evidence": "node scripts/foundation/voc081-f2-evidence-policy.mjs",
+      ...baselineDefinitions,
+      "ci:foundation": [...segments, foundationTest].join(" && "),
+      ...scripts,
     },
   });
-  assert.deepEqual(inspectF2Scripts(valid), []);
+}
+
+function assertScriptFailure(source, marker, message = marker) {
+  const errors = inspectF2Scripts(source);
   assert.ok(
-    inspectF2Scripts(
-      valid.replace("pnpm run ci:f2-evidence", "node noop"),
-    ).some((error) => error.includes("exactly one executable")),
+    errors.some((error) => error.includes(marker)),
+    `${message}: ${errors.join(" | ")}`,
   );
-  assert.ok(
-    inspectF2Scripts(valid.replace("voc081-f2-evidence", "noop")).length > 0,
-  );
-  assert.ok(
+}
+
+test("the current, exact VOC-105, and two-extension foundation chains pass", () => {
+  assert.deepEqual(inspectF2Scripts(scriptFixture()), []);
+  assert.deepEqual(
     inspectF2Scripts(
-      valid.replace(
-        "pnpm run ci:f2-evidence",
-        "pnpm run ci:f2-evidence && pnpm run ci:f2-evidence",
-      ),
-    ).some((error) => error.includes("exactly one executable")),
-  );
-  assert.ok(
-    inspectF2Scripts(
-      valid.replace("pnpm run ci:f2-evidence", "echo pnpm run ci:f2-evidence"),
-    ).some((error) => error.includes("canonical ordered command chain")),
-  );
-  assert.ok(
-    inspectF2Scripts(
-      valid.replace("pnpm run ci:f2-evidence", "# pnpm run ci:f2-evidence"),
-    ).some((error) => error.includes("canonical ordered command chain")),
-  );
-  assert.ok(
-    inspectF2Scripts(
-      valid.replace(
-        "pnpm run ci:f2-evidence",
-        "pnpm run ci:f2-evidence || true",
-      ),
-    ).some((error) => error.includes("|| fallback")),
-  );
-  assert.ok(
-    inspectF2Scripts(
-      JSON.stringify({
+      scriptFixture({
+        segments: [...foundationPrefix, "pnpm run ci:f3-evidence"],
         scripts: {
-          "ci:foundation": "# skipped && pnpm run ci:f2-evidence",
-          "ci:f2-evidence":
-            "node scripts/foundation/voc081-f2-evidence-policy.mjs",
+          "ci:f3-evidence":
+            "node scripts/foundation/voc105-f3-evidence-policy.mjs",
         },
       }),
-    ).some((error) => error.includes("canonical ordered command chain")),
+    ),
+    [],
   );
-  assert.ok(
+  assert.deepEqual(
     inspectF2Scripts(
-      JSON.stringify({
+      scriptFixture({
+        segments: [
+          ...foundationPrefix,
+          "pnpm run ci:first-check",
+          "pnpm run ci:second-check",
+        ],
         scripts: {
-          "ci:foundation": "exit 0 && pnpm run ci:f2-evidence",
-          "ci:f2-evidence":
-            "node scripts/foundation/voc081-f2-evidence-policy.mjs",
+          "ci:first-check": "node scripts/foundation/alpha-policy.mjs",
+          "ci:second-check": "node scripts/foundation/beta-two-policy.mjs",
         },
       }),
-    ).some((error) => error.includes("canonical ordered command chain")),
+    ),
+    [],
   );
-  assert.ok(
-    inspectF2Scripts(
-      JSON.stringify({
-        scripts: {
-          "ci:foundation": `echo prefix && ${foundation} && echo suffix`,
-          "ci:f2-evidence":
-            "node scripts/foundation/voc081-f2-evidence-policy.mjs",
-        },
+});
+
+test("every exact prefix segment is independently required once and in order", () => {
+  for (const [index, segment] of foundationPrefix.entries()) {
+    assertScriptFailure(
+      scriptFixture({
+        segments: foundationPrefix.filter((_, i) => i !== index),
       }),
-    ).some((error) => error.includes("canonical ordered command chain")),
-  );
-  const reordered = [...foundationChain];
-  [reordered[0], reordered[1]] = [reordered[1], reordered[0]];
-  assert.ok(
-    inspectF2Scripts(
-      JSON.stringify({
-        scripts: {
-          "ci:foundation": reordered.join(" && "),
-          "ci:f2-evidence":
-            "node scripts/foundation/voc081-f2-evidence-policy.mjs",
-        },
+      "must occur exactly once",
+      `omitting ${segment}`,
+    );
+    assertScriptFailure(
+      scriptFixture({
+        segments: [
+          ...foundationPrefix.slice(0, index + 1),
+          segment,
+          ...foundationPrefix.slice(index + 1),
+        ],
       }),
-    ).some((error) => error.includes("canonical ordered command chain")),
+      "must occur exactly once",
+      `duplicating ${segment}`,
+    );
+  }
+  for (let index = 0; index < foundationPrefix.length - 1; index += 1) {
+    const swapped = [...foundationPrefix];
+    [swapped[index], swapped[index + 1]] = [swapped[index + 1], swapped[index]];
+    assertScriptFailure(
+      scriptFixture({ segments: swapped }),
+      "prefix position",
+      `swapping positions ${index + 1} and ${index + 2}`,
+    );
+  }
+});
+
+test("F2 direct execution, entry point, aliases, and bypasses fail closed", () => {
+  const f2Index = foundationPrefix.indexOf("pnpm run ci:f2-evidence");
+  const replaceF2 = (replacement) => {
+    const segments = [...foundationPrefix];
+    segments[f2Index] = replacement;
+    return scriptFixture({ segments });
+  };
+  assertScriptFailure(replaceF2("node noop"), "exactly one executable");
+  assertScriptFailure(
+    scriptFixture({
+      scripts: { "ci:f2-evidence": "node scripts/foundation/noop-policy.mjs" },
+    }),
+    "entry point is missing or drifted",
   );
+  for (const replacement of [
+    "echo pnpm run ci:f2-evidence",
+    "# pnpm run ci:f2-evidence",
+    "exit 0 && pnpm run ci:f2-evidence",
+    "pnpm run ci:f2-evidence && echo suffix",
+  ]) {
+    assertScriptFailure(replaceF2(replacement), "prefix position", replacement);
+  }
+  assertScriptFailure(
+    replaceF2("pnpm run ci:f2-evidence || true"),
+    "|| fallback",
+  );
+  for (const alias of [
+    "pnpm run ci:f2-evidence",
+    "node scripts/foundation/voc081-f2-evidence-policy.mjs",
+  ]) {
+    assertScriptFailure(
+      scriptFixture({ scripts: { "ci:alias-check": alias } }),
+      "must not alias or mention",
+      alias,
+    );
+  }
+});
+
+test("extension names, declarations, uniqueness, and placement fail closed", () => {
+  for (const name of [
+    "Upper",
+    "under_score",
+    "",
+    "-leading",
+    "trailing-",
+    "double--hyphen",
+  ]) {
+    assertScriptFailure(
+      scriptFixture({
+        segments: [...foundationPrefix, `pnpm run ci:${name}`],
+        scripts: { [`ci:${name}`]: "node scripts/foundation/valid-policy.mjs" },
+      }),
+      "extension name must use",
+      name,
+    );
+  }
+  assertScriptFailure(
+    scriptFixture({
+      segments: [...foundationPrefix, "pnpm run ci:unknown-check"],
+    }),
+    "is not declared",
+  );
+  assertScriptFailure(
+    scriptFixture({
+      segments: [
+        ...foundationPrefix,
+        "pnpm run ci:repeat-check",
+        "pnpm run ci:repeat-check",
+      ],
+      scripts: {
+        "ci:repeat-check": "node scripts/foundation/repeat-policy.mjs",
+      },
+    }),
+    "duplicate extension name",
+  );
+  const beforeSettings = [...foundationPrefix];
+  beforeSettings.splice(7, 0, "pnpm run ci:early-check");
+  assertScriptFailure(
+    scriptFixture({
+      segments: beforeSettings,
+      scripts: { "ci:early-check": "node scripts/foundation/early-policy.mjs" },
+    }),
+    "prefix position 8",
+  );
+  const afterTest = JSON.parse(
+    scriptFixture({
+      scripts: { "ci:late-check": "node scripts/foundation/late-policy.mjs" },
+    }),
+  );
+  afterTest.scripts["ci:foundation"] += " && pnpm run ci:late-check";
+  assertScriptFailure(JSON.stringify(afterTest), "exact and terminal");
+});
+
+test("extension entry points are direct, canonical, distinct, and noncolliding", () => {
+  const invalidDefinitions = [
+    "node outside/example-policy.mjs",
+    "node scripts/foundation/example-policy.js",
+    "node scripts/foundation/example.mjs",
+    "node scripts/foundation/Upper-policy.mjs",
+    "node scripts/foundation/under_score-policy.mjs",
+    "node scripts/foundation/double--token-policy.mjs",
+    "node scripts/foundation/example-policy.mjs argument",
+    "pnpm run ci:other-check",
+    "node scripts/foundation/example-policy.mjs && echo compound",
+    "node scripts/foundation/example-policy.mjs # comment",
+    "node scripts/foundation/example-policy.mjs; echo compound",
+    "pnpm run ci:foundation",
+  ];
+  for (const definition of invalidDefinitions) {
+    assertScriptFailure(
+      scriptFixture({
+        segments: [...foundationPrefix, "pnpm run ci:example-check"],
+        scripts: { "ci:example-check": definition },
+      }),
+      "one direct canonical foundation policy entry point",
+      definition,
+    );
+  }
+  assertScriptFailure(
+    scriptFixture({
+      segments: [
+        ...foundationPrefix,
+        "pnpm run ci:first-check",
+        "pnpm run ci:second-check",
+      ],
+      scripts: {
+        "ci:first-check": "node scripts/foundation/shared-policy.mjs",
+        "ci:second-check": "node scripts/foundation/shared-policy.mjs",
+      },
+    }),
+    "entry point must be unique",
+  );
+  for (const [baselineName, definition] of Object.entries(
+    baselineDefinitions,
+  ).filter(([name]) => name !== "ci:f2-evidence")) {
+    assertScriptFailure(
+      scriptFixture({
+        segments: [...foundationPrefix, "pnpm run ci:collision-check"],
+        scripts: { "ci:collision-check": definition },
+      }),
+      `collides with baseline script ${baselineName}`,
+      `entry-point collision with ${baselineName}`,
+    );
+  }
+  for (const baselineName of Object.keys(baselineDefinitions).filter(
+    (name) => name !== "ci:f2-evidence",
+  )) {
+    assertScriptFailure(
+      scriptFixture({
+        segments: [...foundationPrefix, `pnpm run ${baselineName}`],
+      }),
+      `extension name collides with baseline script ${baselineName}`,
+      `name collision with ${baselineName}`,
+    );
+  }
+});
+
+test("malformed input and shell-control syntax fail without execution", () => {
+  assertScriptFailure("{ malformed", "cannot parse");
+  assertScriptFailure(
+    JSON.stringify({ scripts: [] }),
+    "scripts must be an object",
+  );
+  assertScriptFailure(
+    scriptFixture({ scripts: { "ci:bad-type": 42 } }),
+    "must be a string",
+  );
+  const controls = [
+    "",
+    "echo; true",
+    "echo\ntrue",
+    "echo > output",
+    "echo < input",
+    "echo & true",
+    "echo # comment",
+    "echo $(uname)",
+    "echo `uname`",
+  ];
+  for (const control of controls) {
+    const source = JSON.parse(scriptFixture());
+    source.scripts["ci:foundation"] = [
+      ...foundationPrefix,
+      control,
+      foundationTest,
+    ].join(" && ");
+    assertScriptFailure(
+      JSON.stringify(source),
+      control === "" ? "empty command segment" : "prohibited shell-control",
+      JSON.stringify(control),
+    );
+  }
+  const sentinel = join(tmpdir(), `voc109-no-exec-${process.pid}`);
+  rmSync(sentinel, { force: true });
+  assertScriptFailure(
+    scriptFixture({
+      segments: [...foundationPrefix, "pnpm run ci:unsafe-check"],
+      scripts: {
+        "ci:unsafe-check": `node -e \"require('fs').writeFileSync('${sentinel}','bad')\"`,
+      },
+    }),
+    "one direct canonical foundation policy entry point",
+  );
+  assert.equal(existsSync(sentinel), false);
 });
