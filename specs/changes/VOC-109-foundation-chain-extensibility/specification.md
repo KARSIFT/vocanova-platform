@@ -66,12 +66,17 @@ name and script must:
 Both the extension name after `ci:` and the target basename before `-policy.mjs` use
 one or more lowercase alphanumeric tokens separated by exactly one hyphen. Uppercase,
 underscore, empty names/tokens, leading or trailing hyphens, and doubled hyphens fail.
+These are independent canonical identifiers: the package-script name and target
+basename need not be equal. In the required positive fixture, package script
+`ci:f3-evidence` is exactly
+`node scripts/foundation/voc105-f3-evidence-policy.mjs`, while the sole extension
+segment is exactly `pnpm run ci:f3-evidence`.
 The target must remain directly under `scripts/foundation` and end exactly
 `-policy.mjs`; a nested/outside path, `.js` or other suffix, missing `-policy`, or
 otherwise noncanonical filename fails.
 
-Zero extensions remains valid for the current repository. One synthetic declared
-`ci:f3-evidence` segment in the slot must validate, proving the exact adopted VOC-105
+Zero extensions remains valid for the current repository. The exact synthetic
+declaration and segment pair above must validate, proving the adopted VOC-105
 integration shape is no longer blocked. Unknown, duplicated, aliased, compound,
 entry-point-colliding, or misplaced extensions fail.
 
@@ -117,6 +122,25 @@ After VOC-109 merges and post-merge validation passes, issue #198 may close and 
 different VOC-105 builder may resume on the corrected `develop`. VOC-109 does not add
 the F3 command, reconcile F3 evidence, establish milestone truth, or satisfy any
 VOC-105 acceptance criterion.
+
+### VOC-109-D07 — Observe the first real downstream integration
+
+Per DOC-15 section 24.18, the accountable VOC-109 repository change owner recorded at
+adoption owns a bounded repository-only observation period. It begins when the
+VOC-109 implementation merges and ends when the first real VOC-105 integration
+candidate uses the exact `ci:f3-evidence` declaration and sole chain segment and its
+focused validator, `ci:foundation`, and hosted required-check results are recorded.
+If VOC-105 is formally abandoned or superseded before that attempt, the window ends
+only when that governed disposition is recorded.
+
+The monitored signal is whether the exact real VOC-105 integration is accepted while
+the current chain and all original F2 protections continue to pass. Rejection of that
+exact fixture, acceptance of a malformed/colliding/bypass fixture, or regression of
+the current F2/foundation checks is the failure trigger. On failure, the owner must
+stop VOC-105 merge and VOC-109 closure, record the failing evidence in issue #198 (or
+a linked plain bug issue if #198 is already closed), and route a separately governed
+remediation or dependency-ordered revert. Observation grants no deployment or other
+external-action authority.
 
 ## Risk and protected areas
 

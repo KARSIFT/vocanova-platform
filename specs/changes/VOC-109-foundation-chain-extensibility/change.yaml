@@ -73,11 +73,15 @@ requirements:
       Names and target basenames must reject uppercase, underscore, empty token,
       leading/trailing hyphen, and doubled-hyphen forms; targets outside
       scripts/foundation, without the exact -policy.mjs suffix, or otherwise
-      noncanonical must fail.
-      Extension names and entry points must be distinct and must not duplicate or
+      noncanonical must fail. Extension names and entry points must be distinct and
+      must not duplicate or
       alias any of the eight baseline package-script names or entry points, including
-      the canonical F2 command. The current unextended package.json must continue to
-      pass, and a synthetic declared ci:f3-evidence segment in that slot must pass.
+      the canonical F2 command. Command identifiers and target basenames are
+      independently canonical and need not be identical. The current unextended
+      package.json must continue to pass. The positive fixture must declare package
+      script `ci:f3-evidence` exactly as
+      `node scripts/foundation/voc105-f3-evidence-policy.mjs` and add exactly one
+      `pnpm run ci:f3-evidence` segment in the sole extension slot.
   - id: VOC-109-D03
     statement: >-
       Fail closed with one-at-a-time evidence for omission and duplication of every
@@ -113,6 +117,17 @@ requirements:
       does not implement, amend, adopt, review, merge, or close VOC-105. A different
       VOC-105 builder must rebase onto the merged correction, perform the unchanged
       adopted work, and obtain VOC-105's own R4 evidence.
+  - id: VOC-109-D07
+    statement: >-
+      The accountable VOC-109 repository change owner recorded at adoption owns a
+      bounded observation period from implementation merge through the first real
+      VOC-105 integration candidate's focused validator, ci:foundation, and hosted
+      required-check results, or through a recorded governed abandonment or
+      supersession disposition. Monitor acceptance of the exact VOC-105 fixture while
+      the current chain and F2 protections continue to pass. Exact-fixture rejection,
+      malformed/collision/bypass acceptance, or F2/foundation regression must stop
+      VOC-105 merge and VOC-109 closure and produce linked failure evidence plus a
+      separately governed remediation or dependency-ordered revert.
 
 owners:
   decision: accountable-repository-change-owner-at-adoption
@@ -121,6 +136,7 @@ owners:
   foundation_policy_ci_specialist: different-non-author-exact-revision-actor
   independent_cross_model_r3_verifier: different-non-author-exact-revision-actor
   merge: separate-non-author-actor
+  post_merge_observation: accountable-repository-change-owner-at-adoption
 
 plan_review_history: []
 
@@ -174,9 +190,11 @@ dependencies:
   - id: VOC-109-DEP-02
     status: downstream-adopted-package-blocked
     description: >-
-      Adopted VOC-105 requires one direct ci:f3-evidence segment in ci:foundation but
-      does not authorize edits to the VOC-081 validator. VOC-109 must merge and pass
-      post-merge validation before a different builder resumes VOC-105 unchanged.
+      Adopted VOC-105 requires package script ci:f3-evidence to equal
+      `node scripts/foundation/voc105-f3-evidence-policy.mjs` and one direct
+      `pnpm run ci:f3-evidence` segment in ci:foundation but does not authorize edits
+      to the VOC-081 validator. VOC-109 must merge and pass post-merge validation
+      before a different builder resumes VOC-105 unchanged.
 
 implementation:
   authorized: false
@@ -223,5 +241,20 @@ release:
   migration_required: false
   rollback_required: true
   issue_closure: after-merged-exact-implementation-and-post-merge-validation
+
+post_merge_observation:
+  owner: accountable-repository-change-owner-at-adoption
+  window_start: merged-VOC-109-implementation
+  window_end: >-
+    recorded-first-real-VOC-105-integration-focused-foundation-and-hosted-check-results-
+    or-recorded-governed-VOC-105-abandonment-or-supersession
+  monitored_signal: >-
+    exact-ci-f3-evidence-fixture-accepted-while-current-chain-and-F2-protections-pass
+  failure_trigger: >-
+    exact-fixture-rejected-or-malformed-collision-bypass-accepted-or-F2-foundation-
+    regression
+  disposition: >-
+    stop-VOC-105-merge-and-VOC-109-closure-record-linked-failure-evidence-and-route-
+    separately-governed-remediation-or-dependency-ordered-revert
 
 ehr: not-triggered

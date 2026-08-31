@@ -32,13 +32,18 @@ the only content added by the plan PR.
    inside the post-settings/pre-test slot. Require each value to be one direct
    argument-free
    `node scripts/foundation/<lowercase-alphanumeric-single-hyphen-name>-policy.mjs`
-   command and each entry point to be distinct. Reject uppercase, underscore, empty,
+   command and each entry point to be distinct. Treat the command identifier and
+   target basename as independently canonical without requiring equality. Require the
+   positive fixture to declare `ci:f3-evidence` exactly as
+   `node scripts/foundation/voc105-f3-evidence-policy.mjs` and add exactly one
+   `pnpm run ci:f3-evidence` segment in the slot. Reject uppercase, underscore, empty,
    leading/trailing/doubled-hyphen names; wrong-directory, wrong-suffix,
    missing-policy, or noncanonical targets; missing declarations; duplicate names or
    entry points; aliases or references to every baseline/F2 script name and entry
    point; compound/commented definitions; and every noncanonical or shell-control
    segment.
-5. Rework focused fixtures so the current chain and synthetic VOC-105 extension pass.
+5. Rework focused fixtures so the current chain and the exact synthetic VOC-105
+   declaration/segment pair pass.
    Mutate one invariant at a time for omission and duplication of each of the eight
    prefix segments; every malformed-name class; wrong-directory/suffix/noncanonical
    targets; reuse of each non-F2 baseline name/entry point; duplicate extension name/
@@ -50,6 +55,13 @@ the only content added by the plan PR.
 7. Obtain exact-SHA foundation-policy/CI-integrity specialist review and separate
    independent cross-model R3 verification. Resolve every blocker with a new SHA and
    fresh checks/reviews; use a separate non-author merge actor.
+8. After implementation merge, the accountable VOC-109 change owner observes the
+   first real VOC-105 integration candidate through the focused validator,
+   `ci:foundation`, and hosted required checks and records the result. Stop VOC-105
+   merge and VOC-109 closure on exact-fixture rejection, malformed/bypass acceptance,
+   or F2/foundation regression; route separately governed remediation or the stated
+   dependency-ordered revert. A governed VOC-105 abandonment or supersession record
+   is the only alternate end to this bounded observation window.
 
 ## Validation commands
 

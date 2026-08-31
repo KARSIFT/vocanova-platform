@@ -13,6 +13,11 @@ the semantic risk is R3. R4 is not triggered: mandatory independent review, orig
 checks, merge rules, credentials, action authority, and external-system boundaries do
 not change.
 
+The positive compatibility proof is not generic: it binds `ci:f3-evidence` to exactly
+`node scripts/foundation/voc105-f3-evidence-policy.mjs` and adds exactly
+`pnpm run ci:f3-evidence` in the extension slot. The command identifier and target
+basename are separately canonical and need not be identical.
+
 ## Security and privacy
 
 The validator reads repository JSON and strings only. It must not invoke a shell,
@@ -50,7 +55,12 @@ make `ci:foundation` invalid.
   and one-at-a-time alias/duplication negatives.
 - `VOC-109-R02`: a prerequisite rollback breaks an already merged downstream check.
   Mitigation: explicit reverse-dependency rollback order.
+- `VOC-109-R03`: a synthetic pass misses a defect in the first real VOC-105
+  integration. Mitigation: the accountable VOC-109 change owner observes that exact
+  integration through focused, foundation, and hosted checks; any exact-fixture
+  rejection, malformed/bypass acceptance, or F2/foundation regression stops VOC-105
+  merge and VOC-109 closure and routes governed remediation or rollback.
 - `VOC-109-DEP-00`: issue #198 exact reproduction at the declared base.
 - `VOC-109-DEP-01`: active VOC-081 validator and test behavior.
 - `VOC-109-DEP-02`: adopted VOC-105 as a blocked downstream consumer only.
-- `VOC-109-EV-00` through `VOC-109-EV-04`: defined in the test plan.
+- `VOC-109-EV-00` through `VOC-109-EV-05`: defined in the test plan.

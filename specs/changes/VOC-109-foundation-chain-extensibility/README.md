@@ -12,6 +12,13 @@ non-bypassable, and permit unique canonical lowercase-single-hyphen `ci:*` check
 in one explicit extension slot when each maps to a distinct single direct Node
 foundation-policy entry point.
 
+The required positive fixture is exact: package script `ci:f3-evidence` equals
+`node scripts/foundation/voc105-f3-evidence-policy.mjs`, and the sole added chain
+segment equals `pnpm run ci:f3-evidence`. The command identifier and target basename
+are independently canonical; they need not be identical. The accountable VOC-109
+change owner observes the merged control through the first real VOC-105 integration
+attempt and records the bounded result before VOC-109 closure.
+
 This package changes no package command, workflow, F2 acceptance fact, historical
 VOC-081 package, or adopted VOC-105 scope. It authorizes no implementation until exact
 review, adoption, and merge of this plan. It authorizes no GitHub setting or secret,

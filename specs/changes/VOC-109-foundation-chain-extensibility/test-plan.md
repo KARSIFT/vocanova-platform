@@ -14,9 +14,11 @@
 
 - Covers: `VOC-109-AC-01`
 - Procedure: call `inspectF2Scripts()` with the exact current package JSON, then with
-  synthetic JSON declaring one `ci:f3-evidence` script and its direct segment after
-  `ci:settings-truth`, then with two distinct declared `ci:*` extensions in that same
-  slot.
+  synthetic JSON declaring package script `ci:f3-evidence` exactly as
+  `node scripts/foundation/voc105-f3-evidence-policy.mjs` and adding exactly one
+  `pnpm run ci:f3-evidence` segment after `ci:settings-truth`, then with two distinct
+  declared `ci:*` extensions in that same slot. Assert independently canonical
+  command identifiers and target basenames need not be identical.
 - Expected: all three pass; the eight-segment prefix and terminal test glob remain
   exact, every extension value is one distinct direct Node foundation-policy entry
   point, and no command is executed.
@@ -67,11 +69,27 @@
   unresolved blockers and a separate non-author performs any merge.
 - Evidence: `VOC-109-EV-04`
 
+## VOC-109-TEST-05 — Bounded first-real-integration observation
+
+- Covers: `VOC-109-AC-05`
+- Procedure: after VOC-109 implementation merge, the accountable VOC-109 repository
+  change owner records the first real VOC-105 integration candidate's exact package
+  declaration and chain segment plus focused-validator, `ci:foundation`, and hosted
+  required-check results. If VOC-105 is governed as abandoned or superseded first,
+  record that disposition instead.
+- Expected: the exact real fixture passes while the current F2/foundation chain
+  remains green. Exact-fixture rejection, malformed/collision/bypass acceptance, or
+  F2/foundation regression stops VOC-105 merge and VOC-109 closure and records a
+  linked defect for separately governed remediation or dependency-ordered revert.
+- Evidence: `VOC-109-EV-05`
+
 ## Evidence definitions
 
 - `VOC-109-EV-00`: plan validation, exact plan reviews, adoption record, normal
   non-author plan merge, implementation path inventory, and risk result.
-- `VOC-109-EV-01`: current-chain and declared-extension positive fixture results.
+- `VOC-109-EV-01`: current-chain results and the exact positive fixture binding
+  `ci:f3-evidence` to `node scripts/foundation/voc105-f3-evidence-policy.mjs` while
+  adding only `pnpm run ci:f3-evidence`, plus an independent-identifier positive.
 - `VOC-109-EV-02`: one-at-a-time omission and duplication of all eight prefix
   segments plus F2 exactness, alias, comment, and bypass negatives.
 - `VOC-109-EV-03`: one-at-a-time exact-prefix/terminal, every malformed extension
@@ -79,6 +97,9 @@
   placement/declaration/uniqueness, grammar, and malformed-input negatives.
 - `VOC-109-EV-04`: focused/full/hosted checks, exact two-file diff, rollback proof,
   specialist and independent exact-SHA verdicts, merge, and post-merge readback.
+- `VOC-109-EV-05`: accountable-owner record for the bounded first real VOC-105
+  integration observation or governed alternate disposition, including monitored
+  results and any triggered stop/remediation outcome.
 
 No test may use a secret, production data, live Cloudflare or GitHub mutation,
 workflow dispatch, deployment, D1 migration, or network request.
