@@ -1,0 +1,257 @@
+schema_version: 1
+
+id: VOC-105
+slug: f3-current-documentation-reconciliation
+title: Reconcile current F3 staging-foundation documentation
+type: canonical-milestone-evidence-reconciliation
+status: proposed
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because active F3 milestone truth controls dependency-ordered product eligibility
+  and a false completion or stale pending claim can materially alter downstream work.
+  The implementation is repository-only; its validator has an R3 integrity effect but
+  the semantic consequence remains R4.
+canonical_path: specs/changes/VOC-105-f3-current-documentation-reconciliation
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/189
+requirement_approval_status: planning-intake-only-no-implementation-authority
+base_branch: develop
+base_sha: 03528a84988ebe664207c6a439e133070627c92a
+plan_branch: plan/voc-105-f3-current-documentation
+target_branch: develop
+approved_candidate_sha: null
+approval_status: pending-independent-plan-review-and-adoption
+implementation_authorized: false
+implementation_authority_status: >-
+  not-authorized; issue #189 and this candidate grant no implementation, settings,
+  secret, Cloudflare, dispatch, deployment, production, data, spending, DNS, or launch
+  authority; adoption and normal merge remain required before implementation
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-single-coherent-documentation-boundary
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Reconcile active F3 staging-foundation documentation and machine-readable evidence
+  against the exact F2, staged resource/observability/rollback, standard environment,
+  and successful delivery records while preserving A1+, production, learner-data,
+  launch, and VOC-080-HOLD-01/HOLD-02 boundaries.
+
+requirements:
+  - id: VOC-105-D00
+    statement: >-
+      Add a current structured F3 evidence record that keeps milestone-gate decision
+      separate from the successful delivery event and marks F3 complete-effective only
+      after validating every DOC-12 gate item; otherwise it remains partial/pending with
+      a missing-evidence reason.
+  - id: VOC-105-D01
+    statement: >-
+      Reconcile docs/README.md, docs/product/README.md,
+      docs/product/12-mvp-implementation-plan.md, docs/operations/README.md,
+      docs/operations/voc-081-f2-evidence.md and .json, and
+      docs/operations/cloudflare-delivery.md with the current evidence-bound F3 state.
+      Preserve A1/P1+, production, launch, learner-data, and inherited hold boundaries;
+      defer A1 intake to a separate future package.
+  - id: VOC-105-D02
+    statement: >-
+      Preserve VOC-094 through VOC-104 packages and historical evidence unchanged.
+      Explain that later exact evidence supersedes prospective pending language without
+      rewriting historical snapshots or exposing secrets or immutable Worker IDs.
+  - id: VOC-105-D03
+    statement: >-
+      Add a network-free voc105 F3 evidence validator and focused positive/negative
+      tests, and include its command exactly once in ci:foundation. Fail closed on
+      wrong or missing identifiers, failed/skipped required evidence, stale active
+      wording, later-milestone claims, hold release, or prohibited disclosure.
+  - id: VOC-105-D04
+    statement: >-
+      Use one minimum-sufficient task and one coherent repository-only implementation
+      PR. Do not dispatch, deploy, query or mutate Cloudflare/GitHub settings, handle
+      secret values, change DNS/traffic, access production or learner data, spend,
+      promote main, or claim to satisfy or close issue #189; the issue's separate A1
+      planning outcome remains outside this package.
+  - id: VOC-105-D05
+    statement: >-
+      Obtain distinct canonical-documentation/milestone-evidence specialist and
+      independent exact-SHA R4 PASS reviews from non-authors, resolve blockers with
+      fresh checks, and merge only through a separate non-author actor. No risk label
+      creates standing founder or technical-steward approval.
+
+owners:
+  decision: accountable-repository-change-owner-at-adoption
+  package_preparation: /root/voc105_plan_resume
+  implementation: different-builder-actor-after-adoption
+  canonical_documentation_milestone_specialist: different-non-author-exact-revision-actor
+  independent_R4_verifier: different-non-author-exact-revision-actor
+  merge: separate-non-author-actor
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - docs/README.md
+  - docs/product/README.md
+  - docs/product/12-mvp-implementation-plan.md
+  - docs/operations/README.md
+  - docs/operations/voc-081-f2-evidence.md
+  - docs/operations/voc-081-f2-evidence.json
+  - docs/operations/cloudflare-delivery.md
+  - docs/operations/voc-105-f3-evidence.md
+  - docs/operations/voc-105-f3-evidence.json
+  - scripts/foundation/voc105-f3-evidence-policy.mjs
+  - scripts/foundation/voc105-f3-evidence-policy.test.mjs
+  - package.json
+
+protected_areas:
+  - DOC-12-milestone-dependency-truth
+  - active-F3-evidence-and-operations-indexes
+  - staging-delivery-authority-and-redaction
+  - VOC-080-HOLD-01-and-HOLD-02
+  - historical-VOC-094-through-VOC-104-records
+
+dependencies:
+  - id: VOC-105-DEP-00
+    status: issue-intake-only
+    description: >-
+      Issue #189 identifies the stale active documentation and supplies the public
+      successful delivery SHA/run observation; it grants no implementation authority.
+  - id: VOC-105-DEP-01
+    status: exact-pr108-f2-evidence
+    description: >-
+      PR #108 and the active VOC-081 record establish accepted repository/local F2.
+  - id: VOC-105-DEP-02
+    status: exact-voc094-phase1-phase2-evidence
+    description: >-
+      Issue #158 comments 5438014817 and 5438136312 preserve independently closed
+      resource/observability/rollback and sanitized external coordination evidence.
+  - id: VOC-105-DEP-03
+    status: exact-voc100-voc101-settings-evidence
+    description: >-
+      VOC-100 PR1 #175, settings-truth PR2 #179, and VOC-101 PR #178 establish the
+      standard protected staging environment contract without exposing secret values.
+  - id: VOC-105-DEP-04
+    status: exact-successful-delivery
+    description: >-
+      CI run 33386240492 attempt 1 at exact event SHA
+      03528a84988ebe664207c6a439e133070627c92a passed required, delivery-gate,
+      staging migration/upload/promotion/smoke, local, foundation, API, web, package,
+      and policy jobs; production was skipped.
+  - id: VOC-105-DEP-05
+    status: historical-packages-immutable
+    description: >-
+      VOC-094 through VOC-104 remain immutable snapshots; active truth is reconciled
+      only through this package's new record.
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    evidence: specification.md and issue #189
+  impact_assessment:
+    required: true
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    evidence: implementation-plan.md and release-plan.md
+  deterministic_evidence:
+    required: true
+    evidence: test-plan.md and exact hosted results
+  specialist_evidence:
+    required: true
+    role: canonical-documentation-milestone-evidence-specialist
+    status: pending-exact-revision-review
+  independent_exact_revision_evidence:
+    required: true
+    role: independent-R4-verifier
+    status: pending-exact-revision-review
+  ehr: not-triggered
+
+scope_boundary:
+  repository_documentation_and_evidence: allowed-after-adoption
+  network_free_validator_and_tests: allowed-after-adoption
+  application_runtime_api_schema_manifest_workflow: prohibited
+  historical_VOC-094_through_VOC-104_edits: prohibited
+  github_settings_or_secrets: prohibited
+  cloudflare_dns_deployment_dispatch: prohibited
+  production_or_learner_data: prohibited
+  main_promotion: prohibited
+  issue_189_closure: post-merge-evidence-only
+
+inherited_holds:
+  - id: VOC-080-HOLD-01
+    status: held
+    action: production-traffic-or-production-D1-migrations
+  - id: VOC-080-HOLD-02
+    status: held
+    action: production-learner-data-access-export-transform-or-delete
+
+observed_evidence:
+  successful_delivery:
+    workflow: CI
+    run: 33386240492
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33386240492
+    event_sha: 03528a84988ebe664207c6a439e133070627c92a
+    attempt: 1
+    required: success
+    delivery_gate: success
+    staging_job: success
+    staging_steps:
+      migration: success
+      immutable_upload: success
+      exact_promotion: success
+      bounded_smoke: success
+      rollback_after_promotion_failure: skipped-expected
+      sanitized_outcome: success
+    production_job: skipped-held
+  reviewed_implementation:
+    pull_request: https://github.com/KARSIFT/vocanova-platform/pull/188
+    reviewed_head_sha: 488f75d63f0e962a7989fe2c78f5869c23a35768
+    independent_review: https://github.com/KARSIFT/vocanova-platform/pull/188#issuecomment-5476678505
+    specialist_review: https://github.com/KARSIFT/vocanova-platform/pull/188#issuecomment-5476647319
+  settings_truth:
+    voc100_pr1: https://github.com/KARSIFT/vocanova-platform/pull/175
+    voc100_pr2: https://github.com/KARSIFT/vocanova-platform/pull/179
+    voc101: https://github.com/KARSIFT/vocanova-platform/pull/178
+    environment_readback: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5471376705
+  f3_closure:
+    phase1: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438014817
+    phase2: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5438136312
+    final_delivery: https://github.com/KARSIFT/vocanova-platform/issues/158#issuecomment-5477915272
+
+implementation:
+  authorized: false
+  required: true
+  status: pending-plan-review-adoption
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-105-T00
+
+external_effects:
+  github_settings_and_secrets: prohibited
+  cloudflare: prohibited
+  workflow_dispatch: prohibited
+  staging_deployment: prohibited
+  d1_migration: prohibited
+  traffic_and_dns: prohibited
+  production: prohibited
+  spending_and_billing: prohibited
+  learner_data: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-documentation-reconciliation-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: >-
+    prohibited-by-this-package; issue-189-also-requires-a-separate-A1-planning-outcome
+
+ehr: not-triggered
