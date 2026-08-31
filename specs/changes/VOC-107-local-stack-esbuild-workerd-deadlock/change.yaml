@@ -1,0 +1,266 @@
+schema_version: 1
+
+id: VOC-107
+slug: local-stack-esbuild-workerd-deadlock
+title: Diagnose and deterministically remediate local-stack esbuild/workerd deadlock
+type: ci-required-local-stack-defect-remediation
+status: adopted
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the change repairs the fail-closed required local-stack CI control that
+  establishes the integrity and availability of the repository's Worker validation
+  boundary. Candidate source paths are R1, with package metadata/lock paths R2, but
+  the semantic effect on a required CI gate requires escalation to R3. This plan-only
+  package has an automated R1 path floor; no live delivery or environment control is
+  changed.
+canonical_path: specs/changes/VOC-107-local-stack-esbuild-workerd-deadlock
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/194
+failing_run: https://github.com/KARSIFT/vocanova-platform/actions/runs/33406243445
+failing_event_sha: abf35db76d8182e82aebd4ee78773a09528153d6
+base_branch: develop
+base_sha: abf35db76d8182e82aebd4ee78773a09528153d6
+plan_branch: plan/voc-107-local-stack-deadlock
+target_branch: develop
+approved_candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+requirement_approval_status: >-
+  exact-independent-R3-plan-review-pass-and-accountable-VOC-107-adoption-recorded;
+  required-distinct-CI-local-runtime-specialist-and-fresh-bookkeeping-reviews-remain-
+  pending-before-plan-merge
+approval_status: adopted-for-declared-repository-only-implementation
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-independent-R3-PASS-and-operator-adoption-for-the-
+  declared-repository-only-single-PR-implementation-once-this-adopted-package-is-on-
+  develop; required-distinct-CI-local-runtime-specialist-and-fresh-bookkeeping-
+  reviews-plus-normal-non-author-plan-merge-remain-required; all-settings-secrets-
+  Cloudflare-dispatch-deployment-production-data-spending-DNS-launch-and-other-
+  external-actions-remain-prohibited
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: >-
+  One diagnosis-to-remediation task and one implementation PR keep the observed
+  lifecycle evidence, any minimal source/dependency change, regression coverage,
+  validation, and rollback point atomic. Splitting diagnosis from remediation would
+  leave a known flaky required gate without its proven correction and add an extra
+  branch, review, exact-SHA, coordination, elapsed-time, repeated-check, and
+  bookkeeping cycle without a releasable or rollback-safe boundary.
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Reproduce and diagnose the intermittent local-only esbuild/workerd deadlock seen
+  in the required local-stack job, then make the smallest evidence-supported,
+  deterministic repository-only remediation with regression coverage while retaining
+  fail-closed diagnostics and every local-stack safety boundary.
+
+requirements:
+  - id: VOC-107-D00
+    statement: >-
+      Treat issue #194 and CI run 33406243445 as symptom evidence only. Preserve the
+      exact event SHA, runner/toolchain facts, second-cycle timing, API-process log,
+      and passing sibling jobs, but do not assert an upstream, application, shutdown,
+      port, service-binding, or dependency root cause until reproducible evidence
+      distinguishes it.
+  - id: VOC-107-D01
+    statement: >-
+      Before editing runtime behavior, inventory the exact local-stack command graph,
+      process ownership and shutdown/stdio order, pinned Wrangler/esbuild/OpenNext
+      dependency chain, configuration/arguments, and relevant current tests. Run
+      bounded, credential-free diagnosis attempts against a clean checkout and record
+      redacted command, revision, Node/pnpm/Wrangler versions, attempt/cycle/stage,
+      exit/signal, timing, and bounded diagnostic classification. Do not commit raw
+      transient logs, secrets, local state, or generated build output.
+  - id: VOC-107-D02
+    statement: >-
+      Select a remediation only after the inventory produces a causal or tightly
+      bounded triggering condition. It may alter only the proven causal source,
+      lifecycle/test harness, and—if a pinned tool defect is demonstrated—the minimal
+      package manifests and lockfile needed to pin a verified compatible version.
+      It must not solve the failure by ignoring, allowlisting, retrying, or converting
+      unexpected esbuild/workerd fatal diagnostics into success.
+  - id: VOC-107-D03
+    statement: >-
+      Preserve the disposable OS-temporary D1 root, loopback-only fixed topology,
+      credential stripping/no remote mode, exact service-binding probe, two-cycle
+      persistence proof, bounded readiness/preparation/migration/cleanup, process and
+      stdio settlement, repository-tree cleanliness, and fail-closed workerd output
+      classification. Existing exact bind-collision retry limits remain unchanged
+      unless the diagnosis proves a narrower lifecycle correction is required.
+  - id: VOC-107-D04
+    statement: >-
+      Add deterministic regression coverage for the proven causal condition and the
+      observed fatal-deadlock diagnostic. The regression must fail before the chosen
+      remediation and pass afterwards without masking a child failure. If the hosted
+      race cannot be made deterministic, retain a deterministic harness for the
+      identified lifecycle/diagnostic invariant and require bounded repeated real
+      local-stack runs plus hosted CI evidence; do not claim root-cause remediation
+      until that evidence is available.
+  - id: VOC-107-D05
+    statement: >-
+      Keep the implementation to one minimum-sufficient repository-only PR. Do not
+      change workflow definitions, GitHub settings/secrets, Cloudflare configuration
+      or APIs, dispatch/deploy, D1 migration, traffic/DNS, production or learner
+      data, spending, launch state, product behavior, or historical packages. Do not
+      close issue #194 until the merged exact implementation has its required
+      validation and hosted evidence.
+  - id: VOC-107-D06
+    statement: >-
+      Plan and implementation require applicable deterministic checks, an exact-SHA
+      CI/local-runtime specialist review, independent R3 verification by distinct
+      non-author actors, resolved blockers, and merge by a separate non-author actor.
+      No risk label creates standing founder or technical-steward approval.
+
+owners:
+  decision: accountable-repository-change-owner-at-adoption
+  package_preparation: /root/voc107_plan_builder
+  implementation: different-builder-actor-after-adoption
+  ci_local_runtime_specialist: different-non-author-exact-revision-actor
+  independent_r3_verifier: different-non-author-exact-revision-actor
+  merge: separate-non-author-actor
+
+plan_review_history:
+  - candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    verdict: pass-independent-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/195#issuecomment-5480457988
+    resolution_status: >-
+      exact-candidate-independent-review; grants-no-settings-secrets-Cloudflare-
+      dispatch-deployment-production-data-spending-DNS-launch-or-other-external-
+      action-authority-and-does-not-transfer-to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    verdict: adopted-for-declared-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/195#issuecomment-5482796846
+    resolution_status: >-
+      operator-adoption-authorizes-only-the-declared-repository-only-single-PR-
+      implementation-once-the-adopted-package-is-on-develop; required-distinct-CI-
+      local-runtime-specialist-and-fresh-bookkeeping-reviews-plus-normal-non-author-
+      plan-merge-remain-required; every-external-action-remains-prohibited
+
+approvals:
+  independent_R3_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/195#issuecomment-5480457988
+  ci_local_runtime_plan_review:
+    status: pending-distinct-non-author-exact-candidate-review-before-plan-merge
+    candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    evidence: pending
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-107-ADOPT-01
+    candidate_sha: 78e7a29757bd8aca8487b4579e01b0f119738d0d
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/195#issuecomment-5482796846
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - scripts/foundation/local-stack-smoke.mjs
+  - scripts/foundation/local-stack-smoke.test.mjs
+  - scripts/foundation/local-development-supervisor.mjs
+  - scripts/foundation/local-development-supervisor.test.mjs
+  - apps/web/scripts/test-workerd.mjs
+  - apps/web/tests/workerd/workerd-smoke.test.mjs
+  - apps/web/package.json
+  - apps/api-worker/package.json
+  - package.json
+  - pnpm-lock.yaml
+
+protected_areas:
+  - ci-required-local-stack-integrity
+  - local-worker-process-lifecycle-and-diagnostics
+  - credential-free-loopback-only-local-stack
+  - disposable-D1-and-repository-tree-cleanliness
+  - pinned-Wrangler-esbuild-OpenNext-toolchain
+  - Cloudflare-delivery-and-production-holds
+
+dependencies:
+  - id: VOC-107-DEP-00
+    status: issue-intake-only
+    description: >-
+      Issue #194 supplies the observed symptom and grants no implementation,
+      external-action, merge, or deployment authority.
+  - id: VOC-107-DEP-01
+    status: exact-failing-hosted-evidence
+    description: >-
+      CI push run 33406243445 at abf35db76d8182e82aebd4ee78773a09528153d6 failed
+      only local-stack after the second successful probe cycle; the API child emitted
+      esbuild's fatal all-goroutines-asleep deadlock diagnostic.
+  - id: VOC-107-DEP-02
+    status: current-locked-local-stack-contract
+    description: >-
+      Current package scripts, local-development policy, supervisor, smoke, and
+      workerd diagnostic collector define the boundaries that diagnosis must retain.
+
+observed_evidence:
+  hosted_failure:
+    run: 33406243445
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33406243445
+    event_sha: abf35db76d8182e82aebd4ee78773a09528153d6
+    event: push-develop
+    local_stack: failed
+    unit_fixtures: passed-10
+    first_cycle: completed
+    second_cycle_probes: completed
+    emitted_by: api-local-worker-child
+    diagnostic: esbuild-fatal-all-goroutines-are-asleep-deadlock
+    sibling_jobs: foundation-packages-web-worker-api-and-delivery-policy-passed
+    delivery_staging_production: skipped-after-required-failure
+  root_cause: unknown
+
+implementation:
+  authorized: true
+  required: true
+  status: >-
+    authorized-pending-adopted-plan-merge-and-required-distinct-CI-local-runtime-
+    specialist-review
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-107-T00
+
+required_r3_evidence:
+  deterministic_diagnosis_and_regression: pending-after-adoption
+  ci_local_runtime_specialist: pending-distinct-non-author-exact-candidate-review-before-plan-merge
+  independent_exact_revision_verification: pass-exact-approved-candidate-plan-review
+  blocking_findings: must-be-resolved-before-merge
+  ehr: not-triggered
+
+scope_boundary:
+  plan_package: allowed-now
+  candidate_local_stack_sources: allowed-only-after-adoption-and-causal-inventory
+  pinned_dependency_metadata: allowed-only-if-proven-minimal-remediation
+  workflow_definitions: prohibited
+  github_settings_or_secrets: prohibited
+  cloudflare_dns_dispatch_deployment: prohibited
+  production_or_learner_data: prohibited
+  application_product_behavior: prohibited
+  historical_change_packages: prohibited
+
+external_effects:
+  github_settings_and_secrets: prohibited
+  cloudflare: prohibited
+  workflow_dispatch: prohibited
+  staging_deployment: prohibited
+  d1_migration: prohibited
+  traffic_and_dns: prohibited
+  production: prohibited
+  spending_and_billing: prohibited
+  learner_data: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-local-stack-defect-remediation-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-merged-exact-implementation-and-hosted-validation
+
+ehr: not-triggered
