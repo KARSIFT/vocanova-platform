@@ -1,0 +1,92 @@
+# VOC-109 — Acceptance Criteria
+
+## VOC-109-AC-00 — Scope and lifecycle remain exact
+
+- Requirements: `VOC-109-D00`, `VOC-109-D04`, `VOC-109-D06`, `VOC-109-D07`
+- Task: `VOC-109-T00`
+- Tests: `VOC-109-TEST-00`, `VOC-109-TEST-04`, `VOC-109-TEST-05`
+- Evidence: `VOC-109-EV-00`, `VOC-109-EV-04`, `VOC-109-EV-05`
+- Result: pending exact implementation evidence
+
+The package remains draft and implementation-unauthorized until independently
+reviewed and adopted. Its future implementation changes exactly the VOC-081 validator
+and focused test in one task/one PR. It does not modify `package.json`, implement
+VOC-105, or authorize an external action.
+
+## VOC-109-AC-01 — Current and extended chains pass narrowly
+
+- Requirements: `VOC-109-D01`, `VOC-109-D02`
+- Task: `VOC-109-T00`
+- Tests: `VOC-109-TEST-01`
+- Evidence: `VOC-109-EV-01`
+- Result: pending exact implementation evidence
+
+The current unextended repository passes. Synthetic package JSON with one or more
+unique, declared direct `ci:*` segments in the sole extension slot passes while every
+one of the first eight segments remains in the exact prefix and the foundation test
+glob remains exact and terminal. Each extension maps to a distinct single direct Node
+foundation-policy entry point. The adopted VOC-105 shape passes with package script
+`ci:f3-evidence` exactly equal to
+`node scripts/foundation/voc105-f3-evidence-policy.mjs` and one direct declared
+`pnpm run ci:f3-evidence` segment. The independently canonical command identifier and
+target basename are not required to be identical.
+
+## VOC-109-AC-02 — F2-owned invariants still fail closed
+
+- Requirements: `VOC-109-D01`, `VOC-109-D03`
+- Task: `VOC-109-T00`
+- Tests: `VOC-109-TEST-02`
+- Evidence: `VOC-109-EV-02`
+- Result: pending exact implementation evidence
+
+One-at-a-time fixtures omit and duplicate each of the eight original prefix segments,
+including all seven non-F2 segments, and reject a drifted F2 entry point, F2 alias,
+comment/echo substitution, `||` fallback, and prefix/suffix or shell-control
+injection. A textual or transitive reference never satisfies or duplicates the
+required direct F2 execution.
+
+## VOC-109-AC-03 — Extension and order errors fail closed
+
+- Requirements: `VOC-109-D02`, `VOC-109-D03`
+- Task: `VOC-109-T00`
+- Tests: `VOC-109-TEST-03`
+- Evidence: `VOC-109-EV-03`
+- Result: pending exact implementation evidence
+
+Missing, altered, or reordered prefix segments; a drifted/non-terminal foundation test
+glob; unknown or duplicate extension names or entry points; uppercase, underscore,
+empty, leading/trailing-hyphen, and doubled-hyphen name forms; targets outside
+`scripts/foundation`, with a wrong suffix, missing `-policy`, or noncanonical
+filename; reuse of each non-F2 baseline package-script name or entry point; aliased,
+compound, commented, argument-bearing, or metacharacter-bearing definitions;
+extensions before or after the sole slot; malformed JSON; empty segments; and
+prohibited shell controls each fail one invariant at a time with a specific
+diagnostic. The validator performs no shell or network execution.
+
+## VOC-109-AC-04 — Exact revision is independently verified and reversible
+
+- Requirements: `VOC-109-D04`, `VOC-109-D05`
+- Task: `VOC-109-T00`
+- Tests: `VOC-109-TEST-04`
+- Evidence: `VOC-109-EV-04`
+- Result: pending exact implementation evidence
+
+Focused, foundation, workspace, governance, hosted, path, and diff checks pass at the
+exact two-file implementation SHA. Distinct non-author foundation-policy specialist
+and cross-model R3 reviewers report PASS with zero unresolved blockers, a separate
+non-author merges, and a repository revert rehearsal restores the exact prior tree.
+
+## VOC-109-AC-05 — Bounded downstream observation closes explicitly
+
+- Requirements: `VOC-109-D07`
+- Task: `VOC-109-T00`
+- Tests: `VOC-109-TEST-05`
+- Evidence: `VOC-109-EV-05`
+- Result: pending post-implementation and first-real-integration evidence
+
+The accountable VOC-109 repository change owner records observation from VOC-109
+implementation merge through the first real VOC-105 integration candidate and its
+focused, foundation, and hosted required checks, or through a governed abandonment or
+supersession disposition. An exact-fixture rejection, malformed/bypass acceptance, or
+F2/foundation regression stops VOC-105 merge and VOC-109 closure and opens the
+separately governed remediation or dependency-ordered revert path.
