@@ -4,7 +4,7 @@ id: VOC-108
 slug: wrangler-esbuild-override
 title: Pin Wrangler's esbuild edge to the upstream deadlock remediation
 type: scoped-local-stack-remediation-correction
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because this narrowly extends the adopted VOC-107 remediation for the required
@@ -22,12 +22,20 @@ base_branch: develop
 base_sha: 669e419385dc8a4b8cfb007238dbaac017139238
 plan_branch: plan/voc-108-wrangler-esbuild-override
 target_branch: develop
-approval_status: not-approved
-implementation_authorized: false
+approved_candidate_sha: d9024d6909f4a1bb36f44baa0521f1090a24fe10
+requirement_approval_status: >-
+  exact-dependency-local-runtime-specialist-and-independent-R3-plan-review-PASS-
+  with-zero-blockers-and-accountable-VOC-108-ADOPT-01-approved; fresh-exact-
+  bookkeeping-review-and-normal-non-author-plan-merge-remain-required
+approval_status: adopted-for-declared-repository-only-implementation
+implementation_authorized: true
 implementation_authority_status: >-
-  not-authorized-until-this-exact-package-receives-distinct-independent-R3-review,
-  accountable-adoption, and is merged-to-develop; issue-196-and-VOC-107-do-not-
-  independently-authorize-a-workspace-manifest-or-lockfile-edit
+  authorized-by-two-exact-candidate-PASS-reviews-and-VOC-108-ADOPT-01-for-the-
+  declared-repository-only-single-PR-implementation-once-this-adopted-package-is-on-
+  develop; fresh-exact-bookkeeping-review-and-normal-non-author-plan-merge-remain-
+  required; issue-196-and-VOC-107-grant-no-independent-authority-and-all-settings-
+  secrets-Cloudflare-dispatch-deployment-production-data-spending-DNS-launch-and-
+  other-external-actions-remain-prohibited
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: >-
   One repository-only dependency-resolution change keeps the exact override,
@@ -118,6 +126,46 @@ owners:
   independent_r3_verifier: different-non-author-exact-revision-actor
   merge: separate-non-author-actor
 
+plan_review_history:
+  - candidate_sha: d9024d6909f4a1bb36f44baa0521f1090a24fe10
+    verdict: pass-independent-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/197#issuecomment-5484521338
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-Cloudflare-
+      dispatch-deployment-production-data-spending-DNS-launch-or-other-external-
+      action-authority-and-does-not-transfer-to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: d9024d6909f4a1bb36f44baa0521f1090a24fe10
+    verdict: pass-dependency-local-runtime-specialist-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/197#issuecomment-5484539257
+    resolution_status: >-
+      exact-approved-candidate-specialist-review; grants-no-settings-secrets-
+      Cloudflare-dispatch-deployment-production-data-spending-DNS-launch-or-other-
+      external-action-authority-and-does-not-transfer-to-the-changed-adoption-
+      bookkeeping-SHA
+  - candidate_sha: d9024d6909f4a1bb36f44baa0521f1090a24fe10
+    verdict: adopted-for-declared-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/197#issuecomment-5484546280
+    resolution_status: >-
+      VOC-108-ADOPT-01-authorizes-only-the-declared-two-file-repository-
+      implementation-once-the-adopted-package-is-on-develop; fresh-exact-
+      bookkeeping-review-and-normal-non-author-plan-merge-remain-required; every-
+      external-action-remains-prohibited
+
+approvals:
+  independent_R3_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: d9024d6909f4a1bb36f44baa0521f1090a24fe10
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/197#issuecomment-5484521338
+  dependency_local_runtime_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: d9024d6909f4a1bb36f44baa0521f1090a24fe10
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/197#issuecomment-5484539257
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-108-ADOPT-01
+    candidate_sha: d9024d6909f4a1bb36f44baa0521f1090a24fe10
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/197#issuecomment-5484546280
+
 artifacts:
   readme: README.md
   specification: specification.md
@@ -160,25 +208,25 @@ dependencies:
       source or changing any upstream package beyond the declared resolution edge.
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: pending-independent-review-and-adoption
+  status: authorized-pending-adopted-plan-merge
   target_branch: develop
   pull_request_count: 1
   task: VOC-108-T00
 
 required_r3_evidence:
-  deterministic_resolution_regression: pending-after-adoption
-  dependency_local_runtime_specialist: pending-distinct-non-author-exact-candidate-review
-  independent_exact_revision_verification: pending-distinct-non-author-exact-candidate-review
-  blocking_findings: must-be-resolved-before-merge
+  deterministic_resolution_regression: pending-implementation-after-adopted-plan-merge
+  dependency_local_runtime_specialist: pass-approved-candidate-fresh-bookkeeping-review-pending
+  independent_exact_revision_verification: pass-approved-candidate-fresh-bookkeeping-review-pending
+  blocking_findings: zero-on-approved-candidate-fresh-bookkeeping-review-pending
   ehr: not-triggered
 
 scope_boundary:
   plan_package: allowed-now
-  pnpm_workspace_override: allowed-only-after-adoption
-  pnpm_lockfile_reconciliation: allowed-only-after-adoption
-  deterministic_command_evidence: required-after-adoption
+  pnpm_workspace_override: allowed-only-after-adopted-plan-merge
+  pnpm_lockfile_reconciliation: allowed-only-after-adopted-plan-merge
+  deterministic_command_evidence: required-after-adopted-plan-merge
   other_source_or_test_harness_changes: prohibited
   workflow_definitions: prohibited
   github_settings_or_secrets: prohibited
