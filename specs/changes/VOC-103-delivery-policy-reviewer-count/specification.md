@@ -28,10 +28,11 @@ scope and must remain unchanged.
 
 ### VOC-103-D00 — Adoption precedes implementation
 
-Issue #183 and the failing run are intake and evidence, not implementation authority.
-The exact package must receive independent review, accountable adoption, and merge to
-`develop` before a different builder implements it. Adoption may authorize only the
-declared two-file repository change; it grants no external action.
+Candidate `e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c` received exact
+Cloudflare/CI-security and independent R3 PASS reviews plus VOC-103-ADOPT-01. The
+adoption authorizes only the declared two-file repository implementation once this
+package is on `develop`; it authorizes no settings, secrets, Cloudflare, dispatch,
+deployment, migration, traffic, production, or other external action.
 
 ### VOC-103-D01 — Count reviewer rules by type
 

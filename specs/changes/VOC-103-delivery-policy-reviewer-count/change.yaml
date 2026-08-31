@@ -4,7 +4,7 @@ id: VOC-103
 slug: delivery-policy-reviewer-count
 title: Count only reviewer rules in the delivery gate
 type: cloudflare-delivery-gate-defect-remediation
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because the implementation changes fail-closed CI/CD delivery-gate behavior
@@ -16,14 +16,21 @@ authority_model: voc-079-approval-neutral-active
 requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/183
 failing_run: https://github.com/KARSIFT/vocanova-platform/actions/runs/33342926874
 failing_event_sha: eeb744cb4f2c17c5c3b7764d6e7d13f5bba23609
+requirement_approval_status: >-
+  exact-cloudflare-ci-security-and-independent-R3-plan-review-pass-and-accountable-
+  VOC-103-ADOPT-01-approved
 base_branch: develop
 base_sha: eeb744cb4f2c17c5c3b7764d6e7d13f5bba23609
 plan_branch: plan/voc-103-delivery-policy-reviewer-count
 target_branch: develop
-approved_candidate_sha: null
-approval_status: not-approved
-implementation_authorized: false
-implementation_authority_status: pending-exact-candidate-review-and-adoption
+approved_candidate_sha: e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-two-exact-candidate-PASS-reviews-and-VOC-103-ADOPT-01-for-the-
+  declared-repository-only-single-PR-implementation-once-this-adopted-package-is-on-
+  develop; fresh-exact-bookkeeping-review-eligibility-and-normal-non-author-plan-
+  merge-remain-required; all-external-actions-remain-prohibited
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-single-implementation-pr-default
 automatic_merge_allowed: true
@@ -38,11 +45,13 @@ objective: >-
 requirements:
   - id: VOC-103-D00
     statement: >-
-      Issue 183 and run 33342926874 are defect intake and evidence only. Repository
-      implementation requires this exact package to receive independent review and
-      adoption on develop. Adoption grants only the declared two-file repository
-      implementation and no settings, secret, Cloudflare, dispatch, deployment,
-      migration, traffic, DNS, spending, production, learner-data, or launch action.
+      Candidate e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c received exact
+      Cloudflare/CI-security and independent R3 PASS reviews plus VOC-103-ADOPT-01.
+      This bookkeeping revision records adoption and repository implementation
+      authority effective once the adopted package is on develop. It grants only the
+      declared two-file repository implementation and no settings, secret,
+      Cloudflare, dispatch, deployment, migration, traffic, DNS, spending,
+      production, learner-data, or launch action.
   - id: VOC-103-D01
     statement: >-
       validateEnvironmentProtection must require protection_rules to be an array,
@@ -91,6 +100,53 @@ owners:
   independent_r3_verifier: different-non-author-exact-revision-actor
   merge: separate-non-author-actor
 
+plan_review_history:
+  - candidate_sha: e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c
+    verdict: pass-cloudflare-ci-security-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/184#issuecomment-5472107642
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-Cloudflare-dispatch-
+      deployment-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c
+    verdict: pass-independent-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/184#issuecomment-5472117847
+    resolution_status: >-
+      exact-approved-candidate-review; grants-no-settings-secrets-Cloudflare-dispatch-
+      deployment-production-or-other-external-action-authority-and-does-not-transfer-
+      to-the-changed-adoption-bookkeeping-SHA
+  - candidate_sha: e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c
+    verdict: adopted-for-declared-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/184#issuecomment-5474674154
+    resolution_status: >-
+      VOC-103-ADOPT-01-authorizes-only-the-declared-two-file-repository-
+      implementation-once-the-adopted-package-is-on-develop; every-external-action-
+      remains-prohibited
+
+approvals:
+  cloudflare_ci_security_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/184#issuecomment-5472107642
+  independent_R3_plan_review:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/184#issuecomment-5472117847
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-103-ADOPT-01
+    candidate_sha: e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/184#issuecomment-5474674154
+
+approved_candidate_hosted_evidence:
+  candidate_sha: e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c
+  ci: https://github.com/KARSIFT/vocanova-platform/actions/runs/33343335512
+  security: https://github.com/KARSIFT/vocanova-platform/actions/runs/33343335518
+  governance:
+    url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33343335513
+    structure_and_changed_path_risk: pass
+    eligibility: fail-closed-before-adoption-bookkeeping-evidence
+
 artifacts:
   readme: README.md
   specification: specification.md
@@ -132,18 +188,18 @@ observed_evidence:
     cloudflare_access: none
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: pending-adoption
+  status: authorized-pending-adopted-plan-merge
   target_branch: develop
   pull_request_count: 1
   task: VOC-103-T00
 
 required_r3_evidence:
-  deterministic_checks: pending-implementation
-  cloudflare_ci_security_specialist: pending-exact-revision-review
-  independent_exact_revision_verification: pending
-  blocking_findings: must-be-zero-before-merge
+  deterministic_checks: pass-approved-candidate-hosted-plan-evidence-implementation-pending
+  cloudflare_ci_security_specialist: pass-approved-candidate-fresh-bookkeeping-review-pending
+  independent_exact_revision_verification: pass-approved-candidate-fresh-bookkeeping-review-pending
+  blocking_findings: zero-on-approved-candidate-fresh-bookkeeping-review-pending
   ehr: not-triggered
 
 external_effects:

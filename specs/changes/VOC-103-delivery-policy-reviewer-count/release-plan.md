@@ -2,9 +2,9 @@
 
 ## Repository delivery
 
-After this exact package is independently reviewed, adopted, and merged to `develop`,
-a different builder prepares one two-file implementation PR into `develop`. The exact
-implementation SHA must pass deterministic and hosted checks, receive
+After this adopted package merges to `develop`, a different builder prepares one
+two-file implementation PR into `develop`. The exact implementation SHA must pass
+deterministic and hosted checks, receive
 Cloudflare/CI-security specialist review and separate independent R3 verification
 from non-author actors, resolve every blocker, and be merged by a separate non-author
 actor.

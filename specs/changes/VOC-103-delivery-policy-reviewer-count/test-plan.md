@@ -6,8 +6,10 @@
 - Procedure: run governance validation and risk classification; inspect package
   lifecycle, exact path inventory, one-task/one-PR mapping, authority exclusions, and
   the implementation diff.
-- Expected: draft status and implementation authority remain false until exact-plan
-  review and adoption; plan and implementation automated path floor is R1 and
+- Expected: approved candidate
+  `e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c` has exact-candidate reviews and
+  VOC-103-ADOPT-01; the adopted bookkeeping revision still requires fresh exact-SHA
+  review and normal merge. Plan and implementation automated path floor is R1 and
   semantic implementation risk is R3; exactly two implementation paths are allowed;
   no external action is authorized.
 - Evidence: `VOC-103-EV-00`

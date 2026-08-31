@@ -7,9 +7,10 @@
 - Tests: `VOC-103-TEST-00`
 - Evidence: `VOC-103-EV-00`
 
-The exact plan candidate receives Cloudflare/CI-security specialist and independent
-R3 PASS verdicts from distinct non-author actors before accountable adoption. No
-implementation or external action occurs from issue intake or this draft.
+Candidate `e66d7a8f02fce685da5d9336d2076b2fcf0b2f2c` has exact
+Cloudflare/CI-security and independent R3 PASS reviews from distinct non-author
+actors. VOC-103-ADOPT-01 records accountable adoption and authorizes only the
+declared two-file repository implementation once this package is on `develop`.
 
 ## VOC-103-AC-01 — One reviewer rule is counted correctly
 

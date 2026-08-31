@@ -17,8 +17,9 @@ The implementation will filter environment protection rules by
 `type === "required_reviewers"`, require exactly one matching rule, validate its
 existing reviewer contract, and preserve the separate exact deployment branch-policy
 checks. No workflow, setting, secret, Cloudflare, dispatch, deployment, migration,
-traffic, DNS, production, spending, or data action is in scope. This draft grants no
-repository implementation or external-action authority.
+traffic, DNS, production, spending, or data action is in scope. VOC-103-ADOPT-01
+authorizes only the declared two-file repository implementation once this adopted
+package is on `develop`. It grants no external-action authority.
 
 ## Artifacts
 
