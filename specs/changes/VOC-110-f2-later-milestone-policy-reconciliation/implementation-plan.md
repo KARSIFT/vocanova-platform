@@ -41,8 +41,12 @@ nine-artifact VOC-110 package.
 5. Generate one-claim-at-a-time fixtures from the complete specified subject/copula/
    verb matrices. Preserve every current F3, A1/P1+, production/deployment, live,
    aggregate/individual hold, and F2-pending class/verb, including passed, accepted,
-   completed, and verified cases, and add effective/resolved plus R1/R2/L1. Add every-
-   surface hybrid tests in both directions, every current-key/value/pointer mutation,
+   completed, and verified cases, and add effective/resolved plus R1/R2/L1. Separately
+   cross the exact generic product acceptance, production readiness, production
+   traffic, learner-data access, and public launch subject forms with absent/`is`
+   copulas and all ten specified positive verbs on every human surface, with exactly
+   one appended claim per fixture. Add every-surface hybrid tests in both directions,
+   every current-key/value/pointer mutation,
    every external-effect true mutation, history/current conflation, malformed record,
    and missing-surface cases. Assert concrete diagnostics and no shell/network
    execution.

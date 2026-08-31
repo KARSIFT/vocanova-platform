@@ -217,12 +217,31 @@ VOC-080 holds`, with absent copula, `are`, or `is`, and individual
 - the current `Repository/local F2` pending class generated across `is`/`remains`,
   absent/`still`, and `pending`/`pending integration`/`incomplete`/`candidate`.
 
+In addition to that lossless legacy/new union, the validator must reject these exact
+canonical boundary-subject forms:
+
+- `product acceptance`;
+- `production readiness`;
+- `production traffic`;
+- `learner-data access` and its whitespace spelling `learner data access`; and
+- `public launch`.
+
+For each listed form, generate both an absent-copula form (`<subject> <verb>`) and an
+`is`-copula form (`<subject> is <verb>`) across the complete positive-verb set
+`complete`, `completed`, `passed`, `accepted`, `active`, `enabled`, `released`,
+`verified`, `effective`, and `resolved`. These are deliberately canonical synthetic
+false-claim forms even when a particular subject/verb sentence is stylistically
+unusual: accepting any of them would overstate a still-unresolved or held boundary.
+Append exactly one generated claim to exactly one of the five human F2-owned surfaces
+per fixture, and cross the matrix over every surface. Matching is case-insensitive,
+with at least one lower- or mixed-case fixture for each of these five subject classes.
+
 At least one lower- or mixed-case subject/verb fixture per class must prove matching
 remains case-insensitive. Each generated fixture contains exactly one injected false
 claim. Before applying this corpus, the implementation may mask only the exact
 evidence-bound F3 required-marker strings listed above at their required locations;
-no substring, synonym, generic `complete-effective` phrase, additional occurrence, or
-worktree-derived text is allowlisted.
+no boundary-subject form, substring, synonym, generic `complete-effective` phrase,
+additional occurrence, or worktree-derived text is allowlisted.
 
 The remaining structural fixtures are:
 

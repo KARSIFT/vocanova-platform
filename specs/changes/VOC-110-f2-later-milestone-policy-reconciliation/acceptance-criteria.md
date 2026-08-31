@@ -59,9 +59,13 @@ renamed, or wrong milestone key/value or evidence pointer. The full current proh
 subject/verb union plus `effective`/`resolved` rejects F3 passed/accepted; A1, P1 and
 P1+ passed/accepted; false P2-P5/R1/R2/L1/product claims; every production/deployment
 variant; live verified; aggregate or individual HOLD-00/01/02 passed/completed and
-other release forms; and active F2-pending forms. Only exact required VOC-105 F3
-sentences at their canonical locations pass. HOLD-01/02 omission and F2 external-
-effect drift also fail without shell or network execution.
+other release forms; and active F2-pending forms. On every human surface, separate
+one-claim fixtures also reject canonical generic product acceptance, production
+readiness, production traffic, learner-data access, and public launch subjects, with
+and without `is`, crossed with complete/completed/passed/accepted/active/enabled/
+released/verified/effective/resolved. Only exact required VOC-105 F3 sentences at
+their canonical locations pass. HOLD-01/02 omission and F2 external-effect drift also
+fail without shell or network execution.
 
 ## VOC-110-AC-04 — VOC-109 extension behavior is unchanged
 

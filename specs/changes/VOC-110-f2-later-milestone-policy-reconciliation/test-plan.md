@@ -80,6 +80,12 @@
     candidate fixtures across is/remains and absent/still, add one mixed/lower-case fixture per claim
     class, and assert that only exact canonical VOC-105 required F3 strings at exact
     locations are masked;
+  - on each of the five human surfaces, append exactly one claim using the canonical
+    subjects `product acceptance`, `production readiness`, `production traffic`,
+    `learner-data access`, `learner data access`, or `public launch`; cross each
+    subject with absent/`is` copula and complete/completed/passed/accepted/active/
+    enabled/released/verified/effective/resolved, and add a lower/mixed-case fixture
+    for each of the five subject classes;
   - independently omit HOLD-01 then HOLD-02; and
   - independently flip every F2 external-effect field to true.
 - Expected: every mutation fails with a profile-, surface-, pointer-, claim-, hold-, or
@@ -136,8 +142,9 @@
 - `VOC-110-EV-02`: exact pre-VOC-105 and full adopted VOC-105 profile positives built
   only from literal plan-canonical normalized markers and the exact JSON object.
 - `VOC-110-EV-03`: exact profile key/value/pointer, every-surface normalized marker and
-  hybrid, lossless current-plus-effective/resolved claim matrix, hold, no-live, and
-  no-execution negatives, each injected one invariant at a time.
+  hybrid, lossless current-plus-effective/resolved claim matrix, every-surface generic
+  product/production/data/launch subject matrix, hold, no-live, and no-execution
+  negatives, each injected one invariant at a time.
 - `VOC-110-EV-04`: complete unchanged-in-effect VOC-109 command-chain matrix results.
 - `VOC-110-EV-05`: focused/full/hosted checks, exact two-file diff, rollback proof,
   specialist and independent exact-SHA verdicts, merge, and post-merge readback.

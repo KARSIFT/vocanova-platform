@@ -21,7 +21,11 @@ surfaces, an exact whitespace-normalization algorithm, and the exact JSON profil
 Fixtures may use only those plan-canonical strings, never the preserved dirty
 worktree. The negative corpus preserves every current F3, A1/P1+, production/
 deployment, live, hold, and F2-pending subject/verb class and adds `effective` and
-`resolved`; only the exact evidence-bound VOC-105 wording is allowlisted.
+`resolved`. It also crosses the canonical generic `product acceptance`, `production
+readiness`, `production traffic`, `learner-data access`, and `public launch` subjects
+with absent/`is` copulas and every specified positive verb, one appended claim per
+fixture on every human surface. Only the exact evidence-bound VOC-105 wording is
+allowlisted.
 
 This package does not decide F3, change documentation, add the VOC-105 command, or
 replace VOC-105's R4 evidence validator. It remains draft and implementation-

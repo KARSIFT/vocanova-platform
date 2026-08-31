@@ -15,8 +15,10 @@ historical boundary, false-claim/external-effect negative, and VOC-109 command-c
 test. Add exact atomic pre-VOC-105 and VOC-105 profile handling, exhaustive hybrid and
 later-gate negatives, literal normalized per-surface marker constants derived only from
 this plan, the lossless current prohibited-claim union plus effective/resolved forms,
-full validation/rollback proof, specialist and independent review, and bounded first-
-real-integration observation. Do not edit or implement VOC-105 and perform no external
+and the every-surface generic product acceptance/production readiness/production
+traffic/learner-data access/public launch subject-copula-positive-verb matrix, full
+validation/rollback proof, specialist and independent review, and bounded first-real-
+integration observation. Do not edit or implement VOC-105 and perform no external
 action.
 
 One task is the minimum-sufficient unit because the parser and its positive/negative

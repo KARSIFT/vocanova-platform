@@ -48,7 +48,10 @@ make the F2 validator reject the active tree.
 - `VOC-110-R01`: a broad exception accepts false F3 or later product state.
   Mitigation: exactly two repository-wide profiles, plan-owned literal normalized
   surface markers, exact VOC-105 pointer/values, every-surface hybrid negatives, and
-  the lossless current prohibited-claim union plus effective/resolved forms.
+  the lossless current prohibited-claim union plus effective/resolved forms. Explicit
+  every-surface crosses also reject generic product acceptance, production readiness,
+  production traffic, learner-data access, and public launch positive claims across
+  absent/`is` copulas and the complete plan-defined verb set.
 - `VOC-110-R02`: the correction duplicates or contradicts VOC-105's validator.
   Mitigation: validate only F2-owned consistency/pointers; leave F3 evidence schema,
   seven-surface truth, and R4 decision entirely with VOC-105.

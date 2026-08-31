@@ -15,8 +15,10 @@ separate independent cross-model R3 PASS, zero unresolved blockers, truthful mer
 eligibility, and a separate non-author merge actor. Post-merge validation must prove
 the current pre-VOC-105 tree passes, the exact synthetic VOC-105 profile passes, and
 all literal normalized per-surface markers, the full current-plus-effective/resolved
-prohibited-claim matrix, immutable F2 invariants, and VOC-109 regressions remain fail
-closed. Synthetic expected strings must come only from the committed plan contract.
+prohibited-claim matrix, the every-surface generic product acceptance/production
+readiness/production traffic/learner-data access/public launch matrix, immutable F2
+invariants, and VOC-109 regressions remain fail closed. Synthetic expected strings
+must come only from the committed plan contract.
 Only then may issue #203 close and a different builder refresh VOC-105.
 
 ## Bounded observation contract
