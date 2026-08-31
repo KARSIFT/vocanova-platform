@@ -1,0 +1,220 @@
+schema_version: 1
+
+id: VOC-109
+slug: foundation-chain-extensibility
+title: Restore governed foundation-chain extensibility
+type: foundation-policy-defect-remediation
+status: draft
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the change modifies a fail-closed foundation validator that protects
+  CI evidence ordering and execution. The implementation has no workflow, merge,
+  deployment, application, data, or external-system effect, and it does not remove
+  independent verification or expand autonomous authority, so R4 is not triggered.
+canonical_path: specs/changes/VOC-109-foundation-chain-extensibility
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/198
+related_adopted_package: VOC-105
+related_adopted_package_path: specs/changes/VOC-105-f3-current-documentation-reconciliation
+base_branch: develop
+base_sha: 669e419385dc8a4b8cfb007238dbaac017139238
+plan_branch: plan/voc-109-foundation-chain-extensibility
+target_branch: develop
+approval_status: not-approved
+implementation_authorized: false
+implementation_authority_status: >-
+  not-authorized-until-this-exact-package-receives-distinct-foundation-policy-
+  specialist-review, independent-cross-model-R3-review, accountable-adoption, and-
+  normal-non-author-plan-merge; issue-198-and-adopted-VOC-105-do-not-authorize-
+  validator-edits-by-themselves
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: >-
+  One repository-only validator correction keeps the parser/invariant change,
+  positive extension fixture, negative bypass/alias/order fixtures, validation, and
+  rollback point atomic. Splitting the validator from its regression tests would
+  temporarily weaken or freeze the protected control and add branch, review,
+  exact-SHA, coordination, elapsed-time, repeated-check, and bookkeeping overhead
+  without a releasable or rollback-safe boundary.
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Restore a narrowly defined extension point in ci:foundation so later independently
+  governed evidence commands can be added without weakening VOC-081's canonical F2
+  command, exact-once, no-bypass, declared-command, and original-order protections,
+  thereby removing the prerequisite blocker for adopted VOC-105.
+
+requirements:
+  - id: VOC-109-D00
+    statement: >-
+      Treat issue #198 as defect intake and reproduction evidence only. Preserve the
+      exact develop baseline and the demonstrated rejection of VOC-105's required
+      segment. Neither the issue nor adopted VOC-105 authorizes this validator change;
+      implementation begins only after this package is independently reviewed,
+      adopted, and present on develop.
+  - id: VOC-109-D01
+    statement: >-
+      Replace only the VOC-081 validator's whole-chain equality with an explicit
+      structural contract. The eight original segments from validate:workspace
+      through ci:settings-truth must remain the exact ordered prefix, each present
+      exactly once, and the original foundation test glob must remain the exact
+      terminal segment. The canonical ci:f2-evidence package script and its direct
+      foundation segment must remain exact and executable exactly once.
+  - id: VOC-109-D02
+    statement: >-
+      Permit zero or more unique later governed extension segments only after
+      `pnpm run ci:settings-truth` and before
+      `node --test scripts/foundation/*.test.mjs`. Each extension segment must be
+      exactly `pnpm run ci:<lowercase-hyphen-name>`, and its declared package script
+      must be exactly one direct
+      `node scripts/foundation/<lowercase-hyphen-policy-file>.mjs` command with no
+      argument, alias, compound command, comment, or metacharacter.
+      Extension names and entry points must be distinct and must not duplicate or
+      alias a baseline or canonical F2 command. The current unextended package.json
+      must continue to pass, and a synthetic declared ci:f3-evidence segment in that
+      slot must pass.
+  - id: VOC-109-D03
+    statement: >-
+      Fail closed on malformed package JSON; missing or duplicate original/F2
+      segments; duplicate/unknown extension names or duplicate entry points; extension
+      definitions that are aliases, compound commands, comments, or contain arguments
+      or metacharacters; extension placement outside the declared slot; any original-
+      segment reordering; `||`, semicolon, newline, comment, echo, exit,
+      prefix/suffix, or shell-control bypass; and direct or package-script aliasing of
+      the F2 validator. Diagnostics must identify the violated invariant without
+      evaluating or executing a shell command.
+  - id: VOC-109-D04
+    statement: >-
+      Implement one minimum-sufficient repository-only PR changing exactly
+      scripts/foundation/voc081-f2-evidence-policy.mjs and its focused test. Do not
+      edit package.json, workflows, historical VOC-081 or VOC-105 packages, F2/F3
+      evidence or milestone state, application/runtime code, settings/secrets,
+      Cloudflare resources, dispatch/deployment, D1, traffic/DNS, production or
+      learner data, spending, or launch state.
+  - id: VOC-109-D05
+    statement: >-
+      Plan and implementation require applicable deterministic checks, exact-SHA
+      foundation-policy/CI-integrity specialist review, independent cross-model R3
+      verification by distinct non-author actors, resolution of every blocker, and
+      merge by a separate non-author actor. The cross-model requirement is defense in
+      depth for self-modifying policy, not authority, and no risk label creates a
+      standing founder or technical-steward approval.
+  - id: VOC-109-D06
+    statement: >-
+      VOC-109 completion only removes VOC-105's foundation-chain prerequisite. It
+      does not implement, amend, adopt, review, merge, or close VOC-105. A different
+      VOC-105 builder must rebase onto the merged correction, perform the unchanged
+      adopted work, and obtain VOC-105's own R4 evidence.
+
+owners:
+  decision: accountable-repository-change-owner-at-adoption
+  package_preparation: /root/voc105_builder
+  implementation: different-builder-actor-after-adoption
+  foundation_policy_ci_specialist: different-non-author-exact-revision-actor
+  independent_cross_model_r3_verifier: different-non-author-exact-revision-actor
+  merge: separate-non-author-actor
+
+plan_review_history: []
+
+approvals:
+  foundation_policy_ci_plan_review:
+    status: pending-distinct-non-author-exact-candidate-review
+    candidate_sha: null
+    evidence: null
+  independent_cross_model_R3_plan_review:
+    status: pending-distinct-non-author-exact-candidate-review
+    candidate_sha: null
+    evidence: null
+  adoption_decision:
+    status: pending-after-required-plan-reviews
+    decision_id: null
+    candidate_sha: null
+    evidence: null
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - scripts/foundation/voc081-f2-evidence-policy.mjs
+  - scripts/foundation/voc081-f2-evidence-policy.test.mjs
+
+protected_areas:
+  - ci-foundation-execution-and-order-integrity
+  - VOC-081-F2-evidence-command-exactness
+  - validator-self-modification-and-independent-verification
+  - adopted-VOC-105-scope-and-evidence-boundary
+
+dependencies:
+  - id: VOC-109-DEP-00
+    status: issue-intake-only
+    description: >-
+      Issue #198 records the exact network-free reproduction and root cause. It grants
+      no implementation, merge, review, adoption, or external-action authority.
+  - id: VOC-109-DEP-01
+    status: active-VOC-081-control
+    description: >-
+      The active VOC-081 validator and focused test define the current F2-owned
+      command, exact-once, bypass, and ordering protections. Historical VOC-081
+      package files and F2 acceptance evidence remain unchanged.
+  - id: VOC-109-DEP-02
+    status: downstream-adopted-package-blocked
+    description: >-
+      Adopted VOC-105 requires one direct ci:f3-evidence segment in ci:foundation but
+      does not authorize edits to the VOC-081 validator. VOC-109 must merge and pass
+      post-merge validation before a different builder resumes VOC-105 unchanged.
+
+implementation:
+  authorized: false
+  required: true
+  status: pending-independent-reviews-adoption-and-plan-merge
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-109-T00
+
+required_r3_evidence:
+  deterministic_policy_regression: pending-after-adoption
+  foundation_policy_ci_specialist: pending-distinct-non-author-exact-candidate-review
+  independent_cross_model_exact_revision_verification: pending-distinct-non-author-exact-candidate-review
+  blocking_findings: must-be-resolved-before-merge
+  ehr: not-triggered
+
+scope_boundary:
+  plan_package: allowed-now
+  voc081_validator_and_focused_test: allowed-only-after-adoption
+  package_json_or_workflows: prohibited
+  historical_change_packages_or_milestone_evidence: prohibited
+  github_settings_or_secrets: prohibited
+  cloudflare_dns_dispatch_deployment: prohibited
+  production_or_learner_data: prohibited
+  application_product_behavior: prohibited
+  voc105_implementation_or_closure: prohibited
+
+external_effects:
+  github_settings_and_secrets: prohibited
+  cloudflare: prohibited
+  workflow_dispatch: prohibited
+  staging_deployment: prohibited
+  d1_migration: prohibited
+  traffic_and_dns: prohibited
+  production: prohibited
+  spending_and_billing: prohibited
+  learner_data: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-foundation-policy-correction-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-merged-exact-implementation-and-post-merge-validation
+
+ehr: not-triggered
