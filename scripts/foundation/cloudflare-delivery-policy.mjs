@@ -1203,14 +1203,13 @@ export function validateEnvironmentProtection(protection) {
   if (environment?.can_admins_bypass !== false)
     errors.push("environment admin bypass must be disabled");
   const rules = environment?.protection_rules;
-  if (
-    !Array.isArray(rules) ||
-    rules.length !== 1 ||
-    rules[0]?.type !== "required_reviewers"
-  ) {
+  const reviewerRules = Array.isArray(rules)
+    ? rules.filter((rule) => rule?.type === "required_reviewers")
+    : [];
+  if (!Array.isArray(rules) || reviewerRules.length !== 1) {
     errors.push("environment must have exactly one required-reviewer rule");
   } else {
-    const rule = rules[0];
+    const rule = reviewerRules[0];
     if (rule.prevent_self_review !== false)
       errors.push("GitHub identity-layer self-review must be allowed");
     if (

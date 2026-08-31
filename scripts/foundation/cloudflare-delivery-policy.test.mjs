@@ -78,6 +78,7 @@ function exactProtection() {
             },
           ],
         },
+        { type: "branch_policy" },
       ],
       deployment_branch_policy: {
         protected_branches: false,
@@ -915,24 +916,117 @@ test("wrong event, actor, ref, SHA, confirmation, checks, or production target f
   }
 });
 
-test("live environment protection requires one exact reviewer and one develop policy", () => {
+test("live environment protection accepts one exact reviewer rule beside unrelated rules", () => {
   assert.deepEqual(validateEnvironmentProtection(exactProtection()), []);
-  const cases = [
-    (value) => (value.environment.can_admins_bypass = true),
+
+  const withAnotherUnrelatedRule = exactProtection();
+  withAnotherUnrelatedRule.environment.protection_rules.unshift({
+    type: "wait_timer",
+  });
+  assert.deepEqual(validateEnvironmentProtection(withAnotherUnrelatedRule), []);
+});
+
+test("live environment protection fails closed on reviewer-rule cardinality and fields", () => {
+  const reviewerRuleError =
+    "environment must have exactly one required-reviewer rule";
+  const cardinalityCases = [
+    (value) => delete value.environment.protection_rules,
+    (value) => (value.environment.protection_rules = {}),
+    (value) => (value.environment.protection_rules = []),
     (value) =>
-      (value.environment.protection_rules[0].prevent_self_review = true),
+      (value.environment.protection_rules = [{ type: "branch_policy" }]),
+    (value) =>
+      value.environment.protection_rules.push(
+        clone(value.environment.protection_rules[0]),
+      ),
+  ];
+  for (const mutate of cardinalityCases) {
+    const candidate = exactProtection();
+    mutate(candidate);
+    assert.deepEqual(validateEnvironmentProtection(candidate), [
+      reviewerRuleError,
+    ]);
+  }
+
+  const selfReview = exactProtection();
+  selfReview.environment.protection_rules[0].prevent_self_review = true;
+  assert.deepEqual(validateEnvironmentProtection(selfReview), [
+    "GitHub identity-layer self-review must be allowed",
+  ]);
+
+  const adminBypass = exactProtection();
+  adminBypass.environment.can_admins_bypass = true;
+  assert.deepEqual(validateEnvironmentProtection(adminBypass), [
+    "environment admin bypass must be disabled",
+  ]);
+
+  const identityCases = [
+    (value) => (value.environment.protection_rules[0].reviewers = []),
+    (value) =>
+      value.environment.protection_rules[0].reviewers.push({
+        type: "User",
+        reviewer: { login: "other", id: 1 },
+      }),
+    (value) =>
+      (value.environment.protection_rules[0].reviewers[0].type = "Team"),
     (value) =>
       (value.environment.protection_rules[0].reviewers[0].reviewer.login =
         "other"),
-    (value) => value.environment.protection_rules.push({ type: "wait_timer" }),
-    (value) => (value.branchPolicies.branch_policies[0].name = "main"),
     (value) =>
-      value.branchPolicies.branch_policies.push({ id: 2, name: "release" }),
+      (value.environment.protection_rules[0].reviewers[0].reviewer.id = 1),
   ];
-  for (const mutate of cases) {
+  for (const mutate of identityCases) {
     const candidate = exactProtection();
     mutate(candidate);
-    assert.notDeepEqual(validateEnvironmentProtection(candidate), []);
+    assert.deepEqual(validateEnvironmentProtection(candidate), [
+      "environment must name only the exact operator reviewer identity",
+    ]);
+  }
+});
+
+test("deployment branch-policy validation remains independent of protection rules", () => {
+  const cases = [
+    [
+      (value) =>
+        (value.environment.deployment_branch_policy.protected_branches = true),
+      "environment must use only custom deployment branch policies",
+    ],
+    [
+      (value) =>
+        (value.environment.deployment_branch_policy.custom_branch_policies = false),
+      "environment must use only custom deployment branch policies",
+    ],
+    [
+      (value) => (value.branchPolicies.total_count = 0),
+      "environment must have exactly one custom develop branch policy",
+    ],
+    [
+      (value) => (value.branchPolicies.branch_policies = []),
+      "environment must have exactly one custom develop branch policy",
+    ],
+    [
+      (value) => (value.branchPolicies.branch_policies[0].name = "main"),
+      "environment must have exactly one custom develop branch policy",
+    ],
+    [
+      (value) =>
+        value.branchPolicies.branch_policies.push({
+          id: 2,
+          name: "release",
+        }),
+      "environment must have exactly one custom develop branch policy",
+    ],
+  ];
+  for (const [mutate, error] of cases) {
+    const candidate = exactProtection();
+    mutate(candidate);
+    assert.equal(
+      candidate.environment.protection_rules.some(
+        (rule) => rule.type === "branch_policy",
+      ),
+      true,
+    );
+    assert.deepEqual(validateEnvironmentProtection(candidate), [error]);
   }
 });
 
