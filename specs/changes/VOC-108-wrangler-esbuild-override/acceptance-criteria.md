@@ -34,9 +34,10 @@ are unchanged.
 A frozen install succeeds and the lockfile's Wrangler resolution reaches esbuild
 0.28.2. Its diff contains only the override, esbuild 0.28.2 package/platform
 snapshots and Wrangler edge, plus mechanically coupled Vite 8.2.2/Vitest
-4.1.11 peer-context re-resolution to the same esbuild instance. Vite, Vitest,
-`@vitest/mocker`, and `@cloudflare/vitest-plugin` versions remain unchanged and
-unrelated refreshes are absent.
+4.1.11 peer-context re-resolution that changes their effective esbuild toolchain to
+the same 0.28.2 instance. Vite, Vitest, `@vitest/mocker`, and
+`@cloudflare/vitest-plugin` versions remain unchanged and unrelated refreshes are
+absent.
 
 ## VOC-108-AC-03 — The regression assertion proves the actual edge
 

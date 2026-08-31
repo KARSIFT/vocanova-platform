@@ -5,8 +5,9 @@ This draft R3 package responds to [issue #196](https://github.com/KARSIFT/vocano
 The reviewed `develop` baseline resolves Wrangler `4.125.0` and its esbuild edge to
 `0.28.1`; issue #196's Wrangler `4.127.1` statement is stale intake narrative, not
 repository state. The override's pnpm lock re-resolution also mechanically rewrites
-Vite/Vitest peer-context keys to the same esbuild `0.28.2` instance without changing
-their declared or resolved package versions.
+Vite/Vitest peer-context keys, changing their effective esbuild toolchain resolution
+to the same `0.28.2` instance without changing their declared or resolved package
+versions.
 
 It neither changes VOC-107 nor authorizes its implementation by inference. This package requires its own exact-revision review, adoption, and distinct-actor implementation review before any dependency metadata changes.
 

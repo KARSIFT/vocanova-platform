@@ -8,11 +8,11 @@ and one coherent implementation PR into `develop`.
 
 ## Existing-file reconciliation
 
-| Path                                                                                            | Classification                     | Reconciliation                                                                                                                                                                                          |
-| ----------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm-workspace.yaml`                                                                           | present-needs-reconciliation       | Add only `"wrangler>esbuild": "0.28.2"` inside the existing `overrides` map; preserve every current setting and override.                                                                               |
-| `pnpm-lock.yaml`                                                                                | present-needs-reconciliation       | Regenerate the override, esbuild 0.28.2 package/platform snapshots and Wrangler edge, plus the mechanically coupled Vite/Vitest peer-context references; reject package-version changes or other churn. |
-| local-stack scripts/tests, package manifests, workflows, configs, docs, and historical packages | present-compatible-or-out-of-scope | Do not edit. The deterministic resolution assertion is an implementation evidence command, so a source test harness would exceed the approved two-file diff.                                            |
+| Path                                                                                            | Classification                     | Reconciliation                                                                                                                                                                                                                             |
+| ----------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm-workspace.yaml`                                                                           | present-needs-reconciliation       | Add only `"wrangler>esbuild": "0.28.2"` inside the existing `overrides` map; preserve every current setting and override.                                                                                                                  |
+| `pnpm-lock.yaml`                                                                                | present-needs-reconciliation       | Regenerate the override, esbuild 0.28.2 package/platform snapshots and Wrangler edge, plus the mechanically coupled Vite/Vitest peer-context references and effective toolchain resolution; reject package-version changes or other churn. |
+| local-stack scripts/tests, package manifests, workflows, configs, docs, and historical packages | present-compatible-or-out-of-scope | Do not edit. The deterministic resolution assertion is an implementation evidence command, so a source test harness would exceed the approved two-file diff.                                                                               |
 
 ## Ordered implementation
 
@@ -25,8 +25,8 @@ and one coherent implementation PR into `develop`.
    changing package manifests or unrelated overrides. Inspect `git diff --
 pnpm-workspace.yaml pnpm-lock.yaml` and stop for a separate plan if unrelated
    dependency changes appear. Permit only the enumerated Vite/Vitest peer-context
-   key/reference rewrites to esbuild 0.28.2; do not permit their package versions to
-   change.
+   key/reference and effective esbuild toolchain resolution changes to 0.28.2; do
+   not permit their package versions to change.
 4. Run a frozen install. Re-run the `createRequire()` assertion for every local
    Wrangler consumer; require esbuild package version exactly `0.28.2` and prove
    the inline executable negative probes for missing, malformed, and different

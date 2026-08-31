@@ -9,9 +9,10 @@ location is `pnpm-workspace.yaml`, a path deliberately absent from VOC-107's ado
 candidate inventory.
 
 This package authorizes no change until it is independently reviewed and adopted.
-Its intended implementation is only the exact `wrangler>esbuild: 0.28.2` workspace
-override, the resulting lockfile reconciliation, and deterministic command evidence
-of the resolved dependency edge.
+Its sole dependency-policy edit is the exact `wrangler>esbuild: 0.28.2` workspace
+override. The intended implementation also includes the resulting mechanically
+coupled lockfile reconciliation and deterministic command evidence of the effective
+toolchain resolutions.
 
 ## Requirements
 
@@ -37,10 +38,11 @@ Wrangler dependency must resolve esbuild 0.28.2, and `pnpm install
 --frozen-lockfile` must remain valid. Pnpm mechanically reuses that esbuild instance
 in the existing Vite `8.2.2` context, so the resulting Vite/Vitest,
 `@vitest/mocker`, and `@cloudflare/vitest-plugin` peer-context keys and references
-may change from esbuild 0.28.1 to 0.28.2. This representation-only coupling is
-authorized; their package versions may not change. Any delta outside the override,
-esbuild 0.28.2 package/platform snapshots, Wrangler edge, and those exact context
-rewrites is a blocking scope finding.
+may change from esbuild 0.28.1 to 0.28.2. This mechanically coupled effective
+esbuild toolchain resolution change is authorized and must be tested; the Vite,
+Vitest, `@vitest/mocker`, and `@cloudflare/vitest-plugin` package versions may not
+change. Any delta outside the override, esbuild 0.28.2 package/platform snapshots,
+Wrangler edge, and those exact context rewrites is a blocking scope finding.
 
 ### VOC-108-D03 — Establish deterministic regression evidence
 

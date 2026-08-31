@@ -55,8 +55,9 @@ requirements:
       statement does not match the reviewed base: both local consumers declare and
       lock Wrangler 4.125.0, whose Wrangler-rooted esbuild resolution is 0.28.1.
       Re-record those exact versions at the implementation base and stop if they
-      differ. Do not change Wrangler; this package authorizes only the specified
-      transitive edge and its mechanically coupled lock representation.
+      differ. Do not change Wrangler. The sole dependency-policy edit is the
+      specified transitive edge; D02 defines its mechanically coupled effective
+      toolchain resolution changes.
   - id: VOC-108-D01
     statement: >-
       Add exactly the pnpm workspace override `wrangler>esbuild: 0.28.2` under the
@@ -72,7 +73,8 @@ requirements:
       and Vite 8.2.2, Vitest 4.1.11, @vitest/mocker 4.1.11, and
       @cloudflare/vitest-plugin 1.0.0 peer-context key/reference re-resolution from
       esbuild 0.28.1 to that same 0.28.2 instance. Those package versions must not
-      change. No unrelated dependency refresh, manifest edit, package-manager
+      change, but their effective esbuild toolchain resolution does change and must
+      be tested. No unrelated dependency refresh, manifest edit, package-manager
       configuration change, or other lockfile churn is permitted.
   - id: VOC-108-D03
     statement: >-

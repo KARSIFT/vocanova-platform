@@ -28,8 +28,9 @@
 - Expected result: frozen installation succeeds, Wrangler reaches esbuild 0.28.2,
   and every lockfile delta is one of the authorized mechanical records: override,
   esbuild 0.28.2 package/platform snapshot, Wrangler edge, or Vite/Vitest peer-context
-  key/reference rewrite to the same esbuild instance. Vite 8.2.2, Vitest 4.1.11,
-  `@vitest/mocker` 4.1.11, and `@cloudflare/vitest-plugin` 1.0.0 remain unchanged.
+  key/reference rewrite and effective toolchain resolution change to the same
+  esbuild instance. Vite 8.2.2, Vitest 4.1.11, `@vitest/mocker` 4.1.11, and
+  `@cloudflare/vitest-plugin` 1.0.0 remain unchanged.
 - Evidence: `VOC-108-EV-02`
 
 ## VOC-108-TEST-03 — No-network resolution regression
@@ -68,7 +69,8 @@
 - `VOC-108-EV-01`: parsed override-map delta and zero unrelated manifest/override
   changes at the exact implementation SHA.
 - `VOC-108-EV-02`: frozen-install result and audited lockfile delta, including the
-  enumerated Vite/Vitest peer-context re-resolution and unchanged package versions.
+  enumerated Vite/Vitest peer-context and effective esbuild toolchain re-resolution
+  with unchanged package versions.
 - `VOC-108-EV-03`: Wrangler 4.125.0/esbuild 0.28.1 baseline inventory, baseline
   exact-0.28.2 failure, final exact-edge success, and executable missing/malformed/
   different-version no-network negative results.

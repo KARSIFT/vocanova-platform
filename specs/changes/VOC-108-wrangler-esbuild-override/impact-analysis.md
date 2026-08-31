@@ -2,7 +2,7 @@
 
 ## Dependency and local-stack impact
 
-The sole behavior change is the esbuild version selected beneath Wrangler. This is
+The sole dependency-policy edit is the scoped `wrangler>esbuild: 0.28.2` override,
 the narrow upstream remediation identified in issue #196. The local-stack scripts,
 CI workflow, Worker configuration, D1 state, and application code are untouched.
 The reviewed base actually uses Wrangler 4.125.0/esbuild 0.28.1 in both local
@@ -11,9 +11,9 @@ that baseline and stop if it changes; this is never license for a Wrangler updat
 
 Pnpm's mechanical lock re-resolution also moves existing Vite 8.2.2 and Vitest
 4.1.11 peer-context references from esbuild 0.28.1 to the new 0.28.2 instance. This
-does not change the Vite, Vitest, `@vitest/mocker`, or
-`@cloudflare/vitest-plugin` package versions, but their validation is required
-because their effective esbuild resolution changes.
+is an authorized and tested effective esbuild toolchain resolution change. It does
+not change the Vite, Vitest, `@vitest/mocker`, or `@cloudflare/vitest-plugin`
+package versions.
 
 ## Security and privacy
 
@@ -43,9 +43,10 @@ dispatch or deploy, and no external effect is authorized by this package.
   Mitigation: resolve esbuild through each Wrangler package's `createRequire()`
   context and run negative cases.
 - `VOC-108-R02`: Pnpm's coupled Vite/Vitest peer-context rewrite could be mistaken
-  for unrelated churn or left untested. Mitigation: authorize only the enumerated
-  context-key/reference changes, prohibit package-version changes, and run the full
-  workspace validation.
+  for representation-only or unrelated churn and its effective toolchain change
+  could be left untested. Mitigation: authorize only the enumerated effective
+  resolution and context-key/reference changes, prohibit package-version changes,
+  and run the full workspace validation.
 - `VOC-108-DEP-00`: Issue #196 and its cited upstream remediation.
 - `VOC-108-DEP-01`: Adopted VOC-107 local-stack control boundaries.
 - `VOC-108-EV-00` through `VOC-108-EV-04`: defined in the test plan.
