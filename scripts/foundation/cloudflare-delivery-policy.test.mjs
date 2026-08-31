@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import {
+  closeSync,
   mkdirSync,
   mkdtempSync,
+  openSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -56,6 +58,10 @@ const configs = {
 };
 const exactSha = "a".repeat(40);
 const versionId = "11111111-1111-4111-8111-111111111111";
+const policyCli = resolve(
+  repositoryRoot,
+  "scripts/foundation/cloudflare-delivery-policy.mjs",
+);
 
 function clone(value) {
   return structuredClone(value);
@@ -646,6 +652,69 @@ test("workflow removes binder inputs and isolates secrets after the first approv
   );
 });
 
+test("workflow completes distinct version JSON files before exact resolution", () => {
+  assert.deepEqual(inspectDeliveryWorkflow(workflow), []);
+  assert.doesNotMatch(
+    workflow,
+    /wrangler versions list[^\n]*\|[^\n]*--resolve-version-tag/,
+  );
+
+  const apiList =
+    'pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json --config wrangler.jsonc > "$api_versions_file"';
+  const apiResolve =
+    'api_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag" < "$api_versions_file")"';
+  const webList =
+    'pnpm --filter @vocanova/web exec wrangler versions list --env staging --json --config wrangler.jsonc > "$web_versions_file"';
+  const webResolve =
+    'web_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag" < "$web_versions_file")"';
+  const mutations = [
+    workflow.replace(
+      `${apiList}\n          ${apiResolve}`,
+      'api_version_id="$(pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json --config wrangler.jsonc | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag")"',
+    ),
+    workflow.replace(`${apiList}\n`, ""),
+    workflow.replace(`${webList}\n`, ""),
+    workflow.replace(
+      'api_versions_file="$(mktemp "$RUNNER_TEMP/vocanova-api-versions.XXXXXX")"',
+      'api_versions_file="$web_versions_file"',
+    ),
+    workflow.replace('> "$web_versions_file"', '> "$api_versions_file"'),
+    workflow.replace('< "$web_versions_file")"', '< "$api_versions_file")"'),
+    workflow.replace(
+      `${apiList}\n          ${apiResolve}`,
+      `${apiResolve}\n          ${apiList}`,
+    ),
+    workflow.replace("trap cleanup_version_files EXIT", "true"),
+    workflow.replace(
+      apiResolve,
+      'api_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag" < <(cat "$api_versions_file"))"',
+    ),
+    workflow.replace(apiList, `${apiList} &`),
+    workflow.replace(apiList, `coproc api_versions { ${apiList}; }`),
+    workflow.replace(apiList, `${apiList} || true`),
+    workflow.replace(
+      'rm -f -- "$api_versions_file" || true',
+      'rm -f -- "$api_versions_file"',
+    ),
+    workflow.replace(
+      `${apiResolve}\n`,
+      `${apiResolve}\n          cat "$api_versions_file"\n`,
+    ),
+    workflow.replace(
+      "${{ steps.versions.outputs.api_version_id }}@100%",
+      "${{ steps.prewrite.outputs.api_rollback_version_id }}@100%",
+    ),
+    workflow.replace(
+      "if: failure() && inputs.delivery_operation == 'deploy' && steps.promote.outcome != 'skipped'",
+      "if: failure() && inputs.delivery_operation == 'deploy'",
+    ),
+  ];
+  for (const candidate of mutations) {
+    assert.notEqual(candidate, workflow);
+    assert.notDeepEqual(inspectDeliveryWorkflow(candidate), []);
+  }
+});
+
 test("workflow graph mutations fail closed before Cloudflare credentials", () => {
   const mutations = [
     workflow.replace(
@@ -1145,6 +1214,102 @@ test("version tag resolution remains exact and unambiguous", () => {
       resolveVersionId([...versions, clone(versions[0])], `sha-${exactSha}`),
     /exactly one/,
   );
+});
+
+test("completed file-backed JSON resolves in an isolated child and partial evidence fails closed", () => {
+  const directory = mkdtempSync(
+    resolve(tmpdir(), "vocanova-version-json-handoff-"),
+  );
+  try {
+    const capture = resolve(directory, "versions.json");
+    const preload = resolve(directory, "deny-network.cjs");
+    writeFileSync(
+      preload,
+      [
+        "const deny=()=>{throw new Error('VOCANOVA_OUTBOUND_NETWORK_DENIED')};",
+        "global.fetch=deny;",
+        "for(const name of ['node:net','node:tls']){const mod=require(name);mod.connect=deny;mod.createConnection=deny;}",
+        "for(const name of ['node:http','node:https']){const mod=require(name);mod.request=deny;mod.get=deny;}",
+      ].join("\n"),
+    );
+    const tag = `sha-${exactSha.slice(0, 12)}-run-123-attempt-1`;
+    const exactVersion = {
+      id: versionId,
+      annotations: { "workers/tag": tag },
+    };
+    const childEnv = {
+      CI: "1",
+      NODE_OPTIONS: `--require=${preload}`,
+      PATH: process.env.PATH,
+    };
+
+    function completeCapture(source) {
+      const split = Math.max(1, Math.floor(source.length / 3));
+      const chunks = [
+        source.slice(0, split),
+        source.slice(split, split * 2),
+        source.slice(split * 2),
+      ];
+      const producer = spawnSync(
+        process.execPath,
+        [
+          "--input-type=module",
+          "--eval",
+          "import { appendFileSync, writeFileSync } from 'node:fs'; const [path, ...chunks] = process.argv.slice(1); writeFileSync(path, chunks.shift()); for (const chunk of chunks) appendFileSync(path, chunk);",
+          capture,
+          ...chunks,
+        ],
+        { encoding: "utf8", env: childEnv },
+      );
+      assert.equal(producer.status, 0, producer.stderr);
+    }
+
+    function resolveCapture() {
+      const stdin = openSync(capture, "r");
+      try {
+        return spawnSync(
+          process.execPath,
+          [policyCli, "--resolve-version-tag", tag],
+          { encoding: "utf8", env: childEnv, stdio: [stdin, "pipe", "pipe"] },
+        );
+      } finally {
+        closeSync(stdin);
+      }
+    }
+
+    completeCapture(JSON.stringify([exactVersion]));
+    const valid = resolveCapture();
+    assert.equal(valid.status, 0, valid.stderr);
+    assert.equal(valid.stdout, `${versionId}\n`);
+    assert.doesNotMatch(valid.stderr, /VOCANOVA_OUTBOUND_NETWORK_DENIED/);
+
+    const invalidDocuments = [
+      JSON.stringify([exactVersion]).slice(0, -1),
+      JSON.stringify([
+        exactVersion,
+        {
+          id: "22222222-2222-4222-8222-222222222222",
+          annotations: { "workers/tag": tag },
+        },
+      ]),
+      JSON.stringify([
+        { id: "not-a-uuid", annotations: { "workers/tag": tag } },
+      ]),
+      JSON.stringify([
+        { id: versionId, annotations: { "workers/tag": "another-tag" } },
+      ]),
+    ];
+    for (const document of invalidDocuments) {
+      completeCapture(document);
+      const invalid = resolveCapture();
+      assert.notEqual(invalid.status, 0);
+      assert.doesNotMatch(invalid.stdout, /[0-9a-f]{8}-[0-9a-f-]{27}/i);
+      assert.doesNotMatch(invalid.stderr, /[0-9a-f]{8}-[0-9a-f-]{27}/i);
+      assert.doesNotMatch(invalid.stderr, /VOCANOVA_OUTBOUND_NETWORK_DENIED/);
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test(
