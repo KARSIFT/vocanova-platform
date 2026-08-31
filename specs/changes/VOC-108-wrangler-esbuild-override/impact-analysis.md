@@ -5,9 +5,15 @@
 The sole behavior change is the esbuild version selected beneath Wrangler. This is
 the narrow upstream remediation identified in issue #196. The local-stack scripts,
 CI workflow, Worker configuration, D1 state, and application code are untouched.
-The exact reviewed resolution must be measured before implementation because the
-issue's stated Wrangler version may differ from the then-current lockfile; that is
-an evidence reconciliation point, never license for a Wrangler update.
+The reviewed base actually uses Wrangler 4.125.0/esbuild 0.28.1 in both local
+consumers, not issue #196's stated Wrangler 4.127.1. The implementation must recheck
+that baseline and stop if it changes; this is never license for a Wrangler update.
+
+Pnpm's mechanical lock re-resolution also moves existing Vite 8.2.2 and Vitest
+4.1.11 peer-context references from esbuild 0.28.1 to the new 0.28.2 instance. This
+does not change the Vite, Vitest, `@vitest/mocker`, or
+`@cloudflare/vitest-plugin` package versions, but their validation is required
+because their effective esbuild resolution changes.
 
 ## Security and privacy
 
@@ -36,6 +42,10 @@ dispatch or deploy, and no external effect is authorized by this package.
 - `VOC-108-R01`: A top-level esbuild package could make a superficial assertion pass.
   Mitigation: resolve esbuild through each Wrangler package's `createRequire()`
   context and run negative cases.
+- `VOC-108-R02`: Pnpm's coupled Vite/Vitest peer-context rewrite could be mistaken
+  for unrelated churn or left untested. Mitigation: authorize only the enumerated
+  context-key/reference changes, prohibit package-version changes, and run the full
+  workspace validation.
 - `VOC-108-DEP-00`: Issue #196 and its cited upstream remediation.
 - `VOC-108-DEP-01`: Adopted VOC-107 local-stack control boundaries.
 - `VOC-108-EV-00` through `VOC-108-EV-04`: defined in the test plan.

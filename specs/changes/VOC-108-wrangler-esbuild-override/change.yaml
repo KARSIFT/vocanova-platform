@@ -51,11 +51,12 @@ requirements:
     statement: >-
       Treat issue #196 as intake and causal evidence only. It identifies upstream
       esbuild 0.28.2 as the fix for the all-goroutines-asleep deadlock and identifies
-      pnpm-workspace.yaml as the active override location. Before implementation,
-      record the reviewed revision's exact Wrangler and esbuild resolution. If the
-      current Wrangler version differs from the issue narrative, reconcile the
-      evidence without changing Wrangler itself; this package authorizes only the
-      specified transitive edge.
+      pnpm-workspace.yaml as the active override location, but its Wrangler 4.127.1
+      statement does not match the reviewed base: both local consumers declare and
+      lock Wrangler 4.125.0, whose Wrangler-rooted esbuild resolution is 0.28.1.
+      Re-record those exact versions at the implementation base and stop if they
+      differ. Do not change Wrangler; this package authorizes only the specified
+      transitive edge and its mechanically coupled lock representation.
   - id: VOC-108-D01
     statement: >-
       Add exactly the pnpm workspace override `wrangler>esbuild: 0.28.2` under the
@@ -66,16 +67,24 @@ requirements:
     statement: >-
       Regenerate only pnpm-lock.yaml as required by the exact override and retain a
       frozen install. The final lockfile must resolve the esbuild dependency reached
-      from Wrangler to exactly 0.28.2. No unrelated dependency refresh, manifest
-      edit, package-manager configuration change, or lockfile churn is permitted.
+      from Wrangler to exactly 0.28.2. Authorized mechanical lock changes are the
+      override record; esbuild 0.28.2 package/platform snapshots and Wrangler edge;
+      and Vite 8.2.2, Vitest 4.1.11, @vitest/mocker 4.1.11, and
+      @cloudflare/vitest-plugin 1.0.0 peer-context key/reference re-resolution from
+      esbuild 0.28.1 to that same 0.28.2 instance. Those package versions must not
+      change. No unrelated dependency refresh, manifest edit, package-manager
+      configuration change, or other lockfile churn is permitted.
   - id: VOC-108-D03
     statement: >-
       Produce deterministic, no-network regression evidence that reads the final
       installed dependency graph from each local Wrangler consumer and proves the
       esbuild package resolved through its Wrangler context is exactly 0.28.2. The
-      evidence must also fail before the override at the reviewed baseline and fail
-      closed for a missing, malformed, or different version; it must not infer
-      success from a top-level esbuild copy or text-only lockfile search.
+      baseline inventory must separately record Wrangler 4.125.0/esbuild 0.28.1,
+      while the same exact-0.28.2 assertion must exit nonzero before the override.
+      The executable inline verifier must prove failure for a missing package,
+      malformed version, and different version without adding a repository test
+      file. It must not infer success from a top-level esbuild copy or text-only
+      lockfile search.
   - id: VOC-108-D04
     statement: >-
       Preserve every VOC-107 local-stack safety boundary and all existing failure

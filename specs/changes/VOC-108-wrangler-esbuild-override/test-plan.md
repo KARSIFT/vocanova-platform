@@ -26,23 +26,28 @@
 - Procedure: run `pnpm install --frozen-lockfile`; inspect the two-file diff and
   query the locked Wrangler dependency edge with pnpm's installed metadata.
 - Expected result: frozen installation succeeds, Wrangler reaches esbuild 0.28.2,
-  and every lockfile delta is mechanically required for that exact resolution.
+  and every lockfile delta is one of the authorized mechanical records: override,
+  esbuild 0.28.2 package/platform snapshot, Wrangler edge, or Vite/Vitest peer-context
+  key/reference rewrite to the same esbuild instance. Vite 8.2.2, Vitest 4.1.11,
+  `@vitest/mocker` 4.1.11, and `@cloudflare/vitest-plugin` 1.0.0 remain unchanged.
 - Evidence: `VOC-108-EV-02`
 
 ## VOC-108-TEST-03 — No-network resolution regression
 
 - Covers: `VOC-108-AC-03`
-- Procedure: after the frozen install, run the exact `createRequire()` assertion in
-  the implementation plan for `apps/api-worker` and `apps/web`. Run it with
-  `EXPECTED_ESBUILD_VERSION=0.28.1` at the pre-override base and then with
-  `EXPECTED_ESBUILD_VERSION=0.28.2` at the final implementation SHA. Also run it
-  with an invalid expected-version argument to verify its input guard. A missing
-  Wrangler/esbuild module or a non-string package version naturally throws and exits
-  nonzero; no fixture or repository test file is required.
-- Expected result: only the final installed graph with exact 0.28.2 exits zero. The
-  baseline and invalid-input cases exit nonzero. The command makes no network,
-  Wrangler, Cloudflare, or credential request and cannot pass from a root esbuild
-  module or a lockfile text match.
+- Procedure: at the pre-override base, run the inventory command and retain its
+  Wrangler 4.125.0/esbuild 0.28.1 output for both consumers. Run the exact assertion
+  with `EXPECTED_ESBUILD_VERSION=0.28.2` at that base and retain its nonzero result.
+  After the final frozen install, run the same exact-0.28.2 assertion. Its inline
+  executable probes inject a missing package, malformed numeric version, and
+  different 0.28.1 version into the same extraction/match functions and require all
+  three to fail; no fixture or repository test file is added. Also run with a
+  malformed expected-version argument to exercise the regex guard.
+- Expected result: only the final real graph with exact 0.28.2 exits zero. The
+  baseline and malformed-input cases exit nonzero, while all three internal negative
+  probes print their rejection confirmation before the real graph is accepted. The
+  command makes no network, Wrangler, Cloudflare, or credential request and cannot
+  pass from a root esbuild module or a lockfile text match.
 - Evidence: `VOC-108-EV-03`
 
 ## VOC-108-TEST-04 — Local-stack invariants and exact revision
@@ -62,9 +67,11 @@
   evidence, and normal different-actor plan merge.
 - `VOC-108-EV-01`: parsed override-map delta and zero unrelated manifest/override
   changes at the exact implementation SHA.
-- `VOC-108-EV-02`: frozen-install result and audited minimal lockfile resolution.
-- `VOC-108-EV-03`: baseline failure, final exact-edge success, and negative no-network
-  resolution assertion results.
+- `VOC-108-EV-02`: frozen-install result and audited lockfile delta, including the
+  enumerated Vite/Vitest peer-context re-resolution and unchanged package versions.
+- `VOC-108-EV-03`: Wrangler 4.125.0/esbuild 0.28.1 baseline inventory, baseline
+  exact-0.28.2 failure, final exact-edge success, and executable missing/malformed/
+  different-version no-network negative results.
 - `VOC-108-EV-04`: focused/workspace/hosted required checks, exact two-file diff,
   and exact-SHA specialist and independent R3 PASS verdicts.
 

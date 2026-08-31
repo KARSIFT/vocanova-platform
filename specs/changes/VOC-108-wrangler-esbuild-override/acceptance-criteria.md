@@ -32,7 +32,10 @@ are unchanged.
 - Evidence: `VOC-108-EV-02`
 
 A frozen install succeeds and the lockfile's Wrangler resolution reaches esbuild
-0.28.2. Its diff contains only entries mechanically required for that resolution;
+0.28.2. Its diff contains only the override, esbuild 0.28.2 package/platform
+snapshots and Wrangler edge, plus mechanically coupled Vite 8.2.2/Vitest
+4.1.11 peer-context re-resolution to the same esbuild instance. Vite, Vitest,
+`@vitest/mocker`, and `@cloudflare/vitest-plugin` versions remain unchanged and
 unrelated refreshes are absent.
 
 ## VOC-108-AC-03 — The regression assertion proves the actual edge
@@ -42,10 +45,12 @@ unrelated refreshes are absent.
 - Tests: `VOC-108-TEST-03`
 - Evidence: `VOC-108-EV-03`
 
-The no-network assertion succeeds only when each local Wrangler context resolves
-esbuild 0.28.2, and fails for the pre-override baseline plus missing, malformed, or
-substituted versions. It does not pass based on a root-level package or a text search.
-All existing local-stack failure classification remains terminal for the deadlock.
+The baseline inventory records Wrangler 4.125.0/esbuild 0.28.1 for both consumers,
+then the exact-0.28.2 no-network assertion exits nonzero at that baseline. At the
+final graph it succeeds only when each Wrangler context resolves esbuild 0.28.2.
+Executable inline negative probes prove rejection of a missing package, malformed
+version, and substituted version. It does not pass based on a root-level package or
+a text search. All existing local-stack failure classification remains terminal.
 
 ## VOC-108-AC-04 — Exact revision receives R3 verification
 

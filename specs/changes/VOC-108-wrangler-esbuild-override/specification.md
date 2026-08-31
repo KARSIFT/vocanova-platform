@@ -17,11 +17,12 @@ of the resolved dependency edge.
 
 ### VOC-108-D00 — Record the exact starting resolution
 
-At the implementation SHA, record the precise Wrangler and esbuild versions that
-pnpm resolves for each local Wrangler consumer. Issue #196's version narrative is
-input evidence; a changed intervening Wrangler version is not authority to update
-Wrangler or any other dependency. The only permitted resolution change is the
-specified `wrangler>esbuild` edge.
+At the reviewed base, both local consumers declare and lock Wrangler `4.125.0`, and
+a `createRequire()` rooted at that Wrangler package resolves esbuild `0.28.1`.
+Issue #196 instead says Wrangler `4.127.1`; that statement is stale intake narrative,
+not repository evidence. Re-record the exact versions at the implementation base
+and stop for reconciliation if either differs. This is not authority to update
+Wrangler or any other declared dependency.
 
 ### VOC-108-D01 — Use pnpm's canonical override location
 
@@ -33,17 +34,24 @@ add direct dependencies, or change another override.
 
 Regenerate `pnpm-lock.yaml` only to represent the scoped override. The locked
 Wrangler dependency must resolve esbuild 0.28.2, and `pnpm install
---frozen-lockfile` must remain valid. Any unrelated lockfile delta is a blocking
-scope finding until separately authorized.
+--frozen-lockfile` must remain valid. Pnpm mechanically reuses that esbuild instance
+in the existing Vite `8.2.2` context, so the resulting Vite/Vitest,
+`@vitest/mocker`, and `@cloudflare/vitest-plugin` peer-context keys and references
+may change from esbuild 0.28.1 to 0.28.2. This representation-only coupling is
+authorized; their package versions may not change. Any delta outside the override,
+esbuild 0.28.2 package/platform snapshots, Wrangler edge, and those exact context
+rewrites is a blocking scope finding.
 
 ### VOC-108-D03 — Establish deterministic regression evidence
 
 After a frozen install, a no-network Node assertion must resolve the `esbuild`
 package using a `createRequire()` rooted at each actual local Wrangler package, not
-the root module path. It must require package version exactly `0.28.2`; missing,
-malformed, or other versions must exit nonzero. The same assertion against the
-pre-override baseline must fail, demonstrating the deterministic regression gap
-without trying to reproduce the intermittent hosted race.
+the root module path. A separate baseline inventory must record Wrangler `4.125.0`
+and esbuild `0.28.1`; the exact-`0.28.2` assertion against that baseline must fail.
+The inline verifier must execute negative probes for a missing package, malformed
+version, and different version, confirming each is rejected without a committed
+fixture or test file. This demonstrates the deterministic regression gap without
+trying to reproduce the intermittent hosted race.
 
 ### VOC-108-D04 — Retain every existing local-stack control
 
