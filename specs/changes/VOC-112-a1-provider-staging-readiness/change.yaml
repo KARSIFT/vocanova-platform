@@ -1,0 +1,328 @@
+schema_version: 1
+
+id: VOC-112
+slug: a1-provider-staging-readiness
+title: Complete A1 provider integration and staging readiness
+type: authentication-user-foundation-completion
+status: adopted
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the proposed implementation changes authentication provider wiring,
+  OAuth code exchange, email delivery, secrets interfaces, session-entry behavior,
+  protected Worker configuration, and security evidence. It implements already
+  approved A1 behavior without changing material product direction or user-rights
+  policy, and it authorizes no live or difficult-to-reverse action, so R4 is not
+  triggered by this repository-only package.
+canonical_path: specs/changes/VOC-112-a1-provider-staging-readiness
+authority_model: voc-079-approval-neutral-active
+requirement_source: >-
+  docs/product/12-mvp-implementation-plan.md A1 objective/gate; DOC-01 MVP completion
+  criterion 8; DOC-04 authentication architecture; DOC-05 identity/session model;
+  DOC-06 backend authentication rules; DOC-07 API/security contract; issue #189 A1
+  intake; completed VOC-025 and VOC-080 identity foundations
+requirement_approval_status: >-
+  canonical A1 outcome and this exact implementation package are approved through
+  exact-candidate security/authorization and independent cross-model R3 reviews plus
+  the accountable VOC-112-ADOPT-2026-09-01 decision; implementation remains unusable
+  until normal plan merge and VOC-105 records F3 complete-effective
+base_branch: develop
+base_sha: 533084432f0672dbf25c402e96209120a8ad50cf
+plan_branch: plan/voc-112-a1-provider-staging-readiness
+target_branch: develop
+approved_candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-security-authorization-and-independent-cross-model-R3-
+  reviews-and-VOC-112-ADOPT-2026-09-01-for-the-declared-sixteen-path-repository-only-
+  implementation; usable-only-after-this-adopted-package-is-freshly-reviewed-and-
+  normally-merged-to-develop-by-a-non-author-and-VOC-105-records-F3-complete-effective;
+  all-external-actions-remain-separately-prohibited
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: >-
+  One repository implementation PR is the largest safe coherent unit because provider
+  adapters, fail-closed construction, bindings/types, contract-preserving tests, web
+  journey coverage, documentation, and rollback evidence form one auth trust boundary.
+  Splitting would create an enabled-without-provider or provider-without-verification
+  intermediate state and add branch, coordination, elapsed-time, repeated-check,
+  exact-review, and bookkeeping overhead. External setup/activation is not a second
+  implementation PR: it is explicitly outside this package and needs its own later
+  action authority and truthful evidence lifecycle.
+automatic_merge_allowed: true
+production_impact: none-repository-only-provider-readiness; production-remains-held
+rollback_required: true
+
+objective: >-
+  Close the repository implementation gap between the existing Cloudflare-native A1
+  identity foundation and real transactional-email/Google-OAuth boundaries, while
+  leaving all live provider activation and A1 staging acceptance separately held.
+
+requirements:
+  - id: VOC-112-D00
+    statement: >-
+      Treat issue #189 as intake, and preserve the completed VOC-025/VOC-080 identity,
+      session, D1, authorization, onboarding, settings, account, API, client, and web
+      behavior. Implement only the remaining provider-integration and staging-readiness
+      gap. Do not recreate retired Go/PostgreSQL/server assets or expand into P1+.
+  - id: VOC-112-D01
+    statement: >-
+      Add a production-shaped Google OAuth adapter behind the existing OAuthProvider
+      interface. Use exactly https://accounts.google.com/o/oauth2/v2/auth,
+      https://oauth2.googleapis.com/token, and
+      https://openidconnect.googleapis.com/v1/userinfo. Pin the request methods,
+      parameters, headers, redirect:error policy, accepted token fields, safe-avatar
+      policy, strict shapes, and an 8,000-ms mandatory timeout as specified in
+      specification.md. Enforce an exact 16,384-byte token-response ceiling and exact
+      65,536-byte user-info-response ceiling using declared-length prechecks and
+      streamed decoded-byte counting independent of Content-Length. Cancel and release
+      the response reader on every response-bearing success, error, timeout,
+      declared/streamed oversize, and exposed redirect path; clear abort/timer state
+      when fetch rejects before a response exists. Never persist, return, or log
+      provider tokens, codes, client secrets, or raw responses.
+  - id: VOC-112-D02
+    statement: >-
+      Reuse and harden the provider-neutral HttpEmailSender for magic-link and account
+      lifecycle email. Require a credential-free/query-free/fragment-free default-port
+      HTTPS endpoint, strict sender/message/header validation, the same mandatory
+      8,000-ms timeout, redirect:error, response-body cancellation, generic user-facing
+      failure, and no credential/link logging. Tests must prove that redirects cannot
+      receive the bearer or magic-link payload. Preserve enumeration-resistant request
+      responses and single-use hashed magic-link behavior. The sender constructor may
+      retain its bounded 100–10,000-ms injected-test seam (including 100-ms synthetic
+      tests and an 8,000-ms direct-test default), but the production factory must require,
+      parse, and explicitly pass only AUTH_PROVIDER_TIMEOUT_MS="8000" and never rely on
+      a constructor default. Normal CI uses injected fake transports and sends no email.
+  - id: VOC-112-D03
+    statement: >-
+      Replace the default unavailable/null provider construction with one centralized,
+      typed, fail-closed identity dependency factory. Disabled features require no
+      provider-specific credentials/configuration. Each enabled capability independently
+      requires its complete exact configuration matrix; absent, partial, malformed, or
+      unsafe values make only that capability unavailable and never fall back to a fake,
+      issue a session, or contact a network boundary. Prove mixed states where one
+      provider is complete and the disabled or malformed other provider cannot block or
+      contaminate it. Keep production and staging switches disabled in committed config.
+  - id: VOC-112-D04
+    statement: >-
+      Keep secret values outside git, generated artifacts, logs, responses, comments,
+      and test output. Use exactly EMAIL_PROVIDER_URL, EMAIL_FROM,
+      AUTH_PROVIDER_TIMEOUT_MS, and GOOGLE_OAUTH_CLIENT_ID for non-secret provider
+      configuration, and exactly EMAIL_PROVIDER_API_KEY and
+      GOOGLE_OAUTH_CLIENT_SECRET for runtime secret bindings. Reuse
+      OAUTH_REDIRECT_URI and the existing feature switches; do not add aliases. Define
+      only the minimum typed interface needed by the adapters. Add the four non-secret
+      names to every committed API Worker vars map with literal empty-string sentinels
+      except AUTH_PROVIDER_TIMEOUT_MS="8000"; reconcile the exact delivery-policy maps
+      and tests in the same PR. Preserve disabled staging/production switches, holds,
+      zero-cost limit, and current two-secret GitHub Actions environment boundary. No
+      provider secret name/value is added to GitHub settings by this implementation.
+  - id: VOC-112-D05
+    statement: >-
+      Preserve the public /api/v1 contract and web journey unless a security correction
+      is required and explicitly adopted in this package. Prove magic-link request and
+      consume, OAuth start/callback, cookie/state/CSRF/session lifecycle, normal
+      navigation, onboarding routing, logout invalidation, unauthorized rejection,
+      disabled-user rejection, replay/expiry rejection, and two-user isolation. Auth
+      failure UI remains accessible and does not disclose account existence or secrets.
+  - id: VOC-112-D06
+    statement: >-
+      Add a sanitized A1 staging-acceptance runbook/evidence template that binds an exact
+      repository SHA and separately authorized delivery attempt to both real supported
+      methods, normal navigation, logout, unauthorized and cross-user denial, abuse
+      controls, redaction, provider kill switches, and repository/Worker rollback.
+      The implementation PR must leave results pending and must not claim A1 complete.
+      Add a deterministic runbook policy/negative suite and index the record from
+      docs/operations/README.md.
+  - id: VOC-112-D07
+    statement: >-
+      Use one minimum-sufficient repository implementation PR after adoption and after
+      VOC-105 records F3 complete-effective. Change exactly the sixteen paths in
+      implementation_allowed_paths and no others. No schema migration, public API
+      expansion, web source/test edit, package/workflow/manifest change, or incidental
+      generated artifact is authorized.
+  - id: VOC-112-D08
+    statement: >-
+      Require complete installed CI, Worker types/safety/workerd/contract/dry-run,
+      auth-specific negative and two-user tests, web lint/type/build/accessibility/e2e,
+      secret/redaction checks, exact-path audit, disposable full-diff rollback rehearsal,
+      independent security/authorization specialist review, and separate independent
+      exact-SHA R3 verification by non-authors. Resolve every blocker on a fresh SHA and
+      merge through a separate non-author actor.
+  - id: VOC-112-D09
+    statement: >-
+      Provider account/vendor selection, contracts or spend, Google Cloud OAuth client,
+      email domain/sender verification, credential creation/installation/rotation,
+      Cloudflare or GitHub settings mutation, live staging identities/inboxes, workflow
+      dispatch, deployment, D1 mutation, DNS/traffic, production/data access, and launch
+      are prohibited. A later accountable action record must name each action, actor,
+      evidence, rollback/expiry, and inherited holds before it occurs.
+
+owners:
+  decision: /root
+  package_preparation: /root/voc112_a1_planner
+  implementation: different-builder-actor-after-adoption
+  security_authorization_specialist: /root/voc112_security_reviewer
+  independent_R3_verifier: /root/voc109_cross_model
+  merge: separate-non-author-actor
+  external_provider_and_staging_actions: unassigned-and-prohibited-by-this-package
+
+plan_review_history:
+  - candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    reviewer: /root/voc112_security_reviewer
+    verdict: pass-security-authorization-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487811657
+    resolution: >-
+      Exact approved-candidate security/authorization review. It grants no
+      implementation before normal plan merge and VOC-105 F3 complete-effective, and
+      grants no external-action authority.
+  - candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    reviewer: /root/voc109_cross_model
+    model_provenance: explicitly-configured-gpt-5.6-sol
+    verdict: pass-independent-cross-model-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487811892
+    resolution: >-
+      Exact approved-candidate independent R3 review. It grants no implementation
+      before normal plan merge and VOC-105 F3 complete-effective, and grants no
+      external-action authority.
+
+superseded_plan_candidates:
+  - candidate_sha: ff286cbb87d13913f7d2a95e40d53f8f16f609fe
+    status: blocked-and-superseded
+    reason: >-
+      Fresh security and cross-model review found missing exact response byte/read-
+      disposal controls, redirect/token/avatar/config rules, deterministic runbook
+      validation, and a literal path/config-policy inventory. No review or authority
+      from this candidate transfers to its correction.
+  - candidate_sha: c9f3cf6a8e40376706055ca4a1d0128bf75b4f70
+    status: blocked-and-superseded
+    reason: >-
+      Fresh review identified an excluded existing HttpEmailSender parity test whose
+      display-name sender fixture conflicts with the hardened ASCII-mailbox contract
+      and whose 100-ms injected timeout needed an explicit test-vs-production boundary.
+      No review or authority transfers to the corrected candidate.
+
+approvals:
+  security_authorization_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487811657
+  independent_R3_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487811892
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-112-ADOPT-2026-09-01
+    candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487812059
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+implementation_allowed_paths:
+  - apps/api-worker/src/app.ts
+  - apps/api-worker/src/identity/http-email-sender.ts
+  - apps/api-worker/src/identity/google-oauth-provider.ts
+  - apps/api-worker/src/identity/provider-factory.ts
+  - apps/api-worker/test/ai-email-observability-parity.test.ts
+  - apps/api-worker/test/identity-provider-adapters.test.ts
+  - apps/api-worker/test/identity-parity.test.ts
+  - apps/api-worker/worker-configuration.d.ts
+  - apps/api-worker/wrangler.jsonc
+  - docs/development.md
+  - docs/operations/README.md
+  - docs/operations/a1-staging-acceptance.md
+  - scripts/foundation/a1-staging-acceptance-policy.mjs
+  - scripts/foundation/a1-staging-acceptance-policy.test.mjs
+  - scripts/foundation/cloudflare-delivery-policy.mjs
+  - scripts/foundation/cloudflare-delivery-policy.test.mjs
+
+affected_areas:
+  - authentication-provider-runtime-construction
+  - exact-Worker-vars-and-delivery-policy-contract
+  - auth-provider-security-tests-and-staging-runbook-policy
+
+protected_areas:
+  - authentication-authorization-and-session-entry
+  - OAuth-and-email-provider-credential-boundaries
+  - personal-identity-and-cross-user-isolation
+  - Cloudflare-Worker-bindings-and-held-environment-configuration
+  - security-redaction-and-abuse-controls
+
+dependencies:
+  - id: VOC-112-DEP-00
+    status: issue-intake-only
+    description: >-
+      Issue #189 requests a separate A1 intake after F3 reconciliation; it grants no
+      implementation or external-action authority.
+  - id: VOC-112-DEP-01
+    status: implemented-foundation
+    description: >-
+      VOC-025 and VOC-080 provide the current identity/session/D1/API/web foundation.
+      Their historical runtime wording is not implementation guidance where ADR-0003
+      and VOC-080 supersede it.
+  - id: VOC-112-DEP-02
+    status: blocking-before-implementation
+    description: >-
+      VOC-105 must merge and its active exact evidence must record F3
+      complete-effective before an A1 implementation branch begins. A successful
+      delivery run alone is not substituted for that milestone record.
+  - id: VOC-112-DEP-03
+    status: not-required-for-repository-implementation-and-blocking-for-live-acceptance
+    description: >-
+      Provider/vendor selection, provider accounts, Google OAuth client, verified email
+      sender/domain, credentials, staging installation, dispatch, and disposable live
+      test identities do not exist as authority in this package. Repository work may
+      use fake transports only; live A1 acceptance remains pending.
+  - id: VOC-112-DEP-04
+    status: inherited-active-holds
+    description: >-
+      VOC-080-HOLD-01 continues to prohibit production traffic and production D1
+      migrations; HOLD-02 continues to prohibit production learner-data actions.
+
+required_r3_evidence:
+  deterministic_evidence:
+    required: true
+    evidence: test-plan.md and exact hosted results
+  protected_area_evidence:
+    required: true
+    evidence: impact-analysis.md and exact path/config/secret audit
+  specialist_evidence:
+    required: true
+    role: security-authorization-specialist
+    status: pass-exact-approved-plan-candidate
+  independent_exact_revision_evidence:
+    required: true
+    role: independent-R3-verifier
+    status: pass-exact-approved-plan-candidate
+  contingency_and_rollback:
+    required: true
+    evidence: implementation-plan.md and release-plan.md
+  ehr: not-triggered-no-exceptional-condition-identified
+
+scope_boundary:
+  repository_provider_adapters_factory_types_tests_docs: >-
+    authorized-only-after-adopted-plan-merges-to-develop-and-VOC-105-F3-is-complete-
+    effective
+  schema_or_public_API_expansion: prohibited
+  staging_or_production_feature_enablement: prohibited
+  provider_account_contract_spend_or_credentials: prohibited
+  github_cloudflare_settings_or_secrets: prohibited
+  dispatch_deployment_D1_DNS_traffic: prohibited
+  production_or_learner_data: prohibited
+  A1_milestone_completion_claim: prohibited-until-separate-live-evidence
+
+inherited_holds:
+  - id: VOC-080-HOLD-01
+    status: held
+    action: production-traffic-or-production-D1-migrations
+  - id: VOC-080-HOLD-02
+    status: held
+    action: production-learner-data-access-export-transform-or-delete
