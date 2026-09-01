@@ -21,7 +21,7 @@
 - Covers: `VOC-117-AC-02`
 - Preconditions: Waiter and marker helper exist in the test file.
 - Procedure: Exercise a marker already present in `record.output`, a marker split across stdout chunks, an exact marker followed by extra output, and a positive startup near but below the finite bound. Inspect listener/timer cleanup after resolve, reject, and timeout.
-- Expected result: Exact marker resolves once, split/buffered output is accepted, unrelated output is ignored, and every waiter path removes temporary resources.
+- Expected result: Exact marker resolves once, split/buffered output is accepted, unrelated output is ignored, and every waiter settlement removes temporary resources.
 - Evidence: `VOC-117-EV-02`
 
 ## VOC-117-TEST-03 — Bounded missing/wrong/early readiness negatives
@@ -36,8 +36,8 @@
 
 - Covers: `VOC-117-AC-04`
 - Preconditions: Clean disposable copy of the exact candidate; mutation commands recorded but never committed.
-- Procedure: One at a time: remove marker emission; rename marker; emit the exact marker in two stdout chunks; emit a split marker with a missing/altered byte; move marker before `process.on`; replace waiter call with `await delay(75)`; change expected 23 or 24. Run focused tests and source/order audit after each mutation, restoring from the clean copy.
-- Expected result: Correctly split exact output passes; missing/wrong/altered/order mutations fail bounded readiness/order controls; delay mutation fails the no-fixed-delay audit; changed expected code fails the outcome assertion; clean candidate passes and no mutation remains.
+- Procedure: One at a time: remove marker emission; rename marker; emit the exact marker in two stdout chunks; emit a split marker with a missing/altered byte; move marker before `process.on`; replace waiter call with `await delay(75)`; change expected 23 or 24. Run the pre-spawn source-order assertion, focused tests, and no-fixed-delay audit after each mutation, restoring from the clean copy.
+- Expected result: Correctly split exact output passes; missing/wrong/altered marker mutations fail bounded readiness; the marker-before-handler mutation fails the deterministic source-order assertion before spawn; delay mutation fails the no-fixed-delay audit; changed expected code fails the outcome assertion; clean candidate passes and no mutation remains.
 - Evidence: `VOC-117-EV-04`
 
 ## VOC-117-TEST-05 — Runtime, command, discovery, and exact path preservation

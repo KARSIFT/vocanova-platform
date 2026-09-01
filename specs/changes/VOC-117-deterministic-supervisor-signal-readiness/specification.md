@@ -42,7 +42,8 @@ settled child.
 - One test-only bounded readiness waiter in
   `scripts/foundation/local-development-supervisor.test.mjs`.
 - A unique sentinel fixture for both parameterized signal cases.
-- Exact signal-handler-before-sentinel ordering.
+- Exact signal-handler-before-sentinel ordering, with a pre-spawn source-order
+  assertion that proves the registration token precedes the marker token.
 - Bounded timeout, wrong/missing sentinel, early-exit, split-output, and cleanup
   negatives.
 - Isolated mutation checks for readiness order, fixed-delay regression, and exit-code
@@ -60,11 +61,15 @@ main promotion, launch, retries, or issue closure.
 ## Functional requirements
 
 1. The signal fixture registers exactly its parameterized handler before writing one
-   exact ready sentinel to stdout.
+   exact ready sentinel to stdout. Before spawning it, the test finds exactly one
+   handler-registration token and one marker-emission token in the generated source
+   and asserts that registration precedes emission; this must fail an early-marker
+   mutation without relying on process scheduling.
 2. The parent waits for that sentinel through the supervised child's existing stream
    and buffered output; it does not sleep a fixed number of milliseconds.
 3. The waiter has a finite declared timeout of at most 5,000 ms, handles split chunks,
-   and cleans all listeners/timers on success and failure.
+   and cleans all listeners/timers on every settlement (success, error, early exit,
+   or timeout).
 4. Missing/wrong readiness and child error/early exit reject with a bounded,
    fixture-specific diagnostic and leave no child or timer running after cleanup.
 5. SIGINT expects exit code 23 and SIGTERM expects exit code 24. `stopAll` remains

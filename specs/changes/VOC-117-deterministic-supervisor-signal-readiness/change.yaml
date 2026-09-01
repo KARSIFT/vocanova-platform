@@ -71,17 +71,22 @@ requirements:
       child-ready handshake for each SIGINT and SIGTERM fixture. Each fixture must
       install its exact signal handler first, emit one unique exact ready sentinel
       only after handler installation, and remain alive until the parent signals it.
-      The parent must await that sentinel before calling stopAll; elapsed time alone
-      must not be accepted as readiness.
+      A deterministic source-order assertion must find exactly one handler-
+      registration token and one marker-emission token in each generated fixture,
+      with the registration index strictly before the emission index; this catches
+      an early-marker mutation without relying on process scheduling. The parent
+      must await that sentinel before calling stopAll; elapsed time alone must not
+      be accepted as readiness.
   - id: VOC-117-D03
     statement: >-
       Add a test-only bounded waiter that consumes the supervised child's existing
       stdout stream and any already-buffered record output, handles split chunks,
       resolves only on the exact sentinel, rejects on child error or exit before
       readiness with the observed outcome, and removes its listeners and timer on
-      every resolution. Its positive timeout must be a declared finite bound of no
-      more than 5,000 ms; it must not poll with an unbounded loop or use a fixed
-      sleep as a substitute for the handshake.
+      every settlement (success, error, early exit, or timeout). Its positive
+      timeout must be a declared finite bound of no more than 5,000 ms; it must not
+      poll with an unbounded loop or use a fixed sleep as a substitute for the
+      handshake.
   - id: VOC-117-D04
     statement: >-
       Preserve the existing signal assertions exactly in meaning for both signals:

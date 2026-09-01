@@ -24,7 +24,8 @@ plan evidence never transfers.
 2. Add a test-only `waitForChildReady` helper that observes the supervised child's
    stdout stream, checks already-buffered `record.output`, joins split chunks, and
    handles exact marker, child error/early exit, and timeout outcomes. Dispose all
-   listeners and timers exactly once on every path.
+   listeners and timers exactly once on every settlement (success, error, early exit,
+   or timeout).
 3. Update the existing parameterized SIGINT/SIGTERM fixtures so each registers its
    requested handler before writing the marker. Replace only `await delay(75)` with
    `await waitForChildReady(child)`, retaining `stopAll(signal)`, `forced === false`,
@@ -32,9 +33,12 @@ plan evidence never transfers.
 4. Add bounded missing-marker, wrong-marker, early-exit, split-chunk, and buffered-
    marker coverage. Keep `finally { await children.stopAll(); }` or equivalent
    cleanup for every spawned negative fixture.
-5. Add deterministic source/order and disposable mutation checks. A marker-before-
-   handler mutation, missing/renamed marker, fixed-delay replacement, or changed
-   expected code must fail its named control; discard all mutation copies.
+5. Add a deterministic source-order assertion that finds exactly one handler-
+   registration token and marker-emission token in each generated fixture and proves
+   registration precedes emission before spawning a child. Add disposable mutation
+   checks: marker-before-handler, missing/renamed or altered marker, fixed-delay
+   replacement, and changed expected code must fail their named controls; discard all
+   mutation copies.
 
 ## Components and preservation
 
@@ -76,9 +80,10 @@ The child may emit the marker before a test-side stream listener is attached; ch
 the supervised record's already-buffered output closes that race. Chunks may split the
 marker; incremental accumulation must handle it. A waiter that forgets cleanup can
 keep Node alive; listener/timer disposal and bounded negative tests make that visible.
-A marker emitted before handler registration would preserve the original race; static
-ordering and disposable mutation checks must fail it. A changed production source or
-workflow would expand scope and risk and is a hard planning stop.
+A marker emitted before handler registration would preserve the original race; the
+pre-spawn source-order assertion and disposable mutation checks must fail it. A
+changed production source or workflow would expand scope and risk and is a hard
+planning stop.
 
 ## Action boundary
 

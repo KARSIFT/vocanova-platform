@@ -33,7 +33,9 @@ No fixed 75-ms precondition remains.
 
 The test-only waiter has a declared finite timeout no greater than 5,000 ms, sees an
 already-buffered sentinel, joins split stdout chunks, resolves exactly once, and
-cleans listeners/timer on every outcome.
+cleans listeners/timer on every settlement. Each generated fixture has exactly one
+handler-registration token and one marker-emission token, with a deterministic source
+order assertion proving registration precedes emission.
 
 ## VOC-117-AC-03 — Negative readiness cases cannot hang or leak
 
@@ -55,10 +57,10 @@ an active timer, listener, process, or port, and no internal retry masks the fai
 
 In a disposable copy, removing/renaming the marker or splitting it with a missing or
 altered byte fails bounded readiness; correctly splitting the exact marker across
-stdout chunks passes; emitting it before handler installation fails the order check;
-restoring the former fixed delay fails the no-fixed-delay audit; and changing either
-expected exit code fails the outcome assertion. The canonical candidate passes after
-the copy is discarded.
+stdout chunks passes; emitting it before handler installation fails the deterministic
+source-order check before any child is spawned; restoring the former fixed delay fails
+the no-fixed-delay audit; and changing either expected exit code fails the outcome
+assertion. The canonical candidate passes after the copy is discarded.
 
 ## VOC-117-AC-05 — Runtime and foundation semantics are preserved
 
