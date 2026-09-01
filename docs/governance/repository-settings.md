@@ -43,15 +43,26 @@ are canonical evidence. The inverse one-field payload restores `false`. Enabling
 setting deletes the source branch after a future merged pull request; it does not merge
 a pull request, protect a branch, delete existing branches, or deploy anything.
 
-The enabled setting also affects the short-lived head used for required
-post-promotion history synchronization. After a reviewed `develop` -> `main` release
-merge, branch finalization uses a short-lived branch from current `develop`, merges
-current `main` ancestry, and merge-commits the reviewed PR back into `develop`.
-Permanent `main` is never the PR head. Evidence must prove `main` is an ancestor of
-`develop`, `develop` is zero commits behind `main`, and record the short-lived head's
-exact SHA and recreation command before GitHub may automatically delete it. This loop
-does not change repository settings and does not deploy or invoke Cloudflare; no
-manual or permanent-branch deletion is part of it.
+The enabled setting means both release and synchronization PRs require disposable
+heads. A release preparer freshly freezes `origin/main` and `origin/develop`, proves
+frozen `main` is their merge base with zero main-only commits, and creates
+`release/voc-106-<frozen-develop-short-sha>` as an exact SHA/tree alias of frozen
+develop. The aggregate compare contains no extra commit or tree. That immutable
+short-lived head—not permanent `develop`—targets `main` through a merge commit whose
+prospective and actual trees equal frozen develop/head.
+
+The ref and draft PR are one attempt. Drift closes and abandons it without ref
+deletion or mutation; the next attempt uses a freshly frozen collision-free name and
+fresh evidence. A pre-existing name fails closed unless proved the untouched head of
+the same attempt; no foreign ref is adopted, overwritten, force-updated, or deleted.
+Post-promotion history synchronization uses a separate short-lived head from current
+`develop` that merges current `main` ancestry and merge-commits into `develop`.
+Evidence proves release-tree
+equality, `main` ancestry, and zero behind. GitHub may automatically delete only
+successfully merged short-lived release and synchronization heads after their names,
+exact SHAs, trees, readbacks, and nonexecuted recreation commands are recorded; it
+must never target permanent `develop` or `main`. This loop does not change settings,
+manually delete a branch, deploy, or invoke Cloudflare.
 
 The same read-only observation records dependency/vulnerability alerts enabled. This
 is distinct from the disabled Dependabot security-update automation. GitHub-hosted
@@ -185,7 +196,8 @@ request can rewrite is not sufficient protection.
 Configure `main`:
 
 - include all `develop` protections;
-- accept only release pull requests from `develop` or the documented emergency path;
+- accept only release pull requests from the documented immutable exact short-lived
+  alias of frozen `develop`, or the documented emergency path;
 - require release, staging, migration, rollback, and health-check gates;
 - enforce strengthened R3 gates and the complete R4 evidence contract without a
   standing founder/steward requirement caused solely by risk class; separately named

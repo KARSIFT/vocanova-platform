@@ -95,17 +95,33 @@ Plan PRs require independent review too. Record a structured verdict bound to th
 exact candidate revision before adoption. GitHub Actions does not call an AI reviewer;
 the reviewer runs separately and its evidence is attached to the pull request.
 
-After a reviewed `develop` -> `main` release merge, branch finalization is not
-complete until post-promotion history synchronization returns that exact `main`
-ancestry to `develop`. Use a short-lived synchronization branch based on current
-`develop`, merge current `main` into it, and merge its independently reviewed pull
-request into `develop` with a merge commit. Never use permanent `main` itself as the
-pull-request head while automatic source-branch deletion is enabled. Before closure,
-prove `main` is an ancestor of `develop` and `develop` is zero commits behind `main`.
-This repository-history loop does not change repository settings and does not deploy
-or authorize Cloudflare or any other live-system action. GitHub may automatically
-delete only the merged short-lived synchronization head under the existing setting;
-record its exact SHA, post-merge readback, and recreation command.
+For a reviewed release, freshly freeze `origin/main` and `origin/develop` and create
+`release/voc-106-<frozen-develop-short-sha>` at the exact frozen develop SHA and tree.
+Frozen `main` must be the merge base with zero main-only commits; the aggregate
+compare must contain no extra commit or tree. The immutable short-lived head targets
+`main` through an identifiable merge-commit PR, and its prospective and actual merge
+trees must equal the frozen develop/head tree. Permanent `develop` is never the PR
+head.
+
+One release ref and draft PR are one immutable attempt. Any protected-ref, head,
+base, merge-base, tree, compare, PR-metadata, check, policy-evidence, or reviewed-SHA
+drift invalidates the binder. Close and abandon that attempt without deleting or
+rewriting its ref, then freeze again and use a new collision-free SHA-derived name
+and fresh PR/evidence. Before creating a release ref, fail if its name exists unless
+it is proved to be the untouched head of that same attempt; never adopt, overwrite,
+force-update, or delete another PR or actor's ref.
+
+After the reviewed release merge, branch finalization is not complete until a
+separately reviewed short-lived synchronization branch based on current `develop`
+merges current `main` ancestry and merge-commits its PR into `develop`. Permanent
+`main` is never that PR's head. Before closure, prove the actual release merge tree
+equals the frozen develop tree, `main` is an ancestor of `develop`, and `develop` is
+zero commits behind `main`. Record each successfully merged short-lived head's name,
+exact SHA, tree, post-merge readback, and nonexecuted recreation command. GitHub may
+automatically delete only those successfully merged release and synchronization
+heads, never permanent `develop` or `main`. This repository-history loop does not
+change settings, manually delete a branch, deploy, or authorize any live-system
+action.
 
 ## External orchestration
 
@@ -228,8 +244,9 @@ Do not invent or report an unavailable check as passing.
 
 ## Release and deployment authority
 
-There is no current workflow that promotes `develop` to `main`, opens a release
-approval issue, or advances a package. Promotion is a separately reviewed pull request.
+There is no current workflow that promotes a frozen develop candidate to `main`, opens
+a release approval issue, or advances a package. Promotion is a separately reviewed
+pull request from the immutable short-lived release alias described above.
 The previous automatic-release delegation remains historical evidence but has no
 executable workflow after VOC-078-T01. The required post-promotion history
 synchronization is likewise a separately reviewed repository-only pull request; it is

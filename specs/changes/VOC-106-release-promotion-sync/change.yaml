@@ -35,14 +35,15 @@ approval_status: adopted
 implementation_authorized: true
 implementation_authority_status: >-
   authorized-by-exact-plan-candidate-review-and-operator-adoption-only-for-the-
-  declared-repository-history-pr-sequence; effective-after-this-bookkeeping-revision-
-  exact-review-normal-plan-merge-and-fresh-per-pr-exact-evidence
+  declared-repository-history-pr-sequence; effective-after-reviewed-VOC-114-
+  correction-and-pending-fresh-per-pr-exact-evidence
 implementation_pull_request_count: 2
 multiple_pull_request_rationale: >-
   The release promotion and the post-promotion synchronization are one coherent
   branch-finalization outcome, but DOC-16 requires two separately reviewed protected-
-  branch PRs in a hard order: current `main` does not exist until the release merge,
-  and the synchronization head must be short-lived and based on current `develop`.
+  branch PRs in a hard order: the promoted `main` result and exact ancestry do not
+  exist until the release merge, and the synchronization head must be short-lived and
+  based on current `develop`.
   The release is rollback-safe before synchronization, whereas synchronization cannot
   be prepared truthfully beforehand. This fixed protected-history/action boundary,
   not component count or convenience, justifies the second PR despite the added
@@ -53,9 +54,10 @@ rollback_required: true
 
 objective: >-
   Make the then-current independently verified integrated `develop` history canonical
-  on `main` through a reviewed merge commit, then close the required repository-history
-  loop by merging that exact current `main` ancestry through a reviewed short-lived
-  synchronization branch into `develop`, without any settings or live-system action.
+  on `main` through a reviewed merge commit from an exact immutable short-lived alias,
+  then close the required repository-history loop by merging that exact current
+  `main` ancestry through a reviewed short-lived synchronization branch into
+  `develop`, without any settings or live-system action.
 
 requirements:
   - id: VOC-106-D00
@@ -73,44 +75,53 @@ requirements:
       main-only/develop-only commits. It is only traceability evidence. After this
       plan is adopted and before release review, a new release preparer must fetch
       both refs and freeze their exact SHAs, tree IDs, merge base, divergence, and
-      aggregate compare in the release PR.
+      aggregate compare in the release PR. Frozen main must be the merge base with
+      zero main-only commits.
   - id: VOC-106-D02
     statement: >-
-      A separately reviewed `develop` to `main` PR must use an identifiable merge
-      commit. Its exact frozen source/base, checks, reviewer verdicts, R4 decision,
-      impact, contingency, and rollback evidence must be recorded. Any movement of
-      either protected ref, PR head/base, merge base, compared tree, or required
-      governance/workflow evidence invalidates the freeze and every exact-SHA review;
-      the release must return to a fresh freeze and fresh evidence.
+      Create `release/voc-106-<frozen-develop-short-sha>` as a ref-only exact alias
+      of the freshly frozen develop SHA and tree. Before review, prove name absence or
+      same-attempt ownership, head/develop SHA and tree equality, zero extra head
+      commits, and no aggregate-compare commit or tree beyond frozen develop. Its
+      separately reviewed PR targets main and uses an identifiable merge commit whose
+      prospective and actual tree equal frozen develop/head. Record exact checks,
+      reviewer verdicts, R4 decision, impact, contingency, and rollback evidence.
   - id: VOC-106-D03
     statement: >-
-      Release finalization is incomplete until a short-lived branch from the then-
-      current `develop` merges the then-current `main` ancestry and its separately
-      reviewed PR merge-commits into `develop`. Permanent `main` is never the PR
-      head. Its own fresh freeze and exact review are required; movement after the
-      release invalidates its synchronization evidence.
+      A release ref and draft PR are one immutable attempt. Any protected-ref, head,
+      base, merge-base, tree, compare, PR metadata, required check, policy evidence,
+      or reviewed-revision drift invalidates the complete binder. Close and abandon
+      the draft PR/ref without deletion or mutation, then start a fresh SHA-named ref
+      and PR with all-new evidence. A collision fails closed unless proved the
+      untouched head of the same attempt; never adopt, overwrite, force-update, or
+      delete another PR or actor's ref.
   - id: VOC-106-D04
     statement: >-
-      Before closure, read back the final refs and prove `main` is an ancestor of
-      `develop` and `develop` is zero commits behind `main`. Record the exact
-      release merge SHA, synchronization branch tip, synchronization merge SHA,
-      post-merge refs, validation/check results, distinct reviewer and merger actors,
-      and the recreation command for an automatically deleted short-lived head.
+      Release finalization is incomplete until a short-lived branch from then-current
+      develop merges then-current main ancestry and its separately reviewed PR
+      merge-commits into develop. Permanent main is never the sync PR head. Its own
+      fresh freeze and exact review are required; movement after release invalidates
+      its synchronization evidence.
   - id: VOC-106-D05
     statement: >-
-      This package authorizes no repository-settings mutation, manual branch deletion,
-      Cloudflare or DNS action, workflow dispatch, deployment, production/data/secret
-      access, migration, traffic change, spending, or launch. If GitHub would delete
-      permanent `develop` as a release PR head, the release is blocked; this package
-      does not authorize a setting workaround. Existing automatic deletion may affect
-      only an already-merged short-lived synchronization head with recorded recovery.
+      Before closure, read back final refs and prove the actual release merge tree
+      equals frozen develop/head, both permanent branches remain, main is an ancestor
+      of develop, and develop is zero commits behind main. Record release head name,
+      SHA, tree, release merge SHA, synchronization head/tip/tree and merge SHA,
+      post-merge refs, checks, actors, and nonexecuted recreation commands. Existing
+      automatic deletion may affect only successfully merged short-lived release and
+      synchronization heads, never permanent develop or main.
   - id: VOC-106-D06
     statement: >-
-      Plan, promotion, and synchronization each require different non-author exact-
-      revision reviewers, resolution of every blocker, and a separately authorized
-      non-author merger. The planner or PR builder cannot approve or merge its own
-      revision. `automatic_merge_allowed: true` is read-only package policy metadata,
-      never an executor or a substitute for these gates.
+      This package authorizes no repository-settings query or mutation, manual branch
+      deletion, force-update of an attempt/permanent/foreign ref, Cloudflare or DNS
+      action, workflow dispatch, deployment, production/data/secret access, migration,
+      traffic change, spending, or launch. Plan, promotion, and synchronization each
+      require different non-author exact-revision reviewers, resolution of every
+      blocker, and a separately authorized non-author merger.
+      The planner or PR builder cannot approve or merge its own revision.
+      `automatic_merge_allowed: true` is read-only package policy metadata, never an
+      executor or a substitute for these gates.
 
 owners:
   decision: accountable-repository-owner-operator-at-adoption
@@ -165,9 +176,7 @@ protected_areas:
 implementation:
   authorized: true
   required: true
-  status: >-
-    authorized-pending-bookkeeping-revision-exact-review-normal-plan-merge-and-fresh-
-    exact-release-freeze
+  status: authorized-pending-fresh-exact-release-freeze-and-immutable-attempt
   target_branches:
     - main
     - develop
@@ -179,41 +188,51 @@ implementation:
 action_specific_authority:
   required: true
   authorization_status: >-
-    adopted-for-the-declared-repository-history-sequence-but-pending-this-bookkeeping-
-    revision-exact-review-normal-plan-merge-and-per-pr-exact-evidence
+    adopted-and-effective-for-the-declared-repository-history-sequence-after-reviewed-
+    VOC-114-correction-but-pending-per-pr-exact-evidence
   actions:
     - id: VOC-106-AUTH-RELEASE-00
-      action: reviewed-merge-commit-promotion-of-fresh-frozen-develop-into-main
+      action: >-
+        reviewed-merge-commit-promotion-of-exact-immutable-short-lived-alias-of-
+        fresh-frozen-develop-into-main
       accountable_role: separate-authorized-non-author-merge-actor
       required_evidence: >-
-        adopted package, exact current base/source freeze, required checks, R4 and
-        specialist reviews bound to the exact release head, resolved blockers,
-        eligible readback where applicable, and proof that permanent develop remains
-        safe without settings mutation
+        adopted package and VOC-114 correction, exact current main/develop freeze,
+        main-as-merge-base and zero-main-only proof, collision-free exact head SHA/tree
+        alias, no extra compare content, prospective-tree equality, required checks,
+        R4 and specialist reviews bound to the exact release head, resolved blockers,
+        and eligible readback where applicable
       completion_condition: >-
-        identifiable release merge commit exists and current main points to it with
-        no repository-settings or live-system action
+        identifiable release merge commit exists, current main points to it, actual
+        merge tree equals frozen develop/head, both permanent refs remain, and no
+        repository-settings, manual-deletion, or live-system action occurred
       expiry_condition: >-
-        any source/base/PR/tree/merge-base/governance evidence movement, failed check,
-        unresolved blocker, missing authority, or permanent-branch deletion risk
+        any source/base/PR/tree/merge-base/compare/check/policy/review movement, name
+        collision not proved same-attempt, failed check, unresolved blocker, missing
+        authority, or permanent-branch deletion risk
     - id: VOC-106-AUTH-SYNC-00
       action: reviewed-merge-commit-of-current-main-ancestry-into-develop-via-short-lived-head
       accountable_role: separate-authorized-non-author-merge-actor
       required_evidence: >-
-        post-release fresh refs, exact synchronization branch tip, required checks,
-        exact-SHA review, merge-commit method, post-merge ancestry/behind proof, and
-        recovery evidence if GitHub automatically deletes the short-lived head
+        post-release fresh refs, proof the synchronization branch began at current
+        develop and contains current main, exact branch tip and tree, required checks,
+        exact-SHA review, merge-commit method, post-merge permanent-ref and
+        ancestry/behind proof, and recovery evidence if GitHub automatically deletes
+        the successfully merged short-lived head
       completion_condition: >-
         main is an ancestor of develop and develop is zero commits behind main
       expiry_condition: >-
-        any post-release ref movement, head/base drift, failed check, unresolved
-        blocker, permanent-head use, or action beyond the short-lived source head
+        any post-release ref movement, head/base/tree/check/review drift, failed check,
+        unresolved blocker, permanent-head use, or action beyond the short-lived
+        source head
 
 external_effects:
   product_behavior: prohibited
   workflow_changes: prohibited
   repository_settings: prohibited
+  repository_settings_query: prohibited
   manual_branch_deletion: prohibited
+  force_push: prohibited
   cloudflare: prohibited
   dns: prohibited
   deployment: prohibited
@@ -226,22 +245,20 @@ external_effects:
 
 release:
   required: true
-  mode: separately-reviewed-repository-only-develop-to-main-promotion-then-history-sync
+  mode: >-
+    separately-reviewed-repository-only-short-lived-exact-develop-alias-to-main-
+    promotion-then-history-sync
   deployment: prohibited
   migration_required: false
   rollback_required: true
   issue_closure: after-promotion-sync-final-readback-and-complete-evidence
 
-repository_adoption_status: >-
-  adopted-pending-bookkeeping-revision-exact-review-normal-plan-merge-and-applicable-
-  postmerge-checks
+repository_adoption_status: adopted-and-effective-after-reviewed-VOC-114-correction
 adoption_pr: 192
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/192#issuecomment-5480127406
 
 ehr: not-triggered
 blocking_reasons:
-  - adoption-bookkeeping-revision-exact-review-pending
-  - normal-plan-merge-and-applicable-postmerge-checks-pending
   - fresh-release-freeze-and-exact-review-pending
   - separately-reviewed-promotion-pending
   - fresh-synchronization-freeze-and-exact-review-pending

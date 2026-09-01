@@ -52,15 +52,33 @@ hosted enforcement control is configured. Automatic deletion of merged branches 
 enabled as the one VOC-092 setting change; it is not branch protection or merge
 automation. See the [current point-in-time settings record](../docs/governance/repository-settings-current.yaml).
 
-Branch finalization after a release also requires post-promotion history
-synchronization. After `develop` is merge-committed to `main`, a separately reviewed
-short-lived synchronization branch must merge current `main` ancestry and then
-merge-commit back to `develop`; permanent `main` is never the pull-request head.
-Completion evidence proves `main` is an ancestor of `develop` and `develop` is zero
-commits behind `main`. The loop does not change repository settings and does not
-deploy or invoke Cloudflare. The enabled source-branch setting may automatically
-delete only the merged short-lived head after its exact SHA and recreation command
-are recorded.
+Repository release finalization uses two immutable, separately reviewed short-lived
+attempts. Freshly fetch and freeze `origin/main` and `origin/develop`, then require
+frozen `main` to be their merge base with zero main-only commits. Create
+`release/voc-106-<frozen-develop-short-sha>` as a ref-only alias of the exact frozen
+develop SHA: the ref SHA and tree must equal frozen develop, and the aggregate compare
+must contain no extra commit or tree. Its PR targets `main` and uses an identifiable
+merge commit; both the prospective and actual release-merge tree must equal the
+frozen develop/release-head tree.
+
+The release ref and draft PR are one immutable attempt. Any ref, PR metadata, merge
+base, tree, compare, check, policy-evidence, or reviewed-revision drift invalidates
+the complete binder. Close and abandon that attempt without deleting or rewriting
+its ref, then use a newly frozen SHA-derived name and fresh PR/evidence. Before ref
+creation, a name collision fails closed unless the existing ref is proved to be the
+untouched head of that same attempt; never adopt, overwrite, force-update, or delete
+another attempt or actor's ref.
+
+Post-promotion history synchronization then uses a separate short-lived branch based
+on current `develop` that merges current `main` ancestry and merge-commits its
+reviewed PR back to
+`develop`; permanent `main` is never the PR head. Completion proves the actual release
+merge tree equality, `main` ancestry of `develop`, and zero commits behind. Record
+each successfully merged short-lived head's name, exact SHA, tree, post-merge
+readback, and nonexecuted recreation command. The existing source-branch setting may
+automatically delete only those successfully merged release and synchronization
+heads—never permanent `develop` or `main`. This repository-history loop does not
+change settings, manually delete a branch, deploy, or invoke Cloudflare.
 
 Governance is role- and evidence-based across R0-R4. Every meaningful plan or
 implementation is built and independently reviewed by different human or AI roles, with

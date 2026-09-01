@@ -8,14 +8,29 @@ release on `main` plus completed `develop` history synchronization—not a deplo
 
 ## Scope and non-goals
 
-The release preparer opens a `develop` → `main` PR from a newly frozen current
-source/base. After its merge, a synchronization preparer creates a short-lived branch
-from current `develop`, merges current `main` into that branch, and opens its PR to
-`develop`; that PR uses a merge commit. Both PRs carry exact evidence and a different
-non-author review and merge actor.
+The release preparer freshly freezes current `origin/main` and `origin/develop`, then
+opens a `main`-targeted PR from
+`release/voc-106-<frozen-develop-short-sha>`. The short-lived head is a ref-only exact
+copy of the frozen develop SHA/tree. Frozen `main` is the merge base, main-only count
+is zero, the aggregate compare has no extra commit/tree, and the prospective and
+actual release merge tree equal frozen develop/head. Permanent `develop` is never the
+PR head.
 
-Excluded: authored product or workflow changes, repository settings, permanent-ref
-deletion, deployment/dispatch, Cloudflare/DNS, secrets, production or learner data,
+The release ref and draft PR are one immutable attempt. Any ref, PR metadata,
+topology, tree, compare, check, policy-evidence, or reviewed-revision drift closes and
+abandons that attempt without deleting or rewriting its ref. A new freshly frozen
+attempt requires a collision-free SHA-derived name and fresh evidence; an existing
+name fails closed unless proved the untouched head of that same attempt. No foreign
+PR/ref is adopted, overwritten, force-updated, or deleted.
+
+After release, a synchronization preparer creates a short-lived branch from current
+`develop`, merges current `main` into that branch, and opens its PR to `develop`; that
+PR also uses a merge commit. Both PRs carry exact evidence, a different non-author
+reviewer, and a separate authorized non-author merger.
+
+Excluded: authored product or workflow changes, repository-settings query or
+mutation, manual or permanent-ref deletion, deployment/dispatch, Cloudflare/DNS,
+secrets, production or learner data,
 D1 migration, traffic, spending, and launch. A permanent-`develop` deletion risk is
 a stop condition, not implied authority to alter settings.
 

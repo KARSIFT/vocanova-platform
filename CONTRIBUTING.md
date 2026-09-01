@@ -47,18 +47,31 @@ Create working branches from the appropriate protected branch using these prefix
 - `hotfix/` for an approved emergency path
 
 Use a stable `VOC-###` identifier in the branch name when one exists. Work in an
-isolated branch or worktree and target `develop`; release pull requests promote
-`develop` to `main`. Working branches are normally squash-merged. Release promotions
-use an identifiable merge commit.
+isolated branch or worktree and target `develop`. Working branches are normally
+squash-merged. A release preparer freshly freezes `origin/main` and
+`origin/develop`, proves frozen `main` is their merge base with zero main-only
+commits, and creates `release/voc-106-<frozen-develop-short-sha>` as an exact ref-only
+alias of the frozen develop SHA and tree. The aggregate compare must contain no extra
+commit or tree. That short-lived head targets `main`; permanent `develop` does not.
+The release uses an identifiable merge commit whose prospective and actual trees
+equal the frozen develop/head tree.
 
-After that release merge, complete post-promotion history synchronization before
-calling the branches finalized: create a short-lived branch from current `develop`,
-merge current `main` ancestry into it, and merge the reviewed synchronization PR back
-to `develop` with a merge commit. Do not use permanent `main` as the PR head. Verify
-that `main` is an ancestor of `develop` and that `develop` is zero commits behind
-`main`. This is repository-history maintenance; it does not change repository
-settings or deploy anything. Automatic source-branch deletion may remove only the
-merged short-lived head, whose exact SHA and recovery command must be recorded.
+The release ref and its draft PR are one immutable attempt. Any protected-ref, PR,
+merge-base, tree, compare, check, policy-evidence, or reviewed-SHA drift invalidates
+the whole binder. Close and abandon it without deleting or rewriting its ref, then
+freeze again and create a fresh collision-free SHA-derived attempt. An existing name
+stops creation unless it is proved to be the untouched head of that same attempt;
+never adopt, overwrite, force-update, or delete another actor's ref.
+
+Post-promotion history synchronization starts after the release merge: create a
+separately reviewed short-lived branch from current `develop`, merge current `main`
+ancestry into it, and merge-commit its PR back to
+`develop`; permanent `main` is not its head. Verify actual release-tree equality,
+`main` ancestry of `develop`, and zero commits behind. Record both successfully
+merged short-lived heads' names, SHAs, trees, post-merge readbacks, and nonexecuted
+recreation commands. Automatic source-branch deletion may remove only those merged
+short-lived heads, never permanent `develop` or `main`. This repository-history work
+does not change repository settings, manually delete a branch, or deploy anything.
 
 For one approved user or business outcome, choose the largest safe coherent delivery
 unit across backend, frontend, contracts, tests, documentation, rollback, and

@@ -1,13 +1,13 @@
 ---
 id: DOC-10
 title: VocaNova Development Workflow
-version: 1.3
+version: 1.4
 document_type: engineering-workflow
 status: approved
 owner: founder
 canonical_path: docs/operations/10-development-workflow.md
 approved_at: 2026-07-21
-last_reviewed_at: 2026-08-24
+last_reviewed_at: 2026-09-01
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -99,8 +99,10 @@ oracles, not an executable second runtime.
 
 The intended topology has two permanent branches: `develop` (default integration branch and future
 staging source) and `main` (production source, accepting governed release changes plus emergency
-hotfixes). No `release/*` branch is planned for MVP; a `develop → main` PR represents a release
-candidate, subject to the live authority and release-class rules. Automatic staging deployment,
+hotfixes). A release candidate uses one disposable
+`release/voc-106-<frozen-develop-short-sha>` ref as the PR head, subject to the live
+authority and release-class rules; this does not create a third permanent or reusable
+release branch. Automatic staging deployment,
 automatic merge, and production deployment are not technically active as of 2026-07-21; consult
 [the A-003 transition state](../governance/a003-transition-state.yaml) rather than inferring
 activation from this topology.
@@ -126,18 +128,31 @@ lifecycle grants no dispatch or review judgment.
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->
 
 ```text
-feature/* ──PR──► develop ──release PR──► main
-                    ▲                       │
-                    └── reviewed sync PR ──┘
+feature/* ──PR──► develop ── exact short-lived release head ──PR──► main
+                    ▲                                             │
+                    └────────── reviewed short-lived sync PR ─────┘
                     │                       │
           Held Cloudflare staging    Production-history source
 ```
 
 Task branches: `<type>/<issue-number>-<short-description>` (`feature/`, `fix/`, `hotfix/`,
 `refactor/`, `chore/`, `docs/`, `test/`, `security/`, `revert/`). Squash merge only into `develop`;
-merge commit for `develop → main`. Rebase before final review; `git push --force-with-lease`, never
+merge commit for release-head to `main`. Rebase before final review; `git push --force-with-lease`, never
 plain `--force`. These mechanics do not grant merge or release authority; that authority comes from
 canonical governance.
+
+Freshly fetch and freeze `origin/main` and `origin/develop`. Frozen `main` must be
+their merge base with zero main-only commits. The release head is a ref-only exact
+copy of the frozen develop SHA and tree, and the aggregate compare contains no extra
+commit or tree. Its PR targets `main`; the prospective and actual release-merge tree
+must equal the frozen develop/head tree.
+
+The release ref and draft PR are one immutable attempt. Ref, PR, merge-base, tree,
+compare, check, policy-evidence, or reviewed-SHA drift closes and abandons the attempt
+without deleting or rewriting its ref. Freeze again and use a new collision-free
+SHA-derived name and all-new evidence. An existing name fails closed unless it is
+proved the untouched head of that same attempt; never adopt, overwrite, force-update,
+or delete another actor's ref.
 
 The release PR alone does not finish branch finalization. Post-promotion history
 synchronization starts a short-lived branch from current `develop`, merges current
@@ -145,8 +160,9 @@ synchronization starts a short-lived branch from current `develop`, merges curre
 `develop`; permanent `main` is never the PR head. Final evidence requires `main` to be
 an ancestor of `develop` and `develop` to be zero commits behind `main`. The loop does
 not change repository settings and does not deploy or invoke Cloudflare. Existing
-automatic deletion may remove only the merged short-lived head after its exact SHA
-and recreation command are recorded.
+automatic deletion may remove only successfully merged short-lived release and
+synchronization heads after their names, exact SHAs, trees, readbacks, and nonexecuted
+recreation commands are recorded; permanent `develop` and `main` are never targets.
 
 ## 4. Work hierarchy
 

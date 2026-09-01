@@ -1,12 +1,12 @@
 ---
 id: DOC-15
 title: Vocanova AI-Native Product and Engineering Operating Model
-version: 1.4
+version: 1.5
 status: approved
 owner: founder
 canonical_path: docs/operations/15-ai-native-product-and-engineering-operating-model.md
 approved_at: 2026-07-13
-last_reviewed_at: 2026-08-24
+last_reviewed_at: 2026-09-01
 review_cycle: quarterly
 supersedes: null
 related_documents:
@@ -31,7 +31,9 @@ related_decisions:
   - ADR-0004
   - ADR-0005
 revision_note: >
-  VOC-101 makes the unchanged least-privilege staging token an operator-revoked
+  VOC-114 makes release promotion use an immutable short-lived exact alias of freshly
+  frozen develop, with fail-closed collision/drift handling and short-lived-only
+  automatic deletion. VOC-101 makes the unchanged least-privilege staging token an operator-revoked
   standing credential valid until revoked, with fail-closed revocation and replacement
   handling. VOC-100 prospectively replaces the VOC-096 custom binder with a standard protected
   GitHub environment: manual SHA-bound dispatch, fresh non-author AI review receipt,
@@ -86,6 +88,18 @@ environment and environment secret names; no dispatch or deployment occurred.
 The least-privilege staging token is operator-controlled and valid until revoked.
 Ruflo has no credential, settings, dispatch, review, approval, or merge authority.
 Production and learner-data holds remain unchanged.
+
+**VOC-114 amendment (2026-09-01):** Current release preparation freshly freezes
+`origin/main` and `origin/develop`, requires frozen `main` as merge base with zero
+main-only commits, and creates `release/voc-106-<frozen-develop-short-sha>` as the
+exact frozen develop SHA/tree. This immutable short-lived head targets `main` and its
+prospective/actual merge tree equals the frozen candidate. Any ref, PR, topology,
+tree, compare, check, policy-evidence, or reviewed-SHA drift closes and abandons the
+attempt without deleting or rewriting its ref; a collision-free newly frozen attempt
+gets fresh evidence. Automatic deletion may affect only successfully merged
+short-lived release and synchronization heads, never permanent `develop` or `main`.
+Promotion, synchronization, settings, deployment, and live-system actions remain
+separate governed events.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
 VOC-101 changes only the token lifecycle: the least-privilege staging token is an
@@ -1569,14 +1583,18 @@ Targets `develop`.
 
 ### Release PR
 
-Promotes:
+Promotes the exact freshly frozen develop candidate through a disposable alias:
 
 ```text
-develop → main
+frozen develop SHA/tree → release/voc-106-<short-sha> → main
 ```
 
 Must include:
 
+- Frozen main/develop SHAs and trees, main-as-merge-base, and zero main-only proof.
+- Exact head/develop SHA/tree and aggregate-compare equality.
+- Collision/ownership proof and immutable-attempt invalidation record.
+- Prospective and actual release-merge tree equality.
 - Included `VOC-###` identifiers.
 - Release notes.
 - Migration summary.
@@ -1585,7 +1603,11 @@ Must include:
 - Staging verification.
 - Outstanding non-blocking issues.
 
-Requires founder approval.
+Permanent `develop` is not the PR head. Drift closes and abandons the draft attempt
+without ref deletion or mutation; a newly frozen collision-free attempt gets fresh
+evidence. The PR requires complete deterministic, R4/specialist, exact-review, and
+action-authority evidence plus a separate non-author merge actor under DOC-16. Risk
+class alone does not require founder approval.
 
 ### Emergency PR
 
@@ -1688,7 +1710,7 @@ new implementation revision followed by complete checks and fresh independent re
 | Implement an adopted task                            | Implementer role, different from its reviewer                                                                             |
 | Independently verify a plan or implementation        | Reviewer role with no write access to the reviewed revision                                                               |
 | Merge into `develop`                                 | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
-| Promote `develop` to `main`                          | Separately reviewed pull request; no current promotion workflow                                                           |
+| Promote a frozen develop candidate to `main`        | Separately reviewed PR from its immutable short-lived exact alias; no current promotion workflow                           |
 | Complete post-promotion history synchronization      | Separately reviewed short-lived-head PR merge-committed into `develop`; prove `main` ancestry and zero-behind readbacks   |
 | Deploy                                               | T10 held manual Cloudflare state machine exists; current manifest blocks before environment jobs/secrets                  |
 
@@ -1700,13 +1722,20 @@ model, or provider is not independence or authority. Model/provider choice may h
 evidence; an expressly applicable cross-model rule remains scoped evidence, not an
 approval source.
 
+The release row requires frozen `main` as merge base, zero main-only commits, an exact
+SHA/tree release alias, no extra compare content, and prospective/actual merge-tree
+equality. The release ref/PR is immutable: drift closes and abandons it without ref
+mutation or deletion; a new collision-free SHA-derived attempt receives fresh
+evidence. Permanent `develop` is never the release PR head.
+
 The synchronization row is repository-history finalization, not another promotion or
 deployment. The short-lived branch starts from current `develop`, merges current
 `main`, and is merge-committed back into `develop`; permanent `main` is never its PR
 head. Completion proves `main` is an ancestor of `develop` and `develop` is zero
 commits behind `main`. It does not change repository settings, deploy, or invoke
-Cloudflare. Existing automatic source deletion may remove only the merged short-lived
-head after its exact SHA and recreation command are recorded; manual or
+Cloudflare. Existing automatic source deletion may remove only successfully merged
+short-lived release and synchronization heads after names, exact SHAs, trees,
+readbacks, and nonexecuted recreation commands are recorded; manual or
 permanent-branch deletion is not authorized.
 
 R0-R4 are consequence classes, not personal-approval classes. R4 requires an explicit
@@ -1777,9 +1806,14 @@ Examples:
 
 ## 18.3 Main and release checks
 
-A release PR from `develop` to `main` must pass:
+A release PR from the immutable exact short-lived alias of frozen develop into `main`
+must pass:
 
 - Standard CI.
+- Frozen-main merge-base and zero-main-only proof.
+- Release-head/develop SHA/tree and aggregate-compare equality.
+- Collision/attempt ownership and drift invalidation proof.
+- Prospective and actual release-merge tree equality.
 - Staging deployment success.
 - Required staging smoke tests.
 - Migration readiness.
@@ -1788,9 +1822,12 @@ A release PR from `develop` to `main` must pass:
 - Confirmation that included changes are accepted.
 - Confirmation that no included change is blocked.
 - Claude release-risk review when configured.
-- Founder approval.
+- Complete action-specific authority and a separate non-author merger.
 
-Claude release review supplements but does not replace founder approval.
+Independent release review supplements but does not replace deterministic checks or
+action-specific authority. Automatic deletion may affect only the successfully merged
+short-lived release head after exact recovery evidence, never permanent `develop` or
+`main`.
 
 ---
 

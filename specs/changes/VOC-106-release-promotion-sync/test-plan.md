@@ -4,17 +4,25 @@
 
 - Covers: `VOC-106-AC-00`
 - Procedure: fetch both protected refs; record SHA/tree/merge-base/divergence/compare;
-  deliberately compare the recorded values after every review/check boundary.
-- Expected result: evidence is exact or discarded and freshly recreated after drift.
+  require frozen main as merge base and zero main-only commits; derive the exact
+  SHA-named release head; prove name absence/same-attempt ownership, head/develop
+  SHA/tree identity, no extra head commit or compare tree, and deliberately compare
+  every recorded value after each review/check boundary.
+- Expected result: the collision-free immutable alias is exact, or the attempt is
+  closed and abandoned without ref mutation/deletion and freshly recreated under a
+  new freeze, name, PR, checks, and reviews.
 - Evidence: `VOC-106-EV-01`
 
 ## VOC-106-TEST-01 — Reviewed release merge method and boundary
 
 - Covers: `VOC-106-AC-00`
-- Procedure: inspect exact PR metadata, required checks/reviews, merge method and
-  resulting commit; inspect the PR event’s workflow outcomes.
-- Expected result: merge commit only; R4 evidence complete; no deployment/dispatch or
-  settings action; permanent `develop` remains safe.
+- Procedure: synthesize the prospective merge without moving refs; inspect exact PR
+  metadata, required checks/reviews, merge method and resulting commit; compare both
+  prospective and actual merge trees with frozen develop/head; inspect the PR event's
+  workflow outcomes and permanent-ref readback.
+- Expected result: merge commit only and all three trees equal; R4 evidence complete;
+  no deployment/dispatch, settings query/mutation, manual deletion, or foreign/ref
+  rewrite; permanent `develop` and `main` remain present.
 - Evidence: `VOC-106-EV-01`
 
 ## VOC-106-TEST-02 — Short-lived synchronization construction
@@ -44,9 +52,14 @@ origin/develop` and `git rev-list --right-only --count origin/develop...origin/m
 ## VOC-106-TEST-05 — Scope and recoverability negative checks
 
 - Covers: `VOC-106-AC-02`
-- Procedure: read back settings/action audit and branch list; verify no settings,
-  dispatch, deployment, Cloudflare/DNS, secret/data, spend, or manual deletion action
-  occurred; if the short-lived head was automatically deleted, test the recorded
-  recreate syntax against its known SHA without executing it.
-- Expected result: only permitted repository history changes occurred.
+- Procedure: read back action audit and branch list; verify no settings query/mutation,
+  dispatch, deployment, Cloudflare/DNS, secret/data, spend, force update, or manual
+  deletion occurred; require permanent refs present. For each successfully merged
+  short-lived release/sync head, record name/SHA/tree and validate its nonexecuted
+  recreate syntax. Negative fixtures cover permanent/wrong heads, stale or diverged
+  refs, non-main merge base, nonzero main-only, wrong SHA/tree, extra commits/trees,
+  prospective/actual tree mismatch, name collision, moved PR/check/review evidence,
+  reuse/force-update after invalidation, and missing recovery evidence.
+- Expected result: only permitted repository history changes occur; every mutation
+  invalidates and only successfully merged short-lived heads are auto-delete eligible.
 - Evidence: `VOC-106-EV-05`

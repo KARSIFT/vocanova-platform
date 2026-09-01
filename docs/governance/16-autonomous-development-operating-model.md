@@ -1,13 +1,13 @@
 ---
 id: DOC-16
 title: Vocanova Autonomous Development Operating Model
-version: 3.4
+version: 3.5
 status: approved
 owner: founder
 canonical_path: docs/governance/16-autonomous-development-operating-model.md
 approved_at: 2026-07-13
 approval_evidence: PR-3-founder-approval-comment-4961029533-reviewed-commit-09f97341ff093fd20a70683d88b772e154979330
-last_reviewed_at: 2026-08-24
+last_reviewed_at: 2026-09-01
 review_cycle: quarterly
 supersedes: null
 folds_in:
@@ -19,10 +19,10 @@ folds_in:
   - VOC-082 (Provider-neutral distinct-agent role separation; adopted 2026-08-23, PR #110)
   - VOC-085 (Public repository settings truth and held activation boundary; adopted 2026-08-24, PR #126)
 revision_note: >
-  This v3.4 revision adds the coherent-outcome delivery default: one approved
-  package, one implementation pull request, and one minimum-sufficient task are the
-  normal safe unit for one outcome, while multi-PR delivery remains an explicit,
-  overhead-aware exception.
+  This v3.5 revision makes a release head an immutable short-lived exact alias of a
+  freshly frozen develop candidate, adds fail-closed collision and drift handling,
+  and limits automatic source deletion to successfully merged short-lived release
+  and synchronization heads. The v3.4 coherent-outcome delivery default remains.
 related_documents:
   - DOC-15
 related_decisions:
@@ -209,19 +209,32 @@ be a disguised hold on all R4 work.
 - Feature and change work occurs on short-lived isolated branches or worktrees.
 - Direct pushes to `develop` and `main`, unverified merges, and local production
   deployments are prohibited.
-- Working branches are normally squash-merged into `develop`. Release pull requests
-  promote `develop` to `main` with an identifiable merge commit. VOC-080-T10 installs
+- Working branches are normally squash-merged into `develop`. Release preparation
+  freshly freezes `origin/main` and `origin/develop`, requires frozen `main` as their
+  merge base with zero main-only commits, and creates
+  `release/voc-106-<frozen-develop-short-sha>` as an exact SHA/tree alias of frozen
+  develop. That immutable short-lived head, not permanent `develop`, targets `main`
+  with an identifiable merge commit whose prospective and actual tree equal the
+  frozen candidate/head tree. VOC-080-T10 installs
   a held Cloudflare publication state machine, but its committed manifest blocks
   before environment jobs and secrets; it creates no automatic branch-to-environment
   effect.
+- A release head and draft PR are one immutable attempt. Any ref, PR, merge-base,
+  tree, compare, check, policy-evidence, or reviewed-SHA drift invalidates the binder;
+  close and abandon it without deleting or rewriting its ref. A new attempt requires
+  a freshly frozen, collision-free SHA-derived name and fresh evidence. An existing
+  name fails closed unless proved the untouched head of that same attempt; no other
+  PR or actor's ref may be adopted, overwritten, force-updated, or deleted.
 - A release merge alone does not complete branch finalization. Post-promotion history
   synchronization uses a short-lived branch from current `develop`, merges the exact
   current `main` ancestry into that branch, and merge-commits its separately reviewed
   PR into `develop`. Permanent `main` is never that PR's head. Final evidence proves
   `main` is an ancestor of `develop` and `develop` is zero commits behind `main`.
   This loop does not change repository settings and does not deploy or authorize a
-  live-system action. Existing automatic source deletion may remove only the merged
-  short-lived head after exact recovery evidence is recorded.
+  live-system action. Existing automatic source deletion may remove only successfully
+  merged short-lived release and synchronization heads after their names, exact SHAs,
+  trees, post-merge readbacks, and nonexecuted recovery commands are recorded. It may
+  never target permanent `develop` or `main`.
 
 **A pull request is merge-eligible into `develop`** when: required deterministic
 checks pass; a different reviewer role records a passing verdict bound to the exact
@@ -299,7 +312,9 @@ permission, not an obligation - any gate may hold a release for investigation.
 VOC-078-T01 retired the workflow that previously promoted completed packages from
 `develop` to `main`. This section continues to define release eligibility, but no
 current GitHub workflow executes that promotion. Promotion uses a separately reviewed
-`develop`-to-`main` pull request. VOC-080-T10 defines held Cloudflare publication, but
+pull request from an immutable short-lived exact alias of the freshly frozen develop
+candidate into `main`; permanent `develop` is not the head. VOC-080-T10 defines held
+Cloudflare publication, but
 its manifest, placeholder resources, credential absence, and action holds prevent
 repository promotion from becoming live deployment. The required post-promotion
 history synchronization back into `develop` is another reviewed repository-history
