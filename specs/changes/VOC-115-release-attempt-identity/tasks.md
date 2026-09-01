@@ -14,8 +14,9 @@
 A different builder reconciles exactly 27 paths and implements the pure validator/test.
 The outcome covers atomic target selection and same-target coalescence, the held
 no-bypass ruleset prerequisite, SHA-bound attempts, exact capture/stable schemas,
-two-pass reconstruction, stale terminal, multiplicity cleanup, actor/crash boundaries,
-immutable same-D retry, release topology, rollback, and monitoring.
+two-pass reconstruction, stale terminal, protected one-shot submit award, null-
+provenance stop, multiplicity cleanup, actor/crash boundaries, immutable same-D retry,
+release topology, rollback, and monitoring.
 
 One task/PR is minimum-sufficient because living policy, adopted packages, and
 enforcement share one safety invariant and rollback boundary. A split creates

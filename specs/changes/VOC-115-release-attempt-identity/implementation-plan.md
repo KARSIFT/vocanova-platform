@@ -17,21 +17,24 @@ evidence are protected.
 2. Replace every comment/client/caller allocation statement with deterministic claim
    frontiers, same-target logical coalescence, atomic create-ref target selection,
    exact SHA-bound attempt identity, mandatory post-claim protected readback,
-   irrecoverable stale topology, cardinality-first cleanup, and same-D retry.
+   irrecoverable stale topology, a protected one-shot submit award, cardinality-first
+   cleanup, null-provenance stop, and same-D retry.
 3. Specify the separately authorized held ruleset prerequisite and its exact readback;
    implementation does not query/change it. Implement exhaustive all-state PR/timeline
    pagination, dual-source ref equality, lossless page captures, timestamp-free stable
    state, exact two-pass equality, actor mapping, and every crash.
 4. Implement `scripts/foundation/voc106-release-attempt-policy.mjs` as a pure,
-   network-free validator. It validates claim/attempt grammar/domain/ref format,
+   network-free validator. It validates claim/attempt/submit grammar/domain/ref format,
    ruleset fixtures, exact JSON projection/page/capture/state schemas, JCS separation,
    page completeness/stable equality, state/frontier/cardinality derivation, claim
-   coalescence/stale outcome, actor/crash recovery, and all 25 textual surfaces.
+   coalescence/stale outcome, one-shot submit awards, actor/crash recovery, and all 25
+   textual surfaces.
 5. Implement its adjacent test with positive and one-mutation negative fixtures for
    same/different-target concurrency and replay coalescence, stale terminal, merged-
-   duplicate cleanup, uncertain POST, ref/PR/timeline crashes, capture-vs-state time
-   variation, hostile inputs, pagination/filter/high-watermark mutations, ruleset drift,
-   handoff, same-D retry, topology, and immutable recovery.
+   duplicate cleanup, submit-ref 201/422/unknown and PR one-shot crashes, capture-vs-
+   state time variation, hostile inputs, null/foreign head provenance, pagination/
+   filter/high-watermark mutations, ruleset drift, handoff, same-D retry, topology, and
+   immutable recovery.
    Confirm `node --test scripts/foundation/*.test.mjs` auto-discovers it. If not, stop
    for scope review rather than changing `package.json` implicitly.
 6. Preserve VOC-106 merge-base, zero-main-only, exact SHA/tree/compare, prospective/
@@ -50,15 +53,17 @@ evidence are protected.
 
 At minimum expose pure functions equivalent to:
 
-- `validateFrontierName(name)`, `validateAttemptName(name, sha)`, and
+- `validateFrontierName(name)`, `validateAttemptName(name, sha)`,
+  `validateSubmitName(name, allocationDigest)`, and
   `deriveFrontier(prs, timelines, refs)`;
 - `validatePagination(pages)` and `projectAllStatePulls(pages)`;
 - `projectTimeline(pages)` and `reconcileRefs(lsRemote, matchingRefsPages)`;
 - `validatePageCapture(capture)`, `deriveStableState(passes)`, and
   `validateReceipt(receipt, projection)`;
 - `deriveAttemptState(prs, timelines, refs)`;
-- `classifyClaimRefRecovery(state, frozenTopology)` and
-  `classifyPrPostRecovery(state, responseClass)`;
+- `classifyClaimRefRecovery(state, frozenTopology)`,
+  `classifySubmitAward(state, responseClass)`, and
+  `classifyOneShotPrOutcome(state, award, responseClass)`;
 - `validateRulesetFixture(ruleset)` and `classifyMultiplicity(prs, timelines)`;
 - `validateActorMapping(actor, githubIdentity)`; and
 - `validateCurrentPolicySurfaces(root)`.
@@ -70,6 +75,8 @@ refs. Fixtures are inert local objects/disposable repositories.
 ## Rollback and monitoring
 
 No authoritative view/ruleset means stop, not comment adoption or another PR POST.
+Submit-marker-present/zero-PR after award loss, crash, or unknown response is held
+irrecoverably; readback never grants a second submit award.
 Before correction merge, closing draft PR #215 has zero protected effect. After merge,
 rollback is a separately reviewed complete revert to the actual first parent; no
 partial policy revert, reset, force, deletion, setting, or live action.

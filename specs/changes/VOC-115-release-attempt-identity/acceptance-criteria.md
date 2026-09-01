@@ -7,7 +7,7 @@
 - Evidence: `VOC-115-EV-00`
 - Result: pending
 
-All four superseded candidate SHAs/trees and all eight exact FAIL reviews remain recorded
+All five superseded candidate SHAs/trees and all ten exact PR #217 FAIL reviews remain recorded
 with no transfer. PR #215 remains draft, and no adoption, review, ref, settings,
 release, merge, deployment, or external authority is inferred.
 
@@ -18,9 +18,11 @@ release, merge, deployment, or external authority is inferred.
 - Evidence: `VOC-115-EV-01`, `VOC-115-EV-02`
 - Result: pending
 
-The deterministic claim/attempt grammar, lossless domains, verified no-bypass ruleset,
+The deterministic claim/attempt/submit grammar and exact per-form byte lengths, lossless
+domains, verified no-bypass ruleset,
 server create-ref arbitration, same-target logical coalescence, attempt SHA/tree
-binding, and globally at-most-one active attempt pass. A different-target race either
+binding, protected one-shot submit award, and globally at-most-one active attempt pass.
+A different-target race either
 selects still-current topology or reaches the specified irrecoverable stale terminal;
 it does not promise a usable caller winner. PR multiplicity cleans up before success.
 
@@ -35,6 +37,8 @@ Full all-state PR pagination, every reserved timeline, equal complete ref sets, 
 and protected refs reconstruct state. Exact own-key/type/null/id/event/page schemas and
 lossless raw-to-projection rules pass. Capture timestamps/ETags/raw digests may change;
 the timestamp-free JCS stable-state digest reproduces when authoritative state is equal.
+A reserved-looking null head repository stops as ambiguous and is never inferred from
+label or timeline events.
 
 ## VOC-115-AC-03 — Every race, crash, collision, and retry is representable
 
@@ -44,10 +48,13 @@ the timestamp-free JCS stable-state digest reproduces when authoritative state i
 - Result: pending
 
 Every boundary has an exact state-idempotent resume or fail-closed state. Fresh stable
-server state alone decides whether the same canonical ref/PR request is eligible; no
-local first-call/retry counter exists. Delayed duplicates enter cleanup. Closed PRs advance same-D
-retry. Stale accepted topology is irrecoverable. Authorized deletion/update is denied
-by prerequisite readback; unauthorized settings mutation is explicitly out of scope.
+server state decides canonical claim/attempt ref eligibility without a local retry
+counter. Only the exact submit-ref `201` recipient may issue one no-retry/no-redirect PR
+POST. Crash, award loss, or unknown-zero is a durable irrecoverable hold and never
+authorizes another POST or successor; an observed PR consumes the only award, excluding
+an authorized delayed duplicate. Closed PRs advance same-D retry. Stale accepted
+topology is irrecoverable. Authorized deletion/update is denied by prerequisite
+readback; unauthorized settings mutation is explicitly out of scope.
 
 ## VOC-115-AC-04 — Actor and release topology controls remain exact
 
