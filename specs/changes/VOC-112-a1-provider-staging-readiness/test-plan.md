@@ -49,6 +49,13 @@ visibly synthetic.
   bearer/link/email details; public request behavior does not enumerate accounts.
 - Evidence: `VOC-112-EV-02`
 
+Also run `apps/api-worker/test/ai-email-observability-parity.test.ts`: its positive
+sender fixture must use `noreply@example.test`, retain the bounded synthetic 100-ms
+constructor timeout, assert the hardened payload, HTTPS/bearer/no-retry contract, and
+retain provider-error body redaction. Separate factory tests must prove runtime
+construction requires and explicitly passes 8,000 ms rather than relying on the
+direct-constructor default.
+
 ## VOC-112-TEST-03 — Factory, bindings, switches, and secrets
 
 - Covers: `VOC-112-AC-01`, `AC-02`, `AC-05`
@@ -102,8 +109,8 @@ visibly synthetic.
 - Covers: `VOC-112-AC-05`
 - Procedure: run focused suites, `pnpm ci:worker-api`, applicable web e2e/accessibility,
   `pnpm ci:delivery`, `pnpm ci:foundation`, `pnpm validate`, governance/risk/diff checks,
-  exact fifteen-path audit, and a disposable full base-to-head reverse rehearsal.
-- Expected: all installed checks pass, only the exact fifteen paths change,
+  exact sixteen-path audit, and a disposable full base-to-head reverse rehearsal.
+- Expected: all installed checks pass, only the exact sixteen paths change,
   no network/external action occurs, and reverse restores the exact base tree.
 - Evidence: `VOC-112-EV-07`
 

@@ -118,6 +118,17 @@ cannot forward the bearer, recipient, subject, or magic-link body to another ori
 Magic-link/account content and enumeration-resistant public responses remain unchanged.
 CI supplies fake fetch and synthetic addresses only.
 
+`HttpEmailSender` remains independently constructible for injected fake-transport
+tests. Its constructor may accept an explicit integer timeout from 100 through 10,000
+ms and may retain 8,000 ms as its direct-constructor default. Existing
+`ai-email-observability-parity.test.ts` may keep its synthetic 100-ms timeout so the
+test is fast and bounded, but must replace `Vocanova <noreply@example.test>` with exact
+`noreply@example.test` and update the asserted payload while preserving HTTPS,
+authorization, no-retry, provider-body redaction, and observability/parity intent.
+Production is different: `provider-factory.ts` is the sole default-app construction
+path, must require `AUTH_PROVIDER_TIMEOUT_MS` exactly `"8000"`, explicitly pass 8,000,
+and must never obtain production behavior from the constructor default.
+
 Vendor selection, provider-specific payload changes, account/domain/sender setup,
 contract, and spend are later accountable decisions. If the chosen provider cannot
 satisfy the adopted HTTP contract, a new governed package must change that contract;
@@ -218,23 +229,24 @@ change is allowed.
 
 ### VOC-112-D07 through D09 — Delivery, review, and prohibitions
 
-One adopted repository implementation PR changes exactly these fifteen paths:
+One adopted repository implementation PR changes exactly these sixteen paths:
 
 1. `apps/api-worker/src/app.ts`
 2. `apps/api-worker/src/identity/http-email-sender.ts`
 3. `apps/api-worker/src/identity/google-oauth-provider.ts`
 4. `apps/api-worker/src/identity/provider-factory.ts`
-5. `apps/api-worker/test/identity-provider-adapters.test.ts`
-6. `apps/api-worker/test/identity-parity.test.ts`
-7. `apps/api-worker/worker-configuration.d.ts`
-8. `apps/api-worker/wrangler.jsonc`
-9. `docs/development.md`
-10. `docs/operations/README.md`
-11. `docs/operations/a1-staging-acceptance.md`
-12. `scripts/foundation/a1-staging-acceptance-policy.mjs`
-13. `scripts/foundation/a1-staging-acceptance-policy.test.mjs`
-14. `scripts/foundation/cloudflare-delivery-policy.mjs`
-15. `scripts/foundation/cloudflare-delivery-policy.test.mjs`
+5. `apps/api-worker/test/ai-email-observability-parity.test.ts`
+6. `apps/api-worker/test/identity-provider-adapters.test.ts`
+7. `apps/api-worker/test/identity-parity.test.ts`
+8. `apps/api-worker/worker-configuration.d.ts`
+9. `apps/api-worker/wrangler.jsonc`
+10. `docs/development.md`
+11. `docs/operations/README.md`
+12. `docs/operations/a1-staging-acceptance.md`
+13. `scripts/foundation/a1-staging-acceptance-policy.mjs`
+14. `scripts/foundation/a1-staging-acceptance-policy.test.mjs`
+15. `scripts/foundation/cloudflare-delivery-policy.mjs`
+16. `scripts/foundation/cloudflare-delivery-policy.test.mjs`
 
 No web file, OpenAPI/client artifact, schema/migration, package/workflow/manifest,
 package script, package-lock, or other generated/documentation path may change.

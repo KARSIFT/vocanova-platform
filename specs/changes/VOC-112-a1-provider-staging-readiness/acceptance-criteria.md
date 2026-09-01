@@ -40,7 +40,10 @@ Fake-transport tests prove validated HTTPS request construction, bounded timeout
 header/sender safety, no redirects, 2xx success, non-2xx/network failure, response
 cancellation, and redaction. Redirects receive no bearer, recipient/header, or
 magic-link payload. Public requests remain enumeration resistant; tokens remain
-hashed/single-use. Disabled/incomplete config sends nothing and never falls back fake.
+hashed/single-use. The existing AI/email observability-parity fixture uses the required
+ASCII mailbox and preserves its 100-ms injected-test timeout/no-retry/redaction intent;
+production construction explicitly passes mandatory 8,000 ms. Disabled/incomplete
+config sends nothing and never falls back fake.
 
 ## VOC-112-AC-03 — Session, authorization, and web journey remain secure
 
@@ -80,7 +83,7 @@ Staging/production switches and inherited holds remain off/held, current GitHub 
 secret interface remains unchanged, the exact six new provider configuration/binding
 names have no aliases/committed secret values, the four exact committed var literals
 match delivery-policy maps/tests, mixed capability states behave independently,
-generated bindings are current, and fifteen-path/secret scans pass. A disposable
+generated bindings are current, and sixteen-path/secret scans pass. A disposable
 reverse restores the adopted base tree without external or D1 action.
 
 ## VOC-112-AC-06 — Exact revision is independently verified

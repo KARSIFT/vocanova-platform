@@ -83,8 +83,11 @@ requirements:
       8,000-ms timeout, redirect:error, response-body cancellation, generic user-facing
       failure, and no credential/link logging. Tests must prove that redirects cannot
       receive the bearer or magic-link payload. Preserve enumeration-resistant request
-      responses and single-use hashed magic-link behavior. Normal CI uses injected fake
-      transports and sends no email.
+      responses and single-use hashed magic-link behavior. The sender constructor may
+      retain its bounded 100–10,000-ms injected-test seam (including 100-ms synthetic
+      tests and an 8,000-ms direct-test default), but the production factory must require,
+      parse, and explicitly pass only AUTH_PROVIDER_TIMEOUT_MS="8000" and never rely on
+      a constructor default. Normal CI uses injected fake transports and sends no email.
   - id: VOC-112-D03
     statement: >-
       Replace the default unavailable/null provider construction with one centralized,
@@ -129,7 +132,7 @@ requirements:
   - id: VOC-112-D07
     statement: >-
       Use one minimum-sufficient repository implementation PR after adoption and after
-      VOC-105 records F3 complete-effective. Change exactly the fifteen paths in
+      VOC-105 records F3 complete-effective. Change exactly the sixteen paths in
       implementation_allowed_paths and no others. No schema migration, public API
       expansion, web source/test edit, package/workflow/manifest change, or incidental
       generated artifact is authorized.
@@ -169,6 +172,13 @@ superseded_plan_candidates:
       disposal controls, redirect/token/avatar/config rules, deterministic runbook
       validation, and a literal path/config-policy inventory. No review or authority
       from this candidate transfers to its correction.
+  - candidate_sha: c9f3cf6a8e40376706055ca4a1d0128bf75b4f70
+    status: blocked-and-superseded
+    reason: >-
+      Fresh review identified an excluded existing HttpEmailSender parity test whose
+      display-name sender fixture conflicts with the hardened ASCII-mailbox contract
+      and whose 100-ms injected timeout needed an explicit test-vs-production boundary.
+      No review or authority transfers to the corrected candidate.
 
 approvals:
   security_authorization_plan_review:
@@ -200,6 +210,7 @@ implementation_allowed_paths:
   - apps/api-worker/src/identity/http-email-sender.ts
   - apps/api-worker/src/identity/google-oauth-provider.ts
   - apps/api-worker/src/identity/provider-factory.ts
+  - apps/api-worker/test/ai-email-observability-parity.test.ts
   - apps/api-worker/test/identity-provider-adapters.test.ts
   - apps/api-worker/test/identity-parity.test.ts
   - apps/api-worker/worker-configuration.d.ts

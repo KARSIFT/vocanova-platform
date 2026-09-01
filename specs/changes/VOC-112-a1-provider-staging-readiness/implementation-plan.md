@@ -34,7 +34,10 @@ the repository PR cannot truthfully pre-record their result.
 3. Reuse/harden `HttpEmailSender` without vendor specialization. Test HTTPS validation,
    URL credentials/query/fragment, sender/header injection, payload, auth header,
    timeout, no-redirect leakage, 2xx/non-2xx/network behavior, cancellation, and
-   redaction with fake transport.
+   redaction with fake transport. Reconcile the existing AI/email observability-parity
+   fixture to the strict mailbox while retaining its injected 100-ms timeout and
+   no-retry/provider-body-redaction intent; production factory tests require explicit
+   8,000 ms and prove no constructor-default reliance.
 4. Add one centralized dependency/config factory and typed bindings. Prove switches-off
    needs no credentials; enabled+complete constructs the real adapter; enabled+missing,
    partial, malformed, or unsafe configuration fails capability-locally without call or
@@ -47,7 +50,7 @@ the repository PR cannot truthfully pre-record their result.
 6. Add the pending sanitized staging runbook, its operations index entry, and named
    network-free policy/negative test. Reconcile only `docs/development.md`; retain all
    live-action/milestone holds. Do not edit any other documentation/generated path.
-7. Run focused and full installed checks, enforce the exact fifteen-path inventory,
+7. Run focused and full installed checks, enforce the exact sixteen-path inventory,
    inspect secrets/redaction,
    and reverse the complete base-to-head diff in a disposable worktree to prove exact
    repository restoration. Do not call Wrangler remotely or access a provider.

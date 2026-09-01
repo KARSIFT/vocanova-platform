@@ -59,6 +59,10 @@ requester isolation, Worker bindings, and security evidence.
   free sender/recipient/subject validation.
 - **R12 — one malformed provider disables the other:** capability-local construction
   and mixed-state tests keep the complete provider usable without fake fallback.
+- **R13 — hardened sender invalidates an excluded parity fixture:** authorize the exact
+  existing AI/email observability test, replace its display-name sender with the strict
+  mailbox, preserve its 100-ms injected timeout, no-retry and redaction assertions, and
+  separately prove the production factory explicitly passes mandatory 8,000 ms.
 
 ## Data, migration, privacy, and cost
 
