@@ -62,12 +62,14 @@ not one caller. Exact same-target contenders are deliberately one logical claim 
 all downstream operations are idempotent/server-serialized; there is no caller-winner
 predicate. A different-target contender loses and performs no mutation.
 
-After `201`, `422`, timeout, or disconnect, GET the exact claim ref and commit/tree:
+Claim creation request JSON has exactly `ref` (`refs/heads/<frontier>`) and `sha`
+(frozen develop) in RFC 8785/JCS bytes. After `201`, `422`, timeout, or disconnect,
+discard local call history and reconstruct state:
 
 - target equals the frozen SHA/tree: this logical claim may continue;
 - another valid target: this contender loses;
-- absent: repeat at most twice only the byte-identical create-ref request with the same
-  frozen target after a complete stable reconciliation; then stop;
+- absent in a fresh stable state: the same canonical request remains eligible; any
+  authorized actor may send it, regardless of whether an earlier call was attempted;
 - malformed/wrong/unreconstructible state: stop; never adopt, update, force, or delete.
 
 The accepted claim is the immutable ref target, not a response recipient. Replayed or
@@ -107,8 +109,8 @@ are 40/64 lowercase hex. Node ids are nonempty 1–256-byte ASCII `[A-Za-z0-9_=-
 Names are safe ASCII, at most 124 bytes including `refs/heads/`, and pass
 `git check-ref-format --branch`. Invalid/exhausted input stops without fallback.
 
-Unknown attempt-ref POST uses the same bounded byte-identical retry/readback rule as
-the claim ref. Exact target resumes; other/malformed target stops. Update, force,
+Attempt creation uses the same exact two-key JCS ref request and state-idempotent
+absence/readback rule as the claim ref. Exact target resumes; other/malformed target stops. Update, force,
 force-with-lease, and deletion are forbidden. Claim and active/abandoned attempt refs
 are never automatic-deletion eligible. A successfully merged short-lived attempt ref
 also remains protected under this design; recovery records a nonexecuted POST request
@@ -116,11 +118,35 @@ but never relies on source deletion.
 
 ## PR creation and cardinality-first lifecycle
 
-After final protected-ref readback, contenders may send the same exact draft PR POST
-with attempt head and `base=main`. GitHub open-head/base uniqueness coalesces concurrent
-requests. After `201` or `422`, reconcile. After timeout/disconnect/unknown result,
-never retry the PR POST: retain the protected refs and scan only. Exactly one valid
-match recovers; zero is a durable stopped claim/ref state; multiplicity enters conflict.
+After final protected-ref readback, contenders use one canonical PR-create JCS object
+with exactly `base:"main"`, `body:<canonical binder bytes as a JSON string>`,
+`draft:true`, `head:<attempt ref>`, `maintainer_can_modify:false`, and
+`title:"VOC-106 release promotion"`. GitHub open-head/base uniqueness normally
+coalesces concurrent requests. After every response class, discard local call counts
+and reconcile. Exactly one valid match recovers; zero in a fresh stable state authorizes
+the same canonical request again; multiplicity enters conflict cleanup. Thus pre-first-
+POST, unknown-zero, restart, and owner-loss all have the same reconstructible server-
+state transition rather than an unpersisted local distinction.
+
+The creation binder is exact LF-framed text `<!-- voc-106-attempt-binder-v1\n`, one JCS
+object, `\n-->\n`, with object own keys `attempt_ref`, `claim_ref`, `claim_sha`,
+`frozen_develop_sha`, `frozen_develop_tree`, `frozen_main_sha`, `frozen_main_tree`,
+`frontier`, `issue_url`, `schema`, and `allocation_state_sha256`. Every SHA/digest/ref uses
+the domains below; `issue_url` is exactly
+`https://github.com/KARSIFT/vocanova-platform/issues/191`; `schema` is
+`voc-106-attempt-binder-v1`. It contains no capture timestamp, ETag, response bytes,
+PR id, full-repository scan boundary, or mutable evidence link, so restart reconstructs
+identical PR-create bytes even when unrelated PR capture state changes.
+Later capture receipts are evidence attachments and never change this creation binder
+or state authority.
+
+`allocation_state_sha256` hashes JCS of an exact `voc-106-allocation-state-v1` object
+with own keys `attempt_ref`, `attempt_sha`, `claim_ref`, `claim_sha`,
+`frozen_develop_sha`, `frozen_develop_tree`, `frozen_main_sha`, `frozen_main_tree`,
+`frontier`, `issue_url`, `repository`, `ruleset_history_version`, `ruleset_id`, and
+`schema`. Values are the already defined domains; schema is that literal. It excludes
+all capture data and unrelated PRs. Any listed policy/topology value change stops the
+old allocation rather than producing a new request.
 
 Cardinality is evaluated before terminal precedence for all PRs mapped to one claim/
 attempt identity:
@@ -139,8 +165,9 @@ attempt identity:
 
 The complete PR timeline must prove closure, reopen absence, merge, assignment, head
 deletion, and transfer. State precedence after cardinality cleanup is merged terminal;
-conflict abandonment; single closed abandonment; single open active; protected claimed-
-but-PR-unknown stopped; empty. Invalid states never degrade into a lower valid state.
+conflict abandonment; single closed abandonment; single open active; protected
+claim/attempt ready-for-PR; claim ready-for-attempt; empty. Invalid states never degrade
+into a lower valid state.
 
 ## Lossless JSON and exact projections
 
@@ -156,9 +183,11 @@ Exact projection own-key sets are:
 
 | Projection | Keys and domains |
 | --- | --- |
-| `pr-v1` | `base_ref:string`, `base_sha:sha40`, `closed_at:time|null`, `created_at:time`, `draft:boolean`, `head_ref:string`, `head_repo_full_name:"KARSIFT/vocanova-platform"`, `head_sha:sha40`, `merge_commit_sha:sha40|null`, `merged_at:time|null`, `node_id:node`, `number:pr-decimal`, `state:"open"|"closed"`, `updated_at:time`, `user_id:id-decimal`, `user_login:string`, `user_node_id:node` |
+| `pr-boundary-v1` | `head_label:string|null`, `head_ref:string|null`, `head_repo_full_name:string|null`, `node_id:node`, `number:pr-decimal`, `updated_at:time` |
+| `reserved-pr-v1` | `base_ref:string`, `base_sha:sha40`, `closed_at:time|null`, `created_at:time`, `draft:boolean`, `head_label:string`, `head_ref:string`, `head_repo_full_name:"KARSIFT/vocanova-platform"|null`, `head_sha:sha40`, `merge_commit_sha:sha40|null`, `merged_at:time|null`, `node_id:node`, `number:pr-decimal`, `state:"open"|"closed"`, `updated_at:time`, `user_id:id-decimal`, `user_login:string`, `user_node_id:node` |
 | `timeline-v1` | `actor_id:id-decimal|null`, `actor_login:string|null`, `actor_node_id:node|null`, `assignee_id:id-decimal|null`, `assignee_login:string|null`, `assignee_node_id:node|null`, `commit_id:sha40|null`, `created_at:time`, `event:timeline-event`, `id:id-decimal`, `node_id:node|null` |
 | `ref-v1` | `name:string`, `sha:sha40` |
+| `git-commit-v1` | `parents:[sha40]` (zero through 16 entries in API order), `sha:sha40`, `tree:sha40` |
 | `protected-v1` | `name:"develop"|"main"`, `sha:sha40`, `tree:sha40` |
 | `ruleset-history-v1` | `actor_id:id-decimal`, `actor_type:"User"`, `updated_at:time`, `version_id:id-decimal` |
 | `ruleset-v1` | `bypass_actors:[]`, `conditions:{ref_name:{exclude:[],include:[exact-two-patterns]}}`, `enforcement:"active"`, `history_version:id-decimal`, `id:id-decimal`, `name:"VOC-106 immutable release attempt refs"`, `rules:[{type:"deletion"},{type:"non_fast_forward"},{parameters:{update_allows_fetch_and_merge:false},type:"update"}]`, `source:"KARSIFT/vocanova-platform"`, `source_type:"Repository"`, `target:"branch"` |
@@ -193,14 +222,18 @@ page URL), `http_status` (JSON integer 200), `etag` (ASCII string or null), `cap
 (time), `page` (id-decimal), `per_page` (string `"100"`), `next_url` (canonical URL or
 null), `item_count` (decimal string `0..100`), `raw_sha256` (digest64), `items` (array of
 the source projection), `items_jcs_sha256` (digest64), and `capture_sha256` (digest64).
+The source projection is `pr-boundary-v1` for `pulls`, `timeline-v1` for `timeline`,
+and `ref-v1` for `matching_refs`; reserved PR detail is an object capture using
+`reserved-pr-v1`.
 `capture_sha256` hashes RFC 8785/JCS of the object with only itself omitted;
 `items_jcs_sha256` hashes JCS `items`. Raw digest covers exact response bytes. Capture
 timestamps/ETags/raw bytes are deliberately capture-specific and need not reproduce.
 
 Each non-page GET produces `voc-106-object-capture-v1` with exactly `schema`, `source`
-(`ruleset|ruleset_history|protected_ref|git_object`), `endpoint`, `http_status` (200),
+(`ruleset|ruleset_history|protected_ref|git_commit|reserved_pr`), `endpoint`, `http_status` (200),
 `etag` (ASCII string or null), `captured_at`, `raw_sha256`, `projection` (the exact
-ruleset/protected/ref object), `projection_jcs_sha256`, and `capture_sha256`. The
+ruleset-history/ruleset/protected/git-commit/reserved-PR object for the source),
+`projection_jcs_sha256`, and `capture_sha256`. The
 projection digest hashes only JCS `projection`; the capture digest hashes the whole
 object with only `capture_sha256` omitted. Capture-specific fields are excluded from
 stable state.
@@ -219,11 +252,16 @@ PRs sorted by numeric number, timeline events by numeric id, or refs by UTF-8 na
 `protected_refs`, `counts`, `high_watermarks`, `all_pr_boundary`, `reserved_prs`,
 `timelines`, and `refs`.
 `repository` is `KARSIFT/vocanova-platform`; `ruleset` is `ruleset-v1`;
-`protected_refs` sorts by name; `all_pr_boundary` contains exact
-`{node_id,number,updated_at}` for every repository PR sorted by numeric number;
-`reserved_prs` contains full `pr-v1` objects selected by exact
-`head_repo_full_name == repository` and head-ref grammar after the full scan, sorted by
-number; `timelines` is sorted objects `{events,pr_number}` with events by numeric id;
+`protected_refs` sorts by name; `all_pr_boundary` contains `pr-boundary-v1` for every
+repository PR, including ordinary forks and deleted sources, sorted by numeric number.
+Only after the full scan, select reserved candidates whose head ref matches the exact
+claim/attempt grammar and either (a) repo is the canonical repository and label is
+`KARSIFT:<head_ref>`, or (b) repo is null and the retained label is exactly
+`KARSIFT:<head_ref>` for a deleted canonical source. Foreign/fork labels remain only in
+the boundary. Fetch each selected PR detail and build `reserved-pr-v1`; its nullable
+repo is allowed only with that exact deleted-source label plus a `head_ref_deleted`
+timeline event. `reserved_prs` sorts by number; `timelines` is sorted objects
+`{events,pr_number}` with events by numeric id;
 `refs` is the equal full reserved `ref-v1` set sorted by UTF-8 ref name. `counts` has
 exact decimal-string keys `all_prs`, `refs`, `reserved_prs`, `timeline_events`, and
 `timelines`. `high_watermarks` has `all_pr_number` (id-decimal or `"0"`), `refs` (last

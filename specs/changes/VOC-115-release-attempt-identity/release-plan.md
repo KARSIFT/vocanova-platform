@@ -15,7 +15,7 @@ deployment, Cloudflare/DNS/resource, secret/data, migration, traffic, spend, or 
 
 ## DOC-15 section 24.18 monitoring
 
-Reason: SHA-only naming and three rejected allocation schemes cannot safely retry or
+Reason: SHA-only naming and four rejected allocation schemes cannot safely retry or
 serialize concurrent work. Expected benefit: target-level coalescence, SHA-bound
 attempts, server-enforced ref immutability, exact stable state, cardinality cleanup,
 bounded actors, and executable enforcement. Risks are stale topology, settings drift,
@@ -33,7 +33,7 @@ permanent-ref, ancestry, and zero-behind evidence.
 ## Failure and rollback
 
 Any missing/drifted ruleset, concurrent-active state, incomplete enumeration, unstable
-view, schema error, stale topology, unknown PR POST retry, unclosed duplicate, ref
+view, schema error, stale topology, noncanonical request, unclosed duplicate, ref
 movement, actor/topology error, or failed check/review stops merge,
 release, and closure while preserving evidence. Before merge, close PR #215 for zero
 protected effect. After merge, a different builder prepares a separately reviewed

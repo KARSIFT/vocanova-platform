@@ -7,7 +7,7 @@
 - Evidence: `VOC-115-EV-00`
 - Result: pending
 
-All three superseded candidate SHAs/trees and all six exact FAIL reviews remain recorded
+All four superseded candidate SHAs/trees and all eight exact FAIL reviews remain recorded
 with no transfer. PR #215 remains draft, and no adoption, review, ref, settings,
 release, merge, deployment, or external authority is inferred.
 
@@ -43,9 +43,9 @@ the timestamp-free JCS stable-state digest reproduces when authoritative state i
 - Evidence: `VOC-115-EV-04`, `VOC-115-EV-05`
 - Result: pending
 
-Every boundary has an exact bounded idempotent resume or fail-closed state. Unknown ref
-creation may repeat only byte-identically under the bounded rule; uncertain PR POST is
-never retried and remains durably anchored by protected refs. Closed PRs advance same-D
+Every boundary has an exact state-idempotent resume or fail-closed state. Fresh stable
+server state alone decides whether the same canonical ref/PR request is eligible; no
+local first-call/retry counter exists. Delayed duplicates enter cleanup. Closed PRs advance same-D
 retry. Stale accepted topology is irrecoverable. Authorized deletion/update is denied
 by prerequisite readback; unauthorized settings mutation is explicitly out of scope.
 

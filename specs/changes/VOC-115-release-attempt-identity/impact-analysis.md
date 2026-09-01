@@ -19,7 +19,7 @@
 Atomic unique-ref creation selects a topology value; same-target callers coalesce.
 Durability depends on a separately authorized exact no-bypass ruleset readback, not
 policy prose. Complete PR/timeline/ref reconstruction, timestamp-free stable digests,
-bounded ref retries, no PR-POST retry, and cardinality cleanup prevent duplicates and
+state-idempotent canonical ref/PR requests and cardinality cleanup prevent duplicates and
 false genesis under authorized actions. Unauthorized ruleset mutation is outside the
 guarantee and stops on readback. VOC-115 itself accesses no credential, setting,
 personal/production data, Cloudflare resource, or live system.
@@ -35,8 +35,8 @@ personal/production data, Cloudflare resource, or live system.
   denies claim/attempt update and deletion; every action freshly reads it.
 - `R04` stale topology: mandatory post-claim protected readback and explicit
   irrecoverable terminal; no false usable-winner promise.
-- `R05` crash duplicates: bounded byte-identical ref retry is safe; PR POST is never
-  retried and protected refs retain the stopped state.
+- `R05` crash duplicates: fresh stable server state, not local call count, decides the
+  same canonical ref/PR request; delayed duplicates enter cardinality cleanup.
 - `R06` incomplete discovery: exact page schemas, full-boundary two-pass equality,
   timelines, dual ref enumeration, stable digest, counts, and high-watermarks.
 - `R07` merged duplicate survives: multiplicity cleanup/readback precedes success.

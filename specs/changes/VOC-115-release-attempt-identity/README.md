@@ -2,11 +2,12 @@
 
 Issue [#216](https://github.com/KARSIFT/vocanova-platform/issues/216) and the
 [PR #215 specialist FAIL](https://github.com/KARSIFT/vocanova-platform/pull/215#issuecomment-5491674409)
-prove that adopted VOC-114 cannot retry at unchanged `develop`. PR #217's first three
+prove that adopted VOC-114 cannot retry at unchanged `develop`. PR #217's first four
 candidates are rejected with no review transfer: `f7abcc8` used a racy client sequence,
 `535bcd4` used editable-comment authority, and `ade2d6d` serialized a value but not a
-caller, relied on deletable refs, and underspecified stale state, receipts, and PR
-cardinality.
+caller, relied on deletable refs, and underspecified stale state/receipts/cardinality;
+`00233a0` retained unreconstructible local retry counts and could not represent all PRs
+or exact Git commit/tree captures.
 
 The replacement removes caller-winner identity. Contenders race one deterministic claim
 ref directly at frozen `develop`; identical-target requests coalesce, while atomic
@@ -18,8 +19,9 @@ irrecoverable terminal. PR multiplicity always cleans up before terminal success
 
 Exhaustive all-state PR/timeline and dual-source ref scans reconstruct state. Exact
 lossless page-capture schemas separate capture timestamps/ETags/raw bytes from a
-timestamp-free JCS stable-state digest. Unknown PR POST results are never retried,
-protected refs prevent false genesis under authorized actions, and exact actor mapping
+timestamp-free JCS stable-state digest. Reconstructed state authorizes only the same
+canonical ref/PR request, independent of lost local call history; delayed duplicates
+enter cleanup. Protected refs prevent false genesis under authorized actions, and exact actor mapping
 prevents inferred takeover.
 
 After reviewed adoption, one corrected revision of draft PR

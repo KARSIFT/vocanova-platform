@@ -22,6 +22,8 @@ blocking_review_evidence:
   - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492118325
   - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492356136
   - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492435728
+  - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492625481
+  - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492662741
 related_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
 related_adopted_packages:
   - VOC-106
@@ -71,6 +73,18 @@ superseded_plan_candidates:
       - receipt-page-stable-view-schemas-and-algorithm-not-frozen
       - merged-precedence-can-leave-nonmerged-duplicate-open
     review_transfer: prohibited-fresh-exact-candidate-reviews-required
+  - candidate_sha: 00233a0fdcc9603346006d473605bca83b590179
+    tree_sha: abda6f29bcf941c0e84973e4ca1a25d65a2cd704
+    status: blocked-and-superseded
+    review_evidence:
+      - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492625481
+      - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492662741
+    reasons:
+      - local-ref-and-PR-call-counts-not-durably-reconstructible
+      - pre-first-PR-and-post-unknown-zero-server-state-contradiction
+      - git-object-projection-schema-missing
+      - all-PR-projection-cannot-represent-forks-or-deleted-sources
+    review_transfer: prohibited-fresh-exact-candidate-reviews-required
 implementation_authorized: false
 implementation_authority_status: >-
   prohibited-until-exact-plan-candidate-release-history-specialist-and-independent-
@@ -98,8 +112,8 @@ objective: >-
 requirements:
   - id: VOC-115-D00
     statement: >-
-      Treat issue #216, PR #215 specialist FAIL, and all six exact PR #217 candidate
-      FAIL reviews as intake. Preserve all three candidate SHAs/trees as superseded evidence
+      Treat issue #216, PR #215 specialist FAIL, and all eight exact PR #217 candidate
+      FAIL reviews as intake. Preserve all four candidate SHAs/trees as superseded evidence
       with no transfer. PR #215 stays draft. None grants plan adoption, implementation,
       ref/settings, release, merge, deployment, or external authority.
   - id: VOC-115-D01
@@ -134,10 +148,11 @@ requirements:
   - id: VOC-115-D05
     statement: >-
       Freeze exact lossless JSON primitive domains and own-key/type/null/event schemas
-      for PR, timeline, ref, protected-ref, ruleset, page-capture, scan-capture, stable-
-      state, and reconciliation objects. Parse raw UTF-8 with duplicate-key rejection
-      and numeric-token preservation. Page captures include exact raw/projection/capture
-      digests and timestamps; capture-specific values are not stable-state equality.
+      for all-PR boundary, reserved-PR detail, timeline, ref, git-commit/tree, protected-
+      ref, ruleset, page/object/scan capture, stable-state, and reconciliation objects.
+      All-PR boundaries allow foreign/null head identity; filter only after exhaustive
+      enumeration using exact canonical/deleted-canonical label rules. Parse raw UTF-8
+      losslessly. Capture-specific values are not stable-state equality.
   - id: VOC-115-D06
     statement: >-
       Define exact complete-pass algorithm: exact all-state PR query and numbered short-
@@ -149,10 +164,12 @@ requirements:
   - id: VOC-115-D07
     statement: >-
       Name the attempt ref with full frozen-develop SHA and frontier suffix, POST-create
-      at exact frozen develop, and coalesce identical calls. Then allow one exact draft
-      PR POST. 201/422 reconcile; unknown PR result is never retried: zero remains a
-      durable protected-ref stop, one recovers, multiple enter cleanup. Freeze every
-      claim/attempt/PR/binder/closure crash outcome and never reopen a failed PR.
+      at exact frozen develop, and coalesce canonical state-idempotent calls. Then use
+      one exact reconstructible draft PR request whose allocation-state binder excludes
+      capture time and unrelated PR boundaries.
+      After any response, discard local call history: fresh stable zero authorizes the same canonical request, one recovers,
+      and multiple enter cleanup. Freeze every claim/attempt/PR/binder/closure crash
+      outcome and never reopen a failed PR.
   - id: VOC-115-D08
     statement: >-
       Map mutation actor /root exactly to GitHub login m-e-h-r-d-a-a-d, numeric id
@@ -188,7 +205,7 @@ requirements:
   - id: VOC-115-D13
     statement: >-
       Implement a network-free validator for ruleset, claim/attempt/domains, exact JSON
-      schemas, raw projections/capture versus stable digests, pagination/filter/equality,
+      schemas including git commit and all-PR/reserved-PR split, raw projection/capture versus stable digests, pagination/filter/equality,
       state/frontier/cardinality, coalescence/stale outcome, actors/crashes, and surfaces.
       Fixtures cover replay, same/different target, stale, ruleset drift, merged duplicate
       cleanup, time variation, hostile ids/JSON, incomplete scans, handoff, retry/topology.
@@ -245,8 +262,8 @@ attempt_identity:
   single_active: global-at-most-one-valid-open-draft-reserved-namespace-PR
   retry: closed-unmerged-PR-number-advances-to-new-claim-even-at-unchanged-develop
   conflict: cardinality-first-close-readback-all-nonmerged-then-merge-or-conflict-terminal
-  uncertain_claim_ref_post: bounded-byte-identical-retry-after-stable-absence-only
-  uncertain_pr_post: never-retry-zero-stops-one-recovers-multiple-conflict-close
+  uncertain_claim_ref_post: fresh-stable-absence-authorizes-same-canonical-request
+  uncertain_pr_post: fresh-stable-zero-authorizes-same-request-one-recovers-multiple-cleanup
   comment_authority: none
 
 reconciliation:
@@ -256,7 +273,7 @@ reconciliation:
   captures: exact-lossless-page-and-scan-schemas-with-times-etags-raw-digests
   stable_state: timestamp-free-JCS-full-PR-boundary-ruleset-protected-PR-timeline-ref-view
   equality: two-byte-identical-stable-states-at-most-three-pairs-then-stop
-  storage: PR-binder-and-issue-191-link-evidence-only-reconstructed-before-action
+  storage: immutable-creation-binder-has-stable-state-only-captures-are-linked-evidence
 
 ruleset_prerequisite:
   status: held-separate-settings-action-required
@@ -327,7 +344,7 @@ dependencies:
   - id: VOC-115-DEP-00
     status: intake-only
     description: >-
-      Issue #216 and seven exact FAIL records establish defects and stop conditions but
+      Issue #216 and nine exact FAIL records establish defects and stop conditions but
       grant no adoption or implementation authority.
   - id: VOC-115-DEP-01
     status: adopted-VOC-114-open-draft-implementation

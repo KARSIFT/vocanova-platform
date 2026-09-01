@@ -3,9 +3,9 @@
 ## VOC-115-TEST-00 — Intake, scope, and authority
 
 - Covers: `VOC-115-AC-00`
-- Procedure: inspect #216, PR #215 FAIL, all six exact plan-candidate FAILs,
+- Procedure: inspect #216, PR #215 FAIL, all eight exact plan-candidate FAILs,
   VOC-106/VOC-114, policy, surfaces, paths, and action wording.
-- Expected: three candidates superseded/no-transfer; PR #215 draft; 27 paths exact;
+- Expected: four candidates superseded/no-transfer; PR #215 draft; 27 paths exact;
   ruleset action held/separate; no implementation/ref/settings/release authority.
 - Evidence: `VOC-115-EV-00`
 
@@ -40,7 +40,9 @@
   protected, ruleset, page-capture, scan-capture, stable-state, and reconciliation
   schemas. Parse raw JSON with duplicate keys/large ids. Test 0/1/99/100/101 pages,
   explicit empty sentinel, exact Link/query order, local filtering, counts, and
-  high-watermarks. Re-fetch equal state with different timestamps/ETags/raw bytes.
+  high-watermarks. Include ordinary local, foreign-fork, reserved local, and deleted-
+  source PR boundaries; only exact canonical/deleted-canonical labels reach reserved
+  detail. Re-fetch equal state with different timestamps/ETags/raw bytes.
 - Expected: capture digest changes while timestamp-free stable-state digest reproduces.
   Missing/extra/wrong fields, unsafe numbers, unknown timeline event, raw/projection
   mismatch, gaps/repeats/truncation, wrong filter/boundary/count/high-watermark fail.
@@ -52,11 +54,14 @@
 - Procedure: build two identical complete passes and mutations before/between/after
   passes in protected refs, ruleset, any repository PR boundary, reserved PR/timeline,
   and either ref source. Exercise claim/attempt-ref POST before/after response/readback,
-  byte-identical retry limits, PR POST unknown, binder, closure, and owner loss.
+  PR POST unknown, restart/handoff with zero PR, delayed duplicate, binder, closure, and
+  owner loss. Mutate canonical ref/PR request keys and bytes. Validate merge-commit
+  projection parents/SHA/tree and every object-capture source.
 - Expected: comparison is exact JCS stable-state equality, never capture equality;
-  unstable pairs discard/retry at most three pairs. Ref recovery is bounded and exact.
-  Unknown PR POST never retries: one recovers, zero remains protected/stopped, multiple
-  enter cleanup. No authorized deletion can pass the ruleset fixture.
+  unstable pairs discard/retry at most three pairs. Pre-first-call and post-unknown-zero
+  are the same reconstructible state and authorize the same canonical request; no local
+  counter exists. One PR recovers; multiple enter cleanup. No authorized deletion can
+  pass the ruleset fixture.
 - Evidence: `VOC-115-EV-04`
 
 ## VOC-115-TEST-05 — Cardinality, deletion boundary, and same-D retry
