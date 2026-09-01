@@ -108,6 +108,7 @@ Staging (from `develop`), Production (from `main`).
 > unchanged.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+
 VOC-101 makes the unchanged least-privilege token an operator-revoked standing
 Cloudflare staging token valid until revoked. Mandatory triggers revoke first and
 keep staging disabled until inactive-token verification and a valid replacement's
@@ -156,6 +157,13 @@ cached, the lockfile remains frozen, and a cache hit never skips a check. Browse
 reports are uploaded only on failure and retained for three days. Fail-fast aggregation
 is explicit: the stable `required` result is blocked by any failed, cancelled, or
 skipped subsystem, and the same script has a synthetic negative contract test.
+The measured adoption baseline contained 204 `foundation` tests: a reviewed PR run
+finished in 14m33s and an identical-tree push run was cancelled by the former
+15-minute ceiling at 15m16s. Unrelated reviewed base growth subsequently brought the
+full wildcard-discovered corpus to 211 tests. The exact 20-minute timeout preserves
+that unfiltered suite with five minutes of bounded headroom; a future timeout or
+near-cap run requires new defect intake and reviewed evidence rather than another
+silent increase or any test weakening.
 
 VOC-081 adds `pnpm ci:local-stack` as a distinct required job inside `ci.yml`. It uses
 fresh OS-temporary D1 state, loopback-only Workers, a non-secret service-binding marker,

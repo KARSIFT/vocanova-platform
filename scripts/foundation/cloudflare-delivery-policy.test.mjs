@@ -605,6 +605,47 @@ test("exact Wrangler environments and the ordered D1 migration ledger fail close
   }
 });
 
+test("provider readiness vars are exact in every API environment without secret bindings", () => {
+  const variables = {
+    EMAIL_PROVIDER_URL: "",
+    EMAIL_FROM: "",
+    AUTH_PROVIDER_TIMEOUT_MS: "8000",
+    GOOGLE_OAUTH_CLIENT_ID: "",
+  };
+  const locations = [
+    ["root", configs.api.vars],
+    ["staging", configs.api.env.staging.vars],
+    ["production", configs.api.env.production.vars],
+  ];
+  for (const [location, vars] of locations) {
+    for (const [name, expected] of Object.entries(variables)) {
+      assert.equal(vars[name], expected, `${location} ${name}`);
+      const candidate = clone(configs);
+      const candidateVars =
+        location === "root"
+          ? candidate.api.vars
+          : candidate.api.env[location].vars;
+      candidateVars[name] = expected === "8000" ? "7999" : "unsafe";
+      assert.notDeepEqual(
+        inspectDeliveryManifest(manifest, candidate),
+        [],
+        `${location} ${name} drift`,
+      );
+    }
+  }
+  assert.equal(configs.api.env.staging.vars.MAGIC_LINK_ENABLED, "false");
+  assert.equal(configs.api.env.staging.vars.GOOGLE_OAUTH_ENABLED, "false");
+  assert.equal(configs.api.env.production.vars.MAGIC_LINK_ENABLED, "false");
+  assert.equal(configs.api.env.production.vars.GOOGLE_OAUTH_ENABLED, "false");
+  assert.deepEqual(manifest.environments.staging.secret_names, [
+    "CLOUDFLARE_ACCOUNT_ID",
+    "CLOUDFLARE_API_TOKEN",
+  ]);
+  const serialized = JSON.stringify(configs.api);
+  assert.doesNotMatch(serialized, /EMAIL_PROVIDER_API_KEY/u);
+  assert.doesNotMatch(serialized, /GOOGLE_OAUTH_CLIENT_SECRET/u);
+});
+
 test("JSONC and strict canonical JSON parsing reject ambiguous receipt bytes", () => {
   assert.deepEqual(
     parseJsonc('{"url":"https://example.invalid/a//b",/* x */"items":[1,],}'),

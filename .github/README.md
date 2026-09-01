@@ -13,7 +13,12 @@ This directory contains repository contribution and governance controls:
 - `workflows/ci.yml` runs stable foundation, shared-package, OpenNext/workerd web,
   Worker API/local-D1, disposable two-Worker local-stack, retirement-policy, and held
   delivery checks plus the single `CI / ci required` aggregate. The aggregate requires
-  the local-stack result and fails closed when it fails or is cancelled.
+  the local-stack result and fails closed when it fails or is cancelled. The measured
+  adoption baseline contained 204 `foundation` tests: a reviewed PR run completed in
+  14m33s while an identical-tree push hit the old 15-minute ceiling at 15m16s. The
+  current full wildcard-discovered corpus contains 211 tests after unrelated reviewed
+  base growth and remains unfiltered under the exact 20-minute hosted cap; recurrence
+  requires new governed measurements, not a silent timeout increase or test weakening.
 - `workflows/governance.yml` validates repository structure, prevents a pull request
   from declaring a risk below its changed-path floor, and reports the read-only
   normalized merge-eligibility decision and concrete reasons.
@@ -147,6 +152,7 @@ values, dispatch, deployment, production, DNS, billing, spending, learner-data,
 launch, or unrelated settings action occurred.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+
 The operator-revoked standing least-privilege staging token is valid until revoked.
 Its exact account, two permissions, environment-only secret placement, redaction,
 delivery controls, and production holds remain unchanged; the

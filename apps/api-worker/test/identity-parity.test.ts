@@ -268,6 +268,56 @@ describe("identity and account parity", () => {
     expect(replay.status).toBe(401);
   });
 
+  it("creates no partial identity or session for provider failure or unverified email", async () => {
+    const providers: OAuthProvider[] = [
+      {
+        ...oauth,
+        verify: () => Promise.reject(new Error("synthetic provider failure")),
+      },
+      {
+        ...oauth,
+        verify: () =>
+          Promise.resolve({
+            subject: "unverified-subject",
+            email: "unverified@example.test",
+            emailVerified: false,
+            displayName: "Unverified Synthetic Learner",
+            avatarUrl: "",
+          }),
+      },
+    ];
+    for (const provider of providers) {
+      const app = identityApp(config, provider);
+      const started = await app.request(
+        "http://worker.test/api/v1/auth/oauth/google/start",
+        json({ redirectUri: "http://127.0.0.1:3000/home" }),
+        env,
+      );
+      const stateCookie = namedCookie(
+        cookieHeader(started),
+        "vocanova_oauth_state",
+      );
+      const state = new URL(
+        (await started.json<{ url: string }>()).url,
+      ).searchParams.get("state")!;
+      const failed = await app.request(
+        `http://worker.test/api/v1/auth/oauth/google/callback?code=valid-code&state=${encodeURIComponent(state)}`,
+        {
+          headers: { Cookie: `vocanova_oauth_state=${stateCookie}` },
+          redirect: "manual",
+        },
+        env,
+      );
+      expect(failed.status).toBe(401);
+    }
+    for (const table of ["users", "external_identities", "sessions"]) {
+      const row = await env.DB.prepare(
+        `SELECT COUNT(*) AS count FROM ${table}`,
+      ).first<{ count: number }>();
+      expect(row?.count).toBe(0);
+    }
+  });
+
   it("rolls back OAuth user creation when identity linking fails", async () => {
     const app = identityApp();
     const started = await app.request(

@@ -11,6 +11,8 @@ export const TARGET_WORKFLOWS = [
   "security.yml",
 ];
 
+export const FOUNDATION_TIMEOUT_MINUTES = 20;
+
 export const RETIRED_CONTROL_PLANE_WORKFLOWS = [
   "change-package.yml",
   "package-release.yml",
@@ -72,7 +74,9 @@ const REQUIRED_MARKERS = {
     "name: cloudflare staging",
     "name: cloudflare production",
     "name: ci required",
+    "FOUNDATION_RESULT: ${{ needs.foundation.result }}",
     "name: local stack",
+    '"foundation=$FOUNDATION_RESULT"',
     "LOCAL_STACK_RESULT: ${{ needs.local-stack.result }}",
     '"local-stack=$LOCAL_STACK_RESULT"',
     "scripts/foundation/require-successful-jobs.sh",
@@ -127,6 +131,60 @@ function inspectImmutableReferences(filename, source) {
       );
     }
   }
+  return errors;
+}
+
+export function inspectExactFoundationTimeout(filename, source) {
+  const errors = [];
+  const jobsMatch = /^jobs:\n/m.exec(source);
+  if (!jobsMatch) {
+    errors.push(`${filename}: jobs section is missing`);
+    return errors;
+  }
+
+  const jobsSource = source.slice(jobsMatch.index + jobsMatch[0].length);
+  const foundationKeys = [
+    ...jobsSource.matchAll(/^ {2}(?:foundation|["']foundation["'])\s*:/gm),
+  ];
+  if (foundationKeys.length !== 1) {
+    errors.push(`${filename}: foundation job must appear exactly once`);
+    return errors;
+  }
+
+  const jobMatches = [...jobsSource.matchAll(/^  ([a-z0-9-]+):\s*$/gm)];
+  const foundationMatches = jobMatches.filter(
+    (match) => match[1] === "foundation",
+  );
+
+  if (foundationMatches.length !== 1) {
+    errors.push(`${filename}: foundation job must appear exactly once`);
+    return errors;
+  }
+
+  const foundationIndex = jobMatches.indexOf(foundationMatches[0]);
+  const foundationStart = foundationMatches[0].index;
+  const foundationEnd =
+    foundationIndex + 1 < jobMatches.length
+      ? jobMatches[foundationIndex + 1].index
+      : jobsSource.length;
+  const foundationBlock = jobsSource.slice(foundationStart, foundationEnd);
+  const timeoutMatches = [
+    ...foundationBlock.matchAll(/^ {4}timeout-minutes\s*:(.*)$/gm),
+  ];
+
+  if (timeoutMatches.length !== 1) {
+    errors.push(
+      `${filename}: foundation job must declare exactly one timeout-minutes scalar`,
+    );
+    return errors;
+  }
+
+  if (timeoutMatches[0][1].trim() !== String(FOUNDATION_TIMEOUT_MINUTES)) {
+    errors.push(
+      `${filename}: foundation job timeout-minutes must be the exact unquoted integer ${FOUNDATION_TIMEOUT_MINUTES}`,
+    );
+  }
+
   return errors;
 }
 
@@ -232,6 +290,7 @@ export function inspectTargetWorkflow(filename, source) {
   }
   if (filename === "ci.yml") {
     errors.push(...inspectDeliveryWorkflow(source));
+    errors.push(...inspectExactFoundationTimeout(filename, source));
     const requiredStart = source.indexOf("  required:\n");
     const deliveryGateStart = source.indexOf("\n  delivery-gate:\n");
     const requiredJob = source.slice(requiredStart, deliveryGateStart);

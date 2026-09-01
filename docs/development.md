@@ -54,6 +54,14 @@ the repository, installs with the frozen lockfile, and caches only the package-m
 download store. Cache contents are an optimization: `node_modules` is never
 cached, and a miss cannot skip installation or validation.
 
+The hosted `foundation` job has an exact 20-minute cap. That bound is deliberate: the
+204-test adoption baseline completed in 14m33s on PR validation but an identical tree
+later hit the former 15-minute job ceiling at 15m16s on a push run. Unrelated reviewed
+base growth subsequently brought the full wildcard-discovered corpus to 211 tests;
+none is filtered or omitted. The extra five minutes are headroom only. Do not respond
+to a recurrence by skipping tests, changing discovery, or raising the timeout again
+without a new governed defect intake and measured evidence.
+
 The audit policy permits moderate and low advisories to be reported without failing;
 all reported advisories remain visible and must be recorded in the pull request.
 
@@ -134,19 +142,19 @@ The API runtime lives at `apps/api-worker`. T11 retired the former Go runtime af
 the full parity chain; immutable Git history plus compact contract/schema snapshots
 retain only the deterministic migration oracle. Credential-free commands are:
 
-| Command                                                        | Purpose                                                                                                                        |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `pnpm --filter @vocanova/api-worker types:write`               | Regenerate D1/runtime binding types from the local Wrangler configuration.                                                     |
-| `pnpm --filter @vocanova/api-worker types:check`               | Fail when committed Wrangler types are stale.                                                                                  |
-| `pnpm --filter @vocanova/api-worker test`                      | Run Hono, CORS, redaction, identity, content, reviews, missions, AI/email-boundary parity, migration, and D1 tests in workerd. |
-| `pnpm --filter @vocanova/api-worker safety:check`              | Reject dynamic/unsafe SQL, destructive foundation migrations, sensitive logs, and remote config.                               |
-| `pnpm --filter @vocanova/api-worker data-conversion:inventory` | Bind all 25 PostgreSQL source tables/columns to their D1 conversion schema and classify D1-only runtime tables.                |
-| `pnpm --filter @vocanova/api-worker test:data-conversion`      | Run the synthetic type conversion, local D1 chunk/import, resume, replay, correction, reconciliation, and privacy suite.       |
-| `pnpm --filter @vocanova/api-worker openapi:check`             | Compare Hono's generated operational OpenAPI with the committed deterministic artifact.                                        |
-| `pnpm --filter @vocanova/api-worker contract:check`            | Bind the Worker contract to the retired-source `/api/v1` snapshot and API client.                                              |
-| `pnpm --filter @vocanova/api-worker dry-run`                   | Bundle local, held staging, and held production Worker configs without uploading, provisioning, or querying Cloudflare.        |
-| `pnpm ci:worker-api`                                           | Run the complete Worker API/local-D1 hosted command, including API-client compatibility.                                       |
-| `pnpm ci:delivery`                                             | Validate the held Cloudflare manifest, environment isolation, workflow sequence, action holds, and migration ceiling.          |
+| Command                                                        | Purpose                                                                                                                                                  |
+| -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm --filter @vocanova/api-worker types:write`               | Regenerate D1/runtime binding types from the local Wrangler configuration.                                                                               |
+| `pnpm --filter @vocanova/api-worker types:check`               | Fail when committed Wrangler types are stale.                                                                                                            |
+| `pnpm --filter @vocanova/api-worker test`                      | Run Hono, CORS, redaction, identity provider/factory security, content, reviews, missions, AI/email-boundary parity, migration, and D1 tests in workerd. |
+| `pnpm --filter @vocanova/api-worker safety:check`              | Reject dynamic/unsafe SQL, destructive foundation migrations, sensitive logs, and remote config.                                                         |
+| `pnpm --filter @vocanova/api-worker data-conversion:inventory` | Bind all 25 PostgreSQL source tables/columns to their D1 conversion schema and classify D1-only runtime tables.                                          |
+| `pnpm --filter @vocanova/api-worker test:data-conversion`      | Run the synthetic type conversion, local D1 chunk/import, resume, replay, correction, reconciliation, and privacy suite.                                 |
+| `pnpm --filter @vocanova/api-worker openapi:check`             | Compare Hono's generated operational OpenAPI with the committed deterministic artifact.                                                                  |
+| `pnpm --filter @vocanova/api-worker contract:check`            | Bind the Worker contract to the retired-source `/api/v1` snapshot and API client.                                                                        |
+| `pnpm --filter @vocanova/api-worker dry-run`                   | Bundle local, held staging, and held production Worker configs without uploading, provisioning, or querying Cloudflare.                                  |
+| `pnpm ci:worker-api`                                           | Run the complete Worker API/local-D1 hosted command, including API-client compatibility.                                                                 |
+| `pnpm ci:delivery`                                             | Validate the held Cloudflare manifest, environment isolation, workflow sequence, action holds, and migration ceiling.                                    |
 
 `wrangler.jsonc` contains the local D1 name/sentinel plus distinct staging/production
 names with `held-*` non-resource sentinels; it contains no Cloudflare account/resource
@@ -158,8 +166,15 @@ deactivation. T06-T08 add content/review, mission/progress, and AI-feedback pari
 including persistent D1 limits, mocked provider/email boundaries, and privacy-safe
 `waitUntil` telemetry. The committed runtime AI kill switch remains off; normal CI
 uses no paid provider or provider secret.
-Email and OAuth providers remain injected boundaries in tests; no local command sends
-email or contacts a provider. T10 owns the held staging/production manifest,
+The default app now constructs production-shaped email and Google adapters only through
+the centralized fail-closed provider factory. Tests inject fake transports. Committed
+local provider URL, sender, and client-ID vars are empty, the timeout literal is
+`8000`, Google remains disabled, and incomplete email configuration cannot call a
+provider; ordinary local commands send no email and contact no provider. Deliberate
+local real-provider use would require an untracked developer-only secret source and is
+not staging acceptance. Staging and production retain disabled provider switches, and
+provider runtime secret values remain absent from Wrangler and generated binding types.
+T10 owns the held staging/production manifest,
 placeholder production D1/routes, environment names, dry runs, and delivery state
 machine. Under VOC-100, staging uses a standard GitHub environment only after a
 separately authorized settings action: manual SHA-bound `develop` dispatch, fresh
@@ -194,6 +209,10 @@ complete contract and recovery rules are in the
 - `pnpm validate` stops at the first failing child command and preserves its output.
 - A `ci:*` command is useful for reproducing one hosted subsystem, but it is not a
   substitute for the full local gate when several surfaces changed.
+- If `pnpm run ci:foundation` or the hosted `foundation` job approaches the 20-minute
+  cap, treat that as a regression signal. Preserve the full suite, record the exact
+  run/job timing, and route a new governed correction instead of raising the timeout
+  ad hoc.
 - `pnpm dev` and `pnpm dev:workers` require ports 3000 and 8080 to be free. Stop the
   named occupying process and retry; do not edit the commands to accept a fallback.
 - If local D1 contents should survive a branch change, archive only

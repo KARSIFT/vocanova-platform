@@ -1,12 +1,12 @@
 import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
 
 import { readRuntimeConfig } from "./config.js";
-import type { EmailSender } from "./domain/identity.js";
 import { D1PlatformRepository } from "./repositories/d1-platform-repository.js";
 import type { PlatformRepository } from "./domain/platform.js";
 import { D1IdentityRepository } from "./identity/repository.js";
 import { registerIdentityRoutes } from "./identity/routes.js";
 import { IdentityService, identityConfig } from "./identity/service.js";
+import { createIdentityProviderDependencies } from "./identity/provider-factory.js";
 import { D1ContentLearningRepository } from "./content/repository.js";
 import { registerContentLearningRoutes } from "./content/routes.js";
 import { D1MissionsRepository } from "./missions/repository.js";
@@ -163,12 +163,7 @@ export function createApp(
   const identityFactory = (env: CloudflareEnv) =>
     dependencies.createIdentityService
       ? dependencies.createIdentityService(env)
-      : new IdentityService(
-          new D1IdentityRepository(env.DB),
-          unavailableEmailSender,
-          null,
-          identityConfig(env),
-        );
+      : defaultIdentityService(env);
   registerIdentityRoutes(app, identityFactory);
   registerContentLearningRoutes(
     app,
@@ -221,9 +216,15 @@ export function createApp(
 
 export const app = createApp();
 
-const unavailableEmailSender: EmailSender = {
-  send: () => Promise.reject(new Error("email provider is not configured")),
-};
+function defaultIdentityService(env: CloudflareEnv): IdentityService {
+  const providers = createIdentityProviderDependencies(env);
+  return new IdentityService(
+    new D1IdentityRepository(env.DB),
+    providers.email,
+    providers.oauth,
+    identityConfig(env),
+  );
+}
 
 export function createOpenApiDocument(): object {
   return app.getOpenAPI31Document(OPENAPI_DOCUMENT_CONFIG);
