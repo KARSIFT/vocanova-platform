@@ -141,7 +141,7 @@ export const PROHIBITED_ACTIVE_TEXT_CLAIMS = [
   {
     example: "A1/P1 product acceptance passed.",
     pattern: new RegExp(
-      `\\b(?:A1(?:\\/P1\\+?|\\s+authenticated-product)?|P1\\+?|P[2-5](?:-P5)?)\\s+(?:product\\s+)?acceptance\\s+${optionalIs}(?:${expression(ACCEPTANCE_VERBS)})\\b|\\b(?:R1|R2|L1)\\s+acceptance\\s+${optionalIs}(?:${expression(ACCEPTANCE_VERBS)})\\b`,
+      `\\b(?:A1(?:\\/P1\\+?|\\s+authenticated-product)?|P1\\+?|P[2-5](?:-P5)?)\\s+(?:product\\s+)?acceptance\\s+${optionalIs}(?:${expression(ACCEPTANCE_VERBS)})\\b|\\b(?:R1|R2|L1)\\s+(?:product\\s+)?acceptance\\s+${optionalIs}(?:${expression(ACCEPTANCE_VERBS)})\\b`,
       "i",
     ),
     reason: "active A1/P1+ acceptance claim is prohibited",
@@ -817,9 +817,10 @@ export function inspectF2Surface(source, relativePath, profile = "pre-voc105") {
       activeSource = source.slice(0, historyStart) + source.slice(historyEnd);
     }
   }
-  const normalized = normalizeAsciiWhitespace(activeSource);
+  const wholeNormalized = normalizeAsciiWhitespace(source);
+  const activeNormalized = normalizeAsciiWhitespace(activeSource);
   for (const marker of contract.immutableRequired ?? []) {
-    if (!normalized.includes(normalizeAsciiWhitespace(marker)))
+    if (!wholeNormalized.includes(normalizeAsciiWhitespace(marker)))
       errors.push(`${relativePath}: missing immutable F2 marker: ${marker}`);
   }
   for (const marker of profileContract.required ?? []) {
@@ -828,7 +829,7 @@ export function inspectF2Surface(source, relativePath, profile = "pre-voc105") {
       relativePath === F2_DOCUMENT_PATH &&
       marker === "## Historical candidate state"
         ? normalizeAsciiWhitespace(source)
-        : normalized;
+        : activeNormalized;
     const markerCount = markerSource.split(normalizedMarker).length - 1;
     if (markerCount !== 1) {
       errors.push(
@@ -837,7 +838,7 @@ export function inspectF2Surface(source, relativePath, profile = "pre-voc105") {
     }
   }
   for (const marker of profileContract.prohibited ?? []) {
-    if (normalized.includes(normalizeAsciiWhitespace(marker))) {
+    if (wholeNormalized.includes(normalizeAsciiWhitespace(marker))) {
       errors.push(
         `${relativePath}: prohibited ${profile} marker is present: ${marker}`,
       );
