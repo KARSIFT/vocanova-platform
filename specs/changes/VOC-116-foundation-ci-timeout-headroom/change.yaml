@@ -4,7 +4,7 @@ id: VOC-116
 slug: foundation-ci-timeout-headroom
 title: Restore foundation CI timeout headroom
 type: ci-reliability-correction
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because .github/workflows/ci.yml is protected CI/CD behavior and the correction
@@ -17,8 +17,10 @@ base_branch: develop
 base_sha: b22a735fa5986023a7795c3f7cb89af7cf1cfccb
 plan_branch: plan/voc-116-foundation-ci-timeout-headroom
 target_branch: develop
-approved_candidate_sha: pending-independent-exact-revision-review-and-adoption
-approval_status: pending-independent-exact-revision-review-and-adoption
+approved_candidate_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+approval_status: >-
+  adopted-approved-substantive-candidate-bookkeeping-pending-fresh-exact-review-and-
+  normal-plan-merge
 superseded_plan_candidates:
   - candidate_sha: cdc3d58a61efb850001aeeb0f7af3384246eee01
     tree_sha: d689d09a1ca2fe59f9e2305dea53850c6c2893a6
@@ -31,11 +33,11 @@ superseded_plan_candidates:
       - privilege-expansion-analysis-not-explicit
       - additive-preservation-proof-not-explicit
     review_transfer: prohibited-fresh-exact-candidate-reviews-required
-implementation_authorized: false
+implementation_authorized: true
 implementation_authority_status: >-
-  prohibited-until-exact-plan-review-accountable-adoption-complete-bookkeeping-and-
-  normal-non-author-plan-merge; issue-218-and-this-draft-grant-no-implementation-or-
-  external-action-authority
+  adopted-and-authorized-only-for-declared-six-path-repository-implementation-but-
+  unusable-until-this-bookkeeping-only-revision-receives-fresh-exact-independent-
+  review-and-PR-219-normally-merges-by-a-non-author; no-external-action-authority
 implementation_pull_request_count: 1
 implementation_pull_request: pending-after-adoption
 multiple_pull_request_rationale: >-
@@ -169,13 +171,12 @@ timing_evidence:
     duration_milliseconds: 618586
 
 owners:
-  decision: accountable-repository-change-owner-at-adoption
+  decision: /root
   package_preparation: /root/voc115_planner
   implementation: different-builder-actor-after-adoption
-  package_preparation_model: pending-exact-builder-model-provenance-record
-  independent_cross_model_plan_verifier: different-non-author-exact-revision-actor
-  independent_cross_model_plan_model: >-
-    pending-exact-model-provenance-distinct-from-package-preparation-model
+  package_preparation_model: inherited-primary-GPT-5-no-override
+  independent_cross_model_plan_verifier: /root/voc116_cross_model_review
+  independent_cross_model_plan_model: gpt-5.6-terra
   independent_cross_model_implementation_verifier: >-
     different-non-author-exact-revision-actor-distinct-from-implementation-builder
   independent_cross_model_implementation_model: >-
@@ -188,14 +189,23 @@ owners:
 
 approvals:
   independent_cross_model_R3_plan_review:
-    status: pending-distinct-non-author-distinct-model-exact-candidate-review
-    candidate_sha: pending
-    evidence: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+    reviewer: /root/voc116_cross_model_review
+    reviewer_model: gpt-5.6-terra
+    package_preparer_model: inherited-primary-GPT-5-no-override
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/219#issuecomment-5494126948
+  ci_workflow_specialist_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+    reviewer: /root
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/219#issuecomment-5494136574
   adoption_decision:
-    status: pending
-    decision_id: pending
-    candidate_sha: pending
-    evidence: pending
+    status: approved-for-adoption-and-declared-six-path-repository-implementation
+    decision_id: VOC-116-ADOPT-2026-09-01
+    actor: /root
+    candidate_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/219#issuecomment-5494428549
   independent_cross_model_R3_implementation_review:
     status: blocked-until-adopted-plan-and-exact-implementation-candidate
     candidate_sha: pending-future-implementation-sha
@@ -265,7 +275,7 @@ scope_boundary:
   main_promotion_or_release: prohibited
 
 implementation:
-  authorized: false
+  authorized: true
   task_count: 1
   pull_request_count: 1
   pull_request: pending-after-adoption
@@ -278,6 +288,74 @@ implementation:
     - scripts/foundation/workflow-policy.mjs
     - scripts/foundation/workflow-policy.test.mjs
   external_effects: prohibited
+
+plan_review_history:
+  - candidate_sha: cdc3d58a61efb850001aeeb0f7af3384246eee01
+    tree_sha: d689d09a1ca2fe59f9e2305dea53850c6c2893a6
+    reviewer: /root
+    verdict: specialist-pass-superseded-no-transfer
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/219#issuecomment-5493944422
+  - candidate_sha: cdc3d58a61efb850001aeeb0f7af3384246eee01
+    tree_sha: d689d09a1ca2fe59f9e2305dea53850c6c2893a6
+    reviewer: /root/voc115_plan_review/voc115_impl_gap
+    verdict: independent-fail-superseded-no-transfer
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/219#issuecomment-5494003051
+  - candidate_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+    tree_sha: 44cfe5adcc98a02ff76493e982315af336b9b17e
+    reviewer: /root/voc116_cross_model_review
+    reviewer_model: gpt-5.6-terra
+    package_preparer_model: inherited-primary-GPT-5-no-override
+    verdict: pass-independent-cross-model-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/219#issuecomment-5494126948
+  - candidate_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+    tree_sha: 44cfe5adcc98a02ff76493e982315af336b9b17e
+    reviewer: /root
+    verdict: pass-CI-workflow-specialist-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/219#issuecomment-5494136574
+  - candidate_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+    tree_sha: 44cfe5adcc98a02ff76493e982315af336b9b17e
+    decision: VOC-116-ADOPT-2026-09-01
+    actor: /root
+    verdict: adopted-for-declared-six-path-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/219#issuecomment-5494428549
+
+hosted_approved_candidate_evidence:
+  candidate_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+  ci:
+    run_id: 33508619896
+    successful_attempt: 2
+    run_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33508619896/attempts/2
+    conclusion: success
+    foundation_job_id: 99863498503
+    foundation_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33508619896/job/99863498503
+    foundation_result: pass-204-of-204
+    foundation_job_duration_seconds: 850
+    foundation_validation_duration_seconds: 816
+    ci_required_job_id: 99867938603
+    ci_required_result: success
+    attempt_1_result: failed-unrelated-signal-fixture-race
+    attempt_1_disposition: truthfully-recorded-separate-defect-intake-no-scope-transfer
+    attempt_1_issue: https://github.com/KARSIFT/vocanova-platform/issues/221
+  governance:
+    run_id: 33508683699
+    run_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33508683699
+    conclusion: success
+  security:
+    run_id: 33508619901
+    run_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33508619901
+    conclusion: success
+
+repository_adoption_status:
+  status: adopted
+  approved_substantive_candidate_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+  approved_substantive_candidate_tree: 44cfe5adcc98a02ff76493e982315af336b9b17e
+  bookkeeping_revision: >-
+    current-change-yaml-only-commit-is-not-the-approved-substantive-candidate-and-
+    requires-fresh-exact-review-before-normal-plan-merge
+  blocking_reasons:
+    - bookkeeping-only-revision-pending-fresh-exact-independent-review
+    - PR-219-pending-normal-non-author-merge
+  implementation_authority_usable: false
 
 rollback:
   before_merge: close-implementation-PR-for-zero-repository-effect
@@ -307,7 +385,8 @@ required_r3_evidence:
   independent_exact_revision_evidence:
     required: true
     role: independent-cross-model-R3-verifier-for-plan-and-separately-implementation
-    status: pending
+    plan_status: pass-exact-approved-substantive-candidate
+    implementation_status: pending-future-exact-implementation-candidate
     distinct_actor_and_model_required: true
     no_review_transfer: true
   deterministic_protection_preservation:
