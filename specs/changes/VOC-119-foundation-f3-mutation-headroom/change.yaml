@@ -1,0 +1,361 @@
+schema_version: 1
+
+id: VOC-119
+slug: foundation-f3-mutation-headroom
+title: Restore foundation F3 mutation-test headroom without reducing coverage
+type: required-foundation-test-performance-correction
+status: adopted
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the planned implementation changes a required foundation CI verifier.
+  The automated path floor is R1, but a mistaken optimization could silently weaken
+  detection of protected governance/delivery wording drift across current-truth
+  surfaces. The change is intended to be one-file, repository-only, reversible, and
+  coverage-preserving, with no R4 consequence if it stays within the declared
+  boundary.
+canonical_path: specs/changes/VOC-119-foundation-f3-mutation-headroom
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/228
+failing_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
+failing_run: https://github.com/KARSIFT/vocanova-platform/actions/runs/33527039103
+failing_job: https://github.com/KARSIFT/vocanova-platform/actions/runs/33527039103/job/99920414097
+failing_head_sha: 476ac55bb5ade513916fa3aacadd8c1a2742430b
+base_branch: develop
+base_sha: e1379508621ee228ae06c88ebcad3b1b018ef4cc
+plan_branch: plan/voc-119-foundation-f3-mutation-headroom
+target_branch: develop
+approved_candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+approval_status: >-
+  adopted-approved-substantive-candidate-bookkeeping-pending-fresh-exact-review-and-
+  normal-plan-merge
+superseded_plan_candidates:
+  - candidate_sha: be41e112f7c4113f2b40b43e79cd3ec30df462f6
+    tree_sha: ce3c94e15ae803e8b134f4356fb70de83abd7289
+    status: blocked-and-superseded
+    review_evidence:
+      - https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497529030
+    reasons:
+      - timing-inference-arithmetic-did-not-reconcile-with-recorded-averages
+      - implementation-base-contract-did-not-bind-then-current-origin-develop
+    review_transfer: prohibited-fresh-exact-candidate-reviews-required
+implementation_authorized: true
+implementation_authority_status: >-
+  adopted-and-authorized-only-for-the-declared-one-file-repository-implementation-
+  but-unusable-until-this-bookkeeping-only-revision-receives-fresh-exact-
+  independent-review-and-PR-229-normally-merges-by-a-non-author;
+  no-external-action-authority
+implementation_pull_request_count: 1
+implementation_pull_request: pending-after-adoption
+multiple_pull_request_rationale: >-
+  One implementation PR keeps the measured hotspot diagnosis, immutable test-local
+  setup, semantic-preservation proof, rollback point, and exact headroom evidence in
+  one required-verifier boundary. Splitting would add coordination, repeated-check,
+  exact-review, and bookkeeping overhead without a releasable or rollback-safe
+  intermediate state.
+automatic_merge_allowed: true
+production_impact: none-repository-test-only
+rollback_required: true
+
+objective: >-
+  Recover reliable hosted foundation headroom by removing repeated full-aggregate
+  VOC-105 evidence scans from the highest-cardinality mutation tests only where an
+  immutable test-local baseline and the already exported surface-local policy checks
+  preserve identical semantic coverage, diagnostics, wildcard discovery, and timeout
+  boundaries.
+
+requirements:
+  - id: VOC-119-D00
+    statement: >-
+      Bind allocator and intake evidence on 2026-09-01. VOC-116 exists on develop as
+      the current 20-minute foundation-cap policy, VOC-118 is already consumed by
+      merged plan PR #224 and implementation PR #227, and no package, local/remote
+      branch, or default-branch content uses VOC-119. Treat issue #228, PR #215 head
+      476ac55bb5ade513916fa3aacadd8c1a2742430b, run 33527039103, job 99920414097,
+      253/253 result, 1,050,570-ms validation duration, and about 69 seconds of
+      hosted job headroom as defect intake only; they grant no implementation,
+      review, merge, settings, dispatch, deployment, release, or live-system
+      authority.
+  - id: VOC-119-D01
+    statement: >-
+      Preserve the planning diagnosis on exact base
+      e1379508621ee228ae06c88ebcad3b1b018ef4cc. Read-only profiling must remain
+      truthful: a representative full mutation path averaged 56.882 ms over 20 runs,
+      with inspectF3Evidence() itself averaging 55.215 ms; fixture creation,
+      snapshot, mutation, and changed-path bookkeeping together averaged 1.668 ms.
+      A direct inspectF3Surface() pass on a representative mutated surface averaged
+      6.071 ms over 200 runs, and the `later authority claim grammar fails across
+      every surface` matrix contains 6,462 mutation assertions. The inferred costs
+      are about 356.8 s for repeated inspectF3Evidence() alone, 367.6 s for the
+      representative full mutation path, and 39.2 s for the surface-local path.
+      Those comparisons are inferences from the local averages and loop cardinality;
+      do not restate them as measured post-change results.
+  - id: VOC-119-D02
+    statement: >-
+      The planning measurements disprove "fixture copy, temp-tree creation, or test
+      runner startup is the dominant cause" as the leading optimization target for
+      the named hotspots. The planned implementation must therefore focus on repeated
+      full-validator work inside scripts/foundation/voc105-f3-evidence-policy.test.mjs,
+      not on timeout growth, workflow changes, or broad test-runner behavior.
+  - id: VOC-119-D03
+    statement: >-
+      After this reviewed plan merges, future implementation must branch from the
+      then-current exact origin/develop, record that implementation parent SHA and
+      tree before editing, and may change exactly one repository path:
+      scripts/foundation/voc105-f3-evidence-policy.test.mjs. Preserve
+      scripts/foundation/voc105-f3-evidence-policy.mjs, package.json,
+      docs/development.md, .github/workflows/ci.yml, pnpm-lock.yaml, and every other
+      scripts/foundation/*.test.mjs file byte-for-byte. Use the recorded
+      implementation parent, not this plan candidate SHA, for before measurements,
+      path diffs, and rollback. If implementation requires a second path, a policy
+      export change, a package-script change, or a workflow or timeout edit, stop
+      and return to governed planning.
+  - id: VOC-119-D04
+    statement: >-
+      Replace repeated fresh fixture-plus-inspectF3Evidence() use only in the
+      high-cardinality designated-surface mutation helpers with an immutable
+      canonical-source baseline and the already exported policy functions needed for
+      the mutated surface. The helper must preserve the same mutation members,
+      surface coverage, regex diagnostics, and fail-closed semantics. Full
+      inspectF3Evidence() must remain in place wherever the assertion truly depends
+      on aggregate designated-surface existence, record-level JSON structure, package
+      script wiring, or cross-file invariants rather than one mutated surface.
+  - id: VOC-119-D05
+    statement: >-
+      Preserve every current positive and negative case in the five issue-named slow
+      tests and in the complete file. No mutation member, surface loop, safe clause,
+      diagnostic regex, assertion count, wildcard discovery pattern, or aggregate
+      test count may be removed, skipped, conditionally bypassed, or reduced. Do not
+      shard the matrix across files or processes, and do not replace semantic checks
+      with snapshots or hard-coded expected counts detached from the parent file.
+  - id: VOC-119-D06
+    statement: >-
+      Preserve VOC-116's exact 20-minute hosted foundation cap and the unchanged
+      pnpm run ci:foundation contract. Do not increase any timeout, add retry/repeat,
+      alter node --test discovery, change CI jobs or aggregates, relax diagnostics,
+      weaken regexes, add caching that can persist mutated residue across assertions,
+      or broaden authority. The correction must recover headroom by reducing repeated
+      immutable work only.
+  - id: VOC-119-D07
+    statement: >-
+      Before and after implementation, capture exact named durations for the five
+      issue-listed slow tests, the complete VOC-105 file result and wall duration,
+      the complete foundation suite result and wall duration, and hosted foundation
+      validation/job headroom on the final exact SHA. Any regression in counts,
+      skipped tests, timeout growth, semantic failures, or renewed near-cap hosted
+      behavior blocks merge and issue closure.
+  - id: VOC-119-D08
+    statement: >-
+      Require exact path/preservation proof, git diff --check, governance/risk
+      validation, focused VOC-105 foundation tests, the full ci:foundation command,
+      and hosted required checks. Evidence must show that the changed file remains
+      auto-discovered by the exact node --test scripts/foundation/*.test.mjs command
+      inside ci:foundation and that no workflow or package-script edit was needed.
+  - id: VOC-119-D09
+    statement: >-
+      Require exact-SHA independent cross-model R3 review for both the plan and the
+      future implementation by a different non-author actor using a model distinct
+      from the exact revision's builder. Any material edit invalidates prior review.
+      A separate non-author actor performs merge. No risk label creates founder or
+      standing-steward approval, and no verdict satisfies external-effect authority.
+  - id: VOC-119-D10
+    statement: >-
+      Keep the plan and future implementation credential-free, network-free except
+      for ordinary GitHub repository operations needed for the PR itself, and
+      repository-only. Do not query or mutate repository settings, dispatch,
+      deploy, access Cloudflare or production/learner data, change DNS or traffic,
+      spend money, promote main, launch publicly, or claim issue closure before the
+      final exact-SHA hosted evidence is attached.
+
+owners:
+  decision: /root
+  package_preparation: /root/voc228_plan
+  package_preparation_model: inherited-primary-GPT-5-no-override
+  adoption_bookkeeping: /root
+  implementation: different-builder-actor-after-adoption
+  independent_cross_model_R3_plan_verifier: /root/voc119_plan_review
+  independent_cross_model_R3_plan_model: gpt-5.6-sol
+  independent_cross_model_R3_implementation_verifier: >-
+    different-non-author-exact-revision-actor-distinct-from-implementation-builder
+  merge: separate-non-author-actor
+  post_merge_monitoring: accountable-repository-change-owner-recorded-at-adoption
+
+approvals:
+  independent_cross_model_R3_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+    reviewer: /root/voc119_plan_review
+    reviewer_model: gpt-5.6-sol
+    package_preparer_model: inherited-primary-GPT-5-no-override
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497622470
+  adoption_decision:
+    status: approved-for-adoption-and-declared-one-file-repository-implementation
+    decision_id: VOC-119-ADOPT-2026-09-01
+    actor: /root
+    candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497771919
+  independent_cross_model_R3_implementation_review:
+    status: blocked-until-adopted-plan-and-exact-implementation-candidate
+    candidate_sha: pending-future-implementation-sha
+    evidence: pending
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - scripts/foundation/voc105-f3-evidence-policy.test.mjs
+  - required-foundation-f3-current-truth-mutation-verifier
+
+implementation_paths:
+  - scripts/foundation/voc105-f3-evidence-policy.test.mjs
+
+preservation_surfaces:
+  - scripts/foundation/voc105-f3-evidence-policy.mjs
+  - package.json
+  - docs/development.md
+  - .github/workflows/ci.yml
+  - pnpm-lock.yaml
+  - scripts/foundation/agent-authority-policy.test.mjs
+  - scripts/foundation/workflow-policy.test.mjs
+  - scripts/foundation/*.test.mjs discovery set
+
+protected_areas:
+  - required-foundation-current-truth-policy-verifier
+  - complete-mutation-matrix-and-fail-closed-diagnostics
+  - exact-foundation-ci-discovery-and-20-minute-hosted-cap
+  - coverage-reduction-timeout-increase-and-retry-prohibitions
+  - production-and-learner-data-holds
+
+privilege_expansion_analysis:
+  classification: zero-authority-expansion
+  expands: []
+  does_not_expand:
+    - workflow-permissions-triggers-timeouts-and-aggregates
+    - package-scripts-test-discovery-and-lockfile
+    - policy-module-semantics-and-current-truth-rules
+    - secrets-credentials-cloudflare-production-and-data-access
+    - GitHub-settings-dispatch-deployment-release-and-main-authority
+
+self_modification:
+  applies: false
+  rationale: >-
+    The planned implementation stays inside one foundation test file and preserves
+    CI workflow, permissions, review rules, merge conditions, deployment authority,
+    and policy-module semantics byte-for-byte.
+
+required_r3_evidence:
+  deterministic_evidence:
+    required: true
+    evidence: exact named timing capture, complete file/foundation validation, and hosted required checks
+  protected_area_evidence:
+    required: true
+    evidence: impact-analysis.md plus exact path/preservation and no-coverage-reduction audit
+  independent_exact_revision_evidence:
+    required: true
+    role: independent-cross-model-R3-verifier
+    status: plan-pass-implementation-review-pending-future-exact-candidate
+  contingency_and_rollback:
+    required: true
+    evidence: implementation-plan.md and release-plan.md
+  ehr: not-triggered-no-exceptional-condition-identified
+
+scope_boundary:
+  immutable-test-local-baseline-and-surface-local-helper: allowed-after-adoption
+  policy-module-package-script-workflow-timeout-or-coverage-change: prohibited
+  external_or_live_action: prohibited
+
+implementation:
+  authorized: true
+  task_count: 1
+  pull_request_count: 1
+  pull_request: pending-after-adoption
+  branch: impl/voc-119-foundation-f3-mutation-headroom
+  exact_paths:
+    - scripts/foundation/voc105-f3-evidence-policy.test.mjs
+  external_effects: prohibited
+
+plan_review_history:
+  - candidate_sha: be41e112f7c4113f2b40b43e79cd3ec30df462f6
+    tree_sha: ce3c94e15ae803e8b134f4356fb70de83abd7289
+    reviewer: /root/voc119_plan_review
+    verdict: independent-fail-superseded-no-transfer
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497529030
+  - candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+    tree_sha: 4c52c0a34efc6cfb3d93d4a2f9a48aead0b352db
+    reviewer: /root/voc119_plan_review
+    reviewer_model: gpt-5.6-sol
+    package_preparer_model: inherited-primary-GPT-5-no-override
+    verdict: pass-independent-cross-model-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497622470
+  - candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+    tree_sha: 4c52c0a34efc6cfb3d93d4a2f9a48aead0b352db
+    decision: VOC-119-ADOPT-2026-09-01
+    actor: /root
+    verdict: adopted-for-declared-one-file-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497771919
+
+hosted_approved_candidate_evidence:
+  candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+  ci:
+    run_id: 33535865743
+    successful_attempt: 1
+    run_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865743
+    conclusion: success
+    foundation_job_id: 99950042180
+    foundation_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865743/job/99950042180
+    foundation_result: pass-253-of-253
+    foundation_job_duration_seconds: 871
+    headroom_under_cap_seconds: 329
+    ci_required_job_id: 99954787774
+    ci_required_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865743/job/99954787774
+    ci_required_result: success
+  governance:
+    run_id: 33535982108
+    run_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535982108
+    conclusion: success
+    structure_job_id: 99950316526
+    structure_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535982108/job/99950316526
+    changed_path_risk_job_id: 99950317010
+    changed_path_risk_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535982108/job/99950317010
+    merge_eligibility_job_id: 99950500548
+    merge_eligibility_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535982108/job/99950500548
+  security:
+    run_id: 33535865796
+    run_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865796
+    conclusion: success
+    secret_scan_job_id: 99949900420
+    secret_scan_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865796/job/99949900420
+    dependency_audit_job_id: 99949900342
+    dependency_audit_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865796/job/99949900342
+
+repository_adoption_status:
+  status: adopted
+  approved_substantive_candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+  approved_substantive_candidate_tree: 4c52c0a34efc6cfb3d93d4a2f9a48aead0b352db
+  bookkeeping_revision: >-
+    current-adoption-bookkeeping-revision-is-not-the-approved-substantive-candidate-
+    and-requires-fresh-exact-review-before-normal-plan-merge
+  blocking_reasons:
+    - bookkeeping-only-revision-pending-fresh-exact-independent-review
+    - PR-229-pending-normal-non-author-merge
+  implementation_authority_usable: false
+
+rollback:
+  strategy: complete-reviewed-one-file-revert-to-actual-first-parent
+  partial_revert: prohibited
+  external_rollback: none-no-external-effect
+
+monitoring:
+  owner: accountable-repository-change-owner-recorded-at-adoption
+  signals:
+    - exact-merge-SHA-five-named-test-durations
+    - complete-voc105-file-result-and-wall-duration
+    - complete-foundation-suite-result-validation-duration-and-job-headroom
+    - skipped-count-timeout-or-diagnostic-regression
+  failure_action: block-issue-closure-and-route-governed-correction-or-complete-revert
