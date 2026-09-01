@@ -1,0 +1,248 @@
+schema_version: 1
+
+id: VOC-111
+slug: transition-stable-f2-tests
+title: Make F2 policy tests stable across the VOC-105 profile transition
+type: foundation-policy-test-defect-remediation
+status: draft
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the sole changed file is the focused verifier for a fail-closed
+  foundation policy protecting immutable F2 evidence, current milestone profiles, and
+  the VOC-109 command chain. Runtime policy and external state do not change, so the
+  protected verification consequence does not rise to R4.
+canonical_path: specs/changes/VOC-111-transition-stable-f2-tests
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/206
+related_adopted_packages:
+  - VOC-105
+  - VOC-110
+  - VOC-109
+base_branch: develop
+base_sha: c94444bc74d3ed1b5ca0aca65141d0532f70fa11
+plan_branch: plan/voc-111-transition-stable-f2-tests
+target_branch: develop
+approval_status: not-approved
+implementation_authorized: false
+implementation_authority_status: >-
+  not-authorized-until-this-exact-package-receives-distinct-foundation-policy-test-
+  specialist-review-independent-cross-model-R3-review-accountable-adoption-and-
+  normal-non-author-plan-merge; issue-206-and-adopted-VOC-105-or-VOC-110-do-not-
+  authorize-the-test-edit
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: >-
+  One test-file correction is the minimum coherent boundary: live-profile selection,
+  duplicate-key construction, explicit pre-profile fixtures, transition positives,
+  hybrid negatives, and regression proof must land and roll back together. Splitting
+  would add branch, coordination, elapsed-time, repeated-check, exact-review, and
+  bookkeeping overhead without an independently releasable or rollback-safe state.
+automatic_merge_allowed: true
+production_impact: none-repository-only
+rollback_required: true
+
+objective: >-
+  Make the VOC-081 focused verifier pass and preserve its full fail-closed evidence
+  contract regardless of whether repositoryRoot is the exact pre-VOC-105 profile or
+  the exact adopted VOC-105 profile.
+
+requirements:
+  - id: VOC-111-D00
+    statement: >-
+      Treat issue #206 and preserved-candidate results as intake/reproduction evidence
+      only. Bind exact base c94444bc74d3ed1b5ca0aca65141d0532f70fa11,
+      reviewed VOC-110 implementation 66928cb432ace3440990514526cc3afc6262d3de,
+      preserved candidate fingerprint
+      8efd149cce12cbd8b20fd07c8c942faacdc028f9b316a2cdedd15768f9a28da1, passing
+      runtime validators, and focused 24/27 / ci:foundation 179/182 results with
+      exactly the same three failures. No implementation starts before reviewed
+      adoption and plan merge.
+  - id: VOC-111-D01
+    statement: >-
+      Determine repositoryRoot's current profile from the complete exact
+      milestone_state object using plan-owned pre-voc105 and voc105 values, exact key
+      sets/types, object-order-insensitive comparison, and array-order-sensitive
+      comparison. Do not infer the profile from one field or default it.
+  - id: VOC-111-D02
+    statement: >-
+      Make raw duplicate-key negatives profile-independent. Locate the selected key's
+      unique raw member using the exact parsed active-profile value and JSON
+      serialization, assert fixture construction changed exactly one member, and prove
+      f3_staging duplicates fail in both exact profiles plus f3_current_evidence in the
+      voc105 profile. Do not search for a fixed unresolved-held literal.
+  - id: VOC-111-D03
+    statement: >-
+      Define explicit plan-owned preserved pre-profile surface fixture strings for all
+      five human F2-owned surfaces. Construct both complete synthetic profiles and
+      both-direction one-surface repository hybrids only from committed test literals,
+      exact plan-owned milestone objects, and stable fixture support markers; never
+      from mutable repositoryRoot, another branch/PR, or the dirty VOC-105 worktree.
+  - id: VOC-111-D04
+    statement: >-
+      Retain every VOC-110 positive and negative unchanged in effect: both atomic
+      profiles and object reorder positives; immutable F2/history/external-effect
+      checks; all profile key/value/type/pointer and marker mutations; exact history
+      isolation/normalization; every legacy/new false-claim cross; raw duplicate
+      rejection; no-execution evidence; missing surfaces; and both hybrid directions.
+  - id: VOC-111-D05
+    statement: >-
+      Retain every VOC-109 command-chain positive and negative unchanged in effect,
+      including zero/one/two extensions, exact VOC-105 pair, eight-command prefix,
+      terminal test, F2 direct execution, extension grammar/declaration/order/
+      collision/entry-point checks, malformed input, shell controls, and sentinel.
+  - id: VOC-111-D06
+    statement: >-
+      Implement one repository-only PR changing exactly
+      scripts/foundation/voc081-f2-evidence-policy.test.mjs. Do not edit the runtime
+      validator, package.json, docs/evidence, packages, workflows, applications,
+      settings/secrets, resources, dispatch/deployment, D1, traffic/DNS, production or
+      learner data, spending, or launch state.
+  - id: VOC-111-D07
+    statement: >-
+      Require focused, foundation, workspace, governance, risk, path, whitespace, and
+      rollback evidence, exact-SHA foundation-policy-test/CI-integrity specialist
+      review, and separate independent cross-model R3 verification by distinct
+      non-authors. Resolve every blocker on a new SHA; require a separate merge actor.
+  - id: VOC-111-D08
+    statement: >-
+      The accountable owner recorded at adoption observes the first refreshed real
+      VOC-105 candidate from VOC-111 implementation merge until both runtime
+      validators, the VOC-081 focused suite, ci:foundation, and hosted required checks
+      pass, or until a governed VOC-105 abandonment/supersession. Any recurrence,
+      false/hybrid acceptance, or VOC-110/VOC-109 regression stops VOC-105 merge and
+      VOC-111 closure and routes linked remediation or repository revert.
+
+owners:
+  decision: accountable-repository-change-owner-at-adoption
+  package_preparation: /root/voc108_plan_builder
+  implementation: different-builder-actor-after-adoption
+  foundation_policy_test_ci_specialist: different-non-author-exact-revision-actor
+  independent_cross_model_r3_verifier: different-non-author-exact-revision-actor
+  merge: separate-non-author-actor
+  post_merge_observation: accountable-repository-change-owner-at-adoption
+
+plan_review_history: []
+
+approvals:
+  foundation_policy_test_ci_plan_review:
+    status: pending-distinct-non-author-exact-candidate-review
+    candidate_sha: null
+    evidence: null
+  independent_cross_model_R3_plan_review:
+    status: pending-distinct-non-author-exact-candidate-review
+    candidate_sha: null
+    evidence: null
+  adoption_decision:
+    status: pending-after-required-plan-reviews
+    decision_id: null
+    candidate_sha: null
+    evidence: null
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - scripts/foundation/voc081-f2-evidence-policy.test.mjs
+
+protected_areas:
+  - immutable-VOC-081-F2-evidence-and-history
+  - VOC-110-two-profile-and-false-claim-verification
+  - VOC-109-foundation-chain-integrity
+  - verifier-self-modification-and-independent-verification
+  - adopted-VOC-105-downstream-boundary
+
+dependencies:
+  - id: VOC-111-DEP-00
+    status: issue-intake-only
+    description: >-
+      Issue #206 records the exact reproduction and root cause; it grants no
+      implementation, review, adoption, merge, or external-action authority.
+  - id: VOC-111-DEP-01
+    status: implemented-VOC-110-runtime-and-test-contract
+    description: >-
+      VOC-110 implementation 66928cb432ace3440990514526cc3afc6262d3de and merge
+      c94444bc74d3ed1b5ca0aca65141d0532f70fa11 define the protected two-profile
+      runtime and focused evidence that VOC-111 must preserve unchanged in effect.
+  - id: VOC-111-DEP-02
+    status: adopted-VOC-105-preserved-real-candidate
+    description: >-
+      The uncommitted 12-path VOC-105 candidate is read-only reproduction and future
+      observation evidence. Its content is not fixture authority and VOC-111 does not
+      authorize its implementation or merge.
+  - id: VOC-111-DEP-03
+    status: implemented-VOC-109-command-contract
+    description: >-
+      The active VOC-109 extension behavior and entire focused regression tail remain
+      unchanged in effect.
+
+implementation:
+  authorized: false
+  required: true
+  status: pending-independent-reviews-adoption-and-plan-merge
+  target_branch: develop
+  pull_request_count: 1
+  task: VOC-111-T00
+
+required_r3_evidence:
+  deterministic_policy_regression: pending-after-adoption
+  foundation_policy_test_ci_specialist: pending-distinct-non-author-exact-candidate-review
+  independent_cross_model_exact_revision_verification: pending-distinct-non-author-exact-candidate-review
+  blocking_findings: must-be-resolved-before-merge
+  ehr: not-triggered
+
+scope_boundary:
+  plan_package: allowed-now
+  voc081_focused_test: allowed-only-after-adoption-and-plan-merge
+  voc081_runtime_validator: prohibited
+  package_json_or_documentation: prohibited
+  F2_or_F3_evidence_files: prohibited
+  historical_change_packages: prohibited
+  application_runtime_or_workflows: prohibited
+  github_settings_or_secrets: prohibited
+  cloudflare_dns_dispatch_deployment: prohibited
+  production_or_learner_data: prohibited
+  voc105_implementation_or_closure: prohibited
+
+external_effects:
+  github_settings_and_secrets: prohibited
+  cloudflare: prohibited
+  workflow_dispatch: prohibited
+  staging_deployment: prohibited
+  d1_migration: prohibited
+  traffic_and_dns: prohibited
+  production: prohibited
+  spending_and_billing: prohibited
+  learner_data: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-foundation-test-correction-into-develop
+  deployment: prohibited
+  migration_required: false
+  rollback_required: true
+  issue_closure: after-merged-exact-implementation-and-bounded-real-candidate-proof
+
+post_merge_observation:
+  owner: accountable-repository-change-owner-at-adoption
+  window_start: merged-VOC-111-implementation
+  window_end: >-
+    recorded-first-refreshed-real-VOC-105-candidate-runtime-focused-foundation-and-
+    hosted-results-or-recorded-governed-VOC-105-abandonment-or-supersession
+  monitored_signal: >-
+    exact-real-profile-selected-and-all-tests-pass-while-VOC-110-and-VOC-109-
+    protections-remain-green
+  failure_trigger: >-
+    recurrence-of-three-assumption-failures-or-false-hybrid-acceptance-or-protected-
+    evidence-regression
+  disposition: >-
+    stop-VOC-105-merge-and-VOC-111-closure-record-linked-failure-evidence-and-route-
+    separately-governed-remediation-or-repository-revert
+
+ehr: not-triggered
