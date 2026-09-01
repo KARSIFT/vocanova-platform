@@ -300,10 +300,7 @@ test("every designated living F2 surface has a precise active contract", () => {
       ...(surface.immutableRequired ?? []),
       ...(surface.profiles["pre-voc105"]?.required ?? []),
     ]) {
-      const mutated = source.replace(
-        marker,
-        "__VOC086_REQUIRED_MARKER_REMOVED__",
-      );
+      const mutated = removeNormalizedMarker(source, marker);
       assert.notEqual(mutated, source);
       const errors = inspectF2Surface(mutated, surface.path);
       assert.ok(
@@ -517,6 +514,145 @@ test("current-state JSON accepts only the two exact profiles", () => {
   }
 });
 
+test("raw duplicate JSON keys and the VOC-105 evidence pointer fail before parsing", () => {
+  const duplicateBaseline = repositoryFixture((fixture) => {
+    const recordPath = join(fixture, F2_RECORD_PATH);
+    const source = readFileSync(recordPath, "utf8");
+    writeFileSync(
+      recordPath,
+      source.replace(
+        '"f3_staging": "unresolved-held",',
+        '"f3_staging": "unresolved-held",\n    "f3_staging": "passed",',
+      ),
+    );
+  });
+  assert.ok(
+    duplicateBaseline.some((error) =>
+      error.includes("duplicate raw JSON key is prohibited: f3_staging"),
+    ),
+  );
+
+  const duplicatePointer = repositoryFixture((fixture) => {
+    installFutureProfile(fixture);
+    const recordPath = join(fixture, F2_RECORD_PATH);
+    const source = readFileSync(recordPath, "utf8");
+    writeFileSync(
+      recordPath,
+      source.replace(
+        '"f3_current_evidence": "docs/operations/voc-105-f3-evidence.json",',
+        '"f3_current_evidence": "docs/operations/voc-105-f3-evidence.json",\n    "f3_current_evidence": "docs/operations/other.json",',
+      ),
+    );
+  });
+  assert.ok(
+    duplicatePointer.some((error) =>
+      error.includes(
+        "duplicate raw JSON key is prohibited: f3_current_evidence",
+      ),
+    ),
+  );
+});
+
+test("current-state JSON rejects every key mutation class one invariant at a time", () => {
+  for (const key of Object.keys(futureMilestoneState)) {
+    for (const mutate of [
+      (value) => delete value[key],
+      (value) => {
+        value[`renamed_${key}`] = value[key];
+        delete value[key];
+      },
+      (value) => {
+        value[key] = Array.isArray(value[key]) ? [] : "wrong";
+      },
+      (value) => {
+        value[key] = [value[key]];
+      },
+    ]) {
+      const candidate = clone(record);
+      candidate.milestone_state = clone(futureMilestoneState);
+      mutate(candidate.milestone_state);
+      assert.ok(
+        inspectF2Record(candidate).some((error) =>
+          error.includes("milestone/hold"),
+        ),
+        `${key} mutation must fail`,
+      );
+    }
+  }
+});
+
+test("future markers are active-only, normalized, unique, and history exclusion is exact", () => {
+  const f2Surface = humanSurfaces.find(
+    ({ path: surfacePath }) =>
+      surfacePath === "docs/operations/voc-081-f2-evidence.md",
+  );
+  const baseline = readFileSync(
+    resolve(repositoryRoot, f2Surface.path),
+    "utf8",
+  );
+  const future = futureSource(baseline, f2Surface);
+  const requiredMarker = planOwnedFutureMarkers[f2Surface.path].required[1];
+  const withoutRequired = removeNormalizedMarker(future, requiredMarker);
+  const historyStart = withoutRequired.indexOf("## Historical candidate state");
+  const nextHeading = withoutRequired.indexOf("\n## ", historyStart + 1);
+  const onlyHistory = `${withoutRequired.slice(0, nextHeading)}\n${requiredMarker}${withoutRequired.slice(nextHeading)}`;
+  assert.ok(
+    inspectF2Surface(onlyHistory, f2Surface.path, "voc105").some((error) =>
+      error.includes("current voc105 marker"),
+    ),
+  );
+  const exactHistory = future.replace(
+    "## Historical candidate state",
+    "## Historical candidate state\nRepository/local F2 still pending integration.",
+  );
+  assert.deepEqual(
+    inspectF2Surface(exactHistory, f2Surface.path, "voc105"),
+    [],
+  );
+  const nearHistory = exactHistory.replace(
+    "## Historical candidate state",
+    "## Historical candidate state (near match)",
+  );
+  assert.ok(
+    inspectF2Surface(nearHistory, f2Surface.path, "voc105").some((error) =>
+      error.includes("pending claim"),
+    ),
+  );
+
+  for (const surface of humanSurfaces) {
+    const source = futureSource(
+      readFileSync(resolve(repositoryRoot, surface.path), "utf8"),
+      surface,
+    );
+    const markers = planOwnedFutureMarkers[surface.path];
+    assert.ok(
+      inspectF2Surface(
+        `${source}\n${markers.required[0]}`,
+        surface.path,
+        "voc105",
+      ).some((error) => error.includes("must occur exactly once")),
+      `${surface.path} must reject a duplicate required marker`,
+    );
+    assert.ok(
+      inspectF2Surface(
+        `${source}\n${markers.prohibited[0]}`,
+        surface.path,
+        "voc105",
+      ).some((error) => error.includes("prohibited voc105 marker")),
+      `${surface.path} must reject a retained prohibited marker`,
+    );
+  }
+
+  const normalized = futureSource(
+    readFileSync(resolve(repositoryRoot, "docs/README.md"), "utf8"),
+    humanSurfaces[0],
+  ).replaceAll(" ", " \t\r\n");
+  assert.deepEqual(
+    inspectF2Surface(normalized, "docs/README.md", "voc105"),
+    [],
+  );
+});
+
 test("every human surface rejects profile hybrids in either direction", () => {
   for (const surface of humanSurfaces) {
     const baseline = readFileSync(
@@ -557,6 +693,38 @@ test("every human surface rejects profile hybrids in either direction", () => {
   }
 });
 
+test("repository-wide profile hybrids fail one surface at a time in both directions", () => {
+  for (const surface of humanSurfaces) {
+    const futureToPre = repositoryFixture((fixture) => {
+      installFutureProfile(fixture);
+      writeFileSync(
+        join(fixture, surface.path),
+        readFileSync(resolve(repositoryRoot, surface.path), "utf8"),
+      );
+    });
+    assert.ok(
+      futureToPre.some((error) => error.startsWith(`${surface.path}:`)),
+      `${surface.path} stale pre-VOC-105 surface must fail the future repository`,
+    );
+
+    const marker =
+      planOwnedFutureMarkers[surface.path].required[
+        surface.path === "docs/operations/voc-081-f2-evidence.md" ? 1 : 0
+      ];
+    const preToFuture = repositoryFixture((fixture) => {
+      const surfacePath = join(fixture, surface.path);
+      writeFileSync(
+        surfacePath,
+        `${readFileSync(surfacePath, "utf8")}\n${marker}\n`,
+      );
+    });
+    assert.ok(
+      preToFuture.some((error) => error.startsWith(`${surface.path}:`)),
+      `${surface.path} VOC-105 surface must fail the pre-VOC-105 repository`,
+    );
+  }
+});
+
 function claimsFor(subjects, verbs, copulas = [""]) {
   return subjects.flatMap((subject) =>
     verbs.flatMap((verb) =>
@@ -585,26 +753,25 @@ test("the complete later-claim matrix fails once on every human surface", () => 
   );
   const acceptanceClaims = claimsFor(
     [
-      "A1 acceptance",
-      "A1 product acceptance",
-      "A1/P1 acceptance",
-      "A1/P1+ product acceptance",
-      "A1 authenticated-product acceptance",
-      "P1 acceptance",
-      "P1+ acceptance",
-      "P2 product acceptance",
-      "P3 acceptance",
-      "P4 acceptance",
-      "P5 acceptance",
-      "P1-P5 acceptance",
-      "P2-P5 acceptance",
-      "P3-P5 acceptance",
-      "P4-P5 acceptance",
-      "P5-P5 acceptance",
-      "R1 acceptance",
-      "R2 acceptance",
-      "L1 acceptance",
-    ],
+      "A1",
+      "A1/P1",
+      "A1/P1+",
+      "A1 authenticated-product",
+      "P1",
+      "P1+",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P1-P5",
+      "P2-P5",
+      "P3-P5",
+      "P4-P5",
+      "P5-P5",
+    ].flatMap((identifier) => [
+      `${identifier} acceptance`,
+      `${identifier} product acceptance`,
+    ]),
     [
       "complete",
       "completed",
@@ -688,12 +855,14 @@ test("the complete later-claim matrix fails once on every human surface", () => 
       ["", "is"],
     ),
   ];
-  const f2Claims = [
-    "Repository/local F2 pending.",
-    "Repository/local F2 still pending integration.",
-    "Repository/local F2 is incomplete.",
-    "Repository/local F2 remains candidate.",
-  ];
+  const f2Claims = ["", "is", "remains"].flatMap((copula) =>
+    ["", "still"].flatMap((still) =>
+      ["pending", "pending integration", "incomplete", "candidate"].map(
+        (state) =>
+          `Repository/local F2 ${copula ? `${copula} ` : ""}${still ? `${still} ` : ""}${state}.`,
+      ),
+    ),
+  );
   const boundaryClaims = claimsFor(
     [
       "product acceptance",
@@ -745,6 +914,34 @@ test("the complete later-claim matrix fails once on every human surface", () => 
       );
     }
   }
+});
+
+test("production claim matching excludes verified while live and generic checks retain it", () => {
+  const source = readFileSync(
+    resolve(repositoryRoot, "docs/README.md"),
+    "utf8",
+  );
+  assert.ok(
+    !inspectF2Surface(
+      `${source}\nProduction is verified.`,
+      "docs/README.md",
+    ).some((error) => error.includes("production/deployment claim")),
+  );
+  const future = futureSource(source, humanSurfaces[0]);
+  assert.ok(
+    inspectF2Surface(
+      `${future}\nLive service is verified.`,
+      "docs/README.md",
+      "voc105",
+    ).some((error) => error.includes("live-activation/verification claim")),
+  );
+  assert.ok(
+    inspectF2Surface(
+      `${future}\nProduction readiness is verified.`,
+      "docs/README.md",
+      "voc105",
+    ).some((error) => error.includes("later-milestone boundary claim")),
+  );
 });
 
 const foundationPrefix = [

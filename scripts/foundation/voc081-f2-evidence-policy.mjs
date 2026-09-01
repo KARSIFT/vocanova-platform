@@ -98,6 +98,9 @@ const POSITIVE_COMPLETION_VERBS = [
   "effective",
   "resolved",
 ];
+const PRODUCTION_COMPLETION_VERBS = POSITIVE_COMPLETION_VERBS.filter(
+  (verb) => verb !== "verified",
+);
 const F3_COMPLETION_VERBS = POSITIVE_COMPLETION_VERBS.filter(
   (verb) => verb !== "verified",
 );
@@ -146,7 +149,7 @@ export const PROHIBITED_ACTIVE_TEXT_CLAIMS = [
   {
     example: "production deployment completed.",
     pattern: new RegExp(
-      `\\b(?:production\\s+)?deployment\\s+${optionalIs}(?:${expression(POSITIVE_COMPLETION_VERBS)})\\b|\\bproduction\\s+${optionalIs}(?:${expression(POSITIVE_COMPLETION_VERBS)})\\b`,
+      `\\b(?:production\\s+)?deployment\\s+${optionalIs}(?:${expression(PRODUCTION_COMPLETION_VERBS)})\\b|\\bproduction\\s+${optionalIs}(?:${expression(PRODUCTION_COMPLETION_VERBS)})\\b`,
       "i",
     ),
     reason: "active production/deployment claim is prohibited",
@@ -210,6 +213,42 @@ const VOC105_MILESTONE_STATE = {
   voc080_holds: ["VOC-080-HOLD-01", "VOC-080-HOLD-02"],
 };
 
+const VOC105_EVIDENCE_BOUND_F3_MARKERS = new Map([
+  [
+    "docs/README.md",
+    [
+      "The current [VOC-105 record](operations/voc-105-f3-evidence.md) validates every DOC-12 gate item and reports F3 staging foundation complete-effective.",
+    ],
+  ],
+  [
+    "docs/operations/README.md",
+    [
+      "| RECORD | [VOC-105 F3 staging-foundation evidence](voc-105-f3-evidence.md) | active (F3 complete-effective) | operator | DOC-12, VOC-105 |",
+      "The separate VOC-105 record validates every DOC-12 gate item and reports F3 staging foundation complete-effective.",
+    ],
+  ],
+  [
+    F2_DOCUMENT_PATH,
+    [
+      "The later [VOC-105 record](voc-105-f3-evidence.md) validates the separate F3 gate and reports F3 staging foundation complete-effective.",
+      "Later exact evidence in VOC-105 reports F3 staging foundation complete-effective.",
+    ],
+  ],
+  [
+    "docs/product/README.md",
+    [
+      "The [VOC-105 evidence record](../operations/voc-105-f3-evidence.md) separately validates every DOC-12 F3 gate item and reports the F3 staging foundation complete-effective.",
+    ],
+  ],
+  [
+    "docs/product/12-mvp-implementation-plan.md",
+    [
+      "The current [VOC-105 evidence record](../operations/voc-105-f3-evidence.md) validates every F3 gate item and reports the F3 staging foundation complete-effective.",
+      "VOC-105's separate gate evaluation reports F3 staging foundation complete-effective; the successful delivery run alone did not establish that result.",
+    ],
+  ],
+]);
+
 function normalizeAsciiWhitespace(source) {
   return source
     .replace(/\r\n?/g, "\n")
@@ -239,6 +278,85 @@ function exactJsonValue(value, expected) {
     );
   }
   return value === expected;
+}
+
+function rawJsonDuplicateKeys(source) {
+  const duplicates = [];
+  let index = 0;
+  const whitespace = /[ \t\n\r]/;
+  const skipWhitespace = () => {
+    while (whitespace.test(source[index] ?? "")) index += 1;
+  };
+  const string = () => {
+    const start = index;
+    index += 1;
+    let escaped = false;
+    while (index < source.length) {
+      const character = source[index++];
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === '"') return JSON.parse(source.slice(start, index));
+    }
+    throw new Error("unterminated JSON string");
+  };
+  const primitive = () => {
+    while (index < source.length && !/[\s,}\]]/.test(source[index])) index += 1;
+  };
+  const value = () => {
+    skipWhitespace();
+    if (source[index] === '"') {
+      string();
+      return;
+    }
+    if (source[index] === "{") {
+      index += 1;
+      const keys = new Set();
+      skipWhitespace();
+      while (source[index] !== "}") {
+        if (source[index] !== '"')
+          throw new Error("object key is not a string");
+        const key = string();
+        if (keys.has(key)) duplicates.push(key);
+        keys.add(key);
+        skipWhitespace();
+        if (source[index++] !== ":") throw new Error("object key lacks colon");
+        value();
+        skipWhitespace();
+        if (source[index] === ",") {
+          index += 1;
+          skipWhitespace();
+        } else if (source[index] !== "}") {
+          throw new Error("object lacks separator");
+        }
+      }
+      index += 1;
+      return;
+    }
+    if (source[index] === "[") {
+      index += 1;
+      skipWhitespace();
+      while (source[index] !== "]") {
+        value();
+        skipWhitespace();
+        if (source[index] === ",") {
+          index += 1;
+          skipWhitespace();
+        } else if (source[index] !== "]") {
+          throw new Error("array lacks separator");
+        }
+      }
+      index += 1;
+      return;
+    }
+    primitive();
+  };
+  try {
+    value();
+    skipWhitespace();
+    return index === source.length ? duplicates : [];
+  } catch {
+    return [];
+  }
 }
 
 function currentProfile(record) {
@@ -341,6 +459,8 @@ export const DESIGNATED_F2_SURFACES = [
           "## No-live and later-gate state",
           "F3/staging, A1/P1+ acceptance, production, live",
           "remain unresolved/held",
+          "`VOC-080-HOLD-00`, `VOC-080-HOLD-01`, and `VOC-080-HOLD-02` remain held.",
+          "No deployment occurred and no deployment URL is expected.",
         ],
         prohibited: [
           "The later [VOC-105 record](voc-105-f3-evidence.md) validates the separate F3 gate and reports F3 staging foundation complete-effective.",
@@ -682,14 +802,34 @@ export function inspectF2Surface(source, relativePath, profile = "pre-voc105") {
   if (!profileContract) {
     return [`${relativePath}: unknown current-state profile: ${profile}`];
   }
-  const normalized = normalizeAsciiWhitespace(source);
+  let activeSource = source;
+  if (relativePath === F2_DOCUMENT_PATH) {
+    const historyHeading = /^## Historical candidate state\r?$/m.exec(source);
+    if (historyHeading) {
+      const historyStart = historyHeading.index;
+      const afterHistoryStart = historyStart + historyHeading[0].length;
+      const afterHistory = /^## [^\r\n]*$/m.exec(
+        source.slice(afterHistoryStart),
+      );
+      const historyEnd = afterHistory
+        ? afterHistoryStart + afterHistory.index
+        : source.length;
+      activeSource = source.slice(0, historyStart) + source.slice(historyEnd);
+    }
+  }
+  const normalized = normalizeAsciiWhitespace(activeSource);
   for (const marker of contract.immutableRequired ?? []) {
     if (!normalized.includes(normalizeAsciiWhitespace(marker)))
       errors.push(`${relativePath}: missing immutable F2 marker: ${marker}`);
   }
   for (const marker of profileContract.required ?? []) {
     const normalizedMarker = normalizeAsciiWhitespace(marker);
-    const markerCount = normalized.split(normalizedMarker).length - 1;
+    const markerSource =
+      relativePath === F2_DOCUMENT_PATH &&
+      marker === "## Historical candidate state"
+        ? normalizeAsciiWhitespace(source)
+        : normalized;
+    const markerCount = markerSource.split(normalizedMarker).length - 1;
     if (markerCount !== 1) {
       errors.push(
         `${relativePath}: current ${profile} marker must occur exactly once: ${marker}`,
@@ -706,19 +846,10 @@ export function inspectF2Surface(source, relativePath, profile = "pre-voc105") {
   for (const [marker, reason] of contract.stale) {
     if (source.includes(marker)) errors.push(`${relativePath}: ${reason}`);
   }
-  let activeSource = source;
-  if (relativePath === F2_DOCUMENT_PATH) {
-    const historyStart = source.indexOf("\n## Historical candidate state");
-    if (historyStart !== -1) {
-      const nextHeading = source.indexOf("\n## ", historyStart + 1);
-      activeSource =
-        source.slice(0, historyStart) +
-        (nextHeading === -1 ? "" : source.slice(nextHeading));
-    }
-  }
   activeSource = normalizeAsciiWhitespace(activeSource);
   if (profile === "voc105") {
-    for (const marker of profileContract.required ?? []) {
+    for (const marker of VOC105_EVIDENCE_BOUND_F3_MARKERS.get(relativePath) ??
+      []) {
       activeSource = activeSource.replace(normalizeAsciiWhitespace(marker), "");
     }
   }
@@ -956,9 +1087,17 @@ export function validateF2Evidence(repositoryRoot) {
   const errors = [];
   let record = {};
   try {
-    record = JSON.parse(
-      readFileSync(path.join(repositoryRoot, F2_RECORD_PATH), "utf8"),
+    const recordSource = readFileSync(
+      path.join(repositoryRoot, F2_RECORD_PATH),
+      "utf8",
     );
+    const duplicates = rawJsonDuplicateKeys(recordSource);
+    for (const key of duplicates) {
+      errors.push(
+        `${F2_RECORD_PATH}: duplicate raw JSON key is prohibited: ${key}`,
+      );
+    }
+    record = JSON.parse(recordSource);
   } catch {
     errors.push(`${F2_RECORD_PATH}: cannot read valid JSON`);
   }
