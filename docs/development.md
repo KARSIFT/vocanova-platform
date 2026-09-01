@@ -54,6 +54,14 @@ the repository, installs with the frozen lockfile, and caches only the package-m
 download store. Cache contents are an optimization: `node_modules` is never
 cached, and a miss cannot skip installation or validation.
 
+The hosted `foundation` job has an exact 20-minute cap. That bound is deliberate: the
+204-test adoption baseline completed in 14m33s on PR validation but an identical tree
+later hit the former 15-minute job ceiling at 15m16s on a push run. Unrelated reviewed
+base growth subsequently brought the full wildcard-discovered corpus to 211 tests;
+none is filtered or omitted. The extra five minutes are headroom only. Do not respond
+to a recurrence by skipping tests, changing discovery, or raising the timeout again
+without a new governed defect intake and measured evidence.
+
 The audit policy permits moderate and low advisories to be reported without failing;
 all reported advisories remain visible and must be recorded in the pull request.
 
@@ -201,6 +209,10 @@ complete contract and recovery rules are in the
 - `pnpm validate` stops at the first failing child command and preserves its output.
 - A `ci:*` command is useful for reproducing one hosted subsystem, but it is not a
   substitute for the full local gate when several surfaces changed.
+- If `pnpm run ci:foundation` or the hosted `foundation` job approaches the 20-minute
+  cap, treat that as a regression signal. Preserve the full suite, record the exact
+  run/job timing, and route a new governed correction instead of raising the timeout
+  ad hoc.
 - `pnpm dev` and `pnpm dev:workers` require ports 3000 and 8080 to be free. Stop the
   named occupying process and retry; do not edit the commands to accept a fallback.
 - If local D1 contents should survive a branch change, archive only
