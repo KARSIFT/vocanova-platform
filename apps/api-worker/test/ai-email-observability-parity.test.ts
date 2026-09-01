@@ -480,7 +480,7 @@ describe("Worker provider, email, and observability boundaries", () => {
       {
         endpoint: "https://email.example/send",
         bearerToken: "email-test-token",
-        from: "Vocanova <noreply@example.test>",
+        from: "noreply@example.test",
         timeoutMs: 100,
       },
       fetcher,
@@ -496,7 +496,7 @@ describe("Worker provider, email, and observability boundaries", () => {
       authorization: "Bearer email-test-token",
     });
     expect(JSON.parse(String(request?.body))).toEqual({
-      from: "Vocanova <noreply@example.test>",
+      from: "noreply@example.test",
       to: ["learner@example.test"],
       subject: "Sign in",
       text: "Use the test link.",
@@ -515,7 +515,7 @@ describe("Worker provider, email, and observability boundaries", () => {
         },
         failedFetch,
       ).send({ to: "learner@example.test", subject: "Test", text: "Body" }),
-    ).rejects.toThrow("status 500");
+    ).rejects.toThrow("email provider request failed");
     expect(failedFetch).toHaveBeenCalledTimes(1);
   });
 
