@@ -41,3 +41,5 @@ notes, historical since DOC-16 v2.0 folded its role in directly) have moved to
 [`docs/archive/`](../archive/) - both are retired records, not live operations
 documents. See [`docs/README.md`](../README.md)'s canonical index for their
 current path and status.
+
+RUNBOOK: [Procedure template](%61%31-%73taging-acceptance.md) — pending-separate-authority; owner: operator; related: DOC-12, VOC-112.
