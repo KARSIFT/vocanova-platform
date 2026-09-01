@@ -87,12 +87,20 @@ untracked developer-only secret source and is not acceptance evidence.
 
 ### VOC-112-D04 — Binding and secret boundary
 
-Declare only the minimum typed binding names for provider endpoint/sender/client
-configuration and credentials. Non-secret defaults may be committed only when they do
-not select/purchase a provider or enable a feature. Secret values never enter Wrangler
-config, git, generated types, fixtures, GitHub comments, or artifacts. The generated
-Worker type file must be regenerated from the committed source contract and pass its
-staleness check.
+The runtime interface uses these exact names and no aliases:
+
+- non-secret configuration: `EMAIL_PROVIDER_URL`, `EMAIL_FROM`,
+  `EMAIL_PROVIDER_TIMEOUT_MS`, and `GOOGLE_OAUTH_CLIENT_ID`;
+- secret bindings: `EMAIL_PROVIDER_API_KEY` and `GOOGLE_OAUTH_CLIENT_SECRET`; and
+- existing configuration reused unchanged: `OAUTH_REDIRECT_URI`,
+  `MAGIC_LINK_ENABLED`, and `GOOGLE_OAUTH_ENABLED`.
+
+Non-secret defaults may be committed only when they do not select/purchase a provider
+or enable a feature. Secret values never enter Wrangler config, git, generated types,
+fixtures, GitHub comments, or artifacts. Generate committed Worker types only from
+the committed Wrangler surface; represent externally installed secret bindings through
+the minimum checked source interface rather than fabricating secret values in config.
+The generated type staleness check must pass.
 
 This package does not change the `cloudflare-staging` GitHub environment, whose two
 Actions secret names remain only `CLOUDFLARE_ACCOUNT_ID` and

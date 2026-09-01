@@ -38,7 +38,9 @@ provider response, account identifier, Worker version, or learner data.
 - Covers: `VOC-112-AC-01`, `AC-02`, `AC-05`
 - Procedure: table-test each switch off/on against absent, partial, malformed, unsafe,
   and complete synthetic configuration; count network/session calls; regenerate/check
-  Worker types; run Worker safety/delivery and secret-pattern scans.
+  Worker types; assert the exact six provider configuration/binding names and absence
+  of aliases/committed secret values; run Worker safety/delivery and secret-pattern
+  scans.
 - Expected: disabled needs no credentials; enabled+complete uses real adapters;
   everything else is unavailable with zero network/session/fake fallback. Staging and
   production remain disabled/held and current GitHub Actions secret names unchanged.

@@ -73,9 +73,10 @@ completion claim occurs in the implementation PR.
 - Result: pending adoption and implementation
 
 Staging/production switches and inherited holds remain off/held, current GitHub Actions
-secret interface remains unchanged, generated bindings are current, and exact-path and
-secret scans pass. A disposable reverse of the complete implementation diff restores
-the adopted base tree without external or D1 action.
+secret interface remains unchanged, the exact six new provider configuration/binding
+names have no aliases or committed secret values, generated bindings are current, and
+exact-path and secret scans pass. A disposable reverse of the complete implementation
+diff restores the adopted base tree without external or D1 action.
 
 ## VOC-112-AC-06 — Exact revision is independently verified
 

@@ -87,8 +87,12 @@ requirements:
   - id: VOC-112-D04
     statement: >-
       Keep secret values outside git, generated artifacts, logs, responses, comments,
-      and test output. Define only the minimum runtime binding-name/interface and
-      non-secret configuration contract needed by the adapters; preserve the exact
+      and test output. Use exactly EMAIL_PROVIDER_URL, EMAIL_FROM,
+      EMAIL_PROVIDER_TIMEOUT_MS, and GOOGLE_OAUTH_CLIENT_ID for non-secret provider
+      configuration, and exactly EMAIL_PROVIDER_API_KEY and
+      GOOGLE_OAUTH_CLIENT_SECRET for runtime secret bindings. Reuse
+      OAUTH_REDIRECT_URI and the existing feature switches; do not add aliases. Define
+      only the minimum typed interface needed by the adapters; preserve the exact
       Cloudflare staging/production tuple, delivery holds, zero-cost limit, and current
       two-secret GitHub Actions environment boundary. No provider secret name/value is
       added to GitHub settings by this implementation.
