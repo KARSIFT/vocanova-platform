@@ -979,11 +979,43 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Token is absent. Values: abcDEF123456.",
       "Password is redacted. Actual: 12345678.",
       "Passphrase is absent. What follows: synthetic-delta.",
+      "Recovery code is absent. They contain abcdefghijklmnop.",
+      "OTP is unavailable. Here is replacement: abcdefghijklmnop.",
+      "Session ID is redacted. This material equals AbCdEfGhIjKlMnOp.",
+      "Client assertion is value-free. Replacement follows: abcdefghijklmnop.",
+      "Signing certificate is absent. Actual contents: AbCdEfGhIjKlMnOp.",
     ])
       assertMutation(
         surface,
         (target) => append(target, surface, continuation),
         /credential value continuation|paragraph-level credential context|credential value is prohibited|credential context is not canonical/,
+      );
+    for (const [lead, value] of [
+      ["They contain", "abcdefghijklmnop"],
+      ["Here is replacement:", "abcdefghijklmnop"],
+      ["This material equals", "AbCdEfGhIjKlMnOp"],
+      ["Actual contents:", "12345678"],
+      ["What follows:", "synthetic-generated-value"],
+    ])
+      assertMutation(
+        surface,
+        (target) =>
+          append(
+            target,
+            surface,
+            `Credentials are redacted. ${lead} ${value}.`,
+          ),
+        /paragraph-level credential context|credential value is prohibited|credential context is not canonical/,
+      );
+    for (const proseOnly of [
+      "Token is redacted. It remains unavailable.",
+      "Credentials are value-free. The explanatory documentation remains descriptive.",
+      "Password is absent. It is characteristically unavailable.",
+    ])
+      assert.deepEqual(
+        inspectF3Surface(`${source}\n${proseOnly}`, surface),
+        [],
+        `${surface} must retain prose-only credential context: ${proseOnly}`,
       );
     for (const stale of [
       "F3 pending.",
@@ -1078,6 +1110,11 @@ test("exact unresolved and held contexts produce zero errors on every surface", 
       "Public launch currently not authorized.",
       "Public launch definitely not authorized.",
       "Learner data definitely not released.",
+      "Production is not currently ready.",
+      "P2 has not yet passed.",
+      "Production demonstrably not authorized.",
+      "Production does not remain currently ready.",
+      "Learner data not currently released.",
       "VOC-080-HOLD-01 remains held.",
       "VOC-080-HOLD-02 is held.",
     ])
@@ -1177,6 +1214,17 @@ test("exact unresolved and held contexts produce zero errors on every surface", 
       "The unit test safely initialized a fixture.",
       "The local runner had executed a fixture.",
       "The prior migration had completed.",
+      "No production deployment occurred.",
+      "No production traffic change occurred.",
+      "No traffic change occurred.",
+      "DNS was not changed.",
+      "Deployment not started.",
+      "Release did not occur.",
+      "The sanitized migration ran in the past.",
+      "The prior migration ran.",
+      "The historical build was published in the past.",
+      "The local test deployed a fixture.",
+      "The unit test migration ran.",
     ])
       assert.deepEqual(
         inspectF3Surface(`${source}\n${safeOperational}`, surface),
@@ -1323,6 +1371,49 @@ test("729 protected-context discourse combinations fail closed", () => {
       }
   }
   assert.equal(assertions, 729);
+});
+
+test("protected safe subjects bind generic anaphoric command continuations", () => {
+  const commands = [
+    "Carry it out now.",
+    "Make it happen now.",
+    "Apply it now.",
+    "Get it done now.",
+    "Did it now.",
+    "Put it online now.",
+    "Carry it out.",
+    "Make it happen.",
+    "Put it online.",
+  ];
+  for (const surface of DESIGNATED_F3_SURFACES) {
+    const source = fs.readFileSync(path.join(root, surface), "utf8");
+    for (const command of commands)
+      for (const candidate of [
+        `Production remains held. ${command}`,
+        `P2 remains unresolved.\n\n${command}`,
+      ])
+        assert.match(
+          inspectF3Surface(`${source}\n${candidate}`, surface).join("\n"),
+          /prohibited command continuation|live-action instruction|bounded procedure/,
+          `${surface} must reject contextual command: ${candidate}`,
+        );
+    assert.deepEqual(
+      inspectF3Surface(
+        `${source}\nProduction remains held. The maintenance meeting begins now.`,
+        surface,
+      ),
+      [],
+      `${surface} must retain an explicit unrelated subject after a safe subject`,
+    );
+    assert.deepEqual(
+      inspectF3Surface(
+        `${source}\nProduction remains held. We discuss it now.`,
+        surface,
+      ),
+      [],
+      `${surface} must retain an explicit unrelated pronoun subject`,
+    );
+  }
 });
 
 test("safe clauses cannot launder an operational or later positive claim", () => {
@@ -1657,10 +1748,16 @@ test("multiple immutable F3 history pairs are consumed independently", () => {
       "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Not complete.",
       "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Still not complete.",
       "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. The prospective state is not complete.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Presently pending.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Unresolved at present.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Incomplete for now.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Not complete today.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. They remain unresolved at present.",
     ])
       assert.match(
         inspectF3Surface(`${source}\n${invalid}`, surface).join("\n"),
         /stale current F3|noncanonical F3 history context|stale subjectless F3 status/,
+        `${surface} must reject adjacent stale history tail: ${invalid}`,
       );
   }
 });

@@ -31,25 +31,25 @@ const ALLOWED_CREDENTIAL_NAMES = new Set([
 ]);
 const HIGH_RISK_PROJECTIONS = Object.freeze({
   "docs/README.md": [
-    "45612ce25bf9ad8a6e7b2059bc12f1d73862b263ec31149d882f417bf8ebdc77",
-    "878ac4afa86d20799efbc81b0d429e390f595f33ebd7343a3f53c4e4eaf8d90a",
-    "8832d2d05828832df014329b72584c9b27669f12a5846aec411373793ad5c743",
-    "652c5ab7fb14b08983e28a6a4e5a8ad0d7164efa761e1c24081912a87d87ae3c",
+    "3e75499263467247e4d6de638c2dc896dfa5a0cf72930a77aa5d12a68659093f",
+    "483aaf62c39f54bb4d3686bb1ae952de64fd5baf219d40c7d255489bf247e343",
+    "68d8e9ea9425c56261c98917298f52a1db9b01f7b07b8168db8a02420bc9bdff",
+    "1c9b98c7040cd7bd67310c51beeb5be3f42a3315ff591696c0ddc3c444c6109b",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/operations/README.md": [
-    "5ef81ea96e3e57adde3c3506aceba5ca972d16dc210d3b18824f46f1b9147dac",
-    "76e7265b61b8c095366ad43d54f4e9f6bc28d71cc9f773693760408e277a0193",
-    "96392476f3118b9691d6a2535cf9b002d25b9af2db23a130ca58de08d973c955",
-    "9297cbdadfaaf30b43aeb7daf7e90cd8a8555b7faac9576da2e740f3e8900078",
+    "afdee98b0d8ab476c2f69878aab9b3f3c794ed20c95971ba703cbc5fc4b72f77",
+    "9920d72838f0b55dafbb62ed5821bcf148aed1b236519b44f34e64ae04f7884a",
+    "26489ec7ff1deff5a889b4887eb9d3cafa76cb81ecf1ce45344f6aff4f746421",
+    "b095339e678156c00fa5684993f9dc15e4ec83cb62af6c32c677c3a58183fa59",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/operations/cloudflare-delivery.md": [
-    "59fe80da876b5aa111e5674c18caa90c1d819063865aa2a8354ed336ba7a37a1",
-    "2a801f8ab23aba771ed8ad1dff41846db7f766be5e1ebf6ecd83ef881213a0ec",
-    "9228e479e6c42c4e7151fda2feb279b134e04d41b65f002b5fdaa6f83e29134f",
+    "6cf2f6244e8c91372bbf47d87b3116634c79b10831e58d30ee92cf2924cbbea5",
+    "77e4af75119bfb06bac1c9b447c1da9d24528e4530f46456adb4c9a3d7a90ea5",
+    "8b44ba694f28c931f1203b2e9a787624d61c774d16b544d73d1fb96814e77946",
     "64688b2e1fa9a049270b1b1783239f03356d9cba4e00fe21aa286d5fa385bb44",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
@@ -63,10 +63,10 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/operations/voc-081-f2-evidence.md": [
-    "511de94e696db4e04a85c74d2a8f440d478fffbe5d261f0e79976fc1d5cbb285",
-    "68325539946c4836b34ecdd505637d30d34feb2606f587d067958671cc791efb",
-    "5f9001281aa5bd4af228c1e8661f429bb7892c58a853880e5dca7faf7d2b8161",
-    "41e73a0be967564c232d1f3848ff8d8db3404e8387286193bed360460f1bcfe8",
+    "12a449c4192e0044f1f598013359b50d6ac745a4bf775d5fd3b3019b997c8f02",
+    "a795a78dfe8ed9e50af5d793aa03fcd2e799bd8606582232335c3efc4c33df66",
+    "8789f268f99465037ae972623ebc6ea63242c24fc190090e8fad8cdc420dc4c0",
+    "f41f99dd470df4b3945a9af5282f1666f28da29bb85b8f1ad2647a477dab000c",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
@@ -87,10 +87,10 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/product/12-mvp-implementation-plan.md": [
-    "a7e54d002bcce888c99c02605372123d06765594936e581ce2ae51115577fc27",
+    "e90281dd2154d0d305ce0c0017c77f224074500f8c41fb92b15ff1218e248711",
     "26ddec86c049d2bf7ea7171fe0b4acd347423c10bfe51f6e154b9a6da67a161d",
-    "80573cdc41ed4e310878d997f14ca6778468f39323d1ee0f725e4a2c0b3ebb8e",
-    "8a41c6b9501977c8ab0ca0a88a473407a6112033b5e93cd0a08918688a01fc91",
+    "455c9b73d263ba707a7fdbd2ef4afcea4839ff22ffe1ac6f1a3f825f48dbbac3",
+    "16c22d4feec456cde52b20f90d215043b2bdf12e337d8d3ec24a538caa71d4cc",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
@@ -144,6 +144,10 @@ const SUBJECTLESS_BOUNDARY_POSITIVE_PATTERN = new RegExp(
 );
 const SUBJECTLESS_STALE_STATUS_PATTERN =
   /(?:^|[.!?;:]\s*)(?:(?:yet|clearly|apparently|actually|still|currently)\s+)*(?:(?:(?:It|This|That)\s+|(?:The\s+)?(?:(?:current|prospective)\s+)?(?:status|state)\s*(?::\s*)?)(?:(?:is|remains?|continues?(?:\s+(?:to\s+be|as))?)\s+)?(?:(?:still|currently|yet)\s+)*|(?:is\s+)?still\s+|remains?\s+|continues?(?:\s+(?:to\s+be|as))?\s+)?(?:pending|unresolved|incomplete|not(?:[\s-]+yet)?[\s-]+complete)(?:\s+(?:still|now))?(?:[.!?]|$)/i;
+const AMBIGUOUS_STALE_TERM_PATTERN =
+  /\b(?:pending|unresolved|incomplete)\b|\bnot(?:\s+yet)?\s+complete\b/i;
+const GENERIC_CONTEXT_COMMAND_PATTERN =
+  /^(?:(?:please|kindly|nevertheless|subsequently|finally|even\s+so|in\s+fact)\s*,?\s*)?(?:(?:[A-Za-z][A-Za-z-]*\s+){1,3}(?:it|so|this|that)\b.*|[^.!?;]*\bnow\b\s*)$/i;
 const SAFE_OPERATIONAL_CLAUSE =
   "(?:No\\s+(?:(?:staging\\s+)?(?:deployment|delivery|migration|activation|restart|live\\s+deployment)|upload|promotion|(?:workflow\\s+)?dispatch)\\s+(?:(?:has|had|never|actually|ever)\\s+)*(?:occurred|took\\s+place)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+(?:is\\s+)?prohibited|(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+did\\s+not\\s+occur)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion|Activation|Application)\\s+(?:was|is)\\s+not\\s+(?:performed|deployed)|No\\s+(?:deployment|migration|dispatch|upload|promotion|activation)\\s+was\\s+performed)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion|Activation|Workflow)\\s+(?:never\\s+occurred|was\\s+never\\s+performed|(?:was\\s+)?not\\s+(?:performed|dispatched|deployed|migrated)|had\\s+not\\s+been\\s+performed))|No\\s+query\\s+was\\s+issued|(?:The\\s+)?job\\s+was\\s+not\\s+invoked|Nothing\\s+was\\s+deployed|(?:The\\s+)?(?:application|app|system)\\s+(?:was|is|has\\s+been)\\s+not\\s+deployed|(?:The\\s+)?system\\s+never\\s+deployed|(?:The\\s+)?(?:deploy|publish|migration|dispatch)\\s+command\\s+was\\s+not\\s+executed|The\\s+(?:database|build)\\s+was\\s+not\\s+(?:migrated|deployed)|The\\s+(?:previous|prior|staging)\\s+(?:staging\\s+)?(?:delivery|upload|migration|deployment|run)\\s+(?:succeeded|failed\\s+safely|(?:had\\s+)?completed(?:\\s+(?:successfully|in\\s+the\\s+past))?|was\\s+completed\\s+in\\s+the\\s+past)|The\\s+(?:previous|prior)\\s+staging\\s+deployment\\s+succeeded|The\\s+(?:app|historical\\s+system)\\s+deployed\\s+in\\s+the\\s+past|The\\s+local\\s+migration\\s+(?:(?:had\\s+)?completed|succeeded|failed\\s+safely)|The\\s+unit[\\s-]+test\\s+(?:safely\\s+)?(?:deployed|initialized)\\s+(?:an?\\s+)?(?:in-memory\\s+)?fixture|The\\s+local\\s+runner\\s+(?:had\\s+)?executed\\s+(?:an?\\s+)?fixture|The\\s+unit[\\s-]+test\\s+local\\s+worker\\s+(?:had\\s+)?ran\\s+(?:an?\\s+)?fixture|The\\s+(?:local|historical|sanitized)\\s+(?:fixture|build|publication|publish|run|worker|system|migration)(?:\\s+[A-Za-z-]+){0,2}\\s+(?:(?:had\\s+)?(?:completed|succeeded)|failed\\s+safely|safely\\s+initialized|published\\s+in\\s+the\\s+past|deployed\\s+in\\s+the\\s+past)|(?:The\\s+)?documentation\\s+was\\s+published\\s+in\\s+the\\s+past|The\\s+sanitized\\s+delivery\\s+deployed\\s+the\\s+API\\s+Worker\\s+successfully\\s+in\\s+the\\s+past|The\\s+command\\s+“Deploy\\s+now”\\s+is\\s+prohibited|The\\s+sanitized\\s+past\\s+delivery\\s+description\\s+records\\s+that\\s+retry\\s+was\\s+not\\s+required|The\\s+reviewer\\s+verified\\s+the\\s+sanitized\\s+evidence|The\\s+sanitized\\s+result\\s+is\\s+not\\s+verified|The\\s+proposal\\s+is\\s+approved|The\\s+unrelated\\s+issue\\s+remains\\s+pending|The\\s+issue\\s+was\\s+resolved\\s+without\\s+external\\s+action|The\\s+(?:unit\\s+test|local\\s+worker)\\s+initialized\\s+(?:an?\\s+)?in-memory\\s+fixture|The\\s+(?:historical\\s+)?parser\\s+queried\\s+(?:a\\s+)?local\\s+object|The\\s+(?:historical|local)\\s+note\\s+verified\\s+(?:the\\s+|a\\s+)?checksum)";
 const SAFE_STATUS_MODIFIERS =
@@ -154,6 +158,32 @@ const HELD_LATER_SUBJECT =
   "(?:Production(?:\\s+(?:readiness|traffic|deployment))?|(?:Production\\s+)?Learner[\\s-]+data(?:\\s+(?:use|access|import|export|transform|transformation|delete|deletion))?|VOC-080-HOLD-(?:01|02))";
 const NEGATABLE_LATER_SUBJECT =
   "(?:(?:Authenticated\\s+)?A1|P1\\+?|P[2-5]|R[12]|L1|Product\\s+acceptance|Public\\s+launch|Live\\s+(?:activation|verification|system|service)|Production(?:\\s+(?:readiness|traffic|deployment))?|(?:Production\\s+)?Learner[\\s-]+data(?:\\s+(?:use|access|import|export|transform|transformation|delete|deletion))?)";
+const NO_SEMANTIC_CONJUNCTION =
+  "(?![^.!?;\\n]*\\b(?:and|but|however|while|although|though|whereas)\\b)";
+const SAFE_PROTECTED_NEGATIVE_CLAUSE =
+  NO_SEMANTIC_CONJUNCTION +
+  NEGATABLE_LATER_SUBJECT +
+  "[^.!?;\\n]{0,120}\\b(?:no|not|never)\\b[^.!?;\\n]{0,120}\\b(?:" +
+  POSITIVE_VERBS +
+  ")\\b[^.!?;\\n]*";
+const OPERATIONAL_CLAUSE_TERM =
+  "(?:deploy\\w*|deployment|dispatch\\w*|workflow|migrat\\w*|promot\\w*|publish\\w*|upload\\w*|releas\\w*|start\\w*|activat\\w*|restart\\w*|traffic|DNS|settings?|resources?|change\\w*|run|ran|execute\\w*|initializ\\w*)";
+const SAFE_NEGATED_OPERATIONAL_CLAUSE =
+  NO_SEMANTIC_CONJUNCTION +
+  "(?:No\\s+[^.!?;\\n]{0,160}\\b" +
+  OPERATIONAL_CLAUSE_TERM +
+  "\\b[^.!?;\\n]*|[^.!?;\\n]*\\b" +
+  OPERATIONAL_CLAUSE_TERM +
+  "\\b[^.!?;\\n]{0,120}\\b(?:(?:did|was|were|is|are|has|had)\\s+not|not|never)\\b[^.!?;\\n]*)";
+const PAST_OPERATIONAL_ACTION =
+  "(?:deployed|dispatched|migrated|promoted|published|uploaded|released|started|activated|restarted|changed|ran|executed|initialized|completed|succeeded|failed)";
+const SAFE_CONTEXTUAL_PAST_OPERATIONAL_CLAUSE =
+  NO_SEMANTIC_CONJUNCTION +
+  "(?:[^.!?;\\n]*\\b(?:sanitized|prior|previous|historical|local|unit[\\s-]+test)\\b[^.!?;\\n]{0,160}\\b" +
+  PAST_OPERATIONAL_ACTION +
+  "\\b[^.!?;\\n]*|[^.!?;\\n]*\\b" +
+  PAST_OPERATIONAL_ACTION +
+  "\\b[^.!?;\\n]{0,160}\\b(?:in\\s+the\\s+past|sanitized|historical|local|unit[\\s-]+test)\\b[^.!?;\\n]*)";
 const SAFE_NEGATIVE_AUXILIARY =
   "(?:(?:does|did)\\s+not(?:\\s+remain)?|(?:is|was)\\s+" +
   SAFE_STATUS_MODIFIERS +
@@ -699,7 +729,7 @@ function projectionDigest(source, pattern) {
 
 function maskSafeClauses(source) {
   const pattern = new RegExp(
-    `(^|[\\n.!?;]\\s*)(${SAFE_OPERATIONAL_CLAUSE}|${SAFE_LATER_CLAUSE}|${SAFE_CREDENTIAL_CLAUSE})(?=$|[\\n.!?;])`,
+    `(^|[\\n.!?;]\\s*)(${SAFE_OPERATIONAL_CLAUSE}|${SAFE_PROTECTED_NEGATIVE_CLAUSE}|${SAFE_NEGATED_OPERATIONAL_CLAUSE}|${SAFE_CONTEXTUAL_PAST_OPERATIONAL_CLAUSE}|${SAFE_LATER_CLAUSE}|${SAFE_CREDENTIAL_CLAUSE})(?=$|[\\n.!?;])`,
     "gim",
   );
   return source.replace(
@@ -837,7 +867,10 @@ function maskPermittedHistoricalContexts(source) {
 }
 
 function subjectlessBoundaryProjectionSource(source) {
-  const safeSubject = new RegExp(`^(?:${SAFE_LATER_CLAUSE})$`, "i");
+  const safeSubject = new RegExp(
+    `^(?:${SAFE_LATER_CLAUSE}|${SAFE_PROTECTED_NEGATIVE_CLAUSE})$`,
+    "i",
+  );
   const paragraphs = source.split(/\r?\n\s*\r?\n/).map((paragraph) => {
     const clauses = semanticClauses(paragraph);
     return {
@@ -872,8 +905,7 @@ function staleHistoricalTailProjectionSource(source) {
   return paragraphs
     .flatMap((entry, index) => {
       const candidateSource = entry.hasPair ? entry.remainder : entry.paragraph;
-      if (!SUBJECTLESS_STALE_STATUS_PATTERN.test(candidateSource.trim()))
-        return [];
+      if (!hasAmbiguousHistoricalTail(candidateSource)) return [];
       const followsPair = paragraphs[index - 1]?.hasPair ?? false;
       return entry.hasPair || followsPair ? [candidateSource.trim()] : [];
     })
@@ -905,7 +937,7 @@ export function protectedProjectionDigests(source, relativePath) {
     ),
     projectionDigest(
       staleHistoricalTailProjectionSource(source),
-      SUBJECTLESS_STALE_STATUS_PATTERN,
+      AMBIGUOUS_STALE_TERM_PATTERN,
     ),
   ];
 }
@@ -998,17 +1030,38 @@ function validateCredentialVocabulary(source, relativePath, projections) {
     "i",
   );
   const plausibleCompactValue =
-    /\b(?:synthetic[-_][A-Za-z0-9_-]{3,}|(?=[A-Za-z0-9_-]{8,}\b)(?=[A-Za-z0-9_-]*[0-9])[A-Za-z0-9_-]{8,})\b/i;
+    /\b(?:synthetic[-_][A-Za-z0-9_-]{3,}|[A-Za-z]{16,}|(?=[A-Za-z0-9_-]{8,}\b)(?=[A-Za-z0-9_-]*[0-9])[A-Za-z0-9_-]{8,})\b/i;
   for (const paragraph of source.split(/\r?\n\s*\r?\n/)) {
-    const clauses = semanticClauses(paragraph);
+    const clauses = paragraph
+      .split(/(?:\r?\n|[.!?;])/)
+      .map((clause) => clause.trim())
+      .filter(Boolean);
     const safeCredentialIndexes = clauses.flatMap((clause, index) =>
       safeCredentialClause.test(clause) ? [index] : [],
     );
     for (const index of safeCredentialIndexes) {
       if (
-        !clauses
-          .slice(index + 1)
-          .some((clause) => plausibleCompactValue.test(clause))
+        !clauses.slice(index + 1).some((clause) => {
+          for (const match of clause.matchAll(
+            new RegExp(plausibleCompactValue.source, "gi"),
+          )) {
+            const lead = clause.slice(0, match.index);
+            const tail = clause.slice(match.index + match[0].length);
+            if (
+              /^\s+(?:value-free|absent|unavailable|redacted|prohibited)\b/i.test(
+                tail,
+              )
+            )
+              continue;
+            if (
+              /(?:[:=]|\b(?:is|are|was|were|equals?|contains?|holds?|follows?)\b)\s*[\x60"']*\s*$/i.test(
+                lead,
+              )
+            )
+              return true;
+          }
+          return false;
+        })
       )
         continue;
       errors.push(
@@ -1042,6 +1095,31 @@ function semanticClauses(source) {
     )
     .map((clause) => clause.trim())
     .filter(Boolean);
+}
+
+function hasExplicitUnrelatedSubject(clause) {
+  return /^(?:(?:nevertheless|subsequently|finally|even\s+so|in\s+fact)\s*,?\s*)?(?:The|A|An)\s+(?!(?:(?:current|prospective)\s+)?(?:status|state)\b)(?!F3\b)[A-Za-z][\w-]*/i.test(
+    clause,
+  );
+}
+
+function hasExplicitCommandSubject(clause) {
+  return (
+    hasExplicitUnrelatedSubject(clause) ||
+    /^(?:I|We|You|He|She|They)\b/i.test(clause)
+  );
+}
+
+function hasAmbiguousHistoricalTail(source) {
+  const statusClauses = source
+    .split(/(?:\r?\n|[.!?;:]|\s+[—–-]\s+)/)
+    .map((clause) => clause.trim())
+    .filter(Boolean);
+  return statusClauses.some(
+    (clause) =>
+      AMBIGUOUS_STALE_TERM_PATTERN.test(clause) &&
+      !hasExplicitUnrelatedSubject(clause),
+  );
 }
 
 function validateProcedures(source, relativePath, projections) {
@@ -1102,7 +1180,10 @@ function validateProcedures(source, relativePath, projections) {
 function validateLaterBoundaries(source, relativePath, projections) {
   const errors = [];
   const clauses = semanticClauses(source);
-  const safeLaterClause = new RegExp("^(?:" + SAFE_LATER_CLAUSE + ")$", "i");
+  const safeLaterClause = new RegExp(
+    "^(?:" + SAFE_LATER_CLAUSE + "|" + SAFE_PROTECTED_NEGATIVE_CLAUSE + ")$",
+    "i",
+  );
   for (const subject of LATER_SUBJECTS) {
     const pattern = new RegExp(
       `\\b${subject.pattern}\\b[^\\n.!?]{0,64}\\b(?:is\\s+|has\\s+been\\s+)?(?:${POSITIVE_VERBS})\\b`,
@@ -1135,6 +1216,39 @@ function validateLaterBoundaries(source, relativePath, projections) {
         );
         break;
       }
+    }
+  }
+  const paragraphClauses = source
+    .split(/\r?\n\s*\r?\n/)
+    .map((paragraph) => semanticClauses(paragraph));
+  for (
+    let paragraphIndex = 0;
+    paragraphIndex < paragraphClauses.length;
+    paragraphIndex += 1
+  ) {
+    const current = paragraphClauses[paragraphIndex];
+    const safeIndexes = current.flatMap((clause, index) =>
+      safeSubjectClause.test(clause) ? [index] : [],
+    );
+    for (let index = 0; index < current.length; index += 1) {
+      const clause = current[index];
+      if (
+        hasExplicitCommandSubject(clause) ||
+        (!GENERIC_CONTEXT_COMMAND_PATTERN.test(clause) &&
+          !IMPERATIVE_ACTION_PATTERN.test(clause))
+      )
+        continue;
+      const followsSameParagraphSubject = safeIndexes.some(
+        (safeIndex) => safeIndex < index,
+      );
+      const followsAdjacentSubject = paragraphClauses[paragraphIndex - 1]?.some(
+        (candidate) => safeSubjectClause.test(candidate),
+      );
+      if (!followsSameParagraphSubject && !followsAdjacentSubject) continue;
+      errors.push(
+        `${relativePath}: protected safe subject has a prohibited command continuation`,
+      );
+      break;
     }
   }
   const holdRelease = new RegExp(
