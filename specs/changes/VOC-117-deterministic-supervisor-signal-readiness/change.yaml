@@ -1,0 +1,244 @@
+schema_version: 1
+
+id: VOC-117
+slug: deterministic-supervisor-signal-readiness
+title: Replace fixed-delay supervisor signal tests with a bounded child-ready handshake
+type: foundation-test-reliability-correction
+status: draft
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the implementation changes a required foundation CI verifier for
+  local-process lifecycle and signal cleanup. The changed test path has an
+  automated R1 path floor, but a false pass could weaken evidence for a required
+  shutdown control, so the semantic floor is R3. No runtime, workflow, authority,
+  deployment, or live-system behavior is in scope and R4 is not triggered.
+canonical_path: specs/changes/VOC-117-deterministic-supervisor-signal-readiness
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/221
+failing_run: https://github.com/KARSIFT/vocanova-platform/actions/runs/33508619896
+failing_job: https://github.com/KARSIFT/vocanova-platform/actions/runs/33508619896/job/99858760273
+failing_event_sha: d464d7b2a07d8e43213ae89471c4a8b8461e7781
+base_branch: develop
+base_sha: b22a735fa5986023a7795c3f7cb89af7cf1cfccb
+plan_branch: plan/voc-117-supervisor-signal-readiness
+target_branch: develop
+approved_candidate_sha: pending-independent-exact-revision-review-and-adoption
+approval_status: pending-independent-exact-revision-review-and-adoption
+implementation_authorized: false
+implementation_authority_status: >-
+  prohibited-until-exact-plan-review-accountable-adoption-complete-bookkeeping-and-
+  normal-non-author-plan-merge; issue-221-and-this-draft-grant-no-implementation-
+  review-approval-merge-settings-dispatch-deployment-or-live-system-authority
+implementation_pull_request_count: 1
+implementation_pull_request: pending-after-adoption
+multiple_pull_request_rationale: >-
+  One test-file implementation PR keeps the readiness fixture, bounded waiter,
+  signal assertions, negative cases, preservation proof, and rollback point atomic.
+  Splitting the helper from its signal tests would leave an unproven or falsely
+  documented foundation verifier and add coordination, repeated-check,
+  exact-review, and bookkeeping overhead without an independently releasable or
+  rollback-safe boundary.
+automatic_merge_allowed: true
+production_impact: none-repository-test-only
+rollback_required: true
+
+objective: >-
+  Replace the fixed 75-ms signal-test precondition with a deterministic, bounded
+  child-ready handshake for both SIGINT and SIGTERM so the foundation suite proves
+  handler installation before signaling, while preserving the supervisor's actual
+  stop, escalation, exit-outcome, and cleanup semantics.
+
+requirements:
+  - id: VOC-117-D00
+    statement: >-
+      Treat issue #221, candidate d464d7b2a07d8e43213ae89471c4a8b8461e7781,
+      hosted run 33508619896, failed foundation job 99858760273, and the 203-pass/
+      1-fail/204-total result as defect intake and reproduction evidence only. The
+      failure is the SIGINT test's null outcome code at line 306 after a 75-ms
+      sleep; the SIGTERM neighbor passed. No issue, run, branch, or draft package
+      grants implementation, review, merge, settings, deployment, or live authority.
+  - id: VOC-117-D01
+    statement: >-
+      Implement one coherent repository-only correction in exactly
+      scripts/foundation/local-development-supervisor.test.mjs. Inspect and
+      preserve scripts/foundation/local-development-supervisor.mjs,
+      docs/development.md, package.json, the ci:foundation command, and wildcard
+      test discovery; any need to change those surfaces stops implementation and
+      returns to governed planning.
+  - id: VOC-117-D02
+    statement: >-
+      Replace the signal-loop's fixed elapsed-time precondition with one explicit
+      child-ready handshake for each SIGINT and SIGTERM fixture. Each fixture must
+      install its exact signal handler first, emit one unique exact ready sentinel
+      only after handler installation, and remain alive until the parent signals it.
+      The parent must await that sentinel before calling stopAll; elapsed time alone
+      must not be accepted as readiness.
+  - id: VOC-117-D03
+    statement: >-
+      Add a test-only bounded waiter that consumes the supervised child's existing
+      stdout stream and any already-buffered record output, handles split chunks,
+      resolves only on the exact sentinel, rejects on child error or exit before
+      readiness with the observed outcome, and removes its listeners and timer on
+      every resolution. Its positive timeout must be a declared finite bound of no
+      more than 5,000 ms; it must not poll with an unbounded loop or use a fixed
+      sleep as a substitute for the handshake.
+  - id: VOC-117-D04
+    statement: >-
+      Preserve the existing signal assertions exactly in meaning for both signals:
+      stopAll receives the parameterized signal once, returns forced=false when
+      the handler exits with code 23 for SIGINT or 24 for SIGTERM, and the child's
+      settled outcome reports that expected code. Preserve the shutdown-escalation
+      test, the production SupervisedChildren implementation, runLocalDevelopment
+      signal handling, bounded grace/force-kill behavior, and close/diagnostic
+      collection unchanged.
+  - id: VOC-117-D05
+    statement: >-
+      Add deterministic bounded negatives for a fixture that omits the sentinel,
+      emits a wrong sentinel, and exits before readiness. Each must reject within
+      its injected short timeout with a diagnostic naming the fixture and reason,
+      and its finally path must stop and settle the child. No negative may hang,
+      retry internally, weaken the positive exit-code assertion, or leave a timer,
+      stream listener, process, port, or other resource behind.
+  - id: VOC-117-D06
+    statement: >-
+      Add exact mutation coverage in an isolated disposable copy: remove or rename
+      the sentinel, split it across stdout chunks, move sentinel emission before
+      handler registration, replace the awaited waiter with the former 75-ms delay,
+      and change the expected SIGINT/SIGTERM exit code. The first three mutations
+      must fail bounded readiness/order checks, the delay replacement must fail the
+      no-fixed-delay/source audit, and changed expected codes must fail the outcome
+      assertion; the canonical candidate must pass with no mutation residue.
+  - id: VOC-117-D07
+    statement: >-
+      Keep the package and implementation to one minimum-sufficient task and one
+      implementation PR. The focused test must remain auto-discovered by the exact
+      pnpm run ci:foundation script. No workflow, validator, package script,
+      dependency, application, API, data, migration, documentation, settings,
+      secret, Cloudflare, deployment, production, learner-data, DNS/traffic,
+      spending, release, main-promotion, or launch change is permitted.
+  - id: VOC-117-D08
+    statement: >-
+      Require focused supervisor tests, the complete foundation command and hosted
+      required checks, workspace/governance/risk/format/diff validation, exact
+      path/SHA/tree evidence, a distinct local-process lifecycle specialist review,
+      and an independent exact-SHA cross-model R3 PASS by a different non-author
+      actor using a model distinct from the exact revision's builder. Plan and
+      implementation reviews are separate; no verdict transfers after an edit and
+      no risk label creates founder or standing-steward approval.
+  - id: VOC-117-D09
+    statement: >-
+      Roll back the complete one-file implementation through a normal reviewed
+      repository PR, restoring the actual implementation parent and fixed-delay
+      test only if the handshake introduces a regression; do not retain a partial
+      helper or weaken lifecycle assertions. After merge, the adoption-recorded
+      owner monitors the exact merge-SHA foundation and required aggregate results;
+      any recurrence, timeout, leaked child, unexpected forced kill, or changed
+      outcome routes a new governed correction and blocks closure.
+  - id: VOC-117-D10
+    statement: >-
+      Self-modification of governance, permissions, review rules, merge conditions,
+      deployment authority, or agent authority does not apply: no such surface is
+      changed. Cross-model verification is nevertheless required as R3 defense in
+      depth for this required lifecycle verifier, not as authority. If implementation
+      expands into a protected workflow, validator, governance, or runtime semantic
+      change, stop and return to planning with a new scope and risk assessment.
+  - id: VOC-117-D11
+    statement: >-
+      The plan and future implementation remain credential-free, network-free, and
+      repository-only. They must not query or mutate GitHub settings, dispatch a
+      workflow, deploy, access Cloudflare or production/learner data, change DNS or
+      traffic, spend money, promote main, launch publicly, or claim issue-221 closure
+      before all required evidence and separate authority are present.
+
+owners:
+  decision: accountable-repository-change-owner-at-adoption
+  package_preparation: /root/voc117_signal_plan
+  implementation: different-builder-actor-after-adoption
+  local_process_lifecycle_specialist: different-non-author-exact-revision-actor
+  independent_cross_model_R3_verifier: different-non-author-exact-revision-actor
+  merge: separate-non-author-actor
+  post_merge_monitoring: accountable-repository-change-owner-recorded-at-adoption
+
+approvals:
+  independent_local_process_specialist_plan_review:
+    status: pending-distinct-non-author-exact-candidate-review
+    candidate_sha: pending
+    evidence: pending
+  independent_cross_model_R3_plan_review:
+    status: pending-distinct-non-author-distinct-model-exact-candidate-review
+    candidate_sha: pending
+    evidence: pending
+  adoption_decision:
+    status: pending
+    decision_id: pending
+    candidate_sha: pending
+    evidence: pending
+  independent_local_process_specialist_implementation_review:
+    status: blocked-until-adopted-plan-and-exact-implementation-candidate
+    candidate_sha: pending-future-implementation-sha
+    evidence: pending
+  independent_cross_model_R3_implementation_review:
+    status: blocked-until-adopted-plan-and-exact-implementation-candidate
+    candidate_sha: pending-future-implementation-sha
+    evidence: pending
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - scripts/foundation/local-development-supervisor.test.mjs
+  - scripts/foundation/local-development-supervisor.mjs (preservation surface)
+  - docs/development.md (preservation surface)
+  - package.json (preservation surface)
+  - specs/changes/VOC-117-deterministic-supervisor-signal-readiness
+
+implementation_paths:
+  - scripts/foundation/local-development-supervisor.test.mjs
+
+preservation_surfaces:
+  - scripts/foundation/local-development-supervisor.mjs
+  - docs/development.md
+  - package.json
+  - pnpm-lock.yaml
+  - .github/workflows/ci.yml
+
+protected_areas:
+  - required-foundation-lifecycle-verifier
+  - signal-forwarding-and-child-cleanup-semantics
+  - bounded-timeout-and-no-hang-test-behavior
+  - exact-exit-outcome-and-forced-kill-assertions
+  - DOC-16-distinct-actor-and-cross-model-R3-evidence
+  - production-and-learner-data-holds
+
+privilege_expansion_analysis:
+  classification: zero-authority-expansion
+  expands: []
+  does_not_expand:
+    - supervisor-runtime-behavior
+    - workflow-permissions-triggers-and-commands
+    - package-scripts-dependencies-and-toolchain
+    - secrets-credentials-network-and-production-data-access
+    - GitHub-settings-dispatch-deployment-release-and-main-authority
+    - Cloudflare-DNS-traffic-spending-and-public-launch-authority
+
+self_modification:
+  applies: false
+  rationale: >-
+    The package changes one regression-test file only; it does not alter governance,
+    validators, permissions, review rules, merge conditions, deployment authority,
+    agent authority, or runtime supervisor implementation.
+
+cross_model:
+  required: true
+  scope: exact-plan-and-future-implementation-R3-reviews
+  rationale: >-
+    A distinct-model review is required as defense in depth for a required
+    foundation lifecycle verifier. It is evidence only and never substitutes for
+    the separate non-author merge actor or any action-specific authority.
