@@ -63,7 +63,7 @@ response ceiling is exactly 65,536 decoded body bytes. One shared bounded-reader
 
 1. acquire the body reader before validation enters a single `try`/`finally` cleanup
    region;
-2. parse a present `Content-Length` only as an unsigned base-10 integer and reject a
+2. parse a present `Content-Length` only with `^(0|[1-9][0-9]*)$` and reject a
    malformed or over-ceiling declaration before reading or JSON parsing;
 3. sum decoded `Uint8Array` chunk byte lengths, stopping
    before retaining more than the ceiling even when length is missing, dishonest, or
@@ -78,16 +78,20 @@ The abort timer is cleared in `finally`. Non-2xx/redirect bodies are never parse
 provider detail; when a response exists they are disposed and become one generic
 provider failure. If fetch rejects before yielding a response (including native
 `redirect: "error"` rejection), no body exists and only abort/timer cleanup applies.
-The token
-JSON object accepts exactly required `access_token` (1–8,192 UTF-8 bytes) and
+Both endpoints accept media type `application/json` case-insensitively with optional
+parameters and reject every other media type. The token JSON object accepts exactly
+required `access_token` (1–8,192 UTF-8 bytes) and
 `token_type` (ASCII case-insensitive `Bearer`), plus optional `expires_in` (integer
 1–86,400), `scope` (0–2,048 UTF-8 bytes), and `id_token` (1–12,288 UTF-8 bytes).
 Unknown fields—including `refresh_token`—or wrong types fail; only `access_token` is
 used for the immediately following user-info request and all token fields are discarded.
 
-Strictly validate user-info HTTP status, JSON content type/object, nonempty `sub`,
-normalized email, boolean `email_verified`, and bounded display/avatar fields. An
-avatar is retained only when its UTF-8 representation is at most 2,048 bytes and it
+Strictly validate the user-info object. Consume only `sub` (1–255 UTF-8 bytes),
+normalized email (3–254 bytes), `email_verified` exactly `true`, optional `name` (at
+most 80 Unicode scalar values and 320 UTF-8 bytes; missing becomes empty), and optional
+`picture`; bounded unknown Google claims are ignored and never persisted. Wrong types
+or overbounds fail. An avatar is retained only when its UTF-8 representation is at
+most 2,048 bytes and it
 parses as HTTPS with no username, password, query, fragment, or non-default port and a
 hostname equal to `googleusercontent.com` or ending in `.googleusercontent.com`;
 otherwise return the existing empty avatar value rather than fail authentication. The

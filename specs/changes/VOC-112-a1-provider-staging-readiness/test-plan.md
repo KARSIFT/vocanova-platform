@@ -24,10 +24,12 @@ visibly synthetic.
   `redirect:error`. Assert the accepted token field set and reject refresh/unknown,
   wrong-type, overbound fields. For both responses cover exact-ceiling success,
   declared Content-Length over ceiling, dishonest within-limit length followed by
-  oversize, missing/chunked length oversize, timeout/network/read error, non-2xx,
-  invalid content/JSON/shape, and instrumented cancellation/release on every success,
-  error, timeout, redirect, and oversize path. Cover unverified/missing identity and
-  avatar scheme/host/port/credentials/query/fragment/byte-limit negatives. Attempt 3xx
+  oversize, missing/chunked length oversize, malformed/leading-zero Content-Length,
+  timeout/network/read error, non-2xx, allowed JSON media-type parameters, rejected
+  non-JSON content, invalid JSON/shape, and instrumented cancellation/release on every
+  success, error, timeout, redirect, and oversize path. Cover exact subject/email/
+  verified/name bounds, ignored unknown user-info claims, and avatar scheme/host/port/
+  credentials/query/fragment/byte-limit negatives. Attempt 3xx
   redirects and prove code/client-secret and access-token are never sent to the target.
 - Expected: exact safe requests and bounded identity on success; generic fail-closed
   behavior otherwise; token retains at most 16,384 bytes and user-info 65,536 bytes
