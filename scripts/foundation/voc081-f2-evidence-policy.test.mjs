@@ -120,9 +120,24 @@ function injectDuplicateMilestoneMember(
   const members = [...source.matchAll(memberExpression)];
   assert.equal(members.length, 1, `fixture has one active ${key} member`);
   const member = members[0][0];
-  const injected = source.replace(
-    memberExpression,
-    `${member},\n    ${escapedKey}: ${JSON.stringify(duplicateValue)}`,
+  const prefix = source.slice(0, members[0].index);
+  const suffix = source.slice(members[0].index + member.length);
+  const replacement = `${member},\n    ${escapedKey}: ${JSON.stringify(duplicateValue)}`;
+  const injected = `${prefix}${replacement}${suffix}`;
+  assert.equal(
+    injected,
+    `${prefix}${replacement}${suffix}`,
+    `fixture changes only the selected ${key} member`,
+  );
+  assert.equal(
+    injected.slice(0, prefix.length),
+    prefix,
+    `fixture preserves the ${key} source prefix byte-for-byte`,
+  );
+  assert.equal(
+    suffix ? injected.slice(-suffix.length) : "",
+    suffix,
+    `fixture preserves the ${key} source suffix byte-for-byte`,
   );
   assert.notEqual(injected, source, `fixture injects ${key}`);
   assert.equal(
@@ -131,7 +146,7 @@ function injectDuplicateMilestoneMember(
     2,
     `fixture has two raw ${key} members`,
   );
-  return injected;
+  return { source: injected, prefix, suffix };
 }
 
 // These literals are copied from the adopted VOC-110 specification, not from
@@ -740,55 +755,69 @@ test("current-state JSON accepts only the two exact profiles", () => {
 });
 
 test("test-owned live-profile selection is complete, order-insensitive, and fail closed", () => {
-  assert.equal(
-    exactProfileForRecord({ milestone_state: preMilestoneState }),
-    "pre-voc105",
-  );
-  assert.equal(
-    exactProfileForRecord({ milestone_state: futureMilestoneState }),
-    "voc105",
-  );
-  assert.equal(
-    exactProfileForRecord({
-      milestone_state: {
-        voc080_holds: ["VOC-080-HOLD-01", "VOC-080-HOLD-02"],
-        live_activation: "unresolved-held",
-        production: "held",
-        p1_plus_product_acceptance: "unresolved",
-        a1_authenticated_product_acceptance: "unresolved",
-        f3_current_evidence: "docs/operations/voc-105-f3-evidence.json",
-        f3_staging: "complete-effective-under-voc-105-evidence",
-        f2_repository_local: "complete-effective",
-      },
-    }),
-    "voc105",
-  );
-  for (const mutate of [
-    (value) => delete value.f3_staging,
-    (value) => {
-      value.renamed_f3_staging = value.f3_staging;
-      delete value.f3_staging;
-    },
-    (value) => {
-      value.f3_staging = [value.f3_staging];
-    },
-    (value) => {
-      value.f3_staging = "wrong";
-    },
-    (value) => {
-      value.voc080_holds = ["VOC-080-HOLD-02", "VOC-080-HOLD-01"];
-    },
-    (value) => {
-      value.extra = "held";
-    },
-  ]) {
-    const candidate = { milestone_state: clone(futureMilestoneState) };
-    mutate(candidate.milestone_state);
+  const profiles = [
+    ["pre-voc105", preMilestoneState],
+    ["voc105", futureMilestoneState],
+  ];
+  const assertNoProfile = (label, milestone_state) =>
     assert.throws(
-      () => exactProfileForRecord(candidate),
+      () => exactProfileForRecord({ milestone_state }),
       /one complete exact profile/,
+      label,
     );
+
+  for (const [profile, state] of profiles) {
+    assert.equal(exactProfileForRecord({ milestone_state: state }), profile);
+    assert.equal(
+      exactProfileForRecord({
+        milestone_state: Object.fromEntries(
+          [...Object.entries(state)].reverse(),
+        ),
+      }),
+      profile,
+      `${profile} object member order is non-semantic`,
+    );
+    for (const [key, value] of Object.entries(state)) {
+      const without = clone(state);
+      delete without[key];
+      assertNoProfile(`${profile} omits ${key}`, without);
+
+      const renamed = clone(state);
+      renamed[`renamed_${key}`] = renamed[key];
+      delete renamed[key];
+      assertNoProfile(`${profile} renames ${key}`, renamed);
+
+      const wrongType = clone(state);
+      wrongType[key] = Array.isArray(value) ? "wrong-type" : [value];
+      assertNoProfile(`${profile} changes ${key} type`, wrongType);
+
+      if (Array.isArray(value)) {
+        const reorderedHolds = clone(state);
+        reorderedHolds[key] = [...value].reverse();
+        assertNoProfile(`${profile} reorders ${key}`, reorderedHolds);
+
+        const changedHold = clone(state);
+        changedHold[key] = [...value];
+        changedHold[key][0] = "VOC-080-HOLD-XX";
+        assertNoProfile(`${profile} changes one ${key} value`, changedHold);
+      } else {
+        const wrongValue = clone(state);
+        wrongValue[key] = `${value}-wrong`;
+        assertNoProfile(`${profile} changes ${key} scalar value`, wrongValue);
+      }
+    }
+    const unknown = clone(state);
+    unknown.unknown = "held";
+    assertNoProfile(`${profile} adds an unknown key`, unknown);
   }
+
+  for (const [label, milestone_state] of [
+    ["null", null],
+    ["array", []],
+    ["primitive", "pre-voc105"],
+    ["missing", undefined],
+  ])
+    assertNoProfile(`rejects ${label} milestone_state`, milestone_state);
 });
 
 test("plan-owned pre and VOC-105 sources pass, then fail one required marker at a time", () => {
@@ -834,10 +863,25 @@ test("raw duplicate JSON keys and the VOC-105 evidence pointer fail before parsi
       const recordPath = join(fixture, F2_RECORD_PATH);
       const source = readFileSync(recordPath, "utf8");
       const candidate = JSON.parse(source);
-      writeFileSync(
-        recordPath,
-        injectDuplicateMilestoneMember(candidate, source, key, duplicateValue),
+      const injection = injectDuplicateMilestoneMember(
+        candidate,
+        source,
+        key,
+        duplicateValue,
       );
+      assert.equal(
+        injection.source.slice(0, injection.prefix.length),
+        injection.prefix,
+        `${profile} ${key} preserves the source prefix`,
+      );
+      assert.equal(
+        injection.suffix
+          ? injection.source.slice(-injection.suffix.length)
+          : "",
+        injection.suffix,
+        `${profile} ${key} preserves the source suffix`,
+      );
+      writeFileSync(recordPath, injection.source);
     });
     assert.ok(
       errors.some((error) =>
