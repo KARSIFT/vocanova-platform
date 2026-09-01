@@ -114,6 +114,12 @@ export function validateAttemptName(name, sha) {
   return sha === undefined || (SHA40.test(sha) && match[1] === sha);
 }
 
+export function deriveAttemptName(sha, frontier) {
+  if (!validSha(sha) || !validateFrontierName(frontier))
+    throw new TypeError("frozen SHA and frontier required");
+  return `release/voc-106-${sha}-attempt-${frontier.slice("release/voc-106-claim-".length)}`;
+}
+
 export function validateSubmitName(name, allocationDigest) {
   if (!validBranch(name, SUBMIT)) return false;
   const digest = SUBMIT.exec(name)[1];
@@ -143,6 +149,38 @@ export function validateFullRefField(name) {
     typeof name === "string" &&
     name.startsWith("refs/heads/") &&
     validateBranchField(name.slice(11))
+  );
+}
+
+export function validateRefFormatAndLength(name, form = "branch-v1") {
+  const branch =
+    form === "full-ref-v1" &&
+    typeof name === "string" &&
+    name.startsWith("refs/heads/")
+      ? name.slice(11)
+      : name;
+  if (
+    !validateBranchField(branch) ||
+    !["branch-v1", "full-ref-v1"].includes(form)
+  )
+    return false;
+  if (form === "branch-v1" && name !== branch) return false;
+  if (form === "full-ref-v1" && name !== `refs/heads/${branch}`) return false;
+  const bytes = Buffer.byteLength(name, "utf8");
+  const maximum = validateAttemptName(branch)
+    ? form === "branch-v1"
+      ? 144
+      : 155
+    : validateFrontierName(branch)
+      ? form === "branch-v1"
+        ? 101
+        : 112
+      : form === "branch-v1"
+        ? 87
+        : 98;
+  return (
+    bytes <= maximum &&
+    !/(?:\.\.|[\x00-\x20~^:?*[\\]|\.lock(?:\/|$)|@\{|\.$|\/\.)/u.test(name)
   );
 }
 
@@ -329,21 +367,13 @@ export function validateProjection(kind, value) {
     )
       errors.push("reserved-pr-v1: domains");
   } else if (kind === "timeline") {
-    const identity = ["actor", "assignee"].every((prefix) => {
-      const triple = [
-        value[`${prefix}_id`],
-        value[`${prefix}_login`],
-        value[`${prefix}_node_id`],
-      ];
-      return (
-        triple.every((item) => item === null) ||
-        (validateIdDecimal(triple[0]) &&
-          validString(triple[1]) &&
-          validNode(triple[2]))
-      );
-    });
     if (
-      !identity ||
+      !nullable(value.actor_id, validateIdDecimal) ||
+      !nullable(value.actor_login, validString) ||
+      !nullable(value.actor_node_id, validNode) ||
+      !nullable(value.assignee_id, validateIdDecimal) ||
+      !nullable(value.assignee_login, validString) ||
+      !nullable(value.assignee_node_id, validNode) ||
       !nullable(value.commit_id, validSha) ||
       !validTime(value.created_at) ||
       !TIMELINE_EVENTS.has(value.event) ||
@@ -407,10 +437,11 @@ export function parseLosslessJson(raw) {
     if (raw[cursor] === "{") {
       cursor += 1;
       const keys = new Set();
+      const object = {};
       whitespace();
       if (raw[cursor] === "}") {
         cursor += 1;
-        return;
+        return object;
       }
       while (true) {
         whitespace();
@@ -419,33 +450,33 @@ export function parseLosslessJson(raw) {
         keys.add(key);
         whitespace();
         if (raw[cursor++] !== ":") throw new SyntaxError("JSON colon required");
-        value();
+        object[key] = value();
         whitespace();
         const separator = raw[cursor++];
-        if (separator === "}") return;
+        if (separator === "}") return object;
         if (separator !== ",")
           throw new SyntaxError("JSON object separator required");
       }
     }
     if (raw[cursor] === "[") {
       cursor += 1;
+      const array = [];
       whitespace();
       if (raw[cursor] === "]") {
         cursor += 1;
-        return;
+        return array;
       }
       while (true) {
-        value();
+        array.push(value());
         whitespace();
         const separator = raw[cursor++];
-        if (separator === "]") return;
+        if (separator === "]") return array;
         if (separator !== ",")
           throw new SyntaxError("JSON array separator required");
       }
     }
     if (raw[cursor] === '"') {
-      stringToken();
-      return;
+      return stringToken();
     }
     const token =
       /^(?:true|false|null|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?)/u.exec(
@@ -453,15 +484,17 @@ export function parseLosslessJson(raw) {
       );
     if (!token) throw new SyntaxError("invalid JSON token");
     cursor += token[0].length;
+    if (token[0] === "true") return true;
+    if (token[0] === "false") return false;
+    if (token[0] === "null") return null;
+    if (/[.eE]/u.test(token[0]))
+      throw new SyntaxError("non-integer raw JSON number is unsafe");
+    return token[0];
   };
-  value();
+  const parsed = value();
   whitespace();
   if (cursor !== raw.length) throw new SyntaxError("trailing JSON content");
-  if (/(?<!["\w])(?:-?\d{16,})(?!["\w])/.test(raw))
-    throw new SyntaxError(
-      "unsafe raw JSON number; ids must project losslessly",
-    );
-  return JSON.parse(raw);
+  return parsed;
 }
 
 export function validateRulesetFixture(ruleset) {
@@ -595,6 +628,8 @@ export function validateAllocationState(value) {
       value.frozen_main_tree,
     ].every(validSha) ||
     value.attempt_sha !== value.frozen_develop_sha ||
+    value.attempt_ref !==
+      deriveAttemptName(value.frozen_develop_sha, value.frontier) ||
     value.claim_sha !== value.frozen_develop_sha ||
     !validateIdDecimal(value.ruleset_history_version) ||
     !validateIdDecimal(value.ruleset_id)
@@ -634,7 +669,47 @@ export function renderAttemptBinder(value) {
   return `<!-- voc-106-attempt-binder-v1\n${canonicalize(value)}\n-->\n`;
 }
 
-export function validateSubmitAward(value) {
+export function buildRefRequest(branch, sha) {
+  if (!validateBranchField(branch) || !validSha(sha))
+    throw new TypeError("canonical branch/SHA required");
+  return { ref: toFullRef(branch), sha };
+}
+
+export function validateRefRequest(value, branch, sha) {
+  if (!exactKeys(value, ["ref", "sha"]))
+    return ["ref-request-v1: exact own keys required"];
+  return value.ref === toFullRef(branch) && value.sha === sha
+    ? []
+    : ["ref-request-v1: canonical ref/SHA mismatch"];
+}
+
+export function validateBinderAllocationJoin(binder, allocation) {
+  const errors = [
+    ...validateAllocationState(allocation),
+    ...validateAttemptBinder(binder),
+  ];
+  const allocationDigest = sha256(canonicalize(allocation));
+  const fields = [
+    "attempt_ref",
+    "claim_ref",
+    "claim_sha",
+    "frozen_develop_sha",
+    "frozen_develop_tree",
+    "frozen_main_sha",
+    "frozen_main_tree",
+    "frontier",
+    "issue_url",
+  ];
+  if (
+    fields.some((field) => binder[field] !== allocation[field]) ||
+    binder.allocation_state_sha256 !== allocationDigest ||
+    binder.submit_ref !== `release/voc-106-submit-${allocationDigest}`
+  )
+    errors.push("attempt-binder-v1: allocation cryptographic join mismatch");
+  return errors;
+}
+
+export function validateSubmitAward(value, context = {}) {
   const keys = [
     "http_status",
     "submit_ref",
@@ -644,16 +719,79 @@ export function validateSubmitAward(value) {
   ];
   if (!exactKeys(value, keys))
     return ["submit-award-v1: exact own keys required"];
-  return value.schema === "voc-106-submit-award-v1" &&
+  const errors = [];
+  if (!(
+    value.schema === "voc-106-submit-award-v1" &&
     value.http_status === 201 &&
     validateSubmitName(value.submit_ref) &&
     validDigest(value.request_jcs_sha256) &&
     validSha(value.sha)
-    ? []
-    : ["submit-award-v1: domains"];
+  ))
+    errors.push("submit-award-v1: domains");
+  const { allocation, binder, request, response, currentInvocationId } =
+    context;
+  if (
+    !allocation ||
+    !binder ||
+    !request ||
+    !response ||
+    typeof currentInvocationId !== "string" ||
+    currentInvocationId === ""
+  )
+    return [
+      ...errors,
+      "submit-award-v1: synchronous invocation join context required",
+    ];
+  errors.push(...validateBinderAllocationJoin(binder, allocation));
+  errors.push(
+    ...validateRefRequest(
+      request,
+      binder.submit_ref,
+      allocation.frozen_develop_sha,
+    ),
+  );
+  if (
+    !exactKeys(response, [
+      "http_status",
+      "ref",
+      "sha",
+      "invocation_id",
+      "received_synchronously",
+    ]) ||
+    response.http_status !== 201 ||
+    response.ref !== request.ref ||
+    response.sha !== request.sha ||
+    response.invocation_id !== currentInvocationId ||
+    response.received_synchronously !== true
+  )
+    errors.push(
+      "submit-award-v1: exact synchronous 201 recipient/response mismatch",
+    );
+  if (
+    value.submit_ref !== binder.submit_ref ||
+    value.sha !== allocation.frozen_develop_sha ||
+    value.request_jcs_sha256 !== sha256(canonicalize(request))
+  )
+    errors.push(
+      "submit-award-v1: allocation/request cryptographic join mismatch",
+    );
+  return errors;
 }
 
-export function validateCanonicalPrRequest(value) {
+export function createSubmitAward(context) {
+  const award = {
+    http_status: 201,
+    submit_ref: context.binder.submit_ref,
+    request_jcs_sha256: sha256(canonicalize(context.request)),
+    schema: "voc-106-submit-award-v1",
+    sha: context.allocation.frozen_develop_sha,
+  };
+  const errors = validateSubmitAward(award, context);
+  if (errors.length) throw new TypeError(errors.join("; "));
+  return award;
+}
+
+export function validateCanonicalPrRequest(value, context = {}) {
   const keys = [
     "base",
     "body",
@@ -664,14 +802,38 @@ export function validateCanonicalPrRequest(value) {
   ];
   if (!exactKeys(value, keys))
     return ["pr-request-v1: exact own keys required"];
-  return value.base === "main" &&
+  const errors = [];
+  if (!(
+    value.base === "main" &&
     validString(value.body) &&
     value.draft === true &&
     validateAttemptName(value.head) &&
     value.maintainer_can_modify === false &&
     value.title === "VOC-106 release promotion"
-    ? []
-    : ["pr-request-v1: domains"];
+  ))
+    errors.push("pr-request-v1: domains");
+  const { allocation, binder, award, awardContext, client } = context;
+  if (!allocation || !binder || !award || !awardContext || !client)
+    return [
+      ...errors,
+      "pr-request-v1: allocation/binder/award/client context required",
+    ];
+  errors.push(...validateBinderAllocationJoin(binder, allocation));
+  errors.push(...validateSubmitAward(award, awardContext));
+  if (
+    value.body !== renderAttemptBinder(binder) ||
+    value.head !== allocation.attempt_ref ||
+    award.submit_ref !== binder.submit_ref ||
+    award.sha !== allocation.frozen_develop_sha
+  )
+    errors.push("pr-request-v1: binder/allocation/award mismatch");
+  if (
+    !exactKeys(client, ["retries", "redirects"]) ||
+    client.retries !== 0 ||
+    client.redirects !== false
+  )
+    errors.push("pr-request-v1: retries zero and redirects disabled required");
+  return errors;
 }
 
 const PAGE_KEYS = [
@@ -697,6 +859,90 @@ const PAGE_SOURCES = new Set([
   "ruleset_history_list",
 ]);
 
+function canonicalPageEndpoint(source, subject, page) {
+  if (!validateIdDecimal(String(page)))
+    throw new TypeError("canonical page required");
+  const root = `https://api.github.com/repos/${REPOSITORY}`;
+  if (source === "pulls")
+    return `${root}/pulls?state=all&sort=created&direction=asc&per_page=100&page=${page}`;
+  if (source === "timeline") {
+    if (!validatePrDecimal(subject))
+      throw new TypeError("timeline PR required");
+    return `${root}/issues/${subject}/timeline?per_page=100&page=${page}`;
+  }
+  if (source === "matching_refs") {
+    if (subject !== "refs/heads/release/voc-106-")
+      throw new TypeError("matching-ref prefix required");
+    return `${root}/git/matching-refs/heads/release/voc-106-?per_page=100&page=${page}`;
+  }
+  if (source === "ruleset_history_list") {
+    if (!validateIdDecimal(subject)) throw new TypeError("ruleset id required");
+    return `${root}/rulesets/${subject}/history?per_page=100&page=${page}`;
+  }
+  throw new TypeError("known page source required");
+}
+
+export function parsePageEndpoint(source, endpoint) {
+  if (typeof endpoint !== "string") return null;
+  const root = `https://api\\.github\\.com/repos/KARSIFT/vocanova-platform`;
+  const patterns = {
+    pulls: new RegExp(
+      `^${root}/pulls\\?state=all&sort=created&direction=asc&per_page=100&page=([1-9][0-9]{0,18})$`,
+      "u",
+    ),
+    timeline: new RegExp(
+      `^${root}/issues/([1-9][0-9]{0,9})/timeline\\?per_page=100&page=([1-9][0-9]{0,18})$`,
+      "u",
+    ),
+    matching_refs: new RegExp(
+      `^${root}/git/matching-refs/heads/release/voc-106-\\?per_page=100&page=([1-9][0-9]{0,18})$`,
+      "u",
+    ),
+    ruleset_history_list: new RegExp(
+      `^${root}/rulesets/([1-9][0-9]{0,18})/history\\?per_page=100&page=([1-9][0-9]{0,18})$`,
+      "u",
+    ),
+  };
+  const match = patterns[source]?.exec(endpoint);
+  if (!match) return null;
+  const hasSubject = source === "timeline" || source === "ruleset_history_list";
+  const subject = hasSubject
+    ? match[1]
+    : source === "matching_refs"
+      ? "refs/heads/release/voc-106-"
+      : REPOSITORY;
+  const page = hasSubject ? match[2] : match[1];
+  if (
+    !validateIdDecimal(page) ||
+    (source === "timeline" && !validatePrDecimal(subject)) ||
+    (source === "ruleset_history_list" && !validateIdDecimal(subject))
+  )
+    return null;
+  return { page, subject };
+}
+
+export function parseNextLink(rawLink, source, subject, currentPage) {
+  if (typeof rawLink !== "string" || rawLink.length === 0)
+    throw new TypeError("Link header required");
+  const entries = rawLink.split(",").map((entry) => entry.trim());
+  const next = entries.filter((entry) => /;\s*rel="next"$/u.test(entry));
+  if (next.length !== 1)
+    throw new TypeError("exactly one Link next relation required");
+  const match = /^<([^>]+)>;\s*rel="next"$/u.exec(next[0]);
+  if (!match) throw new TypeError("canonical Link next syntax required");
+  const expected = canonicalPageEndpoint(
+    source,
+    subject,
+    String(BigInt(currentPage) + 1n),
+  );
+  if (match[1] !== expected)
+    throw new TypeError("Link next URL is not exact canonical successor");
+  const url = new URL(match[1]);
+  if (url.username || url.password || url.hash)
+    throw new TypeError("Link next authority/fragment forbidden");
+  return expected;
+}
+
 export function validatePageCapture(capture) {
   const errors = [];
   if (!exactKeys(capture, PAGE_KEYS))
@@ -704,18 +950,25 @@ export function validatePageCapture(capture) {
   if (capture.schema !== "voc-106-page-capture-v1")
     errors.push("page-capture-v1: schema");
   if (!PAGE_SOURCES.has(capture.source)) errors.push("page-capture-v1: source");
-  const endpointPrefix = `https://api.github.com/repos/${REPOSITORY}/`;
-  if (
-    typeof capture.endpoint !== "string" ||
-    !capture.endpoint.startsWith(endpointPrefix)
-  )
-    errors.push("page-capture-v1: canonical endpoint");
-  if (!(
-    capture.next_url === null ||
-    (typeof capture.next_url === "string" &&
-      capture.next_url.startsWith(endpointPrefix))
-  ))
-    errors.push("page-capture-v1: canonical next URL");
+  const parsedEndpoint = parsePageEndpoint(capture.source, capture.endpoint);
+  if (!parsedEndpoint || parsedEndpoint.page !== capture.page)
+    errors.push("page-capture-v1: canonical source endpoint/page");
+  if (capture.next_url !== null) {
+    const parsedNext = parsePageEndpoint(capture.source, capture.next_url);
+    if (
+      !parsedEndpoint ||
+      !parsedNext ||
+      parsedNext.subject !== parsedEndpoint.subject ||
+      BigInt(parsedNext.page) !== BigInt(capture.page) + 1n ||
+      capture.next_url !==
+        canonicalPageEndpoint(
+          capture.source,
+          parsedEndpoint.subject,
+          parsedNext.page,
+        )
+    )
+      errors.push("page-capture-v1: exact next-page relation");
+  }
   if (capture.http_status !== 200 || capture.per_page !== "100")
     errors.push("page-capture-v1: HTTP/per_page");
   if (!validateIdDecimal(capture.page)) errors.push("page-capture-v1: page");
@@ -774,7 +1027,7 @@ const OBJECT_SOURCES = new Set([
   "reserved_pr",
 ]);
 
-export function validateObjectCapture(capture) {
+export function validateObjectCapture(capture, context = {}) {
   const errors = [];
   if (!exactKeys(capture, OBJECT_KEYS))
     return ["object-capture-v1: exact own keys required"];
@@ -788,9 +1041,6 @@ export function validateObjectCapture(capture) {
     !validTime(capture.captured_at) ||
     !validDigest(capture.raw_sha256) ||
     typeof capture.endpoint !== "string" ||
-    !capture.endpoint.startsWith(
-      `https://api.github.com/repos/${REPOSITORY}/`,
-    ) ||
     !(
       capture.etag === null ||
       (validString(capture.etag) && /^[\x20-\x7e]*$/u.test(capture.etag))
@@ -806,6 +1056,42 @@ export function validateObjectCapture(capture) {
     errors.push(...validateProjection(projectionKind, capture.projection));
   if (capture.source === "ruleset")
     errors.push(...validateRulesetFixture(capture.projection));
+  if (capture.source === "ruleset_history_version") {
+    if (!context.currentRuleset || !context.selectedHistory)
+      errors.push("object-capture-v1: ruleset version join context required");
+    else
+      errors.push(
+        ...validateRulesetVersion(
+          capture.projection,
+          context.currentRuleset,
+          context.selectedHistory,
+        ),
+      );
+  }
+  const root = `https://api.github.com/repos/${REPOSITORY}`;
+  let expectedEndpoint = null;
+  if (capture.source === "ruleset" && validateIdDecimal(capture.projection?.id))
+    expectedEndpoint = `${root}/rulesets/${capture.projection.id}`;
+  if (
+    capture.source === "ruleset_history_version" &&
+    validateIdDecimal(context.currentRuleset?.id) &&
+    validateIdDecimal(capture.projection?.version_id)
+  )
+    expectedEndpoint = `${root}/rulesets/${context.currentRuleset.id}/history/${capture.projection.version_id}`;
+  if (
+    capture.source === "protected_ref" &&
+    ["develop", "main"].includes(capture.projection?.name)
+  )
+    expectedEndpoint = `${root}/git/ref/heads/${capture.projection.name}`;
+  if (capture.source === "git_commit" && validSha(capture.projection?.sha))
+    expectedEndpoint = `${root}/git/commits/${capture.projection.sha}`;
+  if (
+    capture.source === "reserved_pr" &&
+    validatePrDecimal(capture.projection?.number)
+  )
+    expectedEndpoint = `${root}/pulls/${capture.projection.number}`;
+  if (capture.endpoint !== expectedEndpoint)
+    errors.push("object-capture-v1: exact source endpoint/projection identity");
   if (
     capture.projection_jcs_sha256 !== sha256(canonicalize(capture.projection))
   )
@@ -830,7 +1116,7 @@ const COMMAND_KEYS = [
   "capture_sha256",
 ];
 
-export function validateCommandCapture(capture) {
+export function validateCommandCapture(capture, raw = {}) {
   const errors = [];
   if (!exactKeys(capture, COMMAND_KEYS))
     return ["command-capture-v1: exact own keys required"];
@@ -855,10 +1141,35 @@ export function validateCommandCapture(capture) {
   for (const ref of capture.projection ?? [])
     errors.push(...validateProjection("ref", ref));
   const sorted = [...(capture.projection ?? [])].sort((a, b) =>
-    a.name.localeCompare(b.name),
+    utf8Compare(a.name, b.name),
   );
   if (canonicalize(sorted) !== canonicalize(capture.projection))
     errors.push("command-capture-v1: projection order");
+  if (typeof raw.stdout !== "string" || typeof raw.stderr !== "string")
+    errors.push("command-capture-v1: exact raw stdout/stderr required");
+  else {
+    if (
+      raw.stderr !== "" ||
+      sha256(raw.stderr) !== capture.stderr_sha256 ||
+      sha256(raw.stdout) !== capture.stdout_sha256
+    )
+      errors.push("command-capture-v1: raw byte digest/stderr mismatch");
+    const parsed = [];
+    if (raw.stdout !== "") {
+      if (!raw.stdout.endsWith("\n") || raw.stdout.includes("\r"))
+        errors.push("command-capture-v1: stdout framing");
+      for (const line of raw.stdout.slice(0, -1).split("\n")) {
+        const match =
+          /^([0-9a-f]{40})\t(refs\/heads\/release\/voc-106-[^\t\n]+)$/u.exec(
+            line,
+          );
+        if (!match) errors.push("command-capture-v1: stdout record");
+        else parsed.push({ name: match[2], sha: match[1] });
+      }
+    }
+    if (canonicalize(parsed) !== canonicalize(capture.projection))
+      errors.push("command-capture-v1: raw/projection mismatch");
+  }
   if (
     capture.projection_jcs_sha256 !== sha256(canonicalize(capture.projection))
   )
@@ -883,7 +1194,18 @@ const SCAN_KEYS = [
   "state_projection_sha256",
 ];
 
-export function validateScanCapture(capture, pageCaptures, projection) {
+function projectPageItems(pageCaptures, source) {
+  const items = pageCaptures.flatMap((page) => page.items);
+  if (source === "pulls") return items.sort(numericCompare("number"));
+  if (source === "timeline") return items.sort(numericCompare("id"));
+  if (source === "ruleset_history_list")
+    return items.sort(numericCompare("version_id"));
+  if (source === "matching_refs")
+    return items.sort((a, b) => utf8Compare(a.name, b.name));
+  throw new TypeError("known scan source required");
+}
+
+export function validateScanCapture(capture, pageCaptures) {
   const errors = [];
   if (!exactKeys(capture, SCAN_KEYS))
     return ["scan-capture-v1: exact own keys required"];
@@ -894,10 +1216,15 @@ export function validateScanCapture(capture, pageCaptures, projection) {
     !validTime(capture.completed_at) ||
     !Array.isArray(capture.pages) ||
     !capture.pages.every(validDigest) ||
-    !/^\d+$/u.test(capture.page_count) ||
-    !/^\d+$/u.test(capture.total_count)
+    !/^(?:0|[1-9]\d*)$/u.test(capture.page_count) ||
+    !/^(?:0|[1-9]\d*)$/u.test(capture.total_count)
   )
     errors.push("scan-capture-v1: domains");
+  const paginationErrors = validatePagination(pageCaptures, capture.source);
+  errors.push(...paginationErrors);
+  let projection = [];
+  if (paginationErrors.length === 0)
+    projection = projectPageItems(pageCaptures, capture.source);
   if (
     capture.page_count !== String(pageCaptures.length) ||
     capture.total_count !== String(projection.length) ||
@@ -905,6 +1232,20 @@ export function validateScanCapture(capture, pageCaptures, projection) {
       canonicalize(pageCaptures.map((page) => page.capture_sha256))
   )
     errors.push("scan-capture-v1: complete page inventory");
+  let expectedHighWatermark;
+  if (capture.source === "pulls")
+    expectedHighWatermark = projection.at(-1)?.number ?? "0";
+  if (capture.source === "timeline")
+    expectedHighWatermark = projection.at(-1)?.id ?? "0";
+  if (capture.source === "matching_refs")
+    expectedHighWatermark = projection.at(-1)?.name ?? null;
+  if (capture.source === "ruleset_history_list") {
+    if (projection.length === 0)
+      errors.push("scan-capture-v1: ruleset history cannot be empty");
+    expectedHighWatermark = projection.at(-1)?.version_id ?? "0";
+  }
+  if (capture.high_watermark !== expectedHighWatermark)
+    errors.push("scan-capture-v1: source high watermark mismatch");
   if (capture.state_projection_sha256 !== sha256(canonicalize(projection)))
     errors.push("scan-capture-v1: state digest");
   const preimage = { ...capture };
@@ -919,11 +1260,18 @@ export function validatePagination(pages, source) {
   if (!Array.isArray(pages) || pages.length === 0)
     return ["pagination: at least page 1 required"];
   let seenShort = false;
+  let subject = null;
   const seenIds = new Set();
   pages.forEach((page, index) => {
     errors.push(...validatePageCapture(page));
     if (page.source !== source)
       errors.push(`pagination: page ${index + 1} wrong source`);
+    const parsed = parsePageEndpoint(source, page.endpoint);
+    if (parsed) {
+      if (subject === null) subject = parsed.subject;
+      else if (parsed.subject !== subject)
+        errors.push("pagination: source subject changed");
+    }
     if (page.page !== String(index + 1))
       errors.push(`pagination: gap/repeat at page ${index + 1}`);
     const count = Number(page.item_count);
@@ -933,6 +1281,14 @@ export function validatePagination(pages, source) {
       if (page.next_url !== null)
         errors.push("pagination: short page has next");
     }
+    if (count === 100 && index + 1 >= pages.length)
+      errors.push("pagination: full page requires explicit numbered successor");
+    if (
+      count === 100 &&
+      page.next_url !== null &&
+      pages[index + 1]?.endpoint !== page.next_url
+    )
+      errors.push("pagination: Link next does not equal fetched successor");
     for (const item of page.items) {
       const id = item.version_id ?? item.id ?? item.number ?? item.name;
       if (id !== undefined && seenIds.has(String(id)))
@@ -997,8 +1353,8 @@ export function reconcileRefs(lsRemote, matchingRefsPages) {
   if (errors.length) return errors;
   const api = matchingRefsPages
     .flatMap((page) => page.items)
-    .sort((a, b) => a.name.localeCompare(b.name));
-  const git = [...lsRemote].sort((a, b) => a.name.localeCompare(b.name));
+    .sort((a, b) => utf8Compare(a.name, b.name));
+  const git = [...lsRemote].sort((a, b) => utf8Compare(a.name, b.name));
   if (canonicalize(api) !== canonicalize(git))
     errors.push("refs: git/API sets differ");
   for (const ref of api) {
@@ -1016,10 +1372,235 @@ export function stableStateDigest(state) {
   return sha256(canonicalize(state));
 }
 
+const STABLE_KEYS = [
+  "schema",
+  "repository",
+  "ruleset",
+  "ruleset_history",
+  "protected_refs",
+  "counts",
+  "high_watermarks",
+  "all_pr_boundary",
+  "reserved_prs",
+  "timelines",
+  "refs",
+];
+const COUNT_KEYS = [
+  "all_prs",
+  "refs",
+  "reserved_prs",
+  "ruleset_history_versions",
+  "timeline_events",
+  "timelines",
+];
+const HIGH_WATERMARK_KEYS = [
+  "all_pr_number",
+  "refs",
+  "timelines",
+  "ruleset_history_version",
+];
+
+function numericCompare(field) {
+  return (left, right) =>
+    BigInt(left[field]) < BigInt(right[field])
+      ? -1
+      : BigInt(left[field]) > BigInt(right[field])
+        ? 1
+        : 0;
+}
+
+function utf8Compare(left, right) {
+  return Buffer.compare(Buffer.from(left, "utf8"), Buffer.from(right, "utf8"));
+}
+
+function assertUnique(items, field, label) {
+  const values = items.map((item) => item[field]);
+  if (new Set(values).size !== values.length)
+    throw new TypeError(`${label}: duplicate ${field}`);
+}
+
+export function buildStableState(input) {
+  const keys = [
+    "ruleset",
+    "ruleset_history",
+    "protected_refs",
+    "all_pr_boundary",
+    "reserved_prs",
+    "timelines",
+    "refs",
+  ];
+  if (!exactKeys(input, keys))
+    throw new TypeError("stable-state input: exact own keys required");
+  if (validateRulesetFixture(input.ruleset).length)
+    throw new TypeError("stable-state: invalid ruleset");
+  const history = structuredClone(input.ruleset_history);
+  if (!Array.isArray(history) || history.length === 0)
+    throw new TypeError("stable-state: history required");
+  for (const record of history) {
+    const errors = validateProjection("ruleset_history", record);
+    if (errors.length) throw new TypeError(errors.join("; "));
+  }
+  assertUnique(history, "version_id", "stable-state history");
+  history.sort(numericCompare("version_id"));
+  const latest = selectLatestRulesetVersion(history);
+  if (input.ruleset.history_version !== latest.version_id)
+    throw new TypeError("stable-state: current/history numeric-max mismatch");
+
+  const protectedRefs = structuredClone(input.protected_refs);
+  if (!Array.isArray(protectedRefs) || protectedRefs.length !== 2)
+    throw new TypeError(
+      "stable-state: exact develop/main protected refs required",
+    );
+  for (const ref of protectedRefs) {
+    const errors = validateProjection("protected", ref);
+    if (errors.length) throw new TypeError(errors.join("; "));
+  }
+  protectedRefs.sort((a, b) => utf8Compare(a.name, b.name));
+  if (protectedRefs[0].name !== "develop" || protectedRefs[1].name !== "main")
+    throw new TypeError("stable-state: protected ref cardinality");
+
+  const boundaries = structuredClone(input.all_pr_boundary);
+  if (!Array.isArray(boundaries))
+    throw new TypeError("stable-state: all PR boundary array required");
+  for (const boundary of boundaries) {
+    const classification = classifyBoundaryProvenance(boundary);
+    if (
+      classification === "invalid-boundary" ||
+      classification === "ambiguous-head-provenance"
+    )
+      throw new TypeError(`stable-state: ${classification}`);
+  }
+  assertUnique(boundaries, "number", "stable-state PR boundary");
+  boundaries.sort(numericCompare("number"));
+
+  const reserved = structuredClone(input.reserved_prs);
+  if (!Array.isArray(reserved))
+    throw new TypeError("stable-state: reserved PR array required");
+  for (const pr of reserved) {
+    const errors = validateProjection("reserved_pr", pr);
+    if (errors.length) throw new TypeError(errors.join("; "));
+  }
+  assertUnique(reserved, "number", "stable-state reserved PR");
+  reserved.sort(numericCompare("number"));
+  const expectedReserved = boundaries
+    .filter((item) => classifyBoundaryProvenance(item) === "reserved-candidate")
+    .map((item) => item.number);
+  if (
+    canonicalize(expectedReserved) !==
+    canonicalize(reserved.map((item) => item.number))
+  )
+    throw new TypeError(
+      "stable-state: reserved filter/detail inventory mismatch",
+    );
+
+  const timelines = structuredClone(input.timelines);
+  if (!Array.isArray(timelines))
+    throw new TypeError("stable-state: timelines array required");
+  for (const timeline of timelines) {
+    if (
+      !exactKeys(timeline, ["events", "pr_number"]) ||
+      !validatePrDecimal(timeline.pr_number) ||
+      !Array.isArray(timeline.events)
+    )
+      throw new TypeError("stable-state: timeline wrapper schema");
+    for (const event of timeline.events) {
+      const errors = validateProjection("timeline", event);
+      if (errors.length) throw new TypeError(errors.join("; "));
+    }
+    assertUnique(
+      timeline.events,
+      "id",
+      `stable-state timeline ${timeline.pr_number}`,
+    );
+    timeline.events.sort(numericCompare("id"));
+  }
+  assertUnique(timelines, "pr_number", "stable-state timelines");
+  timelines.sort(numericCompare("pr_number"));
+  if (
+    canonicalize(timelines.map((item) => item.pr_number)) !==
+    canonicalize(reserved.map((item) => item.number))
+  )
+    throw new TypeError(
+      "stable-state: one complete timeline per reserved PR required",
+    );
+
+  const refs = structuredClone(input.refs);
+  if (!Array.isArray(refs))
+    throw new TypeError("stable-state: refs array required");
+  for (const ref of refs) {
+    const errors = validateProjection("ref", ref);
+    if (errors.length) throw new TypeError(errors.join("; "));
+  }
+  assertUnique(refs, "name", "stable-state refs");
+  refs.sort((a, b) => utf8Compare(a.name, b.name));
+  const timelineEvents = timelines.reduce(
+    (count, item) => count + item.events.length,
+    0,
+  );
+  return {
+    schema: "voc-106-stable-state-v1",
+    repository: REPOSITORY,
+    ruleset: structuredClone(input.ruleset),
+    ruleset_history: history,
+    protected_refs: protectedRefs,
+    counts: {
+      all_prs: String(boundaries.length),
+      refs: String(refs.length),
+      reserved_prs: String(reserved.length),
+      ruleset_history_versions: String(history.length),
+      timeline_events: String(timelineEvents),
+      timelines: String(timelines.length),
+    },
+    high_watermarks: {
+      all_pr_number: boundaries.at(-1)?.number ?? "0",
+      refs: refs.at(-1)?.name ?? null,
+      timelines: timelines.map((item) => ({
+        event_id: item.events.at(-1)?.id ?? "0",
+        pr_number: item.pr_number,
+      })),
+      ruleset_history_version: latest.version_id,
+    },
+    all_pr_boundary: boundaries,
+    reserved_prs: reserved,
+    timelines,
+    refs,
+  };
+}
+
+export function validateStableState(state) {
+  if (!exactKeys(state, STABLE_KEYS))
+    return ["stable-state-v1: exact own keys required"];
+  if (
+    !exactKeys(state.counts, COUNT_KEYS) ||
+    !exactKeys(state.high_watermarks, HIGH_WATERMARK_KEYS)
+  )
+    return ["stable-state-v1: exact counts/high-watermarks keys required"];
+  try {
+    const rebuilt = buildStableState({
+      ruleset: state.ruleset,
+      ruleset_history: state.ruleset_history,
+      protected_refs: state.protected_refs,
+      all_pr_boundary: state.all_pr_boundary,
+      reserved_prs: state.reserved_prs,
+      timelines: state.timelines,
+      refs: state.refs,
+    });
+    return canonicalize(rebuilt) === canonicalize(state)
+      ? []
+      : ["stable-state-v1: derived ordering/count/high-watermark mismatch"];
+  } catch (error) {
+    return [`stable-state-v1: ${error.message}`];
+  }
+}
+
 export function deriveStableState(passes) {
   if (!Array.isArray(passes) || passes.length !== 2)
     throw new TypeError("exactly two passes required");
   const [first, second] = passes;
+  const firstErrors = validateStableState(first);
+  const secondErrors = validateStableState(second);
+  if (firstErrors.length || secondErrors.length)
+    throw new TypeError([...firstErrors, ...secondErrors].join("; "));
   if (canonicalize(first) !== canonicalize(second))
     throw new TypeError("stable-state mismatch");
   return { state: first, sha256: stableStateDigest(first) };
@@ -1044,7 +1625,7 @@ const RECONCILIATION_KEYS = [
   "pr_node_id",
 ];
 
-export function validateReconciliation(value) {
+export function validateReconciliation(value, context = {}) {
   if (!exactKeys(value, RECONCILIATION_KEYS))
     return ["reconciliation-v1: exact own keys required"];
   const errors = [];
@@ -1078,6 +1659,50 @@ export function validateReconciliation(value) {
     errors.push("reconciliation-v1: domains");
   if ((value.pr_number === null) !== (value.pr_node_id === null))
     errors.push("reconciliation-v1: PR pair nullability");
+  const {
+    pass1,
+    pass2,
+    pass1Context,
+    pass2Context,
+    stableState,
+    persisted = false,
+  } = context;
+  if (!pass1 || !pass2 || !stableState)
+    return [
+      ...errors,
+      "reconciliation-v1: exact pass/stable join context required",
+    ];
+  errors.push(
+    ...validatePassCapture(pass1, pass1Context),
+    ...validatePassCapture(pass2, pass2Context),
+  );
+  if (
+    pass1.pass !== "1" ||
+    pass2.pass !== "2" ||
+    value.pass_1_capture_sha256 !== pass1.capture_sha256 ||
+    value.pass_2_capture_sha256 !== pass2.capture_sha256 ||
+    value.stable_state_sha256 !== stableStateDigest(stableState) ||
+    pass1.stable_state_sha256 !== value.stable_state_sha256 ||
+    pass2.stable_state_sha256 !== value.stable_state_sha256
+  )
+    errors.push("reconciliation-v1: pass/stable digest join mismatch");
+  const develop = stableState.protected_refs?.find(
+    (item) => item.name === "develop",
+  );
+  const main = stableState.protected_refs?.find((item) => item.name === "main");
+  if (
+    value.frozen_develop_sha !== develop?.sha ||
+    value.frozen_develop_tree !== develop?.tree ||
+    value.frozen_main_sha !== main?.sha ||
+    value.frozen_main_tree !== main?.tree
+  )
+    errors.push("reconciliation-v1: frozen protected topology mismatch");
+  if (value.submit_state === "consumed" && value.pr_number === null)
+    errors.push("reconciliation-v1: consumed requires exact PR identity");
+  if (value.submit_state === "awarded-current-invocation" && persisted)
+    errors.push(
+      "reconciliation-v1: ephemeral award cannot be persisted/reconstructed",
+    );
   return errors;
 }
 
@@ -1093,7 +1718,163 @@ const PASS_KEYS = [
 ];
 const MEMBER_KEYS = ["capture_sha256", "kind", "source", "subject"];
 
-export function validatePassCapture(capture, expectedMembers) {
+function requiredPassDescriptors(stableState) {
+  const rulesetId = stableState.ruleset.id;
+  const latestVersion = stableState.ruleset.history_version;
+  const commitShas = new Set(
+    stableState.protected_refs.map((item) => item.sha),
+  );
+  for (const ref of stableState.refs) commitShas.add(ref.sha);
+  for (const pr of stableState.reserved_prs) {
+    commitShas.add(pr.base_sha);
+    commitShas.add(pr.head_sha);
+    if (pr.merge_commit_sha !== null) commitShas.add(pr.merge_commit_sha);
+  }
+  return [
+    {
+      kind: "scan",
+      source: "ruleset_history_list",
+      subject: `ruleset:${rulesetId}`,
+    },
+    { kind: "scan", source: "pulls", subject: REPOSITORY },
+    ...stableState.timelines.map((item) => ({
+      kind: "scan",
+      source: "timeline",
+      subject: `pr:${item.pr_number}`,
+    })),
+    {
+      kind: "scan",
+      source: "matching_refs",
+      subject: "refs/heads/release/voc-106-",
+    },
+    {
+      kind: "command",
+      source: "git_ls_remote",
+      subject: "refs/heads/release/voc-106-",
+    },
+    { kind: "object", source: "ruleset", subject: `ruleset:${rulesetId}` },
+    {
+      kind: "object",
+      source: "ruleset_history_version",
+      subject: `version:${latestVersion}`,
+    },
+    { kind: "object", source: "protected_ref", subject: "ref:develop" },
+    { kind: "object", source: "protected_ref", subject: "ref:main" },
+    ...stableState.reserved_prs.map((item) => ({
+      kind: "object",
+      source: "reserved_pr",
+      subject: `pr:${item.number}`,
+    })),
+    ...[...commitShas].sort(utf8Compare).map((sha) => ({
+      kind: "object",
+      source: "git_commit",
+      subject: `commit:${sha}`,
+    })),
+  ];
+}
+
+function registryKey(item) {
+  return `${item.kind}\0${item.source}\0${item.subject}`;
+}
+
+export function deriveExpectedPassMembers(stableState, registry) {
+  const stateErrors = validateStableState(stableState);
+  if (stateErrors.length) throw new TypeError(stateErrors.join("; "));
+  if (!Array.isArray(registry))
+    throw new TypeError("pass registry array required");
+  const descriptors = requiredPassDescriptors(stableState);
+  const requiredKeys = descriptors.map(registryKey);
+  const entries = new Map();
+  const captureDigests = new Set();
+  for (const entry of registry) {
+    if (
+      !exactKeys(entry, ["kind", "source", "subject", "capture", "auxiliary"])
+    )
+      throw new TypeError("pass registry exact entry keys required");
+    const key = registryKey(entry);
+    if (entries.has(key)) throw new TypeError(`pass registry duplicate ${key}`);
+    entries.set(key, entry);
+    if (
+      !validDigest(entry.capture?.capture_sha256) ||
+      captureDigests.has(entry.capture.capture_sha256)
+    )
+      throw new TypeError("pass registry invalid/duplicate capture digest");
+    captureDigests.add(entry.capture.capture_sha256);
+  }
+  if (
+    canonicalize([...entries.keys()].sort()) !==
+    canonicalize([...requiredKeys].sort())
+  )
+    throw new TypeError("pass registry omission/extra subject");
+
+  const expectedHistory = stableState.ruleset_history;
+  const expectedPulls = stableState.all_pr_boundary;
+  const expectedRefs = stableState.refs;
+  for (const descriptor of descriptors) {
+    const entry = entries.get(registryKey(descriptor));
+    let errors = [];
+    if (descriptor.kind === "scan") {
+      errors = validateScanCapture(entry.capture, entry.auxiliary?.pages);
+      const projection = projectPageItems(
+        entry.auxiliary?.pages ?? [],
+        descriptor.source,
+      );
+      let expected = expectedHistory;
+      if (descriptor.source === "pulls") expected = expectedPulls;
+      if (descriptor.source === "matching_refs") expected = expectedRefs;
+      if (descriptor.source === "timeline") {
+        const number = descriptor.subject.slice(3);
+        expected = stableState.timelines.find(
+          (item) => item.pr_number === number,
+        )?.events;
+      }
+      if (canonicalize(projection) !== canonicalize(expected))
+        errors.push("pass registry scan/stable projection mismatch");
+    } else if (descriptor.kind === "command") {
+      errors = validateCommandCapture(entry.capture, entry.auxiliary);
+      if (
+        canonicalize(entry.capture.projection) !==
+        canonicalize(stableState.refs)
+      )
+        errors.push("pass registry command/stable refs mismatch");
+    } else {
+      const selectedHistory = selectLatestRulesetVersion(
+        stableState.ruleset_history,
+      );
+      errors = validateObjectCapture(entry.capture, {
+        currentRuleset: stableState.ruleset,
+        selectedHistory,
+      });
+      let expected;
+      if (descriptor.source === "ruleset") expected = stableState.ruleset;
+      if (descriptor.source === "protected_ref")
+        expected = stableState.protected_refs.find(
+          (item) => `ref:${item.name}` === descriptor.subject,
+        );
+      if (descriptor.source === "reserved_pr")
+        expected = stableState.reserved_prs.find(
+          (item) => `pr:${item.number}` === descriptor.subject,
+        );
+      if (
+        descriptor.source === "git_commit" &&
+        `commit:${entry.capture.projection.sha}` !== descriptor.subject
+      )
+        errors.push("pass registry git commit subject mismatch");
+      if (
+        expected &&
+        canonicalize(entry.capture.projection) !== canonicalize(expected)
+      )
+        errors.push("pass registry object/stable projection mismatch");
+    }
+    if (errors.length) throw new TypeError(errors.join("; "));
+  }
+  return descriptors.map((descriptor) => ({
+    ...descriptor,
+    capture_sha256: entries.get(registryKey(descriptor)).capture.capture_sha256,
+  }));
+}
+
+export function validatePassCapture(capture, context) {
   const errors = [];
   if (!exactKeys(capture, PASS_KEYS))
     return ["pass-capture-v1: exact own keys required"];
@@ -1117,10 +1898,25 @@ export function validatePassCapture(capture, expectedMembers) {
     )
       errors.push("pass-capture-v1: invalid member");
   }
+  let expectedMembers = [];
+  try {
+    if (!context || Array.isArray(context))
+      throw new TypeError("derived stable-state registry context required");
+    expectedMembers = deriveExpectedPassMembers(
+      context.stableState,
+      context.registry,
+    );
+  } catch (error) {
+    errors.push(`pass-capture-v1: ${error.message}`);
+  }
   if (canonicalize(capture.members) !== canonicalize(expectedMembers))
     errors.push("pass-capture-v1: ordered member inventory mismatch");
-  if (!validDigest(capture.stable_state_sha256))
-    errors.push("pass-capture-v1: stable digest");
+  if (
+    !validDigest(capture.stable_state_sha256) ||
+    !context?.stableState ||
+    capture.stable_state_sha256 !== stableStateDigest(context.stableState)
+  )
+    errors.push("pass-capture-v1: stable digest binding");
   const preimage = { ...capture };
   delete preimage.capture_sha256;
   if (capture.capture_sha256 !== sha256(canonicalize(preimage)))
@@ -1170,8 +1966,12 @@ export function classifyMultiplicity(prs) {
   return { state: "invalid" };
 }
 
-export function deriveFrontier(prs) {
+export function deriveFrontier(stableState) {
+  const errors = validateStableState(stableState);
+  if (errors.length) throw new TypeError(errors.join("; "));
+  const prs = stableState.reserved_prs;
   const result = classifyMultiplicity(prs);
+  if (result.state === "empty" && stableState.refs.length > 0) return null;
   if (result.state === "empty") return "release/voc-106-claim-genesis";
   if (result.state === "single-closed") return result.frontier;
   if (result.state === "conflict-abandonment")
@@ -1179,9 +1979,25 @@ export function deriveFrontier(prs) {
   return null;
 }
 
-export function deriveAttemptState({ claim, attempt, submit, prs }) {
+export function deriveAttemptState({ stableState, claim, attempt, submit }) {
+  const stateErrors = validateStableState(stableState);
+  if (stateErrors.length) return "invalid-stable-state";
+  const exactRef = (record, validator) => {
+    if (record === null) return true;
+    if (!record || !validator(record.ref) || !validSha(record.sha))
+      return false;
+    return stableState.refs.some(
+      (item) => item.name === toFullRef(record.ref) && item.sha === record.sha,
+    );
+  };
+  if (
+    !exactRef(claim, validateFrontierName) ||
+    !exactRef(attempt, validateAttemptName) ||
+    !exactRef(submit, validateSubmitName)
+  )
+    return "invalid-ref-reconciliation";
   if (claim?.stale) return "stale-protected-topology";
-  const multiplicity = classifyMultiplicity(prs ?? []);
+  const multiplicity = classifyMultiplicity(stableState.reserved_prs);
   if (
     [
       "conflict-cleanup",
@@ -1260,19 +2076,41 @@ export function validateSameDevelopRetry(previous, next) {
   return "fresh-distinct-retry";
 }
 
-export function classifySubmitAward(state, responseClass) {
-  if (
-    responseClass === "201-verified" &&
-    state === "created-by-current-invocation"
-  )
+export function classifySubmitAward(context) {
+  if (!context || typeof context !== "object") return "invalid-submit-context";
+  try {
+    createSubmitAward(context);
     return "awarded-current-invocation";
-  return state === "present" ? "submit-outcome-unknown" : "no-award";
+  } catch {
+    return context.markerPresent ? "submit-outcome-unknown" : "no-award";
+  }
 }
 
-export function classifyOneShotPrOutcome(state, award, responseClass) {
-  if (state.pr_count > 1) return "conflict-cleanup";
-  if (state.pr_count === 1) return "consumed";
-  if (award === "awarded-current-invocation" && responseClass === "before-post")
+export function classifyOneShotPrOutcome(trace) {
+  if (
+    !trace ||
+    !Number.isSafeInteger(trace.matchingPrCount) ||
+    trace.matchingPrCount < 0 ||
+    !Number.isSafeInteger(trace.postCount) ||
+    trace.postCount < 0 ||
+    trace.postCount > 1
+  )
+    return "invalid-submit-trace";
+  if (trace.matchingPrCount > 1) return "conflict-cleanup";
+  if (trace.matchingPrCount === 1) return "consumed";
+  if (!trace.markerPresent) return "no-award";
+  const awardValid =
+    trace.award &&
+    trace.awardContext &&
+    validateSubmitAward(trace.award, trace.awardContext).length === 0;
+  if (
+    awardValid &&
+    trace.postCount === 0 &&
+    trace.postStarted === false &&
+    trace.crashed === false &&
+    trace.restarted === false &&
+    trace.handedOff === false
+  )
     return "post-once";
   return "submit-outcome-unknown";
 }
