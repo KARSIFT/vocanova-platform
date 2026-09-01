@@ -4,7 +4,7 @@ id: VOC-115
 slug: release-attempt-identity
 title: Make release-attempt identity retry-safe
 type: release-governance-validator-and-adopted-package-correction
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because the correction changes DOC-15, DOC-16, AGENTS, protected-history
@@ -35,8 +35,8 @@ base_branch: develop
 base_sha: dbe7bb5178e55939f1cdb359a7b70effa55fe8ce
 plan_branch: plan/voc-115-release-attempt-identity
 target_branch: develop
-approved_candidate_sha: pending-independent-review
-approval_status: pending-independent-review-and-adoption
+approved_candidate_sha: 283c8b31bf3ed831066eeccc274e737441d990d1
+approval_status: adopted-reviewed-candidate-bookkeeping-pending-exact-review-and-normal-plan-merge
 superseded_plan_candidates:
   - candidate_sha: f7abcc894bab3f2bc0c1dba633b800f1c51825cd
     tree_sha: 2859c7d13fb040270eb59d21f6b3876d40a2f98f
@@ -111,11 +111,11 @@ superseded_plan_candidates:
       - pass-capture-digest-preimage-and-completeness-unfrozen
       - hashed-ref-fields-mix-branch-and-full-ref-representations
     review_transfer: prohibited-fresh-exact-candidate-reviews-required
-implementation_authorized: false
+implementation_authorized: true
 implementation_authority_status: >-
-  prohibited-until-exact-plan-candidate-release-history-specialist-and-independent-
-  cross-model-R4-PASS-accountable-adoption-bookkeeping-fresh-exact-bookkeeping-review-
-  and-normal-plan-merge
+  adopted-and-authorized-for-declared-27-path-repository-only-correction-but-unusable-
+  until-this-bookkeeping-revision-receives-fresh-exact-review-and-the-plan-PR-normally-
+  merges-to-develop
 implementation_pull_request_count: 1
 implementation_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
 multiple_pull_request_rationale: >-
@@ -355,20 +355,61 @@ actor_mapping:
   current_handoff: unavailable
 
 owners:
-  decision: accountable-repository-owner-operator-at-adoption
+  decision: /root
   package_preparation: /root/voc115_planner
   implementation: different-builder-actor-after-adoption
-  release_history_specialist: different-non-author-exact-revision-reviewer
-  independent_cross_model_r4_verification: different-non-author-exact-revision-reviewer
+  release_history_specialist: /root
+  independent_cross_model_r4_verification: /root/voc115_plan_review
   merge: separate-authorized-non-author-merge-actor
-  monitoring: accountable-repository-owner-recorded-at-adoption
+  monitoring: /root
 
-plan_review_history: []
+plan_review_history:
+  - candidate_sha: 283c8b31bf3ed831066eeccc274e737441d990d1
+    candidate_tree: 57ffb7eadcf8a69fd75487254391f7a2ffa5cf32
+    reviewer: /root
+    verdict: pass-exact-release-history-specialist-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5493135136
+    resolution: >-
+      Exact approved-candidate specialist review; this bookkeeping revision requires
+      fresh exact review and no settings, ref, release, merge, or live authority transfers.
+  - candidate_sha: 283c8b31bf3ed831066eeccc274e737441d990d1
+    candidate_tree: 57ffb7eadcf8a69fd75487254391f7a2ffa5cf32
+    reviewer: /root/voc115_plan_review
+    verdict: pass-independent-cross-model-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5493155047
+    resolution: >-
+      Exact approved-candidate independent review; this bookkeeping revision requires
+      fresh exact review and no settings, ref, release, merge, or live authority transfers.
+  - candidate_sha: 283c8b31bf3ed831066eeccc274e737441d990d1
+    candidate_tree: 57ffb7eadcf8a69fd75487254391f7a2ffa5cf32
+    decision: VOC-115-ADOPT-2026-09-01
+    actor: /root
+    verdict: adopted-for-declared-27-path-repository-only-correction
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5493157632
+    resolution: >-
+      Authorizes only adoption bookkeeping, normal non-author plan merge, and the
+      declared future implementation after that merge. All ruleset/settings/ref/release/
+      deployment and other live actions remain separately held or prohibited.
 approvals:
-  package_independent_verification:
-    status: pending
+  release_history_specialist_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 283c8b31bf3ed831066eeccc274e737441d990d1
+    candidate_tree: 57ffb7eadcf8a69fd75487254391f7a2ffa5cf32
+    reviewer: /root
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5493135136
+  independent_cross_model_R4_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 283c8b31bf3ed831066eeccc274e737441d990d1
+    candidate_tree: 57ffb7eadcf8a69fd75487254391f7a2ffa5cf32
+    reviewer: /root/voc115_plan_review
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5493155047
   adoption_decision:
-    status: pending
+    status: adopted-for-declared-27-path-repository-only-correction
+    decision_id: VOC-115-ADOPT-2026-09-01
+    candidate_sha: 283c8b31bf3ed831066eeccc274e737441d990d1
+    candidate_tree: 57ffb7eadcf8a69fd75487254391f7a2ffa5cf32
+    actor: /root
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5493157632
 
 artifacts:
   readme: README.md
@@ -435,18 +476,19 @@ required_r4_evidence:
   specialist_evidence:
     required: true
     role: release-governance-and-git-history-specialist
-    status: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5493135136
   independent_exact_revision_evidence:
     required: true
     role: independent-cross-model-R4-verifier
-    status: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5493155047
   ehr: not-triggered
 
 implementation:
-  authorized: false
+  authorized: true
   authority_usable_after: >-
-    exact-plan-reviews-adoption-bookkeeping-fresh-exact-bookkeeping-review-and-normal-
-    non-author-plan-merge-to-develop
+    fresh-exact-bookkeeping-review-and-normal-non-author-plan-merge-to-develop
   task_count: 1
   pull_request_count: 1
   pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
@@ -457,7 +499,9 @@ implementation:
 
 action_specific_authority:
   required: true
-  authorization_status: pending-plan-review-adoption-and-normal-plan-merge
+  authorization_status: >-
+    adopted-for-declared-repository-only-correction-but-pending-fresh-exact-bookkeeping-
+    review-normal-non-author-plan-merge-and-fresh-implementation-evidence
   actions:
     - id: VOC-115-AUTH-00
       action: merge-exact-reviewed-27-path-repository-correction-into-develop
@@ -507,11 +551,10 @@ release:
   rollback_required: true
   issue_closure: after-monitoring-and-corrected-VOC-106-finalization-evidence
 
-repository_adoption_status: pending-independent-review-adoption-and-plan-merge
+repository_adoption_status: >-
+  adopted-exact-reviewed-candidate-pending-fresh-exact-bookkeeping-review-and-normal-
+  non-author-plan-merge
 ehr: not-triggered
 blocking_reasons:
-  - exact-plan-release-history-specialist-review-pending
-  - exact-plan-independent-cross-model-R4-review-pending
-  - accountable-adoption-bookkeeping-pending
   - fresh-exact-bookkeeping-review-and-normal-plan-merge-pending
   - implementation-exact-checks-and-reviews-pending
