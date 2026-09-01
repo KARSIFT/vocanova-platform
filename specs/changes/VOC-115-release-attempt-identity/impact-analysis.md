@@ -2,59 +2,59 @@
 
 ## Impact inventory
 
-- **Release governance/protected history — affected:** identity, event lifecycle,
-  arbitration, ownership, crash recovery, collision, invalidation, and recreation.
+- **Release governance/protected history — affected:** frontier identity, atomic claim-
+  ref arbitration, exhaustive reconciliation, ownership, crash recovery, collision,
+  abandonment, and recreation.
 - **Living documents — affected:** seven current release surfaces.
-- **Adopted packages — affected:** all nine VOC-106 and all nine VOC-114 artifacts,
-  with adoption evidence preserved.
-- **Foundation validation — affected:** one new pure network-free validator and test,
+- **Adopted packages — affected:** all nine VOC-106 and all nine VOC-114 artifacts;
+  adoption evidence remains intact.
+- **Foundation validation — affected:** one new network-free validator and test,
   auto-discovered by the existing test glob; no package-script change.
-- **Application/API/data/UI/accessibility/analytics/runtime/workflows/deployment/
-  migrations — not affected.** No executable product/runtime or live action.
-- **Unknowns — none:** exact 27-path inventory; any newly found current surface stops
-  for scope review instead of silent expansion.
+- **Application/API/data/UI/runtime/workflows/deployment/migrations — unaffected.**
+- **Unknowns — none:** exact 27-path inventory. A newly found current surface stops
+  for scope review rather than silently expanding the package.
 
 ## Security, privacy, and privilege
 
-Server ids remove client allocation races but do not make comments immutable.
-Tamper/missing/conflict checks, exact lineage, single-active derivation, atomic ref
-POST, and no-orphan-adoption protect evidence and refs. The later VOC-106 preparer
-needs issue-comment/ref/PR action authority already bounded by that package; VOC-115's
-correction executes none. No setting, credential, personal/learner/production data,
-Cloudflare resource, or live system is read.
+The immutable one-use claim ref/commit and atomic unique-ref creation replace editable
+comments and client scans as authority. Exhaustive PR/timeline/claim/ref reconciliation,
+non-self-referential receipts, immutable ref rules, and no-POST-retry after uncertainty
+prevent duplicate attempts and false genesis. The exact `/root` to authenticated login
+mapping prevents inferred takeover. The later VOC-106 operator needs already-bounded
+ref/PR authority; VOC-115 executes none and accesses no credential, personal/learner/
+production data, Cloudflare resource, setting, or live system.
 
 ## Risks and mitigations
 
-- `R00` same-SHA retry dead-ends: fresh globally unique server reservation id.
-- `R01` concurrent active attempts: provisional reservations, deterministic lowest-id
-  arbitration, dispositions, stable scans, and global one-active validator.
-- `R02` comment edit/delete masquerades as history: exact envelope/body digest,
-  timestamps, predecessor closure, and fail-closed tamper treatment; never reuse ids.
-- `R03` crash creates adoptable orphan: boundary-specific receipt/readback rules;
-  matching SHA/ref/PR alone is insufficient.
-- `R04` hostile numeric/ref input: canonical bounded decimal string, BigInt, explicit
-  exhaustion, byte lengths, safe ASCII, and check-ref-format.
-- `R05` actor takeover: exact effective-owner chain and attributable handoff evidence.
-- `R06` collision/ref mutation: POST-create only; collision disposition; no PATCH,
-  push, force, force-with-lease, manual deletion, or foreign adoption.
-- `R07` policy drift: one 27-path correction and repository-owned semantic validator.
-- `R08` recovery becomes name reuse: only successfully merged heads have recorded
-  nonexecuted recovery requests; active/abandoned refs remain immutable.
-- `R09` correction mistaken for release: exact scoped-head-only update and no-live-
-  action audit.
+- `R00` same-SHA retry dead-end: closed PR number advances to a fresh claim frontier.
+- `R01` concurrent actives: one fixed claim name and GitHub atomic create-ref selects
+  one immutable winner; consumed claim refs are never reused.
+- `R02` impossible duplicates: close every open/unmerged match, prove closure, and
+  advance to the canonical conflict-digest frontier; none is active meanwhile.
+- `R03` deletion recreates genesis: permanent one-use claim refs plus complete durable
+  PR/timeline objects, not comments, are frontier authority.
+- `R04` crash creates duplicates: unknown claim/attempt-ref absence and PR POST are
+  never retried; stopped states remain stopped.
+- `R05` incomplete discovery: all-state PR/timeline/claim pagination plus two equal full
+  ref enumerations, canonical receipts, counts, high-watermarks, and bindings.
+- `R06` actor takeover: exact GitHub login/id/node-id mapping; no current handoff.
+- `R07` collision/ref mutation: create/read only; no adopt, update, force, or deletion.
+- `R08` policy drift: one 27-path correction and executable semantic validator.
+- `R09` correction mistaken for release: scoped ordinary PR-head update only and an
+  explicit no-ref/settings/live-action audit.
 
 ## Coherent unit and dependencies
 
-VOC-114 is adopted with blocked draft implementation PR #215. VOC-106 is adopted but
-cannot run before this correction. The seven living paths, 18 adopted-package paths,
-and validator/test are one safety/review/rollback unit. Splitting would leave policy
-contradictory or unenforced and add coordination, elapsed-time, context, repeated
-checks, exact reviews, and bookkeeping without a safe partial release state.
+VOC-114 is adopted with blocked draft PR #215. VOC-106 is adopted but cannot run
+safely before this correction. The seven living paths, 18 adopted-package paths, and
+validator/test share one safety and rollback boundary. Splitting would publish
+contradictory or unenforced policy and add coordination, elapsed-time, context,
+repeated-check, exact-review, and bookkeeping overhead without a safe partial state.
 
 ## Rollback and contingency
 
-Before merge, PR #215 remains draft/closable for zero protected effect. After merge,
-a different builder prepares a separately reviewed complete revert of the actual
-27-path merge to its first parent. Never partially restore the failed SHA-only/client-
-sequence model, reset, force, delete a branch, change settings, or use a live action.
-Any event/ref/ownership/topology ambiguity stops VOC-106 and preserves evidence.
+Before merge, PR #215 remains draft/closable for zero protected effect. After merge, a
+different builder prepares a separately reviewed complete revert of the actual 27-path
+merge to its first parent. Never partially restore either failed candidate, reset,
+force, delete a bound branch, change settings, or use a live action. Any PR/ref/
+timeline/receipt/owner/topology ambiguity stops VOC-106 and preserves durable evidence.

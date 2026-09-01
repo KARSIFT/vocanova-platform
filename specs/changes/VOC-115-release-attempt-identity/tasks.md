@@ -1,6 +1,6 @@
 # VOC-115 — Tasks
 
-## VOC-115-T00 — Enforce retry-safe release-attempt state
+## VOC-115-T00 — Enforce durable retry-safe release-attempt state
 
 - Requirements: `VOC-115-D00` through `VOC-115-D15`
 - Acceptance criteria: `VOC-115-AC-00` through `VOC-115-AC-06`
@@ -12,10 +12,13 @@
   normal plan merge
 
 A different builder reconciles exactly 27 paths and implements the pure validator/test.
-The outcome covers server identity, exact tamper-failing events, full pagination,
-single-active arbitration, actor/handoff, every crash/collision path, immutable same-D
-retry, preserved release topology, recovery, rollback, and monitoring.
+The outcome covers the atomic one-use claim-ref arbiter, durable frontier identity,
+exhaustive PR/timeline/claim/ref state, canonical reconstructible receipts, exact actor
+mapping, every
+race/crash/collision path, immutable same-D retry, release topology, rollback, and
+monitoring.
 
-One task/PR is minimum-sufficient because policy, adopted packages, and enforcement
-share one safety invariant and rollback boundary. A split creates contradictory or
-unenforced current truth and disproportionate coordination/review overhead.
+One task/PR is minimum-sufficient because living policy, adopted packages, and
+enforcement share one safety invariant and rollback boundary. A split creates
+contradictory or unenforced current truth and disproportionate coordination/review
+overhead.

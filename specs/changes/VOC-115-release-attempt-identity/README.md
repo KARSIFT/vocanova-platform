@@ -2,38 +2,29 @@
 
 Issue [#216](https://github.com/KARSIFT/vocanova-platform/issues/216) and the
 [PR #215 specialist FAIL](https://github.com/KARSIFT/vocanova-platform/pull/215#issuecomment-5491674409)
-prove that adopted VOC-114's SHA-only immutable head cannot retry at unchanged
-`develop`. The first VOC-115 candidate was also rejected by the
-[independent R4 review](https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5491850719)
-and [release-history specialist](https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5491851011):
-its client sequence was racy, comments were underspecified and tamperable, one-active
-arbitration/crash recovery were incomplete, and no executable validator existed.
+prove that adopted VOC-114 cannot retry at unchanged `develop`. PR #217's first two
+candidates are also rejected and transfer no review: `f7abcc8` used a racy client
+sequence and incomplete comment ledger; `535bcd4` still treated non-atomic editable
+comments as allocation authority and specified unreconstructible receipts.
 
-The replacement uses a GitHub server-assigned issue-#191 reservation-comment id:
+The replacement removes comment-ledger authority. For each deterministic frontier,
+contenders create distinct canonical same-tree claim commits and race one GitHub
+POST-create-ref. The fixed claim name is an atomic first-writer lock; the winning
+never-deleted claim ref/commit is durable identity and binds frozen `develop` before an
+exact attempt ref/PR exists. Closed-unmerged PRs advance the frontier, merged closes
+allocation, and any impossible duplicates all close before a conflict frontier.
 
-```text
-release/voc-106-<40-hex-frozen-develop-sha>-attempt-<reservation-comment-id>
-```
-
-Reservation comments are provisional. A frozen `voc-106-release-attempt-v1` event
-format, full pagination, deterministic lowest-id winner, two stable scans before and
-after activation, and a repository-owned validator derive at most one global active
-attempt. All other concurrent same/different-SHA reservations are dispositioned.
-Same-develop retry gets a fresh distinct server id without touching the abandoned ref.
-
-The schema does not pretend comments are append-only. Exact envelope/body digests,
-`created_at == updated_at`, predecessor chains, cardinality, actor/handoff authority,
-and terminal precedence make edit, deletion, minimization, conflict, or missing
-evidence fail closed. Explicit recovery covers every boundary from reservation through
-ref/PR/binder creation and drift/closure; a missing POST receipt or matching orphan is
-never adopted.
+Exhaustive all-state PR, full timeline, claim-commit, and dual-source ref scans
+reconstruct state.
+Canonical non-self-referential scan receipts are evidence only. Unknown PR POST results
+are never retried, comment/body loss cannot recreate genesis, and exact actor-to-login
+mapping prevents inferred takeover.
 
 After reviewed adoption, one corrected revision of draft PR
-[#215](https://github.com/KARSIFT/vocanova-platform/pull/215) changes 27 paths: seven
-living release surfaces, all nine VOC-106 artifacts, all nine VOC-114 artifacts, and
-two foundation validator/test files. It preserves release topology and immutable refs.
-The correction may ordinarily update only its scoped PR head; it performs no release/
-sync/permanent/foreign ref, settings, deployment, secret, data, or live-system action.
+[#215](https://github.com/KARSIFT/vocanova-platform/pull/215) changes exactly 27 paths:
+seven living surfaces, all nine VOC-106 artifacts, all nine VOC-114 artifacts, and two
+foundation validator/test files. It preserves release topology and immutable refs and
+performs no release, settings, deployment, secret, data, or live-system action.
 
 ## Artifacts
 
