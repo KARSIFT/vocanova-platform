@@ -602,7 +602,10 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "The command “Deploy now” is prohibited.",
       "The sanitized past delivery description records that retry was not required.",
       "No deployment occurred.",
+      "No staging deployment took place.",
       "Deployment is prohibited.",
+      "The previous staging deployment succeeded.",
+      "The build was not deployed.",
       "The sanitized delivery deployed the API Worker successfully in the past.",
     ])
       assert.deepEqual(
@@ -643,6 +646,98 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
         /outside its guarded runbook region|bounded procedure/,
       );
   for (const surface of DESIGNATED_F3_SURFACES)
+    for (const verb of [
+      "Publish",
+      "Upload",
+      "Retry",
+      "Rotate",
+      "Revoke",
+      "Remove",
+      "Delete",
+      "Cancel",
+      "Configure",
+      "Change",
+      "Create",
+      "Enable",
+      "Disable",
+      "Restore",
+      "Install",
+      "Route",
+      "Access",
+      "Export",
+      "Import",
+      "Transform",
+      "Set",
+      "Use",
+      "Dispatch",
+      "Deploy",
+      "Migrate",
+      "Promote",
+      "Switch",
+      "Stop",
+      "Run",
+      "Execute",
+      "Provision",
+      "Edit",
+      "Trigger",
+      "Ship",
+      "Move",
+      "Restart",
+    ])
+      assertMutation(
+        surface,
+        (target) => append(target, surface, `${verb} now.`),
+        /live-action instruction|bounded procedure/,
+      );
+  for (const surface of DESIGNATED_F3_SURFACES)
+    assertMutation(
+      surface,
+      (target) => append(target, surface, "Restart the Cloudflare Worker now."),
+      /live-action instruction|bounded procedure/,
+    );
+  for (const surface of DESIGNATED_F3_SURFACES)
+    for (const inflected of [
+      "Publishing now.",
+      "Uploaded now.",
+      "Retrying now.",
+      "Rotated now.",
+      "Revoking now.",
+      "Removed now.",
+      "Deleting now.",
+      "Cancelled now.",
+      "Configuring now.",
+      "Changed now.",
+      "Creating now.",
+      "Enabled now.",
+      "Disabled now.",
+      "Restoring now.",
+      "Installed now.",
+      "Routing now.",
+      "Accessing now.",
+      "Exported now.",
+      "Importing now.",
+      "Transformed now.",
+      "Dispatched now.",
+      "Deployed now.",
+      "Migrating now.",
+      "Promoted now.",
+      "Switching now.",
+      "Stopped now.",
+      "Running now.",
+      "Executed now.",
+      "Provisioning now.",
+      "Edited now.",
+      "Triggered now.",
+      "Shipping now.",
+      "Moved now.",
+      "Restarting now.",
+    ])
+      assertMutation(
+        surface,
+        (target) => append(target, surface, inflected),
+        /live-action instruction|bounded procedure/,
+      );
+  for (const surface of DESIGNATED_F3_SURFACES)
     for (const command of [
       "Configure credentials now.",
       "Create resources now.",
@@ -674,6 +769,15 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Authorization: Bearer synthetic-inert-value",
       "Bearer synthetic-inert-value",
       "Authorization = Bearer redacted-looking-value",
+      "Basic auth synthetic-inert-value",
+      "Authentication key synthetic-inert-value",
+      "Auth header synthetic-inert-value",
+      "JWT synthetic-inert-value",
+      "Session cookie synthetic-inert-value",
+      "Signing key synthetic-inert-value",
+      "Private token synthetic-inert-value",
+      "API key synthetic-inert-value",
+      "Access key synthetic-inert-value",
     ])
       assertMutation(
         surface,
@@ -701,7 +805,17 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
 test("exact unresolved and held contexts produce zero errors on every surface", () => {
   for (const surface of DESIGNATED_F3_SURFACES) {
     const source = fs.readFileSync(path.join(root, surface), "utf8");
-    for (const safe of ["A1 remains unresolved.", "Production remains held."])
+    for (const safe of [
+      "A1 remains unresolved.",
+      "Authenticated A1 remains unresolved.",
+      "P1+ remains unresolved.",
+      "P1+ is unresolved.",
+      "Public launch remains unresolved.",
+      "Production remains held.",
+      "Learner data remains held.",
+      "VOC-080-HOLD-01 remains held.",
+      "VOC-080-HOLD-02 is held.",
+    ])
       assert.deepEqual(
         inspectF3Surface(`${source}\n${safe}`, surface),
         [],
@@ -716,7 +830,37 @@ test("exact unresolved and held contexts produce zero errors on every surface", 
         `${surface} must accept exact historical held context for ${packageId}`,
       );
     }
+    assert.deepEqual(
+      inspectF3Surface(
+        `${source}\nNo staging deployment took place. Authenticated A1 remains unresolved.`,
+        surface,
+      ),
+      [],
+      `${surface} must accept two independently safe clauses`,
+    );
   }
+});
+
+test("safe clauses cannot launder an operational or later positive claim", () => {
+  for (const surface of DESIGNATED_F3_SURFACES)
+    for (const unsafe of [
+      "No deployment occurred; deploy now.",
+      "The previous staging deployment succeeded and promote to production.",
+      "Production remains held but is active.",
+      "A1 remains unresolved and has been accepted.",
+      "Future work is separate and production is active.",
+      "The gate remains unresolved while production is active.",
+      "A1 is not merely planned and is accepted.",
+      "A1 cannot remain pending and is accepted.",
+      "Production is active if true.",
+      "Production is active when this sentence is read.",
+      "Report: no deployment occurred and everything is active.",
+    ])
+      assertMutation(
+        surface,
+        (target) => append(target, surface, unsafe),
+        /live-action instruction|prohibited positive|noncanonical later\/hold context/,
+      );
 });
 
 test("protected-domain paragraphs reject adjacent noncanonical rewrites", () => {
@@ -891,6 +1035,7 @@ test("history checks reject only superseded F3 current claims", () => {
         `${packageId} is immutable history: F3 remains pending. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
         `${packageId} is immutable history: F3 staging is unresolved. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 unresolved status.`,
         `${packageId} is immutable history: F3 is not yet delivered. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 not-delivered status.`,
+        `In immutable ${packageId} history, F3 remains pending. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
         `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status. ${packageId} immutable history records F3 as pending.`,
         `Later exact VOC-105 evidence supersedes the prospective F3 status from ${packageId}. F3 staging is unresolved in ${packageId} immutable history.`,
       ])
@@ -959,6 +1104,35 @@ test("history checks reject only superseded F3 current claims", () => {
       },
       /immutable-history and later-VOC-105 supersession boundary/,
     );
+});
+
+test("multiple immutable F3 history pairs are consumed independently", () => {
+  for (const surface of DESIGNATED_F3_SURFACES) {
+    const source = fs.readFileSync(path.join(root, surface), "utf8");
+    for (const valid of [
+      "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. In immutable VOC-096 history, F3 staging is unresolved. Later exact VOC-105 evidence supersedes VOC-096 prospective F3 unresolved status. Production remains held; Learner data remains held; VOC-080-HOLD-01 remains held; VOC-080-HOLD-02 remains held.",
+      "Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. VOC-094 immutable history records F3 as pending. Later exact VOC-105 evidence supersedes the prospective F3 status from VOC-096. F3 staging is unresolved in VOC-096 immutable history.",
+      "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes that prospective F3 status. VOC-094 is immutable history: F3 is unresolved. Later exact VOC-105 evidence supersedes that prospective F3 status.",
+    ])
+      assert.deepEqual(
+        inspectF3Surface(`${source}\n${valid}`, surface),
+        [],
+        `${surface} must accept independently paired history`,
+      );
+    for (const invalid of [
+      "VOC-094 is immutable history: F3 is pending. VOC-094 is immutable history: F3 is unresolved. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 unresolved status.",
+      "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-095 prospective F3 pending status.",
+      "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 unresolved status.",
+      "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status.",
+      "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. VOC-094 is immutable history: F3 remains pending.",
+      "VOC-094 is immutable history: F3 is pending.\n\nLater exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status.",
+      "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. F3 remains pending.",
+    ])
+      assert.match(
+        inspectF3Surface(`${source}\n${invalid}`, surface).join("\n"),
+        /stale current F3|noncanonical F3 history context/,
+      );
+  }
 });
 
 test("structured record exact keys, duplicates, gate inventory, and status matrices fail closed", () => {

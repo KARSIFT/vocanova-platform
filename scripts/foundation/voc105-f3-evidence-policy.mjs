@@ -31,37 +31,37 @@ const ALLOWED_CREDENTIAL_NAMES = new Set([
 ]);
 const HIGH_RISK_PROJECTIONS = Object.freeze({
   "docs/README.md": [
-    "2ffb9c11fcc852d97b1350ae992f91d242913bdc1b6c676f38056e9c919ce2c5",
+    "421d2a55b1c7ae37456d853afd1ab51169c6d0ba149e240472937ec94d6457f9",
     "878ac4afa86d20799efbc81b0d429e390f595f33ebd7343a3f53c4e4eaf8d90a",
     "8832d2d05828832df014329b72584c9b27669f12a5846aec411373793ad5c743",
     "652c5ab7fb14b08983e28a6a4e5a8ad0d7164efa761e1c24081912a87d87ae3c",
   ],
   "docs/operations/README.md": [
-    "0c206484617186064e772b665056e10531d84006d3a0d2c4b8cf131df48e95d3",
+    "571a2607b68f20fd5e9467424c118f89ee669c1ab1b1dd029951771fc2dd194b",
     "76e7265b61b8c095366ad43d54f4e9f6bc28d71cc9f773693760408e277a0193",
     "96392476f3118b9691d6a2535cf9b002d25b9af2db23a130ca58de08d973c955",
     "9297cbdadfaaf30b43aeb7daf7e90cd8a8555b7faac9576da2e740f3e8900078",
   ],
   "docs/operations/cloudflare-delivery.md": [
-    "fa9d0caf1c3186157ec7476b34f1bee575cb569243a76f33248522bbeacc43e0",
+    "593a5d890bc239108b3bcc996e15f6beaf9283127567597375ff00c3261c742b",
     "2a801f8ab23aba771ed8ad1dff41846db7f766be5e1ebf6ecd83ef881213a0ec",
     "9228e479e6c42c4e7151fda2feb279b134e04d41b65f002b5fdaa6f83e29134f",
     "64688b2e1fa9a049270b1b1783239f03356d9cba4e00fe21aa286d5fa385bb44",
   ],
   "docs/operations/voc-081-f2-evidence.json": [
-    "710b34dc8c253a89f5745fd8a549100fb5615f99ae2af50fbeaf2825b5f407ea",
+    "8b3053425ef0ac744c6bfc7d68bc535455b123c922a3682ce0bc87b99f9b4f71",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "a560577733ece56f33c61cf610398e39d54d14cd70604c46eb4def98a8a966c5",
     "eba6af33d947290b913f91a393e363c4619da9a45658efa002a5b821a969b5b1",
   ],
   "docs/operations/voc-081-f2-evidence.md": [
-    "cef0dd1e99fa57f591532ba7b84c1222ca02dff1284c844bfb2b9b6ebf6267fe",
+    "cb8c09abb218c56d0a57c78cb5fc8fb44559694935438db65427b8a4e65c22cd",
     "68325539946c4836b34ecdd505637d30d34feb2606f587d067958671cc791efb",
     "5f9001281aa5bd4af228c1e8661f429bb7892c58a853880e5dca7faf7d2b8161",
     "41e73a0be967564c232d1f3848ff8d8db3404e8387286193bed360460f1bcfe8",
   ],
   "docs/operations/voc-105-f3-evidence.json": [
-    "7ba7ecee1b591787d3761f52f079a0bb0f197b3a840506b2252441471ff6c774",
+    "78b625a32624881042b991dace3e2737bc383c68ce078824189f9530827a3942",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "a9ee0b5641a49e54c33036ce3f6b8fcc244aa9e74443a1f8d5917118370dcd38",
     "3841de5ce90e64a4b4a1424f73025260bc83b22df7f37741c1b1053c89ae8b5a",
@@ -73,7 +73,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "f4a490a89249dd4f6d3ab3f3d8cae8cb7cae822b0ed2543a10c7642513827c1e",
   ],
   "docs/product/12-mvp-implementation-plan.md": [
-    "710320cecad0eb90d1448d9559ef7986eb3804634f7fb55fd72e15277131c0d2",
+    "ac53e41e59aca94afee111f9eb74c702e1fac6ef74d889e96b09b5d6cf4cea36",
     "26ddec86c049d2bf7ea7171fe0b4acd347423c10bfe51f6e154b9a6da67a161d",
     "80573cdc41ed4e310878d997f14ca6778468f39323d1ee0f725e4a2c0b3ebb8e",
     "8a41c6b9501977c8ab0ca0a88a473407a6112033b5e93cd0a08918688a01fc91",
@@ -86,27 +86,22 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
   ],
 });
 const OPERATIONAL_DOMAIN_PATTERN =
-  /\b(?:staging|delivery|delivered|deploy|deployed|deployment|deployments|dispatch|promote|workflows?|CI|DNS|traffic|resources?|D1|API[\s-]+Worker|build|live|launch|learner[\s-]+data|credentials?|versions?|settings?|environments?|migrations?|promotions?|releases?|rollback|smoke|revocation)(?=\b|_)/i;
+  /\b(?:staging|delivery|delivered|deploy\w*|dispatch\w*|migrat\w*|promot\w*|publish\w*|upload\w*|retr(?:y|ied|ies|ying)|rotat\w*|revok\w*|remov\w*|delet\w*|cancel\w*|configur\w*|chang\w*|creat\w*|enabl\w*|disabl\w*|restor\w*|install\w*|rout\w*|access\w*|export\w*|import\w*|transform\w*|set|use|switch\w*|stop\w*|run|running|execute\w*|provision\w*|edit\w*|trigger\w*|ship\w*|move\w*|restart\w*|workflows?|CI|DNS|traffic|resources?|D1|API[\s-]+Worker|Cloudflare[\s-]+Worker|build|live|launch|learner[\s-]+data|credentials?|versions?|settings?|environments?|migrations?|promotions?|releases?|rollback|smoke|revocation)(?=\b|_)/i;
 const CREDENTIAL_TERM_PATTERN =
-  /\b(?:CLOUDFLARE_(?:ACCOUNT_ID|API_TOKEN)|[A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCOUNT_ID)|credentials?|tokens?|secrets?|passwords?|private[ -]?keys?|api[ -]?keys?|access[ -]?tokens?|Authorization|Bearer)\b/i;
+  /\b(?:CLOUDFLARE_(?:ACCOUNT_ID|API_TOKEN)|[A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCOUNT_ID)|credentials?|Basic[\s-]+auth(?:entication)?|auth(?:entication)?[\s-]+(?:key|header|token)|JWT|session[\s-]+cookie|signing[\s-]+(?:key|token)|private[\s-]+(?:key|token)|api[\s-]+(?:key|token)|access[\s-]+(?:key|token)|tokens?|secrets?|passwords?|Authorization|Bearer)\b/i;
 const LATER_HOLD_TERM_PATTERN =
   /\b(?:A1|P1\+?|P[2-5]|R[12]|L1|product[\s-]+acceptance|production|launch|learner[\s-]+data|VOC-080-HOLD-(?:01|02))\b/i;
 const F3_STATUS_TERM_PATTERN = /\b(?:F3|staging[\s-]+status)\b/i;
-const PERMITTED_OPERATIONAL_LINES = new Set([
-  "The command “Deploy now” is prohibited.",
-  "The sanitized past delivery description records that retry was not required.",
-  "No deployment occurred.",
-  "Deployment is prohibited.",
-  "The sanitized delivery deployed the API Worker successfully in the past.",
-]);
-const PERMITTED_LATER_LINES = new Set([
-  "A1 remains unresolved.",
-  "Production remains held.",
-]);
-const PERMITTED_STANDALONE_LINES = new Set([
-  ...PERMITTED_OPERATIONAL_LINES,
-  ...PERMITTED_LATER_LINES,
-]);
+const SAFE_OPERATIONAL_CLAUSE =
+  "(?:No\\s+(?:staging\\s+)?deployment\\s+(?:occurred|took\\s+place)|Deployment\\s+is\\s+prohibited|The\\s+build\\s+was\\s+not\\s+deployed|The\\s+(?:previous|prior)\\s+staging\\s+deployment\\s+succeeded|The\\s+sanitized\\s+delivery\\s+deployed\\s+the\\s+API\\s+Worker\\s+successfully\\s+in\\s+the\\s+past|The\\s+command\\s+“Deploy\\s+now”\\s+is\\s+prohibited|The\\s+sanitized\\s+past\\s+delivery\\s+description\\s+records\\s+that\\s+retry\\s+was\\s+not\\s+required)";
+const SAFE_LATER_CLAUSE =
+  "(?:(?:Authenticated\\s+)?A1|P1\\+|Public\\s+launch)\\s+(?:is|remains)\\s+unresolved|(?:Production|Learner\\s+data|VOC-080-HOLD-(?:01|02))\\s+(?:is|remains)\\s+held";
+const CANONICAL_PROSPECTIVE_LATER_CLAUSES = Object.freeze({
+  "docs/product/12-mvp-implementation-plan.md": new Set([
+    "production-provider component cannot be accepted until provider candidates",
+    "** production resources ready, credentials",
+  ]),
+});
 const GATE_EVIDENCE = new Map([
   [
     "isolated-staging-resources",
@@ -613,87 +608,138 @@ function projectionDigest(source, pattern) {
     .digest("hex");
 }
 
-function maskExactLines(source, permittedLines) {
-  return source
-    .split(/\r?\n/)
-    .map((line) =>
-      permittedLines.has(line.trim()) ? " ".repeat(line.length) : line,
-    )
-    .join("\n");
+function maskSafeClauses(source) {
+  const pattern = new RegExp(
+    `(^|[\\n.!?;]\\s*)(${SAFE_OPERATIONAL_CLAUSE}|${SAFE_LATER_CLAUSE})(?=$|[\\n.!?;])`,
+    "gim",
+  );
+  return source.replace(
+    pattern,
+    (_match, prefix, clause) => `${prefix}${" ".repeat(clause.length)}`,
+  );
 }
 
-function isPermittedHistoricalF3Paragraph(paragraph) {
-  const compact = normalized(paragraph);
-  for (let number = 94; number <= 104; number += 1) {
-    const packageId = `VOC-${String(number).padStart(3, "0")}`;
-    const historicalStates = [
-      `${packageId} is immutable history: F3 is pending.`,
-      `${packageId} is immutable history: F3 pending.`,
-      `${packageId} is immutable history: F3 remains pending.`,
-      `${packageId} is immutable history: F3 is unresolved.`,
-      `${packageId} is immutable history: F3 unresolved.`,
-      `${packageId} is immutable history: F3 staging is unresolved.`,
-      `${packageId} is immutable history: F3 is not yet delivered.`,
-      `${packageId} is immutable history: F3 has not been delivered.`,
-      `F3 is pending in ${packageId} immutable history.`,
-      `F3 remains pending in ${packageId} immutable history.`,
-      `F3 staging is unresolved in ${packageId} immutable history.`,
-      `F3 is not yet delivered in ${packageId} immutable history.`,
-      `${packageId} immutable history records F3 as pending.`,
-      `${packageId} immutable history records F3 staging as unresolved.`,
-    ];
-    const supersessions = [
-      "Later exact VOC-105 evidence supersedes that prospective F3 status.",
-      `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
-      `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 unresolved status.`,
-      `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 not-delivered status.`,
-      `Later exact VOC-105 evidence supersedes the prospective F3 status from ${packageId}.`,
-    ];
-    for (const state of historicalStates)
-      for (const supersession of supersessions)
-        if (
-          compact === `${state} ${supersession}` ||
-          compact === `${supersession} ${state}`
-        )
-          return true;
+function exactOccurrences(source, text, metadata = {}) {
+  const found = [];
+  let offset = 0;
+  while ((offset = source.indexOf(text, offset)) !== -1) {
+    found.push({ start: offset, end: offset + text.length, text, ...metadata });
+    offset += text.length;
   }
-  return false;
+  return found;
 }
 
-function isPermittedHistoricalHeldParagraph(paragraph) {
-  const compact = normalized(paragraph);
+function maskPairedHistoricalF3(paragraph) {
+  const states = [];
+  const supersessions = [];
+  const genericThat = exactOccurrences(
+    paragraph,
+    "Later exact VOC-105 evidence supersedes that prospective F3 status.",
+    { packageId: null, status: "generic" },
+  );
   for (let number = 94; number <= 104; number += 1) {
     const packageId = `VOC-${String(number).padStart(3, "0")}`;
-    if (
-      compact ===
-      `${packageId} is immutable history. Production remains held; learner data remains held; VOC-080-HOLD-01 remains held; VOC-080-HOLD-02 remains held.`
-    )
-      return true;
+    for (const [text, status] of [
+      [`${packageId} is immutable history: F3 is pending.`, "pending"],
+      [`${packageId} is immutable history: F3 pending.`, "pending"],
+      [`${packageId} is immutable history: F3 remains pending.`, "pending"],
+      [`${packageId} is immutable history: F3 is unresolved.`, "unresolved"],
+      [`${packageId} is immutable history: F3 unresolved.`, "unresolved"],
+      [
+        `${packageId} is immutable history: F3 staging is unresolved.`,
+        "unresolved",
+      ],
+      [
+        `${packageId} is immutable history: F3 is not yet delivered.`,
+        "not-delivered",
+      ],
+      [
+        `${packageId} is immutable history: F3 has not been delivered.`,
+        "not-delivered",
+      ],
+      [`F3 is pending in ${packageId} immutable history.`, "pending"],
+      [`F3 remains pending in ${packageId} immutable history.`, "pending"],
+      [
+        `F3 staging is unresolved in ${packageId} immutable history.`,
+        "unresolved",
+      ],
+      [
+        `F3 is not yet delivered in ${packageId} immutable history.`,
+        "not-delivered",
+      ],
+      [`In immutable ${packageId} history, F3 is pending.`, "pending"],
+      [`In immutable ${packageId} history, F3 remains pending.`, "pending"],
+      [
+        `In immutable ${packageId} history, F3 staging is unresolved.`,
+        "unresolved",
+      ],
+      [`${packageId} immutable history records F3 as pending.`, "pending"],
+      [
+        `${packageId} immutable history records F3 staging as unresolved.`,
+        "unresolved",
+      ],
+    ])
+      states.push(...exactOccurrences(paragraph, text, { packageId, status }));
+    for (const [text, status] of [
+      [
+        `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
+        "pending",
+      ],
+      [
+        `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 unresolved status.`,
+        "unresolved",
+      ],
+      [
+        `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 not-delivered status.`,
+        "not-delivered",
+      ],
+      [
+        `Later exact VOC-105 evidence supersedes the prospective F3 status from ${packageId}.`,
+        "generic",
+      ],
+    ])
+      supersessions.push(
+        ...exactOccurrences(paragraph, text, { packageId, status }),
+      );
   }
-  return false;
+  states.sort((left, right) => left.start - right.start);
+  const candidates = [...supersessions, ...genericThat].sort(
+    (left, right) => left.start - right.start,
+  );
+  const used = new Set();
+  const mask = paragraph.split("");
+  for (const state of states) {
+    const candidate = candidates.find(
+      (entry) =>
+        !used.has(entry) &&
+        (entry.packageId === null || entry.packageId === state.packageId) &&
+        (entry.status === state.status || entry.status === "generic") &&
+        (entry.end <= state.start
+          ? paragraph.slice(entry.end, state.start).trim() === ""
+          : state.end <= entry.start &&
+            paragraph.slice(state.end, entry.start).trim() === ""),
+    );
+    if (!candidate) continue;
+    used.add(candidate);
+    for (const span of [state, candidate])
+      for (let index = span.start; index < span.end; index += 1)
+        mask[index] = " ";
+  }
+  return mask.join("");
 }
 
 function maskPermittedHistoricalContexts(source) {
   return source
     .split(/(\r?\n\s*\r?\n)/)
-    .map((paragraph, index) => {
-      if (
-        index % 2 === 0 &&
-        (isPermittedHistoricalF3Paragraph(paragraph) ||
-          isPermittedHistoricalHeldParagraph(paragraph))
-      )
-        return paragraph.replace(/[^\r\n]/g, " ");
-      return paragraph;
-    })
+    .map((paragraph, index) =>
+      index % 2 === 0 ? maskPairedHistoricalF3(paragraph) : paragraph,
+    )
     .join("");
 }
 
 export function protectedProjectionDigests(source, relativePath) {
   const historyMasked = maskPermittedHistoricalContexts(source);
-  const exactContextMasked = maskExactLines(
-    historyMasked,
-    PERMITTED_STANDALONE_LINES,
-  );
+  const exactContextMasked = maskSafeClauses(historyMasked);
   let operationalSource = exactContextMasked;
   if (relativePath === DELIVERY_PATH) {
     const characters = operationalSource.split("");
@@ -797,7 +843,7 @@ function validateCredentialVocabulary(source, relativePath, projections) {
 function semanticClauses(source) {
   return source
     .split(
-      /(?:\r?\n|[.!?;]|\s*,\s*(?=(?:but|however|yet)\b)|\b(?:but|however|yet)\b)/i,
+      /(?:\r?\n|[.!?;:]|\s+[—–-]\s+|\s*,\s*(?=(?:but|however|yet|and|while|although|though|whereas)\b)|\b(?:but|however|yet|and|while|although|though|whereas)\b)/i,
     )
     .map((clause) => clause.trim())
     .filter(Boolean);
@@ -862,16 +908,7 @@ function validateLaterBoundaries(source, relativePath, projections) {
       const match = pattern.exec(clause);
       pattern.lastIndex = 0;
       if (!match) continue;
-      const prefix = clause.slice(0, match.index);
-      const matchedClaim = match[0];
-      const suffix = clause.slice(match.index + match[0].length);
-      if (
-        /\b(?:future|prospective|objective|gate)\b/i.test(prefix) ||
-        /\b(?:cannot|must\s+not|not|only\s+after|until|if|when)\b/i.test(
-          matchedClaim,
-        ) ||
-        /^\s*(?:[,():-]\s*)?(?:only\s+after|until|if|when)\b/i.test(suffix)
-      )
+      if (CANONICAL_PROSPECTIVE_LATER_CLAUSES[relativePath]?.has(clause))
         continue;
       errors.push(`${relativePath}: prohibited positive ${subject.id} claim`);
       break;
