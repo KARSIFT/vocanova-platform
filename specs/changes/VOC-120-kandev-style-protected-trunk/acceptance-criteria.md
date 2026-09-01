@@ -46,7 +46,7 @@ the broader suite. Merge-group behavior is covered.
 
 ## VOC-120-AC-05 — Native review replaces declared identity
 
-- Requirements: `VOC-120-D06`
+- Requirements: `VOC-120-D02A`, `VOC-120-D06`, `VOC-120-D06A`
 - Tasks: `VOC-120-T01`, `VOC-120-T02`
 - Tests: `VOC-120-TEST-02`
 - Result: pending
@@ -55,16 +55,24 @@ No merge decision depends on builder/reviewer strings or evidence JSON in a PR b
 and no adapter polls sibling checks. Protected review is attributable through native
 GitHub review/check/thread state.
 
+The machine policy makes unknown effects Protected, dismisses stale review on push,
+requires conversation resolution, and requires one non-author approving Review for
+Protected paths. Standard behavior changes require an exact-head semantic review
+check; docs-only Standard changes may use zero approvals.
+
 ## VOC-120-AC-06 — Protected main is truthful
 
-- Requirements: `VOC-120-D04`, `VOC-120-D12`
+- Requirements: `VOC-120-D04`, `VOC-120-D06A`, `VOC-120-D12`
 - Tasks: `VOC-120-T01`, `VOC-120-T02`
 - Tests: `VOC-120-TEST-04`
 - Result: pending
 
 Live readback proves main protection, squash/linear history, required conversation
 resolution, selected stable gates, merge queue configuration where enabled,
-immutable version tags, and native security settings. Committed documentation agrees.
+immutable version tags, protected-review enforcement, `cloudflare-staging`
+reviewer/admin-bypass/policy-mode/custom-branch state, and native security settings.
+The environment moves safely from `develop` through dual/bounded transition to sole
+`main`, and committed documentation agrees after each mutation.
 
 ## VOC-120-AC-07 — Legacy control plane leaves the active path
 
@@ -73,10 +81,10 @@ immutable version tags, and native security settings. Committed documentation ag
 - Tests: `VOC-120-TEST-01`, `VOC-120-TEST-06`
 - Result: pending
 
-Nine-file packages, historical evidence replay, merge-eligibility polling, duplicated
-governance authority, and reverse-sync machinery are absent from the final active
-tree. Their former revisions remain recoverable from Git history and the recorded
-rollback ref.
+Nine-file packages, non-EHR historical evidence replay, merge-eligibility polling,
+duplicated governance authority, and reverse-sync machinery are absent from the final
+active tree. EHR subjects remain until their human dispositions. Former revisions
+remain recoverable from Git history and the recorded rollback ref.
 
 ## VOC-120-AC-08 — EHR is resolvable and scoped
 
@@ -96,9 +104,11 @@ clear outcomes, and scope. It neither becomes routine review nor silently clears
 - Tests: `VOC-120-TEST-04`, `VOC-120-TEST-06`
 - Result: pending
 
-PR1, promotion/synchronization, settings activation, PR2, and develop retirement have
-exact preconditions and readbacks. A captured settings snapshot and immutable rollback
-ref restore the last known good state without production or Cloudflare action.
+PR1, promotion/synchronization, additive settings, immediate PR2 truth, PR3 cleanup,
+final settings, immediate PR4 truth, PR5 finalization, develop retirement, and
+immediate PR6 truth have exact preconditions and readbacks. A captured settings
+snapshot and immutable rollback ref restore the last known good state without
+production or Cloudflare deployment.
 
 ## VOC-120-AC-10 — Repository and product validation remain green
 

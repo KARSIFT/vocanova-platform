@@ -38,6 +38,12 @@ An issue is required for a discovered bug when the repository's reporting rule
 applies, unclear scope, or work needing maintainer discussion. No separate plan PR or
 change package is required.
 
+Standard classification is fail-closed: only configured non-protected paths with no
+protected semantic effect qualify. Unknown effects or classifier failure become
+Protected. Standard behavior changes require an attributable exact-head semantic
+review check; docs-only changes may merge without an approving Review after all
+deterministic gates pass.
+
 ### Protected
 
 Applies to authentication, authorization, personal data, migrations, AI provider or
@@ -55,6 +61,9 @@ issue with acceptance criteria
 
 Exact-revision review is required when stale evidence could invalidate the protected
 decision. Harmless PR-description edits must not invalidate an unchanged code SHA.
+Protected changes require one non-author native approving Review plus applicable
+CODEOWNERS or specialist evidence. Missing reviewer capability blocks rather than
+falling back to self-declared identity.
 
 ### External Action
 
@@ -97,6 +106,8 @@ The final repository uses `main` as the single protected trunk. Required propert
 - stable required aggregate checks;
 - merge queue when parallel PR integration is active;
 - immutable `v*` release tags;
+- stale-review dismissal after every pushed revision;
+- one non-author approving Review for Protected paths;
 - automatic deletion of merged short-lived branches where safe;
 - no permanent `develop` branch or main-to-develop synchronization loop.
 
@@ -154,15 +165,25 @@ EHR applies only to irreducible high-consequence uncertainty. The runbook record
 - unchanged external-action holds.
 
 Existing PR #215 and issue #231 remain scoped under the pre-change EHR record.
+No file, validator, release mechanism, branch, or policy that is the subject of those
+records may be removed or functionally superseded before its qualified-human
+disposition.
 
 ## Transition
 
-PR1 establishes the new repository-side model while remaining compatible with
-`develop` and the old review path. The current rules then govern its merge,
-`develop`-to-`main` promotion, and final history synchronization. Only after exact
-readback may the founder activate the native settings. PR2 removes old machinery and
-finalizes main-only operation. The `develop` branch is retired only after an exact
-rollback reference and ancestry proof exist.
+PR1 stages the dual-compatible future model without replacing active authority and
+adds a frozen executable pre-change transition verifier. The current rules govern its
+merge, promotion, and initial transition history synchronization. An additive settings action enables new gates while retaining the
+old gate and adds `main` to the staging environment policy; immediate doc-only PR2
+records live truth. PR3 removes only non-EHR legacy machinery and remains governed by
+old authority and the verifier, then is promoted/synchronized. A final settings
+action selects new gates and sole `main` staging policy only after credential-free
+validation; immediate doc-only PR4 records and promotes that truth. PR5 removes the
+transition bridge and EHR-overlapping surfaces only after both human dispositions,
+is evaluated against immutable pre-change authority, and receives the final old-model
+promotion/synchronization. `develop` retirement then requires exact rollback/ancestry
+proof and a satisfied EHR boundary; immediate doc-only PR6 records the result before
+the future model governs ordinary work.
 
 ## Security, privacy, data, and accessibility
 

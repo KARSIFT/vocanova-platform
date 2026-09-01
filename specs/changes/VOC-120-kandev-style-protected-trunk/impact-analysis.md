@@ -81,6 +81,14 @@ Accessibility checks remain path-applicable for UI changes.
   ref, settings snapshot, two bounded PRs, and post-cutover observation.
 - `VOC-120-R08`: Copying Kandev overfits a larger project. Mitigation: cap the initial
   VocaNova gate/document surface and require every retained control to name its risk.
+- `VOC-120-R09`: Staging becomes unusable when code moves to main but the environment
+  still admits only develop. Mitigation: held dual/bounded branch-policy migration,
+  credential-free main-gate proof, immediate truth PR, and snapshot restoration.
+- `VOC-120-R10`: New rules authorize removal of old rules. Mitigation: every VOC-120
+  candidate remains bound to immutable pre-change authority and transition-verifier
+  evidence through PR6 exact acceptance.
+- `VOC-120-R11`: EHR subjects disappear before human resolution. Mitigation: PR3
+  exclusion/quarantine and PR5 hard dependency on both qualified-human dispositions.
 
 ## Dependencies
 
@@ -90,6 +98,10 @@ Accessibility checks remain path-applicable for UI changes.
 - `VOC-120-DEP-04`: live GitHub plan/support for rulesets, merge queue, security
   scanning, and bot/app review must be verified before activation.
 - `VOC-120-DEP-05`: PR #215 and issue #231 EHR records remain independently scoped.
+- `VOC-120-DEP-06`: the current `cloudflare-staging` sole `develop` branch policy is
+  migrated with preserved reviewers/admin state and no secret-value read.
+- `VOC-120-DEP-07`: a native non-author Review mechanism must exist before Protected
+  lane activation; absence blocks rather than lowering the requirement.
 
 ## Evidence
 

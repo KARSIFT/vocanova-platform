@@ -26,19 +26,22 @@ short-lived branch
 Routine reversible work should take one PR. Protected work receives stronger tests
 and specialist review. Real external effects remain human-authorized.
 
-## Why this is one package and two implementation PRs
+## Why this is one package and six implementation PRs
 
-The outcome is one governance replacement, so it remains one package. The delivery
-has two implementation PRs because GitHub settings form a hard external-action and
-rollback boundary:
+The outcome is one governance replacement, so it remains one package. Six PRs are
+required because GitHub settings, immediate truth documentation, pre-change
+verification, and EHR form real boundaries:
 
-1. Prepare the repository and dual-compatible checks on `develop` without deleting
-   the old enforcement path.
-2. Promote and synchronize once under the pre-change rules, activate and verify
-   native `main` protection, then remove legacy machinery through protected `main`.
+1. Prepare dual-compatible checks and an immutable pre-change verifier.
+2. Immediately record additive live settings after their authorized mutation.
+3. Remove non-EHR legacy machinery under the old authority.
+4. Immediately record final live settings after cutover.
+5. Remove the transition bridge and EHR-overlapping paths only after both qualified
+   human dispositions, still applying frozen pre-change authority to that candidate.
+6. Immediately record final branch-retirement settings truth.
 
-This avoids deleting the controls needed to review the change itself and prevents a
-period in which neither old nor new enforcement is effective.
+This accepts several final old-process reviews to avoid self-authorization, stale
+settings claims, an enforcement gap, or silent EHR supersession.
 
 ## Scope
 
@@ -72,6 +75,7 @@ review automation, stale approval cleanup, and immutable tag rule.
 
 The replacement is evaluated under the authority effective before it. A distinct
 non-author reviewer must assess the exact plan candidate. After all blocking findings
-are resolved, adoption bookkeeping is recorded under the current rules before either
-implementation PR begins. Repository review never satisfies the separately held live
+are resolved, adoption bookkeeping is recorded under the current rules before any
+implementation PR begins. The accountable adoption decision owner is the
+founder-repository-owner. Repository review never satisfies the separately held live
 GitHub settings actions.

@@ -18,7 +18,9 @@
   1. Inspect workflow permissions and action pinning.
   2. Test same-repository and untrusted-fork event paths without secrets.
   3. Prove review jobs cannot edit/push/merge/change settings/deploy.
-  4. Prove protected-review requirements use native exact-head/thread state.
+  4. Prove pushed revisions dismiss stale review and unresolved threads block.
+  5. Prove docs-only Standard, Standard behavior, Protected, unknown-effect, and
+     missing-reviewer cases enforce their distinct approval/review floors.
 - Expected: attributable least-privilege review and no PR-body identity dependency.
 
 ## VOC-120-TEST-03 — Path-aware aggregate gate matrix
@@ -37,10 +39,15 @@
 
 - Covers: `VOC-120-AC-06`, `VOC-120-AC-09`
 - Procedure:
-  1. Capture before/after GitHub repository, ruleset, branch, security, tag, and
-     required-check state through read-only API calls around the authorized mutation.
+  1. Capture before/after GitHub repository, ruleset, branch, security, tag,
+     required-check, environment reviewer, admin-bypass, deployment-policy-mode, and
+     custom-branch state around each authorized mutation.
   2. Exercise each required gate on a non-destructive PR/merge-group path.
-  3. Compare committed settings truth with live readback.
+  3. Prove `cloudflare-staging` safely admits `main`, preserves reviewer/admin state,
+     reads no secret value, and can restore the captured `develop` policy.
+  4. Verify a credential-free main dispatch reaches the expected gate before sole-main
+     policy or develop retirement.
+  5. Compare each immediate doc-only settings record with live readback.
 - Expected: protected main and immutable version tags match policy with no hidden
   bypass or missing gate.
 
@@ -60,8 +67,12 @@
 - Procedure:
   1. Verify every removed active artifact is reachable from the recorded rollback ref.
   2. Verify no current script, workflow, doc, template, ruleset, or package script
-     depends on a removed path or check name.
+     depends on a removed path or check name, except explicitly quarantined EHR
+     subjects awaiting qualified-human disposition.
   3. Reconstruct the last-known-good branch/settings plan without executing
      destructive or live production actions.
-  4. Prove final main ancestry and branch/PR inventory.
+  4. Execute the immutable pre-change transition verifier against each cleanup
+     candidate, including the exact PR5 candidate that removes its tracked copy and
+     PR6 by using the retained immutable ref.
+  5. Prove final main ancestry and branch/PR inventory.
 - Expected: clean final tree with deterministic repository/settings rollback.
