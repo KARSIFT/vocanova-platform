@@ -1,4 +1,4 @@
-/* global Response, setTimeout */
+/* global Response, clearTimeout, setTimeout */
 
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
@@ -24,6 +24,159 @@ const quietStream = Object.freeze({ write() {} });
 
 function delay(milliseconds) {
   return new Promise((resolveDelay) => setTimeout(resolveDelay, milliseconds));
+}
+
+const CHILD_READY_TIMEOUT_MS = 5_000;
+const CHILD_READY_MARKER_PREFIX = "VOCANOVA_CHILD_SIGNAL_READY";
+
+function childReadyMarker(signal) {
+  return `${CHILD_READY_MARKER_PREFIX}:${signal}`;
+}
+
+function exactMarkerPresent(output, marker) {
+  const markerLine = `${marker}\n`;
+  return output.startsWith(markerLine) || output.includes(`\n${markerLine}`);
+}
+
+function childOutcomeDescription(outcome) {
+  if (!outcome) return "unknown outcome";
+  if (outcome.error) return outcome.error.message;
+  if (outcome.signal) return `signal ${outcome.signal}`;
+  return `exit code ${String(outcome.code)}`;
+}
+
+function waitForChildReady(
+  record,
+  {
+    marker,
+    timeoutMs = CHILD_READY_TIMEOUT_MS,
+    setTimeoutImpl = setTimeout,
+    clearTimeoutImpl = clearTimeout,
+  },
+) {
+  assert(Number.isFinite(timeoutMs) && timeoutMs > 0 && timeoutMs <= 5_000);
+  assert.equal(typeof marker, "string");
+  assert.notEqual(marker, "");
+
+  return new Promise((resolveReady, rejectReady) => {
+    const stdout = record.child.stdout;
+    let observed = "";
+    let settled = false;
+    let timer;
+
+    const cleanup = () => {
+      stdout?.off("data", onData);
+      record.child.off("error", onError);
+      record.child.off("exit", onExit);
+      if (timer !== undefined) clearTimeoutImpl(timer);
+    };
+    const settle = (error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      if (error) rejectReady(error);
+      else resolveReady();
+    };
+    const inspect = () => {
+      if (exactMarkerPresent(observed, marker)) settle();
+    };
+    function onData(chunk) {
+      observed += String(chunk);
+      inspect();
+    }
+    function onError(error) {
+      settle(
+        new Error(`${record.label} errored before readiness: ${error.message}`),
+      );
+    }
+    function onExit(code, signal) {
+      settle(
+        new Error(
+          `${record.label} exited before readiness: ${childOutcomeDescription({ code, error: null, signal })}`,
+        ),
+      );
+    }
+
+    stdout?.on("data", onData);
+    record.child.on("error", onError);
+    record.child.on("exit", onExit);
+    timer = setTimeoutImpl(
+      () =>
+        settle(
+          new Error(
+            `${record.label} did not emit ${marker} within ${String(timeoutMs)}ms`,
+          ),
+        ),
+      timeoutMs,
+    );
+
+    observed = String(record.output ?? "");
+    inspect();
+    if (!settled && record.exited) {
+      settle(
+        new Error(
+          `${record.label} exited before readiness: ${childOutcomeDescription(record.outcome)}`,
+        ),
+      );
+    }
+  });
+}
+
+function occurrenceCount(source, token) {
+  return source.split(token).length - 1;
+}
+
+function assertSignalFixtureSource(source, { marker, signal }) {
+  const handlerToken = `process.on(${JSON.stringify(signal)},`;
+  const markerToken = `process.stdout.write(${JSON.stringify(`${marker}\n`)});`;
+  assert.equal(
+    occurrenceCount(source, handlerToken),
+    1,
+    `${signal} fixture must register its exact handler once`,
+  );
+  assert.equal(
+    occurrenceCount(source, markerToken),
+    1,
+    `${signal} fixture must emit its exact marker once`,
+  );
+  assert(
+    source.indexOf(handlerToken) < source.indexOf(markerToken),
+    `${signal} fixture must register its handler before marker emission`,
+  );
+}
+
+const EXPECTED_SIGNAL_EXIT_CODES = Object.freeze({ SIGINT: 23, SIGTERM: 24 });
+
+function assertSignalTestCase(fixture) {
+  assert.equal(
+    fixture.expectedCode,
+    EXPECTED_SIGNAL_EXIT_CODES[fixture.signal],
+    `${fixture.signal} must retain its expected exit code`,
+  );
+  assert.equal(
+    fixture.readinessStrategy,
+    waitForChildReady,
+    `${fixture.signal} must use waitForChildReady instead of a fixed delay`,
+  );
+  assertSignalFixtureSource(fixture.source, fixture);
+}
+
+function signalFixture(signal, expectedCode) {
+  const marker = childReadyMarker(signal);
+  const source = [
+    "setInterval(() => {}, 1000);",
+    `process.on(${JSON.stringify(signal)}, () => process.exit(${String(expectedCode)}));`,
+    `process.stdout.write(${JSON.stringify(`${marker}\n`)});`,
+  ].join(" ");
+  const fixture = {
+    expectedCode,
+    marker,
+    readinessStrategy: waitForChildReady,
+    signal,
+    source,
+  };
+  assertSignalTestCase(fixture);
+  return fixture;
 }
 
 async function unusedLoopbackPort() {
@@ -283,27 +436,304 @@ test("child exit before readiness is reported with its exit code", async () => {
   }
 });
 
+function readinessFixtureRecord(label, output = "") {
+  const child = new EventEmitter();
+  child.stdout = new EventEmitter();
+  return {
+    child,
+    exited: false,
+    label,
+    outcome: null,
+    output,
+  };
+}
+
+function controlledTimer() {
+  const token = Object.freeze({});
+  let callback;
+  let clearCount = 0;
+  let scheduledDelayMs;
+  return {
+    advanceTo(elapsedMs) {
+      assert(Number.isFinite(scheduledDelayMs));
+      assert(elapsedMs >= 0 && elapsedMs <= scheduledDelayMs);
+      if (elapsedMs === scheduledDelayMs) callback();
+    },
+    clearTimeoutImpl(actualToken) {
+      assert.equal(actualToken, token);
+      clearCount += 1;
+    },
+    fire() {
+      assert(callback, "controlled readiness timer must be scheduled");
+      callback();
+    },
+    get clearCount() {
+      return clearCount;
+    },
+    get scheduledDelayMs() {
+      return scheduledDelayMs;
+    },
+    setTimeoutImpl(scheduledCallback, delayMs) {
+      callback = scheduledCallback;
+      scheduledDelayMs = delayMs;
+      return token;
+    },
+  };
+}
+
+test("child readiness accepts buffered and split exact marker lines and disposes resources", async () => {
+  const marker = childReadyMarker("STREAM");
+  const buffered = readinessFixtureRecord(
+    "buffered fixture",
+    `unrelated output\n${marker}\n`,
+  );
+  const bufferedTimer = controlledTimer();
+  await waitForChildReady(buffered, {
+    marker,
+    ...bufferedTimer,
+    timeoutMs: 500,
+  });
+  assert.equal(bufferedTimer.clearCount, 1);
+  assert.equal(buffered.child.stdout.listenerCount("data"), 0);
+  assert.equal(buffered.child.listenerCount("error"), 0);
+  assert.equal(buffered.child.listenerCount("exit"), 0);
+
+  const split = readinessFixtureRecord("split fixture");
+  const splitTimer = controlledTimer();
+  const ready = waitForChildReady(split, {
+    marker,
+    ...splitTimer,
+    timeoutMs: 500,
+  });
+  split.child.stdout.emit("data", `noise\n${marker.slice(0, 12)}`);
+  split.child.stdout.emit("data", `${marker.slice(12)}\nextra output\n`);
+  await ready;
+  assert.equal(splitTimer.clearCount, 1);
+  assert.equal(split.child.stdout.listenerCount("data"), 0);
+  assert.equal(split.child.listenerCount("error"), 0);
+  assert.equal(split.child.listenerCount("exit"), 0);
+
+  const nearBound = readinessFixtureRecord("near-bound fixture");
+  const nearBoundTimer = controlledTimer();
+  const nearBoundReady = waitForChildReady(nearBound, {
+    marker,
+    ...nearBoundTimer,
+    timeoutMs: CHILD_READY_TIMEOUT_MS,
+  });
+  assert.equal(nearBoundTimer.scheduledDelayMs, 5_000);
+  nearBoundTimer.advanceTo(4_999);
+  nearBound.child.stdout.emit("data", `${marker}\n`);
+  await nearBoundReady;
+  assert.equal(nearBoundTimer.clearCount, 1);
+  assert.equal(nearBound.child.stdout.listenerCount("data"), 0);
+  assert.equal(nearBound.child.listenerCount("error"), 0);
+  assert.equal(nearBound.child.listenerCount("exit"), 0);
+});
+
+test("child readiness rejects altered output, child errors, and timeouts with disposal", async () => {
+  const marker = childReadyMarker("NEGATIVE");
+  const altered = readinessFixtureRecord("altered split fixture");
+  const alteredTimer = controlledTimer();
+  const alteredReady = waitForChildReady(altered, {
+    marker,
+    ...alteredTimer,
+    timeoutMs: 50,
+  });
+  altered.child.stdout.emit("data", `${marker.slice(0, 10)}`);
+  altered.child.stdout.emit("data", `X${marker.slice(11)}\n`);
+  alteredTimer.fire();
+  await assert.rejects(alteredReady, /altered split fixture.*within 50ms/);
+  assert.equal(alteredTimer.clearCount, 1);
+  assert.equal(altered.child.stdout.listenerCount("data"), 0);
+  assert.equal(altered.child.listenerCount("error"), 0);
+  assert.equal(altered.child.listenerCount("exit"), 0);
+
+  const errored = readinessFixtureRecord("errored fixture");
+  const errorTimer = controlledTimer();
+  const errorReady = waitForChildReady(errored, {
+    marker,
+    ...errorTimer,
+    timeoutMs: 50,
+  });
+  errored.child.emit("error", new Error("synthetic spawn failure"));
+  await assert.rejects(
+    errorReady,
+    /errored fixture errored before readiness: synthetic spawn failure/,
+  );
+  assert.equal(errorTimer.clearCount, 1);
+  assert.equal(errored.child.stdout.listenerCount("data"), 0);
+  assert.equal(errored.child.listenerCount("error"), 0);
+  assert.equal(errored.child.listenerCount("exit"), 0);
+
+  const exited = readinessFixtureRecord("exited fixture");
+  const exitTimer = controlledTimer();
+  const exitReady = waitForChildReady(exited, {
+    marker,
+    ...exitTimer,
+    timeoutMs: 50,
+  });
+  exited.child.emit("exit", 7, null);
+  await assert.rejects(
+    exitReady,
+    /exited fixture exited before readiness: exit code 7/,
+  );
+  assert.equal(exitTimer.clearCount, 1);
+  assert.equal(exited.child.stdout.listenerCount("data"), 0);
+  assert.equal(exited.child.listenerCount("error"), 0);
+  assert.equal(exited.child.listenerCount("exit"), 0);
+});
+
+for (const readinessNegative of [
+  {
+    label: "missing marker fixture",
+    source:
+      "setInterval(() => {}, 1000); process.on('SIGTERM', () => process.exit(0));",
+    expected: /missing marker fixture.*within 50ms/,
+  },
+  {
+    label: "wrong marker fixture",
+    source:
+      "setInterval(() => {}, 1000); process.on('SIGTERM', () => process.exit(0)); process.stdout.write('WRONG_READY_MARKER\\n');",
+    expected: /wrong marker fixture.*within 50ms/,
+  },
+  {
+    label: "early exit fixture",
+    source: "process.exit(9);",
+    expected: /early exit fixture exited before readiness: exit code 9/,
+  },
+]) {
+  test(`${readinessNegative.label} rejects bounded readiness and settles`, async () => {
+    const children = new SupervisedChildren({
+      stdout: quietStream,
+      stderr: quietStream,
+      shutdownGraceMs: 100,
+    });
+    const child = children.start(
+      fixtureSpecification(readinessNegative.label, readinessNegative.source),
+    );
+    try {
+      await assert.rejects(
+        waitForChildReady(child, {
+          marker: childReadyMarker("NEGATIVE"),
+          timeoutMs: 50,
+        }),
+        readinessNegative.expected,
+      );
+    } finally {
+      await children.stopAll();
+    }
+    assert.equal(child.settled, true);
+  });
+}
+
+test("signal readiness controls fail closed under disposable mutations", () => {
+  for (const [signal, expectedCode] of [
+    ["SIGINT", 23],
+    ["SIGTERM", 24],
+  ]) {
+    const fixture = signalFixture(signal, expectedCode);
+    const markerToken = `process.stdout.write(${JSON.stringify(`${fixture.marker}\n`)});`;
+
+    assert.throws(
+      () =>
+        assertSignalFixtureSource(
+          fixture.source.replace(markerToken, ""),
+          fixture,
+        ),
+      /must emit its exact marker once/,
+    );
+    assert.throws(
+      () =>
+        assertSignalFixtureSource(
+          fixture.source.replace(fixture.marker, `${fixture.marker}_RENAMED`),
+          fixture,
+        ),
+      /must emit its exact marker once/,
+    );
+    assert.throws(
+      () =>
+        assertSignalFixtureSource(
+          `${markerToken} ${fixture.source.replace(markerToken, "")}`,
+          fixture,
+        ),
+      /must register its handler before marker emission/,
+    );
+    assert.throws(
+      () =>
+        assertSignalTestCase({
+          ...fixture,
+          readinessStrategy: async () => delay(75),
+        }),
+      /must use waitForChildReady instead of a fixed delay/,
+    );
+    assert.throws(
+      () =>
+        assertSignalTestCase({ ...fixture, expectedCode: expectedCode + 1 }),
+      /must retain its expected exit code/,
+    );
+  }
+
+  const fixedDelayMutation = runOwnedChildSignalCase
+    .toString()
+    .replace("await fixture.readinessStrategy(child, {", "await delay(75);");
+  assert.throws(
+    () => assertSignalHarnessSource(fixedDelayMutation),
+    /must not use the fixed 75-ms delay/,
+  );
+});
+
+function assertSignalHarnessSource(source) {
+  assert.equal(
+    occurrenceCount(source, "await delay(75)"),
+    0,
+    "signal harness must not use the fixed 75-ms delay",
+  );
+  assert.equal(
+    occurrenceCount(source, "await fixture.readinessStrategy(child, {"),
+    1,
+    "signal harness must await its readiness strategy exactly once",
+  );
+}
+
+async function runOwnedChildSignalCase(fixture) {
+  const children = new SupervisedChildren({
+    stdout: quietStream,
+    stderr: quietStream,
+    shutdownGraceMs: 500,
+  });
+  const child = children.start(
+    fixtureSpecification(`${fixture.signal} fixture`, fixture.source),
+  );
+  const requestedSignals = [];
+  const originalKill = child.child.kill;
+  child.child.kill = function recordRequestedSignal(requestedSignal) {
+    requestedSignals.push(requestedSignal);
+    return originalKill.call(this, requestedSignal);
+  };
+  try {
+    await fixture.readinessStrategy(child, {
+      marker: fixture.marker,
+      timeoutMs: CHILD_READY_TIMEOUT_MS,
+    });
+    const forced = await children.stopAll(fixture.signal);
+    await child.exit;
+    assert.equal(forced, false);
+    assert.deepEqual(requestedSignals, [fixture.signal]);
+    assert.equal(child.outcome.code, fixture.expectedCode);
+  } finally {
+    if (!child.settled) await children.stopAll();
+    child.child.kill = originalKill;
+  }
+}
+
 for (const [signal, expectedCode] of [
   ["SIGINT", 23],
   ["SIGTERM", 24],
 ]) {
   test(`owned children receive ${signal} once and settle`, async () => {
-    const children = new SupervisedChildren({
-      stdout: quietStream,
-      stderr: quietStream,
-      shutdownGraceMs: 500,
-    });
-    const child = children.start(
-      fixtureSpecification(
-        `${signal} fixture`,
-        `setInterval(() => {}, 1000); process.on('${signal}', () => process.exit(${String(expectedCode)}));`,
-      ),
-    );
-    await delay(75);
-    const forced = await children.stopAll(signal);
-    await child.exit;
-    assert.equal(forced, false);
-    assert.equal(child.outcome.code, expectedCode);
+    const fixture = signalFixture(signal, expectedCode);
+    assertSignalHarnessSource(runOwnedChildSignalCase.toString());
+    await runOwnedChildSignalCase(fixture);
   });
 }
 
