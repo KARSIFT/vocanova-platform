@@ -1,0 +1,395 @@
+schema_version: 1
+
+id: VOC-113
+slug: f3-validator-candidate-remediation
+title: Close F3 validator and candidate-identity gaps
+type: milestone-evidence-validator-and-candidate-remediation
+status: adopted
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because the corrected validator and evidence binder protect the exact current F3
+  milestone decision and later dependency ordering. A false negative blocks an
+  adopted outcome; a false positive can present prohibited disclosure, live authority,
+  or a later milestone as current truth. The implementation remains repository-only.
+canonical_path: specs/changes/VOC-113-f3-validator-candidate-remediation
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/211
+related_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/209
+related_adopted_packages:
+  - VOC-105
+  - VOC-110
+  - VOC-111
+base_branch: develop
+base_sha: 533084432f0672dbf25c402e96209120a8ad50cf
+plan_branch: plan/voc-113-f3-validator-candidate-remediation
+target_branch: develop
+approved_candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+approval_status: adopted
+superseded_plan_candidates:
+  - candidate_sha: 21139e8a7eb82f883adcebfbff615ea73e1cbfec
+    status: blocked-and-superseded
+    reasons:
+      - incomplete-clean-HEAD-and-working-file-manifest-binding
+      - blanket-rules-rejected-canonical-public-resource-and-bounded-procedure-context
+      - overbroad-history-rule-rejected-current-hold-truth
+      - incomplete-DOC-15-section-24.18-monitoring
+      - incorrect-integrated-rollback-chronology
+    review_transfer: prohibited-fresh-exact-candidate-reviews-required
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-canonical-documentation-milestone-specialist-and-
+  independent-cross-model-R4-PASS-reviews-plus-VOC-113-ADOPT-2026-09-01-only-for-the-
+  declared-two-file-repository-remediation-on-existing-draft-PR-209-after-this-adopted-
+  package-is-freshly-reviewed-and-normally-merged; all-external-actions-remain-prohibited
+implementation_pull_request_count: 1
+implementation_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/209
+multiple_pull_request_rationale: >-
+  One corrected revision of the existing draft VOC-105 PR is the minimum coherent
+  implementation boundary. The validator and test files are new in that PR and do not
+  exist on develop, so a separate correction PR would duplicate the full VOC-105 diff
+  or create an intermediate-branch merge that separates code, evidence, exact identity,
+  review, and rollback. Amendment after adoption keeps the complete milestone outcome
+  in one reviewable and reversible PR.
+automatic_merge_allowed: true
+production_impact: prohibited-and-held
+rollback_required: true
+
+objective: >-
+  Replace the drifted VOC-105 candidate identity through an explicit governed refresh,
+  make its network-free validator enforce the adopted fail-closed contract on every
+  designated current-truth file, complete the negative matrix, and obtain fresh exact-
+  revision evidence before PR #209 can merge.
+
+requirements:
+  - id: VOC-113-D00
+    statement: >-
+      Treat issue #211, reviewed PR #209 head 841d263c6a4fd92f0f553e0d1f2fd75bd13b1a1a,
+      its canonical digest 903e7f80bf0f9f955fe30b8dbd91ec186d979c65c37a9d46de3e0a55ff09b7b6,
+      and both blocking reviewer findings as intake only. Preserve VOC-111's former
+      7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43
+      observation as historical evidence; do not relabel either digest.
+  - id: VOC-113-D01
+    statement: >-
+      After adoption, amend draft PR #209 in place by changing exactly the existing
+      VOC-105 validator and focused test. Once content is stable, bind the replacement
+      exact PR head and tree plus its 12 blob OIDs to the unchanged lexicographically
+      sorted VOC-111 path-NUL-blob-OID-without-LF-NUL SHA-256 algorithm. Immediately
+      before each observation require clean status, zero HEAD diff, and each working-
+      file hash equal to git rev-parse HEAD:path. Record the replacement digest before
+      and after all bounded observation commands; any mismatch stops merge and requires
+      a new governed candidate/review cycle.
+  - id: VOC-113-D02
+    statement: >-
+      Define the designated current-truth corpus as the nine VOC-105 document/evidence
+      files listed in candidate_observation.designated_surfaces. Apply every cross-
+      cutting disclosure, vocabulary, live-action, later-boundary, and history/current
+      rule independently to every file, with a path-specific diagnostic.
+  - id: VOC-113-D03
+    statement: >-
+      Use an exact context model, not blanket identifier rejection. Permit the already-
+      public staging account, zone, and D1 identifiers only at their canonical labels
+      and bounded public-resource locations in docs/operations/cloudflare-delivery.md,
+      and permit CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN only as value-free
+      interface names. On every surface reject secret/token values, protected Worker-
+      version UUIDs, unknown resource identifiers, and unknown credential names.
+  - id: VOC-113-D04
+    statement: >-
+      Use an exact authority-and-location context model for procedural prose. Preserve
+      the canonical conditional, authority-bounded credential removal, cancellation,
+      retry, verification, migration, upload, promotion, smoke, and rollback procedures
+      in docs/operations/cloudflare-delivery.md. Reject appended, relocated, guard-
+      removed, unconditional, or otherwise unbounded live commands on every surface;
+      reject positive/authorized later product, production, live, launch, learner-data,
+      or hold-release claims. Exact held/unresolved/history and bounded procedures pass.
+  - id: VOC-113-D05
+    statement: >-
+      Reject only superseded VOC-094 through VOC-104 prospective F3/staging pending or
+      unresolved language when presented as current truth. Preserve current HOLD-01/
+      HOLD-02 and production/learner-data held truth even when its lineage is recorded
+      in those immutable packages. Require explicit history plus later-evidence
+      supersession for the older F3 snapshot, with positive tests for current holds.
+  - id: VOC-113-D06
+    statement: >-
+      Enforce exact own-key sets, types, values, identifiers, URLs, arrays, gate-item
+      inventory, delivery-event fields, every required job and step status, production
+      held status, rollback baseline/rehearsal evidence, and skipped-expected rollback
+      outcome. Reject every missing, extra, renamed, duplicate, wrong-type, failed,
+      skipped, unknown, or otherwise noncanonical mutation with a specific diagnostic.
+  - id: VOC-113-D07
+    statement: >-
+      Complete one-at-a-time positives and negatives for every rule/surface/status,
+      retain all 26 existing focused cases unchanged in effect, prove fixture setup
+      changes exactly the intended file/field, run focused/full/hosted validation, and
+      rehearse a scoped 12-path reversal against historical base
+      533084432f0672dbf25c402e96209120a8ad50cf without claiming it is the later
+      integrated first parent. If merged, prove a full revert restores PR #209's actual
+      then-current first parent, which includes adopted VOC-113.
+  - id: VOC-113-D08
+    statement: >-
+      Require fresh exact-head canonical-documentation/milestone-evidence specialist
+      and independent cross-model R4 PASS reviews after the correction, zero blockers,
+      truthful PR evidence, hosted required checks, and a separate non-author merge.
+      Prior PR #209 findings/reviews cannot approve the replacement SHA.
+  - id: VOC-113-D09
+    statement: >-
+      Perform no application, runtime, workflow, package-script, historical-package,
+      infrastructure, setting, secret, Cloudflare, dispatch/deployment, D1, traffic/DNS,
+      production/data, spending, launch, main-promotion, or issue-closure action.
+  - id: VOC-113-D10
+    statement: >-
+      Under DOC-15 section 24.18, the accountable owner recorded at adoption monitors
+      from corrected PR #209 merge through exact-merge-SHA protected-branch hosted
+      completion and fresh develop readback. Success requires all specified signals;
+      failure stops issue closure and VOC-106 release, records issue-211 evidence or a
+      linked bug, and routes governed remediation or full integrated revert.
+
+candidate_observation:
+  id: VOC-113-CANDIDATE-OBSERVATION-00
+  stopped_candidate_sha: 841d263c6a4fd92f0f553e0d1f2fd75bd13b1a1a
+  stopped_candidate_digest: 903e7f80bf0f9f955fe30b8dbd91ec186d979c65c37a9d46de3e0a55ff09b7b6
+  historical_voc111_digest: 7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43
+  replacement_candidate_sha: pending-post-adoption-corrected-pr-209-head
+  replacement_candidate_digest: pending-post-adoption-stable-candidate
+  ordered_paths:
+    - docs/README.md
+    - docs/operations/README.md
+    - docs/operations/cloudflare-delivery.md
+    - docs/operations/voc-081-f2-evidence.json
+    - docs/operations/voc-081-f2-evidence.md
+    - docs/operations/voc-105-f3-evidence.json
+    - docs/operations/voc-105-f3-evidence.md
+    - docs/product/12-mvp-implementation-plan.md
+    - docs/product/README.md
+    - package.json
+    - scripts/foundation/voc105-f3-evidence-policy.mjs
+    - scripts/foundation/voc105-f3-evidence-policy.test.mjs
+  algorithm: >-
+    for-each-fixed-lexicographically-sorted-path-emit-raw-UTF-8-path-bytes-NUL-git-
+    blob-OID-without-LF-NUL-then-SHA-256-the-concatenated-12-entry-stream
+  designated_surfaces:
+    - docs/README.md
+    - docs/operations/README.md
+    - docs/operations/cloudflare-delivery.md
+    - docs/operations/voc-081-f2-evidence.json
+    - docs/operations/voc-081-f2-evidence.md
+    - docs/operations/voc-105-f3-evidence.json
+    - docs/operations/voc-105-f3-evidence.md
+    - docs/product/12-mvp-implementation-plan.md
+    - docs/product/README.md
+  execution: >-
+    before-each-observation-require-clean-status-zero-HEAD-diff-and-each-working-file-
+    hash-equal-HEAD-path-then-record-exact-head-tree-path-inventory-blob-OIDs-and-
+    digest; run-focused-runtime-foundation-workspace-governance-and-scoped-rollback-
+    observation; repeat-identical-identity-proof-afterward; drift-stops-merge
+
+context_model:
+  canonical_public_resource_context:
+    path: docs/operations/cloudflare-delivery.md
+    account_id: 0a9eda28b96d77c24dcde74f3e074d47
+    zone_id: 63286d93b5f32925ac7366b4e97908be
+    d1_database_id: 22ae386f-e3f5-4d98-a3ad-18b39d3b8556
+    rule: exact-value-at-exact-label-and-existing-public-resource-section-only
+  allowed_value_free_credential_names:
+    - CLOUDFLARE_ACCOUNT_ID
+    - CLOUDFLARE_API_TOKEN
+  canonical_bounded_procedure_path: docs/operations/cloudflare-delivery.md
+  canonical_bounded_procedure_regions:
+    - VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN-to-END
+    - Standard-manual-staging-delivery-after-settings-action
+    - Cancellation-failure-and-rollback
+  rule: >-
+    live-language-is-accepted-only-in-these-existing-regions-with-their-exact-
+    conditional-sequencing-authority-hold-and-no-secret-guards; appended-relocated-
+    unconditional-or-guard-removed-commands-fail
+
+post_merge_monitoring:
+  governing_rule: DOC-15-section-24.18
+  owner: /root
+  begins: corrected-PR-209-merge-event
+  ends: >-
+    exact-merge-SHA-CI-Governance-Security-required-checks-complete-and-fresh-
+    origin-develop-readback-at-that-merge-SHA-passes-both-runtime-validators-both-
+    focused-suites-ci-foundation-and-governance-validation
+  signals:
+    - exact-merge-SHA-hosted-required-check-results
+    - fresh-develop-head-equals-exact-PR-209-merge-SHA
+    - both-runtime-validators-and-both-focused-suites-pass
+    - ci-foundation-and-governance-validation-pass
+    - canonical-public-ID-and-bounded-procedure-positives-pass
+    - every-surface-disclosure-live-later-history-delivery-and-rollback-negatives-pass
+  success: all-signals-pass-at-exact-merge-SHA-with-zero-recurrence
+  stop: >-
+    any-hosted-or-readback-failure-false-acceptance-canonical-positive-rejection-
+    identity-mismatch-or-review-evidence-drift-stops-issue-211-203-206-closure-and-
+    VOC-106-release
+  evidence_route: issue-211-comment-linked-to-PR-209-merge-SHA-and-hosted-runs
+  failure_route: >-
+    append-failing-evidence-to-issue-211-or-open-linked-plain-bug-if-closed-then-
+    route-separately-governed-remediation-or-full-integrated-PR-209-revert
+
+owners:
+  decision: /root
+  package_preparation: /root/voc113_planner
+  implementation: /root/voc105_builder
+  implementation_authority_usable_after: normal-reviewed-non-author-plan-merge
+  canonical_documentation_milestone_specialist: /root/voc111_specialist
+  independent_cross_model_R4_verifier: /root/voc109_cross_model
+  independent_cross_model_provenance: gpt-5.6-sol
+  merge: /root
+  bounded_observation: /root
+
+plan_review_history:
+  - candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    reviewer: /root/voc111_specialist
+    verdict: pass-canonical-documentation-milestone-validator-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770065
+    resolution: >-
+      Exact approved-candidate specialist review; grants no implementation before
+      normal adopted-plan merge and no external-action authority.
+  - candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    reviewer: /root/voc109_cross_model
+    model_provenance: gpt-5.6-sol
+    verdict: pass-independent-cross-model-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770303
+    resolution: >-
+      Exact approved-candidate independent review; grants no implementation before
+      normal adopted-plan merge and no external-action authority.
+  - candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    decision: VOC-113-ADOPT-2026-09-01
+    actor: /root
+    verdict: adopted-for-declared-two-file-repository-only-remediation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770482
+    resolution: >-
+      Authorizes adoption bookkeeping and normal non-author plan merge; implementation
+      becomes usable only after that merge and every external action remains prohibited.
+
+approvals:
+  canonical_documentation_milestone_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770065
+  independent_cross_model_R4_plan_review:
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    model_provenance: gpt-5.6-sol
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770303
+  adoption_decision:
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-113-ADOPT-2026-09-01
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770482
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - scripts/foundation/voc105-f3-evidence-policy.mjs
+  - scripts/foundation/voc105-f3-evidence-policy.test.mjs
+
+protected_areas:
+  - exact-VOC-105-F3-milestone-truth
+  - VOC-111-candidate-identity-and-bounded-observation
+  - active-document-secret-and-Worker-ID-redaction
+  - later-milestone-production-live-launch-and-data-boundaries
+  - VOC-094-through-VOC-104-historical-integrity
+  - VOC-080-HOLD-01-and-HOLD-02
+
+dependencies:
+  - id: VOC-113-DEP-00
+    status: intake-only
+    description: >-
+      Issue #211 and the two independent blocking findings establish the defects and
+      stop condition but grant no implementation or merge authority.
+  - id: VOC-113-DEP-01
+    status: adopted-VOC-105-open-draft-implementation
+    description: >-
+      VOC-105 authorizes the coherent F3 documentation/evidence outcome; PR #209 is its
+      unmerged implementation and remains held at the stopped reviewed SHA.
+  - id: VOC-113-DEP-02
+    status: implemented-VOC-111-fail-closed-identity-boundary
+    description: >-
+      VOC-111 requires candidate drift to stop downstream merge. VOC-113 follows that
+      stop and governs a replacement identity; it does not rewrite historical evidence
+      or waive before/after observation.
+  - id: VOC-113-DEP-03
+    status: active-VOC-110-and-VOC-109-protections
+    description: >-
+      Current profile, false-claim, hybrid, immutable-F2, and foundation-chain tests
+      remain protected and must pass unchanged in effect.
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    evidence: specification.md and issue #211
+  impact_assessment:
+    required: true
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    evidence: implementation-plan.md and release-plan.md
+  deterministic_evidence:
+    required: true
+    evidence: test-plan.md and exact hosted results
+  specialist_evidence:
+    required: true
+    role: canonical-documentation-milestone-evidence-specialist
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770065
+  independent_exact_revision_evidence:
+    required: true
+    role: independent-cross-model-R4-verifier
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    model_provenance: gpt-5.6-sol
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770303
+  ehr: not-triggered
+
+scope_boundary:
+  two_existing_voc105_validator_files: allowed-after-adoption
+  pr_209_evidence_body_and_comments: required-after-stable-correction
+  other_repository_paths: prohibited
+  application_runtime_workflow_package_scripts: prohibited
+  historical_change_packages: prohibited
+  github_settings_or_secrets: prohibited
+  cloudflare_dns_deployment_dispatch: prohibited
+  production_or_learner_data: prohibited
+  main_promotion: prohibited
+  issue_closure: prohibited-by-this-package
+
+inherited_holds:
+  - id: VOC-080-HOLD-01
+    status: held
+    action: production-traffic-or-production-D1-migrations
+  - id: VOC-080-HOLD-02
+    status: held
+    action: production-learner-data-access-export-transform-or-delete
+
+implementation:
+  authorized: true
+  authority_usable_after: normal-reviewed-non-author-plan-merge-to-develop
+  task_count: 1
+  pull_request_count: 1
+  pull_request: https://github.com/KARSIFT/vocanova-platform/pull/209
+  branch: impl/voc-105-f3-current-documentation
+  exact_paths:
+    - scripts/foundation/voc105-f3-evidence-policy.mjs
+    - scripts/foundation/voc105-f3-evidence-policy.test.mjs
+  external_effects: prohibited
+
+rollback:
+  before_merge: close-PR-209-for-zero-repository-effect
+  premerge_rehearsal: >-
+    scoped-12-path-reversal-proves-historical-533084432f0672dbf25c402e96209120a8ad50cf-
+    content-only-and-does-not-claim-that-SHA-is-the-future-first-parent
+  after_merge: >-
+    separately-reviewed-full-revert-restores-the-actual-then-current-PR-209-first-
+    parent-including-adopted-VOC-113
+  live_system_rollback: not-applicable-no-live-action-authorized
