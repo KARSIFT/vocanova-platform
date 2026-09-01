@@ -2053,6 +2053,25 @@ export function deriveExpectedPassMembers(stableState, registry) {
     )
       throw new TypeError("pass registry invalid/duplicate capture digest");
     captureDigests.add(entry.capture.capture_sha256);
+    const auxiliaryKeys = {
+      scan: ["pages", "pageContexts"],
+      command: ["stdout", "stderr"],
+      object: ["raw", "headers"],
+    }[entry.kind];
+    if (!auxiliaryKeys || !exactKeys(entry.auxiliary, auxiliaryKeys))
+      throw new TypeError(
+        `pass registry ${entry.kind} exact raw auxiliary context required`,
+      );
+    if (
+      entry.kind === "scan" &&
+      (!Array.isArray(entry.auxiliary.pageContexts) ||
+        entry.auxiliary.pageContexts.some(
+          (context) => !exactKeys(context, ["raw", "headers"]),
+        ))
+    )
+      throw new TypeError(
+        "pass registry scan exact raw context per page required",
+      );
   }
   if (
     canonicalize([...entries.keys()].sort()) !==
@@ -2063,6 +2082,17 @@ export function deriveExpectedPassMembers(stableState, registry) {
   const expectedHistory = stableState.ruleset_history;
   const expectedPulls = stableState.all_pr_boundary;
   const expectedRefs = stableState.refs;
+  const verifiedCommits = new Map();
+  for (const descriptor of descriptors.filter(
+    (item) => item.kind === "object" && item.source === "git_commit",
+  )) {
+    const entry = entries.get(registryKey(descriptor));
+    const errors = validateObjectCapture(entry.capture, entry.auxiliary);
+    if (`commit:${entry.capture.projection?.sha}` !== descriptor.subject)
+      errors.push("pass registry git commit subject mismatch");
+    if (errors.length) throw new TypeError(errors.join("; "));
+    verifiedCommits.set(entry.capture.projection.sha, entry.capture.projection);
+  }
   for (const descriptor of descriptors) {
     const entry = entries.get(registryKey(descriptor));
     let errors = [];
@@ -2098,11 +2128,6 @@ export function deriveExpectedPassMembers(stableState, registry) {
       const selectedHistory = selectLatestRulesetVersion(
         stableState.ruleset_history,
       );
-      errors = validateObjectCapture(entry.capture, {
-        ...entry.auxiliary,
-        currentRuleset: stableState.ruleset,
-        selectedHistory,
-      });
       let expected;
       if (descriptor.source === "ruleset") expected = stableState.ruleset;
       if (descriptor.source === "protected_ref")
@@ -2113,11 +2138,20 @@ export function deriveExpectedPassMembers(stableState, registry) {
         expected = stableState.reserved_prs.find(
           (item) => `pr:${item.number}` === descriptor.subject,
         );
-      if (
-        descriptor.source === "git_commit" &&
-        `commit:${entry.capture.projection.sha}` !== descriptor.subject
-      )
-        errors.push("pass registry git commit subject mismatch");
+      const verifiedCommit =
+        descriptor.source === "protected_ref"
+          ? verifiedCommits.get(expected?.sha)
+          : undefined;
+      if (descriptor.source === "protected_ref" && !verifiedCommit)
+        errors.push("pass registry protected-ref commit capture join missing");
+      errors.push(
+        ...validateObjectCapture(entry.capture, {
+          ...entry.auxiliary,
+          currentRuleset: stableState.ruleset,
+          selectedHistory,
+          gitCommit: verifiedCommit,
+        }),
+      );
       if (
         expected &&
         canonicalize(entry.capture.projection) !== canonicalize(expected)

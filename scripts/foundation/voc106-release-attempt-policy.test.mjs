@@ -157,7 +157,7 @@ function page(source, number, items, next = null, subject) {
   const preimage = { ...capture };
   delete preimage.capture_sha256;
   capture.capture_sha256 = sha256(canonicalize(preimage));
-  PAGE_CONTEXTS.set(capture, { raw, headers: HEADERS, subject });
+  PAGE_CONTEXTS.set(capture, { raw, headers: HEADERS });
   return capture;
 }
 
@@ -214,6 +214,22 @@ function historyRecord() {
     actor_type: "User",
     updated_at: TIME,
     version_id: "9",
+  };
+}
+
+function timelineEvent() {
+  return {
+    actor_id: "1",
+    actor_login: "m-e-h-r-d-a-a-d",
+    actor_node_id: "USER_node",
+    assignee_id: null,
+    assignee_login: null,
+    assignee_node_id: null,
+    commit_id: SHA,
+    created_at: TIME,
+    event: "closed",
+    id: "11",
+    node_id: "EVENT_node",
   };
 }
 
@@ -376,6 +392,11 @@ function objectContext(capture) {
   return OBJECT_CONTEXTS.get(capture);
 }
 
+function registryObjectContext(capture) {
+  const { raw, headers } = objectContext(capture);
+  return { raw, headers };
+}
+
 function validateObjectCapture(capture, context = {}) {
   return validateObjectCaptureRaw(capture, {
     ...objectContext(capture),
@@ -429,10 +450,21 @@ function scanCapture(source, pages) {
 }
 
 function passContextFixture() {
-  const stableState = stableFixture();
+  const base = stableWithPr();
+  const event = timelineEvent();
+  const stableState = buildStableState({
+    ruleset: base.ruleset,
+    ruleset_history: base.ruleset_history,
+    protected_refs: base.protected_refs,
+    all_pr_boundary: base.all_pr_boundary,
+    reserved_prs: base.reserved_prs,
+    timelines: [{ events: [event], pr_number: "7" }],
+    refs: base.refs,
+  });
   const historyPages = [page("ruleset_history_list", 1, [historyRecord()])];
-  const pullPages = [page("pulls", 1, [])];
-  const refPages = [page("matching_refs", 1, [])];
+  const pullPages = [page("pulls", 1, stableState.all_pr_boundary)];
+  const timelinePages = [page("timeline", 1, [event], null, "7")];
+  const refPages = [page("matching_refs", 1, stableState.refs)];
   const current = ruleset();
   const versionState = { ...current };
   delete versionState.history_version;
@@ -443,7 +475,10 @@ function passContextFixture() {
     updated_at: TIME,
     version_id: "9",
   };
-  const emptyCommand = {
+  const stdout = stableState.refs
+    .map((item) => `${item.sha}\t${item.name}\n`)
+    .join("");
+  const command = {
     schema: "voc-106-command-capture-v1",
     source: "git_ls_remote",
     argv: [
@@ -455,16 +490,26 @@ function passContextFixture() {
     ],
     exit_code: 0,
     captured_at: TIME,
-    stdout_sha256: sha256(""),
+    stdout_sha256: sha256(stdout),
     stderr_sha256: sha256(""),
-    projection: [],
-    projection_jcs_sha256: sha256(canonicalize([])),
+    projection: stableState.refs,
+    projection_jcs_sha256: sha256(canonicalize(stableState.refs)),
     capture_sha256: "",
   };
-  const commandPreimage = { ...emptyCommand };
+  const commandPreimage = { ...command };
   delete commandPreimage.capture_sha256;
-  emptyCommand.capture_sha256 = sha256(canonicalize(commandPreimage));
+  command.capture_sha256 = sha256(canonicalize(commandPreimage));
   const registry = [
+    {
+      kind: "scan",
+      source: "timeline",
+      subject: "pr:7",
+      capture: scanCapture("timeline", timelinePages),
+      auxiliary: {
+        pages: timelinePages,
+        pageContexts: timelinePages.map(pageContext),
+      },
+    },
     {
       kind: "scan",
       source: "ruleset_history_list",
@@ -493,8 +538,15 @@ function passContextFixture() {
       kind: "command",
       source: "git_ls_remote",
       subject: "refs/heads/release/voc-106-",
-      capture: emptyCommand,
-      auxiliary: { stdout: "", stderr: "" },
+      capture: command,
+      auxiliary: { stdout, stderr: "" },
+    },
+    {
+      kind: "object",
+      source: "reserved_pr",
+      subject: "pr:7",
+      capture: objectCapture("reserved_pr", stableState.reserved_prs[0]),
+      auxiliary: {},
     },
     {
       kind: "object",
@@ -548,7 +600,7 @@ function passContextFixture() {
     },
   ];
   for (const entry of registry.filter((item) => item.kind === "object"))
-    entry.auxiliary = objectContext(entry.capture);
+    entry.auxiliary = registryObjectContext(entry.capture);
   return { stableState, registry };
 }
 
@@ -1268,6 +1320,182 @@ test("pass registry rejects omission, duplicate, reorder, substitution, and stab
   assert.match(
     validatePassCapture(wrongStable, context).join(";"),
     /stable digest/u,
+  );
+});
+
+test("full pass registry binds reserved PR, timeline, commits, raw contexts, and member cardinality", () => {
+  const context = passContextFixture();
+  const pass = passFixture(context, "1");
+  assert.deepEqual(validatePassCapture(pass, context), []);
+  assert.equal(pass.members.length, 12);
+  assert.ok(
+    pass.members.some(
+      (item) => item.source === "timeline" && item.subject === "pr:7",
+    ),
+  );
+  assert.ok(
+    pass.members.some(
+      (item) => item.source === "reserved_pr" && item.subject === "pr:7",
+    ),
+  );
+  assert.deepEqual(
+    pass.members
+      .filter((item) => item.source === "git_commit")
+      .map((item) => item.subject),
+    [`commit:${SHA}`, `commit:${TREE}`].sort(),
+  );
+
+  const expectFailure = (mutate, pattern) => {
+    const changed = structuredClone(context);
+    mutate(changed);
+    const errors = validatePassCapture(pass, changed).join(";");
+    assert.match(errors, pattern);
+  };
+  const find = (value, source) =>
+    value.registry.find((item) => item.source === source);
+
+  for (const source of ["timeline", "reserved_pr"]) {
+    expectFailure((value) => {
+      const entry = find(value, source);
+      const rawContext =
+        source === "timeline"
+          ? entry.auxiliary.pageContexts[0]
+          : entry.auxiliary;
+      rawContext.raw = Buffer.concat([
+        Buffer.from(rawContext.raw),
+        Buffer.from(" "),
+      ]);
+    }, /raw byte digest/u);
+    expectFailure((value) => {
+      const entry = find(value, source);
+      if (source === "timeline") {
+        entry.auxiliary.pages[0].raw_sha256 = DIGEST;
+        rehash(entry.auxiliary.pages[0]);
+      } else {
+        entry.capture.raw_sha256 = DIGEST;
+        rehash(entry.capture);
+      }
+    }, /raw byte digest/u);
+    expectFailure((value) => {
+      const entry = find(value, source);
+      if (source === "timeline") {
+        entry.auxiliary.pages[0].items[0].event = "reopened";
+        entry.auxiliary.pages[0].items_jcs_sha256 = sha256(
+          canonicalize(entry.auxiliary.pages[0].items),
+        );
+        rehash(entry.auxiliary.pages[0]);
+      } else {
+        entry.capture.projection.user_login = "wrong-actor";
+        entry.capture.projection_jcs_sha256 = sha256(
+          canonicalize(entry.capture.projection),
+        );
+        rehash(entry.capture);
+      }
+    }, /raw\/source projection/u);
+    expectFailure((value) => {
+      const entry = find(value, source);
+      const rawContext =
+        source === "timeline"
+          ? entry.auxiliary.pageContexts[0]
+          : entry.auxiliary;
+      delete rawContext.raw;
+    }, /raw auxiliary|raw context|raw projection/u);
+    expectFailure((value) => {
+      const entry = find(value, source);
+      const rawContext =
+        source === "timeline"
+          ? entry.auxiliary.pageContexts[0]
+          : entry.auxiliary;
+      rawContext.headers.accept = "wrong";
+    }, /headers/u);
+    expectFailure((value) => {
+      const entry = find(value, source);
+      const rawContext =
+        source === "timeline"
+          ? entry.auxiliary.pageContexts[0]
+          : entry.auxiliary;
+      rawContext.extra = true;
+    }, /exact raw auxiliary|exact raw context/u);
+  }
+
+  expectFailure((value) => {
+    find(value, "protected_ref").auxiliary.gitCommit = {
+      parents: [],
+      sha: SHA,
+      tree: TREE,
+    };
+  }, /exact raw auxiliary context/u);
+  expectFailure((value) => {
+    const entry = value.registry.find(
+      (item) =>
+        item.source === "git_commit" && item.subject === `commit:${SHA}`,
+    );
+    const projection = { ...entry.capture.projection, tree: SHA };
+    const raw = Buffer.from(
+      JSON.stringify({
+        parents: projection.parents.map((sha) => ({ sha })),
+        sha: projection.sha,
+        tree: { sha: projection.tree },
+      }),
+    );
+    entry.capture.projection = projection;
+    entry.capture.projection_jcs_sha256 = sha256(canonicalize(projection));
+    entry.capture.raw_sha256 = sha256(raw);
+    entry.auxiliary.raw = raw;
+    rehash(entry.capture);
+  }, /raw\/source projection mismatch/u);
+  expectFailure((value) => {
+    const entry = value.registry.find(
+      (item) =>
+        item.source === "git_commit" && item.subject === `commit:${SHA}`,
+    );
+    const replacementSha = "d".repeat(40);
+    const projection = { ...entry.capture.projection, sha: replacementSha };
+    const raw = Buffer.from(
+      JSON.stringify({
+        parents: projection.parents.map((sha) => ({ sha })),
+        sha: projection.sha,
+        tree: { sha: projection.tree },
+      }),
+    );
+    entry.capture.endpoint = `https://api.github.com/repos/${REPOSITORY}/git/commits/${replacementSha}`;
+    entry.capture.projection = projection;
+    entry.capture.projection_jcs_sha256 = sha256(canonicalize(projection));
+    entry.capture.raw_sha256 = sha256(raw);
+    entry.auxiliary.raw = raw;
+    rehash(entry.capture);
+  }, /git commit subject mismatch/u);
+  expectFailure((value) => {
+    const entry = value.registry.find(
+      (item) =>
+        item.source === "git_commit" && item.subject === `commit:${SHA}`,
+    );
+    entry.auxiliary.raw = Buffer.concat([
+      Buffer.from(entry.auxiliary.raw),
+      Buffer.from(" "),
+    ]);
+  }, /raw byte digest/u);
+
+  expectFailure((value) => {
+    value.registry[0].capture.capture_sha256 = DIGEST;
+  }, /capture digest|inventory/u);
+  expectFailure((value) => {
+    value.registry[0].subject = "pr:8";
+  }, /omission\/extra subject/u);
+  const reordered = structuredClone(pass);
+  reordered.members.reverse();
+  rehash(reordered);
+  assert.match(
+    validatePassCapture(reordered, context).join(";"),
+    /ordered member inventory/u,
+  );
+  const wrongCount = rehash({
+    ...structuredClone(pass),
+    member_count: "11",
+  });
+  assert.match(
+    validatePassCapture(wrongCount, context).join(";"),
+    /member count/u,
   );
 });
 
