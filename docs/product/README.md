@@ -14,8 +14,11 @@ VOC-081 supplies the contributor-verifiable F2 foundation. Its complete stack wa
 integrated by PR #108 and passed post-merge revalidation, so the
 [evidence record](../operations/voc-081-f2-evidence.md) now reports repository/local
 F2 complete and effective while preserving the earlier candidate state as history.
-F3, A1/P1+ acceptance, staging, production, deployment, and live activation remain
-unresolved and are not implied.
+The [VOC-105 evidence record](../operations/voc-105-f3-evidence.md) separately
+validates every DOC-12 F3 gate item and reports the F3 staging foundation
+complete-effective. A1/P1+ acceptance remains unresolved and is a separate future
+outcome. Production readiness and traffic, learner-data access, and public launch
+remain unresolved or held; `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
 
 [Migration notes](../archive/README-migration-notes.md) preserve VOC-007 source reconciliation evidence;
 [adoption notes](../archive/README-adoption-notes.md) record the VOC-008 semantic correction decisions.
