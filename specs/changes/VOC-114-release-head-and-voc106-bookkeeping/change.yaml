@@ -1,0 +1,249 @@
+schema_version: 1
+
+id: VOC-114
+slug: release-head-and-voc106-bookkeeping
+title: Make the release head disposable and reconcile VOC-106 bookkeeping
+type: release-governance-and-adopted-package-correction
+status: adopted
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because this correction changes canonical release and protected-history rules,
+  corrects an adopted R4 package immediately before execution, and prevents automatic
+  source deletion from targeting permanent develop. The implementation is repository-
+  only and grants no settings or live-system authority.
+canonical_path: specs/changes/VOC-114-release-head-and-voc106-bookkeeping
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/213
+related_adopted_package: VOC-106
+base_branch: develop
+base_sha: 40cc8159a2ae372b5addb5af21c822fa81a5454e
+plan_branch: plan/voc-114-release-head-bookkeeping
+target_branch: develop
+approved_candidate_sha: 5baef9cbd1088ddbbdb7db292754567765e671a3
+approval_status: adopted
+implementation_authorized: true
+implementation_authority_status: >-
+  authorized-by-exact-candidate-independent-R4-PASS-and-accountable-adoption-only-for-
+  the-declared-16-path-repository-correction-after-this-bookkeeping-revision-receives-
+  fresh-exact-review-and-normal-plan-merge; all-external-actions-remain-prohibited
+implementation_pull_request_count: 1
+multiple_pull_request_rationale: not-applicable-single-coherent-policy-and-bookkeeping-correction
+automatic_merge_allowed: true
+production_impact: none-repository-policy-and-history-preparation-only
+rollback_required: true
+
+objective: >-
+  Correct VOC-106 and every living release instruction so promotion uses an exact,
+  short-lived copy of freshly frozen develop as the PR head, never permanent develop;
+  reconcile stale VOC-106 adoption/task fields; and preserve all existing review,
+  merge, synchronization, rollback, and external-action boundaries.
+
+requirements:
+  - id: VOC-114-D00
+    statement: >-
+      Record issue #213 as intake and the observed contradiction: hosted
+      delete_branch_on_merge is true, while adopted VOC-106 directs permanent develop
+      to be the release PR head and only says to stop if its deletion risk cannot be
+      disproved. Do not execute release, settings, or branch mutation from the draft.
+  - id: VOC-114-D01
+    statement: >-
+      Replace the release source with one short-lived
+      release/voc-106-<frozen-develop-short-sha> branch created at the exact freshly
+      fetched origin/develop SHA. Before review and merge, prove its SHA and tree equal
+      the frozen develop SHA and tree, its base is exact frozen main, merge-base of
+      frozen main and develop equals frozen main, main-only count is zero, and the
+      aggregate compare contains no commit or tree beyond frozen develop.
+  - id: VOC-114-D02
+    statement: >-
+      A release head and its draft PR are one immutable attempt and are never force-
+      updated. Any movement of origin/develop, origin/main, release head, PR base/head,
+      merge base, tree, compare, required check, policy evidence, or reviewed revision
+      invalidates the complete binder. Close and abandon that draft PR/ref without
+      manual deletion, then create a fresh correctly named ref and PR with all-new
+      evidence. Before creation, fail if the exact name exists unless it is proved the
+      untouched head of this same attempt; never mutate or adopt another PR/actor ref.
+  - id: VOC-114-D03
+    statement: >-
+      The release PR targets main and uses an identifiable merge commit. Before merge,
+      prove the prospective/resulting release merge tree equals the frozen develop and
+      release-head tree, and record head name, exact SHA, tree, and nonexecuted
+      recreation command. Automatic deletion may remove only that successfully merged
+      short-lived release head and the later merged synchronization head. Permanent
+      develop and main must remain present and unchanged by source deletion.
+  - id: VOC-114-D04
+    statement: >-
+      Preserve VOC-106's separately reviewed post-promotion synchronization from a
+      short-lived current-develop branch, final main-ancestor-of-develop and zero-behind
+      proofs, complete R4 evidence, distinct non-author reviewers, and separate
+      authorized non-author merger for each exact protected-history PR.
+  - id: VOC-114-D05
+    statement: >-
+      Reconcile all nine VOC-106 package artifacts: retain its adopted candidate,
+      review, approval, and implementation authorization evidence; remove only stale
+      pending-adoption/bookkeeping blockers; mark T00 authorized and pending fresh
+      release freeze; leave T01 pending the release merge; and make every release-head,
+      test, evidence, contingency, and rollback statement consistent with D01-D04.
+  - id: VOC-114-D06
+    statement: >-
+      Update AGENTS.md, CONTRIBUTING.md, `.github/README.md`, DOC-15 current release
+      sections, DOC-16, repository-settings.md, and the development-workflow guide in
+      the same PR. The GitHub guide must state immutable release attempts, ancestry and
+      tree proofs, collision/abandonment, and short-lived-only automatic deletion.
+      Preserve explicitly historical text and immutable earlier packages.
+  - id: VOC-114-D07
+    statement: >-
+      Implementation changes exactly the 16 declared existing files, contains no
+      application/workflow/settings state mutation, and passes governance validation,
+      changed-path risk classification, whitespace/link/reference checks, focused
+      semantic positive/negative audits, hosted required checks, and exact-diff review.
+  - id: VOC-114-D08
+    statement: >-
+      Require an exact-revision release-governance/git-history specialist PASS and a
+      different independent R4 reviewer PASS with zero blockers. A separate non-author
+      merge actor may merge the correction only after adoption and all current evidence.
+  - id: VOC-114-D09
+    statement: >-
+      Under DOC-15 section 24.18, the adoption-recorded owner monitors from correction
+      merge through exact-merge-SHA hosted/readback checks and the first corrected
+      VOC-106 promotion/synchronization evidence. Failure or permanent-head exposure
+      stops release/closure and routes a governed correction or reviewed revert.
+  - id: VOC-114-D10
+    statement: >-
+      Prohibit repository-settings query or mutation, manual branch deletion, workflow
+      dispatch, deployment, Cloudflare/DNS/resource action, secret or production/data
+      access, migration, traffic, spending, launch, force-push of any release,
+      synchronization, permanent, or foreign PR head, self-review, self-approval, and
+      self-merge.
+
+implementation_paths:
+  - .github/README.md
+  - AGENTS.md
+  - CONTRIBUTING.md
+  - docs/governance/16-autonomous-development-operating-model.md
+  - docs/governance/repository-settings.md
+  - docs/operations/10-development-workflow.md
+  - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+  - specs/changes/VOC-106-release-promotion-sync/README.md
+  - specs/changes/VOC-106-release-promotion-sync/acceptance-criteria.md
+  - specs/changes/VOC-106-release-promotion-sync/change.yaml
+  - specs/changes/VOC-106-release-promotion-sync/impact-analysis.md
+  - specs/changes/VOC-106-release-promotion-sync/implementation-plan.md
+  - specs/changes/VOC-106-release-promotion-sync/release-plan.md
+  - specs/changes/VOC-106-release-promotion-sync/specification.md
+  - specs/changes/VOC-106-release-promotion-sync/tasks.md
+  - specs/changes/VOC-106-release-promotion-sync/test-plan.md
+
+owners:
+  decision: accountable-repository-owner-operator-at-adoption
+  package_preparation: /root/voc114_planner
+  implementation: different-builder-actor-after-adoption
+  release_governance_specialist: different-non-author-exact-revision-reviewer
+  independent_r4_verification: different-non-author-exact-revision-reviewer
+  merge: separate-authorized-non-author-merge-actor
+  monitoring: accountable-repository-owner-recorded-at-adoption
+
+plan_review_history:
+  - candidate_sha: 5baef9cbd1088ddbbdb7db292754567765e671a3
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/214#issuecomment-5491280721
+    reviewer: /root/voc114_plan_review
+    resolution_status: >-
+      independent R4 plan review bound to the approved substantive candidate; this
+      bookkeeping revision requires fresh exact review and grants no external authority
+approvals:
+  package_independent_verification:
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 5baef9cbd1088ddbbdb7db292754567765e671a3
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/214#issuecomment-5491280721
+  adoption_decision:
+    status: adopted-for-declared-16-path-repository-only-correction
+    candidate_sha: 5baef9cbd1088ddbbdb7db292754567765e671a3
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/214#issuecomment-5491284830
+
+affected_areas:
+  - release-governance
+  - protected-main-and-develop-history
+  - automatic-short-lived-source-deletion-boundary
+  - adopted-VOC-106-bookkeeping
+protected_areas:
+  - DOC-15
+  - DOC-16
+  - AGENTS.md
+  - permanent-branch-history
+  - repository-settings-truth
+
+implementation:
+  authorized: true
+  required: true
+  status: >-
+    adopted-and-authorized-pending-bookkeeping-revision-exact-review-normal-plan-merge-
+    and-fresh-implementation-evidence
+  target_branch: develop
+  pull_request_count: 1
+  tasks:
+    - VOC-114-T00
+
+action_specific_authority:
+  required: true
+  authorization_status: >-
+    adopted-for-the-declared-repository-only-correction-but-pending-bookkeeping-
+    revision-exact-review-normal-plan-merge-and-fresh-implementation-evidence
+  actions:
+    - id: VOC-114-AUTH-00
+      action: merge-exact-reviewed-policy-and-bookkeeping-correction-into-develop
+      accountable_role: separate-authorized-non-author-merge-actor
+      required_evidence: >-
+        adopted exact package, deterministic checks, complete R4 and specialist
+        evidence, zero blockers, and read-only merge-eligibility report where applicable
+      completion_condition: exact reviewed correction merge and postmerge readback pass
+      expiry_condition: any head/base/evidence drift, failure, blocker, EHR, or scope expansion
+
+post_merge_monitoring:
+  governing_rule: DOC-15-section-24.18
+  owner: accountable-repository-owner-recorded-at-adoption
+  begins: VOC-114-correction-merge-event
+  ends: >-
+    exact-correction-merge-SHA-hosted-and-develop-readback-pass-plus-first-corrected-
+    VOC-106-promotion-and-synchronization-final-readback-proves-both-permanent-branches-
+    present-release-merge-tree-equals-frozen-develop-tree-main-ancestor-of-develop-
+    develop-zero-behind-and-only-successfully-merged-short-lived-heads-eligible-for-
+    automatic-deletion
+  stop: >-
+    any-check-or-semantic-failure-evidence-drift-permanent-head-exposure-unexpected-
+    deletion-or-ref-movement-stops-VOC-106-release-or-closure-and-routes-governed-
+    remediation-or-reviewed-revert
+
+external_effects:
+  repository_settings: prohibited
+  settings_query: prohibited
+  manual_branch_deletion: prohibited
+  workflow_dispatch: prohibited
+  cloudflare: prohibited
+  dns: prohibited
+  deployment: prohibited
+  migration: prohibited
+  production_data: prohibited
+  learner_data: prohibited
+  secrets: prohibited
+  traffic: prohibited
+  spending: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-correction-precedes-separately-authorized-VOC-106-release
+  deployment: prohibited
+  rollback_required: true
+  issue_closure: after-monitoring-and-corrected-VOC-106-finalization-evidence
+
+repository_adoption_status: >-
+  adopted-pending-bookkeeping-revision-exact-review-normal-plan-merge-and-applicable-
+  postmerge-checks
+adoption_pr: 214
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/214#issuecomment-5491284830
+
+ehr: not-triggered
+blocking_reasons:
+  - bookkeeping-revision-exact-review-pending
+  - normal-reviewed-plan-merge-pending
+  - implementation-exact-checks-and-reviews-pending
