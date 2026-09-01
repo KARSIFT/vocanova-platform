@@ -19,8 +19,10 @@ preserving old controls. Merge only to `develop`; do not cross the active releas
 - Requirements: `VOC-120-D00` through `VOC-120-D14`
 - Acceptance criteria: `VOC-120-AC-01` through `VOC-120-AC-10`
 - Tests: `VOC-120-TEST-01` through `VOC-120-TEST-06`
-- Evidence: `VOC-120-EV-04`, `VOC-120-EV-05`, `VOC-120-EV-06`, `VOC-120-EV-07`
-- Implementation PRs: `VOC-120-PR2`, `VOC-120-PR3`, `VOC-120-PR4`, `VOC-120-PR5`
+- Evidence: `VOC-120-EV-04`, `VOC-120-EV-05`, `VOC-120-EV-06`, `VOC-120-EV-07`,
+  `VOC-120-EV-08`
+- Implementation PRs: `VOC-120-PR2`, `VOC-120-PR3`, `VOC-120-PR4`, `VOC-120-PR5`,
+  `VOC-120-PR6`
 - Status: blocked-on-t01-qualified-human-ehr-and-held-actions
 
 After qualified confirmation, close PR #215 unmerged under its hold and add only the
@@ -29,4 +31,5 @@ perform merge-compatible settings action A and immediate PR3 truth; complete PR4
 cleanup plus the final old-model promotion/synchronization; then perform action B and
 immediate PR5 truth. Permanent `Policy / required` enforces the frozen verifier for
 PR1/PR2 by tracked digest and PR3-PR5 by protected ref, then becomes the compact future
-policy aggregate. Action B locks every non-PR5 head until PR5 activates future state.
+policy aggregate. Action B locks every non-PR5 head until PR5 activates future state;
+action C then enables the queue and immediate PR6 records/exercises it.

@@ -26,9 +26,9 @@ short-lived branch
 Routine reversible work should take one PR. Protected work receives stronger tests
 and specialist review. Real external effects remain human-authorized.
 
-## Why this is one package and five implementation PRs
+## Why this is one package and six implementation PRs
 
-The outcome is one governance replacement, so it remains one package. Five PRs are
+The outcome is one governance replacement, so it remains one package. Six PRs are
 required because GitHub settings, immediate truth documentation, pre-change
 verification, and EHR form real boundaries:
 
@@ -40,6 +40,8 @@ verification, and EHR form real boundaries:
    pre-change authority through the final old-model promotion and synchronization.
 5. After the final old-model synchronization, activate the future settings and
    immediately record final branch-retirement truth.
+6. Enable the merge queue only after PR5 activation, then immediately record and
+   exercise it through the first future-policy PR.
 
 This accepts several final old-process reviews to avoid self-authorization, stale
 settings claims, an enforcement gap, or silent EHR supersession.
@@ -76,7 +78,8 @@ review automation, stale approval cleanup, and immutable tag rule.
 
 The replacement is evaluated under the authority effective before it. A distinct
 non-author reviewer must assess the exact plan candidate. After all blocking findings
-are resolved, adoption bookkeeping is recorded under the current rules before any
-implementation PR begins. The accountable adoption decision owner is the
-founder-repository-owner. Repository review never satisfies the separately held live
-GitHub settings actions.
+are resolved, the qualified human must confirm both finite EHR outcomes while the plan
+remains draft. Only then is adoption bookkeeping recorded under the current rules
+before any implementation PR begins. The accountable adoption decision owner is the
+founder-repository-owner. Repository review never satisfies separately held GitHub
+actions.

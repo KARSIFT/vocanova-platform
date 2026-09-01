@@ -22,9 +22,9 @@
   5. Prove docs-only Standard, Standard behavior, Protected, unknown-effect, and
      missing-reviewer cases enforce their distinct approval/review floors.
   6. Mutate the full `.github/policy-state.json` machine: bootstrap to preparation only
-     on PR1; fixed PR2/PR3 preparation; PR4-only preparation to locked; PR5-only locked
-     to active; invalid state/edge/branch/actor rejection; and ordinary classification
-     only after active reaches the default branch.
+     on PR1; fixed PR2/PR3/PR4 preparation; PR5-only preparation to active; invalid
+     state/edge/branch/actor rejection; action-B lock-variable match/mismatch/stale/
+     missing cases; and ordinary classification only after active reaches default.
 - Expected: attributable least-privilege review and no PR-body identity dependency.
 
 ## VOC-120-TEST-03 — Path-aware aggregate gate matrix
@@ -49,7 +49,8 @@
   2. Prove transition/rollback refs are created only after authorization and exact
      name/SHA freeze, then protected from update, deletion, and non-fast-forward
      mutation without bypass before reliance.
-  3. Exercise each required gate on a non-destructive PR/merge-group path.
+  3. Exercise each required gate on pull-request paths and, after action C, on a
+     non-destructive merge-group path.
   4. Prove action A permits the required old-model merge commits and does not enable
      squash-only linear history, merge queue, future-only gates, or future review
      floors before the final synchronization.
@@ -57,9 +58,12 @@
      reads no secret value, and can restore the captured `develop` policy.
   6. Verify a credential-free main dispatch reaches the expected gate before sole-main
      policy or develop retirement.
-  7. Prove action B occurs only after final merge-commit synchronization and activates
-     squash/linear history, queue, future gates/reviews, and sole-main staging.
-  8. Compare PR3 and PR5 settings truth with their exact live readbacks.
+  7. Prove action B occurs only after final merge-commit synchronization, activates
+     squash/linear history, future gates/reviews and sole-main staging, sets the exact
+     lock variable, and leaves the merge queue disabled.
+  8. Prove action C occurs only after active PR5 reaches default, clears the lock,
+     enables the queue, and obtains passing required `merge_group` conclusions on PR6.
+  9. Compare PR3, PR5, and PR6 settings truth with exact live readbacks.
 - Expected: protected main and immutable version tags match policy with no hidden
   bypass or missing gate.
 

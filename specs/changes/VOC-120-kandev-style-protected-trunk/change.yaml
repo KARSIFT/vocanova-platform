@@ -25,9 +25,9 @@ target_branch: develop
 approval_status: pending-independent-review
 implementation_authorized: false
 adoption_decision_owner: founder-repository-owner-m-e-h-r-d-a-a-d
-implementation_pull_request_count: 5
+implementation_pull_request_count: 6
 multiple_pull_request_rationale: >-
-  Five implementation pull requests are required by real rollback-safe,
+  Six implementation pull requests are required by real rollback-safe,
   action-authority, settings-truth, and active-EHR boundaries. PR1 installs
   dual-compatible policy, gates, and an immutable pre-change transition verifier.
   PR2 is limited to the selected EHR outcome: abandon draft PR #215 and add the exact
@@ -37,7 +37,9 @@ multiple_pull_request_rationale: >-
   against the frozen pre-change authority/verifier, performs the coherent cleanup and
   completes the final old-model promotion/synchronization. A final authorized settings
   cutover is followed immediately by PR5, the separately reviewed doc-only final truth
-  record. A single PR would delete checks
+  record and policy activation. A separately founder-authorized post-activation action
+  enables the merge queue, followed immediately by PR6, its future-policy truth and
+  queue rehearsal. A single PR would delete checks
   needed to review itself, claim settings before they exist, violate the mandatory
   settings-documentation follow-up, or supersede active EHR. The extra overhead is
   accepted once for a non-self-authorizing transition and is what the replacement
@@ -186,10 +188,14 @@ requirements:
       must invoke the no-bypass ref-pinned verifier for PR3 through PR5, then serve as
       the compact future policy aggregate. Committed settings documentation must match
       live truth through an immediate separately reviewed doc-only PR after every
-      mutation. Between action B and PR5 merge, the committed transition state and
-      required policy gate must reject every head except
+      mutation. Action B must defer the merge queue, set a read-back repository
+      transition lock, and retain committed preparation state through the final old
+      synchronization. Between action B and PR5 merge, the lock and required policy
+      gate must reject every head except
       `transition/voc-120-final-truth`; PR5 alone may flip the default-branch state to
-      active after exact old-authority acceptance.
+      active after exact old-authority acceptance. Only then may separately authorized
+      action C clear the lock and enable the merge queue; immediate PR6
+      must exercise `merge_group` and record final truth under the future policy.
   - id: VOC-120-D13
     statement: >-
       Do not copy Kandev's scale-specific complexity blindly. VocaNova must not copy
@@ -212,13 +218,13 @@ protected_areas:
 action_specific_holds:
   - id: VOC-120-HOLD-01
     action: >-
-      mutate live repository, ruleset, security, tag, review, required-check, and
-      cloudflare-staging environment deployment-branch settings
+      mutate live repository variable, ruleset, security, tag, review, required-check,
+      merge-queue, and cloudflare-staging environment deployment-branch settings
     accountable_role: founder-repository-owner
     required_evidence: >-
       explicit authorization and before/after API readback including environment
-      reviewers, admin bypass, policy mode, custom branch policies, and proof that no
-      secret value was read
+      reviewers, admin bypass, policy mode, custom branch policies, transition-lock
+      variable, merge queue, and proof that no secret value was read
     completion: committed settings truth matches the activated rules
   - id: VOC-120-HOLD-02
     action: retire-or-delete-develop-branch
@@ -271,6 +277,11 @@ implementation:
       target: main
       status: blocked-on-pr4-promotion-and-authorized-final-settings-cutover
       boundary: immediate separately reviewed doc-only final branch/settings truth
+    - id: VOC-120-PR6
+      name: merge-queue-settings-truth
+      target: main
+      status: blocked-on-pr5-and-authorized-queue-activation
+      boundary: immediate future-policy doc-only queue truth and rehearsal
 
 acceptance_criteria:
   - VOC-120-AC-01

@@ -177,17 +177,17 @@ replacing active authority; it may merge to `develop` but cannot be promoted whi
 release EHR stop remains. PR2 applies qualified-human outcomes for PR #215 and issue
 #231 only if they confirm the selected finite scope: abandon PR #215 unmerged and add
 the one-file aggregate-dispatch regression proof. A different outcome requires plan
-revision before adoption. PR1/PR2 use legacy gates plus the exact tracked verifier digest. Additive settings
-action A then protects immutable verifier/rollback refs, keeps merge commits and old
-gates, and adds
-`main` to the staging policy; immediate doc-only PR3 records live truth. PR4 performs
+revision and fresh review before adoption; confirmation occurs while VOC-120 remains
+draft. PR1/PR2 use legacy gates plus the exact tracked verifier digest. Additive
+settings action A then protects immutable verifier/rollback refs, keeps merge commits
+and old gates, and adds `main` to the staging policy; immediate doc-only PR3 records live truth. PR4 performs
 the coherent cleanup under the ref-pinned old verifier and receives the final
 merge-commit promotion/synchronization. Only afterward may action B enable squash-only
-linear main, merge queue, future gates/reviews, sole-main staging, and ordered develop
-retirement. Immediate doc-only PR5 is still required to pass the immutable old verifier
-through permanent `Policy / required`; the future model governs ordinary work only
-after PR5 merges. Until then committed `transition-locked` state rejects every head
-except the exact PR5 branch; PR5 alone changes default-branch state to `active`.
+linear main, future gates/reviews, sole-main staging, ordered develop retirement, and
+a repository-variable lock admitting only PR5; the merge queue remains disabled.
+Immediate doc-only PR5 passes the immutable old verifier and alone changes committed
+preparation state to active. Action C then clears the lock and enables the queue;
+immediate PR6 records and exercises `merge_group` under the future Protected lane.
 
 ## Security, privacy, data, and accessibility
 

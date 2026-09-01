@@ -4,19 +4,36 @@
 
 1. Exact plan review covers governance authority, GitHub Actions/rulesets, security,
    Cloudflare environment policy, EHR, rollback, and lane classification.
-2. The founder-repository-owner records the adoption decision under pre-change
+2. While the plan remains draft, a qualified human confirms both finite EHR outcomes
+   below. A different outcome requires plan revision and fresh exact review.
+3. Only then does the founder-repository-owner record adoption under pre-change
    DOC-15/DOC-16; `implementation_authorized` becomes true only afterward.
-3. All five implementation candidates remain subject to frozen pre-change authority
-   and different-actor exact review. The future model cannot authorize its transition.
-4. No promotion, release/ref action, settings cutover, or EHR-affected correction is
-   executable until PR #215 and issue #231 have permanent qualified-human outcomes.
-5. No setting or ref mutation occurs without its explicit hold and exact readback.
+4. PR1 begins only after adopted bookkeeping receives final exact review and merges.
+5. PR1-PR5 remain subject to frozen pre-change authority and different-actor exact
+   review. PR6 uses the adopted future Protected lane. No model authorizes itself.
+6. No setting, ref, PR closure, promotion, or release action occurs without its hold,
+   prerequisites, and exact readback.
 
-The five implementation heads are fixed as
+The six implementation heads are fixed as
 `impl/voc-120-preparation`, `impl/voc-120-ehr-unblock`,
 `docs/voc-120-additive-settings`, `impl/voc-120-final-cleanup`, and
-`transition/voc-120-final-truth`. The transition gate fails closed for a changed or
-unexpected VOC-120 branch identity.
+`transition/voc-120-final-truth`, followed by
+`docs/voc-120-merge-queue-truth`. The transition gate fails closed for a changed or
+unexpected pre-activation branch identity.
+
+## Pre-adoption qualified-human EHR boundary
+
+Before adoption or PR1:
+
+1. Record truthful reviewer identity, role, and relevant qualification.
+2. Confirm or reject the selected PR #215 outcome: accept the independent FAIL and
+   abandon the draft unmerged. Confirmation satisfies the technical condition only;
+   closure waits for adoption and `HOLD-05`.
+3. Confirm or reject the selected issue #231 outcome: direct surface tests do not prove
+   aggregate dispatch, so the low-cardinality aggregate proof is required in PR2.
+4. Record whether each EHR is technically resolved. A directional founder preference
+   without the qualification record does not satisfy this boundary. Any different
+   outcome stops VOC-120 for revised scope and fresh review before adoption.
 
 ## PR1 — Dual-compatible preparation
 
@@ -31,10 +48,11 @@ release machinery, templates, and required checks operational.
   the exact tracked verifier blob/digest while all legacy gates remain required. After
   action A, PR3-PR5 mode invokes that verifier from the protected immutable ref.
   Ordinary future branches use the compact policy aggregate without prose replay.
-- Add `.github/policy-state.json`. The only valid state machine is absent to
-  `transition-preparation` on exact PR1; preparation through exact PR2/PR3; preparation
-  to `transition-locked` on exact PR4; locked to `active` on exact PR5; then active
-  future lanes. Any other actor, branch, value, or transition fails closed.
+- Add `.github/policy-state.json`. The only valid committed state machine is absent to
+  `transition-preparation` on exact PR1; preparation through exact PR2/PR3/PR4; and
+  preparation to `active` on exact PR5. A repository variable set during action B
+  supplies the temporary lock after final synchronization. Any other state, actor,
+  branch, value, or transition fails closed.
 - Add the executable transition verifier and mutation tests. It binds candidates to
   the accepted control inventory, current authority, active EHR scope, held actions,
   exact transition branch names, and required evidence.
@@ -45,24 +63,10 @@ aggregate/merge-group matrices, affected product/security suites, transition-ver
 mutations, rollback inventory, and independent governance/Actions/security review.
 PR1 may merge to `develop`; it may not be promoted while the release EHR stop remains.
 
-## Qualified-human EHR boundary
-
-Before PR2 or any promotion:
-
-1. Record truthful reviewer identity, role, and relevant qualification.
-2. Confirm or reject the selected PR #215 outcome: accept the independent FAIL and
-   abandon the draft unmerged. After confirmation and `HOLD-05`, close it unmerged with
-   permanent evidence and preserve its history.
-3. Confirm or reject the selected issue #231 outcome: direct surface tests do not prove
-   aggregate dispatch, so the low-cardinality aggregate proof is required in PR2.
-4. Record whether each EHR is cleared. A directional founder preference without the
-   required qualification record does not satisfy this boundary. Any different
-   technical outcome stops VOC-120 for a revised, independently reviewed plan before
-   adoption; the verdict itself cannot expand PR2 scope.
-
 ## PR2 — EHR disposition and transition unblock
 
-Branch from current `origin/develop` only after both selected outcomes are confirmed.
+After adoption, satisfy `HOLD-05` by closing PR #215 unmerged with permanent readback
+and preserved history. Then branch PR2 from current `origin/develop`.
 
 - Change only `scripts/foundation/voc105-f3-evidence-policy.test.mjs`.
 - For every `DESIGNATED_F3_SURFACES` member, apply the accepted prohibited later-
@@ -130,8 +134,8 @@ and permanent `Policy / required` transition mode against the exact candidate.
   external-action controls in affected-path or stable aggregate lanes.
 - Retain permanent `Policy / required`; its transition mode executes the verifier from
   the protected immutable ref for PR4 and the exact final-truth PR5 branch.
-- Change `.github/policy-state.json` from `transition-preparation` to
-  `transition-locked`; exact transition checks must accept this edge before PR4 merge.
+- Keep `.github/policy-state.json` at `transition-preparation` through PR4 and both
+  final old-model release/synchronization PRs.
 - Reconcile every active workflow, script, package command, settings document,
   CODEOWNERS rule, and contributor surface to one provisional truthful state.
 
@@ -148,8 +152,9 @@ authority required by `HOLD-04`:
 1. Snapshot the complete phase-A state and prove PR4 passed the immutable transition
    verifier, current and future aggregate gates, and exact independent review.
 2. Change `main` to squash-only linear protected history, future aggregate gates,
-   conversation resolution, stale-review dismissal, the defined review floors, and
-   merge queue. Retain permanent `Policy / required` with no administrator bypass.
+   conversation resolution, stale-review dismissal, and the defined review floors.
+   Retain permanent `Policy / required` with no administrator bypass, but keep the
+   merge queue disabled through PR5.
 3. Now that PR4 is on `main`, prove a credential-free main dispatch reaches the
    expected pre-secret/environment boundary without deployment. Only then move
    `cloudflare-staging` to sole `main`. Preserve reviewers/admin-bypass/mode and read
@@ -158,9 +163,10 @@ authority required by `HOLD-04`:
    record the exact recreation command, then retire `develop` only with `HOLD-02`.
 5. Keep verifier and rollback refs protected through PR5 acceptance. Restore phase A
    atomically if any rule, check, queue, branch, environment, or ref readback differs.
-6. Keep committed policy state `transition-locked`. While the default branch has that
-   state, `Policy / required` rejects every pull-request head except exact
-   `transition/voc-120-final-truth`, regardless of future lane classification.
+6. Set and read back repository variable `VOC120_TRANSITION_LOCK_SHA` to the exact
+   synchronized `main` SHA. While committed state is `transition-preparation` and this
+   variable matches the base, `Policy / required` rejects every pull-request head
+   except exact `transition/voc-120-final-truth`, regardless of lane classification.
 
 ## PR5 — Immediate final branch/settings truth
 
@@ -171,12 +177,33 @@ immutable pre-change verifier; future aggregate gates and one non-author native 
 also apply. Record settings JSON, final branch/PR/tag/ref/environment inventory,
 rollback/recreation commands, and a future-effective activation decision conditional
 on PR5 merge and exact old-authority acceptance. PR5 alone changes committed policy
-state from `transition-locked` to `active`; mutation tests prove another branch cannot
-change or bypass that state.
+state from `transition-preparation` to `active`; mutation tests prove another branch
+cannot change or bypass that state.
 
-After PR5 merges, ordinary branches use the future lightweight policy. The permanent
-policy gate remains; historical transition refs may be deleted only in a later
-explicitly authorized action after their retention condition expires.
+After PR5 merges, ordinary branches use the future lightweight policy, but the merge
+queue remains disabled until action C. The permanent policy gate and protected refs
+remain.
+
+## Post-activation merge-queue action C
+
+With a new explicit `HOLD-01` authorization already scoped by adopted VOC-120, and only
+after PR5 exact merge/readback:
+
+1. Prove default-branch policy state is `active` at the accepted PR5 merge SHA.
+2. Clear and read back `VOC120_TRANSITION_LOCK_SHA`.
+3. Enable the main merge queue with the future required aggregate checks and no
+   administrator bypass. Preserve all other action-B settings.
+4. Open PR6 immediately; restore the action-B snapshot if queue checks deadlock or
+   settings differ.
+
+## PR6 — Immediate merge-queue truth and rehearsal
+
+Open `docs/voc-120-merge-queue-truth` from `main`. Under the future Protected lane,
+record action-C readback and exact PR5 activation evidence. Obtain one non-author native
+review, run all stable aggregate checks on `pull_request`, enter the merge queue, and
+prove the same required conclusions on `merge_group`. Merge only through the queue.
+After PR6, VOC-120 is complete; protected historical refs may be deleted only by a
+later explicitly authorized action after their retention condition expires.
 
 ## Rollback
 

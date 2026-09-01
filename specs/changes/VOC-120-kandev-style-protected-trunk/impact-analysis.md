@@ -79,7 +79,7 @@ Accessibility checks remain path-applicable for UI changes.
 - `VOC-120-R06`: Existing EHR is bypassed by topology change. Mitigation: preserve
   explicit scope and require reasoned human outcome before affected closure/merge.
 - `VOC-120-R07`: Broad deletion makes rollback hard. Mitigation: immutable rollback
-  and verifier refs, two exact settings snapshots, five bounded PRs, and observation.
+  and verifier refs, three exact settings snapshots, six bounded PRs, and observation.
 - `VOC-120-R08`: Copying Kandev overfits a larger project. Mitigation: cap the initial
   VocaNova gate/document surface and require every retained control to name its risk.
 - `VOC-120-R09`: Staging becomes unusable when code moves to main but the environment
@@ -90,13 +90,14 @@ Accessibility checks remain path-applicable for UI changes.
   tracked digest, then permanent `Policy / required` invokes the protected ref for
   PR3-PR5 exact acceptance.
 - `VOC-120-R11`: EHR subjects disappear before human resolution. Mitigation: PR3
-  and every promotion remain blocked until PR2 applies both qualified-human outcomes.
+  and every promotion remain blocked until pre-adoption qualified confirmation, held
+  PR #215 closure, and the exact PR2 correction are permanent and green.
 - `VOC-120-R12`: Future squash/queue rules make the old merge-commit loop impossible.
   Mitigation: action A explicitly remains merge-compatible; action B occurs only after
   the final old-model promotion/synchronization.
 - `VOC-120-R13`: Ordinary work starts between action B and final truth acceptance.
-  Mitigation: committed `transition-locked` state makes only the exact PR5 branch
-  eligible; PR5 alone changes default-branch state to active.
+  Mitigation: the read-back repository lock makes only exact PR5 eligible; PR5 alone
+  changes committed state to active, and the queue is enabled only afterward.
 
 ## Dependencies
 
@@ -123,5 +124,7 @@ Accessibility checks remain path-applicable for UI changes.
   checks/review.
 - `VOC-120-EV-06`: exact PR4 old-verifier, application, specialist, promotion,
   synchronization, ancestry, and rollback evidence.
-- `VOC-120-EV-07`: action-B ruleset/queue/review/environment/branch readback and exact
-  PR5 old-verifier/future-gate/native-review evidence.
+- `VOC-120-EV-07`: action-B ruleset/lock/review/environment/branch readback and exact
+  PR5 old-verifier/future-gate/native-review evidence, with queue still disabled.
+- `VOC-120-EV-08`: action-C lock-clear/merge-queue readback and exact PR6 future-policy
+  pull-request plus merge-group evidence.
