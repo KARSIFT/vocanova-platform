@@ -8,7 +8,8 @@
 - Evidence: `VOC-113-EV-00` through `VOC-113-EV-08`
 - Implementation pull-request mapping: corrected revision of draft PR #209
 - Risk: R4
-- Status: draft; implementation prohibited
+- Status: adopted; declared repository implementation authorized after normal reviewed
+  non-author plan merge
 
 After reviewed adoption and plan merge, change exactly the VOC-105 validator and
 focused test on PR #209. Govern the replacement candidate using the unchanged 12-path

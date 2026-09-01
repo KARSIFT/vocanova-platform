@@ -4,7 +4,7 @@ id: VOC-113
 slug: f3-validator-candidate-remediation
 title: Close F3 validator and candidate-identity gaps
 type: milestone-evidence-validator-and-candidate-remediation
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because the corrected validator and evidence binder protect the exact current F3
@@ -23,8 +23,8 @@ base_branch: develop
 base_sha: 533084432f0672dbf25c402e96209120a8ad50cf
 plan_branch: plan/voc-113-f3-validator-candidate-remediation
 target_branch: develop
-approved_candidate_sha: pending-independent-exact-revision-review-and-adoption
-approval_status: pending-independent-exact-revision-review-and-adoption
+approved_candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+approval_status: adopted
 superseded_plan_candidates:
   - candidate_sha: 21139e8a7eb82f883adcebfbff615ea73e1cbfec
     status: blocked-and-superseded
@@ -35,11 +35,12 @@ superseded_plan_candidates:
       - incomplete-DOC-15-section-24.18-monitoring
       - incorrect-integrated-rollback-chronology
     review_transfer: prohibited-fresh-exact-candidate-reviews-required
-implementation_authorized: false
+implementation_authorized: true
 implementation_authority_status: >-
-  prohibited-until-exact-plan-specialist-and-independent-R4-reviews-accountable-
-  adoption-complete-bookkeeping-and-normal-non-author-plan-merge; issue-211-and-PR-209-
-  grant-no-authority
+  authorized-by-exact-candidate-canonical-documentation-milestone-specialist-and-
+  independent-cross-model-R4-PASS-reviews-plus-VOC-113-ADOPT-2026-09-01-only-for-the-
+  declared-two-file-repository-remediation-on-existing-draft-PR-209-after-this-adopted-
+  package-is-freshly-reviewed-and-normally-merged; all-external-actions-remain-prohibited
 implementation_pull_request_count: 1
 implementation_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/209
 multiple_pull_request_rationale: >-
@@ -203,7 +204,7 @@ context_model:
 
 post_merge_monitoring:
   governing_rule: DOC-15-section-24.18
-  owner: accountable-repository-change-owner-recorded-at-adoption
+  owner: /root
   begins: corrected-PR-209-merge-event
   ends: >-
     exact-merge-SHA-CI-Governance-Security-required-checks-complete-and-fresh-
@@ -227,28 +228,56 @@ post_merge_monitoring:
     route-separately-governed-remediation-or-full-integrated-PR-209-revert
 
 owners:
-  decision: accountable-repository-change-owner-at-adoption
+  decision: /root
   package_preparation: /root/voc113_planner
-  implementation: different-builder-actor-after-adoption
-  canonical_documentation_milestone_specialist: different-non-author-exact-revision-actor
-  independent_cross_model_R4_verifier: different-non-author-exact-revision-actor
-  merge: separate-non-author-actor
-  bounded_observation: accountable-repository-change-owner-recorded-at-adoption
+  implementation: /root/voc105_builder
+  implementation_authority_usable_after: normal-reviewed-non-author-plan-merge
+  canonical_documentation_milestone_specialist: /root/voc111_specialist
+  independent_cross_model_R4_verifier: /root/voc109_cross_model
+  independent_cross_model_provenance: gpt-5.6-sol
+  merge: /root
+  bounded_observation: /root
+
+plan_review_history:
+  - candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    reviewer: /root/voc111_specialist
+    verdict: pass-canonical-documentation-milestone-validator-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770065
+    resolution: >-
+      Exact approved-candidate specialist review; grants no implementation before
+      normal adopted-plan merge and no external-action authority.
+  - candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    reviewer: /root/voc109_cross_model
+    model_provenance: gpt-5.6-sol
+    verdict: pass-independent-cross-model-R4-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770303
+    resolution: >-
+      Exact approved-candidate independent review; grants no implementation before
+      normal adopted-plan merge and no external-action authority.
+  - candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    decision: VOC-113-ADOPT-2026-09-01
+    actor: /root
+    verdict: adopted-for-declared-two-file-repository-only-remediation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770482
+    resolution: >-
+      Authorizes adoption bookkeeping and normal non-author plan merge; implementation
+      becomes usable only after that merge and every external action remains prohibited.
 
 approvals:
   canonical_documentation_milestone_plan_review:
-    status: pending-distinct-non-author-exact-candidate-review
-    candidate_sha: pending
-    evidence: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770065
   independent_cross_model_R4_plan_review:
-    status: pending-distinct-non-author-exact-candidate-review
-    candidate_sha: pending
-    evidence: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    model_provenance: gpt-5.6-sol
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770303
   adoption_decision:
-    status: pending
-    decision_id: pending
-    candidate_sha: pending
-    evidence: pending
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-113-ADOPT-2026-09-01
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770482
 
 artifacts:
   readme: README.md
@@ -311,11 +340,16 @@ required_r4_evidence:
   specialist_evidence:
     required: true
     role: canonical-documentation-milestone-evidence-specialist
-    status: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770065
   independent_exact_revision_evidence:
     required: true
     role: independent-cross-model-R4-verifier
-    status: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: e25debbd7560b55f95a0586d2b893fed919213a8
+    model_provenance: gpt-5.6-sol
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/212#issuecomment-5487770303
   ehr: not-triggered
 
 scope_boundary:
@@ -339,7 +373,8 @@ inherited_holds:
     action: production-learner-data-access-export-transform-or-delete
 
 implementation:
-  authorized: false
+  authorized: true
+  authority_usable_after: normal-reviewed-non-author-plan-merge-to-develop
   task_count: 1
   pull_request_count: 1
   pull_request: https://github.com/KARSIFT/vocanova-platform/pull/209
