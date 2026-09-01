@@ -51,6 +51,53 @@ const futureMilestoneState = {
   live_activation: "unresolved-held",
   voc080_holds: ["VOC-080-HOLD-01", "VOC-080-HOLD-02"],
 };
+const preMilestoneState = {
+  f2_repository_local: "complete-effective",
+  f3_staging: "unresolved-held",
+  a1_authenticated_product_acceptance: "unresolved",
+  p1_plus_product_acceptance: "unresolved",
+  production: "held",
+  live_activation: "unresolved-held",
+  voc080_holds: ["VOC-080-HOLD-00", "VOC-080-HOLD-01", "VOC-080-HOLD-02"],
+};
+
+function exactJsonValue(value, expected) {
+  if (Array.isArray(expected))
+    return (
+      Array.isArray(value) &&
+      value.length === expected.length &&
+      expected.every((item, index) => exactJsonValue(value[index], item))
+    );
+  if (expected && typeof expected === "object")
+    return (
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === Object.keys(expected).length &&
+      Object.keys(expected).every(
+        (key) =>
+          Object.hasOwn(value, key) &&
+          exactJsonValue(value[key], expected[key]),
+      )
+    );
+  return value === expected;
+}
+
+function exactProfileForRecord(candidate) {
+  const matches = [
+    ["pre-voc105", preMilestoneState],
+    ["voc105", futureMilestoneState],
+  ].filter(([, profile]) =>
+    exactJsonValue(candidate?.milestone_state, profile),
+  );
+  assert.equal(
+    matches.length,
+    1,
+    "record must select one complete exact profile",
+  );
+  return matches[0][0];
+}
+const repositoryProfile = exactProfileForRecord(record);
 
 // These literals are copied from the adopted VOC-110 specification, not from
 // the validator contract or a preserved downstream worktree.
@@ -294,19 +341,22 @@ test("the human record carries the exact boundary and limitation markers", () =>
 test("every designated living F2 surface has a precise active contract", () => {
   for (const surface of DESIGNATED_F2_SURFACES) {
     const source = readFileSync(resolve(repositoryRoot, surface.path), "utf8");
-    assert.deepEqual(inspectF2Surface(source, surface.path), []);
+    assert.deepEqual(
+      inspectF2Surface(source, surface.path, repositoryProfile),
+      [],
+    );
 
     for (const marker of [
       ...(surface.immutableRequired ?? []),
-      ...(surface.profiles["pre-voc105"]?.required ?? []),
+      ...(surface.profiles[repositoryProfile]?.required ?? []),
     ]) {
       const mutated = removeNormalizedMarker(source, marker);
       assert.notEqual(mutated, source);
-      const errors = inspectF2Surface(mutated, surface.path);
+      const errors = inspectF2Surface(mutated, surface.path, repositoryProfile);
       assert.ok(
         errors.some(
           (error) =>
-            error.includes("current pre-voc105 marker") ||
+            error.includes(`current ${repositoryProfile} marker`) ||
             error.includes("missing immutable F2 marker"),
         ),
         `${surface.path} must fail when marker ${marker} is removed`,
