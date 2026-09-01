@@ -147,7 +147,9 @@ const SUBJECTLESS_STALE_STATUS_PATTERN =
 const AMBIGUOUS_STALE_TERM_PATTERN =
   /\b(?:pending|unresolved|incomplete)\b|\bnot(?:\s+yet)?\s+complete\b/i;
 const GENERIC_CONTEXT_COMMAND_PATTERN =
-  /^(?:(?:please|kindly|nevertheless|subsequently|finally|even\s+so|in\s+fact)\s*,?\s*)?(?:(?:[A-Za-z][A-Za-z-]*\s+){1,3}(?:it|so|this|that)\b.*|[^.!?;]*\bnow\b\s*)$/i;
+  /^(?:(?:please|kindly|nevertheless|subsequently|finally|even\s+so|in\s+fact)\s*,?\s*)?(?:(?:[A-Za-z][A-Za-z-]*\s+){1,3}(?:it|so|this|that)\b.*|[A-Za-z][A-Za-z-]*\s+(?:the|an?|with|ahead|through|on|off)\b.*|[^.!?;]*\bnow\b\s*)$/i;
+const BARE_CONTEXT_COMMAND_PATTERN =
+  /^(?:continue|finish|go|advance|resume|complete|act|apply|carry|start|stop|run|execute|proceed)$/i;
 const SAFE_OPERATIONAL_CLAUSE =
   "(?:No\\s+(?:(?:staging\\s+)?(?:deployment|delivery|migration|activation|restart|live\\s+deployment)|upload|promotion|(?:workflow\\s+)?dispatch)\\s+(?:(?:has|had|never|actually|ever)\\s+)*(?:occurred|took\\s+place)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+(?:is\\s+)?prohibited|(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+did\\s+not\\s+occur)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion|Activation|Application)\\s+(?:was|is)\\s+not\\s+(?:performed|deployed)|No\\s+(?:deployment|migration|dispatch|upload|promotion|activation)\\s+was\\s+performed)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion|Activation|Workflow)\\s+(?:never\\s+occurred|was\\s+never\\s+performed|(?:was\\s+)?not\\s+(?:performed|dispatched|deployed|migrated)|had\\s+not\\s+been\\s+performed))|No\\s+query\\s+was\\s+issued|(?:The\\s+)?job\\s+was\\s+not\\s+invoked|Nothing\\s+was\\s+deployed|(?:The\\s+)?(?:application|app|system)\\s+(?:was|is|has\\s+been)\\s+not\\s+deployed|(?:The\\s+)?system\\s+never\\s+deployed|(?:The\\s+)?(?:deploy|publish|migration|dispatch)\\s+command\\s+was\\s+not\\s+executed|The\\s+(?:database|build)\\s+was\\s+not\\s+(?:migrated|deployed)|The\\s+(?:previous|prior|staging)\\s+(?:staging\\s+)?(?:delivery|upload|migration|deployment|run)\\s+(?:succeeded|failed\\s+safely|(?:had\\s+)?completed(?:\\s+(?:successfully|in\\s+the\\s+past))?|was\\s+completed\\s+in\\s+the\\s+past)|The\\s+(?:previous|prior)\\s+staging\\s+deployment\\s+succeeded|The\\s+(?:app|historical\\s+system)\\s+deployed\\s+in\\s+the\\s+past|The\\s+local\\s+migration\\s+(?:(?:had\\s+)?completed|succeeded|failed\\s+safely)|The\\s+unit[\\s-]+test\\s+(?:safely\\s+)?(?:deployed|initialized)\\s+(?:an?\\s+)?(?:in-memory\\s+)?fixture|The\\s+local\\s+runner\\s+(?:had\\s+)?executed\\s+(?:an?\\s+)?fixture|The\\s+unit[\\s-]+test\\s+local\\s+worker\\s+(?:had\\s+)?ran\\s+(?:an?\\s+)?fixture|The\\s+(?:local|historical|sanitized)\\s+(?:fixture|build|publication|publish|run|worker|system|migration)(?:\\s+[A-Za-z-]+){0,2}\\s+(?:(?:had\\s+)?(?:completed|succeeded)|failed\\s+safely|safely\\s+initialized|published\\s+in\\s+the\\s+past|deployed\\s+in\\s+the\\s+past)|(?:The\\s+)?documentation\\s+was\\s+published\\s+in\\s+the\\s+past|The\\s+sanitized\\s+delivery\\s+deployed\\s+the\\s+API\\s+Worker\\s+successfully\\s+in\\s+the\\s+past|The\\s+command\\s+“Deploy\\s+now”\\s+is\\s+prohibited|The\\s+sanitized\\s+past\\s+delivery\\s+description\\s+records\\s+that\\s+retry\\s+was\\s+not\\s+required|The\\s+reviewer\\s+verified\\s+the\\s+sanitized\\s+evidence|The\\s+sanitized\\s+result\\s+is\\s+not\\s+verified|The\\s+proposal\\s+is\\s+approved|The\\s+unrelated\\s+issue\\s+remains\\s+pending|The\\s+issue\\s+was\\s+resolved\\s+without\\s+external\\s+action|The\\s+(?:unit\\s+test|local\\s+worker)\\s+initialized\\s+(?:an?\\s+)?in-memory\\s+fixture|The\\s+(?:historical\\s+)?parser\\s+queried\\s+(?:a\\s+)?local\\s+object|The\\s+(?:historical|local)\\s+note\\s+verified\\s+(?:the\\s+|a\\s+)?checksum)";
 const SAFE_STATUS_MODIFIERS =
@@ -160,6 +162,8 @@ const NEGATABLE_LATER_SUBJECT =
   "(?:(?:Authenticated\\s+)?A1|P1\\+?|P[2-5]|R[12]|L1|Product\\s+acceptance|Public\\s+launch|Live\\s+(?:activation|verification|system|service)|Production(?:\\s+(?:readiness|traffic|deployment))?|(?:Production\\s+)?Learner[\\s-]+data(?:\\s+(?:use|access|import|export|transform|transformation|delete|deletion))?)";
 const NO_SEMANTIC_CONJUNCTION =
   "(?![^.!?;\\n]*\\b(?:and|but|however|while|although|though|whereas)\\b)";
+const NO_LIVE_OPERATIONAL_CONTEXT =
+  "(?![^.!?;\\n]*\\b(?:production|live|traffic|learner[\\s-]+data|current|now)\\b)";
 const SAFE_PROTECTED_NEGATIVE_CLAUSE =
   NO_SEMANTIC_CONJUNCTION +
   NEGATABLE_LATER_SUBJECT +
@@ -177,8 +181,14 @@ const SAFE_NEGATED_OPERATIONAL_CLAUSE =
   "\\b[^.!?;\\n]{0,120}\\b(?:(?:did|was|were|is|are|has|had)\\s+not|not|never)\\b[^.!?;\\n]*)";
 const PAST_OPERATIONAL_ACTION =
   "(?:deployed|dispatched|migrated|promoted|published|uploaded|released|started|activated|restarted|changed|ran|executed|initialized|completed|succeeded|failed)";
+const INERT_PAST_CONTEXT =
+  "(?:fixture|documentation|evidence|migration|deployment|delivery|upload|run|build|publish(?:ing)?|publication|unit[\\s-]+test|local[\\s-]+test|runner|worker|parser|note)";
 const SAFE_CONTEXTUAL_PAST_OPERATIONAL_CLAUSE =
   NO_SEMANTIC_CONJUNCTION +
+  NO_LIVE_OPERATIONAL_CONTEXT +
+  "(?=[^.!?;\\n]{0,200}\\b" +
+  INERT_PAST_CONTEXT +
+  "\\b)" +
   "(?:[^.!?;\\n]*\\b(?:sanitized|prior|previous|historical|local|unit[\\s-]+test)\\b[^.!?;\\n]{0,160}\\b" +
   PAST_OPERATIONAL_ACTION +
   "\\b[^.!?;\\n]*|[^.!?;\\n]*\\b" +
@@ -1030,7 +1040,7 @@ function validateCredentialVocabulary(source, relativePath, projections) {
     "i",
   );
   const plausibleCompactValue =
-    /\b(?:synthetic[-_][A-Za-z0-9_-]{3,}|[A-Za-z]{16,}|(?=[A-Za-z0-9_-]{8,}\b)(?=[A-Za-z0-9_-]*[0-9])[A-Za-z0-9_-]{8,})\b/i;
+    /\b(?:synthetic[-_][A-Za-z0-9_-]{3,}|[A-Za-z]{6,}|(?=[A-Za-z0-9_-]{8,}\b)(?=[A-Za-z0-9_-]*[_-])[A-Za-z0-9_-]{8,}|(?=[A-Za-z0-9_-]{8,}\b)(?=[A-Za-z0-9_-]*[0-9])[A-Za-z0-9_-]{8,})\b/i;
   for (const paragraph of source.split(/\r?\n\s*\r?\n/)) {
     const clauses = paragraph
       .split(/(?:\r?\n|[.!?;])/)
@@ -1048,7 +1058,13 @@ function validateCredentialVocabulary(source, relativePath, projections) {
             const lead = clause.slice(0, match.index);
             const tail = clause.slice(match.index + match[0].length);
             if (
-              /^\s+(?:value-free|absent|unavailable|redacted|prohibited)\b/i.test(
+              /^(?:value-free|non-sensitive|confidential|sensitive|redacted|prohibited|absent|unavailable|required|available|scoped|valid|revoked|inactive|active|held|allowed|canonical|evaluated|referenced|descriptive|explanatory|omitted|undisclosed|unknown|withheld|false|null|none)$/i.test(
+                match[0],
+              )
+            )
+              continue;
+            if (
+              /^\s+(?:value-free|non-sensitive|confidential|sensitive|redacted|prohibited|absent|unavailable|required|available|scoped|valid|revoked|inactive|active|held|allowed|canonical|evaluated|referenced|descriptive|explanatory|omitted|undisclosed|unknown|withheld)\b/i.test(
                 tail,
               )
             )
@@ -1235,6 +1251,7 @@ function validateLaterBoundaries(source, relativePath, projections) {
       if (
         hasExplicitCommandSubject(clause) ||
         (!GENERIC_CONTEXT_COMMAND_PATTERN.test(clause) &&
+          !BARE_CONTEXT_COMMAND_PATTERN.test(clause) &&
           !IMPERATIVE_ACTION_PATTERN.test(clause))
       )
         continue;

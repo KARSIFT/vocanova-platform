@@ -984,6 +984,11 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Session ID is redacted. This material equals AbCdEfGhIjKlMnOp.",
       "Client assertion is value-free. Replacement follows: abcdefghijklmnop.",
       "Signing certificate is absent. Actual contents: AbCdEfGhIjKlMnOp.",
+      "Token is absent. Here it is: sk_live_abcdefghijklmnop.",
+      "Token is absent. Here it is: sk_live_x.",
+      "Token is redacted. They contain abcdefghij.",
+      "Credentials are unavailable. Actual contents: secretword.",
+      "Token is absent. Replacement follows: mytokenvalue.",
     ])
       assertMutation(
         surface,
@@ -1011,6 +1016,8 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Token is redacted. It remains unavailable.",
       "Credentials are value-free. The explanatory documentation remains descriptive.",
       "Password is absent. It is characteristically unavailable.",
+      "Token is absent. This is non-sensitive.",
+      "Token is redacted. It is entirely descriptive.",
     ])
       assert.deepEqual(
         inspectF3Surface(`${source}\n${proseOnly}`, surface),
@@ -1384,6 +1391,14 @@ test("protected safe subjects bind generic anaphoric command continuations", () 
     "Carry it out.",
     "Make it happen.",
     "Put it online.",
+    "Carry the operation out.",
+    "Continue with the operation.",
+    "Finish the job.",
+    "Go ahead.",
+    "Continue.",
+    "Finish.",
+    "Go.",
+    "Advance.",
   ];
   for (const surface of DESIGNATED_F3_SURFACES) {
     const source = fs.readFileSync(path.join(root, surface), "utf8");
@@ -1444,6 +1459,9 @@ test("safe clauses cannot launder an operational or later positive claim", () =>
       "Report: no deployment occurred and everything is active.",
       "Upload was performed.",
       "Promotion was performed.",
+      "The local production system deployed learner data to production.",
+      "The historical production worker activated live traffic now.",
+      "The local system deployed public resources.",
     ])
       assertMutation(
         surface,
