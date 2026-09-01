@@ -49,13 +49,13 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "64688b2e1fa9a049270b1b1783239f03356d9cba4e00fe21aa286d5fa385bb44",
   ],
   "docs/operations/voc-081-f2-evidence.json": [
-    "8b3053425ef0ac744c6bfc7d68bc535455b123c922a3682ce0bc87b99f9b4f71",
+    "1673143566852a5e12d6220be0ee96d855d31416e0cb6f1c59bf50baf050e5ff",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "a560577733ece56f33c61cf610398e39d54d14cd70604c46eb4def98a8a966c5",
     "eba6af33d947290b913f91a393e363c4619da9a45658efa002a5b821a969b5b1",
   ],
   "docs/operations/voc-081-f2-evidence.md": [
-    "cb8c09abb218c56d0a57c78cb5fc8fb44559694935438db65427b8a4e65c22cd",
+    "c3345319c65257801c2d691cf587de41c96185c3e2e3998fdba87a1fa6da0965",
     "68325539946c4836b34ecdd505637d30d34feb2606f587d067958671cc791efb",
     "5f9001281aa5bd4af228c1e8661f429bb7892c58a853880e5dca7faf7d2b8161",
     "41e73a0be967564c232d1f3848ff8d8db3404e8387286193bed360460f1bcfe8",
@@ -73,29 +73,29 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "f4a490a89249dd4f6d3ab3f3d8cae8cb7cae822b0ed2543a10c7642513827c1e",
   ],
   "docs/product/12-mvp-implementation-plan.md": [
-    "ac53e41e59aca94afee111f9eb74c702e1fac6ef74d889e96b09b5d6cf4cea36",
+    "b353515f703886fb8baa89c836d1a1483b326d4fc1a774733ad166d8a5fdbb08",
     "26ddec86c049d2bf7ea7171fe0b4acd347423c10bfe51f6e154b9a6da67a161d",
     "80573cdc41ed4e310878d997f14ca6778468f39323d1ee0f725e4a2c0b3ebb8e",
     "8a41c6b9501977c8ab0ca0a88a473407a6112033b5e93cd0a08918688a01fc91",
   ],
   "docs/product/README.md": [
-    "85da55c0f0f0b454dfb4eb7b7e195df810541e1a72d4f92d0f3ca1621b5fa21c",
+    "87eacef6e1ce4722e100a0f2c258db6541f3f4a370cae13563d72a4d6c241640",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "fbb6b26654e2159dab0288eeb7caa309d622c1320674bec83002864f84fdacd9",
     "630f971607f1ddfd36c47f35c73c81e37a744e194750e527affb9e15a3275204",
   ],
 });
 const OPERATIONAL_DOMAIN_PATTERN =
-  /\b(?:staging|delivery|delivered|deploy\w*|dispatch\w*|migrat\w*|promot\w*|publish\w*|upload\w*|retr(?:y|ied|ies|ying)|rotat\w*|revok\w*|remov\w*|delet\w*|cancel\w*|configur\w*|chang\w*|creat\w*|enabl\w*|disabl\w*|restor\w*|install\w*|rout\w*|access\w*|export\w*|import\w*|transform\w*|set|use|switch\w*|stop\w*|run|running|execute\w*|provision\w*|edit\w*|trigger\w*|ship\w*|move\w*|restart\w*|workflows?|CI|DNS|traffic|resources?|D1|API[\s-]+Worker|Cloudflare[\s-]+Worker|build|live|launch|learner[\s-]+data|credentials?|versions?|settings?|environments?|migrations?|promotions?|releases?|rollback|smoke|revocation)(?=\b|_)/i;
+  /\b(?:staging|delivery|delivered|deploy\w*|dispatch\w*|migrat\w*|promot\w*|publish\w*|upload\w*|retr(?:y|ied|ies|ying)|rotat\w*|revok\w*|remov\w*|delet\w*|cancel\w*|configur\w*|chang\w*|creat\w*|enabl\w*|disabl\w*|restor\w*|install\w*|rout\w*|access\w*|export\w*|import\w*|transform\w*|releas\w*|launch\w*|verif\w*|start\w*|destroy\w*|drop\w*|purg\w*|submit\w*|set|us(?:e|es|ed|ing)|switch\w*|stop\w*|run|running|execute\w*|provision\w*|edit\w*|trigger\w*|ship\w*|move\w*|restart\w*|rollback\w*|roll(?:s|ed|ing)?[\s-]+back|workflows?|CI|DNS|traffic|resources?|D1|API[\s-]+Worker|Cloudflare[\s-]+Worker|build|live|learner[\s-]+data|credentials?|versions?|settings?|environments?|migrations?|promotions?|smoke|revocation)(?=\b|_)/i;
 const CREDENTIAL_TERM_PATTERN =
-  /\b(?:CLOUDFLARE_(?:ACCOUNT_ID|API_TOKEN)|[A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCOUNT_ID)|credentials?|Basic[\s-]+auth(?:entication)?|auth(?:entication)?[\s-]+(?:key|header|token)|JWT|session[\s-]+cookie|signing[\s-]+(?:key|token)|private[\s-]+(?:key|token)|api[\s-]+(?:key|token)|access[\s-]+(?:key|token)|tokens?|secrets?|passwords?|Authorization|Bearer)\b/i;
+  /\b(?:CLOUDFLARE_(?:ACCOUNT_ID|API_TOKEN)|[A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCOUNT_ID)|credentials?|Basic(?:[\s-]+auth(?:entication)?)?|auth(?:entication)?[\s-]+(?:key|header|token|cookie)|JWT|session[\s-]+cookie|signing[\s-]+(?:key|token)|private[\s-]+(?:key|token)|encryption[\s-]+key|api[\s-]+(?:key|token)|access[\s-]+(?:key|token)|TOTP[\s-]+seed|passphrases?|tokens?|secrets?|passwords?|Authorization|Bearer|Cookie)\b/i;
 const LATER_HOLD_TERM_PATTERN =
   /\b(?:A1|P1\+?|P[2-5]|R[12]|L1|product[\s-]+acceptance|production|launch|learner[\s-]+data|VOC-080-HOLD-(?:01|02))\b/i;
 const F3_STATUS_TERM_PATTERN = /\b(?:F3|staging[\s-]+status)\b/i;
 const SAFE_OPERATIONAL_CLAUSE =
-  "(?:No\\s+(?:staging\\s+)?deployment\\s+(?:occurred|took\\s+place)|Deployment\\s+is\\s+prohibited|The\\s+build\\s+was\\s+not\\s+deployed|The\\s+(?:previous|prior)\\s+staging\\s+deployment\\s+succeeded|The\\s+sanitized\\s+delivery\\s+deployed\\s+the\\s+API\\s+Worker\\s+successfully\\s+in\\s+the\\s+past|The\\s+command\\s+“Deploy\\s+now”\\s+is\\s+prohibited|The\\s+sanitized\\s+past\\s+delivery\\s+description\\s+records\\s+that\\s+retry\\s+was\\s+not\\s+required)";
+  "(?:No\\s+(?:(?:staging\\s+)?deployment|(?:workflow\\s+)?dispatch)\\s+(?:occurred|took\\s+place)|(?:Deployment|Dispatch)\\s+is\\s+prohibited|The\\s+build\\s+was\\s+not\\s+deployed|The\\s+(?:previous|prior)\\s+(?:staging\\s+)?delivery\\s+(?:succeeded|completed\\s+successfully)|The\\s+(?:previous|prior)\\s+staging\\s+deployment\\s+succeeded|The\\s+sanitized\\s+delivery\\s+deployed\\s+the\\s+API\\s+Worker\\s+successfully\\s+in\\s+the\\s+past|The\\s+command\\s+“Deploy\\s+now”\\s+is\\s+prohibited|The\\s+sanitized\\s+past\\s+delivery\\s+description\\s+records\\s+that\\s+retry\\s+was\\s+not\\s+required)";
 const SAFE_LATER_CLAUSE =
-  "(?:(?:Authenticated\\s+)?A1|P1\\+|Public\\s+launch)\\s+(?:is|remains)\\s+unresolved|(?:Production|Learner\\s+data|VOC-080-HOLD-(?:01|02))\\s+(?:is|remains)\\s+held";
+  "(?:(?:Authenticated\\s+)?A1|P1\\+?|P[2-5]|R[12]|L1|Product\\s+acceptance|Public\\s+launch|Live\\s+(?:activation|service))\\s+(?:is|remains)\\s+unresolved|(?:Production(?:\\s+(?:readiness|traffic))?|Learner\\s+data|VOC-080-HOLD-(?:01|02))\\s+(?:is|remains)\\s+held";
 const CANONICAL_PROSPECTIVE_LATER_CLAUSES = Object.freeze({
   "docs/product/12-mvp-implementation-plan.md": new Set([
     "production-provider component cannot be accepted until provider candidates",
@@ -643,6 +643,7 @@ function maskPairedHistoricalF3(paragraph) {
       [`${packageId} is immutable history: F3 is pending.`, "pending"],
       [`${packageId} is immutable history: F3 pending.`, "pending"],
       [`${packageId} is immutable history: F3 remains pending.`, "pending"],
+      [`${packageId} is immutable history: F3 was pending.`, "pending"],
       [`${packageId} is immutable history: F3 is unresolved.`, "unresolved"],
       [`${packageId} is immutable history: F3 unresolved.`, "unresolved"],
       [
@@ -669,11 +670,20 @@ function maskPairedHistoricalF3(paragraph) {
       ],
       [`In immutable ${packageId} history, F3 is pending.`, "pending"],
       [`In immutable ${packageId} history, F3 remains pending.`, "pending"],
+      [`In immutable ${packageId} history, F3 was pending.`, "pending"],
       [
         `In immutable ${packageId} history, F3 staging is unresolved.`,
         "unresolved",
       ],
       [`${packageId} immutable history records F3 as pending.`, "pending"],
+      [
+        `${packageId} immutable historical snapshot records F3 as unresolved.`,
+        "unresolved",
+      ],
+      [
+        `In immutable ${packageId} history, the historical snapshot records F3 as unresolved.`,
+        "unresolved",
+      ],
       [
         `${packageId} immutable history records F3 staging as unresolved.`,
         "unresolved",
@@ -833,6 +843,10 @@ function validateCredentialVocabulary(source, relativePath, projections) {
     errors.push(
       `${relativePath}: token, secret, password, key, or credential value is prohibited`,
     );
+  const compactCredentialValue =
+    /\bBasic\s+[A-Za-z0-9+/]{8,}={0,2}\b|\beyJ[A-Za-z0-9_-]{3,}\.[A-Za-z0-9_-]{3,}\.[A-Za-z0-9_-]{3,}\b|\bCookie\s*:\s*(?:session|sessionid|auth|authentication)[-_A-Za-z0-9]*\s*=\s*[^\s;,]{3,}/i;
+  if (compactCredentialValue.test(source))
+    errors.push(`${relativePath}: compact credential value is prohibited`);
   if (projections[1] !== HIGH_RISK_PROJECTIONS[relativePath]?.[1])
     errors.push(
       `${relativePath}: credential value is prohibited or credential context is not canonical`,
@@ -914,6 +928,24 @@ function validateLaterBoundaries(source, relativePath, projections) {
       break;
     }
   }
+  // Safe subject clauses are projected away only for byte-identity comparison. This
+  // semantic pass deliberately retains each subject and scans every later clause in
+  // its paragraph so punctuation cannot launder an elliptical positive continuation.
+  const positiveOnly = new RegExp(`\\b(?:${POSITIVE_VERBS})\\b`, "i");
+  const safeSubjectClause = new RegExp(`^(?:${SAFE_LATER_CLAUSE})$`, "i");
+  for (const paragraph of source.split(/\r?\n\s*\r?\n/)) {
+    const paragraphClauses = semanticClauses(paragraph);
+    for (let index = 0; index < paragraphClauses.length; index += 1) {
+      if (!safeSubjectClause.test(paragraphClauses[index])) continue;
+      for (const continuation of paragraphClauses.slice(index + 1)) {
+        if (!positiveOnly.test(continuation)) continue;
+        errors.push(
+          `${relativePath}: prohibited positive continuation after a protected safe subject`,
+        );
+        break;
+      }
+    }
+  }
   const holdRelease = new RegExp(
     `\\bVOC-080-HOLD-(01|02)\\b[^\\n.!?]{0,64}\\b(?:(?:is\\s+|has\\s+been\\s+)?(?:${POSITIVE_VERBS}|lifted|cleared|removed|satisfied|closed|expired|waived|discharged|ceased)|no\\s+longer\\s+(?:applies|in\\s+force))\\b`,
     "i",
@@ -927,6 +959,14 @@ function validateLaterBoundaries(source, relativePath, projections) {
     )
   )
     errors.push(`${relativePath}: stale current F3 unresolved/held wording`);
+  if (
+    /\bIt\s+(?:(?:still|currently)\s+)?(?:remains?|is|continues?\s+to\s+be)\s+(?:pending|unresolved|not[\s-]+yet[\s-]+delivered)\b|(?:^|[.!?;])\s*Still\s+(?:pending|unresolved|not[\s-]+yet[\s-]+delivered)\b/im.test(
+      currentTruthSource,
+    )
+  )
+    errors.push(
+      `${relativePath}: stale current F3 pronoun or elliptical status tail`,
+    );
   if (projections[2] !== HIGH_RISK_PROJECTIONS[relativePath]?.[2])
     errors.push(
       `${relativePath}: prohibited positive or noncanonical later/hold context`,

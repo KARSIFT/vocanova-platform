@@ -683,6 +683,12 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Ship",
       "Move",
       "Restart",
+      "Verify",
+      "Start",
+      "Destroy",
+      "Drop",
+      "Purge",
+      "Submit",
     ])
       assertMutation(
         surface,
@@ -731,6 +737,20 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Shipping now.",
       "Moved now.",
       "Restarting now.",
+      "Verifying now.",
+      "Started now.",
+      "Destroying now.",
+      "Dropped now.",
+      "Purging now.",
+      "Submitted now.",
+      "Releasing now.",
+      "Launched now.",
+      "Uses staging now.",
+      "Used staging now.",
+      "Using staging now.",
+      "Rollback now.",
+      "Roll back now.",
+      "Rolled back now.",
     ])
       assertMutation(
         surface,
@@ -755,6 +775,12 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Switch DNS.",
       "Turn on traffic.",
       "Go live.",
+      "Verify the governed result now.",
+      "Start the workflow now.",
+      "Destroy resources now.",
+      "Drop the database now.",
+      "Purge the cache now.",
+      "Submit the deployment now.",
     ])
       assertMutation(
         surface,
@@ -778,6 +804,13 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Private token synthetic-inert-value",
       "API key synthetic-inert-value",
       "Access key synthetic-inert-value",
+      "Basic dXNlcjpwYXNzd29yZA==",
+      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.signature",
+      "Cookie: session=synthetic-inert-value",
+      "Passphrase synthetic-inert-value",
+      "TOTP seed synthetic-inert-value",
+      "Authentication cookie synthetic-inert-value",
+      "Encryption key synthetic-inert-value",
     ])
       assertMutation(
         surface,
@@ -811,7 +844,19 @@ test("exact unresolved and held contexts produce zero errors on every surface", 
       "P1+ remains unresolved.",
       "P1+ is unresolved.",
       "Public launch remains unresolved.",
+      "P2 remains unresolved.",
+      "P3 is unresolved.",
+      "P4 remains unresolved.",
+      "P5 is unresolved.",
+      "R1 remains unresolved.",
+      "R2 is unresolved.",
+      "L1 remains unresolved.",
+      "Product acceptance remains unresolved.",
+      "Live activation remains unresolved.",
+      "Live service is unresolved.",
       "Production remains held.",
+      "Production readiness remains held.",
+      "Production traffic is held.",
       "Learner data remains held.",
       "VOC-080-HOLD-01 remains held.",
       "VOC-080-HOLD-02 is held.",
@@ -838,6 +883,18 @@ test("exact unresolved and held contexts produce zero errors on every surface", 
       [],
       `${surface} must accept two independently safe clauses`,
     );
+    for (const safeOperational of [
+      "No dispatch occurred.",
+      "No workflow dispatch took place.",
+      "Dispatch is prohibited.",
+      "The prior delivery completed successfully.",
+      "The previous delivery succeeded.",
+    ])
+      assert.deepEqual(
+        inspectF3Surface(`${source}\n${safeOperational}`, surface),
+        [],
+        `${surface} must accept safe operational grammar: ${safeOperational}`,
+      );
   }
 });
 
@@ -848,6 +905,10 @@ test("safe clauses cannot launder an operational or later positive claim", () =>
       "The previous staging deployment succeeded and promote to production.",
       "Production remains held but is active.",
       "A1 remains unresolved and has been accepted.",
+      "Production remains held; is active.",
+      "Production remains held. Active now.",
+      "A1 remains unresolved; has been accepted.",
+      "P1+ remains unresolved. Approved now.",
       "Future work is separate and production is active.",
       "The gate remains unresolved while production is active.",
       "A1 is not merely planned and is accepted.",
@@ -1033,9 +1094,13 @@ test("history checks reject only superseded F3 current claims", () => {
       for (const historical of [
         `${packageId} is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes that prospective F3 status.`,
         `${packageId} is immutable history: F3 remains pending. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
+        `${packageId} is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
         `${packageId} is immutable history: F3 staging is unresolved. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 unresolved status.`,
         `${packageId} is immutable history: F3 is not yet delivered. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 not-delivered status.`,
         `In immutable ${packageId} history, F3 remains pending. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
+        `In immutable ${packageId} history, F3 was pending. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
+        `${packageId} immutable historical snapshot records F3 as unresolved. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 unresolved status.`,
+        `In immutable ${packageId} history, the historical snapshot records F3 as unresolved. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 unresolved status.`,
         `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status. ${packageId} immutable history records F3 as pending.`,
         `Later exact VOC-105 evidence supersedes the prospective F3 status from ${packageId}. F3 staging is unresolved in ${packageId} immutable history.`,
       ])
@@ -1127,6 +1192,8 @@ test("multiple immutable F3 history pairs are consumed independently", () => {
       "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. VOC-094 is immutable history: F3 remains pending.",
       "VOC-094 is immutable history: F3 is pending.\n\nLater exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status.",
       "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. F3 remains pending.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. It remains pending.",
+      "VOC-094 immutable historical snapshot records F3 as unresolved. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 unresolved status. Still unresolved.",
     ])
       assert.match(
         inspectF3Surface(`${source}\n${invalid}`, surface).join("\n"),
