@@ -23,9 +23,10 @@ paths.
    validator so each is read independently and every cross-cutting content policy
    reports the affected path. Retain the structured F3 record's existing exact facts.
 3. Add deterministic, network-free helpers for credential values, exact allowed
-   secret-name vocabulary, Worker UUIDs, direct live-action imperatives, later-gate/
-   production/live/launch/data positive claims, and history-as-current claims. Keep
-   accepted held/unresolved/historical/current-F3 statements explicit and narrow.
+   secret-name vocabulary, protected/unknown IDs, authority-bounded procedures, later-
+   gate/production/live/launch/data positive claims, and superseded-F3-as-current
+   claims. Explicitly allow the canonical public account/zone/D1 contexts, exact
+   guarded Cloudflare-delivery procedures, and current production/data/hold truth.
 4. Make each governed JSON object and array exact. Validate the complete gate and
    delivery inventory, every success/skipped-held/skipped-expected value, and both
    rollback proof layers. Detect duplicate raw keys before `JSON.parse` loses them.
@@ -33,17 +34,25 @@ paths.
    matrices in `test-plan.md`. First prove the canonical candidate passes. For each
    negative, assert one intended mutation and unchanged other snapshots, then require
    the intended path/field diagnostic. Retain all prior cases unchanged in effect.
-6. Format and commit. Compute the replacement exact head, each fixed path blob OID,
-   and canonical 12-path digest. Run the manifest immediately before validation.
+6. Format and commit. Require clean porcelain status, zero staged/unstaged HEAD diff,
+   and working-file OID equality with `HEAD:path` for each fixed path. Compute the
+   replacement exact head/tree, each HEAD/working blob OID, and canonical 12-path
+   digest. Run this complete identity proof immediately before validation.
 7. Run both runtime validators, both focused suites, `ci:foundation`, `pnpm validate`,
-   governance/risk/diff/path checks, and disposable full PR rollback. Re-run the exact
-   manifest immediately afterward and require identical head/inventory/OIDs/digest.
+   governance/risk/diff/path checks, and disposable scoped 12-path historical-base
+   reversal. Return to the unchanged candidate, prove clean HEAD/file identity again,
+   and require identical head/tree/inventory/HEAD and working OIDs/digest.
 8. Update PR #209's body/binder with the replacement SHA/digest, superseded/stopped
-   identities, exact test inventory/results, full-base rollback, scope, no-external-
+   identities, exact test inventory/results, scoped historical rehearsal, integrated-
+   first-parent rollback, scope, no-external-
    effect statement, and pending review state. Push and wait for hosted checks.
 9. Obtain fresh exact-head specialist and independent cross-model R4 reviews. Resolve
    any blocker on a new SHA by repeating steps 6-9. A separate non-author merges only
    when the final exact head is eligible.
+10. The adoption-recorded owner monitors from merge through exact-merge-SHA hosted
+    required checks and fresh `origin/develop` readback of both validators/suites,
+    foundation, governance, canonical context positives, and negative matrices. Record
+    success/failure in issue #211 and stop issue closure/VOC-106 on any failure.
 
 ## Exact path inventory
 
@@ -58,8 +67,9 @@ paths.
 ## Validation and rollback
 
 Run the commands in `test-plan.md` only after the candidate manifest pre-check.
-Rollback rehearsal must reverse the complete PR #209 diff—not merely the corrective
-commit—and prove exact tree equality with base
-`533084432f0672dbf25c402e96209120a8ad50cf`, `git diff --check`, and no untracked
-residue. Reapply/return to the candidate without changing it. After merge, rollback
-requires a separately reviewed full PR #209 revert; it performs no live-system action.
+Premerge rollback rehearsal reverses the complete 12-path PR #209 scope—not merely the
+corrective commit—and proves those paths equal historical base
+`533084432f0672dbf25c402e96209120a8ad50cf`, with `git diff --check` and no residue.
+It does not claim that SHA will be PR #209's first parent after VOC-113 plan adoption.
+After merge, a separately reviewed full PR #209 revert restores its actual then-current
+first parent, including adopted VOC-113; it performs no live-system action.

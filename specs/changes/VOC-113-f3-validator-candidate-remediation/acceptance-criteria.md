@@ -27,9 +27,10 @@ surface whose content violated policy.
 - Tests: `VOC-113-TEST-02`
 - Evidence: `VOC-113-EV-02`
 
-Every surface rejects token/secret/credential values, protected Worker UUIDs, and any
-credential-like uppercase name outside the two exact Cloudflare interface names.
-Those names pass only without values. The tests use no real secret or environment.
+The exact public staging account, zone, and D1 IDs pass only at their canonical labels
+and locations in the delivery document. Every moved/unknown identifier, protected
+Worker UUID, token/secret/credential value, and unknown credential name fails on every
+surface; the two exact Cloudflare names pass only without values. Tests use no secret.
 
 ## VOC-113-AC-03 — Live action and later authority fail closed everywhere
 
@@ -37,10 +38,11 @@ Those names pass only without values. The tests use no real secret or environmen
 - Tests: `VOC-113-TEST-03`
 - Evidence: `VOC-113-EV-03`
 
-Every surface rejects each direct-live imperative and every positive/authorized later-
-milestone, product, production, live, launch, learner-data, or hold-release claim,
-including the issue #211 examples. Exact unresolved/held/skipped/prohibited language
-and the evidence-bound current F3 decision pass without executing a command.
+The exact conditional, authority-bounded credential removal/cancel/retry/verify and
+migration/upload/promotion/smoke/rollback procedures pass only in the canonical
+delivery-document regions with their guards. Relocated, guard-removed, unconditional,
+or appended live commands fail on every surface, as do false later-boundary/hold-release
+claims. Sanitized past events and unresolved/held/no-action truth pass without execution.
 
 ## VOC-113-AC-04 — Historical pending state cannot masquerade as current
 
@@ -48,10 +50,11 @@ and the evidence-bound current F3 decision pass without executing a command.
 - Tests: `VOC-113-TEST-04`
 - Evidence: `VOC-113-EV-04`
 
-For every VOC-094 through VOC-104 reference and every surface, prospective pending or
-held wording presented as current fails. Explicit immutable historical context plus
-the later-evidence supersession/current boundary passes. Historical packages remain
-unchanged.
+For every VOC-094 through VOC-104 reference and every surface, only superseded
+prospective F3/staging pending/unresolved wording presented as current fails. Explicit
+immutable F3 history plus later-VOC-105 supersession passes. Current production and
+learner-data held truth and HOLD-01/HOLD-02 remain-held statements pass even when
+historical lineage is cited. Historical packages remain unchanged.
 
 ## VOC-113-AC-05 — Gate, delivery, and rollback objects are exact
 
@@ -72,8 +75,9 @@ specific diagnostic.
 
 All existing focused evidence remains unchanged in effect and the complete new matrix,
 both runtime/focused validators, foundation/workspace suites, and VOC-110/VOC-109
-regressions pass. The exact corrected head, fixed inventory, 12 blob OIDs, and canonical
-digest are identical immediately before and after observation. Drift stops merge.
+regressions pass. Immediately before both observations status is clean, staged/unstaged
+HEAD diff is zero, and every working-file OID equals `HEAD:path`. Exact head/tree,
+inventory, 12 HEAD/working OIDs, and digest are identical. Any dirt or drift stops merge.
 
 ## VOC-113-AC-07 — Exact revision is independently verified and reversible
 
@@ -82,7 +86,21 @@ digest are identical immediately before and after observation. Drift stops merge
 - Evidence: `VOC-113-EV-07`
 
 The correction changes exactly two files relative to stopped head, PR #209 retains
-exactly VOC-105's 12-path outcome relative to base, hosted/governance/path checks pass,
-and a disposable full-PR reverse restores exact base with no residue. Fresh distinct
+exactly VOC-105's 12-path outcome relative to historical base, and hosted/governance/
+path checks pass. A disposable scoped 12-path reverse restores historical `5330844...`
+content without claiming it is the future first parent; an integrated full revert is
+specified against PR #209's actual then-current first parent including VOC-113. Fresh distinct
 specialist and independent cross-model R4 reviewers pass the final exact head with
 zero blockers; a separate non-author performs any merge.
+
+## VOC-113-AC-08 — Post-merge monitoring closes explicitly
+
+- Requirements: `VOC-113-D10`
+- Tests: `VOC-113-TEST-08`
+- Evidence: `VOC-113-EV-08`
+
+The adoption-recorded owner monitors from PR #209 merge through exact-merge-SHA CI,
+Governance, Security, and fresh `origin/develop` readback of both runtime/focused
+validators, `ci:foundation`, governance, canonical positives, and negative matrices.
+All signals must pass before issue closure or VOC-106 release. Failure is recorded in
+issue #211 or a linked bug and routes governed remediation or full integrated revert.

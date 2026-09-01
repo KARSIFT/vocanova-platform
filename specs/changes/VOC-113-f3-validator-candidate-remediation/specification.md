@@ -26,13 +26,16 @@ branch and draft PR #209. Change only:
 - `scripts/foundation/voc105-f3-evidence-policy.test.mjs`.
 
 Once the correction is formatted, committed, and otherwise stable, record the exact
-head SHA, fixed 12-path inventory, each path's blob OID, and SHA-256 digest using the
-unchanged VOC-111 framing: raw UTF-8 path, NUL, Git blob OID without LF, NUL. Execute
-the manifest immediately before and after the bounded focused/runtime/foundation/
-workspace/governance/rollback observation. Exact head, ordered paths, blob OIDs, and
-digest must be identical. Any later code or content edit creates a new candidate and
-requires fresh observations, hosted checks, specialist review, and independent R4
-review.
+head SHA and tree, fixed 12-path inventory, each path's HEAD blob OID, and SHA-256
+digest using the unchanged VOC-111 framing: raw UTF-8 path, NUL, Git blob OID without
+LF, NUL. Immediately before both the pre-validation and post-validation observations,
+require `git status --porcelain=v1` empty, `git diff --quiet HEAD --` and
+`git diff --cached --quiet HEAD --`, and for every path require
+`git hash-object "$f"` equals `git rev-parse "HEAD:$f"`. Only then emit the manifest.
+Exact head/tree, ordered paths, HEAD/working-file OIDs, and digest must be identical.
+Any later code/content edit or dirty/untracked state creates or obscures a candidate
+and requires a clean new observation, hosted checks, specialist review, and independent
+R4 review.
 
 PR #209 remains one coherent implementation/rollback boundary. A separate correction
 PR cannot alter these new files against `develop` without duplicating the entire
@@ -59,31 +62,51 @@ in its diagnostic. The record also retains its structured schema checks. Missing
 unreadable files fail closed. No surface is exempt because it is JSON, an index, a
 delivery procedure, or historical/current mixed prose.
 
-### VOC-113-D03 — Disclosure and allowed vocabulary
+### VOC-113-D03 — Context-bound disclosure and public identifiers
 
-On every designated file:
+Do not use a blanket UUID, account-ID, or identifier ban. On the eight non-delivery
+surfaces, reject every credential value and resource-shaped account/zone/UUID value.
+On `docs/operations/cloudflare-delivery.md`, permit only these already-public values,
+only under their existing exact resource labels and canonical settings/resource tuple
+paragraphs or table cells:
 
-- reject RFC-4122-shaped UUIDs representing protected immutable Worker versions;
-- reject token, secret, password, private-key, API-key, access-token, account-ID, or
-  credential values expressed as assignments, JSON/YAML-like fields, environment
-  bindings, or prose-labelled literal values;
-- recognize credential-like uppercase identifiers ending in or containing
-  `SECRET`, `TOKEN`, `PASSWORD`, `PRIVATE_KEY`, `API_KEY`, or `ACCOUNT_ID`; allow only
-  the names `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`; and
-- allow those two names only as value-free interface vocabulary. A reference to a
-  redaction or to the absence/existence of the name is not authority to include its
-  value.
+- account `0a9eda28b96d77c24dcde74f3e074d47`;
+- zone `63286d93b5f32925ac7366b4e97908be`; and
+- D1 `22ae386f-e3f5-4d98-a3ad-18b39d3b8556`.
 
-Focused tests use inert synthetic strings and UUIDs only. They must not read an
-environment variable or actual credential.
+Moving one to another label/section, placing it on another surface, or introducing an
+unknown account/zone/UUID fails. Every other UUID-shaped value is rejected as an
+unknown/protected identifier, including synthetic immutable Worker-version UUIDs.
 
-### VOC-113-D04 — No live or later-boundary promotion
+Across all nine files, `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` are the only
+credential-like uppercase names and are allowed only as value-free interface names.
+Reject any actual/synthetic token, secret, password, private-key, API-key, access-token,
+or credential value and every unknown `*_SECRET`, `*_TOKEN`, `*_PASSWORD`,
+`*_PRIVATE_KEY`, `*_API_KEY`, or `*_ACCOUNT_ID` name. The public account identifier in
+its exact prose/resource context is not a secret value. Tests use inert literals and
+never inspect an environment variable or credential.
 
-Every designated file must reject a direct imperative instruction to dispatch,
-deploy, migrate, promote, upload/publish, rotate/install/create/delete a credential,
-mutate settings/resources/traffic/DNS, activate production, or launch. Test the verbs
-with `now`, staging/production targets, and direct imperative punctuation, including
-the reported `Deploy now.` form.
+### VOC-113-D04 — Authority-bounded procedure and later-boundary model
+
+Do not reject all operational verbs. The delivery document is intentionally a
+conditional runbook. It must retain these canonical positive regions with their exact
+guards and boundaries:
+
+- the `VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN`/`END` block, including conditional
+  remove-secret, cancel, retry, revoke, restore, and verify language;
+- `Standard manual staging delivery after settings action`, including separately
+  authorized/reviewed dispatch, migration, immutable upload, exact promotion, bounded
+  smoke, and rollback sequencing; and
+- `Cancellation, failure, and rollback`, including conditional stop/restore behavior.
+
+Acceptance requires the procedure to remain at this exact path and anchored region,
+with its existing conditional (`if`, `when`, `only then`, failure case), separate-
+authority/review, held-production, no-secret-logging, and stop/rollback guards as
+applicable. Removing a guard, relocating a clause, changing a conditional to an
+unconditional command, or appending `Deploy now.`, `Retry deployment.`, `Promote to
+production.`, or another live imperative anywhere fails with a path/action-context
+diagnostic. All eight other surfaces reject appended live instructions; past-tense
+sanitized event descriptions and explicit no-action statements remain valid.
 
 Every file must also reject positive, complete, accepted, effective, ready, active,
 enabled, released, resolved, verified, approved, or authorized claims for:
@@ -98,15 +121,21 @@ Exact current F3 complete-effective language is allowed only with the VOC-105 ev
 boundary. Exact unresolved/held/skipped/prohibited/no-action language remains allowed.
 `VOC-080-HOLD-01` and `VOC-080-HOLD-02` must remain held.
 
-### VOC-113-D05 — Historical snapshots cannot become current truth
+### VOC-113-D05 — Narrow historical/current transition
 
-VOC-094 through VOC-104 may be cited only as immutable historical evidence. A sentence
-or structured value that presents any of their prospective pending/held status as
-`current`, `now`, `still`, `remains`, or the active repository status must fail. Mixed
-historical/current surfaces must explicitly preserve both facts: the older package is
-historical/immutable, and later exact evidence supersedes only its prospective F3
-pending wording. Tests exercise every package number and both current-as-history and
-history-as-current directions without changing historical package files.
+VOC-094 through VOC-104 remain immutable history, but not every held fact from them is
+superseded. Reject only their prospective F3/staging `pending`, `unresolved`, or
+not-yet-delivered language when it is presented as current/now/still/remains/active
+repository truth. Mixed history/current surfaces must say that the older F3 statement
+is historical/immutable and later exact VOC-105 evidence supersedes only that
+prospective F3 status.
+
+Current production traffic/readiness and learner-data held truth, plus
+`VOC-080-HOLD-01` and `VOC-080-HOLD-02`, remains canonical even when its lineage is
+described in VOC-094 through VOC-104 history. Positives must cover `production remains
+held`, `learner data remains held`, and both holds remain held beside historical
+package citations. Tests must not reject those statements or require false
+supersession of them.
 
 ### VOC-113-D06 — Exact structured event and rollback contract
 
@@ -138,11 +167,31 @@ diagnostic rather than an unrelated failure.
 
 At the final exact head run both VOC-081/VOC-105 validators and focused tests,
 `ci:foundation`, `pnpm validate`, governance validation, risk classification, diff/
-path/format checks, hosted required checks, and a disposable full-PR rollback to
-`533084432f0672dbf25c402e96209120a8ad50cf`. Obtain fresh exact-head canonical-
+path/format checks, hosted required checks, and a disposable scoped reversal of the 12
+PR paths to their historical `533084432f0672dbf25c402e96209120a8ad50cf` content.
+That rehearsal is not a claim about the future merge first parent. Obtain fresh exact-head canonical-
 documentation/milestone-evidence specialist and independent cross-model R4 PASS
 verdicts from different non-authors. A separate non-author may merge only after every
 blocker is resolved and the body/binder truthfully reports the replacement evidence.
+
+### VOC-113-D10 — DOC-15 section 24.18 post-merge monitoring
+
+The accountable repository change owner recorded at adoption owns a bounded window
+beginning when corrected PR #209 merges and ending only when CI, Governance, and
+Security required checks complete for that exact merge SHA and a fresh
+`origin/develop` checkout at the same SHA passes both runtime validators, both focused
+suites, `ci:foundation`, and governance validation. Monitored signals also include the
+canonical public-ID and bounded-procedure positives and every-surface disclosure/live/
+later/history plus structured delivery/rollback negatives.
+
+Success is every signal passing at the exact merge SHA with no issue #211 recurrence.
+Any hosted/readback failure, false acceptance, canonical-positive rejection, or
+evidence/SHA mismatch stops issue #211/#203/#206 closure and VOC-106 release. The owner
+posts exact SHA, run links, commands, and results to issue #211. On failure, append the
+evidence there (or open a linked plain bug if it is already closed) and route a
+separately governed correction or a full integrated PR #209 revert. A full revert
+restores PR #209's actual then-current first parent—including adopted VOC-113—not the
+older historical base. Monitoring grants no external authority.
 
 ## Non-goals and prohibited authority
 

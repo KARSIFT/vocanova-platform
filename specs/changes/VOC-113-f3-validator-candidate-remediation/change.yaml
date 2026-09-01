@@ -25,6 +25,16 @@ plan_branch: plan/voc-113-f3-validator-candidate-remediation
 target_branch: develop
 approved_candidate_sha: pending-independent-exact-revision-review-and-adoption
 approval_status: pending-independent-exact-revision-review-and-adoption
+superseded_plan_candidates:
+  - candidate_sha: 21139e8a7eb82f883adcebfbff615ea73e1cbfec
+    status: blocked-and-superseded
+    reasons:
+      - incomplete-clean-HEAD-and-working-file-manifest-binding
+      - blanket-rules-rejected-canonical-public-resource-and-bounded-procedure-context
+      - overbroad-history-rule-rejected-current-hold-truth
+      - incomplete-DOC-15-section-24.18-monitoring
+      - incorrect-integrated-rollback-chronology
+    review_transfer: prohibited-fresh-exact-candidate-reviews-required
 implementation_authorized: false
 implementation_authority_status: >-
   prohibited-until-exact-plan-specialist-and-independent-R4-reviews-accountable-
@@ -61,10 +71,12 @@ requirements:
     statement: >-
       After adoption, amend draft PR #209 in place by changing exactly the existing
       VOC-105 validator and focused test. Once content is stable, bind the replacement
-      exact PR head and its 12 blob OIDs to the unchanged lexicographically sorted
-      VOC-111 path-NUL-blob-OID-without-LF-NUL SHA-256 algorithm. Record the replacement
-      digest immediately before and after all bounded observation commands; any change
-      stops merge and requires a new governed candidate/review cycle.
+      exact PR head and tree plus its 12 blob OIDs to the unchanged lexicographically
+      sorted VOC-111 path-NUL-blob-OID-without-LF-NUL SHA-256 algorithm. Immediately
+      before each observation require clean status, zero HEAD diff, and each working-
+      file hash equal to git rev-parse HEAD:path. Record the replacement digest before
+      and after all bounded observation commands; any mismatch stops merge and requires
+      a new governed candidate/review cycle.
   - id: VOC-113-D02
     statement: >-
       Define the designated current-truth corpus as the nine VOC-105 document/evidence
@@ -73,23 +85,28 @@ requirements:
       rule independently to every file, with a path-specific diagnostic.
   - id: VOC-113-D03
     statement: >-
-      Reject credential/token/secret values, immutable Worker-version UUIDs, and any
-      credential-like uppercase name outside the exact allowed vocabulary
-      CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN on every designated surface.
-      Names may be cited only without values; tests use inert synthetic placeholders.
+      Use an exact context model, not blanket identifier rejection. Permit the already-
+      public staging account, zone, and D1 identifiers only at their canonical labels
+      and bounded public-resource locations in docs/operations/cloudflare-delivery.md,
+      and permit CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN only as value-free
+      interface names. On every surface reject secret/token values, protected Worker-
+      version UUIDs, unknown resource identifiers, and unknown credential names.
   - id: VOC-113-D04
     statement: >-
-      Reject direct instructions to dispatch, deploy, migrate, promote, rotate/install
-      credentials, mutate settings/resources/traffic/DNS, or launch; reject positive or
-      authorized claims for A1/P1+, later milestones, product acceptance, production
-      readiness/traffic/deployment, live activation/service, public launch, and learner-
-      data access on every designated surface. Exact held/unresolved and historical
-      descriptions remain allowed.
+      Use an exact authority-and-location context model for procedural prose. Preserve
+      the canonical conditional, authority-bounded credential removal, cancellation,
+      retry, verification, migration, upload, promotion, smoke, and rollback procedures
+      in docs/operations/cloudflare-delivery.md. Reject appended, relocated, guard-
+      removed, unconditional, or otherwise unbounded live commands on every surface;
+      reject positive/authorized later product, production, live, launch, learner-data,
+      or hold-release claims. Exact held/unresolved/history and bounded procedures pass.
   - id: VOC-113-D05
     statement: >-
-      Reject VOC-094 through VOC-104 prospective pending/held language when presented
-      as current truth. Allow it only as explicitly historical/immutable context that
-      also preserves later-evidence supersession and the current VOC-105 boundary.
+      Reject only superseded VOC-094 through VOC-104 prospective F3/staging pending or
+      unresolved language when presented as current truth. Preserve current HOLD-01/
+      HOLD-02 and production/learner-data held truth even when its lineage is recorded
+      in those immutable packages. Require explicit history plus later-evidence
+      supersession for the older F3 snapshot, with positive tests for current holds.
   - id: VOC-113-D06
     statement: >-
       Enforce exact own-key sets, types, values, identifiers, URLs, arrays, gate-item
@@ -102,7 +119,10 @@ requirements:
       Complete one-at-a-time positives and negatives for every rule/surface/status,
       retain all 26 existing focused cases unchanged in effect, prove fixture setup
       changes exactly the intended file/field, run focused/full/hosted validation, and
-      rehearse full PR #209 rollback to base 533084432f0672dbf25c402e96209120a8ad50cf.
+      rehearse a scoped 12-path reversal against historical base
+      533084432f0672dbf25c402e96209120a8ad50cf without claiming it is the later
+      integrated first parent. If merged, prove a full revert restores PR #209's actual
+      then-current first parent, which includes adopted VOC-113.
   - id: VOC-113-D08
     statement: >-
       Require fresh exact-head canonical-documentation/milestone-evidence specialist
@@ -114,6 +134,13 @@ requirements:
       Perform no application, runtime, workflow, package-script, historical-package,
       infrastructure, setting, secret, Cloudflare, dispatch/deployment, D1, traffic/DNS,
       production/data, spending, launch, main-promotion, or issue-closure action.
+  - id: VOC-113-D10
+    statement: >-
+      Under DOC-15 section 24.18, the accountable owner recorded at adoption monitors
+      from corrected PR #209 merge through exact-merge-SHA protected-branch hosted
+      completion and fresh develop readback. Success requires all specified signals;
+      failure stops issue closure and VOC-106 release, records issue-211 evidence or a
+      linked bug, and routes governed remediation or full integrated revert.
 
 candidate_observation:
   id: VOC-113-CANDIDATE-OBSERVATION-00
@@ -149,9 +176,55 @@ candidate_observation:
     - docs/product/12-mvp-implementation-plan.md
     - docs/product/README.md
   execution: >-
-    after-corrected-content-is-stable-record-exact-head-path-inventory-blob-OIDs-and-
-    digest-then-run-focused-runtime-foundation-workspace-governance-and-rollback-
-    observation-and-rerun-identical-manifest-before-and-after; drift-stops-merge
+    before-each-observation-require-clean-status-zero-HEAD-diff-and-each-working-file-
+    hash-equal-HEAD-path-then-record-exact-head-tree-path-inventory-blob-OIDs-and-
+    digest; run-focused-runtime-foundation-workspace-governance-and-scoped-rollback-
+    observation; repeat-identical-identity-proof-afterward; drift-stops-merge
+
+context_model:
+  canonical_public_resource_context:
+    path: docs/operations/cloudflare-delivery.md
+    account_id: 0a9eda28b96d77c24dcde74f3e074d47
+    zone_id: 63286d93b5f32925ac7366b4e97908be
+    d1_database_id: 22ae386f-e3f5-4d98-a3ad-18b39d3b8556
+    rule: exact-value-at-exact-label-and-existing-public-resource-section-only
+  allowed_value_free_credential_names:
+    - CLOUDFLARE_ACCOUNT_ID
+    - CLOUDFLARE_API_TOKEN
+  canonical_bounded_procedure_path: docs/operations/cloudflare-delivery.md
+  canonical_bounded_procedure_regions:
+    - VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN-to-END
+    - Standard-manual-staging-delivery-after-settings-action
+    - Cancellation-failure-and-rollback
+  rule: >-
+    live-language-is-accepted-only-in-these-existing-regions-with-their-exact-
+    conditional-sequencing-authority-hold-and-no-secret-guards; appended-relocated-
+    unconditional-or-guard-removed-commands-fail
+
+post_merge_monitoring:
+  governing_rule: DOC-15-section-24.18
+  owner: accountable-repository-change-owner-recorded-at-adoption
+  begins: corrected-PR-209-merge-event
+  ends: >-
+    exact-merge-SHA-CI-Governance-Security-required-checks-complete-and-fresh-
+    origin-develop-readback-at-that-merge-SHA-passes-both-runtime-validators-both-
+    focused-suites-ci-foundation-and-governance-validation
+  signals:
+    - exact-merge-SHA-hosted-required-check-results
+    - fresh-develop-head-equals-exact-PR-209-merge-SHA
+    - both-runtime-validators-and-both-focused-suites-pass
+    - ci-foundation-and-governance-validation-pass
+    - canonical-public-ID-and-bounded-procedure-positives-pass
+    - every-surface-disclosure-live-later-history-delivery-and-rollback-negatives-pass
+  success: all-signals-pass-at-exact-merge-SHA-with-zero-recurrence
+  stop: >-
+    any-hosted-or-readback-failure-false-acceptance-canonical-positive-rejection-
+    identity-mismatch-or-review-evidence-drift-stops-issue-211-203-206-closure-and-
+    VOC-106-release
+  evidence_route: issue-211-comment-linked-to-PR-209-merge-SHA-and-hosted-runs
+  failure_route: >-
+    append-failing-evidence-to-issue-211-or-open-linked-plain-bug-if-closed-then-
+    route-separately-governed-remediation-or-full-integrated-PR-209-revert
 
 owners:
   decision: accountable-repository-change-owner-at-adoption
@@ -278,5 +351,10 @@ implementation:
 
 rollback:
   before_merge: close-PR-209-for-zero-repository-effect
-  after_merge: separately-reviewed-full-PR-209-revert-to-exact-develop-base
+  premerge_rehearsal: >-
+    scoped-12-path-reversal-proves-historical-533084432f0672dbf25c402e96209120a8ad50cf-
+    content-only-and-does-not-claim-that-SHA-is-the-future-first-parent
+  after_merge: >-
+    separately-reviewed-full-revert-restores-the-actual-then-current-PR-209-first-
+    parent-including-adopted-VOC-113
   live_system_rollback: not-applicable-no-live-action-authorized
