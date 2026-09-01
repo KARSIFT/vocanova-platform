@@ -27,10 +27,10 @@ release machinery, templates, and required checks operational.
   templates, EHR runbook, and machine lane/path policy as non-active inputs.
 - Add path-aware aggregate gates that always report and run more work for an unknown
   base or classifier error.
-- Add one permanent compact `Policy / required` workflow. During the five named
-  VOC-120 transition branches it invokes the frozen pre-change verifier; afterward
-  it becomes the ordinary future policy aggregate and does not replay historical
-  prose.
+- Add one permanent compact `Policy / required` workflow. PR1/PR2 bootstrap mode binds
+  the exact tracked verifier blob/digest while all legacy gates remain required. After
+  action A, PR3-PR5 mode invokes that verifier from the protected immutable ref.
+  Ordinary future branches use the compact policy aggregate without prose replay.
 - Add the executable transition verifier and mutation tests. It binds candidates to
   the accepted control inventory, current authority, active EHR scope, held actions,
   exact transition branch names, and required evidence.
@@ -57,15 +57,18 @@ Before PR2 or any promotion:
 
 Branch from current `origin/develop` only after the qualified-human records exist.
 
-- Implement only the correction required by the issue #231 outcome, expected to be
-  the minimal per-designated-surface aggregate semantic-dispatch proof.
-- Apply the PR #215 outcome without silently merging disputed code.
+- Implement every repository correction required by both outcomes, including the
+  expected minimal per-designated-surface aggregate semantic-dispatch proof when that
+  is the issue #231 verdict.
+- For PR #215, either implement its required correction or install the exact,
+  independently reviewed one-time promotion/synchronization procedure expressly
+  permitted by an abandon/supersede outcome. Never silently merge disputed code.
 - Update permanent EHR/release status truth and preserve exact evidence links.
 - Do not remove current governance, release/sync, or transition controls.
 
 PR2 receives current deterministic checks and fresh exact independent review. It may
 merge to `develop`; no promotion or ref/settings action starts until both EHR records
-are permanently cleared and any required correction is green.
+are permanently cleared and every required correction/procedure is green.
 
 ## Additive settings and protected-ref action A
 
@@ -90,8 +93,10 @@ With explicit `VOC-120-HOLD-01` and `VOC-120-HOLD-04` authorization:
 6. Add `main` to `cloudflare-staging` while retaining `develop`, or use a bounded
    stopped swap if dual policy is unsupported. Preserve reviewers, admin bypass, and
    policy mode exactly; update no secret name or value.
-7. Prove a credential-free main dispatch reaches the expected pre-secret/environment
-   boundary without deployment. Restore the snapshot and stop on any mismatch.
+7. Confirm current `main` remains intentionally fail-closed for staging because the
+   prepared dual-compatible delivery code still exists only on `develop`. Do not claim
+   a successful main dispatch until PR4 promotion. Restore the snapshot and stop on
+   any unexpected behavior or readback mismatch.
 
 ## PR3 — Immediate additive-settings truth
 
@@ -133,8 +138,10 @@ authority required by `HOLD-04`:
 2. Change `main` to squash-only linear protected history, future aggregate gates,
    conversation resolution, stale-review dismissal, the defined review floors, and
    merge queue. Retain permanent `Policy / required` with no administrator bypass.
-3. Move `cloudflare-staging` to sole `main` only after credential-free main policy-gate
-   proof. Preserve reviewers/admin-bypass/mode and read no secret values.
+3. Now that PR4 is on `main`, prove a credential-free main dispatch reaches the
+   expected pre-secret/environment boundary without deployment. Only then move
+   `cloudflare-staging` to sole `main`. Preserve reviewers/admin-bypass/mode and read
+   no secret values.
 4. Prove `main` contains intended `develop` ancestry, inventory or retarget open PRs,
    record the exact recreation command, then retire `develop` only with `HOLD-02`.
 5. Keep verifier and rollback refs protected through PR5 acceptance. Restore phase A

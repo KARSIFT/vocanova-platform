@@ -86,8 +86,9 @@ Accessibility checks remain path-applicable for UI changes.
   still admits only develop. Mitigation: held dual/bounded branch-policy migration,
   credential-free main-gate proof, immediate truth PR, and snapshot restoration.
 - `VOC-120-R10`: New rules authorize removal of old rules. Mitigation: every VOC-120
-  candidate remains bound to immutable pre-change authority; permanent
-  `Policy / required` invokes the protected ref through PR5 exact acceptance.
+  candidate remains bound to pre-change authority; PR1/PR2 use legacy gates plus the
+  tracked digest, then permanent `Policy / required` invokes the protected ref for
+  PR3-PR5 exact acceptance.
 - `VOC-120-R11`: EHR subjects disappear before human resolution. Mitigation: PR3
   and every promotion remain blocked until PR2 applies both qualified-human outcomes.
 - `VOC-120-R12`: Future squash/queue rules make the old merge-commit loop impossible.
@@ -114,7 +115,7 @@ Accessibility checks remain path-applicable for UI changes.
 - `VOC-120-EV-02`: before/after file, policy, workflow, and control mapping.
 - `VOC-120-EV-03`: exact PR1 checks and independent specialist review.
 - `VOC-120-EV-04`: permanent qualified-human PR #215 and issue #231 outcomes plus
-  exact PR2 correction checks/review.
+  exact PR2 correction or superseding release-procedure checks/review.
 - `VOC-120-EV-05`: action-A settings/ref/environment readback and exact doc-only PR3
   checks/review.
 - `VOC-120-EV-06`: exact PR4 old-verifier, application, specialist, promotion,

@@ -175,8 +175,10 @@ and required corrections are permanently complete.
 PR1 stages the dual-compatible future model and permanent policy aggregate without
 replacing active authority; it may merge to `develop` but cannot be promoted while the
 release EHR stop remains. PR2 applies qualified-human outcomes for PR #215 and issue
-#231 plus only the required minimal correction. Additive settings action A then
-protects immutable verifier/rollback refs, keeps merge commits and old gates, and adds
+#231 plus every correction or exact one-time release procedure their outcomes require.
+PR1/PR2 use legacy gates plus the exact tracked verifier digest. Additive settings
+action A then protects immutable verifier/rollback refs, keeps merge commits and old
+gates, and adds
 `main` to the staging policy; immediate doc-only PR3 records live truth. PR4 performs
 the coherent cleanup under the ref-pinned old verifier and receives the final
 merge-commit promotion/synchronization. Only afterward may action B enable squash-only

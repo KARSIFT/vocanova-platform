@@ -78,8 +78,9 @@
      depends on a removed path or check name after both EHR outcomes are applied.
   3. Reconstruct the last-known-good branch/settings plan without executing
      destructive or live production actions.
-  4. Execute the immutable pre-change verifier through permanent `Policy / required`
-     for every named transition branch. Prove PR4 can remove the tracked full verifier
-     only after ref-pinned acceptance and PR5 still invokes that protected ref.
+  4. Prove PR1/PR2 keep every legacy gate and bind the exact tracked verifier digest.
+     After action A, execute its protected ref through permanent `Policy / required`
+     for PR3-PR5. Prove PR4 can remove the tracked full verifier only after ref-pinned
+     acceptance and PR5 still invokes that protected ref.
   5. Prove final main ancestry and branch/PR inventory.
 - Expected: clean final tree with deterministic repository/settings rollback.

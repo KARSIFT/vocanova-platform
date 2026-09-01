@@ -5,7 +5,8 @@
 VOC-120 does not deploy the application. PR1 may prepare `develop`, but the current
 issue #191 stop record forbids promotion until PR #215 and issue #231 receive permanent
 qualified-human resolutions and required corrections pass. Every candidate through
-PR5 remains evaluated by frozen pre-change authority and the immutable verifier.
+PR5 remains evaluated by frozen pre-change authority: PR1/PR2 use legacy gates plus
+the exact tracked verifier digest, and PR3-PR5 use its protected immutable ref.
 
 ## Adoption and action authority
 
@@ -18,7 +19,8 @@ authority.
 ## Ordered activation
 
 1. Adopt the plan; implement and independently review PR1 on `develop` only.
-2. Obtain qualified-human EHR records; implement and review PR2 disposition/correction.
+2. Obtain qualified-human EHR records; implement and review every PR2 correction or
+   exact one-time procedure those outcomes require.
 3. Authorize additive action A: protect refs, security/tags/main, merge-compatible old
    plus transition gates, and dual/bounded staging policy.
 4. Merge immediate doc-only PR3 settings truth to `develop`.

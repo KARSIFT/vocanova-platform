@@ -104,7 +104,7 @@ clear outcomes, and scope. It neither becomes routine review nor silently clears
 - Tests: `VOC-120-TEST-04`, `VOC-120-TEST-06`
 - Result: pending
 
-PR1 preparation, the qualified-human EHR boundary, PR2 disposition/correction,
+PR1 preparation, the qualified-human EHR boundary, PR2 dispositions/corrections,
 additive settings, immediate PR3 truth, PR4 cleanup and final old-model
 promotion/synchronization, final settings/develop retirement, and immediate PR5 truth
 have exact preconditions and readbacks. Captured phase snapshots and no-bypass

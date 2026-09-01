@@ -30,7 +30,8 @@ multiple_pull_request_rationale: >-
   Five implementation pull requests are required by real rollback-safe,
   action-authority, settings-truth, and active-EHR boundaries. PR1 installs
   dual-compatible policy, gates, and an immutable pre-change transition verifier.
-  PR2 applies both qualified-human EHR outcomes and the required minimal correction.
+  PR2 applies both qualified-human EHR outcomes and all corrections or the exact
+  one-time release procedure those outcomes require.
   An authorized additive, old-flow-compatible settings action is followed immediately
   by PR3, a separately reviewed doc-only live-truth record. PR4, still evaluated
   against the frozen pre-change authority/verifier, performs the coherent cleanup and
@@ -172,11 +173,13 @@ requirements:
       reading secret values. The additive phase must remain compatible with the old
       merge-commit promotion/synchronization loop; squash-only linear history, merge
       queue, future-only gates, and sole-main staging activate only after the final
-      old-model synchronization. One permanent stable `Policy / required` gate must
-      invoke the no-bypass ref-pinned pre-change verifier for every exact VOC-120
-      transition branch through PR5 acceptance, then serve as the compact future policy
-      aggregate. Committed settings documentation must match live truth through an
-      immediate separately reviewed doc-only PR after every mutation.
+      old-model synchronization. PR1 and PR2 remain controlled by all legacy gates,
+      exact independent review, and the tracked verifier blob/digest established in
+      PR1. After authorized action A, one permanent stable `Policy / required` gate
+      must invoke the no-bypass ref-pinned verifier for PR3 through PR5, then serve as
+      the compact future policy aggregate. Committed settings documentation must match
+      live truth through an immediate separately reviewed doc-only PR after every
+      mutation.
   - id: VOC-120-D13
     statement: >-
       Do not copy Kandev's scale-specific complexity blindly. VocaNova must not copy
@@ -237,7 +240,7 @@ implementation:
       name: ehr-disposition-and-transition-unblock
       target: develop
       status: blocked-on-qualified-human-ehr-records
-      boundary: apply EHR outcomes and only their required minimal correction
+      boundary: apply EHR outcomes and every required correction or one-time procedure
     - id: VOC-120-PR3
       name: additive-settings-truth
       target: develop

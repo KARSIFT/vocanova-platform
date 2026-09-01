@@ -33,7 +33,8 @@ required because GitHub settings, immediate truth documentation, pre-change
 verification, and EHR form real boundaries:
 
 1. Prepare dual-compatible checks and an immutable pre-change verifier.
-2. Apply both qualified-human EHR outcomes and their minimal required correction.
+2. Apply both qualified-human EHR outcomes and every required correction or exact
+   one-time release procedure.
 3. Immediately record additive, old-flow-compatible live settings after authorization.
 4. Perform the coherent cleanup only after EHR resolution, still applying frozen
    pre-change authority through the final old-model promotion and synchronization.
