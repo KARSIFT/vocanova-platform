@@ -16,6 +16,12 @@ const root = path.resolve(
   "../..",
 );
 const fixturePaths = ["package.json", ...DESIGNATED_F3_SURFACES];
+const canonicalSources = new Map(
+  fixturePaths.map((relative) => [
+    relative,
+    fs.readFileSync(path.join(root, relative), "utf8"),
+  ]),
+);
 
 function fixture() {
   const target = fs.mkdtempSync(path.join(os.tmpdir(), "voc105-f3-"));
@@ -58,6 +64,10 @@ function mutateJson(target, mutate) {
 
 function append(target, relative, text) {
   fs.appendFileSync(path.join(target, relative), `\n${text}\n`);
+}
+
+function appendSource(source, text) {
+  return `${source}\n${text}\n`;
 }
 
 function jsonWithDuplicate(value, targetPath, duplicateKey, currentPath = "$") {
@@ -112,6 +122,24 @@ function assertMutation(relative, mutate, pattern) {
   } finally {
     fs.rmSync(target, { recursive: true, force: true });
   }
+}
+
+function assertSurfaceMutation(relative, mutateSource, pattern) {
+  assert.ok(
+    DESIGNATED_F3_SURFACES.includes(relative),
+    `surface mutation must target a designated F3 surface: ${relative}`,
+  );
+  const source = canonicalSources.get(relative);
+  assert.equal(typeof source, "string", `missing canonical ${relative}`);
+  const mutated = mutateSource(source);
+  assert.equal(typeof mutated, "string", `mutation must return ${relative}`);
+  assert.notEqual(mutated, source, `surface mutation must change ${relative}`);
+  const diagnostic = inspectF3Surface(mutated, relative).join("\n");
+  assert.ok(
+    diagnostic.includes(`${relative}:`),
+    `${relative} diagnostic missing: ${diagnostic}`,
+  );
+  assert.match(diagnostic, pattern);
 }
 
 function rejects(name, mutate, pattern) {
@@ -352,51 +380,35 @@ test("public resource identifiers pass only at exact canonical labels and locati
     (entry) => entry !== "docs/operations/cloudflare-delivery.md",
   ))
     for (const identifier of identifiers)
-      assertMutation(
+      assertSurfaceMutation(
         relative,
-        (target) =>
-          append(target, relative, `Moved public resource ${identifier}.`),
+        (source) =>
+          appendSource(source, `Moved public resource ${identifier}.`),
         /protected or unknown resource identifier/,
       );
-  assertMutation(
+  assertSurfaceMutation(
     "docs/operations/cloudflare-delivery.md",
-    (target) => {
-      const file = path.join(target, "docs/operations/cloudflare-delivery.md");
-      fs.writeFileSync(
-        file,
-        fs
-          .readFileSync(file, "utf8")
-          .replace(
-            "tuple binds account `0a9eda28b96d77c24dcde74f3e074d47`",
-            "tuple binds zone `0a9eda28b96d77c24dcde74f3e074d47`",
-          ),
-      );
-    },
+    (source) =>
+      source.replace(
+        "tuple binds account `0a9eda28b96d77c24dcde74f3e074d47`",
+        "tuple binds zone `0a9eda28b96d77c24dcde74f3e074d47`",
+      ),
     /canonical public resource context/,
   );
   for (const identifier of identifiers)
-    assertMutation(
+    assertSurfaceMutation(
       "docs/operations/cloudflare-delivery.md",
-      (target) =>
-        append(
-          target,
-          "docs/operations/cloudflare-delivery.md",
-          `Relocated canonical identifier ${identifier}.`,
-        ),
+      (source) =>
+        appendSource(source, `Relocated canonical identifier ${identifier}.`),
       /canonical public resource .* occur exactly/,
     );
   for (const identifier of [
     "11111111111111111111111111111111",
     "123e4567-e89b-42d3-a456-426614174000",
   ])
-    assertMutation(
+    assertSurfaceMutation(
       "docs/operations/cloudflare-delivery.md",
-      (target) =>
-        append(
-          target,
-          "docs/operations/cloudflare-delivery.md",
-          `Unknown resource ${identifier}.`,
-        ),
+      (source) => appendSource(source, `Unknown resource ${identifier}.`),
       /protected or unknown resource identifier/,
     );
 });
@@ -411,16 +423,15 @@ test("credential vocabulary and values fail closed on every surface", () => {
   ];
   for (const relative of DESIGNATED_F3_SURFACES) {
     for (const name of unknownNames)
-      assertMutation(
+      assertSurfaceMutation(
         relative,
-        (target) => append(target, relative, `${name} is value-free.`),
+        (source) => appendSource(source, `${name} is value-free.`),
         /unknown credential interface name/,
       );
     for (const allowed of ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN"])
-      assertMutation(
+      assertSurfaceMutation(
         relative,
-        (target) =>
-          append(target, relative, `${allowed}=synthetic-inert-value`),
+        (source) => appendSource(source, `${allowed}=synthetic-inert-value`),
         /prohibited value/,
       );
     for (const [labelled, diagnostic] of [
@@ -471,19 +482,15 @@ test("credential vocabulary and values fail closed on every surface", () => {
         /credential value is prohibited|prohibited value/,
       ],
     ])
-      assertMutation(
+      assertSurfaceMutation(
         relative,
-        (target) => append(target, relative, labelled),
+        (source) => appendSource(source, labelled),
         diagnostic,
       );
-    assertMutation(
+    assertSurfaceMutation(
       relative,
-      (target) =>
-        append(
-          target,
-          relative,
-          "Protected 123e4567-e89b-42d3-a456-426614174000.",
-        ),
+      (source) =>
+        appendSource(source, "Protected 123e4567-e89b-42d3-a456-426614174000."),
       /protected or unknown resource identifier/,
     );
   }
@@ -525,46 +532,28 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "cancellation-rollback",
     ],
   ])
-    assertMutation(
+    assertSurfaceMutation(
       relative,
-      (target) => {
-        const file = path.join(target, relative);
-        fs.writeFileSync(
-          file,
-          fs.readFileSync(file, "utf8").replace(needle, replacement),
-        );
-      },
+      (source) => source.replace(needle, replacement),
       new RegExp(`bounded procedure ${region}`),
     );
-  assertMutation(
+  assertSurfaceMutation(
     relative,
-    (target) => {
-      const file = path.join(target, relative);
+    (source) => {
       const clause =
         "Only then do bounded credential steps check the exact account";
-      const source = fs.readFileSync(file, "utf8");
       assert.ok(source.includes(clause));
-      fs.writeFileSync(
-        file,
-        `${source.replace(clause, "The sequence is defined below")}\n${clause}.\n`,
-      );
+      return `${source.replace(clause, "The sequence is defined below")}\n${clause}.\n`;
     },
     /bounded procedure manual-staging/,
   );
-  assertMutation(
+  assertSurfaceMutation(
     relative,
-    (target) => {
-      const file = path.join(target, relative);
-      fs.writeFileSync(
-        file,
-        fs
-          .readFileSync(file, "utf8")
-          .replace(
-            "<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->",
-            "Deploy now.\n<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->",
-          ),
-      );
-    },
+    (source) =>
+      source.replace(
+        "<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->",
+        "Deploy now.\n<!-- VOC-101-STAGING-CREDENTIAL-POLICY-END -->",
+      ),
     /bounded procedure credential-policy/,
   );
   const commands = [
@@ -591,9 +580,9 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
   ];
   for (const surface of DESIGNATED_F3_SURFACES)
     for (const command of commands)
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, command),
+        (source) => appendSource(source, command),
         /live-action instruction|bounded procedure/,
       );
   for (const surface of DESIGNATED_F3_SURFACES) {
@@ -622,9 +611,9 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
         ["Promote", "immediately"],
         ["Migrate", "staging now"],
       ])
-        assertMutation(
+        assertSurfaceMutation(
           surface,
-          (target) => append(target, surface, `${prefix}${verb} ${object}.`),
+          (source) => appendSource(source, `${prefix}${verb} ${object}.`),
           /live-action instruction|bounded procedure/,
         );
   const boundedClauses = [
@@ -640,9 +629,9 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
   ];
   for (const surface of DESIGNATED_F3_SURFACES)
     for (const clause of boundedClauses)
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, `Relocated procedure: ${clause}.`),
+        (source) => appendSource(source, `Relocated procedure: ${clause}.`),
         /outside its guarded runbook region|bounded procedure/,
       );
   for (const surface of DESIGNATED_F3_SURFACES)
@@ -690,15 +679,15 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Purge",
       "Submit",
     ])
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, `${verb} now.`),
+        (source) => appendSource(source, `${verb} now.`),
         /live-action instruction|bounded procedure/,
       );
   for (const surface of DESIGNATED_F3_SURFACES)
-    assertMutation(
+    assertSurfaceMutation(
       surface,
-      (target) => append(target, surface, "Restart the Cloudflare Worker now."),
+      (source) => appendSource(source, "Restart the Cloudflare Worker now."),
       /live-action instruction|bounded procedure/,
     );
   for (const surface of DESIGNATED_F3_SURFACES)
@@ -756,9 +745,9 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Ran now.",
       "Sets now.",
     ])
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, inflected),
+        (source) => appendSource(source, inflected),
         /live-action instruction|bounded procedure/,
       );
   for (const surface of DESIGNATED_F3_SURFACES)
@@ -808,9 +797,9 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Write the record now.",
       "Terminate the job now.",
     ])
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, command),
+        (source) => appendSource(source, command),
         /live-action instruction|bounded procedure/,
       );
   const repeatedImperatives = [
@@ -839,9 +828,9 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
         "Production remains held. " + command,
         "P2 remains unresolved.\n\n" + command,
       ])
-        assertMutation(
+        assertSurfaceMutation(
           surface,
-          (target) => append(target, surface, context),
+          (source) => appendSource(source, context),
           /live-action instruction|bounded procedure/,
         );
   for (const surface of DESIGNATED_F3_SURFACES)
@@ -863,9 +852,9 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Terminates the job now.",
       "Terminated the job now.",
     ])
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, inflected),
+        (source) => appendSource(source, inflected),
         /live-action instruction|bounded procedure/,
       );
 });
@@ -915,9 +904,9 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Signing certificate: synthetic-inert-value",
       "SSH key: synthetic-inert-value",
     ])
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, disclosure),
+        (source) => appendSource(source, disclosure),
         /credential value is prohibited|credential context is not canonical/,
       );
     for (const valueFree of [
@@ -990,9 +979,9 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Credentials are unavailable. Actual contents: secretword.",
       "Token is absent. Replacement follows: mytokenvalue.",
     ])
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, continuation),
+        (source) => appendSource(source, continuation),
         /credential value continuation|paragraph-level credential context|credential value is prohibited|credential context is not canonical/,
       );
     for (const [lead, value] of [
@@ -1002,14 +991,10 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       ["Actual contents:", "12345678"],
       ["What follows:", "synthetic-generated-value"],
     ])
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) =>
-          append(
-            target,
-            surface,
-            `Credentials are redacted. ${lead} ${value}.`,
-          ),
+        (source) =>
+          appendSource(source, `Credentials are redacted. ${lead} ${value}.`),
         /paragraph-level credential context|credential value is prohibited|credential context is not canonical/,
       );
     for (const proseOnly of [
@@ -1039,9 +1024,9 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "F3 has not been delivered.",
       "F3 delivery remains pending.",
     ])
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, stale),
+        (source) => appendSource(source, stale),
         /stale current F3|noncanonical F3 history context|stale subjectless F3 status/,
       );
   }
@@ -1468,9 +1453,9 @@ test("safe clauses cannot launder an operational or later positive claim", () =>
       "The historical production worker activated live traffic now.",
       "The local system deployed public resources.",
     ])
-      assertMutation(
+      assertSurfaceMutation(
         surface,
-        (target) => append(target, surface, unsafe),
+        (source) => appendSource(source, unsafe),
         /live-action instruction|prohibited positive|noncanonical later\/hold context|subjectless positive boundary/,
       );
 });
@@ -1537,10 +1522,9 @@ test("later authority claim grammar fails across every surface", () => {
     for (const [subject, diagnostic] of subjects)
       for (const copula of copulas)
         for (const verb of verbs)
-          assertMutation(
+          assertSurfaceMutation(
             relative,
-            (target) =>
-              append(target, relative, `${subject} ${copula}${verb}.`),
+            (source) => appendSource(source, `${subject} ${copula}${verb}.`),
             new RegExp(`prohibited positive ${diagnostic}`),
           );
   for (const relative of DESIGNATED_F3_SURFACES)
@@ -1550,9 +1534,9 @@ test("later authority claim grammar fails across every surface", () => {
       ["PUBLIC-LAUNCH accepted", "public launch"],
       ["Learner\tData access authorized", "learner data"],
     ])
-      assertMutation(
+      assertSurfaceMutation(
         relative,
-        (target) => append(target, relative, `${claim}.`),
+        (source) => appendSource(source, `${claim}.`),
         new RegExp(`prohibited positive ${diagnostic}`),
       );
   for (const relative of DESIGNATED_F3_SURFACES)
@@ -1571,23 +1555,23 @@ test("later authority claim grammar fails across every surface", () => {
         "later product milestone",
       ],
     ])
-      assertMutation(
+      assertSurfaceMutation(
         relative,
-        (target) => append(target, relative, claim),
+        (source) => appendSource(source, claim),
         new RegExp(`prohibited positive ${diagnostic}`),
       );
   for (const relative of DESIGNATED_F3_SURFACES)
     for (const hold of ["VOC-080-HOLD-01", "VOC-080-HOLD-02"])
       for (const verb of verbs)
-        assertMutation(
+        assertSurfaceMutation(
           relative,
-          (target) => append(target, relative, `${hold} is ${verb}.`),
+          (source) => appendSource(source, `${hold} is ${verb}.`),
           /hold release/,
         );
   for (const relative of DESIGNATED_F3_SURFACES)
-    assertMutation(
+    assertSurfaceMutation(
       relative,
-      (target) => append(target, relative, "VOC-080-HOLD-01 has been lifted."),
+      (source) => appendSource(source, "VOC-080-HOLD-01 has been lifted."),
       /hold release/,
     );
   for (const relative of DESIGNATED_F3_SURFACES)
@@ -1599,12 +1583,11 @@ test("later authority claim grammar fails across every surface", () => {
       ["; ", "has ceased"],
       [". ", "is no longer in force"],
     ])
-      assertMutation(
+      assertSurfaceMutation(
         relative,
-        (target) =>
-          append(
-            target,
-            relative,
+        (source) =>
+          appendSource(
+            source,
             `Hold status${punctuation}VOC-080-HOLD-01 ${release}.`,
           ),
         /hold release/,
@@ -1613,14 +1596,14 @@ test("later authority claim grammar fails across every surface", () => {
 
 test("history checks reject only superseded F3 current claims", () => {
   for (const relative of DESIGNATED_F3_SURFACES) {
-    assertMutation(
+    assertSurfaceMutation(
       relative,
-      (target) => append(target, relative, "F3 continues to be unresolved."),
+      (source) => appendSource(source, "F3 continues to be unresolved."),
       /stale current F3 unresolved\/held wording/,
     );
-    assertMutation(
+    assertSurfaceMutation(
       relative,
-      (target) => append(target, relative, "F3 is not yet delivered."),
+      (source) => appendSource(source, "F3 is not yet delivered."),
       /stale current F3 unresolved\/held wording/,
     );
     const source = fs.readFileSync(path.join(root, relative), "utf8");
@@ -1665,9 +1648,9 @@ test("history checks reject only superseded F3 current claims", () => {
         `F3 remains pending. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
         `${packageId} is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-${String(number === 104 ? 94 : number + 1).padStart(3, "0")} prospective F3 pending status.`,
       ])
-        assertMutation(
+        assertSurfaceMutation(
           relative,
-          (target) => append(target, relative, noncanonical),
+          (source) => appendSource(source, noncanonical),
           /stale current F3|noncanonical F3 history context/,
         );
       for (const currentWord of [
@@ -1678,24 +1661,19 @@ test("history checks reject only superseded F3 current claims", () => {
         "active",
       ])
         for (const staleState of ["pending", "unresolved", "not-yet-delivered"])
-          assertMutation(
+          assertSurfaceMutation(
             relative,
-            (target) =>
-              append(
-                target,
-                relative,
+            (source) =>
+              appendSource(
+                source,
                 `${packageId} ${currentWord} F3 staging remains ${staleState}.`,
               ),
             new RegExp(`${packageId} superseded F3 history`),
           );
-      assertMutation(
+      assertSurfaceMutation(
         relative,
-        (target) =>
-          append(
-            target,
-            relative,
-            `${packageId} F3 staging is now unresolved.`,
-          ),
+        (source) =>
+          appendSource(source, `${packageId} F3 staging is now unresolved.`),
         new RegExp(`${packageId} superseded F3 history`),
       );
       const positive = `${source}\n${packageId} is immutable history. Production remains held; learner data remains held; VOC-080-HOLD-01 remains held; VOC-080-HOLD-02 remains held.`;
