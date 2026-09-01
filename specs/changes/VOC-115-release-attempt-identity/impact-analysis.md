@@ -1,66 +1,60 @@
 # VOC-115 — Impact Analysis
 
-## Affected areas
+## Impact inventory
 
-- **Release governance and protected history — affected.** The attempt name,
-  allocation, collision, ownership, invalidation, and recovery contract changes.
-- **Living documents — affected.** Seven current release surfaces must agree.
-- **Adopted change packages — affected.** All nine VOC-106 and all nine VOC-114
-  artifacts require prospective reconciliation while preserving adoption evidence.
-- **Application, API, database, UI, accessibility, analytics, runtime, workflows,
-  deployment, and migrations — not affected.** No executable product/runtime path
-  changes and no live action is authorized.
-- **Unknowns — none.** The path and semantic inventories are explicit; review may
-  raise the risk or block but cannot silently expand scope.
+- **Release governance/protected history — affected:** identity, event lifecycle,
+  arbitration, ownership, crash recovery, collision, invalidation, and recreation.
+- **Living documents — affected:** seven current release surfaces.
+- **Adopted packages — affected:** all nine VOC-106 and all nine VOC-114 artifacts,
+  with adoption evidence preserved.
+- **Foundation validation — affected:** one new pure network-free validator and test,
+  auto-discovered by the existing test glob; no package-script change.
+- **Application/API/data/UI/accessibility/analytics/runtime/workflows/deployment/
+  migrations — not affected.** No executable product/runtime or live action.
+- **Unknowns — none:** exact 27-path inventory; any newly found current surface stops
+  for scope review instead of silent expansion.
 
-## Security, privacy, and privilege impact
+## Security, privacy, and privilege
 
-The change removes a recovery dead-end without adding force, deletion, settings, or
-deployment authority. Atomic create-ref is specified for the later separately
-authorized VOC-106 release action, not executed by this correction. No credentials,
-personal/learner/production data, Cloudflare resources, or settings are read. The
-autonomous privilege boundary is unchanged: exact evidence and a separate authorized
-actor remain necessary for each repository mutation.
+Server ids remove client allocation races but do not make comments immutable.
+Tamper/missing/conflict checks, exact lineage, single-active derivation, atomic ref
+POST, and no-orphan-adoption protect evidence and refs. The later VOC-106 preparer
+needs issue-comment/ref/PR action authority already bounded by that package; VOC-115's
+correction executes none. No setting, credential, personal/learner/production data,
+Cloudflare resource, or live system is read.
 
 ## Risks and mitigations
 
-- `VOC-115-R00`: a retry derives the same name and dead-ends. Mitigation: full SHA
-  plus globally monotonic recorded sequence and same-develop N/N+1 fixture.
-- `VOC-115-R01`: an ordinal is reused after automatic deletion hid the ref.
-  Mitigation: scan all PR states and recorded attempt evidence, not live refs alone.
-- `VOC-115-R02`: concurrent or foreign creation steals a selected name. Mitigation:
-  atomic create-if-absent, reserve every collision, refresh, allocate higher, never
-  adopt/update/delete.
-- `VOC-115-R03`: a matching ref is misrepresented as the same attempt. Mitigation:
-  complete immutable ownership tuple and recorded handoff; SHA equality alone is
-  insufficient.
-- `VOC-115-R04`: abandoned evidence is destroyed. Mitigation: abandoned refs are
-  immutable and never deletion-eligible; unexpected absence/movement stops.
-- `VOC-115-R05`: name progress weakens release topology. Mitigation: retain every
-  merge-base, divergence, compare, tree, review, merge-method, sync, and final-readback
-  proof.
-- `VOC-115-R06`: current surfaces disagree. Mitigation: one exact 25-path correction,
-  current-surface semantic audit, and exact reviews.
-- `VOC-115-R07`: repository correction is mistaken for release or deployment.
-  Mitigation: explicit no-ref/no-release/no-live-action boundary and action audit.
-- `VOC-115-R08`: recreation becomes covert name reuse. Mitigation: recreation syntax
-  is recorded but not executed and applies only to recovery of a successfully merged
-  auto-deleted head under separate authority.
+- `R00` same-SHA retry dead-ends: fresh globally unique server reservation id.
+- `R01` concurrent active attempts: provisional reservations, deterministic lowest-id
+  arbitration, dispositions, stable scans, and global one-active validator.
+- `R02` comment edit/delete masquerades as history: exact envelope/body digest,
+  timestamps, predecessor closure, and fail-closed tamper treatment; never reuse ids.
+- `R03` crash creates adoptable orphan: boundary-specific receipt/readback rules;
+  matching SHA/ref/PR alone is insufficient.
+- `R04` hostile numeric/ref input: canonical bounded decimal string, BigInt, explicit
+  exhaustion, byte lengths, safe ASCII, and check-ref-format.
+- `R05` actor takeover: exact effective-owner chain and attributable handoff evidence.
+- `R06` collision/ref mutation: POST-create only; collision disposition; no PATCH,
+  push, force, force-with-lease, manual deletion, or foreign adoption.
+- `R07` policy drift: one 27-path correction and repository-owned semantic validator.
+- `R08` recovery becomes name reuse: only successfully merged heads have recorded
+  nonexecuted recovery requests; active/abandoned refs remain immutable.
+- `R09` correction mistaken for release: exact scoped-head-only update and no-live-
+  action audit.
 
-## Dependencies and coherent unit
+## Coherent unit and dependencies
 
-VOC-114 is adopted; its draft implementation PR #215 is blocked. VOC-106 is adopted
-but cannot execute until this correction is adopted, merged, implemented, and passes
-postmerge gates. One PR is the largest safe coherent implementation because the 25
-paths state one invariant and reverse to one parent. Splitting would expose conflicting
-current policy and add coordination, elapsed-time, token/context, repeated-check,
-exact-review, and bookkeeping cost without an independently safe release state.
+VOC-114 is adopted with blocked draft implementation PR #215. VOC-106 is adopted but
+cannot run before this correction. The seven living paths, 18 adopted-package paths,
+and validator/test are one safety/review/rollback unit. Splitting would leave policy
+contradictory or unenforced and add coordination, elapsed-time, context, repeated
+checks, exact reviews, and bookkeeping without a safe partial release state.
 
 ## Rollback and contingency
 
-Before merge, keep or close PR #215 for zero protected-branch effect. After merge, a
-different builder prepares a separately reviewed revert of the complete actual PR
-#215 merge to its first parent; do not partially restore the retry-dead-end language.
-Never reset, force, force-with-lease, mutate settings, manually delete a branch, or use
-a live-system action for rollback. Any identity, ownership, collision, ref, or tree
-ambiguity stops VOC-106 and preserves evidence for governed correction or revert.
+Before merge, PR #215 remains draft/closable for zero protected effect. After merge,
+a different builder prepares a separately reviewed complete revert of the actual
+27-path merge to its first parent. Never partially restore the failed SHA-only/client-
+sequence model, reset, force, delete a branch, change settings, or use a live action.
+Any event/ref/ownership/topology ambiguity stops VOC-106 and preserves evidence.

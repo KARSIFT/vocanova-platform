@@ -2,59 +2,71 @@
 
 ## Preconditions and protected areas
 
-PR #215 stays draft. Do not edit it until this exact package candidate receives
-release-governance/git-history specialist and independent cross-model R4 reviews,
-accountable adoption is recorded in `change.yaml`, the bookkeeping revision receives
-fresh exact review, and the plan PR normally merges. A different builder then works
-on PR #215's isolated branch/worktree. DOC-15, DOC-16, AGENTS, permanent history,
-release-ref integrity, repository-settings truth, and adopted evidence are protected.
+PR #215 remains draft. Do not edit it until this replacement plan candidate receives
+exact release-history specialist and independent cross-model R4 PASS reviews,
+accountable adoption is recorded, the bookkeeping revision receives fresh review, and
+the plan PR normally merges. A different builder then uses PR #215's isolated
+worktree. DOC-15, DOC-16, AGENTS, permanent history, release refs/events, settings
+truth, and adopted evidence are protected.
 
-## One coherent implementation
+## One coherent 27-path implementation
 
-1. Rebase or otherwise update draft PR #215 from then-current `origin/develop`
-   without changing a protected ref. Preserve its existing seven living-surface and
-   nine VOC-106 changes, then add the nine VOC-114 artifacts. Require exactly the 25
-   declared implementation paths.
-2. Replace every SHA-only attempt name with the exact full-SHA-plus-sequence grammar.
-   Define canonical numeric parsing, the three-source allocation inventory, one-plus-
-   max selection, append-only `voc-106-release-attempt-v1` evidence fields, and atomic
-   GitHub create-ref semantics.
-3. Define successful-attempt ownership as the exact tuple, immediate ref/PR readback,
-   same-attempt continuation, actor handoff, collision reservation, refresh/reallocate,
-   invalidation, same-develop retry, immutable abandonment, automatic-deletion
-   eligibility, and nonexecuted recreation request.
-4. Preserve all VOC-106 topology, merge-tree, review, merge, synchronization,
-   ancestry, zero-behind, rollback, authority, and no-live-effect controls. Preserve
-   VOC-106/VOC-114 approved candidate, review, adoption, and authorization evidence;
-   record VOC-115 as the prospective correction rather than rewriting history.
-5. Search all non-archived current surfaces for contradictory SHA-only naming,
-   same-attempt collision exceptions, unsafe update/delete/reuse, incomplete ownership,
-   or living release instructions outside the 25-path inventory. Classify genuinely
-   historical occurrences and stop for scope review if another current path exists.
-6. Run a network-free/ref-free synthetic fixture for allocation, collision,
-   invalidation, same-develop retry, exact ownership/handoff, topology/tree equality,
-   and recreation syntax. Tests must not create, move, or delete a real ref.
-7. Run deterministic and hosted checks, exact path/OID/diff audit, and a disposable
-   reverse-diff rehearsal against the actual implementation first parent. Update PR
-   evidence truthfully and obtain fresh exact-SHA specialist and different independent
-   cross-model R4 PASS verdicts. Any edit repeats all evidence.
+1. Bring PR #215's scoped implementation branch to then-current `origin/develop`
+   using ordinary non-force history updates. Keep its seven living and nine VOC-106
+   changes, add all nine VOC-114 artifacts, and add the validator/test. No other path.
+2. Reconcile all current prose/metadata to the exact full-SHA/server-comment-id name,
+   issue-#191-only v1 schema, full-pagination proof, global one-active derivation,
+   winner/loser disposition, crash recovery, ownership/handoff, invalidation,
+   immutable abandonment, collision, deletion, and recreation contracts.
+3. Implement `scripts/foundation/voc106-release-attempt-policy.mjs` as a network-free
+   CLI and pure exported functions. It parses/canonicalizes raw event envelopes,
+   validates full page fixtures, derives lineages/state/effective owner/frontier,
+   arbitrates reservations with lossless BigInt, validates names/ref limits and crash
+   transitions, and audits all 25 document/package surfaces.
+4. Implement the adjacent test with complete positive and one-mutation negatives for
+   event types/fields/serialization, envelope tamper, pages, concurrency, races,
+   crash boundaries, hostile ids/names, actor/handoff, collision, same-D retry,
+   one-active state, immutable refs, topology, and recovery. Confirm existing
+   `node --test scripts/foundation/*.test.mjs` auto-discovers it; do not edit
+   `package.json` unless that precondition is disproved, which stops for scope review.
+5. Preserve VOC-106 main-as-merge-base, zero-main-only, SHA/tree/compare, prospective/
+   actual merge-tree, two reviewed merge-commit PRs, synchronization, actor separation,
+   final permanent refs/ancestry/zero-behind, rollback, and external-action controls.
+   Preserve exact VOC-106/VOC-114 adoption evidence and historical packages.
+6. Search every non-archived current surface for stale SHA-only/client-sequence names,
+   ambiguous same-attempt adoption, unsafe push/update/delete, incomplete event/crash
+   state, or another living release instruction. A new current path stops for impact
+   review; historical occurrences remain classified and unchanged.
+7. Run focused/full/hosted checks and exact 27-path/OID diff. Rehearse reversing the
+   actual complete PR #215 diff in a disposable worktree to its true first parent.
+   Update body/binder and obtain fresh exact specialist and independent cross-model R4
+   PASS reviews; any edit repeats checks/reviews.
 
-## Allocation algorithm to implement in policy prose
+## Validator acceptance interface
 
-Parse only exact names matching the full grammar and canonical decimal form. Compute
-the numeric maximum over remote refs, all canonical repository PR head names in every
-state, and recorded attempt evidence. Record inputs and selection. Invoke GitHub's
-create-ref endpoint for the exact name/SHA and require successful exact readback. A
-422/name-exists or any preflight collision reserves the name; record it, refetch all
-inputs, and select a higher value. Do not use update-ref, `--force`, or
-`--force-with-lease`. A successfully created ref—not merely a proposed name—starts
-the immutable attempt.
+At minimum export pure functions equivalent to:
 
-## Monitoring and rollback
+- `parseEventEnvelope(rawBytes)` and `canonicalizeEventBody(object)`;
+- `validatePagination(pages)` and `validateEventSet(events)`;
+- `deriveAttemptState(events, currentRefsAndPrFixtures)`;
+- `selectReservationWinner(state, frozenDevelopSha)`;
+- `validateHeadName(head, sha, reservationId)`;
+- `classifyRecoveryBoundary(state, receiptsAndReadback)`; and
+- `validateCurrentPolicySurfaces(root)`.
 
-DOC-15 §24.18 monitoring starts at the correction merge. It includes exact merge-SHA
-hosted/develop readback, the full semantic/synthetic matrix, and first corrected
-VOC-106 promotion/synchronization evidence. If real drift at unchanged develop occurs,
-the owner must record the old immutable N ref and new N+1 attempt. Failure stops
-release/closure. Rollback is a separately reviewed complete revert of actual PR #215;
-no ref, settings, or live-system workaround is permitted.
+Names may refine internally, but the observable capabilities and tests cannot be
+removed. Runtime must not access network, credentials, environment secrets, GitHub,
+Cloudflare, or live refs. Fixtures are inert local objects/disposable repositories.
+
+## Crash, rollback, and monitoring
+
+Implement every crash row in specification.md literally. No receipt/ownership proof
+means stop, not orphan adoption. Before correction merge, closing draft PR #215 has
+zero protected effect. After merge, rollback is a separately reviewed complete revert
+to the actual first parent; no partial policy revert, reset, force, deletion, setting,
+or live action.
+
+DOC-15 §24.18 monitoring starts at correction merge and continues through exact
+postmerge checks/readback plus first corrected VOC-106 promotion/sync. Synthetic
+concurrency/crash/same-D retry remains mandatory; a real retry also proves old ref
+immutability and distinct server id. Failure stops release/closure.

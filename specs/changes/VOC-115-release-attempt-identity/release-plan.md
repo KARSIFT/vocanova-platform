@@ -2,41 +2,41 @@
 
 ## Repository-only correction
 
-VOC-115 has no release or deployment. After exact plan reviews, recorded adoption,
-fresh bookkeeping review, and normal plan merge, a different builder may amend draft
-PR #215 across exactly 25 paths. A separate non-author may merge that exact correction
-into `develop` only after all deterministic, hosted, R4, specialist, independent-
-review, blocker-resolution, rollback, and action-authority evidence passes.
+VOC-115 has no release/deployment. After exact plan reviews, adoption, fresh
+bookkeeping review, and normal plan merge, a different builder may ordinarily update
+only draft PR #215's scoped implementation head across exactly 27 paths. A separate
+non-author may merge its exact correction into `develop` after the validator/matrix,
+all deterministic/hosted checks, rollback, R4 specialist and independent cross-model
+reviews, blocker resolution, and action authority pass.
 
-The correction merge changes repository policy/history only. It creates, updates, or
-deletes no release ref and does not execute VOC-106, query/change settings, dispatch,
-deploy, access a live system, use secrets/data, migrate, alter DNS/traffic, spend, or
-launch.
+The correction creates/updates/deletes no release, sync, permanent, foreign, or
+unrelated ref; queries/changes no setting; executes no release/sync, dispatch,
+deployment, Cloudflare/DNS/resource, secret/data, migration, traffic, spend, or launch.
 
-## Monitoring and first use
+## DOC-15 section 24.18 monitoring
 
-Record the plan/implementation base, head, tree, exact 25-path OIDs/diff, checks,
-reviewers, merge actor/SHA, and protected-branch readback. Under DOC-15 §24.18 the
-adoption-recorded owner monitors through exact correction postmerge results and the
-first corrected VOC-106 promotion/synchronization final readback. The deterministic
-same-develop retry fixture is mandatory even if the first real attempt succeeds. If
-real drift occurs at unchanged develop, evidence must show old attempt N unchanged and
-new attempt N+1 created atomically with a complete new binder.
+Reason: SHA-only naming and the rejected client sequence cannot safely retry or
+serialize concurrent work. Expected benefit: unique server reservation identities,
+one active chain, tamper-failing evidence, explicit crash recovery, and executable
+enforcement. Risks are event tamper/deletion, concurrency, orphan adoption, actor
+takeover, hostile numeric/ref input, and policy drift. Evaluation is the complete
+network-free state-machine matrix, exact checks/reviews, and rollback rehearsal.
 
-Issues #216 and #213 close only after the bounded monitoring evidence passes; #191
-closes only after promotion/synchronization, actual release-tree equality, permanent-
-ref presence, final main ancestry, and zero-behind evidence pass.
+The adoption-recorded owner monitors from exact correction merge through hosted/
+develop readback and first corrected VOC-106 promotion/sync. Synthetic same-D retry is
+mandatory; a real retry also proves the prior ref unchanged and new server id distinct.
+Issues #216/#213 close only after this window; #191 also requires release/sync tree,
+permanent-ref, ancestry, and zero-behind evidence.
 
 ## Failure and rollback
 
-Any stale inventory, malformed identity, collision adoption, ref movement/absence,
-ownership ambiguity, tree/topology mismatch, check/review failure, prohibited action,
-or monitoring recurrence stops merge/release/closure and preserves all evidence.
-Before correction merge, close PR #215 for zero protected-branch effect. After merge,
-use a separately reviewed complete revert PR against its actual first parent; never
-partially restore contradictory SHA-only policy.
+Any concurrent-active state, tamper/missing/conflicting event, incomplete pagination,
+crash/receipt ambiguity, collision adoption, ref movement/absence, actor/handoff error,
+topology mismatch, or check/review failure stops merge/release/closure and preserves
+evidence. Before merge, close PR #215 for zero protected effect. After merge, a
+different builder prepares a separately reviewed complete revert to its actual first
+parent, restoring all 27 paths together.
 
-No rollback uses reset, force, force-with-lease, settings mutation/query, manual
-branch deletion, deployment, Cloudflare/DNS, secret/data access, migration, traffic,
-spending, or launch. An unexpected missing attempt ref requires governed investigation,
-not silent recreation or reuse.
+Never partially restore failed policy, reset, force, force-with-lease, manually delete
+a branch, query/change settings, or use a live-system action. Missing active/abandoned
+refs route governed investigation, not silent recreation or reuse.
