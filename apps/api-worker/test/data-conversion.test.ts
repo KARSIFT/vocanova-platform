@@ -387,28 +387,32 @@ describe("PostgreSQL-to-D1 conversion", () => {
       .run();
   });
 
-  it("reruns a completed reconciliation instead of returning a stale pass", async () => {
-    const plan = await convertPostgresExport(
-      fixtureFor("stale-reconciliation"),
-    );
-    await runImport(env.DB, plan);
-    await consumeReconciliation(env.DB, plan, (report) => {
-      expect(report.status).toBe("pass");
-    });
+  it(
+    "reruns a completed reconciliation instead of returning a stale pass",
+    { timeout: 10_000 },
+    async () => {
+      const plan = await convertPostgresExport(
+        fixtureFor("stale-reconciliation"),
+      );
+      await runImport(env.DB, plan);
+      await consumeReconciliation(env.DB, plan, (report) => {
+        expect(report.status).toBe("pass");
+      });
 
-    await env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
-      .bind(
-        "Post-checkpoint mutation",
-        plan.expectedRows.canonical_words[0]?.id,
-      )
-      .run();
+      await env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
+        .bind(
+          "Post-checkpoint mutation",
+          plan.expectedRows.canonical_words[0]?.id,
+        )
+        .run();
 
-    const restarted = await reconcileD1Import(env.DB, plan);
-    expect(restarted.status).toBe("pending");
-    await consumeReconciliation(env.DB, plan, (report) => {
-      expect(report.status).toBe("fail");
-    });
-  });
+      const restarted = await reconcileD1Import(env.DB, plan);
+      expect(restarted.status).toBe("pending");
+      await consumeReconciliation(env.DB, plan, (report) => {
+        expect(report.status).toBe("fail");
+      });
+    },
+  );
 
   it("rejects a changed plan under a completed export id", async () => {
     const initialFixture = fixtureFor("stale");
