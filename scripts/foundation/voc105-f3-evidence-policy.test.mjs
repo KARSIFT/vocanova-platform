@@ -791,6 +791,14 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Query the account now.",
       "Push the artifact now.",
       "Turn it on now.",
+      "Erase the database now.",
+      "Truncate the database now.",
+      "Boot the service now.",
+      "Proceed now.",
+      "Invoke the job now.",
+      "Send it now.",
+      "Spin it up now.",
+      "Shut it down now.",
     ])
       assertMutation(
         surface,
@@ -828,6 +836,13 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Passcode: synthetic-inert-value",
       "Session ID: synthetic-inert-value",
       "Client certificate: synthetic-inert-value",
+      "Recovery PIN: synthetic-inert-value",
+      "Login code: synthetic-inert-value",
+      "Session identifier: synthetic-inert-value",
+      "Client cert: synthetic-inert-value",
+      "mTLS certificate: synthetic-inert-value",
+      "Authenticator seed: synthetic-inert-value",
+      "Backup code: synthetic-inert-value",
     ])
       assertMutation(
         surface,
@@ -841,11 +856,28 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Passcode is prohibited.",
       "Session ID is redacted.",
       "Client certificate is unavailable.",
+      "Credentials remain unavailable.",
+      "Token is redacted.",
+      "Password is absent.",
+      "Private key is prohibited.",
+      "JWT is unavailable.",
+      "Basic authentication is prohibited.",
     ])
       assert.deepEqual(
         inspectF3Surface(`${source}\n${valueFree}`, surface),
         [],
         `${surface} must retain value-free private-auth prose: ${valueFree}`,
+      );
+    for (const continuation of [
+      "Recovery code is absent. Its value is synthetic-inert-value.",
+      "OTP is unavailable. It equals synthetic-inert-value.",
+      "Session ID is redacted. The value is synthetic-inert-value.",
+      "Client certificate is value-free. Actual value: synthetic-inert-value.",
+    ])
+      assertMutation(
+        surface,
+        (target) => append(target, surface, continuation),
+        /credential value continuation|credential value is prohibited|credential context is not canonical/,
       );
     for (const stale of [
       "F3 pending.",
@@ -896,6 +928,13 @@ test("exact unresolved and held contexts produce zero errors on every surface", 
       "P2 acceptance remains unresolved.",
       "A1 product acceptance remains unresolved.",
       "Authenticated A1 acceptance remains unresolved.",
+      "R1 acceptance remains unresolved.",
+      "R2 acceptance remains unresolved.",
+      "L1 acceptance remains unresolved.",
+      "P1 product acceptance remains unresolved.",
+      "P2 product acceptance remains unresolved.",
+      "Learner data access remains held.",
+      "Learner-data deletion remains held.",
       "VOC-080-HOLD-01 remains held.",
       "VOC-080-HOLD-02 is held.",
     ])
@@ -932,11 +971,49 @@ test("exact unresolved and held contexts produce zero errors on every surface", 
       "The deploy command was not executed.",
       "The database was not migrated.",
       "The staging delivery was completed in the past.",
+      "No upload occurred.",
+      "No promotion took place.",
+      "No promotion occurred.",
+      "Upload did not occur.",
+      "The publish command was not executed.",
+      "No staging migration occurred.",
+      "The system was not deployed.",
+      "No deployment was performed.",
+      "The documentation was published in the past.",
+      "The prior upload succeeded.",
     ])
       assert.deepEqual(
         inspectF3Surface(`${source}\n${safeOperational}`, surface),
         [],
         `${surface} must accept safe operational grammar: ${safeOperational}`,
+      );
+  }
+});
+
+test("unrelated completion and status prose remains outside protected domains", () => {
+  const harmless = [
+    "This review is complete.",
+    "The documentation is ready.",
+    "The proposal is approved.",
+    "The unrelated decision remains pending.",
+    "The unrelated issue remains pending.",
+    "The ticket remains unresolved.",
+    "The request remains unresolved.",
+    "The dependency continues unresolved.",
+    "The historical documentation task completed successfully.",
+    "The reviewer verified the sanitized evidence.",
+    "The issue was resolved without external action.",
+    "The local parser is ready for review.",
+    "The historical check was not completed.",
+    "The sanitized result is not verified.",
+  ];
+  for (const surface of DESIGNATED_F3_SURFACES) {
+    const source = fs.readFileSync(path.join(root, surface), "utf8");
+    for (const prose of harmless)
+      assert.deepEqual(
+        inspectF3Surface(`${source}\n${prose}`, surface),
+        [],
+        `${surface} must ignore unrelated protected-word prose: ${prose}`,
       );
   }
 });
@@ -958,6 +1035,8 @@ test("safe clauses cannot launder an operational or later positive claim", () =>
       "Authorized now. Learner data remains held.",
       "Production remains held.\n\nActive now.",
       "P2 remains unresolved.\n\nReady now.",
+      "P2 remains unresolved.\n\nPassed now.",
+      "Production remains held.\n\nEffective now.",
       "Future work is separate and production is active.",
       "The gate remains unresolved while production is active.",
       "A1 is not merely planned and is accepted.",
