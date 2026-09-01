@@ -26,6 +26,7 @@ blocking_review_evidence:
   - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492662741
   - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492713857
   - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492747455
+  - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492995926
 related_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
 related_adopted_packages:
   - VOC-106
@@ -99,6 +100,17 @@ superseded_plan_candidates:
       - delayed-old-identity-PR-can-strand-successor
       - null-head-repository-is-not-proven-by-label-or-timeline
     review_transfer: prohibited-fresh-exact-candidate-reviews-required
+  - candidate_sha: 2308e8defb50178ed6127fd910b678a1ac549cc7
+    tree_sha: 79707e1ab0cedcd9dc0ce4d68d1754eb2daceb8e
+    status: blocked-and-superseded
+    review_evidence:
+      - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492859146
+      - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492995926
+    reasons:
+      - ruleset-history-list-pagination-and-stable-binding-unfrozen
+      - pass-capture-digest-preimage-and-completeness-unfrozen
+      - hashed-ref-fields-mix-branch-and-full-ref-representations
+    review_transfer: prohibited-fresh-exact-candidate-reviews-required
 implementation_authorized: false
 implementation_authority_status: >-
   prohibited-until-exact-plan-candidate-release-history-specialist-and-independent-
@@ -127,8 +139,9 @@ objective: >-
 requirements:
   - id: VOC-115-D00
     statement: >-
-      Treat issue #216, PR #215 specialist FAIL, and all ten exact PR #217 candidate
-      FAIL reviews as intake. Preserve all five candidate SHAs/trees as superseded evidence
+      Treat issue #216, PR #215 specialist FAIL, all eleven exact PR #217 candidate
+      FAIL reviews, and the superseded 2308e8d specialist PASS as intake. Preserve all
+      six candidate SHAs/trees as superseded evidence
       with no transfer. PR #215 stays draft. None grants plan adoption, implementation,
       ref/settings, release, merge, deployment, or external authority.
   - id: VOC-115-D01
@@ -138,14 +151,18 @@ requirements:
       PR-numbers> as the deterministic current frontier; use the full-SHA attempt forms
       and allocation-digest submit form. Freeze every exact branch/full-ref length,
       accepting the 144/155-byte conflict attempt and rejecting max-plus-one without
-      truncation. Define canonical numeric/digest/ASCII/ref domains and exhaustion.
+      truncation. Every frontier/claim_ref/attempt_ref/submit_ref record field is exact
+      branch form; only ref-create request/ruleset/enumeration fields use the one-prefix
+      full form. Define canonical numeric/digest/ASCII/ref domains and exhaustion.
   - id: VOC-115-D02
     statement: >-
       Hold VOC-106 until a separately authorized settings action installs and reads back
       an active GitHub ruleset matching only claim/attempt/submit patterns, allowing creation
       while denying update/non-fast-forward/force/deletion with empty bypass including
       administrators. Record exact ids/version/patterns/rules/enforcement/digest. VOC-115
-      implementation neither queries nor changes settings; unavailable capability holds.
+      Exhaustively enumerate paginated ruleset history, bind its count/high-watermark/
+      complete projection into stable state, fetch numeric-max version, and compare exact
+      state. Implementation neither queries nor changes settings; unavailable capability holds.
   - id: VOC-115-D03
     statement: >-
       Each contender POST-creates the same deterministic claim ref directly at frozen
@@ -167,7 +184,8 @@ requirements:
     statement: >-
       Freeze exact lossless JSON primitive domains and own-key/type/null/event schemas
       for all-PR boundary, reserved-PR detail, timeline, ref, git-commit/tree, protected-
-      ref, ruleset, page/object/scan capture, stable-state, and reconciliation objects.
+      ref, ruleset/history/version, page/object/command/scan/pass capture, stable-state,
+      and reconciliation objects.
       All-PR boundaries allow foreign/null head identity; filter only after exhaustive
       enumeration. Reserved detail requires exact nonnull canonical repository and
       label. A reserved-looking null repository is ambiguous and stops; label/timeline
@@ -176,9 +194,11 @@ requirements:
   - id: VOC-115-D06
     statement: >-
       Define exact complete-pass algorithm: exact all-state PR query and numbered short-
-      page termination, complete reserved timelines, dual equal release-ref sets, ruleset
-      and protected refs, full-repository PR boundary before local filtering, counts and
-      high-watermarks. Construct timestamp-free voc-106-stable-state-v1 JCS. Require two
+      page termination, complete reserved timelines, exhaustive exact ruleset-history
+      pages, dual equal release-ref sets, ruleset/latest-version comparison and protected
+      refs, full-repository PR boundary before local filtering, counts and high-watermarks.
+      Construct exact ordered voc-106-pass-capture-v1 inventory/hash and timestamp-free
+      voc-106-stable-state-v1 JCS. Require two
       byte-identical stable states, retry at most three pairs, then stop. Later actors
       reproduce stable-state digest when state is unchanged, not capture timestamps.
   - id: VOC-115-D07
@@ -191,7 +211,9 @@ requirements:
       binder excludes capture time and unrelated PR boundaries. A 422/timeout/readback,
       crash, lost award, or marker-present zero PR never authorizes POST/retry/successor
       and is an irrecoverable hold. One PR consumes the award; multiple enter cleanup.
-      Freeze every claim/attempt/submit/PR/binder/closure crash outcome and never reopen.
+      Award/binder/allocation/reconciliation ref fields use branch form; request ref is
+      exact full form and PR head is branch form. Freeze every claim/attempt/submit/PR/
+      binder/closure crash outcome and never reopen.
   - id: VOC-115-D08
     statement: >-
       Map mutation actor /root exactly to GitHub login m-e-h-r-d-a-a-d, numeric id
@@ -228,13 +250,15 @@ requirements:
       path. The existing foundation glob auto-discovers the test; if disproved, stop.
   - id: VOC-115-D13
     statement: >-
-      Implement a network-free validator for ruleset, claim/attempt/submit/domains, exact JSON
-      schemas including git commit and all-PR/reserved-PR split, raw projection/capture versus stable digests, pagination/filter/equality,
+      Implement a network-free validator for ruleset/history pagination, claim/attempt/
+      submit/ref-form domains, exact JSON schemas including git commit, command/pass
+      capture, and all-PR/reserved-PR split, raw projection/capture versus stable digests, pagination/filter/equality,
       state/frontier/cardinality, coalescence/stale outcome, actors/crashes, and surfaces.
       Fixtures cover exact max/+1 ref lengths, replay, same/different target, stale,
       one-shot 201/422/crash/unknown/delayed-submit exclusion, null provenance, ruleset
-      drift, merged duplicate cleanup, time variation, hostile ids/JSON, incomplete
-      scans, handoff, retry/topology.
+      history 0/1/99/100/101 pages/max-version drift, pass-member omission/reorder,
+      branch/full-ref swaps, ruleset drift, merged duplicate cleanup, time variation,
+      hostile ids/JSON, incomplete scans, handoff, retry/topology.
   - id: VOC-115-D14
     statement: >-
       Require exact path/OID/diff evidence, governance/risk/diff/format/link checks,
@@ -297,11 +321,13 @@ attempt_identity:
 reconciliation:
   pull_requests: exact-all-state-created-ascending-numbered-pages-through-short-page
   timelines: exhaustive-every-reserved-PR-numbered-pages-through-short-page
+  ruleset_history: exhaustive-numbered-pages-through-short-page-numeric-max-version-state-match
   refs: full-git-ls-remote-set-equals-full-numbered-GitHub-matching-refs-set
-  captures: exact-lossless-page-and-scan-schemas-with-times-etags-raw-digests
-  stable_state: timestamp-free-JCS-full-PR-boundary-ruleset-protected-PR-timeline-ref-view
+  captures: exact-lossless-page-object-command-scan-pass-schemas-and-ordered-preimages
+  stable_state: timestamp-free-JCS-full-PR-boundary-ruleset-history-protected-PR-timeline-ref-view
   equality: two-byte-identical-stable-states-at-most-three-pairs-then-stop
   storage: immutable-creation-binder-has-stable-state-only-captures-are-linked-evidence
+  ref_fields: frontier-claim-attempt-submit-branch-form-requests-and-enumeration-full-form
 
 ruleset_prerequisite:
   status: held-separate-settings-action-required
@@ -373,8 +399,8 @@ dependencies:
   - id: VOC-115-DEP-00
     status: intake-only
     description: >-
-      Issue #216 and eleven exact FAIL records establish defects and stop conditions but
-      grant no adoption or implementation authority.
+      Issue #216, twelve exact FAIL records, and one superseded candidate specialist PASS
+      establish evidence and stop conditions but grant no adoption or implementation authority.
   - id: VOC-115-DEP-01
     status: adopted-VOC-114-open-draft-implementation
     description: >-

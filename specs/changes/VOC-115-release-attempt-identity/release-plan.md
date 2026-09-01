@@ -15,19 +15,21 @@ deployment, Cloudflare/DNS/resource, secret/data, migration, traffic, spend, or 
 
 ## DOC-15 section 24.18 monitoring
 
-Reason: SHA-only naming and five rejected allocation schemes cannot safely retry or
+Reason: SHA-only naming and six rejected allocation schemes cannot safely retry or
 serialize concurrent work. Expected benefit: target-level coalescence, SHA-bound
 attempts, a protected one-shot submit award, server-enforced ref immutability, exact
 stable state, cardinality cleanup, bounded actors, and executable enforcement. Risks
 are stale topology, settings drift, incomplete scans, unknown POST, null head
-provenance, duplicate PRs, hostile input, and policy drift.
+provenance, incomplete ruleset history/pass receipts, split ref encoding, duplicate
+PRs, hostile input, and policy drift.
 Evaluation is the complete network-free matrix, exact checks/reviews, and rollback.
 
 The adoption-recorded owner monitors from exact correction merge through hosted/
 develop readback, separately authorized ruleset evidence, and first corrected VOC-106
 promotion/sync. Synthetic coalescence/different-target/stale, capture/stable schema,
-unknown response/irrecoverable submit hold, ruleset drift, cardinality cleanup, and
-same-D retry are mandatory. A real
+unknown response/irrecoverable submit hold, exhaustive ruleset history/latest-version,
+complete pass capture, exact branch/full-ref forms, ruleset drift, cardinality cleanup,
+and same-D retry are mandatory. A real
 retry additionally proves prior ref immutability and a distinct durable PR identity.
 Issues #216/#213 close only after this window; #191 also requires release/sync tree,
 permanent-ref, ancestry, and zero-behind evidence.

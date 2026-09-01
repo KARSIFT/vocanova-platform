@@ -18,7 +18,8 @@
 
 Atomic unique-ref creation selects a topology value; same-target callers coalesce.
 Durability depends on a separately authorized exact no-bypass ruleset readback, not
-policy prose. Complete PR/timeline/ref reconstruction, timestamp-free stable digests,
+policy prose. Complete PR/timeline/ref/ruleset-history reconstruction, exact ordered
+pass-capture digests, timestamp-free stable digests,
 state-idempotent canonical ref requests, a one-shot protected submit award, and
 cardinality cleanup prevent duplicates and
 false genesis under authorized actions. Unauthorized ruleset mutation is outside the
@@ -40,7 +41,8 @@ personal/production data, Cloudflare resource, or live system.
   submit-ref `201` invocation sends one PR request with retries/redirects disabled;
   crash/unknown-zero is a durable irrecoverable hold, never successor eligibility.
 - `R06` incomplete discovery: exact page schemas, full-boundary two-pass equality,
-  timelines, dual ref enumeration, stable digest, counts, and high-watermarks.
+  timelines, exhaustive ruleset-history/numeric-max version proof, dual ref enumeration,
+  stable/pass digests, counts, and high-watermarks.
 - `R07` merged duplicate survives: multiplicity cleanup/readback precedes success.
 - `R08` actor/ref takeover: exact actor mapping, create/read only, and ruleset.
 - `R09` policy drift: one 27-path correction and executable semantic validator.
@@ -48,6 +50,10 @@ personal/production data, Cloudflare resource, or live system.
   explicit no-ref/settings/live-action audit.
 - `R11` deleted-head misattribution: a reserved-looking null repository invalidates the
   allocation view; label/timeline evidence never substitutes for repository identity.
+- `R12` split ref encoding: every hashed identity field is branch-v1 and only exact
+  request/ruleset/enumeration fields derive full-ref-v1.
+- `R13` incomplete pass evidence: an exact ordered member manifest transitively binds
+  every page scan and directly binds every command/non-page object capture.
 
 ## Coherent unit and dependencies
 

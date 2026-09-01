@@ -7,8 +7,9 @@ Issue #216 and PR #215's exact specialist FAIL prove that a head named only by f
 `535bcd47e1d82236e1e5b46dc1317ca66c4893e6`, and
 `ade2d6db3376b879c3f68d2bc23010b0c8894bed`,
 `00233a0fdcc9603346006d473605bca83b590179`, and
-`6ecc996687eb629dfd06d27708195d1d28a0a010` are superseded blocked evidence. Their
-exact FAIL verdicts transfer nowhere. Editable comments and scans are not locks; a
+`6ecc996687eb629dfd06d27708195d1d28a0a010`, and
+`2308e8defb50178ed6127fd910b678a1ac549cc7` are superseded blocked evidence. No exact
+verdict transfers, including 2308e8d's specialist PASS and independent FAIL. Editable comments and scans are not locks; a
 client nonce/commit serializes a value, not a caller; and policy prose cannot make a
 deletable ref durable. This replacement removes caller uniqueness and makes server-
 enforced ref immutability a held execution prerequisite.
@@ -52,6 +53,16 @@ release/voc-106-claim-after-pr-<prior-pr-number>
 release/voc-106-claim-after-conflict-<64-lowercase-hex-digest>
 ```
 
+Every `frontier`, `claim_ref`, `attempt_ref`, and `submit_ref` field in allocation
+state, binder, submit award, reconciliation, validator input, and derived identity is
+the exact branch form shown here and below, without `refs/heads/`. `branch-v1` means one
+of those grammar-valid ASCII strings, with `frontier`/`claim_ref` restricted to claim,
+`attempt_ref` to attempt, and `submit_ref` to submit grammar. `full-ref-v1` is exactly the 11-byte ASCII prefix
+`refs/heads/` followed by `branch-v1`. Only `POST /git/refs` request field `ref`,
+ruleset include patterns, `ref-v1.name`, and Git/GitHub ref enumeration use full-ref
+form. Conversion is the one prefix operation; accepting either representation in one
+field is forbidden. The PR-create `head` field is the branch-form `attempt_ref`.
+
 Genesis is valid only when exhaustive stable reconciliation finds no claim, attempt, submit,
 or reserved PR history. One valid closed-unmerged attempt PR advances to its number.
 One valid merged attempt closes allocation only after duplicate cleanup below. The
@@ -65,7 +76,8 @@ not one caller. Exact same-target contenders are deliberately one logical claim 
 all downstream claim/attempt ref operations are idempotent/server-serialized; there is no caller-winner
 predicate. A different-target contender loses and performs no mutation.
 
-Claim creation request JSON has exactly `ref` (`refs/heads/<frontier>`) and `sha`
+Claim creation request JSON has exactly `ref` (`full-ref-v1` derived from branch-form
+`frontier`) and `sha`
 (frozen develop) in RFC 8785/JCS bytes. After `201`, `422`, timeout, or disconnect,
 discard local call history and reconstruct state:
 
@@ -129,15 +141,16 @@ also remains protected under this design; recovery never relies on source deleti
 
 After attempt-ref and final protected/ruleset readback, derive the already defined
 `allocation_state_sha256`. Its submit marker is exactly
-`release/voc-106-submit-<64-lowercase-hex-allocation-state-sha256>` at frozen
+`release/voc-106-submit-<64-lowercase-hex-allocation-state-sha256>` (branch form) at frozen
 `develop`. Its create request is the same exact two-key JCS `{ref,sha}` object used for
-claim/attempt creation, with the full submit ref and frozen develop SHA. It is covered
+claim/attempt creation, with full-ref-v1 derived from `submit_ref` and frozen develop SHA. It is covered
 by the verified no-bypass ruleset and is never updated, forced, or deleted.
 
 Atomic creation grants a deliberately nontransferable, one-shot submit award only to
 the exact HTTP invocation that synchronously receives status `201`, verifies returned
-ref and object SHA equal the request, and constructs `voc-106-submit-award-v1` with
-exact own keys `http_status` (JSON integer `201`), `ref` (full submit ref),
+full response ref and object SHA equal the request, and constructs
+`voc-106-submit-award-v1` with exact own keys `http_status` (JSON integer `201`),
+`submit_ref` (branch-v1),
 `request_jcs_sha256` (digest64), `schema` (that literal), and `sha` (frozen develop).
 The award is ephemeral control-flow evidence, never a durable/history receipt and
 never reconstructible or handoff eligible. A same-target `422`, timeout, disconnect,
@@ -231,18 +244,24 @@ Exact projection own-key sets are:
 | Projection | Keys and domains |
 | --- | --- |
 | `pr-boundary-v1` | `head_label:string|null`, `head_ref:string|null`, `head_repo_full_name:string|null`, `node_id:node`, `number:pr-decimal`, `updated_at:time` |
-| `reserved-pr-v1` | `base_ref:string`, `base_sha:sha40`, `closed_at:time|null`, `created_at:time`, `draft:boolean`, `head_label:string`, `head_ref:string`, `head_repo_full_name:"KARSIFT/vocanova-platform"`, `head_sha:sha40`, `merge_commit_sha:sha40|null`, `merged_at:time|null`, `node_id:node`, `number:pr-decimal`, `state:"open"|"closed"`, `updated_at:time`, `user_id:id-decimal`, `user_login:string`, `user_node_id:node` |
+| `reserved-pr-v1` | `base_ref:"main"`, `base_sha:sha40`, `closed_at:time|null`, `created_at:time`, `draft:boolean`, `head_label:"KARSIFT:<head_ref>"`, `head_ref:attempt-branch-v1`, `head_repo_full_name:"KARSIFT/vocanova-platform"`, `head_sha:sha40`, `merge_commit_sha:sha40|null`, `merged_at:time|null`, `node_id:node`, `number:pr-decimal`, `state:"open"|"closed"`, `updated_at:time`, `user_id:id-decimal`, `user_login:string`, `user_node_id:node` |
 | `timeline-v1` | `actor_id:id-decimal|null`, `actor_login:string|null`, `actor_node_id:node|null`, `assignee_id:id-decimal|null`, `assignee_login:string|null`, `assignee_node_id:node|null`, `commit_id:sha40|null`, `created_at:time`, `event:timeline-event`, `id:id-decimal`, `node_id:node|null` |
-| `ref-v1` | `name:string`, `sha:sha40` |
+| `ref-v1` | `name:full-ref-v1`, `sha:sha40` |
 | `git-commit-v1` | `parents:[sha40]` (zero through 16 entries in API order), `sha:sha40`, `tree:sha40` |
 | `protected-v1` | `name:"develop"|"main"`, `sha:sha40`, `tree:sha40` |
 | `ruleset-history-v1` | `actor_id:id-decimal`, `actor_type:"User"`, `updated_at:time`, `version_id:id-decimal` |
+| `ruleset-version-state-v1` | Same exact own keys/domains as `ruleset-v1` except `history_version` is omitted. |
+| `ruleset-version-v1` | `actor_id:id-decimal`, `actor_type:"User"`, `state:ruleset-version-state-v1`, `updated_at:time`, `version_id:id-decimal` |
 | `ruleset-v1` | `bypass_actors:[]`, `conditions:{ref_name:{exclude:[],include:[exact-three-patterns-in-the-order-above]}}`, `enforcement:"active"`, `history_version:id-decimal`, `id:id-decimal`, `name:"VOC-106 immutable release attempt refs"`, `rules:[{type:"deletion"},{type:"non_fast_forward"},{parameters:{update_allows_fetch_and_merge:false},type:"update"}]`, `source:"KARSIFT/vocanova-platform"`, `source_type:"Repository"`, `target:"branch"` |
 
-`history_version` is projected from the numeric-max exact ruleset-history record. Fetch
-that exact version and require its `state` projection byte-equal the current ruleset
-projection after omitting only `history_version`. The remaining ruleset keys come from
-the exact ruleset GET. For raw GET arrays, the
+`history_version` is projected only after exhaustive ruleset-history enumeration below
+from the numeric-max unique `version_id`. Fetch that exact version at
+`https://api.github.com/repos/KARSIFT/vocanova-platform/rulesets/<ruleset-id>/history/<version-id>`
+with no query and require its `ruleset-version-state-v1` projection byte-equal the
+current ruleset projection after omitting only `history_version`; its version/actor/time
+must equal the selected `ruleset-history-v1` record. Raw history `actor.id` and
+`actor.type` project to the flat exact fields above. The remaining ruleset
+keys come from the exact ruleset GET. For raw GET arrays, the
 lossless parser validates every listed source path and projects
 only these exact keys; unrelated documented API response keys do not enter policy state.
 Missing, duplicate, lossy, or wrong-type source values fail. Numeric source tokens are
@@ -264,41 +283,92 @@ enum stops for governed schema revision rather than being ignored.
 
 Each fetched page produces `voc-106-page-capture-v1` with exactly:
 
-`schema` (that literal), `source` (`pulls|timeline|matching_refs`), `endpoint` (exact
+`schema` (that literal), `source`
+(`pulls|timeline|matching_refs|ruleset_history_list`), `endpoint` (exact
 page URL), `http_status` (JSON integer 200), `etag` (ASCII string or null), `captured_at`
 (time), `page` (id-decimal), `per_page` (string `"100"`), `next_url` (canonical URL or
 null), `item_count` (decimal string `0..100`), `raw_sha256` (digest64), `items` (array of
 the source projection), `items_jcs_sha256` (digest64), and `capture_sha256` (digest64).
 The source projection is `pr-boundary-v1` for `pulls`, `timeline-v1` for `timeline`,
-and `ref-v1` for `matching_refs`; reserved PR detail is an object capture using
-`reserved-pr-v1`.
+and `ref-v1` for `matching_refs`; `ruleset_history_list` uses
+`ruleset-history-v1`; reserved PR detail is an object capture using `reserved-pr-v1`.
 `capture_sha256` hashes RFC 8785/JCS of the object with only itself omitted;
 `items_jcs_sha256` hashes JCS `items`. Raw digest covers exact response bytes. Capture
 timestamps/ETags/raw bytes are deliberately capture-specific and need not reproduce.
 
 Each non-page GET produces `voc-106-object-capture-v1` with exactly `schema`, `source`
-(`ruleset|ruleset_history|protected_ref|git_commit|reserved_pr`), `endpoint`, `http_status` (200),
+(`ruleset|ruleset_history_version|protected_ref|git_commit|reserved_pr`), `endpoint`, `http_status` (200),
 `etag` (ASCII string or null), `captured_at`, `raw_sha256`, `projection` (the exact
-ruleset-history/ruleset/protected/git-commit/reserved-PR object for the source),
+ruleset/ruleset-version/protected/git-commit/reserved-PR object for the source),
 `projection_jcs_sha256`, and `capture_sha256`. The
 projection digest hashes only JCS `projection`; the capture digest hashes the whole
 object with only `capture_sha256` omitted. Capture-specific fields are excluded from
 stable state.
 
+The non-HTTP ref source produces `voc-106-command-capture-v1` with exactly `schema`
+(that literal), `source:"git_ls_remote"`, `argv` (exact array
+`["git","ls-remote","--heads","origin","refs/heads/release/voc-106-*"]`),
+`exit_code` (JSON integer `0`), `captured_at` (time),
+`stdout_sha256` (digest64), `stderr_sha256` (SHA-256 of zero bytes), `projection`
+(UTF-8-full-ref-sorted `ref-v1` array), `projection_jcs_sha256`, and `capture_sha256`.
+Stdout is zero or more exact `<sha40>\t<full-ref-v1>\n` records with no duplicate name;
+stderr is empty. Projection and capture digests follow the object-capture rules.
+
 One source scan produces `voc-106-scan-capture-v1` with exact keys `schema`, `source`,
 `started_at`, `completed_at`, `pages`, `page_count`, `total_count`, `high_watermark`,
 `capture_sha256`, and `state_projection_sha256`. Counts/page numbers are canonical
 decimal strings. Pull/timeline high watermark is id-decimal or `"0"`; matching-ref
-high watermark is its last UTF-8 ref name or null. `pages` is ordered page-
+high watermark is its last UTF-8 ref name or null; ruleset-history high watermark is
+numeric-max version id or `"0"`. `pages` is ordered page-
 capture digests. Its capture digest omits only itself. The state digest excludes all
 capture times, ETags, page boundaries, raw digests, and capture digests.
 `state_projection_sha256` hashes JCS of the complete concatenated source projections:
-PRs sorted by numeric number, timeline events by numeric id, or refs by UTF-8 name.
+PRs sorted by numeric number, timeline events by numeric id, refs by UTF-8 full name,
+or ruleset-history records by numeric version id.
 
-`voc-106-stable-state-v1` has exactly `schema`, `repository`, `ruleset`,
+The `ruleset_history_list` scan uses exactly
+`https://api.github.com/repos/KARSIFT/vocanova-platform/rulesets/<ruleset-id>/history?per_page=100&page=<n>`
+with query keys in that order. Start at page `1`; require a present Link `next` URL to
+parse as the same HTTPS origin/path with exactly `per_page=100` and page `n+1`, then
+serialize to the canonical query order above; duplicate/unknown query keys, fragment,
+wrong relation/cardinality, or target fail. Fetch numbered pages without gaps or repeats
+until item count is below 100, including an explicit empty sentinel after a full page.
+A short page must have no `next`; a full page without `next` still requires the next
+numbered sentinel. Reject duplicate `version_id` values. Zero total records is invalid
+because no current-version state can be proven. Its scan
+`total_count` is the canonical decimal record count and `high_watermark` is numeric-max
+`version_id` or `"0"`. Stable state sorts the complete projection by numeric version.
+
+`voc-106-pass-capture-v1` has exactly `schema` (that literal), `pass` (`"1"|"2"`),
+`started_at` (time), `completed_at` (time), `members`, `member_count` (decimal),
+`stable_state_sha256` (digest64), and `capture_sha256` (digest64). Each ordered member
+is `voc-106-pass-member-v1` with exact own keys `capture_sha256`, `kind`
+(`"scan"|"command"|"object"`), `source`, and `subject`. Scan members are ordered:
+`ruleset_history_list` subject `ruleset:<id>`; `pulls` subject repository; every
+`timeline` subject `pr:<number>` by numeric PR; then `matching_refs` subject the exact
+full prefix `refs/heads/release/voc-106-`. The `git_ls_remote` command member with that
+same subject follows. Object members then follow: `ruleset` subject `ruleset:<id>`;
+`ruleset_history_version` subject `version:<numeric-max-version>`; protected refs
+subjects `ref:develop`, then `ref:main`; reserved PR subjects `pr:<number>` by numeric
+number; then every distinct required `git_commit` subject `commit:<sha>` by SHA lexical
+order. The required Git-commit SHA set is the union of every `protected_refs.sha`,
+`refs.sha`, `reserved_prs.base_sha`, `reserved_prs.head_sha`, and nonnull
+`reserved_prs.merge_commit_sha`.
+Member `source` must be exactly the referenced capture's source and be valid for its
+kind: the four page sources for `scan`, only `git_ls_remote` for `command`, and the five
+non-page sources for `object`. `subject` is always the exact form specified above.
+No other order is valid. `member_count` equals array length. The validator derives the
+expected member subjects from the stable state and source scans, requires exactly one
+member per required capture and no extras, and verifies every referenced capture hash.
+`capture_sha256` hashes RFC 8785/JCS of the entire pass object with only itself omitted.
+Thus every page is included transitively by its scan digest, every non-page object is
+included directly, and omission/reorder/substitution changes or invalidates the pass.
+
+`voc-106-stable-state-v1` has exactly `schema`, `repository`, `ruleset`, `ruleset_history`,
 `protected_refs`, `counts`, `high_watermarks`, `all_pr_boundary`, `reserved_prs`,
 `timelines`, and `refs`.
 `repository` is `KARSIFT/vocanova-platform`; `ruleset` is `ruleset-v1`;
+`ruleset_history` is the complete numeric-version-sorted `ruleset-history-v1` array;
 `protected_refs` sorts by name; `all_pr_boundary` contains `pr-boundary-v1` for every
 repository PR, including ordinary forks and deleted sources, sorted by numeric number.
 Only after the full scan, select reserved candidates whose head ref matches the exact
@@ -314,20 +384,25 @@ silently ignored. Fetch each selected PR detail and build `reserved-pr-v1`;
 `reserved_prs` sorts by number; `timelines` is sorted objects
 `{events,pr_number}` with events by numeric id;
 `refs` is the equal full reserved `ref-v1` set sorted by UTF-8 ref name. `counts` has
-exact decimal-string keys `all_prs`, `refs`, `reserved_prs`, `timeline_events`, and
-`timelines`. `high_watermarks` has `all_pr_number` (id-decimal or `"0"`), `refs` (last
+exact decimal-string keys `all_prs`, `refs`, `reserved_prs`, `ruleset_history_versions`,
+`timeline_events`, and `timelines`. `high_watermarks` has `all_pr_number` (id-decimal or `"0"`), `refs` (last
 UTF-8 name or null), and `timelines` (PR-number-sorted exact objects
-`{event_id,pr_number}`, where empty event id is `"0"`). The state
+`{event_id,pr_number}`, where empty event id is `"0"`), plus
+`ruleset_history_version` (id-decimal or `"0"`). The state
 digest is SHA-256 of its JCS bytes and is what a later actor must reproduce when state
 has not changed. A separate `voc-106-reconciliation-v1` has exact keys `schema`,
 `pass_1_capture_sha256`, `pass_2_capture_sha256`, `stable_state_sha256`,
 `frozen_develop_sha`, `frozen_develop_tree`, `frozen_main_sha`, `frozen_main_tree`,
-`frontier`, `claim_sha`, `attempt_ref`, `submit_ref`, `submit_state`, `pr_number`,
-`pr_node_id`. Their exact field domains are: `frontier` and `attempt_ref` are valid
-ref-name strings or null, `submit_ref` is a valid submit ref or null, `submit_state` is
+`frontier`, `claim_ref`, `claim_sha`, `attempt_ref`, `submit_ref`, `submit_state`, `pr_number`,
+`pr_node_id`. Their exact field domains are: `frontier`, `claim_ref`, `attempt_ref`, and
+`submit_ref` are their exact branch-v1 forms or null; `claim_sha` is sha40 or null;
+`submit_state` is
 exactly `absent`, `awarded-current-invocation`, `submit-outcome-unknown`, or `consumed`,
-`claim_sha` is sha40 or null, `pr_number` is PR-decimal or null, and `pr_node_id` is
-node or null. `awarded-current-invocation` may exist only in the synchronous 201
+`pr_number` is PR-decimal or null, and `pr_node_id` is node or null.
+`pass_1_capture_sha256` and `pass_2_capture_sha256` are exactly the verified
+`capture_sha256` fields of complete pass-capture objects whose `pass` values are `"1"`
+and `"2"`; both bind the same `stable_state_sha256`. `awarded-current-invocation` may
+exist only in the synchronous 201
 recipient and is not persisted or reconstructed. Capture digests/times may change;
 stable-state digest must not.
 
@@ -335,7 +410,9 @@ stable-state digest must not.
 
 For each pass, with no mutation by the actor:
 
-1. GET/read back ruleset, its latest history version, and protected SHA/tree.
+1. GET/read back the current ruleset; exhaustively paginate its history-list endpoint;
+   select the unique numeric-max version; fetch that exact version; compare its state;
+   and read protected SHA/tree.
 2. Request all PR pages using exact query
    `state=all&sort=created&direction=asc&per_page=100&page=<n>`. Start at page 1,
    require Link next URL to equal page `n+1` when present, and always fetch successive
@@ -347,10 +424,11 @@ For each pass, with no mutation by the actor:
 4. Enumerate reserved refs through full `git ls-remote --heads origin
    'refs/heads/release/voc-106-*'` and numbered GitHub matching-ref pages until short;
    require byte-identical sorted sets and exact object/tree readback.
-5. Construct the timestamp-free stable state and digest.
+5. Construct the timestamp-free stable state/digest and the exact pass capture including
+   every required scan/object capture.
 
 Run two complete passes. Equality means byte-equal JCS stable-state objects, including
-full-repository PR boundary vectors, protected refs, ruleset, reserved PR/timelines,
+full-repository PR boundary vectors, protected refs, ruleset/history, reserved PR/timelines,
 and refs; it is evaluated after full-page completeness but before any mutation. Page
 capture metadata is not compared. Any outside-namespace PR create/update changes
 `all_pr_boundary` and destabilizes the pair. Discard unequal pairs and retry from pass

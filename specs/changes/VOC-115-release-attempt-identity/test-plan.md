@@ -3,9 +3,10 @@
 ## VOC-115-TEST-00 — Intake, scope, and authority
 
 - Covers: `VOC-115-AC-00`
-- Procedure: inspect #216, PR #215 FAIL, all ten exact plan-candidate FAILs,
+- Procedure: inspect #216, PR #215 FAIL, all eleven exact plan-candidate FAILs and the
+  superseded 2308e8d specialist PASS,
   VOC-106/VOC-114, policy, surfaces, paths, and action wording.
-- Expected: five candidates superseded/no-transfer; PR #215 draft; 27 paths exact;
+- Expected: six candidates superseded/no-transfer; PR #215 draft; 27 paths exact;
   ruleset action held/separate; no implementation/ref/settings/release authority.
 - Evidence: `VOC-115-EV-00`
 
@@ -18,6 +19,9 @@
   `29/40`, `41/52`, `101/112`, `72/83`, `84/95`, `144/155`, and `87/98`, and both
   `check-ref-format --branch`/full-ref checks. Accept PR max `2147483647` and exact
   64-byte digest fixtures; reject their +1 values and every one-byte suffix extension.
+  For every frontier/claim_ref/attempt_ref/submit_ref occurrence, accept only branch-v1;
+  accept full-ref-v1 only in ref-create requests, ruleset patterns, ref-v1, and dual
+  enumeration. Swap each field representation independently.
 - Negatives: absent/disabled/wrong-target/wrong-pattern/exclude/bypass/missing rule;
   zero/sign/leading-zero/above-max/unsafe Number; Unicode/control/traversal; wrong SHA/
   digest/frontier; overlength/invalid ref; unauthorized settings claim.
@@ -40,8 +44,9 @@
 
 - Covers: `VOC-115-AC-02`
 - Procedure: mutate every exact own key/type/null/enum/id/domain of PR, timeline, ref,
-  protected, ruleset, page-capture, scan-capture, stable-state, and reconciliation
-  schemas. Parse raw JSON with duplicate keys/large ids. Test 0/1/99/100/101 pages,
+  protected, ruleset/history/version, page/object/command/scan/pass-capture, stable-state,
+  and reconciliation schemas. Parse raw JSON with duplicate keys/large ids. Test
+  all-PR/timeline/ruleset-history 0/1/99/100/101 pages,
   explicit empty sentinel, exact Link/query order, local filtering, counts, and
   high-watermarks. Include ordinary local, foreign-fork, reserved local, and deleted-
   source PR boundaries; only exact nonnull canonical repository/label pairs reach
@@ -50,7 +55,12 @@
   timestamps/ETags/raw bytes.
 - Expected: capture digest changes while timestamp-free stable-state digest reproduces.
   Missing/extra/wrong fields, unsafe numbers, unknown timeline event, raw/projection
-  mismatch, gaps/repeats/truncation, wrong filter/boundary/count/high-watermark fail.
+  mismatch, gaps/repeats/truncation, wrong history numeric max/version state, wrong
+  filter/boundary/count/high-watermark fail. Pass members cover exact ordered history,
+  pull/timeline/ref scans, ls-remote command, ruleset/version/protected/PR/Git objects;
+  omission, duplicate, reorder, wrong subject/hash/count, or pass number fails.
+  An empty all-PR/timeline/ref source may pass its domain, but empty ruleset history
+  fails because no latest state is provable.
 - Evidence: `VOC-115-EV-03`
 
 ## VOC-115-TEST-04 — Stable algorithm and crash matrix
@@ -64,6 +74,8 @@
   binder, closure, and owner loss. Mutate canonical ref/PR request keys and bytes.
   Validate merge-commit projection parents/SHA/tree and every object-capture source.
 - Expected: comparison is exact JCS stable-state equality, never capture equality;
+  reconciliation pass digests equal the exact pass-1/pass-2 capture hashes and each
+  pass binds the same stable-state digest;
   unstable pairs discard/retry at most three pairs. Claim/attempt absence authorizes the
   same canonical ref request without a counter. Only the exact submit-ref `201`
   invocation receives a nontransferable award and makes one PR POST. Same-target 422,
@@ -116,8 +128,9 @@
 ## VOC-115-TEST-08 — Exact paths, reviews, and rollback
 
 - Covers: `VOC-115-AC-05`
-- Procedure: audit exact 27 paths/OIDs and 25 textual surfaces; preserve adoption and
-  failed-review history; run governance/risk/diff/format/link/foundation/hosted checks;
+- Procedure: audit exact 27 paths/OIDs and 25 textual surfaces; preserve adoption,
+  failed-review history, and superseded specialist PASS; run governance/risk/diff/
+  format/link/foundation/hosted checks;
   reverse full diff in disposable worktree; bind fresh exact specialist and different
   cross-model R4 reviews after every edit.
 - Expected: no other path/contradiction; zero blockers; exact parent tree restores;
@@ -153,7 +166,7 @@ dispatch, deployment, migration, data, DNS/traffic, spending, or launch.
 - `VOC-115-EV-00`: intake, all superseded reviews, scope, and authority.
 - `VOC-115-EV-01`: ruleset, claim/attempt/submit grammar, exact lengths, and primitive domains.
 - `VOC-115-EV-02`: coalesced races and explicit stale terminal matrix.
-- `VOC-115-EV-03`: exact schemas, page captures, and stable state.
+- `VOC-115-EV-03`: exact schemas, exhaustive history, pass captures, and stable state.
 - `VOC-115-EV-04`: stable equality and every crash/unknown-response boundary.
 - `VOC-115-EV-05`: cardinality cleanup, deletion boundary, and same-D retry.
 - `VOC-115-EV-06`: actor, topology, settings hold, and recovery regression.

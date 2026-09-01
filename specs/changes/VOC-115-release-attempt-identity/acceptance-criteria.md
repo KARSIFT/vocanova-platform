@@ -7,8 +7,9 @@
 - Evidence: `VOC-115-EV-00`
 - Result: pending
 
-All five superseded candidate SHAs/trees and all ten exact PR #217 FAIL reviews remain recorded
-with no transfer. PR #215 remains draft, and no adoption, review, ref, settings,
+All six superseded candidate SHAs/trees, eleven exact PR #217 FAIL reviews, and the
+superseded 2308e8d specialist PASS remain recorded with no transfer. PR #215 remains
+draft, and no adoption, review, ref, settings,
 release, merge, deployment, or external authority is inferred.
 
 ## VOC-115-AC-01 — Durable atomic attempt identity is exact
@@ -22,6 +23,8 @@ The deterministic claim/attempt/submit grammar and exact per-form byte lengths, 
 domains, verified no-bypass ruleset,
 server create-ref arbitration, same-target logical coalescence, attempt SHA/tree
 binding, protected one-shot submit award, and globally at-most-one active attempt pass.
+A single branch-v1 representation for every hashed identity field and one explicit
+full-ref derivation for request/ruleset/enumeration fields pass.
 A different-target race either
 selects still-current topology or reaches the specified irrecoverable stale terminal;
 it does not promise a usable caller winner. PR multiplicity cleans up before success.
@@ -33,10 +36,13 @@ it does not promise a usable caller winner. PR multiplicity cleans up before suc
 - Evidence: `VOC-115-EV-03`
 - Result: pending
 
-Full all-state PR pagination, every reserved timeline, equal complete ref sets, ruleset,
-and protected refs reconstruct state. Exact own-key/type/null/id/event/page schemas and
+Full all-state PR pagination, every reserved timeline, equal complete ref sets,
+exhaustive ruleset-history pagination/numeric-max version comparison, ruleset, and
+protected refs reconstruct state. Exact own-key/type/null/id/event/page schemas and
 lossless raw-to-projection rules pass. Capture timestamps/ETags/raw digests may change;
 the timestamp-free JCS stable-state digest reproduces when authoritative state is equal.
+A pass-capture JCS digest binds the exact ordered inventory of every scan, non-page
+object, and command capture; one omitted/reordered/substituted member fails.
 A reserved-looking null head repository stops as ambiguous and is never inferred from
 label or timeline events.
 
