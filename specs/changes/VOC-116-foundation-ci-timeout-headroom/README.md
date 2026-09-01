@@ -14,6 +14,15 @@ workflow validator and negative fixtures freeze that exact value, preserve compl
 non-success result still blocks `CI / ci required`. Three living CI/development
 documents record the same contract.
 
+DOC-16 self-modification safety applies because CI requirements are protected. Both
+this plan and the future exact implementation therefore require independent
+cross-model verification by a different actor using a model distinct from the builder
+of that exact revision. Deterministic policy proof must retain every pre-existing
+workflow-policy protection and add the 20-minute invariant without a protection gap.
+The privilege analysis finds one bounded expansion only: the foundation runner may
+execute and delay feedback for at most five additional minutes. Permissions, triggers,
+secrets, writes, deployment, actions, and all other authority remain unchanged.
+
 The package does not remove, skip, shard, parallelize, reorder, retry, or weaken any
 foundation command or test. It authorizes no implementation until exact-revision
 independent review, adoption bookkeeping, and normal plan merge. It grants no GitHub

@@ -2,18 +2,26 @@
 
 Implementation is prohibited until this exact plan revision is independently reviewed,
 adopted, updated with bookkeeping, freshly reviewed as required, and normally merged.
+The independent review must be cross-model: a different non-author actor using a
+recorded model distinct from this revision's builder. The future implementation needs
+its own fresh distinct-actor/distinct-model review; plan evidence never transfers.
 
 ## Technical approach
 
 1. On a short-lived implementation branch from then-current `develop`, change only the
    foundation job scalar in `.github/workflows/ci.yml` from 15 to 20.
-2. Add an exported exact foundation timeout constant/invariant to
+2. Inventory every parent `workflow-policy.mjs` protection and focused positive/
+   negative test. Preserve each unchanged in effect. Add an exported exact foundation
+   timeout constant/invariant to
    `workflow-policy.mjs`. Parse the top-level foundation job boundary independently of
    other jobs; require one job, one unquoted integer timeout key, and value 20.
-3. Extend `workflow-policy.test.mjs` with canonical positive and isolated negative
+3. Extend `workflow-policy.test.mjs` additively with canonical positive and isolated negative
    mutations for wrong ranges/types/cardinality/placement plus every nonsuccess
-   aggregate result.
-4. Synchronize the three exact living documents with the measured contract.
+   aggregate result. Against proposed complete workflow bytes, run every parent
+   protection regression and the new matrix before eligibility.
+4. Change the workflow scalar and synchronize the three exact living documents. The
+   final revision atomically includes preserved guards and new proof; no protection is
+   removed or disabled before replacement proof.
 
 ## Components affected
 
@@ -31,6 +39,12 @@ Preserve top-level read-only permissions, non-persisted checkout credentials, pi
 action SHAs, frozen dependency installation, current concurrency, and no secrets. The
 validator remains network-free. Exact upper-bound enforcement prevents accidental
 unbounded drift.
+
+The explicit privilege analysis permits only +5 minutes of existing foundation runner
+execution/feedback delay. It permits no new capability or authority. Exact workflow
+diff assertions enforce zero change to permissions, triggers, secrets, actions, writes,
+runner class, concurrency, artifacts, environments, dispatch, deployment, and all
+other jobs.
 
 ## Testing approach
 
@@ -56,7 +70,8 @@ worktree before merge.
 4. Run full foundation, workspace, governance, risk, diff, and format checks.
 5. Rehearse scoped reverse/reapply and confirm clean identity.
 6. Push an ordinary short-lived branch and open one implementation PR with exact binder.
-7. Obtain hosted checks and different-actor exact-revision R3 PASS; remediate then repeat if needed.
+7. Obtain hosted checks and different-actor/distinct-model exact-revision R3 PASS with
+   recorded provenance; remediate then repeat if needed.
 8. A separate non-author may merge only the eligible exact revision.
 9. Complete bounded post-merge monitoring and attach evidence to issue #218.
 
@@ -67,6 +82,9 @@ fixtures cover both. Runtime variance may still exceed 20 minutes; monitoring tr
 that as new evidence, not permission to auto-expand. The reported 204 count can grow
 under later adopted work; the no-omission contract remains authoritative, while a
 future legitimate count change updates evidence through its own governed scope.
+Removing a pre-existing check while adding the timeout check would be unsafe
+self-modification; the parent protection inventory, unchanged-effect replay, exact
+diff, and cross-model review make that condition blocking.
 
 ## Action boundaries
 

@@ -5,7 +5,9 @@
 - Covers: `VOC-116-AC-00`
 - Procedure: validate all nine package files, issue/base linkage, R3 declaration,
   explicit automatic merge policy, pending review/adoption, one task/PR, exact sorted
-  six-path implementation inventory, holds, rollback, and prohibited authority.
+  six-path implementation inventory, superseded candidate/reviews with no transfer,
+  prospective cross-model fields remaining pending, holds, rollback, and prohibited
+  authority.
 - Expected: draft is internally complete but grants no implementation or external action.
 - Evidence: `VOC-116-EV-00`
 
@@ -86,6 +88,24 @@
   signal opens/reopens governed intake; no automatic cap increase occurs.
 - Evidence: `VOC-116-EV-07`
 
+## VOC-116-TEST-08 — Self-modification, privilege, and protection continuity
+
+- Covers: `VOC-116-AC-08`
+- Procedure: record exact actor and model provenance for the plan builder/reviewer and,
+  separately, implementation builder/reviewer; require actor inequality and model
+  inequality for each exact SHA, with no evidence transfer. Diff every workflow field
+  against the parent and allow only foundation timeout 15 to 20, proving the sole
+  effects are at most +5 minutes runner occupation and feedback delay. Inventory every
+  parent workflow-policy diagnostic and focused test; replay every existing positive/
+  negative unchanged in effect against the proposed complete workflow, then run the
+  new exact-20 matrix. Inspect source/test diff to reject removed/bypassed/relaxed old
+  guards and require the final atomic revision to contain preserved protections plus
+  the new invariant/proof.
+- Expected: both cross-model gates pass with distinct actor/model provenance; no
+  authority/capability field changes; every old protection and new exact-20 invariant
+  passes before eligibility; no weakened intermediate revision authorizes transition.
+- Evidence: `VOC-116-EV-08`
+
 ## Commands
 
 - `node --test scripts/foundation/workflow-policy.test.mjs`
@@ -112,3 +132,6 @@ Cloudflare, accesses production/data, changes DNS/traffic, spends, releases, or 
 - `VOC-116-EV-05`: living-document audit and exact six-path implementation manifest.
 - `VOC-116-EV-06`: local/hosted checks, exact identity, review, and merge eligibility.
 - `VOC-116-EV-07`: rollback rehearsal and bounded post-merge issue evidence.
+- `VOC-116-EV-08`: plan/implementation cross-model provenance, exact privilege diff,
+  parent-protection inventory, unchanged-effect replay, additive invariant proof, and
+  no-weakened-intermediate evidence.

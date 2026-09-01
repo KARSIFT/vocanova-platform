@@ -8,6 +8,16 @@ changes application behavior nor creates an external effect. A too-small cap rep
 false cancellations; a needlessly large/unvalidated cap can conceal runaway CI and
 delay feedback. Exact 20-minute enforcement bounds both risks.
 
+## Privilege-expansion analysis
+
+DOC-16 self-modification safety applies. The delta expands only the duration for which
+the already-authorized foundation job may hold its existing hosted runner and delay
+feedback: at most +5 minutes, from 15 to 20. It creates no permission, trigger, secret,
+write, checkout, action, cache, runner, concurrency, artifact, environment, dispatch,
+deployment, merge, release, or live capability. This is not a material autonomous-
+authority expansion and remains R3. Any implementation diff outside these two bounded
+time effects invalidates the conclusion and stops for replanning.
+
 ## Impact matrix
 
 | Area                                     | Status                      | Analysis                                                                                       |
@@ -54,6 +64,11 @@ discovers the focused test and must not change. Historical packages remain immut
 - Documentation drift: exact six-path review and cross-document assertions/evidence block merge.
 - Hosted variance consumes 20 minutes: timeout remains visible; monitoring stops closure and opens governed intake rather than raising it ad hoc.
 - Scope expansion: exact path audit fails and returns to planning.
+- Protection substitution gap: parent protection inventory and existing regression
+  replay must pass before the additive exact-20 proof; no old guard may be removed or
+  disabled in an intermediate or final candidate.
+- Reviewer coupling: plan and implementation use separate exact-revision cross-model
+  gates with distinct actor/model provenance; no verdict transfers.
 
 ## External-effect and hold analysis
 

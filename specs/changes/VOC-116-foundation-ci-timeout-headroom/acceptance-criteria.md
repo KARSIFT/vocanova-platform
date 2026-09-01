@@ -6,7 +6,7 @@
 - Tests: `VOC-116-TEST-00`
 - Evidence: `VOC-116-EV-00`
 
-The R3 draft binds issue #218 and base `b22a735...`, declares one task, one future
+The R3 draft binds issue #218, superseded `cdc3d58...`, and base `b22a735...`, declares one task, one future
 implementation PR, exactly six implementation paths, `automatic_merge_allowed: true`,
 pending exact review/adoption, and no external or implementation authority.
 
@@ -69,8 +69,9 @@ bounded response to recurrence. No historical package or unrelated surface chang
 
 Focused workflow tests, full 204-test foundation, `pnpm validate`, governance/risk/
 diff/format checks, hosted CI/Governance/Security, exact SHA/tree/path audit, and a
-different non-author exact-revision R3 review all pass with zero blockers before a
-separate non-author merge.
+different non-author/distinct-model exact-revision R3 review all pass with zero
+blockers before a separate non-author merge. The plan and implementation receive
+separate reviews with recorded actor/model provenance and no transfer.
 
 ## VOC-116-AC-07 — Rollback and monitoring remain bounded
 
@@ -82,3 +83,16 @@ A disposable reverse/reapply rehearsal proves the coherent six-path rollback. Af
 merge, the adoption-recorded owner records exact merge SHA, hosted links, duration,
 204-test count, and results. Any cancellation, incomplete suite, non-success aggregate,
 scope drift, or duration at/over 20 minutes stops closure and routes governed follow-up.
+
+## VOC-116-AC-08 — Self-modification preserves protection and bounds privilege
+
+- Requirements: `VOC-116-D07`, `VOC-116-D11`, `VOC-116-D12`
+- Tests: `VOC-116-TEST-08`
+- Evidence: `VOC-116-EV-08`
+
+The exact plan and exact implementation each have a fresh PASS by a distinct actor
+using a model distinct from that revision's builder. The privilege diff proves only a
++5-minute foundation runner/feedback window and zero permission, trigger, secret,
+write, action, deployment, or other authority expansion. A parent protection inventory
+and unchanged-effect regressions prove every old guard before the additive exact-20
+invariant; no weakened intermediate state is used for authorization.

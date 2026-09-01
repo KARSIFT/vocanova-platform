@@ -66,6 +66,28 @@ The change remains credential-free and read-only. It introduces no secret, permi
 network call, artifact, personal data, UI, accessibility surface, API, contract,
 schema, or migration. Existing production and learner-data holds remain active.
 
+## DOC-16 self-modification and privilege analysis
+
+CI requirements are a DOC-16 protected autonomous-development surface. The exact plan
+revision and, separately, the exact future implementation revision must each receive a
+PASS from a distinct non-author actor using a recorded model distinct from the recorded
+model of that revision's builder. Plan review cannot transfer to implementation, and
+no verdict transfers after an edit.
+
+The only expansion is quantitative and bounded: `foundation` may occupy its existing
+GitHub-hosted runner and delay validation feedback for up to five additional minutes.
+There is no expansion of permissions, triggers/events, secrets/credentials,
+repository writes, checkout/action/cache capability, runner class, concurrency,
+artifacts, environment access, dispatch, deploy, merge, release, or live authority.
+Any such change is outside R3 VOC-116 and stops for a new plan.
+
+Every pre-existing workflow-policy check and focused protection test must remain
+unchanged in effect. The new exact timeout check is additive and is proven against the
+proposed complete workflow before the final implementation is eligible. No existing
+guard may be removed, bypassed, relaxed, or temporarily disabled; the atomic final
+revision contains both the preserved controls and their new proof, so it cannot use a
+weakened intermediate policy to authorize itself.
+
 ## Performance expectations
 
 The 20-minute value is an upper cancellation boundary, not an expected runtime or a

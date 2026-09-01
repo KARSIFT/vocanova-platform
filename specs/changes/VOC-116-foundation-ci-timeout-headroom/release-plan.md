@@ -15,7 +15,12 @@ traffic/DNS, spending, `main` promotion, or launch action is authorized.
 - Governance, R3 risk floor, formatting, and diff checks.
 - Disposable six-path rollback/reapply rehearsal.
 - Hosted CI/Governance/Security PASS on the exact final SHA.
-- Different non-author exact-revision R3 PASS with zero blockers.
+- Different non-author/distinct-model exact-revision R3 PASS with recorded actor/model
+  provenance and zero blockers; plan review and implementation review are separate.
+- Parent workflow-policy protection inventory, unchanged-effect regression replay, and
+  additive exact-20 proof pass before eligibility, with no weakened intermediate state.
+- Exact privilege diff shows only +5 minutes of foundation runner execution/feedback
+  delay and no permission, trigger, secret, write, action, deploy, or other authority.
 - Truthful PR evidence and separate non-author merge.
 
 ## Activation and monitoring
