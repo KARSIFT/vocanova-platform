@@ -31,7 +31,7 @@ const ALLOWED_CREDENTIAL_NAMES = new Set([
 ]);
 const HIGH_RISK_PROJECTIONS = Object.freeze({
   "docs/README.md": [
-    "421d2a55b1c7ae37456d853afd1ab51169c6d0ba149e240472937ec94d6457f9",
+    "45612ce25bf9ad8a6e7b2059bc12f1d73862b263ec31149d882f417bf8ebdc77",
     "878ac4afa86d20799efbc81b0d429e390f595f33ebd7343a3f53c4e4eaf8d90a",
     "8832d2d05828832df014329b72584c9b27669f12a5846aec411373793ad5c743",
     "652c5ab7fb14b08983e28a6a4e5a8ad0d7164efa761e1c24081912a87d87ae3c",
@@ -39,7 +39,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/operations/README.md": [
-    "571a2607b68f20fd5e9467424c118f89ee669c1ab1b1dd029951771fc2dd194b",
+    "5ef81ea96e3e57adde3c3506aceba5ca972d16dc210d3b18824f46f1b9147dac",
     "76e7265b61b8c095366ad43d54f4e9f6bc28d71cc9f773693760408e277a0193",
     "96392476f3118b9691d6a2535cf9b002d25b9af2db23a130ca58de08d973c955",
     "9297cbdadfaaf30b43aeb7daf7e90cd8a8555b7faac9576da2e740f3e8900078",
@@ -47,7 +47,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/operations/cloudflare-delivery.md": [
-    "cfa8329c9e61a7f78e60eb80607223ade3a3e8554ff03273768097c144c3d519",
+    "59fe80da876b5aa111e5674c18caa90c1d819063865aa2a8354ed336ba7a37a1",
     "2a801f8ab23aba771ed8ad1dff41846db7f766be5e1ebf6ecd83ef881213a0ec",
     "9228e479e6c42c4e7151fda2feb279b134e04d41b65f002b5fdaa6f83e29134f",
     "64688b2e1fa9a049270b1b1783239f03356d9cba4e00fe21aa286d5fa385bb44",
@@ -55,7 +55,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/operations/voc-081-f2-evidence.json": [
-    "4088442117406b2c5140fe8f5ac26ace216524c1ef2c3bda7ffe3ca0cfa76b74",
+    "96ce99c2f6f3016349a04d79e96a6924eb80305ed6cf4f0f6cf9a7e41e9c5a31",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "a560577733ece56f33c61cf610398e39d54d14cd70604c46eb4def98a8a966c5",
     "eba6af33d947290b913f91a393e363c4619da9a45658efa002a5b821a969b5b1",
@@ -63,7 +63,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/operations/voc-081-f2-evidence.md": [
-    "0f39e759a35393fb9f80e7059b087289b660d9cc078c6ee297d62948445df320",
+    "511de94e696db4e04a85c74d2a8f440d478fffbe5d261f0e79976fc1d5cbb285",
     "68325539946c4836b34ecdd505637d30d34feb2606f587d067958671cc791efb",
     "5f9001281aa5bd4af228c1e8661f429bb7892c58a853880e5dca7faf7d2b8161",
     "41e73a0be967564c232d1f3848ff8d8db3404e8387286193bed360460f1bcfe8",
@@ -71,7 +71,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/operations/voc-105-f3-evidence.json": [
-    "8e131e4feeb2661bca765a39d4fe935b0c2edf2dec0c477b3c71162f9ed87c51",
+    "c00ca8e8a95172dcc382cb77c083b92cabe43c871836807d1b88fcaabbd3c366",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "a9ee0b5641a49e54c33036ce3f6b8fcc244aa9e74443a1f8d5917118370dcd38",
     "3841de5ce90e64a4b4a1424f73025260bc83b22df7f37741c1b1053c89ae8b5a",
@@ -79,7 +79,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/operations/voc-105-f3-evidence.md": [
-    "0f4d56a3c44d35ee10476b381fd62772cd3fdf8511804b32abeb629cac50e432",
+    "a8fb732239f1552c3509540cbd504391ffe004e4c31a8c86a6cf717bda136fac",
     "e56803e1b8a5b217df468f6afb8f24ff80200599b4d4408838df84a004eebe99",
     "e22b0023b329d93cc578cdb2c0e74a30f1ac42aa62f26fafab2093f62228f68c",
     "f4a490a89249dd4f6d3ab3f3d8cae8cb7cae822b0ed2543a10c7642513827c1e",
@@ -87,7 +87,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/product/12-mvp-implementation-plan.md": [
-    "4c5e386a17e0a4bb4a88382acc60979fafb58c591a61442081c86336ed0dc3bb",
+    "a7e54d002bcce888c99c02605372123d06765594936e581ce2ae51115577fc27",
     "26ddec86c049d2bf7ea7171fe0b4acd347423c10bfe51f6e154b9a6da67a161d",
     "80573cdc41ed4e310878d997f14ca6778468f39323d1ee0f725e4a2c0b3ebb8e",
     "8a41c6b9501977c8ab0ca0a88a473407a6112033b5e93cd0a08918688a01fc91",
@@ -95,7 +95,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
   ],
   "docs/product/README.md": [
-    "87eacef6e1ce4722e100a0f2c258db6541f3f4a370cae13563d72a4d6c241640",
+    "9d9963f4e2ee70d5538099fdb869b35bb904f3c207ae0cd169163f3ee9de4ac3",
     "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
     "fbb6b26654e2159dab0288eeb7caa309d622c1320674bec83002864f84fdacd9",
     "630f971607f1ddfd36c47f35c73c81e37a744e194750e527affb9e15a3275204",
@@ -104,22 +104,24 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
   ],
 });
 const OPERATIONAL_DOMAIN_PATTERN =
-  /\b(?:staging|delivery|delivered|deploy\w*|dispatch\w*|migrat\w*|promot\w*|publish\w*|upload\w*|retr(?:y|ied|ies|ying)|rotat\w*|revok\w*|remov\w*|delet\w*|cancel\w*|configur\w*|chang\w*|creat\w*|enabl\w*|disabl\w*|restor\w*|install\w*|rout\w*|access\w*|export\w*|import\w*|transform\w*|releas\w*|launch\w*|verif\w*|start\w*|destroy\w*|drop\w*|purg\w*|submit\w*|activat\w*|initializ\w*|wip(?:e|es|ed|ing)|eras(?:e|es|ed|ing)|truncat\w*|boot\w*|proceed\w*|invok\w*|send(?:s|ing)?|sent|spin(?:s|ning)?|spun|shut(?:s|ting)?|quer(?:y|ies|ied|ying)|push\w*|turn(?:s|ed|ing)?|set(?:s|ting)?|us(?:e|es|ed|ing)|switch\w*|stop\w*|run(?:s|ning)?|ran|execute\w*|provision\w*|edit\w*|trigger\w*|ship\w*|mov(?:e|es|ed|ing)|restart\w*|rollback\w*|roll(?:s|ed|ing)?[\s-]+back|workflows?|CI|DNS|traffic|resources?|D1|API[\s-]+Worker|Cloudflare[\s-]+Worker|build|live|learner[\s-]+data|credentials?|versions?|settings?|environments?|migrations?|promotions?|smoke|revocation)(?=\b|_)/i;
+  /\b(?:staging|delivery|delivered|deploy\w*|dispatch\w*|migrat\w*|promot\w*|publish\w*|upload\w*|retr(?:y|ied|ies|ying)|rotat\w*|revok\w*|remov\w*|delet\w*|cancel\w*|configur\w*|chang\w*|creat\w*|enabl\w*|disabl\w*|restor\w*|install\w*|rout\w*|access\w*|export\w*|import\w*|transform\w*|releas\w*|launch\w*|verif\w*|start\w*|destroy\w*|drop\w*|purg\w*|submit\w*|activat\w*|initializ\w*|wip(?:e|es|ed|ing)|eras(?:e|es|ed|ing)|truncat\w*|boot\w*|proceed\w*|invok\w*|send(?:s|ing)?|sent|spin(?:s|ning)?|spun|shut(?:s|ting)?|flush\w*|clear\w*|open\w*|issu\w*|approv\w*|authoriz\w*|writ(?:e|es|ing|ten)|terminat\w*|quer(?:y|ies|ied|ying)|push\w*|turn(?:s|ed|ing)?|set(?:s|ting)?|us(?:e|es|ed|ing)|switch\w*|stop\w*|run(?:s|ning)?|ran|execute\w*|provision\w*|edit\w*|trigger\w*|ship\w*|mov(?:e|es|ed|ing)|restart\w*|rollback\w*|roll(?:s|ed|ing)?[\s-]+back|workflows?|CI|DNS|traffic|resources?|D1|API[\s-]+Worker|Cloudflare[\s-]+Worker|build|live|learner[\s-]+data|credentials?|versions?|settings?|environments?|migrations?|promotions?|smoke|revocation)(?=\b|_)/i;
 const CREDENTIAL_TERM_PATTERN =
-  /\b(?:CLOUDFLARE_(?:ACCOUNT_ID|API_TOKEN)|[A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCOUNT_ID)|credentials?|Basic(?:[\s-]+auth(?:entication)?)?|auth(?:entication)?[\s-]+(?:key|header|token|cookie|code)|JWT|session[\s-]+(?:cookie|ID|identifier)|signing[\s-]+(?:key|token)|private[\s-]+(?:key|token)|encryption[\s-]+key|api[\s-]+(?:key|token)|access[\s-]+(?:key|token)|TOTP(?:[\s-]+seed)?|OTP|passcodes?|passphrases?|recovery[\s-]+(?:codes?|PIN)|login[\s-]+code|client[\s-]+cert(?:ificate)?s?|mTLS[\s-]+certificates?|authenticator[\s-]+seed|backup[\s-]+code|tokens?|secrets?|passwords?|Authorization|Bearer|Cookie)\b/i;
+  /\b(?:CLOUDFLARE_(?:ACCOUNT_ID|API_TOKEN)|[A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCOUNT_ID)|credentials?|Basic(?:[\s-]+auth(?:entication)?)?|auth(?:entication)?[\s-]+(?:key|header|token|cookie|code)|JWT|session[\s-]+(?:cookie|ID|identifier)|signing[\s-]+(?:key|token|certificate)|private[\s-]+(?:key|token)|encryption[\s-]+key|SSH[\s-]+key|api[\s-]+(?:key|token)|access[\s-]+(?:key|token)|TOTP(?:[\s-]+seed)?|OTP|passcodes?|passphrases?|recovery[\s-]+(?:codes?|PIN|phrase)|login[\s-]+code|(?:reset|emergency|device|security|backup)[\s-]+code|client[\s-]+(?:cert(?:ificate)?s?|assertion)|mTLS[\s-]+certificates?|authenticator[\s-]+seed|tokens?|secrets?|passwords?|Authorization|Bearer|Cookie)\b/i;
 const LATER_HOLD_TERM_PATTERN =
   /\b(?:A1|P1\+?|P[2-5]|R[12]|L1|product[\s-]+acceptance|production|launch|learner[\s-]+data|VOC-080-HOLD-(?:01|02))\b/i;
 const F3_STATUS_TERM_PATTERN = /\b(?:F3|staging[\s-]+status)\b/i;
 const SUBJECTLESS_BOUNDARY_POSITIVE_PATTERN =
-  /(?:^|[.!?;]\s*)(?:ready|active|accepted|authorized|approved|passed|effective|complete(?:[\s-]+effective)?|completed|enabled|released|resolved|verified)(?:\s+now)?(?=[.!?;](?:\s|$)|$)/i;
+  /(?:^|[.!?;]\s*)(?:(?:clearly|actually|already|nevertheless|now)\s+)*(?:(?:It|This|That)\s+(?:(?:is|has\s+been)\s+)?|The\s+(?:result|status)\s+(?:is\s+)?|Now\s+)?(?:ready|active|accepted|authorized|approved|passed|effective|complete(?:[\s-]+effective)?|completed|enabled|released|resolved|verified)(?:\s+now)?(?=[.!?;](?:\s|$)|$)/i;
 const SUBJECTLESS_STALE_STATUS_PATTERN =
-  /(?:^|[.!?;]\s*)(?:(?:It\s+)?remains?\s+pending|pending|(?:It\s+)?(?:remains?\s+)?unresolved(?:\s+now)?|(?:It\s+)?continues?\s+(?:to\s+be\s+)?unresolved|still\s+(?:pending|unresolved))(?:[.!?]|$)/i;
+  /(?:^|[.!?;]\s*)(?:(?:clearly|apparently|actually|still|currently)\s+)*(?:(?:It|This|That)\s+)?(?:(?:The|current|prospective)\s+status\s*(?::\s*|(?:is|remains|continues)\s+)|(?:is\s+)?still\s+|remains?\s+|continues?\s+(?:to\s+be\s+)?)?(?:pending|unresolved)(?:\s+now)?(?:[.!?]|$)/i;
 const SAFE_OPERATIONAL_CLAUSE =
-  "(?:No\\s+(?:(?:staging\\s+)?(?:deployment|delivery|migration)|upload|promotion|(?:workflow\\s+)?dispatch)\\s+(?:occurred|took\\s+place)|(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+(?:is\\s+prohibited|did\\s+not\\s+occur)|(?:No\\s+deployment\\s+was|Deployment\\s+was\\s+not)\\s+performed|(?:The\\s+)?(?:deploy|publish|migration|dispatch)\\s+command\\s+was\\s+not\\s+executed|The\\s+(?:database|build|system)\\s+was\\s+not\\s+(?:migrated|deployed)|The\\s+(?:previous|prior|staging)\\s+(?:staging\\s+)?(?:delivery|upload)\\s+(?:succeeded|completed\\s+successfully|was\\s+completed\\s+in\\s+the\\s+past)|The\\s+(?:previous|prior)\\s+staging\\s+deployment\\s+succeeded|(?:The\\s+)?documentation\\s+was\\s+published\\s+in\\s+the\\s+past|The\\s+sanitized\\s+delivery\\s+deployed\\s+the\\s+API\\s+Worker\\s+successfully\\s+in\\s+the\\s+past|The\\s+command\\s+“Deploy\\s+now”\\s+is\\s+prohibited|The\\s+sanitized\\s+past\\s+delivery\\s+description\\s+records\\s+that\\s+retry\\s+was\\s+not\\s+required|The\\s+reviewer\\s+verified\\s+the\\s+sanitized\\s+evidence|The\\s+sanitized\\s+result\\s+is\\s+not\\s+verified)";
+  "(?:No\\s+(?:(?:staging\\s+)?(?:deployment|delivery|migration|activation)|upload|promotion|(?:workflow\\s+)?dispatch)\\s+(?:occurred|took\\s+place)|(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+(?:is\\s+prohibited|did\\s+not\\s+occur)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion|Activation)\\s+was\\s+not\\s+performed|No\\s+(?:deployment|migration|dispatch|upload|promotion|activation)\\s+was\\s+performed)|No\\s+query\\s+was\\s+issued|(?:The\\s+)?job\\s+was\\s+not\\s+invoked|Nothing\\s+was\\s+deployed|(?:The\\s+)?system\\s+(?:was\\s+not|never)\\s+deployed|(?:The\\s+)?(?:deploy|publish|migration|dispatch)\\s+command\\s+was\\s+not\\s+executed|The\\s+(?:database|build)\\s+was\\s+not\\s+(?:migrated|deployed)|The\\s+(?:previous|prior|staging)\\s+(?:staging\\s+)?(?:delivery|upload|migration)\\s+(?:succeeded|completed\\s+successfully|was\\s+completed\\s+in\\s+the\\s+past)|The\\s+(?:previous|prior)\\s+staging\\s+deployment\\s+succeeded|(?:The\\s+)?documentation\\s+was\\s+published\\s+in\\s+the\\s+past|The\\s+sanitized\\s+delivery\\s+deployed\\s+the\\s+API\\s+Worker\\s+successfully\\s+in\\s+the\\s+past|The\\s+command\\s+“Deploy\\s+now”\\s+is\\s+prohibited|The\\s+sanitized\\s+past\\s+delivery\\s+description\\s+records\\s+that\\s+retry\\s+was\\s+not\\s+required|The\\s+reviewer\\s+verified\\s+the\\s+sanitized\\s+evidence|The\\s+sanitized\\s+result\\s+is\\s+not\\s+verified|The\\s+proposal\\s+is\\s+approved|The\\s+unrelated\\s+issue\\s+remains\\s+pending|The\\s+issue\\s+was\\s+resolved\\s+without\\s+external\\s+action|The\\s+(?:unit\\s+test|local\\s+worker)\\s+initialized\\s+(?:an?\\s+)?in-memory\\s+fixture|The\\s+(?:historical\\s+)?parser\\s+queried\\s+(?:a\\s+)?local\\s+object|The\\s+(?:historical|local)\\s+note\\s+verified\\s+(?:the\\s+|a\\s+)?checksum)";
 const SAFE_LATER_CLAUSE =
-  "(?:(?:Authenticated\\s+)?A1(?:\\s+(?:product\\s+)?acceptance)?|P1\\+?(?:\\s+(?:product\\s+)?acceptance)?|P[2-5](?:\\s+(?:product\\s+)?acceptance)?|R[12](?:\\s+acceptance)?|L1(?:\\s+acceptance)?|Product\\s+acceptance|Public\\s+launch|Live\\s+(?:activation|verification|system|service))\\s+(?:is|remains)\\s+unresolved|(?:Production(?:\\s+(?:readiness|traffic|deployment))?|Learner[\\s-]+data(?:\\s+(?:access|deletion))?|VOC-080-HOLD-(?:01|02))\\s+(?:is|remains)\\s+held";
+  "(?:(?:Authenticated\\s+)?A1(?:\\s+(?:product\\s+)?acceptance)?|P1\\+?(?:\\s+(?:product\\s+)?acceptance)?|P[2-5](?:\\s+(?:product\\s+)?acceptance)?|R[12](?:\\s+acceptance)?|L1(?:\\s+acceptance)?|Product\\s+acceptance|Public\\s+launch|Live\\s+(?:activation|verification|system|service))\\s+(?:is|remains)\\s+unresolved|(?:Production(?:\\s+(?:readiness|traffic|deployment))?|(?:Production\\s+)?Learner[\\s-]+data(?:\\s+(?:use|access|import|export|transform|transformation|delete|deletion))?|VOC-080-HOLD-(?:01|02))\\s+(?:is|remains)\\s+held";
 const SAFE_CREDENTIAL_CLAUSE =
-  "(?:Credentials?|Tokens?|Passwords?|Private[\\s-]+key|JWT|Basic[\\s-]+authentication|Recovery[\\s-]+(?:code|PIN)|Authentication[\\s-]+code|Login[\\s-]+code|OTP|Passcode|Session[\\s-]+(?:ID|identifier)|Client[\\s-]+cert(?:ificate)?|mTLS[\\s-]+certificate|Authenticator[\\s-]+seed|Backup[\\s-]+code|Passphrase|TOTP[\\s-]+seed|Authentication[\\s-]+cookie|Encryption[\\s-]+key)\\s+(?:is|are|remains?)\\s+(?:value-free|absent|unavailable|redacted|prohibited)";
+  "(?:Credentials?|Tokens?|Passwords?|Private[\\s-]+key|JWT|Basic[\\s-]+authentication|Recovery[\\s-]+(?:code|PIN|phrase)|Authentication[\\s-]+code|Login[\\s-]+code|(?:Reset|Emergency|Device|Security|Backup)[\\s-]+code|OTP|Passcode|Session[\\s-]+(?:ID|identifier)|Client[\\s-]+(?:cert(?:ificate)?|assertion)|mTLS[\\s-]+certificate|Signing[\\s-]+certificate|SSH[\\s-]+key|Authenticator[\\s-]+seed|Passphrase|TOTP[\\s-]+seed|Authentication[\\s-]+cookie|Encryption[\\s-]+key)\\s+(?:is|are|remains?)\\s+(?:value-free|absent|unavailable|redacted|prohibited)";
+const IMPERATIVE_ACTION_PATTERN =
+  /^(?:(?:please|kindly)\s*,?\s*)?(?:(?:immediately|now|carefully)\s+)*(?:deploy|dispatch|migrate|promote|publish|upload|retry|rotate|revoke|remove|delete|cancel|configure|change|create|enable|disable|restore|install|route|access|export|import|transform|release|launch|verify|start|destroy|drop|purge|submit|activate|initialize|wipe|erase|truncate|boot|proceed|invoke|send|spin|shut|flush|clear|open|issue|approve|authorize|write|terminate|query|push|turn|set|use|switch|stop|run|execute|provision|edit|trigger|ship|move|restart|rollback|roll\s+back)\b/i;
 const CANONICAL_PROSPECTIVE_LATER_CLAUSES = Object.freeze({
   "docs/product/12-mvp-implementation-plan.md": new Set([
     "production-provider component cannot be accepted until provider candidates",
@@ -802,19 +804,19 @@ function subjectlessBoundaryProjectionSource(source) {
 }
 
 function staleHistoricalTailProjectionSource(source) {
-  return source
-    .split(/\r?\n\s*\r?\n/)
-    .flatMap((paragraph) => {
-      if (
-        !/\bVOC-(?:09[4-9]|10[0-4])\b/i.test(paragraph) ||
-        !/\bF3\b/i.test(paragraph) ||
-        !/\bLater exact VOC-105 evidence supersedes\b/i.test(paragraph)
-      )
+  const paragraphs = source.split(/\r?\n\s*\r?\n/).map((paragraph) => {
+    const remainder = maskPairedHistoricalF3(paragraph);
+    return { paragraph, remainder, hasPair: remainder !== paragraph };
+  });
+  return paragraphs
+    .flatMap((entry, index) => {
+      const candidateSource = entry.hasPair ? entry.remainder : entry.paragraph;
+      if (!SUBJECTLESS_STALE_STATUS_PATTERN.test(candidateSource.trim()))
         return [];
-      const remainder = maskPairedHistoricalF3(paragraph).trim();
-      return SUBJECTLESS_STALE_STATUS_PATTERN.test(remainder)
-        ? [remainder]
-        : [];
+      const adjacentPair = [index - 1, index + 1].some(
+        (candidateIndex) => paragraphs[candidateIndex]?.hasPair,
+      );
+      return entry.hasPair || adjacentPair ? [candidateSource.trim()] : [];
     })
     .join("\n\n");
 }
@@ -914,7 +916,7 @@ function validateCredentialVocabulary(source, relativePath, projections) {
       `${relativePath}: allowed credential interface name has a prohibited value`,
     );
   const labelledValue = new RegExp(
-    `\\b(?:token|api[_ -]?token|access[_ -]?token|secret|password|private[_ -]?key|api[_ -]?key|credential|recovery[_ -]?(?:code|PIN)|authentication[_ -]?code|login[_ -]?code|OTP|passcode|session[_ -]?(?:ID|identifier)|client[_ -]?cert(?:ificate)?|mTLS[_ -]?certificate|authenticator[_ -]?seed|backup[_ -]?code|passphrase|TOTP[_ -]?seed|authentication[_ -]?cookie|encryption[_ -]?key)\\b[\\\"'\\x60]*\\s*` +
+    `\\b(?:token|api[_ -]?token|access[_ -]?token|secret|password|private[_ -]?key|api[_ -]?key|credential|recovery[_ -]?(?:code|PIN|phrase)|authentication[_ -]?code|login[_ -]?code|(?:reset|emergency|device|security|backup)[_ -]?code|OTP|passcode|session[_ -]?(?:ID|identifier)|client[_ -]?(?:cert(?:ificate)?|assertion)|mTLS[_ -]?certificate|signing[_ -]?certificate|SSH[_ -]?key|authenticator[_ -]?seed|passphrase|TOTP[_ -]?seed|authentication[_ -]?cookie|encryption[_ -]?key)\\b[\\\"'\\x60]*\\s*` +
       `(?:(?:has|had)\\b\\s+(?:a\\s+)?value(?:\\s+of)?|value\\s+(?:is|was|equals)\\b|(?:is|was|equals)\\b|[=:])\\s*` +
       `[\\\"'\\x60]?(?!${safeCredentialDescription})[A-Za-z0-9_./+:=-]{6,}`,
     "i",
@@ -925,7 +927,7 @@ function validateCredentialVocabulary(source, relativePath, projections) {
     );
   const credentialContextWithValueContinuation = new RegExp(
     `\\b(?:${CREDENTIAL_TERM_PATTERN.source})\\b[^\\n]*?[.!?]\\s*` +
-      `(?:Its\\s+value\\s+(?:is|was|equals)|It\\s+equals|The\\s+value\\s+(?:is|was|equals)|Actual\\s+value\\s*:)[\\s\\x60\"']*[A-Za-z0-9_./+:=-]{6,}`,
+      `(?:Its\\s+(?:value|replacement)\\s*(?:(?:is|was|equals)\\s*|[:=])|That\\s+value\\s*(?:(?:is|was|equals)\\s*|[:=])|It\\s+(?:equals|contains)|(?:The\\s+)?(?:value|replacement)\\s*(?:(?:is|was|equals)\\s*|[:=])|Actual\\s+value\\s*:)[\\s\\x60\"']*[A-Za-z0-9_./+:=-]{6,}`,
     "i",
   );
   if (credentialContextWithValueContinuation.test(source))
@@ -954,7 +956,7 @@ function semanticClauses(source) {
 
 function validateProcedures(source, relativePath, projections) {
   const errors = [];
-  let scanSource = maskPermittedHistoricalContexts(source);
+  let scanSource = maskSafeClauses(maskPermittedHistoricalContexts(source));
   if (relativePath === DELIVERY_PATH) {
     const regions = [];
     for (const definition of PROCEDURE_REGIONS) {
@@ -981,10 +983,18 @@ function validateProcedures(source, relativePath, projections) {
         characters[index] = " ";
     scanSource = characters.join("");
   }
-  if (projections[0] !== HIGH_RISK_PROJECTIONS[relativePath]?.[0])
+  if (projections[0] !== HIGH_RISK_PROJECTIONS[relativePath]?.[0]) {
     errors.push(
       `${relativePath}: protected operational domain occurrence exposes an unbounded, moved, or noncanonical live-action instruction context`,
     );
+    const imperative = semanticClauses(scanSource).find((clause) =>
+      IMPERATIVE_ACTION_PATTERN.test(clause),
+    );
+    if (imperative)
+      errors.push(
+        `${relativePath}: subjectless command-shaped live action is prohibited: ${imperative}`,
+      );
+  }
   const relocatedProcedure =
     /remove the environment API-token secret|cancel in-flight staging runs|retry\s+revocation|verify the affected token is inactive|run the exact ordered D1 migration ledger|upload immutable SHA-prefix\/run-ID\/attempt-tagged Worker versions|promote the exact UUIDs|run bounded staging smoke|both API and web restoration independently/i;
   const relocatedScanSource = scanSource.replace(
@@ -1021,7 +1031,7 @@ function validateLaterBoundaries(source, relativePath, projections) {
   // semantic pass deliberately retains each subject and scans every later clause in
   // its paragraph so punctuation cannot launder an elliptical positive continuation.
   const subjectlessPositiveOnly = new RegExp(
-    `^(?:(?:is|has\\s+been)\\s+)?(?:${POSITIVE_VERBS})(?:\\s+now)?$`,
+    `^(?:(?:clearly|actually|already|nevertheless|now)\\s+)*(?:(?:It|This|That)\\s+(?:(?:is|has\\s+been)\\s+)?|The\\s+(?:result|status)\\s+(?:is\\s+)?|(?:is|has\\s+been)\\s+)?(?:${POSITIVE_VERBS})(?:\\s+now)?$`,
     "i",
   );
   const safeSubjectClause = new RegExp(`^(?:${SAFE_LATER_CLAUSE})$`, "i");

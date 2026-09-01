@@ -799,10 +799,42 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Send it now.",
       "Spin it up now.",
       "Shut it down now.",
+      "Flush the cache now.",
+      "Clear the queue now.",
+      "Open the gate now.",
+      "Issue the request now.",
+      "Approve it now.",
+      "Authorize it now.",
+      "Write the record now.",
+      "Terminate the job now.",
     ])
       assertMutation(
         surface,
         (target) => append(target, surface, command),
+        /live-action instruction|bounded procedure/,
+      );
+  for (const surface of DESIGNATED_F3_SURFACES)
+    for (const inflected of [
+      "Flushing the cache now.",
+      "Flushed the cache now.",
+      "Clears the queue now.",
+      "Cleared the queue now.",
+      "Opening the gate now.",
+      "Opened the gate now.",
+      "Issues the request now.",
+      "Issued the request now.",
+      "Approving it now.",
+      "Approved it now.",
+      "Authorizes it now.",
+      "Authorized it now.",
+      "Writing the record now.",
+      "Written into the record now.",
+      "Terminates the job now.",
+      "Terminated the job now.",
+    ])
+      assertMutation(
+        surface,
+        (target) => append(target, surface, inflected),
         /live-action instruction|bounded procedure/,
       );
 });
@@ -843,6 +875,14 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "mTLS certificate: synthetic-inert-value",
       "Authenticator seed: synthetic-inert-value",
       "Backup code: synthetic-inert-value",
+      "Reset code: synthetic-inert-value",
+      "Emergency code: synthetic-inert-value",
+      "Device code: synthetic-inert-value",
+      "Security code: synthetic-inert-value",
+      "Recovery phrase: synthetic-inert-value",
+      "Client assertion: synthetic-inert-value",
+      "Signing certificate: synthetic-inert-value",
+      "SSH key: synthetic-inert-value",
     ])
       assertMutation(
         surface,
@@ -862,6 +902,14 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Private key is prohibited.",
       "JWT is unavailable.",
       "Basic authentication is prohibited.",
+      "Reset code is unavailable.",
+      "Emergency code remains value-free.",
+      "Device code is absent.",
+      "Security code is redacted.",
+      "Recovery phrase is prohibited.",
+      "Client assertion is unavailable.",
+      "Signing certificate is redacted.",
+      "SSH key remains value-free.",
     ])
       assert.deepEqual(
         inspectF3Surface(`${source}\n${valueFree}`, surface),
@@ -873,6 +921,14 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "OTP is unavailable. It equals synthetic-inert-value.",
       "Session ID is redacted. The value is synthetic-inert-value.",
       "Client certificate is value-free. Actual value: synthetic-inert-value.",
+      "Recovery code is absent. Its replacement is synthetic-inert-value.",
+      "OTP is unavailable. That value is synthetic-inert-value.",
+      "Session ID is redacted. It contains synthetic-inert-value.",
+      "Client certificate is value-free. The replacement = synthetic-inert-value.",
+      "Recovery phrase is absent. Its replacement: synthetic-inert-value.",
+      "Client assertion is redacted. That value: synthetic-inert-value.",
+      "Signing certificate is value-free. Replacement: synthetic-inert-value.",
+      "SSH key is prohibited. Its value = synthetic-inert-value.",
     ])
       assertMutation(
         surface,
@@ -935,6 +991,17 @@ test("exact unresolved and held contexts produce zero errors on every surface", 
       "P2 product acceptance remains unresolved.",
       "Learner data access remains held.",
       "Learner-data deletion remains held.",
+      "Learner data use remains held.",
+      "Learner-data import remains held.",
+      "Learner data export remains held.",
+      "Learner-data transform remains held.",
+      "Learner data transformation remains held.",
+      "Learner-data delete remains held.",
+      "Production learner data remains held.",
+      "Production learner-data access remains held.",
+      "Production learner data export remains held.",
+      "Production learner-data transform remains held.",
+      "Production learner data delete remains held.",
       "VOC-080-HOLD-01 remains held.",
       "VOC-080-HOLD-02 is held.",
     ])
@@ -981,6 +1048,25 @@ test("exact unresolved and held contexts produce zero errors on every surface", 
       "No deployment was performed.",
       "The documentation was published in the past.",
       "The prior upload succeeded.",
+      "No activation occurred.",
+      "Upload was not performed.",
+      "Promotion was not performed.",
+      "No upload was performed.",
+      "No promotion was performed.",
+      "No migration was performed.",
+      "No dispatch was performed.",
+      "No activation was performed.",
+      "Migration was not performed.",
+      "Dispatch was not performed.",
+      "Activation was not performed.",
+      "No query was issued.",
+      "The job was not invoked.",
+      "Nothing was deployed.",
+      "The system never deployed.",
+      "The prior migration succeeded.",
+      "The unit test initialized an in-memory fixture.",
+      "The parser queried a local object.",
+      "The historical note verified the checksum.",
     ])
       assert.deepEqual(
         inspectF3Surface(`${source}\n${safeOperational}`, surface),
@@ -1006,6 +1092,12 @@ test("unrelated completion and status prose remains outside protected domains", 
     "The local parser is ready for review.",
     "The historical check was not completed.",
     "The sanitized result is not verified.",
+    "Production remains held. The proposal is approved.",
+    "P2 remains unresolved. This review is complete.",
+    "Production remains held. It is not ready.",
+    "The local worker initialized an in-memory fixture.",
+    "The historical parser queried a local object.",
+    "The local note verified a checksum.",
   ];
   for (const surface of DESIGNATED_F3_SURFACES) {
     const source = fs.readFileSync(path.join(root, surface), "utf8");
@@ -1014,6 +1106,56 @@ test("unrelated completion and status prose remains outside protected domains", 
         inspectF3Surface(`${source}\n${prose}`, surface),
         [],
         `${surface} must ignore unrelated protected-word prose: ${prose}`,
+      );
+  }
+});
+
+test("protected safe subjects bind generated positive continuation grammar", () => {
+  const safeSubjects = [
+    "Production remains held.",
+    "P2 remains unresolved.",
+    "Learner data remains held.",
+  ];
+  const positiveFragments = [
+    ...["Clearly", "Actually", "Already", "Nevertheless"].flatMap((adverb) => [
+      `${adverb} active.`,
+      `${adverb} ready.`,
+    ]),
+    ...["It", "This", "That"].flatMap((pronoun) => [
+      `${pronoun} is ready.`,
+      `${pronoun} is active.`,
+      `${pronoun} has been authorized.`,
+      `${pronoun} passed.`,
+    ]),
+    "The result is effective.",
+    "Now effective.",
+  ];
+  for (const surface of DESIGNATED_F3_SURFACES) {
+    const source = fs.readFileSync(path.join(root, surface), "utf8");
+    for (const [safe, positive] of safeSubjects.flatMap((safe) =>
+      positiveFragments.map((positive) => [safe, positive]),
+    ))
+      for (const candidate of [
+        `${safe} ${positive}`,
+        `${positive} ${safe}`,
+        `${safe}\n\n${positive}`,
+        `${positive}\n\n${safe}`,
+      ])
+        assert.match(
+          inspectF3Surface(`${source}\n${candidate}`, surface).join("\n"),
+          /prohibited positive|noncanonical later\/hold context|subjectless positive boundary/,
+          `${surface} must reject protected continuation: ${candidate}`,
+        );
+    for (const [safe, positive] of safeSubjects.flatMap((safe) =>
+      positiveFragments.map((positive) => [safe, positive]),
+    ))
+      assert.match(
+        inspectF3Surface(
+          `${source}\n${safe} The unrelated note remains descriptive. ${positive}`,
+          surface,
+        ).join("\n"),
+        /prohibited positive continuation|prohibited positive|noncanonical later\/hold context|subjectless positive boundary/,
+        `${surface} must reject a separated protected continuation: ${safe} ${positive}`,
       );
   }
 });
@@ -1044,6 +1186,8 @@ test("safe clauses cannot launder an operational or later positive claim", () =>
       "Production is active if true.",
       "Production is active when this sentence is read.",
       "Report: no deployment occurred and everything is active.",
+      "Upload was performed.",
+      "Promotion was performed.",
     ])
       assertMutation(
         surface,
@@ -1306,6 +1450,8 @@ test("multiple immutable F3 history pairs are consumed independently", () => {
       "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. In immutable VOC-096 history, F3 staging is unresolved. Later exact VOC-105 evidence supersedes VOC-096 prospective F3 unresolved status. Production remains held; Learner data remains held; VOC-080-HOLD-01 remains held; VOC-080-HOLD-02 remains held.",
       "Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. VOC-094 immutable history records F3 as pending. Later exact VOC-105 evidence supersedes the prospective F3 status from VOC-096. F3 staging is unresolved in VOC-096 immutable history.",
       "VOC-094 is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes that prospective F3 status. VOC-094 is immutable history: F3 is unresolved. Later exact VOC-105 evidence supersedes that prospective F3 status.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. The unrelated decision remains pending.",
+      "VOC-094 immutable historical snapshot records F3 as unresolved. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 unresolved status. The ticket remains unresolved.",
     ])
       assert.deepEqual(
         inspectF3Surface(`${source}\n${valid}`, surface),
@@ -1326,6 +1472,13 @@ test("multiple immutable F3 history pairs are consumed independently", () => {
       "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Pending.",
       "VOC-094 immutable historical snapshot records F3 as unresolved. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 unresolved status. Unresolved now.",
       "VOC-094 immutable historical snapshot records F3 as unresolved. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 unresolved status. Continues unresolved.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. Clearly pending.",
+      "VOC-094 immutable historical snapshot records F3 as unresolved. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 unresolved status. Apparently unresolved now.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. The status remains pending.",
+      "VOC-094 immutable historical snapshot records F3 as unresolved. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 unresolved status. Current status: unresolved.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status. It is still pending.",
+      "VOC-094 immutable historical snapshot records F3 as unresolved. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 unresolved status. This remains unresolved.",
+      "VOC-094 is immutable history: F3 was pending. Later exact VOC-105 evidence supersedes VOC-094 prospective F3 pending status.\n\nProspective status remains pending.",
     ])
       assert.match(
         inspectF3Surface(`${source}\n${invalid}`, surface).join("\n"),
