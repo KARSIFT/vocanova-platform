@@ -1041,6 +1041,8 @@ function validateCredentialVocabulary(source, relativePath, projections) {
   );
   const plausibleCompactValue =
     /\b(?:synthetic[-_][A-Za-z0-9_-]{3,}|[A-Za-z]{6,}|(?=[A-Za-z0-9_-]{8,}\b)(?=[A-Za-z0-9_-]*[_-])[A-Za-z0-9_-]{8,}|(?=[A-Za-z0-9_-]{8,}\b)(?=[A-Za-z0-9_-]*[0-9])[A-Za-z0-9_-]{8,})\b/i;
+  const credentialValueIntroducer =
+    /^(?:here\s+(?:it\s+is|is\s+replacement)\s*[:=]?|(?:it|they|those|this|that)\s+(?:is|are|equals?|contains?|holds?)\s*|(?:(?:its|their|said|that|this|the|actual|associated|following)\s+)*(?:values?|string|material|contents?|replacement|one)\s*(?:(?:is|are|was|were|equals?|contains?|holds?|follows?)\s*)?[:=]?|what\s+follows\s*[:=]|actual\s*[:=])$/i;
   for (const paragraph of source.split(/\r?\n\s*\r?\n/)) {
     const clauses = paragraph
       .split(/(?:\r?\n|[.!?;])/)
@@ -1069,12 +1071,7 @@ function validateCredentialVocabulary(source, relativePath, projections) {
               )
             )
               continue;
-            if (
-              /(?:[:=]|\b(?:is|are|was|were|equals?|contains?|holds?|follows?)\b)\s*[\x60"']*\s*$/i.test(
-                lead,
-              )
-            )
-              return true;
+            if (credentialValueIntroducer.test(lead.trim())) return true;
           }
           return false;
         })

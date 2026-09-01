@@ -1018,6 +1018,11 @@ test("protected credential and F3 occurrences fail closed on every surface", () 
       "Password is absent. It is characteristically unavailable.",
       "Token is absent. This is non-sensitive.",
       "Token is redacted. It is entirely descriptive.",
+      "Credentials are redacted. The review is complete.",
+      "Token is absent. The documentation is accurate.",
+      "Password is unavailable. The unrelated proposal is accepted.",
+      "Credential is redacted. The meeting was productive.",
+      "Token is absent. The reviewer is satisfied.",
     ])
       assert.deepEqual(
         inspectF3Surface(`${source}\n${proseOnly}`, surface),
