@@ -4,7 +4,7 @@ id: VOC-112
 slug: a1-provider-staging-readiness
 title: Complete A1 provider integration and staging readiness
 type: authentication-user-foundation-completion
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because the proposed implementation changes authentication provider wiring,
@@ -21,19 +21,23 @@ requirement_source: >-
   DOC-06 backend authentication rules; DOC-07 API/security contract; issue #189 A1
   intake; completed VOC-025 and VOC-080 identity foundations
 requirement_approval_status: >-
-  canonical A1 outcome is approved; this exact implementation package remains an
-  unreviewed draft pending independent security/authorization and independent R3
-  exact-candidate review plus accountable adoption
+  canonical A1 outcome and this exact implementation package are approved through
+  exact-candidate security/authorization and independent cross-model R3 reviews plus
+  the accountable VOC-112-ADOPT-2026-09-01 decision; implementation remains unusable
+  until normal plan merge and VOC-105 records F3 complete-effective
 base_branch: develop
 base_sha: 533084432f0672dbf25c402e96209120a8ad50cf
 plan_branch: plan/voc-112-a1-provider-staging-readiness
 target_branch: develop
-approved_candidate_sha: null
-approval_status: not-adopted
-implementation_authorized: false
+approved_candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+approval_status: adopted
+implementation_authorized: true
 implementation_authority_status: >-
-  prohibited-until-exact-candidate-reviews-accountable-adoption-bookkeeping-and-normal-
-  non-author-plan-merge; all-external-actions-remain-separately-prohibited
+  authorized-by-exact-candidate-security-authorization-and-independent-cross-model-R3-
+  reviews-and-VOC-112-ADOPT-2026-09-01-for-the-declared-sixteen-path-repository-only-
+  implementation; usable-only-after-this-adopted-package-is-freshly-reviewed-and-
+  normally-merged-to-develop-by-a-non-author-and-VOC-105-records-F3-complete-effective;
+  all-external-actions-remain-separately-prohibited
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: >-
   One repository implementation PR is the largest safe coherent unit because provider
@@ -154,15 +158,32 @@ requirements:
       evidence, rollback/expiry, and inherited holds before it occurs.
 
 owners:
-  decision: accountable-repository-change-owner-at-adoption
+  decision: /root
   package_preparation: /root/voc112_a1_planner
   implementation: different-builder-actor-after-adoption
-  security_authorization_specialist: different-non-author-exact-revision-actor
-  independent_R3_verifier: different-non-author-exact-revision-actor
+  security_authorization_specialist: /root/voc112_security_reviewer
+  independent_R3_verifier: /root/voc109_cross_model
   merge: separate-non-author-actor
   external_provider_and_staging_actions: unassigned-and-prohibited-by-this-package
 
-plan_review_history: []
+plan_review_history:
+  - candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    reviewer: /root/voc112_security_reviewer
+    verdict: pass-security-authorization-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487811657
+    resolution: >-
+      Exact approved-candidate security/authorization review. It grants no
+      implementation before normal plan merge and VOC-105 F3 complete-effective, and
+      grants no external-action authority.
+  - candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    reviewer: /root/voc109_cross_model
+    model_provenance: explicitly-configured-gpt-5.6-sol
+    verdict: pass-independent-cross-model-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487811892
+    resolution: >-
+      Exact approved-candidate independent R3 review. It grants no implementation
+      before normal plan merge and VOC-105 F3 complete-effective, and grants no
+      external-action authority.
 
 superseded_plan_candidates:
   - candidate_sha: ff286cbb87d13913f7d2a95e40d53f8f16f609fe
@@ -182,18 +203,18 @@ superseded_plan_candidates:
 
 approvals:
   security_authorization_plan_review:
-    status: pending-distinct-non-author-exact-candidate-review
-    candidate_sha: null
-    evidence: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487811657
   independent_R3_plan_review:
-    status: pending-distinct-non-author-exact-candidate-review
-    candidate_sha: null
-    evidence: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487811892
   adoption_decision:
-    status: pending-accountable-adoption
-    decision_id: null
-    candidate_sha: null
-    evidence: pending
+    status: approved-for-adoption-and-declared-repository-only-implementation
+    decision_id: VOC-112-ADOPT-2026-09-01
+    candidate_sha: 199436cd20c17b6006353515ece4650e4d95d3bd
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/210#issuecomment-5487812059
 
 artifacts:
   readme: README.md
@@ -276,18 +297,20 @@ required_r3_evidence:
   specialist_evidence:
     required: true
     role: security-authorization-specialist
-    status: pending
+    status: pass-exact-approved-plan-candidate
   independent_exact_revision_evidence:
     required: true
     role: independent-R3-verifier
-    status: pending
+    status: pass-exact-approved-plan-candidate
   contingency_and_rollback:
     required: true
     evidence: implementation-plan.md and release-plan.md
   ehr: not-triggered-no-exceptional-condition-identified
 
 scope_boundary:
-  repository_provider_adapters_factory_types_tests_docs: allowed-only-after-adoption
+  repository_provider_adapters_factory_types_tests_docs: >-
+    authorized-only-after-adopted-plan-merges-to-develop-and-VOC-105-F3-is-complete-
+    effective
   schema_or_public_API_expansion: prohibited
   staging_or_production_feature_enablement: prohibited
   provider_account_contract_spend_or_credentials: prohibited
