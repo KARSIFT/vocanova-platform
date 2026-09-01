@@ -20,7 +20,7 @@ DNS, traffic, spending, or launch state.
 
 The implementation PR must record:
 
-- exact parent/head SHAs;
+- exact implementation-parent and head SHAs/trees;
 - exact one-file path inventory;
 - before/after timings for the five named tests;
 - complete VOC-105 file and complete foundation suite counts/durations;

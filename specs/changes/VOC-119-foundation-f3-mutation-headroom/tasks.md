@@ -3,7 +3,8 @@
 ## VOC-119-T01 — Recover VOC-105 mutation-test headroom without reducing coverage
 
 - Branch: `impl/voc-119-foundation-f3-mutation-headroom`
-- Base: exact adopted candidate SHA from this package
+- Base: after this reviewed plan merges, the then-current exact `origin/develop`;
+  record that implementation parent SHA/tree before editing
 - Output: one implementation PR that changes only
   `scripts/foundation/voc105-f3-evidence-policy.test.mjs`
 

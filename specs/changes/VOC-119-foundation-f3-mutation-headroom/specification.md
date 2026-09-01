@@ -12,38 +12,41 @@ The issue already narrows the likely hotspot away from the newly added VOC-115
 release-attempt policy suite, which completes locally in about 139 ms. Its hosted
 slow tail instead clusters in five VOC-105 mutation-heavy tests:
 
-| Named test | Hosted duration |
-| ---------- | ---------------:|
-| `later authority claim grammar fails across every surface` | `508,154 ms` |
-| `canonical guarded runbook regions pass and every guard drift or command fails` | `171,580 ms` |
-| `history checks reject only superseded F3 current claims` | `158,991 ms` |
-| `protected credential and F3 occurrences fail closed on every surface` | `68,459 ms` |
-| `protected safe subjects bind generated positive continuation grammar` | `35,178 ms` |
+| Named test                                                                      | Hosted duration |
+| ------------------------------------------------------------------------------- | --------------: |
+| `later authority claim grammar fails across every surface`                      |    `508,154 ms` |
+| `canonical guarded runbook regions pass and every guard drift or command fails` |    `171,580 ms` |
+| `history checks reject only superseded F3 current claims`                       |    `158,991 ms` |
+| `protected credential and F3 occurrences fail closed on every surface`          |     `68,459 ms` |
+| `protected safe subjects bind generated positive continuation grammar`          |     `35,178 ms` |
 
 Read-only planning measurements on exact `origin/develop`
 `e1379508621ee228ae06c88ebcad3b1b018ef4cc` confirm the dominant local cost is
 repeated full-validator work, not temp-fixture churn:
 
-| Measurement | Runs | Average |
-| ----------- | ---: | ------: |
-| Representative mutation helper end-to-end | 20 | `56.882 ms` |
-| `inspectF3Evidence()` inside that path | 20 | `55.215 ms` |
-| Fixture create + snapshot + mutate + changed-path bookkeeping | 20 | `1.668 ms` |
-| Direct `inspectF3Surface()` on equivalent mutated source | 200 | `6.071 ms` |
+| Measurement                                                   | Runs |     Average |
+| ------------------------------------------------------------- | ---: | ----------: |
+| Representative mutation helper end-to-end                     |   20 | `56.882 ms` |
+| `inspectF3Evidence()` inside that path                        |   20 | `55.215 ms` |
+| Fixture create + snapshot + mutate + changed-path bookkeeping |   20 |  `1.668 ms` |
+| Direct `inspectF3Surface()` on equivalent mutated source      |  200 |  `6.071 ms` |
 
 The largest issue-named matrix, `later authority claim grammar fails across every
 surface`, contains 6,462 mutation assertions. From the measured local averages, that
-implies about `321.9 s` of repeated validator time through the full aggregate path and
-about `39.2 s` through the already exported surface-local path. That comparison is an
-inference from measured averages and loop cardinality; it is not yet a measured
-post-implementation result.
+implies about `356.8 s` of repeated `inspectF3Evidence()` time, about `367.6 s` for
+the representative full mutation path, and about `39.2 s` through the already
+exported surface-local path. Those comparisons are inferences from measured averages
+and loop cardinality; they are not measured post-implementation results.
 
 ## Requirements
 
 1. Treat issue #228, its hosted run/job/head evidence, and all planning measurements
    as defect intake and diagnosis only. They grant no implementation or live-system
    authority.
-2. Keep the future correction in one implementation PR and one task. The sole
+2. Keep the future correction in one implementation PR and one task. After this
+   reviewed plan merges, branch the implementation from the then-current exact
+   `origin/develop`, record that implementation parent SHA and tree before editing,
+   and use that recorded parent for before/after diffs and rollback. The sole
    implementation path is `scripts/foundation/voc105-f3-evidence-policy.test.mjs`.
    If a second path appears necessary, stop and return to governed planning.
 3. Preserve the production policy module,

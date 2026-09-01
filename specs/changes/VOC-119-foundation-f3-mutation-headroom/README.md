@@ -17,9 +17,10 @@ together averaged only `1.668 ms`. The exported surface-local policy path,
 
 The largest named hotspot, `later authority claim grammar fails across every
 surface`, performs 6,462 mutation assertions. From the measured averages, that
-implies about `321.9 s` of validator time through the full aggregate path versus
-about `39.2 s` through the already exported surface-local path. That estimate is an
-inference from local averages and loop cardinality, not a claimed post-change result.
+implies about `356.8 s` of repeated `inspectF3Evidence()` time, about `367.6 s` for
+the representative full mutation path, and about `39.2 s` through the already
+exported surface-local path. Those figures are inferences from local averages and
+loop cardinality, not claimed post-change results.
 
 This draft R3 repository-only package authorizes no implementation yet. After exact
 plan review and adoption, one future implementation PR may change only

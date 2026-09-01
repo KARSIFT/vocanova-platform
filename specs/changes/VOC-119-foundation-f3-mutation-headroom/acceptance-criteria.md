@@ -21,8 +21,10 @@
 - `scripts/foundation/voc105-f3-evidence-policy.mjs`, `package.json`,
   `docs/development.md`, `.github/workflows/ci.yml`, `pnpm-lock.yaml`, and all other
   `scripts/foundation/*.test.mjs` files are explicit preservation surfaces.
-- The package states that implementation stops and returns to planning if a second
-  file, timeout change, workflow edit, or package-script change appears necessary.
+- The package states that after the plan merges, implementation branches from the
+  then-current exact `origin/develop`, records that implementation parent SHA/tree
+  before editing, and stops and returns to planning if a second file, timeout
+  change, workflow edit, or package-script change appears necessary.
 
 ## Gate B — Measured diagnosis and semantic boundary
 
@@ -32,9 +34,11 @@
 - The package records the local planning measurements exactly: representative mutation
   path `56.882 ms`, `inspectF3Evidence()` `55.215 ms`, fixture/support work
   `1.668 ms`, and direct `inspectF3Surface()` `6.071 ms`.
-- The package records that the 6,462-assertion `later authority claim...` estimate is
-  an inference from measured averages plus loop cardinality, not a measured after
-  result.
+- The package records that the 6,462-assertion `later authority claim...` estimates
+  are about `356.8 s` for repeated `inspectF3Evidence()`, about `367.6 s` for the
+  representative full mutation path, and `39.2 s` for the surface-local path, and
+  that each is an inference from measured averages plus loop cardinality rather than
+  a measured after result.
 - The package explicitly states that fixture churn/process startup as the dominant
   cause was disproved by local profiling.
 

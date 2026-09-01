@@ -9,7 +9,8 @@ production or learner data, or change live traffic.
 - Covers: `VOC-119-AC-00`, `VOC-119-AC-01`
 - Procedure: validate all nine package files, allocator evidence for VOC-116/VOC-118/
   VOC-119, exact issue/run/job/base linkage, R3 declaration, one task/PR/path,
-  explicit `automatic_merge_allowed: true`, pending review/adoption, rollback, and
+  explicit `automatic_merge_allowed: true`, the post-merge `origin/develop`
+  implementation-parent recording rule, pending review/adoption, rollback, and
   prohibited authority.
 - Expected: complete draft package with no implementation or external-action
   authority.
@@ -19,8 +20,8 @@ production or learner data, or change live traffic.
 
 - Covers: `VOC-119-AC-02`
 - Procedure: confirm the issue's five hosted durations, reproduce the local planning
-  profile values, and verify the 6,462-assertion cardinality used for the largest
-  timing inference.
+  profile values, and verify the 6,462-assertion cardinality used for the inferred
+  `356.8 s`, `367.6 s`, and `39.2 s` comparisons.
 - Expected: planning measurements are recorded exactly, and the disproved dominant-
   cause assumption is explicit.
 - Evidence: `VOC-119-EV-01`

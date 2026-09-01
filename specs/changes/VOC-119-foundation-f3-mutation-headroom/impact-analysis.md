@@ -10,14 +10,14 @@ against one test file.
 
 ## Surfaces
 
-| Surface | Classification | Effect |
-| ------- | -------------- | ------ |
-| `scripts/foundation/voc105-f3-evidence-policy.test.mjs` | Affected | Planned implementation path. Refactor test-local setup and assertion routing only. |
-| `scripts/foundation/voc105-f3-evidence-policy.mjs` | Preserved protected surface | Production policy semantics stay byte-identical. |
-| `package.json` | Preserved current-truth surface | Exact `ci:foundation` wiring and wildcard discovery remain unchanged. |
-| `.github/workflows/ci.yml` | Preserved protected surface | Exact foundation job and VOC-116 20-minute cap remain unchanged. |
-| `docs/development.md` | Preserved living doc | No command-contract change is permitted. |
-| Other `scripts/foundation/*.test.mjs` | Preserved verifier set | No sharding or spillover into other files. |
+| Surface                                                 | Classification                  | Effect                                                                             |
+| ------------------------------------------------------- | ------------------------------- | ---------------------------------------------------------------------------------- |
+| `scripts/foundation/voc105-f3-evidence-policy.test.mjs` | Affected                        | Planned implementation path. Refactor test-local setup and assertion routing only. |
+| `scripts/foundation/voc105-f3-evidence-policy.mjs`      | Preserved protected surface     | Production policy semantics stay byte-identical.                                   |
+| `package.json`                                          | Preserved current-truth surface | Exact `ci:foundation` wiring and wildcard discovery remain unchanged.              |
+| `.github/workflows/ci.yml`                              | Preserved protected surface     | Exact foundation job and VOC-116 20-minute cap remain unchanged.                   |
+| `docs/development.md`                                   | Preserved living doc            | No command-contract change is permitted.                                           |
+| Other `scripts/foundation/*.test.mjs`                   | Preserved verifier set          | No sharding or spillover into other files.                                         |
 
 ## Measured diagnosis
 

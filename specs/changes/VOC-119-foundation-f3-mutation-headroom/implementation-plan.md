@@ -2,7 +2,10 @@
 
 ## Step 1 — Reconfirm the exact parent behavior
 
-Use the exact implementation parent recorded in `change.yaml`. Before editing, capture:
+After this reviewed plan merges, branch the implementation from the then-current
+exact `origin/develop`. Record that implementation parent SHA and tree before
+editing. Use that recorded implementation parent, not this plan candidate SHA or the
+planning `base_sha`, for before measurements, path diffs, and rollback. Then capture:
 
 - one exact before-duration for each of the five issue-named slow tests using
   `node --test --test-name-pattern=...`;

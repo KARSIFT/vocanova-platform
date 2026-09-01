@@ -70,9 +70,11 @@ requirements:
       snapshot, mutation, and changed-path bookkeeping together averaged 1.668 ms.
       A direct inspectF3Surface() pass on a representative mutated surface averaged
       6.071 ms over 200 runs, and the `later authority claim grammar fails across
-      every surface` matrix contains 6,462 mutation assertions. The 321.9-s versus
-      39.2-s timing comparison is an inference from those local averages and that
-      loop cardinality; do not restate it as a measured post-change result.
+      every surface` matrix contains 6,462 mutation assertions. The inferred costs
+      are about 356.8 s for repeated inspectF3Evidence() alone, 367.6 s for the
+      representative full mutation path, and 39.2 s for the surface-local path.
+      Those comparisons are inferences from the local averages and loop cardinality;
+      do not restate them as measured post-change results.
   - id: VOC-119-D02
     statement: >-
       The planning measurements disprove "fixture copy, temp-tree creation, or test
@@ -82,13 +84,17 @@ requirements:
       not on timeout growth, workflow changes, or broad test-runner behavior.
   - id: VOC-119-D03
     statement: >-
-      After adoption, implementation may change exactly one repository path:
+      After this reviewed plan merges, future implementation must branch from the
+      then-current exact origin/develop, record that implementation parent SHA and
+      tree before editing, and may change exactly one repository path:
       scripts/foundation/voc105-f3-evidence-policy.test.mjs. Preserve
       scripts/foundation/voc105-f3-evidence-policy.mjs, package.json,
       docs/development.md, .github/workflows/ci.yml, pnpm-lock.yaml, and every other
-      scripts/foundation/*.test.mjs file byte-for-byte. If implementation requires a
-      second path, a policy export change, a package-script change, or a workflow or
-      timeout edit, stop and return to governed planning.
+      scripts/foundation/*.test.mjs file byte-for-byte. Use the recorded
+      implementation parent, not this plan candidate SHA, for before measurements,
+      path diffs, and rollback. If implementation requires a second path, a policy
+      export change, a package-script change, or a workflow or timeout edit, stop
+      and return to governed planning.
   - id: VOC-119-D04
     statement: >-
       Replace repeated fresh fixture-plus-inspectF3Evidence() use only in the
