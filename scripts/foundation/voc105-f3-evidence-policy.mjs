@@ -104,7 +104,7 @@ const HIGH_RISK_PROJECTIONS = Object.freeze({
   ],
 });
 const OPERATIONAL_DOMAIN_PATTERN =
-  /\b(?:(?:re[\s-]?)?(?:deploy\w*|dispatch\w*|migrat\w*|promot\w*|publish\w*|upload\w*|rotat\w*|revok\w*|remov\w*|delet\w*|cancel\w*|configur\w*|chang\w*|creat\w*|enabl\w*|disabl\w*|restor\w*|install\w*|rout\w*|access\w*|export\w*|import\w*|transform\w*|launch\w*|verif\w*|start\w*|destroy\w*|drop\w*|purg\w*|submit\w*|activat\w*|initializ\w*|flush\w*|clear\w*|open\w*|issu\w*|approv\w*|authoriz\w*|terminat\w*|quer(?:y|ies|ied|ying)|push\w*|switch\w*|stop\w*|run(?:s|ning)?|execute\w*|provision\w*|edit\w*|trigger\w*|ship\w*|mov(?:e|es|ed|ing)|restart\w*)|staging|delivery|delivered|retr(?:y|ied|ies|ying)|releas\w*|wip(?:e|es|ed|ing)|eras(?:e|es|ed|ing)|truncat\w*|boot\w*|proceed\w*|invok\w*|send(?:s|ing)?|sent|spin(?:s|ning)?|spun|shut(?:s|ting)?|writ(?:e|es|ing|ten)|turn(?:s|ed|ing)?|set(?:s|ting)?|us(?:e|es|ed|ing)|ran|rollback\w*|roll(?:s|ed|ing)?[\s-]+(?:back|out)|kick(?:s|ed|ing)?[\s-]+off|workflows?|CI|DNS|traffic|resources?|D1|API[\s-]+Worker|Cloudflare[\s-]+Worker|build|live|learner[\s-]+data|credentials?|versions?|settings?|environments?|migrations?|promotions?|smoke|revocation)(?=\b|_)/i;
+  /\b(?:(?:re[\s-]?)?(?:deploy\w*|dispatch\w*|migrat\w*|promot\w*|publish\w*|upload\w*|rotat\w*|revok\w*|remov\w*|delet\w*|cancel\w*|configur\w*|chang\w*|creat\w*|enabl\w*|disabl\w*|restor\w*|install\w*|rout\w*|access\w*|export\w*|import\w*|transform\w*|launch\w*|verif\w*|start\w*|destroy\w*|drop\w*|purg\w*|submit\w*|activat\w*|initializ\w*|flush\w*|clear\w*|open\w*|issu\w*|approv\w*|authoriz\w*|terminat\w*|quer(?:y|ies|ied|ying)|push\w*|switch\w*|stop\w*|run(?:s|ning)?|execute\w*|provision\w*|edit\w*|trigger\w*|ship\w*|mov(?:e|es|ed|ing)|restart\w*)|staging|delivery|delivered|retr(?:y|ied|ies|ying)|releas\w*|wip(?:e|es|ed|ing)|eras(?:e|es|ed|ing)|truncat\w*|boot\w*|proceed\w*|invok\w*|send(?:s|ing)?|sent|spin(?:s|ning)?|spun|shut(?:s|ting)?|writ(?:e|es|ing|ten)|turn(?:s|ed|ing)?|set(?:s|ting)?|us(?:e|es|ed|ing)|do[\s-]+(?:it|so)|ran|rollback\w*|roll(?:s|ed|ing)?[\s-]+(?:back|out)|kick(?:s|ed|ing)?[\s-]+off|workflows?|CI|DNS|traffic|resources?|D1|API[\s-]+Worker|Cloudflare[\s-]+Worker|build|live|learner[\s-]+data|credentials?|versions?|settings?|environments?|migrations?|promotions?|smoke|revocation)(?=\b|_)/i;
 const CREDENTIAL_TERM_PATTERN =
   /\b(?:CLOUDFLARE_(?:ACCOUNT_ID|API_TOKEN)|[A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCOUNT_ID)|credentials?|Basic(?:[\s-]+auth(?:entication)?)?|auth(?:entication)?[\s-]+(?:key|header|token|cookie|code)|JWT|session[\s-]+(?:cookie|ID|identifier)|signing[\s-]+(?:key|token|certificate)|private[\s-]+(?:key|token)|encryption[\s-]+key|SSH[\s-]+key|api[\s-]+(?:key|token)|access[\s-]+(?:key|token)|TOTP(?:[\s-]+seed)?|OTP|passcodes?|passphrases?|recovery[\s-]+(?:codes?|PIN|phrase)|login[\s-]+code|(?:reset|emergency|device|security|backup)[\s-]+code|client[\s-]+(?:cert(?:ificate)?s?|assertion)|mTLS[\s-]+certificates?|authenticator[\s-]+seed|tokens?|secrets?|passwords?|Authorization|Bearer|Cookie)\b/i;
 const LATER_HOLD_TERM_PATTERN =
@@ -113,7 +113,7 @@ const F3_STATUS_TERM_PATTERN = /\b(?:F3|staging[\s-]+status)\b/i;
 const POSITIVE_VERBS =
   "complete(?:[\\s-]+effective)?|completed|passed|accepted|effective|ready|active|enabled|released|resolved|verified|approved|authorized";
 const POSITIVE_MODIFIERS =
-  "(?:(?:clearly|actually|already|nevertheless|now|demonstrably|explicitly|firmly|currently)\\s+)*";
+  "(?:(?:clearly|actually|already|nevertheless|now|demonstrably|explicitly|firmly|currently|subsequently|finally|even\\s+so|in\\s+fact)\\s*,?\\s*)*";
 const COPULAR_CHANGE =
   "(?:(?:is|was|became|becomes|turned|turns|changed|changes)(?:\\s+to)?|has\\s+been)";
 const SUBJECTLESS_POSITIVE_LEAD =
@@ -143,15 +143,50 @@ const SUBJECTLESS_BOUNDARY_POSITIVE_PATTERN = new RegExp(
   "i",
 );
 const SUBJECTLESS_STALE_STATUS_PATTERN =
-  /(?:^|[.!?;:]\s*)(?:(?:yet|clearly|apparently|actually|still|currently)\s+)*(?:(?:(?:It|This|That)\s+|(?:(?:The|current|prospective)\s+)?(?:status|state)\s*(?::\s*)?)(?:(?:is|remains?|continues?(?:\s+(?:to\s+be|as))?)\s+)?(?:(?:still|currently|yet)\s+)*|(?:is\s+)?still\s+|remains?\s+|continues?(?:\s+(?:to\s+be|as))?\s+)?(?:pending|unresolved|incomplete|not[\s-]+yet[\s-]+complete)(?:\s+(?:still|now))?(?:[.!?]|$)/i;
+  /(?:^|[.!?;:]\s*)(?:(?:yet|clearly|apparently|actually|still|currently)\s+)*(?:(?:(?:It|This|That)\s+|(?:The\s+)?(?:(?:current|prospective)\s+)?(?:status|state)\s*(?::\s*)?)(?:(?:is|remains?|continues?(?:\s+(?:to\s+be|as))?)\s+)?(?:(?:still|currently|yet)\s+)*|(?:is\s+)?still\s+|remains?\s+|continues?(?:\s+(?:to\s+be|as))?\s+)?(?:pending|unresolved|incomplete|not(?:[\s-]+yet)?[\s-]+complete)(?:\s+(?:still|now))?(?:[.!?]|$)/i;
 const SAFE_OPERATIONAL_CLAUSE =
-  "(?:No\\s+(?:(?:staging\\s+)?(?:deployment|delivery|migration|activation|restart|live\\s+deployment)|upload|promotion|(?:workflow\\s+)?dispatch)\\s+(?:ever\\s+)?(?:occurred|took\\s+place)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+(?:is\\s+)?prohibited|(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+did\\s+not\\s+occur)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion|Activation|Application)\\s+(?:was|is)\\s+not\\s+(?:performed|deployed)|No\\s+(?:deployment|migration|dispatch|upload|promotion|activation)\\s+was\\s+performed)|No\\s+query\\s+was\\s+issued|(?:The\\s+)?job\\s+was\\s+not\\s+invoked|Nothing\\s+was\\s+deployed|(?:The\\s+)?(?:application|app|system)\\s+(?:was|is|has\\s+been)\\s+not\\s+deployed|(?:The\\s+)?system\\s+never\\s+deployed|(?:The\\s+)?(?:deploy|publish|migration|dispatch)\\s+command\\s+was\\s+not\\s+executed|The\\s+(?:database|build)\\s+was\\s+not\\s+(?:migrated|deployed)|The\\s+(?:previous|prior|staging)\\s+(?:staging\\s+)?(?:delivery|upload|migration|deployment|run)\\s+(?:succeeded|failed\\s+safely|completed(?:\\s+(?:successfully|in\\s+the\\s+past))?|was\\s+completed\\s+in\\s+the\\s+past)|The\\s+(?:previous|prior)\\s+staging\\s+deployment\\s+succeeded|The\\s+(?:app|historical\\s+system)\\s+deployed\\s+in\\s+the\\s+past|The\\s+local\\s+migration\\s+(?:completed|succeeded|failed\\s+safely)|The\\s+unit[\\s-]+test\\s+(?:deployed|initialized)\\s+(?:an?\\s+)?(?:in-memory\\s+)?fixture|The\\s+local\\s+runner\\s+executed\\s+(?:an?\\s+)?fixture|The\\s+unit[\\s-]+test\\s+local\\s+worker\\s+ran\\s+(?:an?\\s+)?fixture|(?:The\\s+)?documentation\\s+was\\s+published\\s+in\\s+the\\s+past|The\\s+sanitized\\s+delivery\\s+deployed\\s+the\\s+API\\s+Worker\\s+successfully\\s+in\\s+the\\s+past|The\\s+command\\s+“Deploy\\s+now”\\s+is\\s+prohibited|The\\s+sanitized\\s+past\\s+delivery\\s+description\\s+records\\s+that\\s+retry\\s+was\\s+not\\s+required|The\\s+reviewer\\s+verified\\s+the\\s+sanitized\\s+evidence|The\\s+sanitized\\s+result\\s+is\\s+not\\s+verified|The\\s+proposal\\s+is\\s+approved|The\\s+unrelated\\s+issue\\s+remains\\s+pending|The\\s+issue\\s+was\\s+resolved\\s+without\\s+external\\s+action|The\\s+(?:unit\\s+test|local\\s+worker)\\s+initialized\\s+(?:an?\\s+)?in-memory\\s+fixture|The\\s+(?:historical\\s+)?parser\\s+queried\\s+(?:a\\s+)?local\\s+object|The\\s+(?:historical|local)\\s+note\\s+verified\\s+(?:the\\s+|a\\s+)?checksum)";
+  "(?:No\\s+(?:(?:staging\\s+)?(?:deployment|delivery|migration|activation|restart|live\\s+deployment)|upload|promotion|(?:workflow\\s+)?dispatch)\\s+(?:(?:has|had|never|actually|ever)\\s+)*(?:occurred|took\\s+place)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+(?:is\\s+)?prohibited|(?:Deployment|Migration|Dispatch|Upload|Promotion)\\s+did\\s+not\\s+occur)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion|Activation|Application)\\s+(?:was|is)\\s+not\\s+(?:performed|deployed)|No\\s+(?:deployment|migration|dispatch|upload|promotion|activation)\\s+was\\s+performed)|(?:(?:Deployment|Migration|Dispatch|Upload|Promotion|Activation|Workflow)\\s+(?:never\\s+occurred|was\\s+never\\s+performed|(?:was\\s+)?not\\s+(?:performed|dispatched|deployed|migrated)|had\\s+not\\s+been\\s+performed))|No\\s+query\\s+was\\s+issued|(?:The\\s+)?job\\s+was\\s+not\\s+invoked|Nothing\\s+was\\s+deployed|(?:The\\s+)?(?:application|app|system)\\s+(?:was|is|has\\s+been)\\s+not\\s+deployed|(?:The\\s+)?system\\s+never\\s+deployed|(?:The\\s+)?(?:deploy|publish|migration|dispatch)\\s+command\\s+was\\s+not\\s+executed|The\\s+(?:database|build)\\s+was\\s+not\\s+(?:migrated|deployed)|The\\s+(?:previous|prior|staging)\\s+(?:staging\\s+)?(?:delivery|upload|migration|deployment|run)\\s+(?:succeeded|failed\\s+safely|(?:had\\s+)?completed(?:\\s+(?:successfully|in\\s+the\\s+past))?|was\\s+completed\\s+in\\s+the\\s+past)|The\\s+(?:previous|prior)\\s+staging\\s+deployment\\s+succeeded|The\\s+(?:app|historical\\s+system)\\s+deployed\\s+in\\s+the\\s+past|The\\s+local\\s+migration\\s+(?:(?:had\\s+)?completed|succeeded|failed\\s+safely)|The\\s+unit[\\s-]+test\\s+(?:safely\\s+)?(?:deployed|initialized)\\s+(?:an?\\s+)?(?:in-memory\\s+)?fixture|The\\s+local\\s+runner\\s+(?:had\\s+)?executed\\s+(?:an?\\s+)?fixture|The\\s+unit[\\s-]+test\\s+local\\s+worker\\s+(?:had\\s+)?ran\\s+(?:an?\\s+)?fixture|The\\s+(?:local|historical|sanitized)\\s+(?:fixture|build|publication|publish|run|worker|system|migration)(?:\\s+[A-Za-z-]+){0,2}\\s+(?:(?:had\\s+)?(?:completed|succeeded)|failed\\s+safely|safely\\s+initialized|published\\s+in\\s+the\\s+past|deployed\\s+in\\s+the\\s+past)|(?:The\\s+)?documentation\\s+was\\s+published\\s+in\\s+the\\s+past|The\\s+sanitized\\s+delivery\\s+deployed\\s+the\\s+API\\s+Worker\\s+successfully\\s+in\\s+the\\s+past|The\\s+command\\s+“Deploy\\s+now”\\s+is\\s+prohibited|The\\s+sanitized\\s+past\\s+delivery\\s+description\\s+records\\s+that\\s+retry\\s+was\\s+not\\s+required|The\\s+reviewer\\s+verified\\s+the\\s+sanitized\\s+evidence|The\\s+sanitized\\s+result\\s+is\\s+not\\s+verified|The\\s+proposal\\s+is\\s+approved|The\\s+unrelated\\s+issue\\s+remains\\s+pending|The\\s+issue\\s+was\\s+resolved\\s+without\\s+external\\s+action|The\\s+(?:unit\\s+test|local\\s+worker)\\s+initialized\\s+(?:an?\\s+)?in-memory\\s+fixture|The\\s+(?:historical\\s+)?parser\\s+queried\\s+(?:a\\s+)?local\\s+object|The\\s+(?:historical|local)\\s+note\\s+verified\\s+(?:the\\s+|a\\s+)?checksum)";
+const SAFE_STATUS_MODIFIERS =
+  "(?:(?:however|still|firmly|explicitly|currently|clearly|definitely|actually)\\s+)*";
+const UNRESOLVED_LATER_SUBJECT =
+  "(?:(?:Authenticated\\s+)?A1(?:\\s+(?:product\\s+)?acceptance)?|P1\\+?(?:\\s+(?:product\\s+)?acceptance)?|P[2-5](?:\\s+(?:product\\s+)?acceptance)?|R[12](?:\\s+acceptance)?|L1(?:\\s+acceptance)?|Product\\s+acceptance|Public\\s+launch|Live\\s+(?:activation|verification|system|service))";
+const HELD_LATER_SUBJECT =
+  "(?:Production(?:\\s+(?:readiness|traffic|deployment))?|(?:Production\\s+)?Learner[\\s-]+data(?:\\s+(?:use|access|import|export|transform|transformation|delete|deletion))?|VOC-080-HOLD-(?:01|02))";
+const NEGATABLE_LATER_SUBJECT =
+  "(?:(?:Authenticated\\s+)?A1|P1\\+?|P[2-5]|R[12]|L1|Product\\s+acceptance|Public\\s+launch|Live\\s+(?:activation|verification|system|service)|Production(?:\\s+(?:readiness|traffic|deployment))?|(?:Production\\s+)?Learner[\\s-]+data(?:\\s+(?:use|access|import|export|transform|transformation|delete|deletion))?)";
+const SAFE_NEGATIVE_AUXILIARY =
+  "(?:(?:does|did)\\s+not(?:\\s+remain)?|(?:is|was)\\s+" +
+  SAFE_STATUS_MODIFIERS +
+  "not|has\\s+" +
+  SAFE_STATUS_MODIFIERS +
+  "not(?:\\s+been)?|" +
+  SAFE_STATUS_MODIFIERS +
+  "not(?:\\s+yet)?)";
 const SAFE_LATER_CLAUSE =
-  "(?:(?:(?:Authenticated\\s+)?A1(?:\\s+(?:product\\s+)?acceptance)?|P1\\+?(?:\\s+(?:product\\s+)?acceptance)?|P[2-5](?:\\s+(?:product\\s+)?acceptance)?|R[12](?:\\s+acceptance)?|L1(?:\\s+acceptance)?|Product\\s+acceptance|Public\\s+launch|Live\\s+(?:activation|verification|system|service))\\s+(?:(?:however|still|firmly|explicitly|currently)\\s+)*(?:(?:is|remains?|continues?(?:\\s+to\\s+be)?)\\s+)?(?:(?:however|still|firmly|explicitly|currently)\\s+)*unresolved|(?:Production(?:\\s+(?:readiness|traffic|deployment))?|(?:Production\\s+)?Learner[\\s-]+data(?:\\s+(?:use|access|import|export|transform|transformation|delete|deletion))?|VOC-080-HOLD-(?:01|02))\\s+(?:(?:however|still|firmly|explicitly|currently)\\s+)*(?:(?:is|remains?|continues?(?:\\s+to\\s+be)?)\\s+)?(?:(?:however|still|firmly|explicitly|currently)\\s+)*held|(?:(?:Authenticated\\s+)?A1|P1\\+?|P[2-5]|R[12]|L1|Product\\s+acceptance|Public\\s+launch|Live\\s+(?:activation|verification|system|service)|Production(?:\\s+(?:readiness|traffic|deployment))?|(?:Production\\s+)?Learner[\\s-]+data(?:\\s+(?:use|access|import|export|transform|transformation|delete|deletion))?)\\s+(?:(?:(?:is|was)\\s+not|has\\s+not(?:\\s+been)?|not)\\s+)(?:complete(?:[\\s-]+effective)?|completed|passed|accepted|effective|ready|active|enabled|released|resolved|verified|approved|authorized))";
+  "(?:" +
+  UNRESOLVED_LATER_SUBJECT +
+  "\\s+" +
+  SAFE_STATUS_MODIFIERS +
+  "(?:(?:is|remains?|continues?(?:\\s+to\\s+be)?)\\s+)?" +
+  SAFE_STATUS_MODIFIERS +
+  "unresolved|" +
+  HELD_LATER_SUBJECT +
+  "\\s+" +
+  SAFE_STATUS_MODIFIERS +
+  "(?:(?:is|remains?|continues?(?:\\s+to\\s+be)?)\\s+)?" +
+  SAFE_STATUS_MODIFIERS +
+  "held|" +
+  NEGATABLE_LATER_SUBJECT +
+  "\\s+" +
+  SAFE_STATUS_MODIFIERS +
+  SAFE_NEGATIVE_AUXILIARY +
+  "\\s+(?:" +
+  POSITIVE_VERBS +
+  "))";
 const SAFE_CREDENTIAL_CLAUSE =
   "(?:Credentials?|Tokens?|Passwords?|Private[\\s-]+key|JWT|Basic[\\s-]+authentication|Recovery[\\s-]+(?:code|PIN|phrase)|Authentication[\\s-]+code|Login[\\s-]+code|(?:Reset|Emergency|Device|Security|Backup)[\\s-]+code|OTP|Passcode|Session[\\s-]+(?:ID|identifier)|Client[\\s-]+(?:cert(?:ificate)?|assertion)|mTLS[\\s-]+certificate|Signing[\\s-]+certificate|SSH[\\s-]+key|Authenticator[\\s-]+seed|Passphrase|TOTP[\\s-]+seed|Authentication[\\s-]+cookie|Encryption[\\s-]+key)\\s+(?:is|are|remains?)\\s+(?:value-free|absent|unavailable|redacted|prohibited)";
 const IMPERATIVE_ACTION_PATTERN =
-  /^(?:(?:please|kindly)\s*,?\s*)?(?:(?:immediately|now|carefully)\s+)*(?:(?:re[\s-]?)?(?:deploy|dispatch|migrate|promote|publish|upload|rotate|revoke|remove|delete|cancel|configure|change|create|enable|disable|restore|install|route|access|export|import|transform|launch|verify|start|destroy|drop|purge|submit|activate|initialize|flush|clear|open|issue|approve|authorize|terminate|query|push|switch|stop|run|execute|provision|edit|trigger|ship|move|restart)|retry|release|wipe|erase|truncate|boot|proceed|invoke|send|spin|shut|write|turn|set|use|rollback|roll\s+(?:back|out)|kick\s+off)\b/i;
+  /^(?:(?:please|kindly)\s*,?\s*)?(?:(?:immediately|now|carefully)\s+)*(?:(?:re[\s-]?)?(?:deploy|dispatch|migrate|promote|publish|upload|rotate|revoke|remove|delete|cancel|configure|change|create|enable|disable|restore|install|route|access|export|import|transform|launch|verify|start|destroy|drop|purge|submit|activate|initialize|flush|clear|open|issue|approve|authorize|terminate|query|push|switch|stop|run|execute|provision|edit|trigger|ship|move|restart)|retry|release|wipe|erase|truncate|boot|proceed|invoke|send|spin|shut|write|turn|set|use|do\s+(?:it|so)|rollback|roll\s+(?:back|out)|kick\s+off)\b/i;
 const CANONICAL_PROSPECTIVE_LATER_CLAUSES = Object.freeze({
   "docs/product/12-mvp-implementation-plan.md": new Set([
     "production-provider component cannot be accepted until provider candidates",
@@ -958,29 +993,36 @@ function validateCredentialVocabulary(source, relativePath, projections) {
     errors.push(
       `${relativePath}: credential value continuation after a safe label is prohibited`,
     );
-  const safeCredentialContinuation =
-    "(?:value-free|confidential|sensitive|redacted|prohibited|absent|unavailable|required|available|scoped|restricted|valid|revoked|inactive|active|held|allowed|canonical|non-sensitive|evaluated|referenced|false|null|none)\\b";
-  const anaphoricCredentialValue = new RegExp(
-    "(?:\\b(?:It|This)\\s+(?:is|was|equals?|contains?)|\\bThat(?:\\s+string)?\\s+(?:is|was|equals?|contains?)|\\bThey\\s+(?:are|were|equal)|\\bIts\\s+(?:contents?|value|replacement)\\s*(?:is|was|are|were|equals?|contains?|[:=])|\\b(?:The\\s+)?following\\s+value\\s*(?:(?:is|was|equals?)\\s*|[:=]\\s*)?|\\b(?:The\\s+)?replacement\\s+(?:follows?|is|was|equals?)\\s*:?|\\b(?:The\\s+)?associated\\s+material\\s+(?:is|was|equals?|contains?))\\s*[\\x60\"'\\[]*(?!" +
-      safeCredentialContinuation +
-      ")[A-Za-z0-9_./+:=-]{6,}",
+  const safeCredentialClause = new RegExp(
+    "^(?:" + SAFE_CREDENTIAL_CLAUSE + ")$",
     "i",
   );
+  const plausibleCompactValue =
+    /\b(?:synthetic[-_][A-Za-z0-9_-]{3,}|(?=[A-Za-z0-9_-]{8,}\b)(?=[A-Za-z0-9_-]*[0-9])[A-Za-z0-9_-]{8,})\b/i;
   for (const paragraph of source.split(/\r?\n\s*\r?\n/)) {
-    const credential = CREDENTIAL_TERM_PATTERN.exec(paragraph);
-    CREDENTIAL_TERM_PATTERN.lastIndex = 0;
-    if (!credential) continue;
-    if (
-      anaphoricCredentialValue.test(
-        paragraph.slice(credential.index + credential[0].length),
+    const clauses = semanticClauses(paragraph);
+    const safeCredentialIndexes = clauses.flatMap((clause, index) =>
+      safeCredentialClause.test(clause) ? [index] : [],
+    );
+    for (const index of safeCredentialIndexes) {
+      if (
+        !clauses
+          .slice(index + 1)
+          .some((clause) => plausibleCompactValue.test(clause))
       )
-    ) {
+        continue;
       errors.push(
         relativePath +
-          ": paragraph-level credential context has a prohibited anaphoric value",
+          ": paragraph-level credential context has a prohibited compact value",
       );
       break;
     }
+    if (
+      errors.some((error) =>
+        error.includes("paragraph-level credential context"),
+      )
+    )
+      break;
   }
   const compactCredentialValue =
     /\bBasic\s+(?!(?:auth|authentication)\b)[A-Za-z0-9+/]{8,}={0,2}\b|\beyJ[A-Za-z0-9_-]{3,}\.[A-Za-z0-9_-]{3,}\.[A-Za-z0-9_-]{3,}\b|\bCookie\s*:\s*(?:session|sessionid|auth|authentication)[-_A-Za-z0-9]*\s*=\s*[^\s;,]{3,}/i;
