@@ -114,8 +114,8 @@ plus separate PR6 activation, post-activation queue action C, and immediate PR7 
 have exact preconditions and readbacks. Captured phase snapshots and no-bypass
 immutable refs restore the last known good state without production or Cloudflare
 deployment. Between action B and PR6 merge, the read-back repository lock admits only
-the exact doc-only PR5 then one-file PR6 chain; PR6 alone activates committed future
-state, and the queue is enabled only afterward.
+the exact doc-only PR5 then two-path PR6 chain; PR6 atomically activates policy and its
+single current-state document, and the queue is enabled only afterward.
 
 ## VOC-120-AC-10 — Repository and product validation remain green
 

@@ -186,9 +186,10 @@ merge-commit promotion/synchronization. Only afterward may action B enable squas
 linear main, future gates/reviews, sole-main staging, ordered develop retirement, and
 a repository-variable lock admitting only the ordered PR5/PR6 chain; the merge queue
 remains disabled. Immediate PR5 is genuinely doc-only and leaves preparation state
-unchanged. Exact one-file PR6 passes the immutable old verifier and alone changes state
-to active. Action C then clears the lock and enables the queue; immediate PR7 records
-and exercises `merge_group` under the future Protected lane.
+unchanged. Exact two-path PR6 updates policy state plus the consolidated current-state
+document, passes the immutable old verifier, and alone activates the future model.
+Action C then clears the lock and enables the queue; immediate PR7 records and
+exercises `merge_group` under the future Protected lane.
 
 ## Security, privacy, data, and accessibility
 

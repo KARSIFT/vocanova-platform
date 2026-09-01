@@ -39,7 +39,8 @@ authority.
    ordered PR5/PR6 chain; keep the merge queue disabled.
 9. Merge immediate genuinely doc-only PR5 after old-verifier/future-gate checks; it
    leaves preparation state unchanged.
-10. Merge exact one-file PR6 under frozen old authority; it alone activates state.
+10. Merge exact two-path PR6 under frozen old authority; it atomically activates policy
+    and the consolidated current-state document.
 11. Authorize action C to clear the lock and enable the merge queue; immediately merge
     PR7 under the future Protected lane through that queue and record final truth.
 

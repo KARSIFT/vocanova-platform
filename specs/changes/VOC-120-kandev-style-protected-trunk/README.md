@@ -40,7 +40,8 @@ verification, and EHR form real boundaries:
    pre-change authority through the final old-model promotion and synchronization.
 5. After the final old-model synchronization, apply final settings and immediately
    record their genuinely doc-only truth.
-6. Activate committed future policy in a separate exact old-authority-reviewed PR.
+6. Atomically activate committed future policy and its consolidated current-state
+   document in a separate exact old-authority-reviewed PR.
 7. Enable the merge queue only after PR6 activation, then immediately record and
    exercise it through the first future-policy PR.
 

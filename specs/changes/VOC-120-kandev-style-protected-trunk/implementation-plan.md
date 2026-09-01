@@ -139,6 +139,9 @@ and permanent `Policy / required` transition mode against the exact candidate.
   final old-model release/synchronization PRs.
 - Reconcile every active workflow, script, package command, settings document,
   CODEOWNERS rule, and contributor surface to one provisional truthful state.
+- Consolidate mutable activation/settings status in
+  `docs/governance/current-state.md`. Other normative/engineering docs describe the
+  state machine or link there without independently claiming the current state.
 
 After exact old-authority review, merge PR4 to `develop`. Then perform the one final
 old-model `develop -> main` merge-commit promotion and main-to-develop merge-commit
@@ -168,7 +171,8 @@ authority required by `HOLD-04`:
    synchronized `main` SHA. While committed state is `transition-preparation`, the
    policy admits only this ordered chain: doc-only PR5 directly over the locked SHA,
    then PR6 directly over PR5. It verifies PR5 changed only approved truth paths and
-   PR6 changes only `.github/policy-state.json`; missing/stale/mismatched anchors,
+   PR6 changes only `.github/policy-state.json` and
+   `docs/governance/current-state.md`; missing/stale/mismatched anchors,
    reordered branches, extra commits/paths, and every other head fail.
 
 ## PR5 — Immediate final branch/settings truth
@@ -184,11 +188,13 @@ strictly doc-only and leaves committed policy state at `transition-preparation`.
 ## PR6 — Future-policy activation under old authority
 
 Open fixed branch `transition/voc-120-activate` directly from the accepted PR5 merge.
-Change only `.github/policy-state.json` from `transition-preparation` to `active`.
+Change exactly `.github/policy-state.json` from `transition-preparation` to `active`
+and `docs/governance/current-state.md` from pending to active/queue-disabled truth.
 Required `Policy / required` proves the lock anchor, exact PR5 doc-only predecessor,
-single allowed path/value transition, protected old verifier, future aggregate gates,
-and non-author review. After PR6 merges, ordinary branches use the future lightweight
-policy, but the queue remains disabled until action C.
+two-path/value transition, absence of another tracked current-state claim, protected
+old verifier, future aggregate gates, and non-author review. After PR6 merges, ordinary
+branches use the future lightweight policy, but the queue remains disabled until
+action C.
 
 ## Post-activation merge-queue action C
 

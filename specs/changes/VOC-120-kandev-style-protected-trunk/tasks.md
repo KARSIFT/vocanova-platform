@@ -29,7 +29,8 @@ After qualified confirmation, adoption, and PR1 merge, close PR #215 unmerged un
 its hold and add only the exact issue #231 aggregate-dispatch test in PR2;
 perform merge-compatible settings action A and immediate PR3 truth; complete PR4
 cleanup plus the final old-model promotion/synchronization; then perform action B and
-immediate doc-only PR5 truth; activate through one-file PR6 under old authority.
+immediate doc-only PR5 truth; activate policy plus consolidated truth through exact
+two-path PR6 under old authority.
 Permanent `Policy / required` enforces PR1/PR2 by tracked digest and PR3-PR6 by
 protected ref, then becomes the future aggregate. Action C enables the queue and
 immediate PR7 records/exercises it.

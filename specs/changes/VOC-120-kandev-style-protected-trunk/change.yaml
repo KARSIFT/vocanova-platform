@@ -37,7 +37,8 @@ multiple_pull_request_rationale: >-
   against the frozen pre-change authority/verifier, performs the coherent cleanup and
   completes the final old-model promotion/synchronization. A final authorized settings
   cutover is followed immediately by genuinely doc-only PR5. PR6 separately activates
-  committed future policy under the frozen old verifier. A founder-authorized
+  committed future policy and its single current-state document under the frozen old
+  verifier. A founder-authorized
   post-activation action enables the merge queue, followed immediately by PR7, its
   future-policy truth and queue rehearsal. A single PR would delete checks
   needed to review itself, claim settings before they exist, violate the mandatory
@@ -192,8 +193,9 @@ requirements:
       transition lock, and retain committed preparation state through the final old
       synchronization. Between action B and PR6 merge, the lock and required policy
       gate must admit only the exact ordered doc-only PR5 and activation PR6 chain.
-      PR5 may not alter executable policy; PR6 alone may flip default-branch state to
-      active after exact old-authority acceptance. Only then may separately authorized
+      PR5 may not alter executable policy; PR6 alone may atomically flip default-branch
+      state and its consolidated current-state document to active after exact
+      old-authority acceptance. Only then may separately authorized
       action C clear the lock and enable the merge queue; immediate PR7
       must exercise `merge_group` and record final truth under the future policy.
   - id: VOC-120-D13
@@ -281,7 +283,7 @@ implementation:
       name: future-policy-activation
       target: main
       status: blocked-on-pr5-settings-truth
-      boundary: exact old-authority-reviewed committed policy activation
+      boundary: exact two-path old-authority-reviewed policy and truth activation
     - id: VOC-120-PR7
       name: merge-queue-settings-truth
       target: main

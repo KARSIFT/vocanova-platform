@@ -98,7 +98,7 @@ Accessibility checks remain path-applicable for UI changes.
   the final old-model promotion/synchronization.
 - `VOC-120-R13`: Ordinary work starts between action B and final truth acceptance.
   Mitigation: the read-back repository lock admits only exact doc-only PR5 then
-  one-file PR6; PR6 alone activates state, and the queue is enabled only afterward.
+  two-path PR6; PR6 atomically activates policy/current truth, and the queue follows.
 
 ## Dependencies
 
@@ -127,6 +127,7 @@ Accessibility checks remain path-applicable for UI changes.
   synchronization, ancestry, and rollback evidence.
 - `VOC-120-EV-07`: action-B ruleset/lock/review/environment/branch readback and exact
   doc-only PR5 old-verifier/future-gate/native-review evidence, with queue disabled.
-- `VOC-120-EV-08`: exact one-file PR6 activation diff and old-verifier acceptance.
+- `VOC-120-EV-08`: exact two-path PR6 policy/current-truth activation diff and
+  old-verifier acceptance.
 - `VOC-120-EV-09`: action-C lock-clear/merge-queue readback and exact PR7 future-policy
   pull-request plus merge-group evidence.
