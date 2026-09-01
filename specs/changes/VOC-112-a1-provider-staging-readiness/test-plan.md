@@ -1,8 +1,11 @@
 # VOC-112 — Test Plan
 
 No test contacts Google, an email provider, Cloudflare, GitHub settings, or a live
-endpoint. No fixture/evidence contains a real credential, token, code, email address,
-provider response, account identifier, Worker version, or learner data.
+endpoint. No fixture/evidence contains a **real** provider response, delivered email,
+credential, token, code, personal email/address data, account identifier, Worker
+version, or learner data. Required synthetic JSON responses, opaque bearers/codes, and
+`example.test` identities are allowed only in local fake-transport fixtures and must be
+visibly synthetic.
 
 ## VOC-112-TEST-00 — Baseline and contract preservation
 
@@ -16,19 +19,30 @@ provider response, account identifier, Worker version, or learner data.
 ## VOC-112-TEST-01 — Google adapter requests and negatives
 
 - Covers: `VOC-112-AC-01`
-- Procedure: use injected fake fetch for authorization URL, code exchange, and userinfo;
-  cover success, timeout/network error, non-2xx, invalid content/JSON, missing/oversized
-  fields, unverified email, absent subject, and malicious endpoint/config inputs.
+- Procedure: use fake fetch for the three literal endpoints. Assert exact authorization
+  GET query, token POST form/headers/`redirect:error`, and user-info GET bearer/header/
+  `redirect:error`. Assert the accepted token field set and reject refresh/unknown,
+  wrong-type, overbound fields. For both responses cover exact-ceiling success,
+  declared Content-Length over ceiling, dishonest within-limit length followed by
+  oversize, missing/chunked length oversize, timeout/network/read error, non-2xx,
+  invalid content/JSON/shape, and instrumented cancellation/release on every success,
+  error, timeout, redirect, and oversize path. Cover unverified/missing identity and
+  avatar scheme/host/port/credentials/query/fragment/byte-limit negatives. Attempt 3xx
+  redirects and prove code/client-secret and access-token are never sent to the target.
 - Expected: exact safe requests and bounded identity on success; generic fail-closed
-  behavior otherwise; no raw provider token/code/secret/response escapes.
+  behavior otherwise; token retains at most 16,384 bytes and user-info 65,536 bytes
+  independent of headers/transfer; every reader cancels/releases; no secret escapes.
 - Evidence: `VOC-112-EV-01`
 
 ## VOC-112-TEST-02 — Email adapter requests and negatives
 
 - Covers: `VOC-112-AC-02`
 - Procedure: inject fake fetch and test endpoint/sender/token/message validation,
-  authorization/payload, bounded timeout/body, 2xx, non-2xx, network error, and response
-  cancellation. Compare registered/unregistered magic-link public responses.
+  URL credentials/query/fragment/port, CR/LF/control/header injection, authorization/
+  payload, exact endpoint/mailbox/subject/text/serialized-body/API-key byte bounds,
+  exact timeout, 2xx, non-2xx, network error, redirect:error, and response cancellation.
+  A fake redirect target must prove it receives no API bearer, recipient, subject, or
+  magic-link payload. Compare registered/unregistered public responses.
 - Expected: no real network; valid request is exact; failures are generic and redact
   bearer/link/email details; public request behavior does not enumerate accounts.
 - Evidence: `VOC-112-EV-02`
@@ -38,9 +52,10 @@ provider response, account identifier, Worker version, or learner data.
 - Covers: `VOC-112-AC-01`, `AC-02`, `AC-05`
 - Procedure: table-test each switch off/on against absent, partial, malformed, unsafe,
   and complete synthetic configuration; count network/session calls; regenerate/check
-  Worker types; assert the exact six provider configuration/binding names and absence
-  of aliases/committed secret values; run Worker safety/delivery and secret-pattern
-  scans.
+  Worker types; assert the exact six names, required-vs-ignored matrix, mandatory
+  `AUTH_PROVIDER_TIMEOUT_MS="8000"`, four committed literals, no aliases/secret values,
+  and both complete-A/malformed-or-disabled-B directions. Mutate each new root/staging/
+  production policy var to prove exact-map rejection; run safety/delivery/secret scans.
 - Expected: disabled needs no credentials; enabled+complete uses real adapters;
   everything else is unavailable with zero network/session/fake fallback. Staging and
   production remain disabled/held and current GitHub Actions secret names unchanged.
@@ -73,7 +88,9 @@ provider response, account identifier, Worker version, or learner data.
 - Covers: `VOC-112-AC-04`
 - Procedure: inspect the runbook for exact SHA/attempt, real email/OAuth, navigation,
   logout, unauthenticated/cross-user/CSRF/abuse/redaction, kill-switch, and rollback
-  procedures; scan for completion claims, secrets, private data, or live results.
+  procedures; run `a1-staging-acceptance-policy.test.mjs` positive and one-invariant-
+  at-a-time negatives for missing index/step/hold, completion/live claim, secret, and
+  personal data.
 - Expected: complete procedure, every result pending separate authority, and no
   prohibited disclosure or inferred A1 acceptance.
 - Evidence: `VOC-112-EV-06`
@@ -83,8 +100,8 @@ provider response, account identifier, Worker version, or learner data.
 - Covers: `VOC-112-AC-05`
 - Procedure: run focused suites, `pnpm ci:worker-api`, applicable web e2e/accessibility,
   `pnpm ci:delivery`, `pnpm ci:foundation`, `pnpm validate`, governance/risk/diff checks,
-  exact allowed-path audit, and a disposable full base-to-head reverse rehearsal.
-- Expected: all installed checks pass, only adopted paths/generated outputs change,
+  exact fifteen-path audit, and a disposable full base-to-head reverse rehearsal.
+- Expected: all installed checks pass, only the exact fifteen paths change,
   no network/external action occurs, and reverse restores the exact base tree.
 - Evidence: `VOC-112-EV-07`
 
@@ -106,6 +123,7 @@ provider response, account identifier, Worker version, or learner data.
 - `pnpm --filter @vocanova/api-worker openapi:check`
 - `pnpm --filter @vocanova/api-worker contract:check`
 - `pnpm --filter @vocanova/api-worker dry-run`
+- `node --test scripts/foundation/a1-staging-acceptance-policy.test.mjs`
 - `pnpm ci:worker-api`
 - applicable committed web e2e/accessibility commands discovered in
   `apps/web/package.json` and `docs/development.md`

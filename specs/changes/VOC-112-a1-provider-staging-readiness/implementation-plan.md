@@ -27,22 +27,28 @@ the repository PR cannot truthfully pre-record their result.
    config, generated bindings, Worker safety/delivery policy, web journey, and tests.
    Freeze the allowed-path inventory; stop on incompatible drift.
 2. Add the Worker-compatible Google adapter behind `OAuthProvider` with injected fetch,
-   fixed live HTTPS endpoints, timeout, strict shapes, least scope, and confidential
-   token/code handling. Unit-test every request and negative with fake transport.
+   three literal endpoints, exact GET/POST/form/header/no-redirect contracts, exact
+   accepted token fields, 16,384/65,536-byte bounded reader, cancel/release `finally`,
+   8-second abort, strict shapes/avatar safety, and confidential token/code handling.
+   Unit-test every request, declared/chunked oversize, disposal path, and redirect.
 3. Reuse/harden `HttpEmailSender` without vendor specialization. Test HTTPS validation,
-   payload, auth header, timeout, 2xx/non-2xx/network behavior, cancellation, and
+   URL credentials/query/fragment, sender/header injection, payload, auth header,
+   timeout, no-redirect leakage, 2xx/non-2xx/network behavior, cancellation, and
    redaction with fake transport.
 4. Add one centralized dependency/config factory and typed bindings. Prove switches-off
    needs no credentials; enabled+complete constructs the real adapter; enabled+missing,
-   partial, malformed, or unsafe configuration fails closed without network or session.
-   Regenerate types only through the committed command.
+   partial, malformed, or unsafe configuration fails capability-locally without call or
+   session; prove both mixed-provider directions. Add the four exact disabled var
+   literals to all Wrangler API maps, reconcile exact delivery-policy maps/tests, and
+   regenerate types only through the committed command.
 5. Preserve public contract/schema and expand identity/workerd tests across magic link,
    OAuth, replay/expiry, session/cookie/CSRF/logout, disabled user, rate limits, provider
    failure, and two-user isolation. Run web auth/accessibility/e2e coverage.
-6. Add the pending sanitized staging-acceptance runbook and reconcile only current docs
-   that incorrectly say providers have no repository implementation. Explicitly retain
-   all live-action and milestone-completion holds.
-7. Run focused and full installed checks, inspect exact paths and secrets/redaction,
+6. Add the pending sanitized staging runbook, its operations index entry, and named
+   network-free policy/negative test. Reconcile only `docs/development.md`; retain all
+   live-action/milestone holds. Do not edit any other documentation/generated path.
+7. Run focused and full installed checks, enforce the exact fifteen-path inventory,
+   inspect secrets/redaction,
    and reverse the complete base-to-head diff in a disposable worktree to prove exact
    repository restoration. Do not call Wrangler remotely or access a provider.
 8. Obtain fresh exact-SHA specialist and independent R3 PASS verdicts from different

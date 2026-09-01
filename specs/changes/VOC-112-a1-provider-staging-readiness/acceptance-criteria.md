@@ -21,9 +21,12 @@ authorization, onboarding, account, web-shell, and P1+ boundary passing.
 - Result: pending adoption and implementation
 
 Fake-transport tests prove authorization URL, HTTPS token exchange, user-info mapping,
-timeouts, malformed/non-2xx rejection, verified identity, and no secret/token/code/raw
-response persistence or disclosure. Missing/partial config or a disabled switch makes
-the method unavailable without a network call or session.
+literal endpoints/methods/parameters/headers, no redirects, accepted token fields,
+timeouts, malformed/non-2xx rejection, verified identity, safe avatar, exact
+16,384/65,536-byte ceilings independent of declared length, and no secret/token/code/
+raw-response disclosure. Every token and user-info success/error/declared-oversize/
+chunked-oversize path cancels and releases its reader. Missing/partial config or a
+disabled switch makes only that method unavailable without a call or session.
 
 ## VOC-112-AC-02 — Transactional email adapter is bounded and confidential
 
@@ -34,9 +37,10 @@ the method unavailable without a network call or session.
 - Result: pending adoption and implementation
 
 Fake-transport tests prove validated HTTPS request construction, bounded timeout/body,
-2xx success, non-2xx/network failure, and redaction. Public magic-link requests remain
-enumeration resistant; tokens remain hashed/single-use. Disabled or incomplete config
-sends nothing and never falls back to fake delivery in a live mode.
+header/sender safety, no redirects, 2xx success, non-2xx/network failure, response
+cancellation, and redaction. Redirects receive no bearer, recipient/header, or
+magic-link payload. Public requests remain enumeration resistant; tokens remain
+hashed/single-use. Disabled/incomplete config sends nothing and never falls back fake.
 
 ## VOC-112-AC-03 — Session, authorization, and web journey remain secure
 
@@ -61,8 +65,8 @@ identity/session corruption or private-data disclosure. Auth UI accessibility pa
 
 The runbook contains complete exact-SHA, provider, auth, abuse, redaction, kill-switch,
 and rollback procedures, but every live result is marked pending separate authority.
-No provider setup, setting/secret action, dispatch/deployment, test identity, or A1
-completion claim occurs in the implementation PR.
+Its index and deterministic policy/negative tests pass. No provider setup,
+setting/secret action, dispatch/deployment, test identity, or A1 completion claim occurs.
 
 ## VOC-112-AC-05 — Configuration, scope, and rollback fail closed
 
@@ -74,9 +78,10 @@ completion claim occurs in the implementation PR.
 
 Staging/production switches and inherited holds remain off/held, current GitHub Actions
 secret interface remains unchanged, the exact six new provider configuration/binding
-names have no aliases or committed secret values, generated bindings are current, and
-exact-path and secret scans pass. A disposable reverse of the complete implementation
-diff restores the adopted base tree without external or D1 action.
+names have no aliases/committed secret values, the four exact committed var literals
+match delivery-policy maps/tests, mixed capability states behave independently,
+generated bindings are current, and fifteen-path/secret scans pass. A disposable
+reverse restores the adopted base tree without external or D1 action.
 
 ## VOC-112-AC-06 — Exact revision is independently verified
 

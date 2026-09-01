@@ -63,39 +63,52 @@ requirements:
   - id: VOC-112-D01
     statement: >-
       Add a production-shaped Google OAuth adapter behind the existing OAuthProvider
-      interface. It must construct the Google authorization request from typed runtime
-      configuration, exchange a one-use authorization code at the HTTPS token boundary,
-      obtain the verified user identity from the HTTPS user-info boundary, enforce
-      bounded timeouts and strict response validation, and return only subject, email,
-      email-verification, display-name, and avatar fields. It must never persist, return,
-      or log provider access/refresh tokens, codes, client secrets, or raw responses.
+      interface. Use exactly https://accounts.google.com/o/oauth2/v2/auth,
+      https://oauth2.googleapis.com/token, and
+      https://openidconnect.googleapis.com/v1/userinfo. Pin the request methods,
+      parameters, headers, redirect:error policy, accepted token fields, safe-avatar
+      policy, strict shapes, and an 8,000-ms mandatory timeout as specified in
+      specification.md. Enforce an exact 16,384-byte token-response ceiling and exact
+      65,536-byte user-info-response ceiling using declared-length prechecks and
+      streamed decoded-byte counting independent of Content-Length. Cancel and release
+      the response reader on every response-bearing success, error, timeout,
+      declared/streamed oversize, and exposed redirect path; clear abort/timer state
+      when fetch rejects before a response exists. Never persist, return, or log
+      provider tokens, codes, client secrets, or raw responses.
   - id: VOC-112-D02
     statement: >-
       Reuse and harden the provider-neutral HttpEmailSender for magic-link and account
-      lifecycle email. Require HTTPS outside local tests, bounded timeout, strict
-      request/response handling, generic user-facing failure, and no credential/link
-      logging. Preserve enumeration-resistant request responses and single-use hashed
-      magic-link behavior. Normal CI must use injected fake transports and send no email.
+      lifecycle email. Require a credential-free/query-free/fragment-free default-port
+      HTTPS endpoint, strict sender/message/header validation, the same mandatory
+      8,000-ms timeout, redirect:error, response-body cancellation, generic user-facing
+      failure, and no credential/link logging. Tests must prove that redirects cannot
+      receive the bearer or magic-link payload. Preserve enumeration-resistant request
+      responses and single-use hashed magic-link behavior. Normal CI uses injected fake
+      transports and sends no email.
   - id: VOC-112-D03
     statement: >-
       Replace the default unavailable/null provider construction with one centralized,
       typed, fail-closed identity dependency factory. Disabled features require no
-      provider credentials. An enabled feature with absent, partial, malformed, or
-      unsafe configuration must remain unavailable and must never fall back to a fake
-      provider, issue a session, or contact a network boundary. Keep production and
-      staging feature switches disabled in committed configuration.
+      provider-specific credentials/configuration. Each enabled capability independently
+      requires its complete exact configuration matrix; absent, partial, malformed, or
+      unsafe values make only that capability unavailable and never fall back to a fake,
+      issue a session, or contact a network boundary. Prove mixed states where one
+      provider is complete and the disabled or malformed other provider cannot block or
+      contaminate it. Keep production and staging switches disabled in committed config.
   - id: VOC-112-D04
     statement: >-
       Keep secret values outside git, generated artifacts, logs, responses, comments,
       and test output. Use exactly EMAIL_PROVIDER_URL, EMAIL_FROM,
-      EMAIL_PROVIDER_TIMEOUT_MS, and GOOGLE_OAUTH_CLIENT_ID for non-secret provider
+      AUTH_PROVIDER_TIMEOUT_MS, and GOOGLE_OAUTH_CLIENT_ID for non-secret provider
       configuration, and exactly EMAIL_PROVIDER_API_KEY and
       GOOGLE_OAUTH_CLIENT_SECRET for runtime secret bindings. Reuse
       OAUTH_REDIRECT_URI and the existing feature switches; do not add aliases. Define
-      only the minimum typed interface needed by the adapters; preserve the exact
-      Cloudflare staging/production tuple, delivery holds, zero-cost limit, and current
-      two-secret GitHub Actions environment boundary. No provider secret name/value is
-      added to GitHub settings by this implementation.
+      only the minimum typed interface needed by the adapters. Add the four non-secret
+      names to every committed API Worker vars map with literal empty-string sentinels
+      except AUTH_PROVIDER_TIMEOUT_MS="8000"; reconcile the exact delivery-policy maps
+      and tests in the same PR. Preserve disabled staging/production switches, holds,
+      zero-cost limit, and current two-secret GitHub Actions environment boundary. No
+      provider secret name/value is added to GitHub settings by this implementation.
   - id: VOC-112-D05
     statement: >-
       Preserve the public /api/v1 contract and web journey unless a security correction
@@ -111,14 +124,15 @@ requirements:
       methods, normal navigation, logout, unauthorized and cross-user denial, abuse
       controls, redaction, provider kill switches, and repository/Worker rollback.
       The implementation PR must leave results pending and must not claim A1 complete.
+      Add a deterministic runbook policy/negative suite and index the record from
+      docs/operations/README.md.
   - id: VOC-112-D07
     statement: >-
       Use one minimum-sufficient repository implementation PR after adoption and after
-      VOC-105 records F3 complete-effective. Limit changes to the Worker identity
-      adapters/factory/config/types/tests, directly affected web auth tests if needed,
-      the A1 runbook/evidence template, development/operations documentation describing
-      the new contract, and generated artifacts that deterministically follow those
-      sources. No schema migration or public API expansion is authorized.
+      VOC-105 records F3 complete-effective. Change exactly the fifteen paths in
+      implementation_allowed_paths and no others. No schema migration, public API
+      expansion, web source/test edit, package/workflow/manifest change, or incidental
+      generated artifact is authorized.
   - id: VOC-112-D08
     statement: >-
       Require complete installed CI, Worker types/safety/workerd/contract/dry-run,
@@ -147,6 +161,15 @@ owners:
 
 plan_review_history: []
 
+superseded_plan_candidates:
+  - candidate_sha: ff286cbb87d13913f7d2a95e40d53f8f16f609fe
+    status: blocked-and-superseded
+    reason: >-
+      Fresh security and cross-model review found missing exact response byte/read-
+      disposal controls, redirect/token/avatar/config rules, deterministic runbook
+      validation, and a literal path/config-policy inventory. No review or authority
+      from this candidate transfers to its correction.
+
 approvals:
   security_authorization_plan_review:
     status: pending-distinct-non-author-exact-candidate-review
@@ -172,22 +195,27 @@ artifacts:
   test_plan: test-plan.md
   release_plan: release-plan.md
 
-affected_areas:
+implementation_allowed_paths:
   - apps/api-worker/src/app.ts
   - apps/api-worker/src/identity/http-email-sender.ts
   - apps/api-worker/src/identity/google-oauth-provider.ts
   - apps/api-worker/src/identity/provider-factory.ts
-  - apps/api-worker/src/identity/service.ts
   - apps/api-worker/test/identity-provider-adapters.test.ts
   - apps/api-worker/test/identity-parity.test.ts
   - apps/api-worker/worker-configuration.d.ts
   - apps/api-worker/wrangler.jsonc
-  - apps/web/tests/e2e/auth-magic-accessibility.spec.ts
-  - apps/web/tests/e2e/signin-accessibility.spec.ts
   - docs/development.md
+  - docs/operations/README.md
   - docs/operations/a1-staging-acceptance.md
-  - directly-generated-OpenAPI-or-binding-artifacts-only-if-source-change-requires
-  - specs/changes/VOC-112-a1-provider-staging-readiness
+  - scripts/foundation/a1-staging-acceptance-policy.mjs
+  - scripts/foundation/a1-staging-acceptance-policy.test.mjs
+  - scripts/foundation/cloudflare-delivery-policy.mjs
+  - scripts/foundation/cloudflare-delivery-policy.test.mjs
+
+affected_areas:
+  - authentication-provider-runtime-construction
+  - exact-Worker-vars-and-delivery-policy-contract
+  - auth-provider-security-tests-and-staging-runbook-policy
 
 protected_areas:
   - authentication-authorization-and-session-entry

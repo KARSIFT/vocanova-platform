@@ -20,10 +20,11 @@ described as `A1 provider-ready in repository`, not `A1 complete-effective`.
 
 Before merge, close the PR. After merge, use a separately reviewed revert PR against
 the exact implementation merge. Trigger on authorization bypass, credential leakage,
-provider call while disabled/incomplete, identity-link/session corruption, cross-user
-access, contract/schema drift, or failed required checks. Revert removes only the
-repository delta; no D1 down migration or external action is needed because no schema
-or live state changed.
+provider call while disabled/incomplete, response ceiling/cleanup failure, redirect or
+URL/header injection, unsafe avatar, mixed-capability coupling, identity-link/session
+corruption, cross-user access, contract/schema drift, runbook-policy failure, or failed
+required checks. Revert removes only the repository delta; no D1 down migration or
+external action is needed because no schema or live state changed.
 
 ## Later staging action (not authorized)
 

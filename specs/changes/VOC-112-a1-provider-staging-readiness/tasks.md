@@ -12,10 +12,12 @@
 
 Add and wire the bounded Google OAuth and transactional-email adapters; establish the
 typed fail-closed dependency/configuration boundary; preserve schema, contract,
-session, authorization, web, and held-environment behavior; add complete deterministic
-security/browser evidence and a pending sanitized staging procedure; validate and
-rollback-rehearse the exact revision; obtain distinct specialist and independent R3
-reviews; and merge through a separate actor.
+session, authorization, web, and held-environment behavior; enforce literal provider
+requests, exact response ceilings/reader cleanup, redirect/header/URL/avatar safety,
+mixed-capability independence, exact fifteen paths, delivery-policy reconciliation,
+and deterministic runbook validation; add security/browser evidence and the pending
+staging procedure; validate/revert-rehearse; obtain distinct specialist and independent
+R3 reviews; and merge through a separate actor.
 
 One task is minimum sufficient because every deliverable controls the same auth entry
 and provider-secret trust boundary. Task IDs are traceability groupings, not reasons to

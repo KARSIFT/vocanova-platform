@@ -39,31 +39,80 @@ public endpoint, account-policy change, or session-renewal change is in scope.
 
 ### VOC-112-D01 — Google adapter contract
 
-Implement a Worker-compatible `OAuthProvider` adapter using injected `fetch` and a
-bounded timeout. It obtains the client ID/secret only from typed runtime inputs,
-constructs a Google authorization URL with the approved callback and least necessary
-`openid email profile` scope, exchanges the authorization code at an HTTPS token
-endpoint, and retrieves identity from an HTTPS user-info endpoint. Endpoint overrides
-are allowed only as constructor-level test injection; live configuration uses fixed
-Google HTTPS endpoints.
+Implement a Worker-compatible `OAuthProvider` adapter using injected `fetch` and an
+exact mandatory 8,000-ms timeout. Production code uses these literal endpoints, with
+no runtime override:
 
-Strictly validate HTTP status, content type/JSON shape, `sub`, normalized email,
-`email_verified`, and bounded display/avatar fields. The adapter returns only the
-existing `OAuthIdentity` fields. Provider access/refresh/ID tokens, code, client secret,
-state bearer, and raw response are ephemeral and must never reach D1, logs, errors,
-responses, telemetry, snapshots, or evidence. The existing service remains responsible
-for stored state consumption, cookie comparison, verified-email enforcement,
-identity-link transactionality, disabled-user rejection, and session issuance.
+- authorization: `https://accounts.google.com/o/oauth2/v2/auth`;
+- token: `https://oauth2.googleapis.com/token`; and
+- user info: `https://openidconnect.googleapis.com/v1/userinfo`.
+
+The authorization URL is a browser `GET` with exactly `client_id`, `redirect_uri`,
+`response_type=code`, `scope=openid email profile`, and `state`; it adds no `prompt`,
+offline-access, or extra-scope parameter. Token exchange is `POST` with
+`redirect: "error"`, `Accept: application/json`,
+`Content-Type: application/x-www-form-urlencoded`, and exactly `code`, `client_id`,
+`client_secret`, `redirect_uri`, and `grant_type=authorization_code` in the form body.
+User-info retrieval is `GET` with `redirect: "error"`, `Accept: application/json`,
+and `Authorization: Bearer <access token>`, with no query token, cookie, or request
+body. Endpoint injection is allowed only as an explicit constructor test seam using
+`*.example.test`; the same no-credentials/query/fragment and no-redirect policy applies.
+
+The token response ceiling is exactly 16,384 decoded body bytes and the user-info
+response ceiling is exactly 65,536 decoded body bytes. One shared bounded-reader must:
+
+1. acquire the body reader before validation enters a single `try`/`finally` cleanup
+   region;
+2. parse a present `Content-Length` only as an unsigned base-10 integer and reject a
+   malformed or over-ceiling declaration before reading or JSON parsing;
+3. sum decoded `Uint8Array` chunk byte lengths, stopping
+   before retaining more than the ceiling even when length is missing, dishonest, or
+   transfer is chunked;
+4. reject the first byte beyond the ceiling before JSON parsing; and
+5. in one `finally`, invoke `reader.cancel()` (suppressing only cancellation-cleanup
+   failure) and `reader.releaseLock()` on success, non-2xx, content-type/JSON/shape/read
+   error, timeout/abort, redirect rejection, declared oversize, and streamed oversize.
+   A null body is a bounded failure with no reader to dispose.
+
+The abort timer is cleared in `finally`. Non-2xx/redirect bodies are never parsed for
+provider detail; when a response exists they are disposed and become one generic
+provider failure. If fetch rejects before yielding a response (including native
+`redirect: "error"` rejection), no body exists and only abort/timer cleanup applies.
+The token
+JSON object accepts exactly required `access_token` (1–8,192 UTF-8 bytes) and
+`token_type` (ASCII case-insensitive `Bearer`), plus optional `expires_in` (integer
+1–86,400), `scope` (0–2,048 UTF-8 bytes), and `id_token` (1–12,288 UTF-8 bytes).
+Unknown fields—including `refresh_token`—or wrong types fail; only `access_token` is
+used for the immediately following user-info request and all token fields are discarded.
+
+Strictly validate user-info HTTP status, JSON content type/object, nonempty `sub`,
+normalized email, boolean `email_verified`, and bounded display/avatar fields. An
+avatar is retained only when its UTF-8 representation is at most 2,048 bytes and it
+parses as HTTPS with no username, password, query, fragment, or non-default port and a
+hostname equal to `googleusercontent.com` or ending in `.googleusercontent.com`;
+otherwise return the existing empty avatar value rather than fail authentication. The
+adapter returns only existing `OAuthIdentity` fields. Provider access/refresh/ID tokens,
+code, client secret, state bearer, and raw response are ephemeral and never reach D1,
+logs, errors, responses, telemetry, snapshots, or evidence. The existing service owns
+stored-state consumption, cookie comparison, verified-email enforcement, transactional
+linking, disabled-user rejection, and session issuance.
 
 ### VOC-112-D02 — Transactional email boundary
 
 Use the existing provider-neutral `HttpEmailSender` shape rather than select an email
-vendor in code. Harden it where tests identify gaps: HTTPS outside explicit local test
-injection, validated endpoint/sender, bearer authentication from runtime input,
-bounded body and timeout, 2xx-only success, response cancellation, and generic failure
-without credential or magic-link disclosure. Magic-link/account service content and
-enumeration-resistant public responses remain unchanged. CI supplies fake fetch and
-synthetic addresses only.
+vendor in code. Its endpoint must be HTTPS, have a nonempty hostname, default port,
+be at most 2,048 UTF-8 bytes, and have no username, password, query, or fragment. Its
+sender and recipient are single 3–254-byte ASCII mailboxes without whitespace/control/
+CR/LF; subject is 1–160 UTF-8 bytes with no control/CR/LF; text is 1–8,192 UTF-8 bytes;
+and the serialized JSON request is at most 16,384 UTF-8 bytes before fetch. Its API key
+is a required 1–4,096-byte control-free runtime secret. It uses the exact mandatory
+8,000-ms timeout,
+`redirect: "error"`, bounded request fields, 2xx-only success, and response-body
+cancellation on every success/non-2xx/redirect path. Provider failures are generic and
+never disclose credential or magic-link payload. Fake-transport tests prove that a 3xx
+cannot forward the bearer, recipient, subject, or magic-link body to another origin.
+Magic-link/account content and enumeration-resistant public responses remain unchanged.
+CI supplies fake fetch and synthetic addresses only.
 
 Vendor selection, provider-specific payload changes, account/domain/sender setup,
 contract, and spend are later accountable decisions. If the chosen provider cannot
@@ -72,13 +121,21 @@ the implementer may not silently specialize it.
 
 ### VOC-112-D03 — Fail-closed dependency construction
 
-Create one identity dependency factory used by the default app. Feature switches off
-means no credential is required and no provider network call is possible. When a
-switch is on, the complete corresponding provider configuration must validate before
-that provider can be used. Missing/partial/malformed values yield a privacy-safe
-unavailable response and no session/provider call; live modes never substitute a fake
-sender or OAuth identity. Provider construction must not make `/healthz` or unrelated
-disabled capabilities disclose configuration or credentials.
+Create one identity dependency factory used by the default app. The required matrix is
+literal:
+
+| Capability       | Switch off                                                                                                                            | Switch on                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Magic link/email | `EMAIL_PROVIDER_URL`, `EMAIL_FROM`, and `EMAIL_PROVIDER_API_KEY` are ignored and may be absent/empty/malformed; no email network call | all three must pass D02; `AUTH_PROVIDER_TIMEOUT_MS` must be integer string `8000`; otherwise only email is unavailable                                                                                                                                                                                                                                                                                                            |
+| Google OAuth     | `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET` are ignored and may be absent/empty/malformed; no Google call               | both must be nonempty, control-free strings at most 512 UTF-8 bytes; `OAUTH_REDIRECT_URI` must exactly equal the committed callback for the active environment (`http://127.0.0.1:8080/api/v1/auth/oauth/google/callback`, `https://api-stag.vocanova.site/api/v1/auth/oauth/google/callback`, or the held production sentinel), with no credentials/query/fragment; timeout must be `8000`; otherwise only Google is unavailable |
+
+There is no runtime timeout default: the committed `AUTH_PROVIDER_TIMEOUT_MS="8000"`
+is mandatory whenever either switch is enabled. Complete email + disabled/malformed
+Google must leave email working; complete Google + disabled/malformed email must leave
+Google working; with both enabled, one malformed capability fails independently while
+the complete one still works. No invalid capability falls back to a fake, issues a
+session, or contacts a network. `/healthz` and unrelated disabled capabilities disclose
+no configuration or credential detail.
 
 Staging and production switches remain `false` in committed `wrangler.jsonc`.
 Production sentinels, routes, D1 binding, service binding, and holds remain unchanged.
@@ -90,17 +147,24 @@ untracked developer-only secret source and is not acceptance evidence.
 The runtime interface uses these exact names and no aliases:
 
 - non-secret configuration: `EMAIL_PROVIDER_URL`, `EMAIL_FROM`,
-  `EMAIL_PROVIDER_TIMEOUT_MS`, and `GOOGLE_OAUTH_CLIENT_ID`;
+  `AUTH_PROVIDER_TIMEOUT_MS`, and `GOOGLE_OAUTH_CLIENT_ID`;
 - secret bindings: `EMAIL_PROVIDER_API_KEY` and `GOOGLE_OAUTH_CLIENT_SECRET`; and
 - existing configuration reused unchanged: `OAUTH_REDIRECT_URI`,
   `MAGIC_LINK_ENABLED`, and `GOOGLE_OAUTH_ENABLED`.
 
-Non-secret defaults may be committed only when they do not select/purchase a provider
-or enable a feature. Secret values never enter Wrangler config, git, generated types,
-fixtures, GitHub comments, or artifacts. Generate committed Worker types only from
-the committed Wrangler surface; represent externally installed secret bindings through
-the minimum checked source interface rather than fabricating secret values in config.
-The generated type staleness check must pass.
+Every local, staging, and production API Worker `vars` object receives literal `""`
+for `EMAIL_PROVIDER_URL`, `EMAIL_FROM`, and `GOOGLE_OAUTH_CLIENT_ID`, plus literal
+`"8000"` for `AUTH_PROVIDER_TIMEOUT_MS`. These disabled sentinels do not select a
+provider or enable a feature. Add the same literals to
+`EXPECTED_WRANGLER_ROOTS.api.vars` and each environment-specific `expectedApi.vars`
+map in `scripts/foundation/cloudflare-delivery-policy.mjs`; focused tests mutate every
+new key in root/staging/production maps and require exact-map failure. No other delivery
+policy behavior changes.
+
+Secret values never enter Wrangler config, git, generated types, fixtures, comments,
+or artifacts. Generate `worker-configuration.d.ts` only from committed Wrangler config;
+represent the two externally installed secret bindings through the minimum checked
+interface in `provider-factory.ts`, never fabricated config values. Type staleness passes.
 
 This package does not change the `cloudflare-staging` GitHub environment, whose two
 Actions secret names remain only `CLOUDFLARE_ACCOUNT_ID` and
@@ -140,10 +204,36 @@ record must identify provider accounts, credential installation, test identities
 dispatch/deployment authority, evidence minimization, rollback, and expiry. Only after
 real evidence passes may another governed change mark A1 complete-effective.
 
+Index the runbook from `docs/operations/README.md`. Add
+`scripts/foundation/a1-staging-acceptance-policy.mjs` plus its `.test.mjs` suite. The
+network-free policy validates exact pending status, SHA/attempt/provider/auth/abuse/
+redaction/kill-switch/rollback fields, later-authority and HOLD-01/HOLD-02 boundaries,
+and rejects completion claims, live results, secrets/personal data, missing steps, or
+an unindexed runbook. The root foundation wildcard executes the test; no package-script
+change is allowed.
+
 ### VOC-112-D07 through D09 — Delivery, review, and prohibitions
 
-One adopted repository implementation PR contains adapters, factory/config/types,
-tests, runbook, directly affected documentation, and deterministic generated outputs.
+One adopted repository implementation PR changes exactly these fifteen paths:
+
+1. `apps/api-worker/src/app.ts`
+2. `apps/api-worker/src/identity/http-email-sender.ts`
+3. `apps/api-worker/src/identity/google-oauth-provider.ts`
+4. `apps/api-worker/src/identity/provider-factory.ts`
+5. `apps/api-worker/test/identity-provider-adapters.test.ts`
+6. `apps/api-worker/test/identity-parity.test.ts`
+7. `apps/api-worker/worker-configuration.d.ts`
+8. `apps/api-worker/wrangler.jsonc`
+9. `docs/development.md`
+10. `docs/operations/README.md`
+11. `docs/operations/a1-staging-acceptance.md`
+12. `scripts/foundation/a1-staging-acceptance-policy.mjs`
+13. `scripts/foundation/a1-staging-acceptance-policy.test.mjs`
+14. `scripts/foundation/cloudflare-delivery-policy.mjs`
+15. `scripts/foundation/cloudflare-delivery-policy.test.mjs`
+
+No web file, OpenAPI/client artifact, schema/migration, package/workflow/manifest,
+package script, package-lock, or other generated/documentation path may change.
 The exact implementation requires a security/authorization specialist and a separate
 independent R3 verifier. Complete installed checks and a disposable full-diff reverse
 rehearsal must pass before a separate non-author merge actor acts.
