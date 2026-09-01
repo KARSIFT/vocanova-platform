@@ -10,10 +10,11 @@ production or learner data, or change live traffic.
 - Procedure: validate all nine package files, allocator evidence for VOC-116/VOC-118/
   VOC-119, exact issue/run/job/base linkage, R3 declaration, one task/PR/path,
   explicit `automatic_merge_allowed: true`, the post-merge `origin/develop`
-  implementation-parent recording rule, pending review/adoption, rollback, and
-  prohibited authority.
-- Expected: complete draft package with no implementation or external-action
-  authority.
+  implementation-parent recording rule, adopted candidate bookkeeping, rollback, and
+  prohibited external authority.
+- Expected: adopted package authorizing the declared future implementation boundary,
+  while the later bookkeeping revision still requires fresh exact-SHA review before
+  merge.
 - Evidence: `VOC-119-EV-00`
 
 ## VOC-119-TEST-01 — Read-only diagnosis is exact

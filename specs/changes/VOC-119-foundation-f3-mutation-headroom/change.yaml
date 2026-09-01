@@ -4,7 +4,7 @@ id: VOC-119
 slug: foundation-f3-mutation-headroom
 title: Restore foundation F3 mutation-test headroom without reducing coverage
 type: required-foundation-test-performance-correction
-status: draft
+status: adopted
 risk: R3
 planned_implementation_risk_floor: >-
   R3 because the planned implementation changes a required foundation CI verifier.
@@ -24,12 +24,26 @@ base_branch: develop
 base_sha: e1379508621ee228ae06c88ebcad3b1b018ef4cc
 plan_branch: plan/voc-119-foundation-f3-mutation-headroom
 target_branch: develop
-approved_candidate_sha: pending-exact-plan-review-and-adoption
-approval_status: pending-independent-review-adoption-and-normal-plan-merge
-implementation_authorized: false
+approved_candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+approval_status: >-
+  adopted-approved-substantive-candidate-bookkeeping-pending-fresh-exact-review-and-
+  normal-plan-merge
+superseded_plan_candidates:
+  - candidate_sha: be41e112f7c4113f2b40b43e79cd3ec30df462f6
+    tree_sha: ce3c94e15ae803e8b134f4356fb70de83abd7289
+    status: blocked-and-superseded
+    review_evidence:
+      - https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497529030
+    reasons:
+      - timing-inference-arithmetic-did-not-reconcile-with-recorded-averages
+      - implementation-base-contract-did-not-bind-then-current-origin-develop
+    review_transfer: prohibited-fresh-exact-candidate-reviews-required
+implementation_authorized: true
 implementation_authority_status: >-
-  draft-package-only-no-implementation-authority-until-exact-plan-review-adoption-
-  bookkeeping-and-normal-plan-merge; no-external-action-authority
+  adopted-and-authorized-only-for-the-declared-one-file-repository-implementation-
+  but-unusable-until-this-bookkeeping-only-revision-receives-fresh-exact-
+  independent-review-and-PR-229-normally-merges-by-a-non-author;
+  no-external-action-authority
 implementation_pull_request_count: 1
 implementation_pull_request: pending-after-adoption
 multiple_pull_request_rationale: >-
@@ -156,9 +170,10 @@ owners:
   decision: /root
   package_preparation: /root/voc228_plan
   package_preparation_model: inherited-primary-GPT-5-no-override
+  adoption_bookkeeping: /root
   implementation: different-builder-actor-after-adoption
-  independent_cross_model_R3_plan_verifier: pending-distinct-non-author-actor
-  independent_cross_model_R3_plan_model: pending
+  independent_cross_model_R3_plan_verifier: /root/voc119_plan_review
+  independent_cross_model_R3_plan_model: gpt-5.6-sol
   independent_cross_model_R3_implementation_verifier: >-
     different-non-author-exact-revision-actor-distinct-from-implementation-builder
   merge: separate-non-author-actor
@@ -166,15 +181,18 @@ owners:
 
 approvals:
   independent_cross_model_R3_plan_review:
-    status: pending-required-before-adoption
-    candidate_sha: pending-final-plan-head-sha
-    evidence: pending
+    status: pass-exact-approved-candidate-zero-blockers
+    candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+    reviewer: /root/voc119_plan_review
+    reviewer_model: gpt-5.6-sol
+    package_preparer_model: inherited-primary-GPT-5-no-override
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497622470
   adoption_decision:
-    status: pending-required-before-implementation
-    decision_id: pending
+    status: approved-for-adoption-and-declared-one-file-repository-implementation
+    decision_id: VOC-119-ADOPT-2026-09-01
     actor: /root
-    candidate_sha: pending-final-plan-head-sha
-    evidence: pending
+    candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497771919
   independent_cross_model_R3_implementation_review:
     status: blocked-until-adopted-plan-and-exact-implementation-candidate
     candidate_sha: pending-future-implementation-sha
@@ -241,7 +259,7 @@ required_r3_evidence:
   independent_exact_revision_evidence:
     required: true
     role: independent-cross-model-R3-verifier
-    status: pending-plan-and-future-implementation-reviews
+    status: plan-pass-implementation-review-pending-future-exact-candidate
   contingency_and_rollback:
     required: true
     evidence: implementation-plan.md and release-plan.md
@@ -251,6 +269,82 @@ scope_boundary:
   immutable-test-local-baseline-and-surface-local-helper: allowed-after-adoption
   policy-module-package-script-workflow-timeout-or-coverage-change: prohibited
   external_or_live_action: prohibited
+
+implementation:
+  authorized: true
+  task_count: 1
+  pull_request_count: 1
+  pull_request: pending-after-adoption
+  branch: impl/voc-119-foundation-f3-mutation-headroom
+  exact_paths:
+    - scripts/foundation/voc105-f3-evidence-policy.test.mjs
+  external_effects: prohibited
+
+plan_review_history:
+  - candidate_sha: be41e112f7c4113f2b40b43e79cd3ec30df462f6
+    tree_sha: ce3c94e15ae803e8b134f4356fb70de83abd7289
+    reviewer: /root/voc119_plan_review
+    verdict: independent-fail-superseded-no-transfer
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497529030
+  - candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+    tree_sha: 4c52c0a34efc6cfb3d93d4a2f9a48aead0b352db
+    reviewer: /root/voc119_plan_review
+    reviewer_model: gpt-5.6-sol
+    package_preparer_model: inherited-primary-GPT-5-no-override
+    verdict: pass-independent-cross-model-R3-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497622470
+  - candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+    tree_sha: 4c52c0a34efc6cfb3d93d4a2f9a48aead0b352db
+    decision: VOC-119-ADOPT-2026-09-01
+    actor: /root
+    verdict: adopted-for-declared-one-file-repository-only-implementation
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/229#issuecomment-5497771919
+
+hosted_approved_candidate_evidence:
+  candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+  ci:
+    run_id: 33535865743
+    successful_attempt: 1
+    run_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865743
+    conclusion: success
+    foundation_job_id: 99950042180
+    foundation_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865743/job/99950042180
+    foundation_result: pass-253-of-253
+    foundation_job_duration_seconds: 871
+    headroom_under_cap_seconds: 329
+    ci_required_job_id: 99954787774
+    ci_required_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865743/job/99954787774
+    ci_required_result: success
+  governance:
+    run_id: 33535982108
+    run_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535982108
+    conclusion: success
+    structure_job_id: 99950316526
+    structure_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535982108/job/99950316526
+    changed_path_risk_job_id: 99950317010
+    changed_path_risk_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535982108/job/99950317010
+    merge_eligibility_job_id: 99950500548
+    merge_eligibility_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535982108/job/99950500548
+  security:
+    run_id: 33535865796
+    run_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865796
+    conclusion: success
+    secret_scan_job_id: 99949900420
+    secret_scan_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865796/job/99949900420
+    dependency_audit_job_id: 99949900342
+    dependency_audit_job_url: https://github.com/KARSIFT/vocanova-platform/actions/runs/33535865796/job/99949900342
+
+repository_adoption_status:
+  status: adopted
+  approved_substantive_candidate_sha: 16d5b5cee3c6ece074edc1bde64c5ac1207ff4da
+  approved_substantive_candidate_tree: 4c52c0a34efc6cfb3d93d4a2f9a48aead0b352db
+  bookkeeping_revision: >-
+    current-adoption-bookkeeping-revision-is-not-the-approved-substantive-candidate-
+    and-requires-fresh-exact-review-before-normal-plan-merge
+  blocking_reasons:
+    - bookkeeping-only-revision-pending-fresh-exact-independent-review
+    - PR-229-pending-normal-non-author-merge
+  implementation_authority_usable: false
 
 rollback:
   strategy: complete-reviewed-one-file-revert-to-actual-first-parent

@@ -22,12 +22,18 @@ the representative full mutation path, and about `39.2 s` through the already
 exported surface-local path. Those figures are inferences from local averages and
 loop cardinality, not claimed post-change results.
 
-This draft R3 repository-only package authorizes no implementation yet. After exact
-plan review and adoption, one future implementation PR may change only
+This adopted R3 repository-only package authorizes one future implementation PR to
+change only
 `scripts/foundation/voc105-f3-evidence-policy.test.mjs`. It must preserve every
 existing mutation member, positive safe clause, diagnostic expectation, wildcard test
 discovery, foundation aggregate, and the exact 20-minute hosted timeout. It may not
 skip, shard away, retry, weaken, reduce coverage, or raise any timeout.
+
+The approved substantive candidate is
+`16d5b5cee3c6ece074edc1bde64c5ac1207ff4da` with cross-model PASS evidence on PR #229
+and hosted green checks including foundation `253/253` in `14m31s` and `ci required`
+PASS. This later bookkeeping revision still requires fresh exact-SHA independent
+review before the plan PR may merge.
 
 Allocator evidence on 2026-09-01 found VOC-118 already merged on `develop` (plan PR
 #224, implementation PR #227) and no existing `VOC-119` package, branch, or default-

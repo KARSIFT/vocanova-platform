@@ -11,8 +11,9 @@
 - The package records that VOC-116 is current foundation timeout authority, VOC-118 is
   already consumed on `develop`, and `VOC-119` is the next free package ID as of
   2026-09-01.
-- The package remains `draft`, `implementation_authorized: false`, one task, one
-  future implementation PR, and no external-action authority.
+- The package is `adopted`, binds `approved_candidate_sha` to
+  `16d5b5cee3c6ece074edc1bde64c5ac1207ff4da`, authorizes one task and one future
+  implementation PR, and grants no external-action authority.
 
 ### VOC-119-AC-01 — Exact one-file implementation boundary
 
