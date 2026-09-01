@@ -8,21 +8,21 @@ replay, disclose account existence, or make a disabled feature contact a provide
 Protection covers auth/session entry, OAuth/email credentials, personal identity,
 requester isolation, Worker bindings, and security evidence.
 
-| Area | Status | Evidence or required work |
-| --- | --- | --- |
-| Product scope and UX | Affected | Completes the already approved two-method A1 implementation boundary; no new method or P1+ behavior. |
-| Living documents and decisions | Affected | Add pending A1 staging runbook and update only directly stale development/operations provider-boundary wording. |
-| Frontend and accessibility | Affected | Existing sign-in/magic-link/logout journey is regression-tested; changes only if needed for adopted security/accessibility correctness. |
-| Backend and API contracts | Affected | New provider adapters and default factory; public endpoints/DTOs remain compatible. |
-| Database and migrations | Not affected | Existing seven D1 migrations and identity schema remain unchanged. |
-| Authentication and authorization | Affected | R3 provider, session-entry, state, cookie, CSRF, and cross-user controls. |
-| Privacy, personal data, audio, or voice | Affected | Synthetic identity tests only; live personal/test identity use is prohibited here. No audio/voice. |
-| Security and secrets | Affected | Binding-name/interface and strict redaction; no values or settings mutation. |
-| Analytics | Not affected | No analytics event or identity correlation added. |
-| AI behavior/providers | Not affected | No AI provider, prompt, cost, or evaluation change. |
-| Infrastructure and deployment | Affected but held | Worker config/types may declare disabled interfaces; tuple, switches, deployment workflow, and external state remain unchanged. |
-| Testing | Affected | Adapter, factory, workerd, security, browser, path, secret, and rollback evidence. |
-| Support and operations | Affected | Pending staging procedure and failure/rollback triggers; no live execution. |
+| Area                                    | Status            | Evidence or required work                                                                                                               |
+| --------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Product scope and UX                    | Affected          | Completes the already approved two-method A1 implementation boundary; no new method or P1+ behavior.                                    |
+| Living documents and decisions          | Affected          | Add pending A1 staging runbook and update only directly stale development/operations provider-boundary wording.                         |
+| Frontend and accessibility              | Affected          | Existing sign-in/magic-link/logout journey is regression-tested; changes only if needed for adopted security/accessibility correctness. |
+| Backend and API contracts               | Affected          | New provider adapters and default factory; public endpoints/DTOs remain compatible.                                                     |
+| Database and migrations                 | Not affected      | Existing seven D1 migrations and identity schema remain unchanged.                                                                      |
+| Authentication and authorization        | Affected          | R3 provider, session-entry, state, cookie, CSRF, and cross-user controls.                                                               |
+| Privacy, personal data, audio, or voice | Affected          | Synthetic identity tests only; live personal/test identity use is prohibited here. No audio/voice.                                      |
+| Security and secrets                    | Affected          | Binding-name/interface and strict redaction; no values or settings mutation.                                                            |
+| Analytics                               | Not affected      | No analytics event or identity correlation added.                                                                                       |
+| AI behavior/providers                   | Not affected      | No AI provider, prompt, cost, or evaluation change.                                                                                     |
+| Infrastructure and deployment           | Affected but held | Worker config/types may declare disabled interfaces; tuple, switches, deployment workflow, and external state remain unchanged.         |
+| Testing                                 | Affected          | Adapter, factory, workerd, security, browser, path, secret, and rollback evidence.                                                      |
+| Support and operations                  | Affected          | Pending staging procedure and failure/rollback triggers; no live execution.                                                             |
 
 ## Failure modes and mitigations
 
