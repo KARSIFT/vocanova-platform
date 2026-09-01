@@ -42,12 +42,20 @@
   1. Capture before/after GitHub repository, ruleset, branch, security, tag,
      required-check, environment reviewer, admin-bypass, deployment-policy-mode, and
      custom-branch state around each authorized mutation.
-  2. Exercise each required gate on a non-destructive PR/merge-group path.
-  3. Prove `cloudflare-staging` safely admits `main`, preserves reviewer/admin state,
+  2. Prove transition/rollback refs are created only after authorization and exact
+     name/SHA freeze, then protected from update, deletion, and non-fast-forward
+     mutation without bypass before reliance.
+  3. Exercise each required gate on a non-destructive PR/merge-group path.
+  4. Prove action A permits the required old-model merge commits and does not enable
+     squash-only linear history, merge queue, future-only gates, or future review
+     floors before the final synchronization.
+  5. Prove `cloudflare-staging` safely admits `main`, preserves reviewer/admin state,
      reads no secret value, and can restore the captured `develop` policy.
-  4. Verify a credential-free main dispatch reaches the expected gate before sole-main
+  6. Verify a credential-free main dispatch reaches the expected gate before sole-main
      policy or develop retirement.
-  5. Compare each immediate doc-only settings record with live readback.
+  7. Prove action B occurs only after final merge-commit synchronization and activates
+     squash/linear history, queue, future gates/reviews, and sole-main staging.
+  8. Compare PR3 and PR5 settings truth with their exact live readbacks.
 - Expected: protected main and immutable version tags match policy with no hidden
   bypass or missing gate.
 
@@ -67,12 +75,11 @@
 - Procedure:
   1. Verify every removed active artifact is reachable from the recorded rollback ref.
   2. Verify no current script, workflow, doc, template, ruleset, or package script
-     depends on a removed path or check name, except explicitly quarantined EHR
-     subjects awaiting qualified-human disposition.
+     depends on a removed path or check name after both EHR outcomes are applied.
   3. Reconstruct the last-known-good branch/settings plan without executing
      destructive or live production actions.
-  4. Execute the immutable pre-change transition verifier against each cleanup
-     candidate, including the exact PR5 candidate that removes its tracked copy and
-     PR6 by using the retained immutable ref.
+  4. Execute the immutable pre-change verifier through permanent `Policy / required`
+     for every named transition branch. Prove PR4 can remove the tracked full verifier
+     only after ref-pinned acceptance and PR5 still invokes that protected ref.
   5. Prove final main ancestry and branch/PR inventory.
 - Expected: clean final tree with deterministic repository/settings rollback.

@@ -104,11 +104,12 @@ clear outcomes, and scope. It neither becomes routine review nor silently clears
 - Tests: `VOC-120-TEST-04`, `VOC-120-TEST-06`
 - Result: pending
 
-PR1, promotion/synchronization, additive settings, immediate PR2 truth, PR3 cleanup,
-final settings, immediate PR4 truth, PR5 finalization, develop retirement, and
-immediate PR6 truth have exact preconditions and readbacks. A captured settings
-snapshot and immutable rollback ref restore the last known good state without
-production or Cloudflare deployment.
+PR1 preparation, the qualified-human EHR boundary, PR2 disposition/correction,
+additive settings, immediate PR3 truth, PR4 cleanup and final old-model
+promotion/synchronization, final settings/develop retirement, and immediate PR5 truth
+have exact preconditions and readbacks. Captured phase snapshots and no-bypass
+immutable refs restore the last known good state without production or Cloudflare
+deployment.
 
 ## VOC-120-AC-10 — Repository and product validation remain green
 

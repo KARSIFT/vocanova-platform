@@ -25,21 +25,20 @@ target_branch: develop
 approval_status: pending-independent-review
 implementation_authorized: false
 adoption_decision_owner: founder-repository-owner-m-e-h-r-d-a-a-d
-implementation_pull_request_count: 6
+implementation_pull_request_count: 5
 multiple_pull_request_rationale: >-
-  Six implementation pull requests are required by real rollback-safe,
+  Five implementation pull requests are required by real rollback-safe,
   action-authority, settings-truth, and active-EHR boundaries. PR1 installs
   dual-compatible policy, gates, and an immutable pre-change transition verifier.
-  An authorized additive settings action is followed immediately by PR2, a
-  separately reviewed doc-only live-truth record. PR3 removes only non-EHR legacy
-  machinery while old authority and the verifier remain controlling. A second
-  authorized settings cutover is followed immediately by PR4, another separately
-  reviewed doc-only truth record. PR5, still evaluated against the frozen
-  pre-change authority/verifier, removes the transition bridge and EHR-overlapping
-  paths only after both human dispositions exist. A single PR would delete checks
+  PR2 applies both qualified-human EHR outcomes and the required minimal correction.
+  An authorized additive, old-flow-compatible settings action is followed immediately
+  by PR3, a separately reviewed doc-only live-truth record. PR4, still evaluated
+  against the frozen pre-change authority/verifier, performs the coherent cleanup and
+  completes the final old-model promotion/synchronization. A final authorized settings
+  cutover is followed immediately by PR5, the separately reviewed doc-only final truth
+  record. A single PR would delete checks
   needed to review itself, claim settings before they exist, violate the mandatory
-  settings-documentation follow-up, or supersede active EHR. PR6 is the immediate
-  doc-only truth record after final branch retirement. The extra overhead is
+  settings-documentation follow-up, or supersede active EHR. The extra overhead is
   accepted once for a non-self-authorizing transition and is what the replacement
   eliminates for future routine work.
 automatic_merge_allowed: true
@@ -150,7 +149,9 @@ requirements:
       those disputed revisions. A qualified human decision or an allowed abandon/
       revert/supersession verdict remains necessary for each conflict.
       No file, validator, release mechanism, branch, or policy that is the subject of
-      either dispute may be removed or functionally superseded first.
+      either dispute may be removed or functionally superseded first. The issue #191
+      stop record prohibits every promotion and release/ref action until both outcomes
+      and any required correction are permanent and complete.
   - id: VOC-120-D11
     statement: >-
       Separate repository history from delivery. A main merge may make a SHA
@@ -168,8 +169,14 @@ requirements:
       and migrate the `cloudflare-staging` deployment-branch policy from sole
       `develop` through a safe dual-policy or bounded stopped state to sole `main`,
       including reviewer/admin-bypass/policy-mode readback and rollback without
-      reading secret values. Committed settings documentation must match live truth
-      through an immediate separately reviewed doc-only PR after every mutation.
+      reading secret values. The additive phase must remain compatible with the old
+      merge-commit promotion/synchronization loop; squash-only linear history, merge
+      queue, future-only gates, and sole-main staging activate only after the final
+      old-model synchronization. One permanent stable `Policy / required` gate must
+      invoke the no-bypass ref-pinned pre-change verifier for every exact VOC-120
+      transition branch through PR5 acceptance, then serve as the compact future policy
+      aggregate. Committed settings documentation must match live truth through an
+      immediate separately reviewed doc-only PR after every mutation.
   - id: VOC-120-D13
     statement: >-
       Do not copy Kandev's scale-specific complexity blindly. VocaNova must not copy
@@ -211,9 +218,11 @@ action_specific_holds:
     required_evidence: unchanged existing production and learner-data hold evidence
     completion: not satisfiable by VOC-120
   - id: VOC-120-HOLD-04
-    action: create-or-delete-transition-and-rollback-git-refs
+    action: create-update-or-delete-transition-and-rollback-git-refs
     accountable_role: founder-repository-owner
-    required_evidence: exact ref name/SHA, purpose, recreation command, and readback
+    required_evidence: >-
+      prior explicit authorization; exact ref grammar/name/SHA/purpose/recreation
+      command; and no-bypass update/deletion/non-fast-forward protection readback
     completion: rollback ref remains immutable through final transition acceptance
 
 implementation:
@@ -225,29 +234,24 @@ implementation:
       status: pending-adoption
       boundary: repository-only dual-compatible policy and workflow preparation
     - id: VOC-120-PR2
+      name: ehr-disposition-and-transition-unblock
+      target: develop
+      status: blocked-on-qualified-human-ehr-records
+      boundary: apply EHR outcomes and only their required minimal correction
+    - id: VOC-120-PR3
       name: additive-settings-truth
       target: develop
-      status: blocked-on-pr1-promotion-and-additive-settings-readback
+      status: blocked-on-pr2-and-authorized-additive-settings-readback
       boundary: immediate separately reviewed doc-only live-settings reconciliation
-    - id: VOC-120-PR3
-      name: non-ehr-legacy-cleanup
-      target: develop
-      status: blocked-on-pr2-and-additive-protection
-      boundary: old-authority-reviewed cleanup excluding every active EHR subject
     - id: VOC-120-PR4
-      name: cutover-settings-truth
+      name: final-cleanup-under-old-authority
       target: develop
-      status: blocked-on-pr3-and-final-settings-readback
-      boundary: immediate separately reviewed doc-only final-settings reconciliation
+      status: blocked-on-pr3-settings-truth
+      boundary: pre-change-evaluated coherent cleanup and final old-model synchronization
     - id: VOC-120-PR5
-      name: transition-bridge-and-ehr-finalization
-      target: develop
-      status: blocked-on-both-qualified-human-ehr-dispositions
-      boundary: pre-change-evaluated final cleanup and branch-retirement eligibility
-    - id: VOC-120-PR6
       name: branch-retirement-settings-truth
       target: main
-      status: blocked-on-pr5-promotion-and-authorized-develop-retirement
+      status: blocked-on-pr4-promotion-and-authorized-final-settings-cutover
       boundary: immediate separately reviewed doc-only final branch/settings truth
 
 acceptance_criteria:
@@ -280,10 +284,11 @@ rollback:
     PRs cannot merge safely, protected controls are lost, or active history is
     incomplete
   mechanism: >-
-    Before activation, revert PR1. After activation, restore the captured settings
-    snapshot and rollback ref, re-enable the dual-compatible workflow, and revert
-    the failing cleanup revision through protected main. Never delete the rollback
-    ref until post-cutover verification completes.
+    Before settings action A, revert PR1/PR2. After action A, restore its captured
+    merge-compatible settings snapshot and protected refs. After final action B,
+    restore phase A, recreate develop at the recorded SHA, and revert the failing
+    cleanup through the protected branch. Never delete protected transition/rollback
+    refs until PR5 exact old-authority acceptance completes.
   owner: founder-repository-owner
 
 independent_verification:

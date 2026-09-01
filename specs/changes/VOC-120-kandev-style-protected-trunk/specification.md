@@ -167,23 +167,23 @@ EHR applies only to irreducible high-consequence uncertainty. The runbook record
 Existing PR #215 and issue #231 remain scoped under the pre-change EHR record.
 No file, validator, release mechanism, branch, or policy that is the subject of those
 records may be removed or functionally superseded before its qualified-human
-disposition.
+disposition. Issue #191 prohibits promotion and release/ref action until both outcomes
+and required corrections are permanently complete.
 
 ## Transition
 
-PR1 stages the dual-compatible future model without replacing active authority and
-adds a frozen executable pre-change transition verifier. The current rules govern its
-merge, promotion, and initial transition history synchronization. An additive settings action enables new gates while retaining the
-old gate and adds `main` to the staging environment policy; immediate doc-only PR2
-records live truth. PR3 removes only non-EHR legacy machinery and remains governed by
-old authority and the verifier, then is promoted/synchronized. A final settings
-action selects new gates and sole `main` staging policy only after credential-free
-validation; immediate doc-only PR4 records and promotes that truth. PR5 removes the
-transition bridge and EHR-overlapping surfaces only after both human dispositions,
-is evaluated against immutable pre-change authority, and receives the final old-model
-promotion/synchronization. `develop` retirement then requires exact rollback/ancestry
-proof and a satisfied EHR boundary; immediate doc-only PR6 records the result before
-the future model governs ordinary work.
+PR1 stages the dual-compatible future model and permanent policy aggregate without
+replacing active authority; it may merge to `develop` but cannot be promoted while the
+release EHR stop remains. PR2 applies qualified-human outcomes for PR #215 and issue
+#231 plus only the required minimal correction. Additive settings action A then
+protects immutable verifier/rollback refs, keeps merge commits and old gates, and adds
+`main` to the staging policy; immediate doc-only PR3 records live truth. PR4 performs
+the coherent cleanup under the ref-pinned old verifier and receives the final
+merge-commit promotion/synchronization. Only afterward may action B enable squash-only
+linear main, merge queue, future gates/reviews, sole-main staging, and ordered develop
+retirement. Immediate doc-only PR5 is still required to pass the immutable old verifier
+through permanent `Policy / required`; the future model governs ordinary work only
+after PR5 merges.
 
 ## Security, privacy, data, and accessibility
 

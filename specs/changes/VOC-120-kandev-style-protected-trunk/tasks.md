@@ -12,20 +12,19 @@
 
 Install the concise future model, machine lane/path policy, aggregate gates, review
 contract, EHR runbook, transition inventory, and immutable pre-change verifier while
-preserving old controls. Complete the initial transition promotion/synchronization.
+preserving old controls. Merge only to `develop`; do not cross the active release EHR.
 
 ## VOC-120-T02 — Activate, reconcile, clean, and finalize
 
 - Requirements: `VOC-120-D00` through `VOC-120-D14`
 - Acceptance criteria: `VOC-120-AC-01` through `VOC-120-AC-10`
 - Tests: `VOC-120-TEST-01` through `VOC-120-TEST-06`
-- Evidence: `VOC-120-EV-04`, `VOC-120-EV-05`, `VOC-120-EV-06`
-- Implementation PRs: `VOC-120-PR2`, `VOC-120-PR3`, `VOC-120-PR4`, `VOC-120-PR5`,
-  `VOC-120-PR6`
-- Status: blocked-on-t01-and-held-settings-actions
+- Evidence: `VOC-120-EV-04`, `VOC-120-EV-05`, `VOC-120-EV-06`, `VOC-120-EV-07`
+- Implementation PRs: `VOC-120-PR2`, `VOC-120-PR3`, `VOC-120-PR4`, `VOC-120-PR5`
+- Status: blocked-on-t01-qualified-human-ehr-and-held-actions
 
-Perform additive settings activation and immediate PR2 truth; PR3 non-EHR cleanup
-under old authority; final settings cutover and immediate PR4 truth; then, after both
-human EHR dispositions, PR5 transition-bridge cleanup and branch finalization. Every
-candidate remains bound to the frozen pre-change transition contract; PR6 records
-the final branch/settings truth immediately after retirement.
+Apply both qualified-human outcomes and the required minimal correction in PR2;
+perform merge-compatible settings action A and immediate PR3 truth; complete PR4
+cleanup plus the final old-model promotion/synchronization; then perform action B and
+immediate PR5 truth. Permanent `Policy / required` enforces the frozen verifier for
+all transition branches and becomes the compact future policy aggregate afterward.

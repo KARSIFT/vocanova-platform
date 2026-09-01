@@ -6,163 +6,157 @@
    Cloudflare environment policy, EHR, rollback, and lane classification.
 2. The founder-repository-owner records the adoption decision under pre-change
    DOC-15/DOC-16; `implementation_authorized` becomes true only afterward.
-3. All six implementation candidates remain subject to the frozen pre-change
-   authority and independent exact review. The future model cannot authorize any
-   part of its own transition.
-4. PR #215 and issue #231 remain untouched except for read-only impact analysis until
-   qualified-human dispositions exist.
-5. No setting or ref mutation occurs without the applicable hold and exact readback.
+3. All five implementation candidates remain subject to frozen pre-change authority
+   and different-actor exact review. The future model cannot authorize its transition.
+4. No promotion, release/ref action, settings cutover, or EHR-affected correction is
+   executable until PR #215 and issue #231 have permanent qualified-human outcomes.
+5. No setting or ref mutation occurs without its explicit hold and exact readback.
+
+The five implementation heads are fixed as
+`impl/voc-120-preparation`, `impl/voc-120-ehr-unblock`,
+`docs/voc-120-additive-settings`, `impl/voc-120-final-cleanup`, and
+`transition/voc-120-final-truth`. The transition gate fails closed for a changed or
+unexpected VOC-120 branch identity.
 
 ## PR1 — Dual-compatible preparation
 
-Branch from then-current `origin/develop`. Keep the old process operational.
+Branch from then-current `origin/develop`. Keep all current authority, EHR subjects,
+release machinery, templates, and required checks operational.
 
-### Policy and contributor surfaces
+- Stage the future concise policy, engineering-oriented `AGENTS.md`, contributor
+  templates, EHR runbook, and machine lane/path policy as non-active inputs.
+- Add path-aware aggregate gates that always report and run more work for an unknown
+  base or classifier error.
+- Add one permanent compact `Policy / required` workflow. During the five named
+  VOC-120 transition branches it invokes the frozen pre-change verifier; afterward
+  it becomes the ordinary future policy aggregate and does not replay historical
+  prose.
+- Add the executable transition verifier and mutation tests. It binds candidates to
+  the accepted control inventory, current authority, active EHR scope, held actions,
+  exact transition branch names, and required evidence.
+- Preserve all legacy checks needed by current review and release.
 
-- Introduce one concise future normative governance/workflow document.
-- Stage the future root `AGENTS.md` and concise issue/PR templates as non-active
-  transition inputs; preserve every current authority and contributor surface until
-  PR5 installs their reviewed replacements.
-- Add the EHR runbook, machine lane/path policy, and control-transition inventory.
-- Define Standard, Protected, and External Action floors, including unknown to
-  Protected, stale-review dismissal, conversation resolution, Standard semantic
-  review checks, and one native non-author approval for Protected work.
+Run current governance/risk checks, workflow security/action pinning, lane/path/
+aggregate/merge-group matrices, affected product/security suites, transition-verifier
+mutations, rollback inventory, and independent governance/Actions/security review.
+PR1 may merge to `develop`; it may not be promoted while the release EHR stop remains.
 
-### CI and review surfaces
+## Qualified-human EHR boundary
 
-- Add the smallest future aggregate gate set for policy, web/packages, API/D1,
-  integration/quality, and security.
-- Add a tested changed-path helper. Required workflows always report; unknown bases
-  run more checks; merge-group events are supported.
-- Preserve all legacy checks needed by pre-change review and promotion.
-- Add an immutable, executable transition verifier that binds every later VOC-120
-  candidate to the frozen pre-change authority, accepted path/control inventory,
-  active EHR exclusions, and held settings actions. Record its exact digest/ref.
-- Add attributable review automation only if a usable native app/bot identity exists;
-  otherwise Protected work remains blocked rather than faking provenance.
+Before PR2 or any promotion:
 
-### PR1 validation
+1. Record truthful reviewer identity, role, and relevant qualification.
+2. Resolve PR #215 by a reasoned uphold/correct/abandon/supersede verdict. If abandoned
+   or superseded, close it with permanent evidence and preserve its history.
+3. Resolve issue #231 with a technical verdict on aggregate semantic dispatch. If the
+   low-cardinality aggregate proof is required, PR2 implements it before release.
+4. Record whether each EHR is cleared. A directional founder preference without the
+   required qualification record does not satisfy this boundary.
 
-- current governance/risk checks;
-- action pinning and workflow security lint;
-- lane/path/aggregate/merge-group mutation tests;
-- product/security regression suites affected by workflow restructuring;
-- transition-verifier mutation tests;
-- exact rollback and control inventory;
-- independent governance, Actions/ruleset, security, and environment-policy review.
+## PR2 — EHR disposition and transition unblock
 
-## Initial transition promotion and synchronization
+Branch from current `origin/develop` only after the qualified-human records exist.
 
-After PR1 merges to `develop`, use the current reviewed `develop` to `main` promotion
-and one final reviewed main-to-develop synchronization. Record exact SHAs, ancestry,
-branch inventory, checks, rollback ref, and recreation command. No deployment occurs.
+- Implement only the correction required by the issue #231 outcome, expected to be
+  the minimal per-designated-surface aggregate semantic-dispatch proof.
+- Apply the PR #215 outcome without silently merging disputed code.
+- Update permanent EHR/release status truth and preserve exact evidence links.
+- Do not remove current governance, release/sync, or transition controls.
 
-## Additive settings action A
+PR2 receives current deterministic checks and fresh exact independent review. It may
+merge to `develop`; no promotion or ref/settings action starts until both EHR records
+are permanently cleared and any required correction is green.
 
-With explicit `VOC-120-HOLD-01` and `HOLD-04` authorization:
+## Additive settings and protected-ref action A
 
-1. Capture exact repository, ruleset, branch, security, tag, environment reviewer,
-   admin-bypass, deployment-policy mode, custom-branch-policy, and ref state without
-   reading secret values.
-2. Enable supported secret scanning, push protection, and Dependabot security updates.
-3. Create immutable `v*` tag protection and the main ruleset without permanent admin
-   bypass, requiring both observed legacy transition gates and future aggregate gates.
-4. Configure stale-review dismissal, conversation resolution, and Protected-review
-   enforcement. Do not claim a reviewer actor that is not installed and verified.
-5. Add `main` to `cloudflare-staging` while retaining `develop`, or use a bounded
-   stopped swap if GitHub cannot represent both safely. Preserve reviewers and admin
-   bypass exactly. Update no secret name or value.
-6. Prove every configured gate reports and a credential-free main dispatch reaches
-   the expected pre-secret/environment boundary. Do not deploy.
-7. Restore the snapshot and stop if any readback differs.
+With explicit `VOC-120-HOLD-01` and `VOC-120-HOLD-04` authorization:
 
-## PR2 — Immediate additive-settings truth
+1. Capture repository, branch, ruleset, merge-method, required-check, security, tag,
+   environment reviewer, admin-bypass, deployment-policy mode, custom-branch-policy,
+   and ref state without reading secret values.
+2. Freeze rollback tag grammar `refs/tags/voc-120-rollback-<40hex>` and verifier tag
+   grammar `refs/tags/voc-120-verifier-<40hex>`. Create each at its recorded exact SHA
+   only after authorization, then install no-bypass rules over both namespaces that
+   prohibit update, deletion, and any non-fast-forward replacement. Read rules and
+   target objects back before reliance; creation, mutation, or deletion before
+   authorization fails.
+3. Enable supported secret scanning, push protection, and Dependabot security updates
+   plus immutable `v*` release-tag protection.
+4. Protect `main` against deletion/force push and require conversation resolution,
+   stale-review dismissal, observed legacy gates, and permanent `Policy / required`.
+5. Keep merge commits and the old release/synchronization topology allowed. Do not yet
+   enable squash-only linear history, merge queue, future-only checks, or future review
+   floors.
+6. Add `main` to `cloudflare-staging` while retaining `develop`, or use a bounded
+   stopped swap if dual policy is unsupported. Preserve reviewers, admin bypass, and
+   policy mode exactly; update no secret name or value.
+7. Prove a credential-free main dispatch reaches the expected pre-secret/environment
+   boundary without deployment. Restore the snapshot and stop on any mismatch.
 
-Open immediately after action A. It is separately reviewed, doc-only, and governed by
-the frozen pre-change authority. Update only current settings truth and directly
-dependent links. Record exact before/after JSON, gate names, dual staging policy,
-review requirements, rollback ref, and no-secret-read evidence. PR3 cannot start
-until PR2 merges.
+## PR3 — Immediate additive-settings truth
 
-## PR3 — Non-EHR legacy cleanup
+Open immediately from `origin/develop`. It is separately reviewed, doc-only, and
+governed by frozen pre-change authority. Record exact before/after JSON, allowed merge
+methods, legacy and transition gate names, protected ref grammar/SHAs/rules, dual or
+bounded staging policy, security state, rollback, and no-secret-read evidence.
 
-Branch from then-current `origin/develop`. Old authority, legacy gate, and immutable transition
-verifier remain controlling through exact candidate acceptance and merge.
+## PR4 — Final cleanup under old authority
 
-- Remove only non-authoritative historical/prose-replay material and dead machinery
-  that the transition inventory classifies non-product, non-EHR, and unnecessary to
-  evaluate or operate the remaining transition. Preserve DOC-15/DOC-16, root
-  `AGENTS.md`, active templates, package adoption/verification, release/sync, and
-  other current authority surfaces until PR5.
-- Preserve every file, validator, release/synchronization mechanism, and branch
-  implicated by PR #215 or issue #231.
-- Retain the transition verifier and minimal legacy gate needed to prove PR4/PR5.
-- Keep current product auth, data, D1, API, AI safety, accessibility, dependency,
-  delivery, rollback, and external-action controls in affected-path/trunk lanes.
-- Reconcile remaining active docs and scripts to one truthful provisional state.
+After PR3 merges, branch from current `origin/develop`. Use the immutable verifier ref
+and permanent `Policy / required` transition mode against the exact candidate.
 
-PR3 receives complete deterministic checks and different-actor exact specialist
-review under the pre-change authority. Promote PR3 through a reviewed `develop` to
-`main` release and synchronize back before settings action B. The future governance
-does not become authoritative yet; all later transition work remains under the old
-authority.
+- Apply both EHR outcomes and remove only machinery their dispositions permit.
+- Atomically install the reviewed concise policy, engineering `AGENTS.md`, and concise
+  templates while retiring nine-file package creation, duplicated authority prose,
+  PR-body identity/binder polling, non-product historical replay, and obsolete release
+  scaffolding.
+- Retain product auth, authorization, learner isolation, D1 migration/recovery, API,
+  AI safety/cost, accessibility, dependency, staging isolation, rollback, and held
+  external-action controls in affected-path or stable aggregate lanes.
+- Retain permanent `Policy / required`; its transition mode executes the verifier from
+  the protected immutable ref for PR4 and the exact final-truth PR5 branch.
+- Reconcile every active workflow, script, package command, settings document,
+  CODEOWNERS rule, and contributor surface to one provisional truthful state.
 
-## Final settings action B
+After exact old-authority review, merge PR4 to `develop`. Then perform the one final
+old-model `develop -> main` merge-commit promotion and main-to-develop merge-commit
+synchronization. Record merge SHAs and prove `main` ancestry. Squash-only history and
+the merge queue remain disabled through this synchronization.
 
-After PR3 and only with explicit authorization:
+## Final settings and branch action B
 
-1. Prove new gates and Protected review on exact main.
-2. Remove legacy required gates only after the immutable transition verifier has
-   accepted PR3 and remains available by recorded ref for PR4/PR5.
-3. Move `cloudflare-staging` from dual/bounded policy to sole `main` only after the
-   credential-free main dispatch passes. Preserve reviewers/admin bypass/mode and
-   keep secret values unread.
-4. Keep `develop` while PR #215 EHR remains active. Retire it only if both EHR
-   dispositions, ancestry, rollback ref, open-PR inventory, and `HOLD-02` permit it.
-5. Capture exact before/after readback and restore on mismatch.
+Only after the final synchronization, with explicit `HOLD-01`, `HOLD-02`, and any ref
+authority required by `HOLD-04`:
 
-## PR4 — Immediate final-settings truth
+1. Snapshot the complete phase-A state and prove PR4 passed the immutable transition
+   verifier, current and future aggregate gates, and exact independent review.
+2. Change `main` to squash-only linear protected history, future aggregate gates,
+   conversation resolution, stale-review dismissal, the defined review floors, and
+   merge queue. Retain permanent `Policy / required` with no administrator bypass.
+3. Move `cloudflare-staging` to sole `main` only after credential-free main policy-gate
+   proof. Preserve reviewers/admin-bypass/mode and read no secret values.
+4. Prove `main` contains intended `develop` ancestry, inventory or retarget open PRs,
+   record the exact recreation command, then retire `develop` only with `HOLD-02`.
+5. Keep verifier and rollback refs protected through PR5 acceptance. Restore phase A
+   atomically if any rule, check, queue, branch, environment, or ref readback differs.
 
-Open immediately after action B. It is separately reviewed, doc-only, and still
-evaluated under the frozen pre-change transition contract. Record sole-main or
-explicit EHR-retained branch state, required gates, reviews, environment policy,
-security features, tags, rollback ref, and all remaining holds. It targets `develop`
-under the pre-change workflow and is promoted/synchronized before PR5.
+## PR5 — Immediate final branch/settings truth
 
-## PR5 — Transition bridge and EHR finalization
+Open the fixed short-lived branch `transition/voc-120-final-truth` from protected
+`main`. Update only settings/branch truth and directly dependent links. The required
+`Policy / required` workflow recognizes this exact transition branch and invokes the
+immutable pre-change verifier; future aggregate gates and one non-author native review
+also apply. Record settings JSON, final branch/PR/tag/ref/environment inventory,
+rollback/recreation commands, and a future-effective activation decision conditional
+on PR5 merge and exact old-authority acceptance.
 
-PR5 branches from then-current `origin/develop` and cannot begin until qualified
-humans resolve both PR #215 and issue #231. Apply
-each outcome explicitly: uphold, correct, revert, abandon, or supersede. Then:
-
-- remove only the now-resolved disputed machinery authorized by those outcomes;
-- atomically install the reviewed concise policy, root `AGENTS.md`, and contributor
-  templates while retiring the current normative/package workflow surfaces;
-- remove the transition verifier/legacy bridge after executing its immutable version
-  from the recorded ref against the exact PR5 candidate;
-- retire remaining tracked `develop` references and prepare branch retirement when
-  `HOLD-02` is satisfied;
-- prove main ancestry, rollback recreation, open-PR targets, rulesets, tags, checks,
-  staging environment policy, and final repository inventory;
-- obtain fresh pre-change governance, Actions/ruleset, security, and EHR-scope review
-  of the exact candidate.
-
-After PR5 merges, promote it to `main` and perform the final old-model synchronization.
-Only then may the adoption owner record future-policy activation. With `HOLD-02`,
-retire `develop` and read back every PR target, branch, rule, tag, and environment.
-
-## PR6 — Immediate branch-retirement truth
-
-Open immediately on protected `main` after `develop` retirement. It is doc-only,
-separately reviewed, and records the final live branch/settings inventory, rollback
-recreation command, closed or retargeted PR evidence, and activation decision. PR6 is
-the final pre-change transition obligation; after it merges, ordinary future work
-uses the new policy.
+After PR5 merges, ordinary branches use the future lightweight policy. The permanent
+policy gate remains; historical transition refs may be deleted only in a later
+explicitly authorized action after their retention condition expires.
 
 ## Rollback
 
-Before PR3, revert PR1/PR2 and restore settings snapshot A. After PR3, restore snapshot
-B, recreate `develop` from the recorded SHA when applicable, restore the transition
-gate/ref, and revert cleanup through the branch protected at that phase. PR6 must
-retain the exact develop recreation command. Never delete Git history, local developer
-state, D1 state, Cloudflare resources, production data, or secret values.
+Before action A, revert PR1/PR2 under current review. After action A, restore its
+snapshot and protected refs. After PR4, restore the phase-A merge-compatible rules,
+recreate `develop` at the recorded SHA, and revert through the protected branch. Never
+delete Git history, learner data, D1 state, Cloudflare resources, or secret values.
