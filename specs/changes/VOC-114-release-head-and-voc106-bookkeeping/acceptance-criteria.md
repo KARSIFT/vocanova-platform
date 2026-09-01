@@ -21,8 +21,9 @@ authority but has no false pending-adoption blocker.
 - Result: pending
 
 Every current instruction requires an exact short-lived release head targeting
-`main`; positive evidence proves SHA/tree identity and negative evidence rejects
-`develop`, `main`, drifted, extra-commit, wrong-base, or unrecorded heads.
+`main`; positive evidence proves SHA/tree identity, main as merge base, zero main-only
+commits, and release-merge tree identity. Negative evidence rejects permanent,
+drifted, extra-commit, diverged-main, tree-mismatched, colliding, or unrecorded heads.
 
 ## VOC-114-AC-02 — Release and synchronization controls remain complete
 
@@ -32,9 +33,10 @@ Every current instruction requires an exact short-lived release head targeting
 - Evidence: `VOC-114-EV-02`, `VOC-114-EV-03`
 - Result: pending
 
-Fresh invalidation, two separately reviewed merge-commit PRs, R4/specialist evidence,
-actor separation, recreation records, ancestry proof, and zero-behind proof remain
-mandatory and internally consistent.
+Each drifted attempt is closed and abandoned without ref deletion or mutation; a new
+collision-free name and PR receive fresh evidence. Two reviewed merge-commit PRs,
+R4/specialist evidence, actor separation, recreation records, tree/ancestry proof, and
+zero-behind proof remain mandatory and internally consistent.
 
 ## VOC-114-AC-03 — All current policy surfaces agree
 
@@ -44,8 +46,9 @@ mandatory and internally consistent.
 - Evidence: `VOC-114-EV-04`
 - Result: pending
 
-Exactly the 15 declared existing implementation paths change. All current release
-statements agree on the disposable exact head; historical records remain unchanged;
+Exactly the 16 declared existing implementation paths change. `.github/README.md` and
+all other current surfaces agree on the immutable disposable head, ancestry/tree,
+collision, abandonment, and deletion boundary; historical records remain unchanged;
 governance, risk, formatting, link/reference, and hosted checks pass.
 
 ## VOC-114-AC-04 — Independent evidence, rollback, and monitoring close
@@ -58,4 +61,5 @@ governance, risk, formatting, link/reference, and hosted checks pass.
 
 Exact specialist and independent R4 reviewers report PASS with zero blockers, a
 separate actor merges, reverse-diff rollback is proven, prohibited actions remain
-absent, and DOC-15 §24.18 monitoring reaches its bounded success condition.
+absent, and DOC-15 §24.18 monitoring proves release-tree identity and reaches its
+bounded success condition.

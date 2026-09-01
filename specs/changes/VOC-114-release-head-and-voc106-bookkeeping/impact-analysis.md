@@ -4,8 +4,8 @@
 
 The correction removes a destructive permanent-ref hazard. It does not query or
 change settings and uses no credentials, personal data, production data, or networked
-runtime. `--force-with-lease` is permitted only for refreshing the future disposable
-release head; force updates to `develop` or `main` remain prohibited.
+runtime. Release attempt refs are immutable; no release, synchronization, `develop`,
+`main`, or foreign PR head may be force-updated by this package.
 
 ## Data, migrations, analytics, and accessibility
 
@@ -17,13 +17,20 @@ changes.
 - `VOC-114-R00`: a permanent head is automatically deleted after release. Mitigation:
   exact short-lived release head plus pre/post branch readback and recovery evidence.
 - `VOC-114-R01`: the short-lived head drifts from integrated `develop`. Mitigation:
-  SHA/tree/compare equality, protected-ref freeze, complete invalidation, fresh review.
+  immutable attempts, SHA/tree/compare equality, complete invalidation, close/abandon,
+  collision check, and a fresh ref/PR/review.
 - `VOC-114-R02`: documents disagree and a later actor follows stale instructions.
-  Mitigation: one 15-path reconciliation and exhaustive current-surface search.
+  Mitigation: one 16-path reconciliation and exhaustive current-surface search,
+  including `.github/README.md`.
 - `VOC-114-R03`: correcting stale fields rewrites adoption evidence. Mitigation:
   retain the exact candidate/review/approval records and change only operational state.
 - `VOC-114-R04`: repository promotion is mistaken for deployment. Mitigation: explicit
   no-live-action boundary and audit of workflows/actions.
+- `VOC-114-R05`: diverged main or merge synthesis changes the promoted tree.
+  Mitigation: main-is-merge-base, zero main-only, and prospective/actual merge-tree
+  equality; any mismatch blocks rather than resolving divergence during release.
+- `VOC-114-R06`: a stale or foreign name collision is overwritten. Mitigation:
+  fail-closed ownership check; never force-update, adopt, or delete another attempt.
 - `VOC-114-DEP-00`: exact reviewed/adopted VOC-114 and its normal plan merge precede
   implementation.
 - `VOC-114-DEP-01`: exact implementation checks/reviews and non-author merge precede

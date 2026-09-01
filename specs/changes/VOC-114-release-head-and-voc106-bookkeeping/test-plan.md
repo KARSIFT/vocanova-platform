@@ -14,19 +14,24 @@
 - Covers: `VOC-114-AC-01`
 - Procedure: in a local ref-free fixture, select frozen develop/main SHAs and verify
   proposed head name prefix, head SHA = develop SHA, head tree = develop tree, PR base
-  = main, merge base/divergence/compare, zero extra head commits, and recreation syntax.
-- Expected: an exact short-lived alias of the frozen candidate passes without a push.
+  = main, merge-base(main,develop) = main, zero main-only and extra-head commits,
+  aggregate compare, prospective merge tree = develop/head tree, name absence/ownership,
+  and recreation syntax.
+- Expected: an exact collision-free immutable alias of a lineal frozen candidate and
+  its tree-preserving prospective merge pass without a push.
 - Evidence: `VOC-114-EV-01`
 
 ## VOC-114-TEST-02 — Fail-closed topology and invalidation matrix
 
 - Covers: `VOC-114-AC-01`, `VOC-114-AC-02`
 - Procedure: independently substitute permanent develop/main as head; wrong base;
-  stale develop/main; head SHA/tree mismatch; extra commit; wrong prefix; moved PR
-  metadata; changed check/review; missing recovery record; and force update of a
-  permanent ref. Audit the stated response to each mutation.
-- Expected: every mutation invalidates/stops; only the disposable head may refresh
-  with force-with-lease and then requires fresh complete evidence.
+  stale or diverged develop/main; non-main merge base; nonzero main-only count; head
+  SHA/tree mismatch; extra commit; prospective/actual merge-tree mismatch; wrong
+  prefix; pre-existing same-name ref owned by another/no PR; moved PR metadata;
+  changed check/review; missing recovery record; reuse/force update of an invalidated
+  head; and force mutation of any permanent or foreign ref.
+- Expected: every mutation invalidates/stops. Drift closes and abandons the attempt
+  without manual deletion; a new collision-free name/PR needs complete fresh evidence.
 - Evidence: `VOC-114-EV-02`
 
 ## VOC-114-TEST-03 — Protected-history and actor-boundary regression
@@ -42,10 +47,11 @@
 ## VOC-114-TEST-04 — Exact paths and current-surface consistency
 
 - Covers: `VOC-114-AC-03`
-- Procedure: require exactly the 15 declared paths; search current non-archived docs
+- Procedure: require exactly the 16 declared paths; search current non-archived docs
   and VOC-106 artifacts for direct permanent-develop release-head instructions;
-  classify historical occurrences; run governance, risk, diff, format, link/reference,
-  and hosted required checks.
+  require `.github/README.md` to name immutable attempts, ancestry/tree proofs,
+  collision/abandonment, and short-lived-only deletion; classify historical
+  occurrences; run governance, risk, diff, format, link/reference, and hosted checks.
 - Expected: all current instructions agree, historical evidence remains intact, and
   every deterministic check passes.
 - Evidence: `VOC-114-EV-04`
@@ -64,7 +70,8 @@
 
 - Covers: `VOC-114-AC-04`
 - Procedure: monitor exact correction-merge hosted/readback results, then the first
-  corrected VOC-106 promotion/sync binders and post-action refs/branch list.
+  corrected VOC-106 promotion/sync binders, actual release merge-tree equality, and
+  post-action refs/branch list.
 - Expected: both permanent branches remain; only merged short-lived heads are deletion
   targets; final ancestry and zero-behind proofs pass; failure stops and is recorded.
 - Evidence: `VOC-114-EV-06`

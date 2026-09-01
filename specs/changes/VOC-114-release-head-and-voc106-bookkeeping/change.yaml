@@ -49,21 +49,25 @@ requirements:
       Replace the release source with one short-lived
       release/voc-106-<frozen-develop-short-sha> branch created at the exact freshly
       fetched origin/develop SHA. Before review and merge, prove its SHA and tree equal
-      the frozen develop SHA and tree, its base is exact current main, and the aggregate
-      compare contains no commit or tree beyond the frozen develop candidate.
+      the frozen develop SHA and tree, its base is exact frozen main, merge-base of
+      frozen main and develop equals frozen main, main-only count is zero, and the
+      aggregate compare contains no commit or tree beyond frozen develop.
   - id: VOC-114-D02
     statement: >-
-      Any movement of origin/develop, origin/main, the release head, PR base/head,
+      A release head and its draft PR are one immutable attempt and are never force-
+      updated. Any movement of origin/develop, origin/main, release head, PR base/head,
       merge base, tree, compare, required check, policy evidence, or reviewed revision
-      invalidates the complete release binder. Refresh the same short-lived head to a
-      new exact develop freeze only with force-with-lease or close without merge; then
-      rerun all checks and obtain fresh exact-revision reviews.
+      invalidates the complete binder. Close and abandon that draft PR/ref without
+      manual deletion, then create a fresh correctly named ref and PR with all-new
+      evidence. Before creation, fail if the exact name exists unless it is proved the
+      untouched head of this same attempt; never mutate or adopt another PR/actor ref.
   - id: VOC-114-D03
     statement: >-
       The release PR targets main and uses an identifiable merge commit. Before merge,
-      record the short-lived release head name, exact SHA, and nonexecuted recreation
-      command. Existing automatic deletion may remove only that merged short-lived
-      release head and the later merged short-lived synchronization head. Permanent
+      prove the prospective/resulting release merge tree equals the frozen develop and
+      release-head tree, and record head name, exact SHA, tree, and nonexecuted
+      recreation command. Automatic deletion may remove only that successfully merged
+      short-lived release head and the later merged synchronization head. Permanent
       develop and main must remain present and unchanged by source deletion.
   - id: VOC-114-D04
     statement: >-
@@ -80,13 +84,14 @@ requirements:
       test, evidence, contingency, and rollback statement consistent with D01-D04.
   - id: VOC-114-D06
     statement: >-
-      Update AGENTS.md, CONTRIBUTING.md, DOC-15 current release sections, DOC-16,
-      repository-settings.md, and the development-workflow guide in the same PR.
-      Preserve explicitly historical text and immutable earlier packages, but ensure
-      every living current-behavior statement names the disposable exact release head.
+      Update AGENTS.md, CONTRIBUTING.md, `.github/README.md`, DOC-15 current release
+      sections, DOC-16, repository-settings.md, and the development-workflow guide in
+      the same PR. The GitHub guide must state immutable release attempts, ancestry and
+      tree proofs, collision/abandonment, and short-lived-only automatic deletion.
+      Preserve explicitly historical text and immutable earlier packages.
   - id: VOC-114-D07
     statement: >-
-      Implementation changes exactly the 15 declared existing files, contains no
+      Implementation changes exactly the 16 declared existing files, contains no
       application/workflow/settings state mutation, and passes governance validation,
       changed-path risk classification, whitespace/link/reference checks, focused
       semantic positive/negative audits, hosted required checks, and exact-diff review.
@@ -105,10 +110,12 @@ requirements:
     statement: >-
       Prohibit repository-settings query or mutation, manual branch deletion, workflow
       dispatch, deployment, Cloudflare/DNS/resource action, secret or production/data
-      access, migration, traffic, spending, launch, force-push of a permanent branch,
-      self-review, self-approval, and self-merge.
+      access, migration, traffic, spending, launch, force-push of any release,
+      synchronization, permanent, or foreign PR head, self-review, self-approval, and
+      self-merge.
 
 implementation_paths:
+  - .github/README.md
   - AGENTS.md
   - CONTRIBUTING.md
   - docs/governance/16-autonomous-development-operating-model.md
@@ -186,8 +193,9 @@ post_merge_monitoring:
   ends: >-
     exact-correction-merge-SHA-hosted-and-develop-readback-pass-plus-first-corrected-
     VOC-106-promotion-and-synchronization-final-readback-proves-both-permanent-branches-
-    present-main-ancestor-of-develop-develop-zero-behind-and-only-short-lived-heads-
-    eligible-for-automatic-deletion
+    present-release-merge-tree-equals-frozen-develop-tree-main-ancestor-of-develop-
+    develop-zero-behind-and-only-successfully-merged-short-lived-heads-eligible-for-
+    automatic-deletion
   stop: >-
     any-check-or-semantic-failure-evidence-drift-permanent-head-exposure-unexpected-
     deletion-or-ref-movement-stops-VOC-106-release-or-closure-and-routes-governed-

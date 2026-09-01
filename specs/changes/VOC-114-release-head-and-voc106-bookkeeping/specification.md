@@ -12,24 +12,36 @@ without changing the setting or broadening release authority.
 After adoption, the implementation makes current policy require:
 
 ```text
-frozen origin/develop SHA
+frozen origin/main (merge base; zero main-only commits)
+        │
+frozen origin/develop SHA and tree
         │ exact short-lived ref (same SHA and tree)
         ▼
 release/voc-106-<short-sha> ── reviewed merge-commit PR ──► main
+        resulting merge tree equals frozen develop/head tree
         GitHub may auto-delete this short-lived head after merge
 
 current develop ── short-lived sync head containing current main ──► develop
 ```
 
-The release head is a ref-only exact copy, not an authored release commit. Current
-`develop` and `main`, the short-lived head, their trees, merge base, compare, PR
-metadata, checks, and reviews form one invalidation domain. Drift requires refresh
-with `--force-with-lease` on only the disposable head and complete new evidence.
+The release head is a ref-only exact copy, not an authored release commit. Frozen
+`main` must be the merge base of frozen `main` and `develop`, with zero main-only
+commits; diverged main fails closed. The prospective and actual release merge tree
+must equal both the frozen develop tree and release-head tree.
+
+Current `develop` and `main`, the short-lived head, their trees, merge base, compare,
+PR metadata, checks, and reviews form one invalidation domain. A head/PR is an
+immutable attempt: drift closes and abandons it without deleting or rewriting its ref.
+A new attempt first checks its SHA-derived name is absent. A collision stops unless
+the ref is proved the untouched head of that same attempt; a different PR/actor head
+is never force-mutated, adopted, overwritten, or deleted.
 
 ## Scope and contradictions
 
-One implementation PR changes the six living governance/contribution guides and all
-nine adopted VOC-106 artifacts. It corrects stale adoption/task fields without
+One implementation PR changes the seven living governance/contribution guides and all
+nine adopted VOC-106 artifacts. `.github/README.md` gains the same immutable-attempt,
+ancestry/tree, collision/abandonment, and short-lived-only deletion semantics. The
+package corrects stale adoption/task fields without
 altering the already-recorded approved SHA, reviewers, approvals, authority source,
 or two-PR protected-history delivery shape. Archived text and earlier immutable
 packages remain historical evidence.
