@@ -1,0 +1,237 @@
+schema_version: 1
+
+id: VOC-120
+slug: kandev-style-protected-trunk
+title: Replace governance-heavy development with a Kandev-style protected trunk
+type: governance-and-delivery-operating-model-replacement
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because this package replaces repository governance, review, merge, release,
+  and agent-authority rules; removes executable policy surfaces; and introduces
+  native GitHub settings as the primary enforcement boundary. The replacement is
+  evaluated under the pre-change DOC-15/DOC-16 authority and cannot authorize its
+  own adoption.
+canonical_path: specs/changes/VOC-120-kandev-style-protected-trunk
+authority_model: pre-change-doc15-doc16-v3.3
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/232
+reference_repository: https://github.com/kdlbs/kandev
+reference_revision: b4f1933812a15f27cd3f07a355a62e576d12a9f1
+base_branch: develop
+base_sha: 21d5990d373a5b85296e4eeccdf654df202c92df
+plan_branch: plan/voc-120-kandev-style-workflow
+target_branch: develop
+
+approval_status: pending-independent-review
+implementation_authorized: false
+implementation_pull_request_count: 2
+multiple_pull_request_rationale: >-
+  Two implementation pull requests are required by a real rollback-safe and
+  action-authority boundary. PR1 installs repository-side policy, path-aware
+  aggregate gates, concise contributor surfaces, and transition compatibility on
+  develop without deleting the old enforcement path. After PR1 is promoted and
+  synchronized under the pre-change rules, an explicitly authorized GitHub
+  settings action activates the protected-main ruleset and verifies it. PR2 then
+  removes legacy governance/packages/workflows and develop-specific machinery from
+  protected main. A single PR would either delete the checks needed to review
+  itself or claim native settings that do not yet exist. The split adds one review
+  cycle but preserves an independently reversible pre-activation state and prevents
+  a mixed unprotected cutover.
+automatic_merge_allowed: true
+production_impact: none-repository-and-github-control-plane-only
+rollback_required: true
+
+objective: >-
+  Make VocaNova's development system clean and understandable by adopting the
+  useful operating properties of Kandev: one protected main trunk, short-lived
+  branches, focused pull requests, issue discussion only when consequence or
+  ambiguity warrants it, path-aware always-reporting checks, native review and
+  ruleset evidence, immutable release tags, and separately controlled external
+  actions.
+
+requirements:
+  - id: VOC-120-D00
+    statement: >-
+      Treat issue #232 and the founder request as direction and intake, not
+      implementation authority. Adopt this replacement under the authority in
+      force before it. The package, its implementation, or the future lightweight
+      lane may not approve its own adoption or retroactively validate earlier work.
+  - id: VOC-120-D01
+    statement: >-
+      Establish one concise normative governance and contribution source. Root
+      agent guidance may describe architecture and commands, but must link to—not
+      duplicate—the normative merge, review, risk, EHR, release, and external-action
+      rules. Contradictory current/historical prose must leave the active path.
+  - id: VOC-120-D02
+    statement: >-
+      Replace the universal issue-to-nine-file-plan-to-adoption-to-implementation
+      loop with three operational lanes: Standard for reversible routine work,
+      Protected for auth/data/migrations/AI-safety/workflows/infrastructure/
+      governance, and External Action for secrets/spending/contracts/production/
+      DNS/learner data/irreversible mutation/public launch. Routine work uses one
+      focused implementation PR; a separate design record or PR exists only for a
+      material unresolved decision.
+  - id: VOC-120-D03
+    statement: >-
+      Stop creating nine-file change packages. New Standard work needs no package;
+      Protected work uses one compact record only when useful; consequential
+      decisions use an ADR or similarly compact decision record plus the affected
+      implementation PR. Preserve existing package history through Git history and
+      a deterministic archive-integrity record rather than routine prose replay.
+  - id: VOC-120-D04
+    statement: >-
+      Converge repository topology on protected main plus short-lived branches,
+      squash-only linear history, deletion/non-fast-forward protection, required
+      conversation resolution, stable aggregate status checks, and a merge queue
+      suitable for parallel agent PRs. Remove the permanent release-promotion and
+      main-to-develop synchronization loop only after the final pre-change promotion
+      and synchronization are proven.
+  - id: VOC-120-D05
+    statement: >-
+      Implement Kandev-style internal path selection: every required workflow starts
+      and its stable aggregate gate always reports, while expensive web, API,
+      integration, migration, quality, delivery, and governance jobs run only for
+      applicable paths. Unknown bases or classifier errors fail open to running more
+      checks, never to skipping evidence.
+  - id: VOC-120-D06
+    statement: >-
+      Replace PR-body reviewer identity strings and the sibling-check polling
+      eligibility adapter with native GitHub review/check/thread state. Automated
+      reviewers remain read-only toward repository content, use attributable bot or
+      app identities when available, treat PR content as untrusted, and receive no
+      deployment, secret, settings, merge, spending, or production authority.
+  - id: VOC-120-D07
+    statement: >-
+      Use a concise PR template: required summary and validation; linked issue,
+      architecture discussion, risks, rollback, screenshots, or diagrams only when
+      applicable; one-logical-change and self-review/testing checklist retained.
+      Remove irrelevant sections rather than filling them with boilerplate.
+  - id: VOC-120-D08
+    statement: >-
+      Preserve strong deterministic application controls for authentication,
+      authorization, cross-user isolation, D1 migrations and recovery, API contracts,
+      AI input/moderation/structured output/cost limits, accessibility, dependency
+      integrity, secret scanning, staging isolation, rollback, and production holds.
+      Simplification may remove historical/prose coupling but may not weaken these
+      product and external-effect boundaries.
+  - id: VOC-120-D09
+    statement: >-
+      Define EHR as a narrow conflict-resolution runbook, not a standing review
+      layer. It must identify the stopped operation, disputed question, accountable
+      selector, reviewer qualification, response bound, permanent evidence, and
+      uphold/narrow/revert/abandon outcomes. It grants no external-action authority.
+  - id: VOC-120-D10
+    statement: >-
+      Preserve active EHR scope for PR #215 and issue #231. The transition may
+      proceed independently, but may not silently merge, close, correct, or validate
+      those disputed revisions. A qualified human decision or an allowed abandon/
+      revert/supersession verdict remains necessary for each conflict.
+  - id: VOC-120-D11
+    statement: >-
+      Separate repository history from delivery. A main merge may make a SHA
+      eligible for staging but never deploys automatically merely because it merged.
+      Production, real learner data, secrets, spending, DNS, contracts, and public
+      launch remain explicit human-authorized external actions with exact scope,
+      rollback, and readback.
+  - id: VOC-120-D12
+    statement: >-
+      Activate native settings only through explicit founder-authorized GitHub API
+      or UI actions with before/after readback. Enable secret scanning, push
+      protection, Dependabot security updates where supported, a protected-main
+      ruleset, immutable version tags, and the selected required gates. Committed
+      settings documentation must match live truth immediately after mutation.
+  - id: VOC-120-D13
+    statement: >-
+      Do not copy Kandev's scale-specific complexity blindly. VocaNova must not copy
+      its 21-workflow/50-plus-check surface, permanent administrator bypass, zero
+      review-count policy, or hundreds of active specs. Reuse the operating pattern
+      with the smallest VocaNova-specific set of gates and documents.
+  - id: VOC-120-D14
+    statement: >-
+      Change no learner-facing product behavior, application contract, database
+      schema, live Cloudflare resource, deployment, production traffic, learner data,
+      secret value, DNS record, spending commitment, or public promise.
+
+protected_areas:
+  - repository-governance-and-agent-authority
+  - github-actions-and-required-checks
+  - repository-rulesets-and-branch-topology
+  - release-and-deployment-boundaries
+  - security-scanning-and-dependency-policy
+
+action_specific_holds:
+  - id: VOC-120-HOLD-01
+    action: mutate-live-github-repository-settings
+    accountable_role: founder-repository-owner
+    required_evidence: explicit authorization plus exact before-and-after API readback
+    completion: committed settings truth matches the activated rules
+  - id: VOC-120-HOLD-02
+    action: retire-or-delete-develop-branch
+    accountable_role: founder-repository-owner
+    required_evidence: protected main contains the complete intended history and rollback ref
+    completion: default/protected trunk and branch inventory are read back successfully
+  - id: VOC-120-HOLD-03
+    action: production-or-learner-data-effect
+    accountable_role: separately-assigned-human-authority
+    required_evidence: unchanged existing production and learner-data hold evidence
+    completion: not satisfiable by VOC-120
+
+implementation:
+  authorized: false
+  pull_requests:
+    - id: VOC-120-PR1
+      name: protected-trunk-preparation
+      target: develop
+      status: pending-adoption
+      boundary: repository-only dual-compatible policy and workflow preparation
+    - id: VOC-120-PR2
+      name: protected-trunk-cleanup
+      target: main
+      status: blocked-on-pr1-promotion-sync-and-settings-activation
+      boundary: legacy removal and final main-only active tree
+
+acceptance_criteria:
+  - VOC-120-AC-01
+  - VOC-120-AC-02
+  - VOC-120-AC-03
+  - VOC-120-AC-04
+  - VOC-120-AC-05
+  - VOC-120-AC-06
+  - VOC-120-AC-07
+  - VOC-120-AC-08
+  - VOC-120-AC-09
+  - VOC-120-AC-10
+
+tasks:
+  - VOC-120-T01
+  - VOC-120-T02
+
+tests:
+  - VOC-120-TEST-01
+  - VOC-120-TEST-02
+  - VOC-120-TEST-03
+  - VOC-120-TEST-04
+  - VOC-120-TEST-05
+  - VOC-120-TEST-06
+
+rollback:
+  trigger: >-
+    required checks fail to report, native settings do not match policy, ordinary
+    PRs cannot merge safely, protected controls are lost, or active history is
+    incomplete
+  mechanism: >-
+    Before activation, revert PR1. After activation, restore the captured settings
+    snapshot and rollback ref, re-enable the dual-compatible workflow, and revert
+    the failing cleanup revision through protected main. Never delete the rollback
+    ref until post-cutover verification completes.
+  owner: founder-repository-owner
+
+independent_verification:
+  required: true
+  exact_revision: true
+  specialist_scopes:
+    - github-actions-and-rulesets
+    - governance-authority-and-transition
+    - security-and-external-action-boundaries
+  plan_verdict: pending
+  implementation_verdicts: pending
