@@ -8,7 +8,7 @@
 - Evidence: `VOC-111-EV-00` through `VOC-111-EV-06`
 - Implementation pull-request mapping: one coherent implementation PR
 - Risk: R3
-- Status: pending review and adoption
+- Status: adopted; repository implementation authorized after normal plan merge
 
 Change only `scripts/foundation/voc081-f2-evidence-policy.test.mjs`. Select the active
 profile from the complete exact record, inject duplicate raw members without a fixed
