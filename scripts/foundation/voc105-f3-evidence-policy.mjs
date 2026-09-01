@@ -31,60 +31,81 @@ const ALLOWED_CREDENTIAL_NAMES = new Set([
 ]);
 const HIGH_RISK_PROJECTIONS = Object.freeze({
   "docs/README.md": [
-    "85d2b5e63661155624516ca3c045e47c62f91a8f744b5549c2a13b9f5483b439",
-    "8d7058ba5b1a408aeecc12607e9441b22c6eba61afa1f7eda855c4b36876dead",
-    "b9557b08dfd08392c7cbc0166d0498a36a684c5e9401569ce65fcdede01f2d31",
+    "2ffb9c11fcc852d97b1350ae992f91d242913bdc1b6c676f38056e9c919ce2c5",
+    "878ac4afa86d20799efbc81b0d429e390f595f33ebd7343a3f53c4e4eaf8d90a",
+    "8832d2d05828832df014329b72584c9b27669f12a5846aec411373793ad5c743",
+    "652c5ab7fb14b08983e28a6a4e5a8ad0d7164efa761e1c24081912a87d87ae3c",
   ],
   "docs/operations/README.md": [
-    "e578efdb426efa4344e14a387ca3f92bd34af6cba7462e8dfa35cc043c6b8da8",
-    "1b276bc9120de48da02384d8465a8c8702918ade10d7109a77c4ff8e0e44bc54",
-    "fb3ee6d14bd47d4e2a487a3ecc2d43c66071c3bf284bf8bed61a106ab5590601",
+    "0c206484617186064e772b665056e10531d84006d3a0d2c4b8cf131df48e95d3",
+    "76e7265b61b8c095366ad43d54f4e9f6bc28d71cc9f773693760408e277a0193",
+    "96392476f3118b9691d6a2535cf9b002d25b9af2db23a130ca58de08d973c955",
+    "9297cbdadfaaf30b43aeb7daf7e90cd8a8555b7faac9576da2e740f3e8900078",
   ],
   "docs/operations/cloudflare-delivery.md": [
-    "b815609add1d3c6c32a7a680b4cab6955cbcb3f61b1b5b8b3f278455088df877",
-    "5fdb0be398f07f6723cf01941fd9cd7f9e06370605573455054c9e43b05b1a9a",
-    "e5fbe3b2e7cebdea3f68fc9a5268a10427320ff62442a8a085e752c4071f675a",
+    "fa9d0caf1c3186157ec7476b34f1bee575cb569243a76f33248522bbeacc43e0",
+    "2a801f8ab23aba771ed8ad1dff41846db7f766be5e1ebf6ecd83ef881213a0ec",
+    "9228e479e6c42c4e7151fda2feb279b134e04d41b65f002b5fdaa6f83e29134f",
+    "64688b2e1fa9a049270b1b1783239f03356d9cba4e00fe21aa286d5fa385bb44",
   ],
   "docs/operations/voc-081-f2-evidence.json": [
-    "c2389e9b42ed6570a1d62ee4acbd26256d578df2043a18938675ef5093ebe3e3",
-    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "976a5521ef1af3f69687c65aa078faf9fdadf01840414c470d7fc4c7a7fd8661",
+    "710b34dc8c253a89f5745fd8a549100fb5615f99ae2af50fbeaf2825b5f407ea",
+    "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
+    "a560577733ece56f33c61cf610398e39d54d14cd70604c46eb4def98a8a966c5",
+    "eba6af33d947290b913f91a393e363c4619da9a45658efa002a5b821a969b5b1",
   ],
   "docs/operations/voc-081-f2-evidence.md": [
-    "cfea28a1eb854f2f39ec861095cd8c98626900c50501755f6879becfdce08bcd",
-    "8167bba92c9089985b66bb81b35c327a2d7d85af28b5a01144e06690c3541b10",
-    "49540c4232e827c3564a94c3a2cebca7ff5ee54fb4fe731c2dd6edd365e2243a",
+    "cef0dd1e99fa57f591532ba7b84c1222ca02dff1284c844bfb2b9b6ebf6267fe",
+    "68325539946c4836b34ecdd505637d30d34feb2606f587d067958671cc791efb",
+    "5f9001281aa5bd4af228c1e8661f429bb7892c58a853880e5dca7faf7d2b8161",
+    "41e73a0be967564c232d1f3848ff8d8db3404e8387286193bed360460f1bcfe8",
   ],
   "docs/operations/voc-105-f3-evidence.json": [
-    "c44c1fa7fc13cef87f151d03fa50b26258b1dcd494d1b974641bab5ad181bddd",
-    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "50a64c277c66ed6678956363594ab9c233db2e4161208237d901bb22181fdb5e",
+    "7ba7ecee1b591787d3761f52f079a0bb0f197b3a840506b2252441471ff6c774",
+    "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
+    "a9ee0b5641a49e54c33036ce3f6b8fcc244aa9e74443a1f8d5917118370dcd38",
+    "3841de5ce90e64a4b4a1424f73025260bc83b22df7f37741c1b1053c89ae8b5a",
   ],
   "docs/operations/voc-105-f3-evidence.md": [
-    "08cf93f8071a838bb36519d37ce30aeb442cc1bd8445ac4c9f5760407ce25c17",
-    "ef084dd9b49cbc8f8510afc9b48ffe61ea6eab04b7b10a3266f708d9cb1fee17",
-    "0e19b8abfab527f9a049e35485aaea7b066ad0399dc16d2007357e7a137c057f",
+    "1bb3c307a77107227a96011065391641dbb75c198e1411978a9e3eb401cf4528",
+    "e56803e1b8a5b217df468f6afb8f24ff80200599b4d4408838df84a004eebe99",
+    "e22b0023b329d93cc578cdb2c0e74a30f1ac42aa62f26fafab2093f62228f68c",
+    "f4a490a89249dd4f6d3ab3f3d8cae8cb7cae822b0ed2543a10c7642513827c1e",
   ],
   "docs/product/12-mvp-implementation-plan.md": [
-    "71a5d13f439ae10e0eb1a41f9371bab1bfa4d135bc34921d23dc53d5b4fd1286",
-    "805e7d6f9a6bf07743d45d4e3c39b83762155bc52ed314636e67400bdb11e6d3",
-    "2fe84043e8f84f0496c0eed76ea12757fae17057647e4c36661d5955a7d3d411",
+    "710320cecad0eb90d1448d9559ef7986eb3804634f7fb55fd72e15277131c0d2",
+    "26ddec86c049d2bf7ea7171fe0b4acd347423c10bfe51f6e154b9a6da67a161d",
+    "80573cdc41ed4e310878d997f14ca6778468f39323d1ee0f725e4a2c0b3ebb8e",
+    "8a41c6b9501977c8ab0ca0a88a473407a6112033b5e93cd0a08918688a01fc91",
   ],
   "docs/product/README.md": [
-    "81fbe22ff8be3f50e4ea10efcda6aac8911917fa47002dfb83a888bd3e4304d0",
-    "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-    "dc5932f72dc597602d749a6aae376849300f93be7bbc7b952f289b223fb40650",
+    "85da55c0f0f0b454dfb4eb7b7e195df810541e1a72d4f92d0f3ca1621b5fa21c",
+    "b4adb3f162894178e2a75aaeb835a5c35e7348cecdc8eaf1195858960d2834f4",
+    "fbb6b26654e2159dab0288eeb7caa309d622c1320674bec83002864f84fdacd9",
+    "630f971607f1ddfd36c47f35c73c81e37a744e194750e527affb9e15a3275204",
   ],
 });
-const ACTION_STEM_PATTERN =
-  /\b(?:deploy\w*|dispatch\w*|migrat\w*|promot\w*|retr(?:y|ied|ies|ying)|upload\w*|publish\w*|rotat\w*|revok\w*|remov\w*|delet\w*|cancel\w*|configur\w*|chang\w*|creat\w*|enabl\w*|disabl\w*|restor\w*|install\w*|settings?|rout\w*|releas\w*|launch\w*|access\w*|export\w*|import\w*|transform\w*)\b/i;
+const OPERATIONAL_DOMAIN_PATTERN =
+  /\b(?:staging|delivery|delivered|deploy|deployed|deployment|deployments|dispatch|promote|workflows?|CI|DNS|traffic|resources?|D1|API[\s-]+Worker|build|live|launch|learner[\s-]+data|credentials?|versions?|settings?|environments?|migrations?|promotions?|releases?|rollback|smoke|revocation)(?=\b|_)/i;
 const CREDENTIAL_TERM_PATTERN =
-  /\b(?:CLOUDFLARE_(?:ACCOUNT_ID|API_TOKEN)|[A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCOUNT_ID)|credentials?|tokens?|secrets?|passwords?|private[ -]?keys?|api[ -]?keys?)\b/i;
+  /\b(?:CLOUDFLARE_(?:ACCOUNT_ID|API_TOKEN)|[A-Z][A-Z0-9_]*(?:SECRET|TOKEN|PASSWORD|PRIVATE_KEY|API_KEY|ACCOUNT_ID)|credentials?|tokens?|secrets?|passwords?|private[ -]?keys?|api[ -]?keys?|access[ -]?tokens?|Authorization|Bearer)\b/i;
 const LATER_HOLD_TERM_PATTERN =
-  /\b(?:A1|P1\+?|P[2-5]|R[12]|L1|product[\s-]+acceptance|production|live[\s-]+(?:activation|verification|system|service)|public[\s-]+launch|learner[\s-]+data|VOC-080-HOLD-(?:01|02))\b/i;
-const PERMITTED_ACTION_DESCRIPTIONS = new Set([
+  /\b(?:A1|P1\+?|P[2-5]|R[12]|L1|product[\s-]+acceptance|production|launch|learner[\s-]+data|VOC-080-HOLD-(?:01|02))\b/i;
+const F3_STATUS_TERM_PATTERN = /\b(?:F3|staging[\s-]+status)\b/i;
+const PERMITTED_OPERATIONAL_LINES = new Set([
   "The command “Deploy now” is prohibited.",
   "The sanitized past delivery description records that retry was not required.",
+  "No deployment occurred.",
+  "Deployment is prohibited.",
+  "The sanitized delivery deployed the API Worker successfully in the past.",
+]);
+const PERMITTED_LATER_LINES = new Set([
+  "A1 remains unresolved.",
+  "Production remains held.",
+]);
+const PERMITTED_STANDALONE_LINES = new Set([
+  ...PERMITTED_OPERATIONAL_LINES,
+  ...PERMITTED_LATER_LINES,
 ]);
 const GATE_EVIDENCE = new Map([
   [
@@ -571,24 +592,125 @@ function extractProcedureRegion(source, definition) {
 }
 
 function projectionDigest(source, pattern) {
-  const projection = source
+  const lineProjection = source
     .split(/\r?\n/)
     .flatMap((line, index) =>
       pattern.test(line) ? [`${index + 1}\0${line}\0`] : [],
     )
     .join("");
-  return crypto.createHash("sha256").update(projection).digest("hex");
+  const paragraphProjection = source
+    .split(/\r?\n\s*\r?\n/)
+    .flatMap((paragraph, index) => {
+      const exactParagraph = paragraph.trim();
+      return pattern.test(exactParagraph)
+        ? [`${index + 1}\0${exactParagraph}\0`]
+        : [];
+    })
+    .join("");
+  return crypto
+    .createHash("sha256")
+    .update(`lines\0${lineProjection}paragraphs\0${paragraphProjection}`)
+    .digest("hex");
 }
 
-function removePermittedActionDescriptions(source) {
+function maskExactLines(source, permittedLines) {
   return source
     .split(/\r?\n/)
     .map((line) =>
-      PERMITTED_ACTION_DESCRIPTIONS.has(line.trim())
-        ? " ".repeat(line.length)
-        : line,
+      permittedLines.has(line.trim()) ? " ".repeat(line.length) : line,
     )
     .join("\n");
+}
+
+function isPermittedHistoricalF3Paragraph(paragraph) {
+  const compact = normalized(paragraph);
+  for (let number = 94; number <= 104; number += 1) {
+    const packageId = `VOC-${String(number).padStart(3, "0")}`;
+    const historicalStates = [
+      `${packageId} is immutable history: F3 is pending.`,
+      `${packageId} is immutable history: F3 pending.`,
+      `${packageId} is immutable history: F3 remains pending.`,
+      `${packageId} is immutable history: F3 is unresolved.`,
+      `${packageId} is immutable history: F3 unresolved.`,
+      `${packageId} is immutable history: F3 staging is unresolved.`,
+      `${packageId} is immutable history: F3 is not yet delivered.`,
+      `${packageId} is immutable history: F3 has not been delivered.`,
+      `F3 is pending in ${packageId} immutable history.`,
+      `F3 remains pending in ${packageId} immutable history.`,
+      `F3 staging is unresolved in ${packageId} immutable history.`,
+      `F3 is not yet delivered in ${packageId} immutable history.`,
+      `${packageId} immutable history records F3 as pending.`,
+      `${packageId} immutable history records F3 staging as unresolved.`,
+    ];
+    const supersessions = [
+      "Later exact VOC-105 evidence supersedes that prospective F3 status.",
+      `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
+      `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 unresolved status.`,
+      `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 not-delivered status.`,
+      `Later exact VOC-105 evidence supersedes the prospective F3 status from ${packageId}.`,
+    ];
+    for (const state of historicalStates)
+      for (const supersession of supersessions)
+        if (
+          compact === `${state} ${supersession}` ||
+          compact === `${supersession} ${state}`
+        )
+          return true;
+  }
+  return false;
+}
+
+function isPermittedHistoricalHeldParagraph(paragraph) {
+  const compact = normalized(paragraph);
+  for (let number = 94; number <= 104; number += 1) {
+    const packageId = `VOC-${String(number).padStart(3, "0")}`;
+    if (
+      compact ===
+      `${packageId} is immutable history. Production remains held; learner data remains held; VOC-080-HOLD-01 remains held; VOC-080-HOLD-02 remains held.`
+    )
+      return true;
+  }
+  return false;
+}
+
+function maskPermittedHistoricalContexts(source) {
+  return source
+    .split(/(\r?\n\s*\r?\n)/)
+    .map((paragraph, index) => {
+      if (
+        index % 2 === 0 &&
+        (isPermittedHistoricalF3Paragraph(paragraph) ||
+          isPermittedHistoricalHeldParagraph(paragraph))
+      )
+        return paragraph.replace(/[^\r\n]/g, " ");
+      return paragraph;
+    })
+    .join("");
+}
+
+export function protectedProjectionDigests(source, relativePath) {
+  const historyMasked = maskPermittedHistoricalContexts(source);
+  const exactContextMasked = maskExactLines(
+    historyMasked,
+    PERMITTED_STANDALONE_LINES,
+  );
+  let operationalSource = exactContextMasked;
+  if (relativePath === DELIVERY_PATH) {
+    const characters = operationalSource.split("");
+    for (const definition of PROCEDURE_REGIONS) {
+      const region = extractProcedureRegion(exactContextMasked, definition);
+      if (!region) continue;
+      for (let index = region.start; index < region.end; index += 1)
+        characters[index] = " ";
+    }
+    operationalSource = characters.join("");
+  }
+  return [
+    projectionDigest(operationalSource, OPERATIONAL_DOMAIN_PATTERN),
+    projectionDigest(exactContextMasked, CREDENTIAL_TERM_PATTERN),
+    projectionDigest(exactContextMasked, LATER_HOLD_TERM_PATTERN),
+    projectionDigest(exactContextMasked, F3_STATUS_TERM_PATTERN),
+  ];
 }
 
 function validatePublicResourceContext(source, relativePath) {
@@ -634,7 +756,7 @@ function validatePublicResourceContext(source, relativePath) {
   return errors;
 }
 
-function validateCredentialVocabulary(source, relativePath) {
+function validateCredentialVocabulary(source, relativePath, projections) {
   const errors = [];
   const names =
     source.match(
@@ -665,10 +787,7 @@ function validateCredentialVocabulary(source, relativePath) {
     errors.push(
       `${relativePath}: token, secret, password, key, or credential value is prohibited`,
     );
-  if (
-    projectionDigest(source, CREDENTIAL_TERM_PATTERN) !==
-    HIGH_RISK_PROJECTIONS[relativePath]?.[1]
-  )
+  if (projections[1] !== HIGH_RISK_PROJECTIONS[relativePath]?.[1])
     errors.push(
       `${relativePath}: credential value is prohibited or credential context is not canonical`,
     );
@@ -684,9 +803,9 @@ function semanticClauses(source) {
     .filter(Boolean);
 }
 
-function validateProcedures(source, relativePath) {
+function validateProcedures(source, relativePath, projections) {
   const errors = [];
-  let scanSource = source;
+  let scanSource = maskPermittedHistoricalContexts(source);
   if (relativePath === DELIVERY_PATH) {
     const regions = [];
     for (const definition of PROCEDURE_REGIONS) {
@@ -707,20 +826,15 @@ function validateProcedures(source, relativePath) {
         );
       regions.push(region);
     }
-    const characters = [...scanSource];
+    const characters = scanSource.split("");
     for (const region of regions)
       for (let index = region.start; index < region.end; index += 1)
         characters[index] = " ";
     scanSource = characters.join("");
   }
-  if (
-    projectionDigest(
-      removePermittedActionDescriptions(scanSource),
-      ACTION_STEM_PATTERN,
-    ) !== HIGH_RISK_PROJECTIONS[relativePath]?.[0]
-  )
+  if (projections[0] !== HIGH_RISK_PROJECTIONS[relativePath]?.[0])
     errors.push(
-      `${relativePath}: unbounded, moved, or noncanonical live-action instruction context`,
+      `${relativePath}: protected operational domain occurrence exposes an unbounded, moved, or noncanonical live-action instruction context`,
     );
   const relocatedProcedure =
     /remove the environment API-token secret|cancel in-flight staging runs|retry\s+revocation|verify the affected token is inactive|run the exact ordered D1 migration ledger|upload immutable SHA-prefix\/run-ID\/attempt-tagged Worker versions|promote the exact UUIDs|run bounded staging smoke|both API and web restoration independently/i;
@@ -736,7 +850,7 @@ function validateProcedures(source, relativePath) {
   return errors;
 }
 
-function validateLaterBoundaries(source, relativePath) {
+function validateLaterBoundaries(source, relativePath, projections) {
   const errors = [];
   const clauses = semanticClauses(source);
   for (const subject of LATER_SUBJECTS) {
@@ -769,63 +883,34 @@ function validateLaterBoundaries(source, relativePath) {
   );
   if (holdRelease.test(source))
     errors.push(`${relativePath}: inherited hold release claim is prohibited`);
-  const currentTruthSource = maskSupersededHistoricalF3(source);
+  const currentTruthSource = maskPermittedHistoricalContexts(source);
   if (
     /\bF3(?:\/staging|[ -]+staging)?\b[^\n.!?]{0,80}\b(?:(?:remains?|is|are|stays?|continues?\s+to\s+be)\s+(?:pending|unresolved|held)|is\s+not[\s-]+yet[\s-]+delivered)\b/i.test(
       currentTruthSource,
     )
   )
     errors.push(`${relativePath}: stale current F3 unresolved/held wording`);
-  if (
-    projectionDigest(source, LATER_HOLD_TERM_PATTERN) !==
-    HIGH_RISK_PROJECTIONS[relativePath]?.[2]
-  )
+  if (projections[2] !== HIGH_RISK_PROJECTIONS[relativePath]?.[2])
     errors.push(
       `${relativePath}: prohibited positive or noncanonical later/hold context`,
+    );
+  if (projections[3] !== HIGH_RISK_PROJECTIONS[relativePath]?.[3])
+    errors.push(
+      `${relativePath}: stale current F3 or noncanonical F3 history context`,
     );
   return errors;
 }
 
-function maskSupersededHistoricalF3(source) {
-  return source
-    .split(/(\r?\n\s*\r?\n)/)
-    .map((paragraph, index) => {
-      if (index % 2 === 1) return paragraph;
-      let masked = paragraph;
-      for (let number = 94; number <= 104; number += 1) {
-        const packageId = `VOC-${String(number).padStart(3, "0")}`;
-        const immutable = new RegExp(
-          `\\b${packageId}\\b\\s+is\\s+immutable\\s+history\\b`,
-          "i",
-        );
-        const supersession = new RegExp(
-          `\\bLater\\s+exact\\s+VOC-105\\s+evidence\\s+supersedes\\s+(?:that|${packageId})\\s+prospective\\s+F3(?:\\s+(?:pending|unresolved|not[\\s-]+yet[\\s-]+delivered))?\\s+status\\b`,
-          "i",
-        );
-        if (!immutable.test(paragraph) || !supersession.test(paragraph))
-          continue;
-        masked = masked.replace(
-          new RegExp(
-            `\\b${packageId}\\b\\s+is\\s+immutable\\s+history\\s*:\\s*F3\\s+(?:is\\s+(?:pending|unresolved)|is\\s+not[\\s-]+yet[\\s-]+delivered)\\s*\\.`,
-            "gi",
-          ),
-          " ",
-        );
-      }
-      return masked;
-    })
-    .join("");
-}
-
 function validateHistoryBoundary(source, relativePath) {
   const errors = [];
+  const currentTruthSource = maskPermittedHistoricalContexts(source);
   for (let number = 94; number <= 104; number += 1) {
     const packageId = `VOC-${String(number).padStart(3, "0")}`;
     const pattern = new RegExp(
       `\\b${packageId}\\b[^.!?]{0,180}\\b(?:current|now|still|remains?|active)\\b[^.!?]{0,100}\\b(?:F3|staging)\\b[^.!?]{0,60}\\b(?:pending|unresolved|not[\\s-]+yet[\\s-]+delivered)\\b|\\b${packageId}\\b[^.!?]{0,180}\\b(?:F3|staging)\\b[^.!?]{0,80}\\b(?:current|now|still|remains?|active)\\b[^.!?]{0,60}\\b(?:pending|unresolved|not[\\s-]+yet[\\s-]+delivered)\\b`,
       "i",
     );
-    if (pattern.test(source))
+    if (pattern.test(currentTruthSource))
       errors.push(
         `${relativePath}: ${packageId} superseded F3 history is presented as current`,
       );
@@ -845,11 +930,12 @@ function validateHistoryBoundary(source, relativePath) {
 }
 
 export function inspectF3Surface(source, relativePath) {
+  const projections = protectedProjectionDigests(source, relativePath);
   return [
     ...validatePublicResourceContext(source, relativePath),
-    ...validateCredentialVocabulary(source, relativePath),
-    ...validateProcedures(source, relativePath),
-    ...validateLaterBoundaries(source, relativePath),
+    ...validateCredentialVocabulary(source, relativePath, projections),
+    ...validateProcedures(source, relativePath, projections),
+    ...validateLaterBoundaries(source, relativePath, projections),
     ...validateHistoryBoundary(source, relativePath),
   ];
 }

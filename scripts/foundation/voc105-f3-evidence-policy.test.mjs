@@ -601,12 +601,14 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
     for (const description of [
       "The command “Deploy now” is prohibited.",
       "The sanitized past delivery description records that retry was not required.",
+      "No deployment occurred.",
+      "Deployment is prohibited.",
+      "The sanitized delivery deployed the API Worker successfully in the past.",
     ])
-      assert.equal(
-        inspectF3Surface(`${source}\n${description}`, surface).some((error) =>
-          error.includes("live-action"),
-        ),
-        false,
+      assert.deepEqual(
+        inspectF3Surface(`${source}\n${description}`, surface),
+        [],
+        `${surface} must accept exact safe operational description: ${description}`,
       );
   }
   for (const surface of DESIGNATED_F3_SURFACES)
@@ -645,12 +647,98 @@ test("canonical guarded runbook regions pass and every guard drift or command fa
       "Configure credentials now.",
       "Create resources now.",
       "Release production now.",
+      "Move staging.",
+      "Provision resources.",
+      "Edit deployment.",
+      "Trigger workflow.",
+      "Ship build.",
+      "Execute workflow.",
+      "Set DNS.",
+      "Run CI.",
+      "Stop staging.",
+      "Roll out staging.",
+      "Switch DNS.",
+      "Turn on traffic.",
+      "Go live.",
     ])
       assertMutation(
         surface,
         (target) => append(target, surface, command),
         /live-action instruction|bounded procedure/,
       );
+});
+
+test("protected credential and F3 occurrences fail closed on every surface", () => {
+  for (const surface of DESIGNATED_F3_SURFACES) {
+    for (const disclosure of [
+      "Authorization: Bearer synthetic-inert-value",
+      "Bearer synthetic-inert-value",
+      "Authorization = Bearer redacted-looking-value",
+    ])
+      assertMutation(
+        surface,
+        (target) => append(target, surface, disclosure),
+        /credential value is prohibited|credential context is not canonical/,
+      );
+    for (const stale of [
+      "F3 pending.",
+      "F3 remains pending.",
+      "F3 is unresolved.",
+      "F3 staging unresolved.",
+      "F3 staging is unresolved.",
+      "F3 is not delivered.",
+      "F3 has not been delivered.",
+      "F3 delivery remains pending.",
+    ])
+      assertMutation(
+        surface,
+        (target) => append(target, surface, stale),
+        /stale current F3|noncanonical F3 history context/,
+      );
+  }
+});
+
+test("exact unresolved and held contexts produce zero errors on every surface", () => {
+  for (const surface of DESIGNATED_F3_SURFACES) {
+    const source = fs.readFileSync(path.join(root, surface), "utf8");
+    for (const safe of ["A1 remains unresolved.", "Production remains held."])
+      assert.deepEqual(
+        inspectF3Surface(`${source}\n${safe}`, surface),
+        [],
+        `${surface} must accept exact safe later-boundary context: ${safe}`,
+      );
+    for (let number = 94; number <= 104; number += 1) {
+      const packageId = `VOC-${String(number).padStart(3, "0")}`;
+      const held = `${packageId} is immutable history. Production remains held; learner data remains held; VOC-080-HOLD-01 remains held; VOC-080-HOLD-02 remains held.`;
+      assert.deepEqual(
+        inspectF3Surface(`${source}\n${held}`, surface),
+        [],
+        `${surface} must accept exact historical held context for ${packageId}`,
+      );
+    }
+  }
+});
+
+test("protected-domain paragraphs reject adjacent noncanonical rewrites", () => {
+  const protectedLine =
+    /^.*(?:staging|delivery|deployment|workflow|CI|DNS|traffic|resources?|D1|API Worker|build|live|credential|token|secret|A1|production|launch|learner data|VOC-080-HOLD-0[12]|F3).*$/im;
+  for (const surface of DESIGNATED_F3_SURFACES) {
+    const source = fs.readFileSync(path.join(root, surface), "utf8");
+    assert.match(
+      source,
+      protectedLine,
+      `${surface} needs a protected fixture line`,
+    );
+    const rewritten = source.replace(
+      protectedLine,
+      (line) => `${line}\nThis adjacent sentence was rewritten.`,
+    );
+    assert.match(
+      inspectF3Surface(rewritten, surface).join("\n"),
+      /protected operational domain|credential context is not canonical|noncanonical later\/hold context|noncanonical F3 history context/,
+      `${surface} must reject a rewrite in a protected paragraph`,
+    );
+  }
 });
 
 test("later authority claim grammar fails across every surface", () => {
@@ -798,6 +886,29 @@ test("history checks reject only superseded F3 current claims", () => {
     );
     for (let number = 94; number <= 104; number += 1) {
       const packageId = `VOC-${String(number).padStart(3, "0")}`;
+      for (const historical of [
+        `${packageId} is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes that prospective F3 status.`,
+        `${packageId} is immutable history: F3 remains pending. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
+        `${packageId} is immutable history: F3 staging is unresolved. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 unresolved status.`,
+        `${packageId} is immutable history: F3 is not yet delivered. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 not-delivered status.`,
+        `Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status. ${packageId} immutable history records F3 as pending.`,
+        `Later exact VOC-105 evidence supersedes the prospective F3 status from ${packageId}. F3 staging is unresolved in ${packageId} immutable history.`,
+      ])
+        assert.deepEqual(
+          inspectF3Surface(`${source}\n${historical}`, relative),
+          [],
+          `${relative} must accept bounded ${packageId} F3 history: ${historical}`,
+        );
+      for (const noncanonical of [
+        `${packageId} is immutable history: F3 remains pending.`,
+        `F3 remains pending. Later exact VOC-105 evidence supersedes ${packageId} prospective F3 pending status.`,
+        `${packageId} is immutable history: F3 is pending. Later exact VOC-105 evidence supersedes VOC-${String(number === 104 ? 94 : number + 1).padStart(3, "0")} prospective F3 pending status.`,
+      ])
+        assertMutation(
+          relative,
+          (target) => append(target, relative, noncanonical),
+          /stale current F3|noncanonical F3 history context/,
+        );
       for (const currentWord of [
         "current",
         "now",
@@ -826,14 +937,8 @@ test("history checks reject only superseded F3 current claims", () => {
           ),
         new RegExp(`${packageId} superseded F3 history`),
       );
-      const source = fs.readFileSync(path.join(root, relative), "utf8");
       const positive = `${source}\n${packageId} is immutable history. Production remains held; learner data remains held; VOC-080-HOLD-01 remains held; VOC-080-HOLD-02 remains held.`;
-      assert.equal(
-        inspectF3Surface(positive, relative).some((error) =>
-          error.includes(`${packageId} superseded`),
-        ),
-        false,
-      );
+      assert.deepEqual(inspectF3Surface(positive, relative), []);
     }
   }
   for (const marker of [
