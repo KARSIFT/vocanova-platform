@@ -18,13 +18,10 @@ hosted-settings truth, and adopted VOC-106 evidence are protected.
 3. Reconcile all nine VOC-106 artifact files, preserving adopted candidate/review/
    approval evidence while removing stale pre-adoption blockers and setting task state
    accurately. Preserve its two hard-sequenced protected-history PRs.
-4. Specify immutable attempt heads. Drift invalidates the attempt, closes its draft PR,
-   and abandons its ref without deletion or mutation. A new SHA-derived name/PR may be
-   created only after proving no collision; an existing name fails closed unless it is
-   the untouched head of the same attempt. Never rewrite, adopt, or delete another
-   actor/PR head. Before successful merge record head name, SHA, tree, compare, and
-   recreation command; automatic deletion may affect only successfully merged
-   short-lived heads.
+4. Prospectively use immutable claim/attempt/submit refs. Same-target creation
+   coalesces; post-claim drift and submit-marker-plus-zero stop. Resolve cardinality
+   first. Never rewrite or delete protected release refs; only the merged
+   synchronization head is automatic-deletion eligible.
 5. Search every non-archived current surface for contradictory direct-`develop` head
    instructions. Classify explicitly historical records rather than rewriting them.
 6. Locally synthesize the prospective merge without moving refs and require its tree
@@ -49,3 +46,22 @@ auto-delete-target, ancestry, and behind-count readbacks. Any failure stops rele
 closure. Revert via a separately reviewed PR against the actual correction merge
 first parent; no reset, permanent-ref force-push, settings change, manual deletion, or
 live-system action is allowed.
+
+## VOC-115 durable release-attempt contract
+
+This is the operative prospective procedure; every conflicting SHA-only, generic
+collision, blanket abandonment/retry, and release-attempt auto-deletion instruction
+above is retained only as superseded history. Adopted VOC-115 uses deterministic
+`release/voc-106-claim-*`, a full-SHA attempt ref, and allocation-bound
+`release/voc-106-submit-*`. Exact same-target atomic requests coalesce; foreign,
+malformed, or post-claim stale topology stops. Only the exact invocation verifying the
+submit-marker `201` may send one canonical no-retry/no-redirect PR POST. Every other
+observer/response and marker-plus-zero is `submit-outcome-unknown`, never retry.
+
+The separately authorized held active no-bypass three-pattern ruleset plus exhaustive
+numeric-max history equality is a prerequisite. Lossless exact page/object/command/
+scan/pass schemas, dual-source refs, two stable passes, null-provenance stops, and
+cardinality-first cleanup apply. Claim, attempt, and submit refs remain immutable and
+never deletion eligible; same-`develop` retry requires a deterministic closed/conflict
+frontier and fresh distinct identity. `VOC-080-HOLD-01` and every settings/ref/release/
+deployment/live hold remains. Approved SHA/review/adoption evidence is unchanged.

@@ -95,31 +95,32 @@ Plan PRs require independent review too. Record a structured verdict bound to th
 exact candidate revision before adoption. GitHub Actions does not call an AI reviewer;
 the reviewer runs separately and its evidence is attached to the pull request.
 
-For a reviewed release, freshly freeze `origin/main` and `origin/develop` and create
-`release/voc-106-<frozen-develop-short-sha>` at the exact frozen develop SHA and tree.
+For a reviewed release, freshly freeze `origin/main` and `origin/develop`, derive the
+deterministic `release/voc-106-claim-*` frontier, and atomically create its full-SHA
+`release/voc-106-<sha>-attempt-*` at the exact frozen develop SHA and tree.
 Frozen `main` must be the merge base with zero main-only commits; the aggregate
 compare must contain no extra commit or tree. The immutable short-lived head targets
 `main` through an identifiable merge-commit PR, and its prospective and actual merge
 trees must equal the frozen develop/head tree. Permanent `develop` is never the PR
 head.
 
-One release ref and draft PR are one immutable attempt. Any protected-ref, head,
-base, merge-base, tree, compare, PR-metadata, check, policy-evidence, or reviewed-SHA
-drift invalidates the binder. Close and abandon that attempt without deleting or
-rewriting its ref, then freeze again and use a new collision-free SHA-derived name
-and fresh PR/evidence. Before creating a release ref, fail if its name exists unless
-it is proved to be the untouched head of that same attempt; never adopt, overwrite,
-force-update, or delete another PR or actor's ref.
+Claim, attempt, allocation-bound `release/voc-106-submit-*`, and draft PR are one
+immutable identity. Same-target requests coalesce; other targets stop. Only the
+invocation receiving verified submit `201` may send one no-retry/no-redirect PR POST;
+marker-plus-zero is `submit-outcome-unknown`. Protected drift after claim is
+irrecoverable, and cardinality cleanup precedes terminal state. Claim, attempt, and
+submit refs are never updated, forced, deleted, or automatic-deletion eligible.
+Same-`develop` retry needs the closed/conflict frontier and a fresh distinct identity.
 
 After the reviewed release merge, branch finalization is not complete until a
 separately reviewed short-lived synchronization branch based on current `develop`
 merges current `main` ancestry and merge-commits its PR into `develop`. Permanent
 `main` is never that PR's head. Before closure, prove the actual release merge tree
 equals the frozen develop tree, `main` is an ancestor of `develop`, and `develop` is
-zero commits behind `main`. Record each successfully merged short-lived head's name,
-exact SHA, tree, post-merge readback, and nonexecuted recreation command. GitHub may
-automatically delete only those successfully merged release and synchronization
-heads, never permanent `develop` or `main`. This repository-history loop does not
+zero commits behind `main`. Record every protected release ref and the merged
+synchronization head's exact SHA, tree, readback, and recreation command. GitHub may
+automatically delete only the synchronization head, never claim/attempt/submit refs
+or permanent `develop`/`main`. This repository-history loop does not
 change settings, manually delete a branch, deploy, or authorize any live-system
 action.
 
@@ -246,7 +247,7 @@ Do not invent or report an unavailable check as passing.
 
 There is no current workflow that promotes a frozen develop candidate to `main`, opens
 a release approval issue, or advances a package. Promotion is a separately reviewed
-pull request from the immutable short-lived release alias described above.
+pull request from the protected durable release-attempt identity described above.
 The previous automatic-release delegation remains historical evidence but has no
 executable workflow after VOC-078-T01. The required post-promotion history
 synchronization is likewise a separately reviewed repository-only pull request; it is
@@ -270,3 +271,27 @@ ChatGPT may receive read-only access to KARSIFT/vocanova-platform for
 repository-grounded product analysis, architecture analysis, specification
 drafting, and cross-document impact analysis. ChatGPT must not receive
 repository write, merge, deployment, secret, or production-data access.
+
+## VOC-115 durable release-attempt contract
+
+This section is the operative release-attempt procedure. Adopted VOC-115
+prospectively supersedes every conflicting SHA-only, generic collision, blanket
+close/abandon, fresh-retry, and release-head auto-deletion statement above; those
+statements remain historical context only. Derive the deterministic
+`release/voc-106-claim-*` frontier, atomically coalesce only exact same-target requests,
+create the full-frozen-SHA attempt branch, and derive the allocation-bound
+`release/voc-106-submit-*` marker. Only the exact submit-marker invocation receiving
+and verifying synchronous `201` may send one canonical no-retry/no-redirect draft-PR
+POST. Any other response/observer and marker-plus-zero are the irrecoverable
+`submit-outcome-unknown` hold.
+
+Before allocation, verify the separately held active no-bypass three-pattern ruleset
+and its exhaustive numeric-max history version, exact lossless schemas, dual ref
+enumerations, and two complete stable passes. Null/foreign provenance, post-claim
+protected topology drift, history/schema mismatch, or unresolved multiplicity stops.
+Cardinality cleanup precedes terminal state. Claim, attempt, and submit refs are never
+updated, forced, deleted, or automatic-deletion eligible. Same-`develop` retry is
+allowed only from the deterministic closed/conflict frontier with a fresh distinct
+attempt identity and full evidence. The existing auto-delete setting may affect only a
+successfully merged synchronization head. `VOC-080-HOLD-01` and every settings, ref,
+release, deployment, production-data, spending, and live-system hold remains.

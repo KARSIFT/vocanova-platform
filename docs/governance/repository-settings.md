@@ -45,23 +45,21 @@ a pull request, protect a branch, delete existing branches, or deploy anything.
 
 The enabled setting means both release and synchronization PRs require disposable
 heads. A release preparer freshly freezes `origin/main` and `origin/develop`, proves
-frozen `main` is their merge base with zero main-only commits, and creates
-`release/voc-106-<frozen-develop-short-sha>` as an exact SHA/tree alias of frozen
-develop. The aggregate compare contains no extra commit or tree. That immutable
-short-lived head—not permanent `develop`—targets `main` through a merge commit whose
+frozen `main` is their merge base with zero main-only commits, derives the deterministic
+claim frontier, and atomically creates its full-SHA protected attempt at frozen develop.
+The aggregate compare contains no extra commit or tree. That attempt—not permanent
+`develop`—targets `main` through a merge commit whose
 prospective and actual trees equal frozen develop/head.
 
-The ref and draft PR are one attempt. Drift closes and abandons it without ref
-deletion or mutation; the next attempt uses a freshly frozen collision-free name and
-fresh evidence. A pre-existing name fails closed unless proved the untouched head of
-the same attempt; no foreign ref is adopted, overwritten, force-updated, or deleted.
+Claim, attempt, submit marker, and draft PR are one identity. Same-target requests
+coalesce; foreign targets stop. Verified submit `201` authorizes one POST; marker-plus-
+zero is `submit-outcome-unknown`. Protected drift is irrecoverable, cardinality is
+resolved first, and claim/attempt/submit refs are never mutation or deletion eligible.
 Post-promotion history synchronization uses a separate short-lived head from current
 `develop` that merges current `main` ancestry and merge-commits into `develop`.
-Evidence proves release-tree
-equality, `main` ancestry, and zero behind. GitHub may automatically delete only
-successfully merged short-lived release and synchronization heads after their names,
-exact SHAs, trees, readbacks, and nonexecuted recreation commands are recorded; it
-must never target permanent `develop` or `main`. This loop does not change settings,
+Evidence proves release-tree equality, `main` ancestry, and zero behind. GitHub may
+automatically delete only the merged synchronization head after exact recovery
+evidence; protected release refs and permanent branches are never eligible. This loop does not change settings,
 manually delete a branch, deploy, or invoke Cloudflare.
 
 The same read-only observation records dependency/vulnerability alerts enabled. This
@@ -357,3 +355,27 @@ R0-R4 while retaining stronger R4 evidence and explicit action-specific authorit
 Automatic merge into `develop`, autonomous production release, and repository-driven
 production deployment are disabled after VOC-078-T01/T03; RL1/RL2 technical activation
 remains disabled.
+
+## VOC-115 durable release-attempt contract
+
+This section is the operative release-attempt procedure. Adopted VOC-115
+prospectively supersedes every conflicting SHA-only, generic collision, blanket
+close/abandon, fresh-retry, and release-head auto-deletion statement above; those
+statements remain historical context only. Derive the deterministic
+`release/voc-106-claim-*` frontier, atomically coalesce only exact same-target requests,
+create the full-frozen-SHA attempt branch, and derive the allocation-bound
+`release/voc-106-submit-*` marker. Only the exact submit-marker invocation receiving
+and verifying synchronous `201` may send one canonical no-retry/no-redirect draft-PR
+POST. Any other response/observer and marker-plus-zero are the irrecoverable
+`submit-outcome-unknown` hold.
+
+Before allocation, verify the separately held active no-bypass three-pattern ruleset
+and its exhaustive numeric-max history version, exact lossless schemas, dual ref
+enumerations, and two complete stable passes. Null/foreign provenance, post-claim
+protected topology drift, history/schema mismatch, or unresolved multiplicity stops.
+Cardinality cleanup precedes terminal state. Claim, attempt, and submit refs are never
+updated, forced, deleted, or automatic-deletion eligible. Same-`develop` retry is
+allowed only from the deterministic closed/conflict frontier with a fresh distinct
+attempt identity and full evidence. The existing auto-delete setting may affect only a
+successfully merged synchronization head. `VOC-080-HOLD-01` and every settings, ref,
+release, deployment, production-data, spending, and live-system hold remains.

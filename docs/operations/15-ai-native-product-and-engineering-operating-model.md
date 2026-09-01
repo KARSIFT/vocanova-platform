@@ -91,13 +91,13 @@ Production and learner-data holds remain unchanged.
 
 **VOC-114 amendment (2026-09-01):** Current release preparation freshly freezes
 `origin/main` and `origin/develop`, requires frozen `main` as merge base with zero
-main-only commits, and creates `release/voc-106-<frozen-develop-short-sha>` as the
-exact frozen develop SHA/tree. This immutable short-lived head targets `main` and its
+main-only commits, then uses the deterministic claim, full-SHA protected attempt, and
+allocation-bound submit marker identity at the exact frozen develop SHA/tree. It targets `main` and its
 prospective/actual merge tree equals the frozen candidate. Any ref, PR, topology,
-tree, compare, check, policy-evidence, or reviewed-SHA drift closes and abandons the
-attempt without deleting or rewriting its ref; a collision-free newly frozen attempt
-gets fresh evidence. Automatic deletion may affect only successfully merged
-short-lived release and synchronization heads, never permanent `develop` or `main`.
+tree, compare, check, policy-evidence, or reviewed-SHA drift after claim is irrecoverable.
+Only verified submit `201` authorizes one POST; marker-plus-zero is
+`submit-outcome-unknown`. Protected release refs are never deletion eligible;
+automatic deletion may affect only the successfully merged synchronization head.
 Promotion, synchronization, settings, deployment, and live-system actions remain
 separate governed events.
 
@@ -1586,7 +1586,7 @@ Targets `develop`.
 Promotes the exact freshly frozen develop candidate through a disposable alias:
 
 ```text
-frozen develop SHA/tree → release/voc-106-<short-sha> → main
+frozen develop SHA/tree → claim-* → <full-sha>-attempt-* → submit-* → main
 ```
 
 Must include:
@@ -1603,9 +1603,9 @@ Must include:
 - Staging verification.
 - Outstanding non-blocking issues.
 
-Permanent `develop` is not the PR head. Drift closes and abandons the draft attempt
-without ref deletion or mutation; a newly frozen collision-free attempt gets fresh
-evidence. The PR requires complete deterministic, R4/specialist, exact-review, and
+Permanent `develop` is not the PR head. Post-claim drift is irrecoverable; protected
+claim/attempt/submit refs remain immutable, and retry requires a deterministic closed/
+conflict frontier plus a fresh distinct identity. The PR requires R4/specialist review and
 action-authority evidence plus a separate non-author merge actor under DOC-16. Risk
 class alone does not require founder approval.
 
@@ -1722,20 +1722,19 @@ model, or provider is not independence or authority. Model/provider choice may h
 evidence; an expressly applicable cross-model rule remains scoped evidence, not an
 approval source.
 
-The release row requires frozen `main` as merge base, zero main-only commits, an exact
-SHA/tree release alias, no extra compare content, and prospective/actual merge-tree
-equality. The release ref/PR is immutable: drift closes and abandons it without ref
-mutation or deletion; a new collision-free SHA-derived attempt receives fresh
-evidence. Permanent `develop` is never the release PR head.
+The release row requires frozen `main` as merge base, zero main-only commits, the exact
+claim/full-SHA-attempt/submit identity, no extra compare content, and merge-tree
+equality. Same-target requests coalesce. Only verified submit `201` authorizes one
+POST; marker-plus-zero is `submit-outcome-unknown`. Post-claim drift is irrecoverable,
+cardinality is resolved first, and protected release refs are never mutated/deleted.
 
 The synchronization row is repository-history finalization, not another promotion or
 deployment. The short-lived branch starts from current `develop`, merges current
 `main`, and is merge-committed back into `develop`; permanent `main` is never its PR
 head. Completion proves `main` is an ancestor of `develop` and `develop` is zero
 commits behind `main`. It does not change repository settings, deploy, or invoke
-Cloudflare. Existing automatic source deletion may remove only successfully merged
-short-lived release and synchronization heads after names, exact SHAs, trees,
-readbacks, and nonexecuted recreation commands are recorded; manual or
+Cloudflare. Existing automatic source deletion may remove only the successfully merged
+synchronization head after exact evidence is recorded; manual or
 permanent-branch deletion is not authorized.
 
 R0-R4 are consequence classes, not personal-approval classes. R4 requires an explicit
@@ -1826,8 +1825,8 @@ must pass:
 
 Independent release review supplements but does not replace deterministic checks or
 action-specific authority. Automatic deletion may affect only the successfully merged
-short-lived release head after exact recovery evidence, never permanent `develop` or
-`main`.
+synchronization head after exact recovery evidence, never protected release refs or
+permanent branches.
 
 ---
 
@@ -3527,3 +3526,27 @@ After this document is merged into the canonical repository:
 This document is approved as **Vocanova AI-Native Product and Engineering Operating Model v1.0**.
 
 It is the canonical operating model for the Vocanova MVP and includes Amendment A-001.
+
+## VOC-115 durable release-attempt contract
+
+This section is the operative release-attempt procedure. Adopted VOC-115
+prospectively supersedes every conflicting SHA-only, generic collision, blanket
+close/abandon, fresh-retry, and release-head auto-deletion statement above; those
+statements remain historical context only. Derive the deterministic
+`release/voc-106-claim-*` frontier, atomically coalesce only exact same-target requests,
+create the full-frozen-SHA attempt branch, and derive the allocation-bound
+`release/voc-106-submit-*` marker. Only the exact submit-marker invocation receiving
+and verifying synchronous `201` may send one canonical no-retry/no-redirect draft-PR
+POST. Any other response/observer and marker-plus-zero are the irrecoverable
+`submit-outcome-unknown` hold.
+
+Before allocation, verify the separately held active no-bypass three-pattern ruleset
+and its exhaustive numeric-max history version, exact lossless schemas, dual ref
+enumerations, and two complete stable passes. Null/foreign provenance, post-claim
+protected topology drift, history/schema mismatch, or unresolved multiplicity stops.
+Cardinality cleanup precedes terminal state. Claim, attempt, and submit refs are never
+updated, forced, deleted, or automatic-deletion eligible. Same-`develop` retry is
+allowed only from the deterministic closed/conflict frontier with a fresh distinct
+attempt identity and full evidence. The existing auto-delete setting may affect only a
+successfully merged synchronization head. `VOC-080-HOLD-01` and every settings, ref,
+release, deployment, production-data, spending, and live-system hold remains.

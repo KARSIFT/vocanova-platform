@@ -79,22 +79,22 @@ requirements:
       zero main-only commits.
   - id: VOC-106-D02
     statement: >-
-      Create `release/voc-106-<frozen-develop-short-sha>` as a ref-only exact alias
-      of the freshly frozen develop SHA and tree. Before review, prove name absence or
-      same-attempt ownership, head/develop SHA and tree equality, zero extra head
+      Verify the held ruleset/history and two stable passes; derive the deterministic
+      claim, full-SHA attempt, and submit-marker identity at frozen develop. Before
+      review, prove exact same-target coalescence, head/develop equality, zero extra head
       commits, and no aggregate-compare commit or tree beyond frozen develop. Its
       separately reviewed PR targets main and uses an identifiable merge commit whose
       prospective and actual tree equal frozen develop/head. Record exact checks,
       reviewer verdicts, R4 decision, impact, contingency, and rollback evidence.
   - id: VOC-106-D03
     statement: >-
-      A release ref and draft PR are one immutable attempt. Any protected-ref, head,
+      Claim, attempt, submit marker, and draft PR are one immutable identity. Only a
+      verified submit 201 invocation may POST once; marker-plus-zero is
+      submit-outcome-unknown. Any protected-ref, head,
       base, merge-base, tree, compare, PR metadata, required check, policy evidence,
-      or reviewed-revision drift invalidates the complete binder. Close and abandon
-      the draft PR/ref without deletion or mutation, then start a fresh SHA-named ref
-      and PR with all-new evidence. A collision fails closed unless proved the
-      untouched head of the same attempt; never adopt, overwrite, force-update, or
-      delete another PR or actor's ref.
+      or reviewed-revision drift after claim is irrecoverable. Resolve cardinality
+      first. Never update, force, delete, or auto-delete protected release refs; retry
+      needs the deterministic advanced frontier and a fresh distinct identity.
   - id: VOC-106-D04
     statement: >-
       Release finalization is incomplete until a short-lived branch from then-current
@@ -109,8 +109,8 @@ requirements:
       of develop, and develop is zero commits behind main. Record release head name,
       SHA, tree, release merge SHA, synchronization head/tip/tree and merge SHA,
       post-merge refs, checks, actors, and nonexecuted recreation commands. Existing
-      automatic deletion may affect only successfully merged short-lived release and
-      synchronization heads, never permanent develop or main.
+      automatic deletion may affect only the successfully merged synchronization head,
+      never protected release refs or permanent branches.
   - id: VOC-106-D06
     statement: >-
       This package authorizes no repository-settings query or mutation, manual branch
@@ -263,3 +263,14 @@ blocking_reasons:
   - separately-reviewed-promotion-pending
   - fresh-synchronization-freeze-and-exact-review-pending
   - post-synchronization-ancestry-and-zero-behind-proof-pending
+# VOC-115 prospectively supersedes only the operative SHA-only attempt procedure;
+# every approved-candidate, review, adoption, and authority record above remains history.
+voc115_durable_release_attempt_contract:
+  marker: VOC-115 durable release-attempt contract
+  status: prospective-supersession-of-sha-only-procedure
+  claim_ref: release/voc-106-claim-*
+  submit_ref: release/voc-106-submit-*
+  unknown_state: submit-outcome-unknown
+  inherited_hold: VOC-080-HOLD-01
+  ruleset_prerequisite: separately-authorized-held-no-bypass-control
+  settings_ref_release_deployment_live_authority: prohibited

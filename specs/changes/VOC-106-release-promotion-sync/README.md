@@ -28,19 +28,19 @@ ordinary repository work can move `develop`.
 
 The release PR must freshly fetch and freeze exact `origin/main` and
 `origin/develop` SHAs and trees. Frozen `main` must be their merge base with zero
-main-only commits. The preparer creates
-`release/voc-106-<frozen-develop-short-sha>` as a ref-only exact SHA/tree alias of
-frozen develop, and proves its aggregate compare contains no extra commit or tree.
+main-only commits. After exact held-ruleset/history and stable-state verification, the
+preparer derives `release/voc-106-claim-*`, atomically coalesces its exact target, and
+creates the full-SHA attempt plus allocation-bound submit marker at frozen develop.
 The PR uses that alias as head, targets `main`, and records a prospective merge tree
 equal to frozen develop/head. The actual release merge must preserve that tree.
 
-The alias and draft PR are one immutable attempt. Any protected-ref, head/base,
+Claim/attempt/submit and draft PR are one immutable identity. Only verified submit
+`201` authorizes one no-retry/no-redirect POST; zero after marker is
+`submit-outcome-unknown`. Any protected-ref, head/base,
 merge-base, tree, compare, PR metadata, check, policy evidence, or reviewed-revision
-drift invalidates the complete evidence set. Close and abandon it without deleting or
-rewriting the ref; freeze again and use a fresh collision-free SHA-derived name and
-evidence. An existing name fails closed unless proved the untouched head of that same
-attempt; another PR or actor's ref is never adopted, overwritten, force-updated, or
-deleted. The synchronization PR repeats the freeze after release because its correct
+drift after claim is irrecoverable. Cardinality cleanup comes first. Protected release
+refs are never updated, forced, deleted, or automatic-deletion eligible. Same-develop
+retry needs the deterministic advanced frontier and a fresh distinct identity. The synchronization PR repeats the freeze after release because its correct
 main ancestry cannot be known beforehand.
 
 ## Boundaries
@@ -53,8 +53,26 @@ traffic change, spend, or launch is in scope.
 
 Before each successful merge, record the short-lived head name, exact SHA, tree, and
 nonexecuted recreation command. Existing automatic deletion may remove only the
-successfully merged release and synchronization heads, never permanent `develop` or
-`main`.
+successfully merged synchronization head, never protected release refs or permanent branches.
 
 `automatic_merge_allowed: true` records the required default package policy only; it
 does not perform a merge or relax R4 evidence, actor separation, or action authority.
+
+## VOC-115 durable release-attempt contract
+
+This is the operative prospective procedure; every conflicting SHA-only, generic
+collision, blanket abandonment/retry, and release-attempt auto-deletion instruction
+above is retained only as superseded history. Adopted VOC-115 uses deterministic
+`release/voc-106-claim-*`, a full-SHA attempt ref, and allocation-bound
+`release/voc-106-submit-*`. Exact same-target atomic requests coalesce; foreign,
+malformed, or post-claim stale topology stops. Only the exact invocation verifying the
+submit-marker `201` may send one canonical no-retry/no-redirect PR POST. Every other
+observer/response and marker-plus-zero is `submit-outcome-unknown`, never retry.
+
+The separately authorized held active no-bypass three-pattern ruleset plus exhaustive
+numeric-max history equality is a prerequisite. Lossless exact page/object/command/
+scan/pass schemas, dual-source refs, two stable passes, null-provenance stops, and
+cardinality-first cleanup apply. Claim, attempt, and submit refs remain immutable and
+never deletion eligible; same-`develop` retry requires a deterministic closed/conflict
+frontier and fresh distinct identity. `VOC-080-HOLD-01` and every settings/ref/release/
+deployment/live hold remains. Approved SHA/review/adoption evidence is unchanged.

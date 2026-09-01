@@ -30,8 +30,9 @@
   prefix; pre-existing same-name ref owned by another/no PR; moved PR metadata;
   changed check/review; missing recovery record; reuse/force update of an invalidated
   head; and force mutation of any permanent or foreign ref.
-- Expected: every mutation invalidates/stops. Drift closes and abandons the attempt
-  without manual deletion; a new collision-free name/PR needs complete fresh evidence.
+- Expected: every mutation stops. Post-claim drift is irrecoverable; protected refs
+  remain immutable. Retry needs the deterministic advanced frontier, a fresh distinct
+  identity, and complete evidence; submit-marker-plus-zero never retries.
 - Evidence: `VOC-114-EV-02`
 
 ## VOC-114-TEST-03 — Protected-history and actor-boundary regression
@@ -99,3 +100,22 @@ spends, or launches.
 - `VOC-114-EV-04`: exact paths, surface inventory, and deterministic/hosted results.
 - `VOC-114-EV-05`: exact reviewer verdicts, merge actor, and rollback rehearsal.
 - `VOC-114-EV-06`: bounded postmerge and first-use monitoring record.
+
+## VOC-115 durable release-attempt contract
+
+This is the operative prospective procedure; every conflicting SHA-only, generic
+collision, blanket abandonment/retry, and release-attempt auto-deletion instruction
+above is retained only as superseded history. Adopted VOC-115 uses deterministic
+`release/voc-106-claim-*`, a full-SHA attempt ref, and allocation-bound
+`release/voc-106-submit-*`. Exact same-target atomic requests coalesce; foreign,
+malformed, or post-claim stale topology stops. Only the exact invocation verifying the
+submit-marker `201` may send one canonical no-retry/no-redirect PR POST. Every other
+observer/response and marker-plus-zero is `submit-outcome-unknown`, never retry.
+
+The separately authorized held active no-bypass three-pattern ruleset plus exhaustive
+numeric-max history equality is a prerequisite. Lossless exact page/object/command/
+scan/pass schemas, dual-source refs, two stable passes, null-provenance stops, and
+cardinality-first cleanup apply. Claim, attempt, and submit refs remain immutable and
+never deletion eligible; same-`develop` retry requires a deterministic closed/conflict
+frontier and fresh distinct identity. `VOC-080-HOLD-01` and every settings/ref/release/
+deployment/live hold remains. Approved SHA/review/adoption evidence is unchanged.

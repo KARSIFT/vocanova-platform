@@ -54,12 +54,31 @@ origin/develop` and `git rev-list --right-only --count origin/develop...origin/m
 - Covers: `VOC-106-AC-02`
 - Procedure: read back action audit and branch list; verify no settings query/mutation,
   dispatch, deployment, Cloudflare/DNS, secret/data, spend, force update, or manual
-  deletion occurred; require permanent refs present. For each successfully merged
-  short-lived release/sync head, record name/SHA/tree and validate its nonexecuted
+  deletion occurred; require permanent refs present. For the merged synchronization
+  head, record name/SHA/tree and validate its nonexecuted
   recreate syntax. Negative fixtures cover permanent/wrong heads, stale or diverged
   refs, non-main merge base, nonzero main-only, wrong SHA/tree, extra commits/trees,
   prospective/actual tree mismatch, name collision, moved PR/check/review evidence,
   reuse/force-update after invalidation, and missing recovery evidence.
-- Expected result: only permitted repository history changes occur; every mutation
-  invalidates and only successfully merged short-lived heads are auto-delete eligible.
+- Expected result: only permitted repository history changes occur; protected release
+  refs remain immutable and only the merged synchronization head is deletion eligible.
 - Evidence: `VOC-106-EV-05`
+
+## VOC-115 durable release-attempt contract
+
+This is the operative prospective procedure; every conflicting SHA-only, generic
+collision, blanket abandonment/retry, and release-attempt auto-deletion instruction
+above is retained only as superseded history. Adopted VOC-115 uses deterministic
+`release/voc-106-claim-*`, a full-SHA attempt ref, and allocation-bound
+`release/voc-106-submit-*`. Exact same-target atomic requests coalesce; foreign,
+malformed, or post-claim stale topology stops. Only the exact invocation verifying the
+submit-marker `201` may send one canonical no-retry/no-redirect PR POST. Every other
+observer/response and marker-plus-zero is `submit-outcome-unknown`, never retry.
+
+The separately authorized held active no-bypass three-pattern ruleset plus exhaustive
+numeric-max history equality is a prerequisite. Lossless exact page/object/command/
+scan/pass schemas, dual-source refs, two stable passes, null-provenance stops, and
+cardinality-first cleanup apply. Claim, attempt, and submit refs remain immutable and
+never deletion eligible; same-`develop` retry requires a deterministic closed/conflict
+frontier and fresh distinct identity. `VOC-080-HOLD-01` and every settings/ref/release/
+deployment/live hold remains. Approved SHA/review/adoption evidence is unchanged.

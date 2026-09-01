@@ -52,32 +52,32 @@ hosted enforcement control is configured. Automatic deletion of merged branches 
 enabled as the one VOC-092 setting change; it is not branch protection or merge
 automation. See the [current point-in-time settings record](../docs/governance/repository-settings-current.yaml).
 
-Repository release finalization uses two immutable, separately reviewed short-lived
-attempts. Freshly fetch and freeze `origin/main` and `origin/develop`, then require
-frozen `main` to be their merge base with zero main-only commits. Create
-`release/voc-106-<frozen-develop-short-sha>` as a ref-only alias of the exact frozen
-develop SHA: the ref SHA and tree must equal frozen develop, and the aggregate compare
-must contain no extra commit or tree. Its PR targets `main` and uses an identifiable
-merge commit; both the prospective and actual release-merge tree must equal the
-frozen develop/release-head tree.
+Repository release finalization uses durable, separately reviewed attempts. Freshly
+fetch and freeze `origin/main` and `origin/develop`, require frozen `main` as merge base
+with zero main-only commits, and derive the deterministic `release/voc-106-claim-*`
+frontier. Under the separately authorized held no-bypass ruleset, atomically create its
+full-SHA `release/voc-106-<sha>-attempt-*` alias at frozen develop, then the allocation-
+bound `release/voc-106-submit-*` marker. Same-target requests coalesce; different or
+malformed targets stop. The SHA/tree/compare and prospective/actual merge tree equal
+the frozen candidate.
 
-The release ref and draft PR are one immutable attempt. Any ref, PR metadata, merge
-base, tree, compare, check, policy-evidence, or reviewed-revision drift invalidates
-the complete binder. Close and abandon that attempt without deleting or rewriting
-its ref, then use a newly frozen SHA-derived name and fresh PR/evidence. Before ref
-creation, a name collision fails closed unless the existing ref is proved to be the
-untouched head of that same attempt; never adopt, overwrite, force-update, or delete
-another attempt or actor's ref.
+Claim, attempt, submit marker, and draft PR are one immutable identity. Only the exact
+invocation receiving and verifying submit-marker `201` may make one no-retry/no-
+redirect PR POST. Marker-plus-zero is `submit-outcome-unknown`, never retry permission.
+Resolve PR cardinality before terminal classification. Protected-topology drift after
+claim is irrecoverable. Claim, attempt, and submit refs are never updated, forced,
+deleted, or automatic-deletion eligible; same-`develop` retry requires the deterministic
+closed/conflict frontier, a fresh distinct identity, and complete new evidence.
 
 Post-promotion history synchronization then uses a separate short-lived branch based
 on current `develop` that merges current `main` ancestry and merge-commits its
 reviewed PR back to
 `develop`; permanent `main` is never the PR head. Completion proves the actual release
 merge tree equality, `main` ancestry of `develop`, and zero commits behind. Record
-each successfully merged short-lived head's name, exact SHA, tree, post-merge
-readback, and nonexecuted recreation command. The existing source-branch setting may
-automatically delete only those successfully merged release and synchronization
-heads—never permanent `develop` or `main`. This repository-history loop does not
+each protected release ref and the successfully merged synchronization head's name,
+exact SHA, tree, post-merge readback, and nonexecuted recreation command. The existing
+source-branch setting may automatically delete only the synchronization head—never
+claim/attempt/submit refs, permanent `develop`, or permanent `main`. This loop does not
 change settings, manually delete a branch, deploy, or invoke Cloudflare.
 
 Governance is role- and evidence-based across R0-R4. Every meaningful plan or
@@ -180,3 +180,27 @@ VOC-080-T02's [external runbook](../docs/operations/ruflo-external-orchestration
 records the exact locked installation and rehearsal. Repository guards reject local
 Ruflo/Claude Flow state or dependencies, generated instruction replacement, launchers,
 autonomous GitHub writes, and held external-effect commands.
+
+## VOC-115 durable release-attempt contract
+
+This section is the operative release-attempt procedure. Adopted VOC-115
+prospectively supersedes every conflicting SHA-only, generic collision, blanket
+close/abandon, fresh-retry, and release-head auto-deletion statement above; those
+statements remain historical context only. Derive the deterministic
+`release/voc-106-claim-*` frontier, atomically coalesce only exact same-target requests,
+create the full-frozen-SHA attempt branch, and derive the allocation-bound
+`release/voc-106-submit-*` marker. Only the exact submit-marker invocation receiving
+and verifying synchronous `201` may send one canonical no-retry/no-redirect draft-PR
+POST. Any other response/observer and marker-plus-zero are the irrecoverable
+`submit-outcome-unknown` hold.
+
+Before allocation, verify the separately held active no-bypass three-pattern ruleset
+and its exhaustive numeric-max history version, exact lossless schemas, dual ref
+enumerations, and two complete stable passes. Null/foreign provenance, post-claim
+protected topology drift, history/schema mismatch, or unresolved multiplicity stops.
+Cardinality cleanup precedes terminal state. Claim, attempt, and submit refs are never
+updated, forced, deleted, or automatic-deletion eligible. Same-`develop` retry is
+allowed only from the deterministic closed/conflict frontier with a fresh distinct
+attempt identity and full evidence. The existing auto-delete setting may affect only a
+successfully merged synchronization head. `VOC-080-HOLD-01` and every settings, ref,
+release, deployment, production-data, spending, and live-system hold remains.

@@ -23,9 +23,9 @@ approved_candidate_sha: 5baef9cbd1088ddbbdb7db292754567765e671a3
 approval_status: adopted
 implementation_authorized: true
 implementation_authority_status: >-
-  authorized-by-exact-candidate-independent-R4-PASS-and-accountable-adoption-only-for-
-  the-declared-16-path-repository-correction-after-this-bookkeeping-revision-receives-
-  fresh-exact-review-and-normal-plan-merge; all-external-actions-remain-prohibited
+  prospectively-corrected-by-adopted-VOC-115-for-one-exact-27-path-repository-
+  implementation; fresh-exact-checks-and-different-actor-review-remain-required;
+  all-external-actions-remain-prohibited
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-single-coherent-policy-and-bookkeeping-correction
 automatic_merge_allowed: true
@@ -47,9 +47,9 @@ requirements:
       disproved. Do not execute release, settings, or branch mutation from the draft.
   - id: VOC-114-D01
     statement: >-
-      Replace the release source with one short-lived
-      release/voc-106-<frozen-develop-short-sha> branch created at the exact freshly
-      fetched origin/develop SHA. Before review and merge, prove its SHA and tree equal
+      Prospectively superseded by VOC-115: verify the held ruleset/two-pass view and
+      use deterministic claim, full-SHA protected attempt, and submit-marker identity
+      at exact origin/develop. Before review and merge, prove its SHA and tree equal
       the frozen develop SHA and tree, its base is exact frozen main, merge-base of
       frozen main and develop equals frozen main, main-only count is zero, and the
       aggregate compare contains no commit or tree beyond frozen develop.
@@ -176,8 +176,8 @@ implementation:
   authorized: true
   required: true
   status: >-
-    adopted-and-authorized-pending-bookkeeping-revision-exact-review-normal-plan-merge-
-    and-fresh-implementation-evidence
+    adopted-VOC-114-history-preserved-and-VOC-115-27-path-correction-authorized-
+    pending-fresh-implementation-evidence-and-different-actor-exact-review
   target_branch: develop
   pull_request_count: 1
   tasks:
@@ -186,8 +186,8 @@ implementation:
 action_specific_authority:
   required: true
   authorization_status: >-
-    adopted-for-the-declared-repository-only-correction-but-pending-bookkeeping-
-    revision-exact-review-normal-plan-merge-and-fresh-implementation-evidence
+    adopted-VOC-115-authorizes-the-exact-27-path-repository-correction-pending-
+    deterministic-evidence-and-different-actor-exact-review
   actions:
     - id: VOC-114-AUTH-00
       action: merge-exact-reviewed-policy-and-bookkeeping-correction-into-develop
@@ -237,13 +237,21 @@ release:
   issue_closure: after-monitoring-and-corrected-VOC-106-finalization-evidence
 
 repository_adoption_status: >-
-  adopted-pending-bookkeeping-revision-exact-review-normal-plan-merge-and-applicable-
-  postmerge-checks
+  adopted-VOC-114-history-preserved-and-prospectively-corrected-by-adopted-VOC-115
 adoption_pr: 214
 adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/214#issuecomment-5491284830
 
 ehr: not-triggered
 blocking_reasons:
-  - bookkeeping-revision-exact-review-pending
-  - normal-reviewed-plan-merge-pending
   - implementation-exact-checks-and-reviews-pending
+# VOC-115 preserves this package's adoption record while replacing its blocked
+# 16-path implementation procedure with the adopted 27-path durable correction.
+voc115_durable_release_attempt_contract:
+  marker: VOC-115 durable release-attempt contract
+  status: superseded-for-implementation-by-adopted-voc-115
+  claim_ref: release/voc-106-claim-*
+  submit_ref: release/voc-106-submit-*
+  unknown_state: submit-outcome-unknown
+  inherited_hold: VOC-080-HOLD-01
+  ruleset_prerequisite: separately-authorized-held-no-bypass-control
+  settings_ref_release_deployment_live_authority: prohibited

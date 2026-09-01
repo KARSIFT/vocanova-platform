@@ -20,7 +20,7 @@ authority but has no false pending-adoption blocker.
 - Evidence: `VOC-114-EV-01`, `VOC-114-EV-02`
 - Result: pending
 
-Every current instruction requires an exact short-lived release head targeting
+Every current instruction requires exact claim/full-SHA-attempt/submit identity targeting
 `main`; positive evidence proves SHA/tree identity, main as merge base, zero main-only
 commits, and release-merge tree identity. Negative evidence rejects permanent,
 drifted, extra-commit, diverged-main, tree-mismatched, colliding, or unrecorded heads.
@@ -33,8 +33,8 @@ drifted, extra-commit, diverged-main, tree-mismatched, colliding, or unrecorded 
 - Evidence: `VOC-114-EV-02`, `VOC-114-EV-03`
 - Result: pending
 
-Each drifted attempt is closed and abandoned without ref deletion or mutation; a new
-collision-free name and PR receive fresh evidence. Two reviewed merge-commit PRs,
+Post-claim drift stops irrecoverably; marker-plus-zero cannot retry; protected refs
+remain immutable. A valid advanced frontier uses a fresh distinct identity. Two PRs,
 R4/specialist evidence, actor separation, recreation records, tree/ancestry proof, and
 zero-behind proof remain mandatory and internally consistent.
 
@@ -63,3 +63,22 @@ Exact specialist and independent R4 reviewers report PASS with zero blockers, a
 separate actor merges, reverse-diff rollback is proven, prohibited actions remain
 absent, and DOC-15 §24.18 monitoring proves release-tree identity and reaches its
 bounded success condition.
+
+## VOC-115 durable release-attempt contract
+
+This is the operative prospective procedure; every conflicting SHA-only, generic
+collision, blanket abandonment/retry, and release-attempt auto-deletion instruction
+above is retained only as superseded history. Adopted VOC-115 uses deterministic
+`release/voc-106-claim-*`, a full-SHA attempt ref, and allocation-bound
+`release/voc-106-submit-*`. Exact same-target atomic requests coalesce; foreign,
+malformed, or post-claim stale topology stops. Only the exact invocation verifying the
+submit-marker `201` may send one canonical no-retry/no-redirect PR POST. Every other
+observer/response and marker-plus-zero is `submit-outcome-unknown`, never retry.
+
+The separately authorized held active no-bypass three-pattern ruleset plus exhaustive
+numeric-max history equality is a prerequisite. Lossless exact page/object/command/
+scan/pass schemas, dual-source refs, two stable passes, null-provenance stops, and
+cardinality-first cleanup apply. Claim, attempt, and submit refs remain immutable and
+never deletion eligible; same-`develop` retry requires a deterministic closed/conflict
+frontier and fresh distinct identity. `VOC-080-HOLD-01` and every settings/ref/release/
+deployment/live hold remains. Approved SHA/review/adoption evidence is unchanged.

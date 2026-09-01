@@ -15,11 +15,11 @@ After adoption, the implementation makes current policy require:
 frozen origin/main (merge base; zero main-only commits)
         │
 frozen origin/develop SHA and tree
-        │ exact short-lived ref (same SHA and tree)
+        │ exact protected full-SHA attempt (same SHA and tree)
         ▼
-release/voc-106-<short-sha> ── reviewed merge-commit PR ──► main
+claim-* → <full-sha>-attempt-* → submit-* ── reviewed PR ──► main
         resulting merge tree equals frozen develop/head tree
-        GitHub may auto-delete this short-lived head after merge
+        protected release refs remain immutable
 
 current develop ── short-lived sync head containing current main ──► develop
 ```
@@ -62,3 +62,22 @@ Cloudflare, DNS, migration, spending, or launch surface is accessed.
 
 Not applicable. The change is repository policy and bookkeeping only and has no
 application behavior, user interface, analytics, database, or live migration effect.
+
+## VOC-115 durable release-attempt contract
+
+This is the operative prospective procedure; every conflicting SHA-only, generic
+collision, blanket abandonment/retry, and release-attempt auto-deletion instruction
+above is retained only as superseded history. Adopted VOC-115 uses deterministic
+`release/voc-106-claim-*`, a full-SHA attempt ref, and allocation-bound
+`release/voc-106-submit-*`. Exact same-target atomic requests coalesce; foreign,
+malformed, or post-claim stale topology stops. Only the exact invocation verifying the
+submit-marker `201` may send one canonical no-retry/no-redirect PR POST. Every other
+observer/response and marker-plus-zero is `submit-outcome-unknown`, never retry.
+
+The separately authorized held active no-bypass three-pattern ruleset plus exhaustive
+numeric-max history equality is a prerequisite. Lossless exact page/object/command/
+scan/pass schemas, dual-source refs, two stable passes, null-provenance stops, and
+cardinality-first cleanup apply. Claim, attempt, and submit refs remain immutable and
+never deletion eligible; same-`develop` retry requires a deterministic closed/conflict
+frontier and fresh distinct identity. `VOC-080-HOLD-01` and every settings/ref/release/
+deployment/live hold remains. Approved SHA/review/adoption evidence is unchanged.

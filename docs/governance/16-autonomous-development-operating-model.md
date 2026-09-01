@@ -19,10 +19,9 @@ folds_in:
   - VOC-082 (Provider-neutral distinct-agent role separation; adopted 2026-08-23, PR #110)
   - VOC-085 (Public repository settings truth and held activation boundary; adopted 2026-08-24, PR #126)
 revision_note: >
-  This v3.5 revision makes a release head an immutable short-lived exact alias of a
-  freshly frozen develop candidate, adds fail-closed collision and drift handling,
-  and limits automatic source deletion to successfully merged short-lived release
-  and synchronization heads. The v3.4 coherent-outcome delivery default remains.
+  VOC-115 prospectively supersedes the v3.5 SHA-only attempt: deterministic protected
+  claim/full-SHA-attempt/submit refs, one-shot submit, exhaustive stable receipts, and
+  synchronization-head-only automatic deletion now govern. Earlier history remains.
 related_documents:
   - DOC-15
 related_decisions:
@@ -211,30 +210,28 @@ be a disguised hold on all R4 work.
   deployments are prohibited.
 - Working branches are normally squash-merged into `develop`. Release preparation
   freshly freezes `origin/main` and `origin/develop`, requires frozen `main` as their
-  merge base with zero main-only commits, and creates
-  `release/voc-106-<frozen-develop-short-sha>` as an exact SHA/tree alias of frozen
-  develop. That immutable short-lived head, not permanent `develop`, targets `main`
+  merge base with zero main-only commits, derives `release/voc-106-claim-*`, and
+  atomically creates its full-SHA attempt ref as the exact frozen SHA/tree. That
+  protected attempt head, not permanent `develop`, targets `main`
   with an identifiable merge commit whose prospective and actual tree equal the
   frozen candidate/head tree. VOC-080-T10 installs
   a held Cloudflare publication state machine, but its committed manifest blocks
   before environment jobs and secrets; it creates no automatic branch-to-environment
   effect.
-- A release head and draft PR are one immutable attempt. Any ref, PR, merge-base,
-  tree, compare, check, policy-evidence, or reviewed-SHA drift invalidates the binder;
-  close and abandon it without deleting or rewriting its ref. A new attempt requires
-  a freshly frozen, collision-free SHA-derived name and fresh evidence. An existing
-  name fails closed unless proved the untouched head of that same attempt; no other
-  PR or actor's ref may be adopted, overwritten, force-updated, or deleted.
+- Claim, full-SHA attempt, allocation-bound submit marker, and draft PR are one
+  immutable identity. Same-target atomic requests coalesce; other targets stop. Only
+  verified submit `201` authorizes one no-retry/no-redirect POST; marker-plus-zero is
+  `submit-outcome-unknown`. Post-claim topology drift is irrecoverable, cardinality is
+  resolved first, and protected release refs are never updated, forced, or deleted.
 - A release merge alone does not complete branch finalization. Post-promotion history
   synchronization uses a short-lived branch from current `develop`, merges the exact
   current `main` ancestry into that branch, and merge-commits its separately reviewed
   PR into `develop`. Permanent `main` is never that PR's head. Final evidence proves
   `main` is an ancestor of `develop` and `develop` is zero commits behind `main`.
   This loop does not change repository settings and does not deploy or authorize a
-  live-system action. Existing automatic source deletion may remove only successfully
-  merged short-lived release and synchronization heads after their names, exact SHAs,
-  trees, post-merge readbacks, and nonexecuted recovery commands are recorded. It may
-  never target permanent `develop` or `main`.
+  live-system action. Existing automatic source deletion may remove only the merged
+  synchronization head after exact recovery evidence. It never targets protected
+  release claim/attempt/submit refs or permanent branches.
 
 **A pull request is merge-eligible into `develop`** when: required deterministic
 checks pass; a different reviewer role records a passing verdict bound to the exact
@@ -485,3 +482,27 @@ production-release authority
 (2026-08-08, a separate founder decision - see AGENTS.md's "Release and deployment
 authority") is recorded there, not here, since it did not go through this
 amendment pattern.
+
+## VOC-115 durable release-attempt contract
+
+This section is the operative release-attempt procedure. Adopted VOC-115
+prospectively supersedes every conflicting SHA-only, generic collision, blanket
+close/abandon, fresh-retry, and release-head auto-deletion statement above; those
+statements remain historical context only. Derive the deterministic
+`release/voc-106-claim-*` frontier, atomically coalesce only exact same-target requests,
+create the full-frozen-SHA attempt branch, and derive the allocation-bound
+`release/voc-106-submit-*` marker. Only the exact submit-marker invocation receiving
+and verifying synchronous `201` may send one canonical no-retry/no-redirect draft-PR
+POST. Any other response/observer and marker-plus-zero are the irrecoverable
+`submit-outcome-unknown` hold.
+
+Before allocation, verify the separately held active no-bypass three-pattern ruleset
+and its exhaustive numeric-max history version, exact lossless schemas, dual ref
+enumerations, and two complete stable passes. Null/foreign provenance, post-claim
+protected topology drift, history/schema mismatch, or unresolved multiplicity stops.
+Cardinality cleanup precedes terminal state. Claim, attempt, and submit refs are never
+updated, forced, deleted, or automatic-deletion eligible. Same-`develop` retry is
+allowed only from the deterministic closed/conflict frontier with a fresh distinct
+attempt identity and full evidence. The existing auto-delete setting may affect only a
+successfully merged synchronization head. `VOC-080-HOLD-01` and every settings, ref,
+release, deployment, production-data, spending, and live-system hold remains.
