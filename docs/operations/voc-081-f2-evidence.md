@@ -21,9 +21,12 @@ revision into `develop` as merge `36d526bdec83e28b17aa30a6814d42b92f058ec1`.
 The required post-merge checks passed, making repository/local F2 complete and
 effective.
 
-This record does **not** claim F3 staging, A1 authenticated-product acceptance, any
-P1+ product milestone, production readiness, a public launch, or a deployment.
-`VOC-080-HOLD-00`, `VOC-080-HOLD-01`, and `VOC-080-HOLD-02` remain held.
+This F2 record does **not by itself** claim F3 staging, A1 authenticated-product
+acceptance, any P1+ product milestone, production readiness, or a public launch. The
+later [VOC-105 record](voc-105-f3-evidence.md) validates the separate F3 gate and
+reports F3 staging foundation complete-effective. A1/P1+ acceptance remains
+unresolved; production, learner data, and launch remain held or unresolved under
+`VOC-080-HOLD-01` and `VOC-080-HOLD-02`.
 
 ## Exact integration evidence
 
@@ -95,12 +98,14 @@ not execute during an ordinary pull request.
   archive or deliberately remove only the exact `.wrangler/state/vocanova-local`
   directory. Never broadly recurse over `.wrangler`, a workspace, or a home directory.
 
-## No-live and later-gate state
+## No-live evidence and current later-gate state
 
-No command or evidence step queries or mutates Cloudflare, DNS, a server, Sentry,
-repository settings, a secret, or production learner data. No deployment occurred and
-no deployment URL is expected. F3/staging, A1/P1+ acceptance, production, live
-activation, and every inherited VOC-080 hold remain unresolved/held.
+No command or evidence step in this F2 record queried or mutated Cloudflare, DNS, a
+server, Sentry, repository settings, a secret, or production learner data. No F2
+deployment occurred and no F2 deployment URL was expected. Later exact evidence in
+VOC-105 reports F3 staging foundation complete-effective. A1/P1+ acceptance remains
+unresolved; production readiness and traffic, learner-data access, and public launch
+remain unresolved or held under `VOC-080-HOLD-01` and `VOC-080-HOLD-02`.
 
 ## Rollback status
 

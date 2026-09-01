@@ -226,6 +226,23 @@ fail in argument parsing. PR/push evidence remains credential-free. A successful
 staging delivery may be claimed only from the separately authorized, environment-
 reviewed run's sanitized evidence.
 
+## Current successful staging outcome
+
+The current [VOC-105 evidence record](voc-105-f3-evidence.md) validates every DOC-12
+gate item and reports F3 staging foundation complete-effective. Its distinct delivery
+event is [CI run 33386240492](https://github.com/KARSIFT/vocanova-platform/actions/runs/33386240492),
+attempt 1, at exact event SHA
+`03528a84988ebe664207c6a439e133070627c92a`. Required validation, the delivery gate,
+and staging succeeded; migration, immutable upload, exact promotion, bounded smoke,
+and the sanitized outcome succeeded. Rollback after promotion failure was
+`skipped-expected`, and production was `skipped-held`.
+
+That event is one input to the separately evaluated milestone gate. A1/P1+
+acceptance remains unresolved. Production readiness and traffic, learner-data access,
+and public launch remain unresolved or held; `VOC-080-HOLD-01` and
+`VOC-080-HOLD-02` remain held. VOC-105 records the prior event and performs no new
+dispatch or live action.
+
 ## Local development is not delivery
 
 VOC-081's `pnpm dev:init`, `pnpm dev`, `pnpm dev:workers`, and

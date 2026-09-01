@@ -41,9 +41,11 @@ adopted packages under [`specs/`](../specs/README.md); decision rationale lives 
 - [VOC-081's F2 record](operations/voc-081-f2-evidence.md) binds the local D1,
   supervised-loop, service-binding, disposable-stack, CI, and limitation evidence. Its
   complete stack was integrated by PR #108 and passed post-merge revalidation, so
-  repository/local F2 is complete and effective. F3/staging, A1/P1+ acceptance,
-  production, deployment, live activation, and every inherited live-action hold
-  remain unresolved.
+  repository/local F2 is complete and effective. The current
+  [VOC-105 record](operations/voc-105-f3-evidence.md) validates every DOC-12 gate
+  item and reports F3 staging foundation complete-effective. A1/P1+ acceptance,
+  production readiness and traffic, learner-data access, and public launch remain
+  unresolved or held; `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
 
 ## Canonical document index
 
