@@ -72,7 +72,7 @@ resolution, selected stable gates, merge queue configuration where enabled,
 immutable version tags, protected-review enforcement, `cloudflare-staging`
 reviewer/admin-bypass/policy-mode/custom-branch state, and native security settings.
 The environment moves safely from `develop` through dual/bounded transition to sole
-`main`; action C enables the queue only after PR5 activation; and PR3, PR5, and PR6
+`main`; action C enables the queue only after PR6 activation; and PR3, PR5, and PR7
 documentation agrees with each settings phase.
 
 ## VOC-120-AC-07 — Legacy control plane leaves the active path
@@ -110,12 +110,12 @@ Confirmation occurs while the plan is draft and before adoption or PR1.
 The draft EHR boundary precedes adoption and PR1. PR1 preparation, PR2 correction,
 additive settings, immediate PR3 truth, PR4 cleanup and final old-model
 promotion/synchronization, final settings/develop retirement, and immediate PR5 truth
-plus post-activation queue action C and immediate PR6 truth have exact preconditions
-and readbacks. Captured phase snapshots and no-bypass
+plus separate PR6 activation, post-activation queue action C, and immediate PR7 truth
+have exact preconditions and readbacks. Captured phase snapshots and no-bypass
 immutable refs restore the last known good state without production or Cloudflare
-deployment. Between action B and PR5 merge, the read-back repository lock makes every
-non-PR5 head ineligible; PR5 alone activates committed future state, and the queue is
-enabled only afterward.
+deployment. Between action B and PR6 merge, the read-back repository lock admits only
+the exact doc-only PR5 then one-file PR6 chain; PR6 alone activates committed future
+state, and the queue is enabled only afterward.
 
 ## VOC-120-AC-10 — Repository and product validation remain green
 

@@ -25,9 +25,9 @@ target_branch: develop
 approval_status: pending-independent-review
 implementation_authorized: false
 adoption_decision_owner: founder-repository-owner-m-e-h-r-d-a-a-d
-implementation_pull_request_count: 6
+implementation_pull_request_count: 7
 multiple_pull_request_rationale: >-
-  Six implementation pull requests are required by real rollback-safe,
+  Seven implementation pull requests are required by real rollback-safe,
   action-authority, settings-truth, and active-EHR boundaries. PR1 installs
   dual-compatible policy, gates, and an immutable pre-change transition verifier.
   PR2 is limited to the selected EHR outcome: abandon draft PR #215 and add the exact
@@ -36,10 +36,10 @@ multiple_pull_request_rationale: >-
   by PR3, a separately reviewed doc-only live-truth record. PR4, still evaluated
   against the frozen pre-change authority/verifier, performs the coherent cleanup and
   completes the final old-model promotion/synchronization. A final authorized settings
-  cutover is followed immediately by PR5, the separately reviewed doc-only final truth
-  record and policy activation. A separately founder-authorized post-activation action
-  enables the merge queue, followed immediately by PR6, its future-policy truth and
-  queue rehearsal. A single PR would delete checks
+  cutover is followed immediately by genuinely doc-only PR5. PR6 separately activates
+  committed future policy under the frozen old verifier. A founder-authorized
+  post-activation action enables the merge queue, followed immediately by PR7, its
+  future-policy truth and queue rehearsal. A single PR would delete checks
   needed to review itself, claim settings before they exist, violate the mandatory
   settings-documentation follow-up, or supersede active EHR. The extra overhead is
   accepted once for a non-self-authorizing transition and is what the replacement
@@ -185,16 +185,16 @@ requirements:
       old-model synchronization. PR1 and PR2 remain controlled by all legacy gates,
       exact independent review, and the tracked verifier blob/digest established in
       PR1. After authorized action A, one permanent stable `Policy / required` gate
-      must invoke the no-bypass ref-pinned verifier for PR3 through PR5, then serve as
+      must invoke the no-bypass ref-pinned verifier for PR3 through PR6, then serve as
       the compact future policy aggregate. Committed settings documentation must match
       live truth through an immediate separately reviewed doc-only PR after every
       mutation. Action B must defer the merge queue, set a read-back repository
       transition lock, and retain committed preparation state through the final old
-      synchronization. Between action B and PR5 merge, the lock and required policy
-      gate must reject every head except
-      `transition/voc-120-final-truth`; PR5 alone may flip the default-branch state to
+      synchronization. Between action B and PR6 merge, the lock and required policy
+      gate must admit only the exact ordered doc-only PR5 and activation PR6 chain.
+      PR5 may not alter executable policy; PR6 alone may flip default-branch state to
       active after exact old-authority acceptance. Only then may separately authorized
-      action C clear the lock and enable the merge queue; immediate PR6
+      action C clear the lock and enable the merge queue; immediate PR7
       must exercise `merge_group` and record final truth under the future policy.
   - id: VOC-120-D13
     statement: >-
@@ -278,9 +278,14 @@ implementation:
       status: blocked-on-pr4-promotion-and-authorized-final-settings-cutover
       boundary: immediate separately reviewed doc-only final branch/settings truth
     - id: VOC-120-PR6
+      name: future-policy-activation
+      target: main
+      status: blocked-on-pr5-settings-truth
+      boundary: exact old-authority-reviewed committed policy activation
+    - id: VOC-120-PR7
       name: merge-queue-settings-truth
       target: main
-      status: blocked-on-pr5-and-authorized-queue-activation
+      status: blocked-on-pr6-and-authorized-queue-activation
       boundary: immediate future-policy doc-only queue truth and rehearsal
 
 acceptance_criteria:
@@ -317,7 +322,7 @@ rollback:
     merge-compatible settings snapshot and protected refs. After final action B,
     restore phase A, recreate develop at the recorded SHA, and revert the failing
     cleanup through the protected branch. Never delete protected transition/rollback
-    refs until PR5 exact old-authority acceptance completes.
+    refs until PR6 exact old-authority acceptance completes.
   owner: founder-repository-owner
 
 independent_verification:

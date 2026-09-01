@@ -9,15 +9,15 @@
 3. Only then does the founder-repository-owner record adoption under pre-change
    DOC-15/DOC-16; `implementation_authorized` becomes true only afterward.
 4. PR1 begins only after adopted bookkeeping receives final exact review and merges.
-5. PR1-PR5 remain subject to frozen pre-change authority and different-actor exact
-   review. PR6 uses the adopted future Protected lane. No model authorizes itself.
+5. PR1-PR6 remain subject to frozen pre-change authority and different-actor exact
+   review. PR7 uses the adopted future Protected lane. No model authorizes itself.
 6. No setting, ref, PR closure, promotion, or release action occurs without its hold,
    prerequisites, and exact readback.
 
-The six implementation heads are fixed as
+The seven implementation heads are fixed as
 `impl/voc-120-preparation`, `impl/voc-120-ehr-unblock`,
 `docs/voc-120-additive-settings`, `impl/voc-120-final-cleanup`, and
-`transition/voc-120-final-truth`, followed by
+`docs/voc-120-final-settings-truth`, `transition/voc-120-activate`, followed by
 `docs/voc-120-merge-queue-truth`. The transition gate fails closed for a changed or
 unexpected pre-activation branch identity.
 
@@ -46,11 +46,11 @@ release machinery, templates, and required checks operational.
   base or classifier error.
 - Add one permanent compact `Policy / required` workflow. PR1/PR2 bootstrap mode binds
   the exact tracked verifier blob/digest while all legacy gates remain required. After
-  action A, PR3-PR5 mode invokes that verifier from the protected immutable ref.
+  action A, PR3-PR6 mode invokes that verifier from the protected immutable ref.
   Ordinary future branches use the compact policy aggregate without prose replay.
 - Add `.github/policy-state.json`. The only valid committed state machine is absent to
   `transition-preparation` on exact PR1; preparation through exact PR2/PR3/PR4; and
-  preparation to `active` on exact PR5. A repository variable set during action B
+  preparation through exact doc-only PR5 and to `active` on exact PR6. A repository variable set during action B
   supplies the temporary lock after final synchronization. Any other state, actor,
   branch, value, or transition fails closed.
 - Add the executable transition verifier and mutation tests. It binds candidates to
@@ -65,8 +65,9 @@ PR1 may merge to `develop`; it may not be promoted while the release EHR stop re
 
 ## PR2 — EHR disposition and transition unblock
 
-After adoption, satisfy `HOLD-05` by closing PR #215 unmerged with permanent readback
-and preserved history. Then branch PR2 from current `origin/develop`.
+Only after adopted PR1 merges to `develop`, satisfy `HOLD-05` by closing PR #215
+unmerged with permanent readback and preserved history. Then branch PR2 from that
+current `origin/develop`.
 
 - Change only `scripts/foundation/voc105-f3-evidence-policy.test.mjs`.
 - For every `DESIGNATED_F3_SURFACES` member, apply the accepted prohibited later-
@@ -133,7 +134,7 @@ and permanent `Policy / required` transition mode against the exact candidate.
   AI safety/cost, accessibility, dependency, staging isolation, rollback, and held
   external-action controls in affected-path or stable aggregate lanes.
 - Retain permanent `Policy / required`; its transition mode executes the verifier from
-  the protected immutable ref for PR4 and the exact final-truth PR5 branch.
+  the protected immutable ref for PR4 and exact PR5/PR6 branches.
 - Keep `.github/policy-state.json` at `transition-preparation` through PR4 and both
   final old-model release/synchronization PRs.
 - Reconcile every active workflow, script, package command, settings document,
@@ -154,55 +155,60 @@ authority required by `HOLD-04`:
 2. Change `main` to squash-only linear protected history, future aggregate gates,
    conversation resolution, stale-review dismissal, and the defined review floors.
    Retain permanent `Policy / required` with no administrator bypass, but keep the
-   merge queue disabled through PR5.
+   merge queue disabled through PR6.
 3. Now that PR4 is on `main`, prove a credential-free main dispatch reaches the
    expected pre-secret/environment boundary without deployment. Only then move
    `cloudflare-staging` to sole `main`. Preserve reviewers/admin-bypass/mode and read
    no secret values.
 4. Prove `main` contains intended `develop` ancestry, inventory or retarget open PRs,
    record the exact recreation command, then retire `develop` only with `HOLD-02`.
-5. Keep verifier and rollback refs protected through PR5 acceptance. Restore phase A
+5. Keep verifier and rollback refs protected through PR6 acceptance. Restore phase A
    atomically if any rule, check, queue, branch, environment, or ref readback differs.
 6. Set and read back repository variable `VOC120_TRANSITION_LOCK_SHA` to the exact
-   synchronized `main` SHA. While committed state is `transition-preparation` and this
-   variable matches the base, `Policy / required` rejects every pull-request head
-   except exact `transition/voc-120-final-truth`, regardless of lane classification.
+   synchronized `main` SHA. While committed state is `transition-preparation`, the
+   policy admits only this ordered chain: doc-only PR5 directly over the locked SHA,
+   then PR6 directly over PR5. It verifies PR5 changed only approved truth paths and
+   PR6 changes only `.github/policy-state.json`; missing/stale/mismatched anchors,
+   reordered branches, extra commits/paths, and every other head fail.
 
 ## PR5 — Immediate final branch/settings truth
 
-Open the fixed short-lived branch `transition/voc-120-final-truth` from protected
-`main`. Update only settings/branch truth and directly dependent links. The required
+Open fixed branch `docs/voc-120-final-settings-truth` from protected `main`. Update only
+settings/branch truth and directly dependent documentation links. The required
 `Policy / required` workflow recognizes this exact transition branch and invokes the
 immutable pre-change verifier; future aggregate gates and one non-author native review
 also apply. Record settings JSON, final branch/PR/tag/ref/environment inventory,
-rollback/recreation commands, and a future-effective activation decision conditional
-on PR5 merge and exact old-authority acceptance. PR5 alone changes committed policy
-state from `transition-preparation` to `active`; mutation tests prove another branch
-cannot change or bypass that state.
+rollback/recreation commands, and the still-pending activation condition. PR5 is
+strictly doc-only and leaves committed policy state at `transition-preparation`.
 
-After PR5 merges, ordinary branches use the future lightweight policy, but the merge
-queue remains disabled until action C. The permanent policy gate and protected refs
-remain.
+## PR6 — Future-policy activation under old authority
+
+Open fixed branch `transition/voc-120-activate` directly from the accepted PR5 merge.
+Change only `.github/policy-state.json` from `transition-preparation` to `active`.
+Required `Policy / required` proves the lock anchor, exact PR5 doc-only predecessor,
+single allowed path/value transition, protected old verifier, future aggregate gates,
+and non-author review. After PR6 merges, ordinary branches use the future lightweight
+policy, but the queue remains disabled until action C.
 
 ## Post-activation merge-queue action C
 
 With a new explicit `HOLD-01` authorization already scoped by adopted VOC-120, and only
-after PR5 exact merge/readback:
+after PR6 exact merge/readback:
 
-1. Prove default-branch policy state is `active` at the accepted PR5 merge SHA.
+1. Prove default-branch policy state is `active` at the accepted PR6 merge SHA.
 2. Clear and read back `VOC120_TRANSITION_LOCK_SHA`.
 3. Enable the main merge queue with the future required aggregate checks and no
    administrator bypass. Preserve all other action-B settings.
-4. Open PR6 immediately; restore the action-B snapshot if queue checks deadlock or
+4. Open PR7 immediately; restore the action-B snapshot if queue checks deadlock or
    settings differ.
 
-## PR6 — Immediate merge-queue truth and rehearsal
+## PR7 — Immediate merge-queue truth and rehearsal
 
 Open `docs/voc-120-merge-queue-truth` from `main`. Under the future Protected lane,
-record action-C readback and exact PR5 activation evidence. Obtain one non-author native
+record action-C readback and exact PR6 activation evidence. Obtain one non-author native
 review, run all stable aggregate checks on `pull_request`, enter the merge queue, and
 prove the same required conclusions on `merge_group`. Merge only through the queue.
-After PR6, VOC-120 is complete; protected historical refs may be deleted only by a
+After PR7, VOC-120 is complete; protected historical refs may be deleted only by a
 later explicitly authorized action after their retention condition expires.
 
 ## Rollback

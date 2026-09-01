@@ -22,9 +22,10 @@
   5. Prove docs-only Standard, Standard behavior, Protected, unknown-effect, and
      missing-reviewer cases enforce their distinct approval/review floors.
   6. Mutate the full `.github/policy-state.json` machine: bootstrap to preparation only
-     on PR1; fixed PR2/PR3/PR4 preparation; PR5-only preparation to active; invalid
-     state/edge/branch/actor rejection; action-B lock-variable match/mismatch/stale/
-     missing cases; and ordinary classification only after active reaches default.
+     on PR1; fixed PR2/PR3/PR4/PR5 preparation; PR6-only preparation to active;
+     invalid state/edge/branch/actor rejection; ordered PR5-doc-only then PR6-one-file
+     lock-chain and match/mismatch/stale/missing cases; ordinary classification only
+     after active reaches default.
 - Expected: attributable least-privilege review and no PR-body identity dependency.
 
 ## VOC-120-TEST-03 — Path-aware aggregate gate matrix
@@ -61,9 +62,10 @@
   7. Prove action B occurs only after final merge-commit synchronization, activates
      squash/linear history, future gates/reviews and sole-main staging, sets the exact
      lock variable, and leaves the merge queue disabled.
-  8. Prove action C occurs only after active PR5 reaches default, clears the lock,
-     enables the queue, and obtains passing required `merge_group` conclusions on PR6.
-  9. Compare PR3, PR5, and PR6 settings truth with exact live readbacks.
+  8. Prove action C occurs only after active PR6 reaches default, clears the lock,
+     enables the queue, and obtains passing required `merge_group` conclusions on PR7.
+  9. Compare PR3, PR5, and PR7 settings truth with exact live readbacks; prove PR5 is
+     doc-only and PR6 changes only the policy-state file/value.
 - Expected: protected main and immutable version tags match policy with no hidden
   bypass or missing gate.
 
@@ -91,7 +93,7 @@
      destructive or live production actions.
   4. Prove PR1/PR2 keep every legacy gate and bind the exact tracked verifier digest.
      After action A, execute its protected ref through permanent `Policy / required`
-     for PR3-PR5. Prove PR4 can remove the tracked full verifier only after ref-pinned
-     acceptance and PR5 still invokes that protected ref.
+     for PR3-PR6. Prove PR4 can remove the tracked full verifier only after ref-pinned
+     acceptance and PR5/PR6 still invoke that protected ref.
   5. Prove final main ancestry and branch/PR inventory.
 - Expected: clean final tree with deterministic repository/settings rollback.

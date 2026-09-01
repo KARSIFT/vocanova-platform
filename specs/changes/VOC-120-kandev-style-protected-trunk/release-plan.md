@@ -5,8 +5,8 @@
 VOC-120 does not deploy the application. PR1 may prepare `develop`, but the current
 issue #191 stop record forbids promotion until PR #215 and issue #231 receive permanent
 qualified-human resolutions and required corrections pass. Every candidate through
-PR5 remains evaluated by frozen pre-change authority: PR1/PR2 use legacy gates plus
-the exact tracked verifier digest, and PR3-PR5 use its protected immutable ref. PR6 is
+PR6 remains evaluated by frozen pre-change authority: PR1/PR2 use legacy gates plus
+the exact tracked verifier digest, and PR3-PR6 use its protected immutable ref. PR7 is
 the first future-policy merge-queue rehearsal.
 VOC-120 is scoped only for qualified confirmation that PR #215 is abandoned unmerged
 and issue #231 needs the aggregate-dispatch proof; a different outcome requires plan
@@ -26,7 +26,8 @@ authority.
    and re-review the plan if either differs.
 2. Record adoption, complete bookkeeping review/merge, then implement and review PR1
    on `develop` only.
-3. Close PR #215 unmerged under `HOLD-05`; implement/review the exact one-file PR2 test.
+3. After PR1 merges, close PR #215 unmerged under `HOLD-05`; implement/review the exact
+   one-file PR2 test.
 4. Authorize additive action A: protect refs, security/tags/main, merge-compatible old
    plus transition gates, and dual/bounded staging policy.
 5. Merge immediate doc-only PR3 settings truth to `develop`.
@@ -34,12 +35,13 @@ authority.
 7. Perform the final old-model merge-commit promotion and synchronization while
    committed state remains preparation.
 8. Authorize action B: squash/linear main, future gates/reviews, sole-main staging,
-   ordered `develop` retirement, and a repository-variable lock admitting only PR5;
-   keep the merge queue disabled.
-9. Merge immediate doc-only PR5 after its old-verifier/future-gate checks; PR5 alone
-   changes committed state to active.
-10. Authorize action C to clear the lock and enable the merge queue; immediately merge
-    PR6 under the future Protected lane through that queue and record final truth.
+   ordered `develop` retirement, and a repository-variable lock admitting only the
+   ordered PR5/PR6 chain; keep the merge queue disabled.
+9. Merge immediate genuinely doc-only PR5 after old-verifier/future-gate checks; it
+   leaves preparation state unchanged.
+10. Merge exact one-file PR6 under frozen old authority; it alone activates state.
+11. Authorize action C to clear the lock and enable the merge queue; immediately merge
+    PR7 under the future Protected lane through that queue and record final truth.
 
 ## Monitoring
 
@@ -52,14 +54,14 @@ rollback.
 ## Rollback
 
 Restore the applicable ruleset/settings/environment snapshot, protected verifier and
-rollback refs, and `develop` from its exact recreation SHA. Before PR5 acceptance,
+rollback refs, and `develop` from its exact recreation SHA. Before PR6 acceptance,
 restore merge-compatible phase-A rules if old-process reversal is required. Preserve
 Git and EHR evidence; do not touch D1, Cloudflare Workers, traffic, learner data, DNS,
 or secret values.
 
 ## Closure
 
-VOC-120 closes only after six exact-reviewed PRs, both qualified-human EHR outcomes,
+VOC-120 closes only after seven exact-reviewed PRs, both qualified-human EHR outcomes,
 the exact correction, all three settings readbacks, final branch/PR inventory,
-rollback proof, PR5 old-authority acceptance, and PR6 merge-queue rehearsal. A missing
+rollback proof, PR6 old-authority acceptance, and PR7 merge-queue rehearsal. A missing
 qualification statement keeps the draft unadopted and prevents PR1.

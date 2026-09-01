@@ -184,10 +184,11 @@ and old gates, and adds `main` to the staging policy; immediate doc-only PR3 rec
 the coherent cleanup under the ref-pinned old verifier and receives the final
 merge-commit promotion/synchronization. Only afterward may action B enable squash-only
 linear main, future gates/reviews, sole-main staging, ordered develop retirement, and
-a repository-variable lock admitting only PR5; the merge queue remains disabled.
-Immediate doc-only PR5 passes the immutable old verifier and alone changes committed
-preparation state to active. Action C then clears the lock and enables the queue;
-immediate PR6 records and exercises `merge_group` under the future Protected lane.
+a repository-variable lock admitting only the ordered PR5/PR6 chain; the merge queue
+remains disabled. Immediate PR5 is genuinely doc-only and leaves preparation state
+unchanged. Exact one-file PR6 passes the immutable old verifier and alone changes state
+to active. Action C then clears the lock and enables the queue; immediate PR7 records
+and exercises `merge_group` under the future Protected lane.
 
 ## Security, privacy, data, and accessibility
 

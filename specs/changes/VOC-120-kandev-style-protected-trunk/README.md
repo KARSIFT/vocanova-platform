@@ -26,9 +26,9 @@ short-lived branch
 Routine reversible work should take one PR. Protected work receives stronger tests
 and specialist review. Real external effects remain human-authorized.
 
-## Why this is one package and six implementation PRs
+## Why this is one package and seven implementation PRs
 
-The outcome is one governance replacement, so it remains one package. Six PRs are
+The outcome is one governance replacement, so it remains one package. Seven PRs are
 required because GitHub settings, immediate truth documentation, pre-change
 verification, and EHR form real boundaries:
 
@@ -38,9 +38,10 @@ verification, and EHR form real boundaries:
 3. Immediately record additive, old-flow-compatible live settings after authorization.
 4. Perform the coherent cleanup only after EHR resolution, still applying frozen
    pre-change authority through the final old-model promotion and synchronization.
-5. After the final old-model synchronization, activate the future settings and
-   immediately record final branch-retirement truth.
-6. Enable the merge queue only after PR5 activation, then immediately record and
+5. After the final old-model synchronization, apply final settings and immediately
+   record their genuinely doc-only truth.
+6. Activate committed future policy in a separate exact old-authority-reviewed PR.
+7. Enable the merge queue only after PR6 activation, then immediately record and
    exercise it through the first future-policy PR.
 
 This accepts several final old-process reviews to avoid self-authorization, stale

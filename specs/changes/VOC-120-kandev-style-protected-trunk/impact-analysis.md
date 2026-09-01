@@ -69,7 +69,8 @@ Accessibility checks remain path-applicable for UI changes.
   adoption and exact independent review.
 - `VOC-120-R02`: Unprotected gap during settings/workflow cutover. Mitigation:
   dual-compatible PR1, merge-compatible action A, immediate PR3 truth, ref-pinned
-  PR4 verification, final action B, and immediate PR5 truth.
+  PR4 verification, action B plus doc-only PR5, old-authority PR6 activation, and
+  action C plus queue-truth PR7.
 - `VOC-120-R03`: Path filtering silently misses relevant tests. Mitigation:
   always-reporting aggregate gates, fail-to-run-more behavior, contract tests.
 - `VOC-120-R04`: Valuable historical validator removed with a product control.
@@ -79,7 +80,7 @@ Accessibility checks remain path-applicable for UI changes.
 - `VOC-120-R06`: Existing EHR is bypassed by topology change. Mitigation: preserve
   explicit scope and require reasoned human outcome before affected closure/merge.
 - `VOC-120-R07`: Broad deletion makes rollback hard. Mitigation: immutable rollback
-  and verifier refs, three exact settings snapshots, six bounded PRs, and observation.
+  and verifier refs, three exact settings snapshots, seven bounded PRs, and observation.
 - `VOC-120-R08`: Copying Kandev overfits a larger project. Mitigation: cap the initial
   VocaNova gate/document surface and require every retained control to name its risk.
 - `VOC-120-R09`: Staging becomes unusable when code moves to main but the environment
@@ -88,7 +89,7 @@ Accessibility checks remain path-applicable for UI changes.
 - `VOC-120-R10`: New rules authorize removal of old rules. Mitigation: every VOC-120
   candidate remains bound to pre-change authority; PR1/PR2 use legacy gates plus the
   tracked digest, then permanent `Policy / required` invokes the protected ref for
-  PR3-PR5 exact acceptance.
+  PR3-PR6 exact acceptance.
 - `VOC-120-R11`: EHR subjects disappear before human resolution. Mitigation: PR3
   and every promotion remain blocked until pre-adoption qualified confirmation, held
   PR #215 closure, and the exact PR2 correction are permanent and green.
@@ -96,8 +97,8 @@ Accessibility checks remain path-applicable for UI changes.
   Mitigation: action A explicitly remains merge-compatible; action B occurs only after
   the final old-model promotion/synchronization.
 - `VOC-120-R13`: Ordinary work starts between action B and final truth acceptance.
-  Mitigation: the read-back repository lock makes only exact PR5 eligible; PR5 alone
-  changes committed state to active, and the queue is enabled only afterward.
+  Mitigation: the read-back repository lock admits only exact doc-only PR5 then
+  one-file PR6; PR6 alone activates state, and the queue is enabled only afterward.
 
 ## Dependencies
 
@@ -125,6 +126,7 @@ Accessibility checks remain path-applicable for UI changes.
 - `VOC-120-EV-06`: exact PR4 old-verifier, application, specialist, promotion,
   synchronization, ancestry, and rollback evidence.
 - `VOC-120-EV-07`: action-B ruleset/lock/review/environment/branch readback and exact
-  PR5 old-verifier/future-gate/native-review evidence, with queue still disabled.
-- `VOC-120-EV-08`: action-C lock-clear/merge-queue readback and exact PR6 future-policy
+  doc-only PR5 old-verifier/future-gate/native-review evidence, with queue disabled.
+- `VOC-120-EV-08`: exact one-file PR6 activation diff and old-verifier acceptance.
+- `VOC-120-EV-09`: action-C lock-clear/merge-queue readback and exact PR7 future-policy
   pull-request plus merge-group evidence.
