@@ -30,8 +30,8 @@ multiple_pull_request_rationale: >-
   Five implementation pull requests are required by real rollback-safe,
   action-authority, settings-truth, and active-EHR boundaries. PR1 installs
   dual-compatible policy, gates, and an immutable pre-change transition verifier.
-  PR2 applies both qualified-human EHR outcomes and all corrections or the exact
-  one-time release procedure those outcomes require.
+  PR2 is limited to the selected EHR outcome: abandon draft PR #215 and add the exact
+  low-cardinality aggregate-dispatch regression test for issue #231.
   An authorized additive, old-flow-compatible settings action is followed immediately
   by PR3, a separately reviewed doc-only live-truth record. PR4, still evaluated
   against the frozen pre-change authority/verifier, performs the coherent cleanup and
@@ -152,7 +152,14 @@ requirements:
       No file, validator, release mechanism, branch, or policy that is the subject of
       either dispute may be removed or functionally superseded first. The issue #191
       stop record prohibits every promotion and release/ref action until both outcomes
-      and any required correction are permanent and complete.
+      and any required correction are permanent and complete. VOC-120 is
+      implementation-ready only for a qualified-human verdict that abandons PR #215
+      and requires the issue #231 aggregate-dispatch proof; any different verdict
+      requires a newly reviewed plan revision before adoption. The only PR2 code path
+      is `scripts/foundation/voc105-f3-evidence-policy.test.mjs`: add one aggregate
+      semantic mutation per `DESIGNATED_F3_SURFACES` member through
+      `inspectF3Evidence()`, preserve all existing cases, and prove the full foundation
+      suite remains within its committed cap.
   - id: VOC-120-D11
     statement: >-
       Separate repository history from delivery. A main merge may make a SHA
@@ -179,7 +186,10 @@ requirements:
       must invoke the no-bypass ref-pinned verifier for PR3 through PR5, then serve as
       the compact future policy aggregate. Committed settings documentation must match
       live truth through an immediate separately reviewed doc-only PR after every
-      mutation.
+      mutation. Between action B and PR5 merge, the committed transition state and
+      required policy gate must reject every head except
+      `transition/voc-120-final-truth`; PR5 alone may flip the default-branch state to
+      active after exact old-authority acceptance.
   - id: VOC-120-D13
     statement: >-
       Do not copy Kandev's scale-specific complexity blindly. VocaNova must not copy
@@ -227,6 +237,11 @@ action_specific_holds:
       prior explicit authorization; exact ref grammar/name/SHA/purpose/recreation
       command; and no-bypass update/deletion/non-fast-forward protection readback
     completion: rollback ref remains immutable through final transition acceptance
+  - id: VOC-120-HOLD-05
+    action: close-abandoned-draft-pr-215
+    accountable_role: founder-repository-owner
+    required_evidence: qualified-human abandon verdict and permanent closure readback
+    completion: PR 215 is closed unmerged with its history preserved
 
 implementation:
   authorized: false
@@ -240,7 +255,7 @@ implementation:
       name: ehr-disposition-and-transition-unblock
       target: develop
       status: blocked-on-qualified-human-ehr-records
-      boundary: apply EHR outcomes and every required correction or one-time procedure
+      boundary: exact issue 231 aggregate test after held unmerged abandonment of PR 215
     - id: VOC-120-PR3
       name: additive-settings-truth
       target: develop

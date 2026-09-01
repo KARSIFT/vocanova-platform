@@ -31,6 +31,10 @@ release machinery, templates, and required checks operational.
   the exact tracked verifier blob/digest while all legacy gates remain required. After
   action A, PR3-PR5 mode invokes that verifier from the protected immutable ref.
   Ordinary future branches use the compact policy aggregate without prose replay.
+- Add `.github/policy-state.json`. The only valid state machine is absent to
+  `transition-preparation` on exact PR1; preparation through exact PR2/PR3; preparation
+  to `transition-locked` on exact PR4; locked to `active` on exact PR5; then active
+  future lanes. Any other actor, branch, value, or transition fails closed.
 - Add the executable transition verifier and mutation tests. It binds candidates to
   the accepted control inventory, current authority, active EHR scope, held actions,
   exact transition branch names, and required evidence.
@@ -46,29 +50,35 @@ PR1 may merge to `develop`; it may not be promoted while the release EHR stop re
 Before PR2 or any promotion:
 
 1. Record truthful reviewer identity, role, and relevant qualification.
-2. Resolve PR #215 by a reasoned uphold/correct/abandon/supersede verdict. If abandoned
-   or superseded, close it with permanent evidence and preserve its history.
-3. Resolve issue #231 with a technical verdict on aggregate semantic dispatch. If the
-   low-cardinality aggregate proof is required, PR2 implements it before release.
+2. Confirm or reject the selected PR #215 outcome: accept the independent FAIL and
+   abandon the draft unmerged. After confirmation and `HOLD-05`, close it unmerged with
+   permanent evidence and preserve its history.
+3. Confirm or reject the selected issue #231 outcome: direct surface tests do not prove
+   aggregate dispatch, so the low-cardinality aggregate proof is required in PR2.
 4. Record whether each EHR is cleared. A directional founder preference without the
-   required qualification record does not satisfy this boundary.
+   required qualification record does not satisfy this boundary. Any different
+   technical outcome stops VOC-120 for a revised, independently reviewed plan before
+   adoption; the verdict itself cannot expand PR2 scope.
 
 ## PR2 — EHR disposition and transition unblock
 
-Branch from current `origin/develop` only after the qualified-human records exist.
+Branch from current `origin/develop` only after both selected outcomes are confirmed.
 
-- Implement every repository correction required by both outcomes, including the
-  expected minimal per-designated-surface aggregate semantic-dispatch proof when that
-  is the issue #231 verdict.
-- For PR #215, either implement its required correction or install the exact,
-  independently reviewed one-time promotion/synchronization procedure expressly
-  permitted by an abandon/supersede outcome. Never silently merge disputed code.
-- Update permanent EHR/release status truth and preserve exact evidence links.
+- Change only `scripts/foundation/voc105-f3-evidence-policy.test.mjs`.
+- For every `DESIGNATED_F3_SURFACES` member, apply the accepted prohibited later-
+  milestone semantic mutation through aggregate `inspectF3Evidence()` and require its
+  diagnostic. Preserve every existing test and direct surface-local matrix.
+- Prove focused counts and the complete foundation suite remain green and within the
+  committed 20-minute cap.
+- Keep PR #215 closed and unmerged. Add no replacement release implementation; after
+  abandonment, the unchanged pre-change promotion/synchronization procedure uses the
+  adopted VOC-120 package. If execution shows that procedure is insufficient, stop for
+  a separately adopted revision rather than improvising.
 - Do not remove current governance, release/sync, or transition controls.
 
 PR2 receives current deterministic checks and fresh exact independent review. It may
 merge to `develop`; no promotion or ref/settings action starts until both EHR records
-are permanently cleared and every required correction/procedure is green.
+are permanently cleared and the exact aggregate correction is green.
 
 ## Additive settings and protected-ref action A
 
@@ -120,6 +130,8 @@ and permanent `Policy / required` transition mode against the exact candidate.
   external-action controls in affected-path or stable aggregate lanes.
 - Retain permanent `Policy / required`; its transition mode executes the verifier from
   the protected immutable ref for PR4 and the exact final-truth PR5 branch.
+- Change `.github/policy-state.json` from `transition-preparation` to
+  `transition-locked`; exact transition checks must accept this edge before PR4 merge.
 - Reconcile every active workflow, script, package command, settings document,
   CODEOWNERS rule, and contributor surface to one provisional truthful state.
 
@@ -146,6 +158,9 @@ authority required by `HOLD-04`:
    record the exact recreation command, then retire `develop` only with `HOLD-02`.
 5. Keep verifier and rollback refs protected through PR5 acceptance. Restore phase A
    atomically if any rule, check, queue, branch, environment, or ref readback differs.
+6. Keep committed policy state `transition-locked`. While the default branch has that
+   state, `Policy / required` rejects every pull-request head except exact
+   `transition/voc-120-final-truth`, regardless of future lane classification.
 
 ## PR5 — Immediate final branch/settings truth
 
@@ -155,7 +170,9 @@ Open the fixed short-lived branch `transition/voc-120-final-truth` from protecte
 immutable pre-change verifier; future aggregate gates and one non-author native review
 also apply. Record settings JSON, final branch/PR/tag/ref/environment inventory,
 rollback/recreation commands, and a future-effective activation decision conditional
-on PR5 merge and exact old-authority acceptance.
+on PR5 merge and exact old-authority acceptance. PR5 alone changes committed policy
+state from `transition-locked` to `active`; mutation tests prove another branch cannot
+change or bypass that state.
 
 After PR5 merges, ordinary branches use the future lightweight policy. The permanent
 policy gate remains; historical transition refs may be deleted only in a later

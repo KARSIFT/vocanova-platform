@@ -94,6 +94,9 @@ Accessibility checks remain path-applicable for UI changes.
 - `VOC-120-R12`: Future squash/queue rules make the old merge-commit loop impossible.
   Mitigation: action A explicitly remains merge-compatible; action B occurs only after
   the final old-model promotion/synchronization.
+- `VOC-120-R13`: Ordinary work starts between action B and final truth acceptance.
+  Mitigation: committed `transition-locked` state makes only the exact PR5 branch
+  eligible; PR5 alone changes default-branch state to active.
 
 ## Dependencies
 
@@ -114,8 +117,8 @@ Accessibility checks remain path-applicable for UI changes.
 - `VOC-120-EV-01`: exact plan review and adoption record.
 - `VOC-120-EV-02`: before/after file, policy, workflow, and control mapping.
 - `VOC-120-EV-03`: exact PR1 checks and independent specialist review.
-- `VOC-120-EV-04`: permanent qualified-human PR #215 and issue #231 outcomes plus
-  exact PR2 correction or superseding release-procedure checks/review.
+- `VOC-120-EV-04`: permanent qualified-human confirmation, held unmerged closure of PR
+  #215, and exact one-file PR2 aggregate-test checks/review for issue #231.
 - `VOC-120-EV-05`: action-A settings/ref/environment readback and exact doc-only PR3
   checks/review.
 - `VOC-120-EV-06`: exact PR4 old-verifier, application, specialist, promotion,

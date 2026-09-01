@@ -95,7 +95,8 @@ remain recoverable from Git history and the recorded rollback ref.
 
 The EHR runbook has an accountable selector, qualification criteria, response target,
 clear outcomes, and scope. It neither becomes routine review nor silently clears PR
-#215 or issue #231.
+#215 or issue #231. Adoption requires qualified confirmation of the selected finite
+outcomes; any different outcome forces a revised, independently reviewed plan.
 
 ## VOC-120-AC-09 — Transition and rollback are proven
 
@@ -109,7 +110,8 @@ additive settings, immediate PR3 truth, PR4 cleanup and final old-model
 promotion/synchronization, final settings/develop retirement, and immediate PR5 truth
 have exact preconditions and readbacks. Captured phase snapshots and no-bypass
 immutable refs restore the last known good state without production or Cloudflare
-deployment.
+deployment. Between action B and PR5 merge, `transition-locked` policy state makes
+every non-PR5 head ineligible; PR5 alone activates the future state.
 
 ## VOC-120-AC-10 — Repository and product validation remain green
 

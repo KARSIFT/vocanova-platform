@@ -175,8 +175,9 @@ and required corrections are permanently complete.
 PR1 stages the dual-compatible future model and permanent policy aggregate without
 replacing active authority; it may merge to `develop` but cannot be promoted while the
 release EHR stop remains. PR2 applies qualified-human outcomes for PR #215 and issue
-#231 plus every correction or exact one-time release procedure their outcomes require.
-PR1/PR2 use legacy gates plus the exact tracked verifier digest. Additive settings
+#231 only if they confirm the selected finite scope: abandon PR #215 unmerged and add
+the one-file aggregate-dispatch regression proof. A different outcome requires plan
+revision before adoption. PR1/PR2 use legacy gates plus the exact tracked verifier digest. Additive settings
 action A then protects immutable verifier/rollback refs, keeps merge commits and old
 gates, and adds
 `main` to the staging policy; immediate doc-only PR3 records live truth. PR4 performs
@@ -185,7 +186,8 @@ merge-commit promotion/synchronization. Only afterward may action B enable squas
 linear main, merge queue, future gates/reviews, sole-main staging, and ordered develop
 retirement. Immediate doc-only PR5 is still required to pass the immutable old verifier
 through permanent `Policy / required`; the future model governs ordinary work only
-after PR5 merges.
+after PR5 merges. Until then committed `transition-locked` state rejects every head
+except the exact PR5 branch; PR5 alone changes default-branch state to `active`.
 
 ## Security, privacy, data, and accessibility
 

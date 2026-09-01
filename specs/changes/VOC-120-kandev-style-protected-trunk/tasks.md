@@ -23,10 +23,10 @@ preserving old controls. Merge only to `develop`; do not cross the active releas
 - Implementation PRs: `VOC-120-PR2`, `VOC-120-PR3`, `VOC-120-PR4`, `VOC-120-PR5`
 - Status: blocked-on-t01-qualified-human-ehr-and-held-actions
 
-Apply both qualified-human outcomes and all required corrections or the permitted
-one-time release procedure in PR2;
+After qualified confirmation, close PR #215 unmerged under its hold and add only the
+exact issue #231 aggregate-dispatch regression test in PR2;
 perform merge-compatible settings action A and immediate PR3 truth; complete PR4
 cleanup plus the final old-model promotion/synchronization; then perform action B and
 immediate PR5 truth. Permanent `Policy / required` enforces the frozen verifier for
 PR1/PR2 by tracked digest and PR3-PR5 by protected ref, then becomes the compact future
-policy aggregate.
+policy aggregate. Action B locks every non-PR5 head until PR5 activates future state.

@@ -21,6 +21,10 @@
   4. Prove pushed revisions dismiss stale review and unresolved threads block.
   5. Prove docs-only Standard, Standard behavior, Protected, unknown-effect, and
      missing-reviewer cases enforce their distinct approval/review floors.
+  6. Mutate the full `.github/policy-state.json` machine: bootstrap to preparation only
+     on PR1; fixed PR2/PR3 preparation; PR4-only preparation to locked; PR5-only locked
+     to active; invalid state/edge/branch/actor rejection; and ordinary classification
+     only after active reaches the default branch.
 - Expected: attributable least-privilege review and no PR-body identity dependency.
 
 ## VOC-120-TEST-03 — Path-aware aggregate gate matrix
@@ -67,6 +71,9 @@
   2. Run auth/data/migration/API/AI safety/accessibility/dependency/delivery tests
      retained by the transition.
   3. Run workflow security lint, secret scan, and `git diff --check`.
+  4. For PR2, mutate every `DESIGNATED_F3_SURFACES` member through aggregate
+     `inspectF3Evidence()`, preserve all existing direct/local cases, and run the
+     complete foundation suite within the committed cap.
 - Expected: no product behavior change and no protected-control regression.
 
 ## VOC-120-TEST-06 — Legacy removal and rollback rehearsal

@@ -7,6 +7,9 @@ issue #191 stop record forbids promotion until PR #215 and issue #231 receive pe
 qualified-human resolutions and required corrections pass. Every candidate through
 PR5 remains evaluated by frozen pre-change authority: PR1/PR2 use legacy gates plus
 the exact tracked verifier digest, and PR3-PR5 use its protected immutable ref.
+VOC-120 is scoped only for qualified confirmation that PR #215 is abandoned unmerged
+and issue #231 needs the aggregate-dispatch proof; a different outcome requires plan
+revision and fresh review before adoption.
 
 ## Adoption and action authority
 
@@ -19,17 +22,19 @@ authority.
 ## Ordered activation
 
 1. Adopt the plan; implement and independently review PR1 on `develop` only.
-2. Obtain qualified-human EHR records; implement and review every PR2 correction or
-   exact one-time procedure those outcomes require.
+2. Obtain qualified-human confirmation of both selected outcomes, close PR #215
+   unmerged under its hold, and implement/review the exact one-file PR2 aggregate test.
 3. Authorize additive action A: protect refs, security/tags/main, merge-compatible old
    plus transition gates, and dual/bounded staging policy.
 4. Merge immediate doc-only PR3 settings truth to `develop`.
 5. Implement and review PR4 cleanup under the immutable verifier.
 6. Perform the final old-model merge-commit promotion and synchronization.
 7. Authorize action B: squash/linear main, merge queue, future gates/reviews, sole-main
-   staging, and ordered `develop` retirement.
+   staging, ordered `develop` retirement, and a transition lock that rejects all heads
+   except exact PR5.
 8. Merge immediate doc-only PR5 on protected main after its required old-verifier and
-   future-gate checks; only then does the future model govern ordinary work.
+   future-gate checks; PR5 alone changes committed policy state to active, and only
+   then does the future model govern ordinary work.
 
 ## Monitoring
 
