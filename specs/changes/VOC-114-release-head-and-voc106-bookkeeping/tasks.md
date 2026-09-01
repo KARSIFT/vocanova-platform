@@ -8,7 +8,8 @@
 - Evidence: `VOC-114-EV-00` through `VOC-114-EV-06`
 - Implementation pull-request mapping: one repository-only correction PR into develop
 - Risk: R4
-- Status: pending-plan-review-adoption-and-normal-plan-merge
+- Status: adopted; repository implementation authorized after this bookkeeping
+  revision receives exact non-author review and the plan PR merges normally
 
 After adoption, a different builder reconciles exactly the 16 declared existing files,
 including `.github/README.md`; encodes immutable collision-checked release attempts,

@@ -4,7 +4,7 @@ id: VOC-114
 slug: release-head-and-voc106-bookkeeping
 title: Make the release head disposable and reconcile VOC-106 bookkeeping
 type: release-governance-and-adopted-package-correction
-status: draft
+status: adopted
 risk: R4
 planned_implementation_risk_floor: >-
   R4 because this correction changes canonical release and protected-history rules,
@@ -19,12 +19,13 @@ base_branch: develop
 base_sha: 40cc8159a2ae372b5addb5af21c822fa81a5454e
 plan_branch: plan/voc-114-release-head-bookkeeping
 target_branch: develop
-approved_candidate_sha: pending-independent-plan-review
-approval_status: pending-independent-plan-review-and-adoption
-implementation_authorized: false
+approved_candidate_sha: 5baef9cbd1088ddbbdb7db292754567765e671a3
+approval_status: adopted
+implementation_authorized: true
 implementation_authority_status: >-
-  prohibited-until-exact-plan-candidate-independent-R4-review-operator-adoption-
-  bookkeeping-and-normal-reviewed-plan-merge
+  authorized-by-exact-candidate-independent-R4-PASS-and-accountable-adoption-only-for-
+  the-declared-16-path-repository-correction-after-this-bookkeeping-revision-receives-
+  fresh-exact-review-and-normal-plan-merge; all-external-actions-remain-prohibited
 implementation_pull_request_count: 1
 multiple_pull_request_rationale: not-applicable-single-coherent-policy-and-bookkeeping-correction
 automatic_merge_allowed: true
@@ -141,16 +142,23 @@ owners:
   merge: separate-authorized-non-author-merge-actor
   monitoring: accountable-repository-owner-recorded-at-adoption
 
-plan_review_history: []
+plan_review_history:
+  - candidate_sha: 5baef9cbd1088ddbbdb7db292754567765e671a3
+    verdict: pass-exact-revision-zero-blockers
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/214#issuecomment-5491280721
+    reviewer: /root/voc114_plan_review
+    resolution_status: >-
+      independent R4 plan review bound to the approved substantive candidate; this
+      bookkeeping revision requires fresh exact review and grants no external authority
 approvals:
   package_independent_verification:
-    status: pending
-    candidate_sha: pending
-    evidence: pending
+    status: pass-exact-revision-zero-blockers
+    candidate_sha: 5baef9cbd1088ddbbdb7db292754567765e671a3
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/214#issuecomment-5491280721
   adoption_decision:
-    status: pending
-    candidate_sha: pending
-    evidence: pending
+    status: adopted-for-declared-16-path-repository-only-correction
+    candidate_sha: 5baef9cbd1088ddbbdb7db292754567765e671a3
+    evidence: https://github.com/KARSIFT/vocanova-platform/pull/214#issuecomment-5491284830
 
 affected_areas:
   - release-governance
@@ -165,9 +173,11 @@ protected_areas:
   - repository-settings-truth
 
 implementation:
-  authorized: false
+  authorized: true
   required: true
-  status: pending-plan-review-adoption-and-normal-plan-merge
+  status: >-
+    adopted-and-authorized-pending-bookkeeping-revision-exact-review-normal-plan-merge-
+    and-fresh-implementation-evidence
   target_branch: develop
   pull_request_count: 1
   tasks:
@@ -175,7 +185,9 @@ implementation:
 
 action_specific_authority:
   required: true
-  authorization_status: pending-adoption-for-repository-only-correction-merge
+  authorization_status: >-
+    adopted-for-the-declared-repository-only-correction-but-pending-bookkeeping-
+    revision-exact-review-normal-plan-merge-and-fresh-implementation-evidence
   actions:
     - id: VOC-114-AUTH-00
       action: merge-exact-reviewed-policy-and-bookkeeping-correction-into-develop
@@ -224,9 +236,14 @@ release:
   rollback_required: true
   issue_closure: after-monitoring-and-corrected-VOC-106-finalization-evidence
 
+repository_adoption_status: >-
+  adopted-pending-bookkeeping-revision-exact-review-normal-plan-merge-and-applicable-
+  postmerge-checks
+adoption_pr: 214
+adoption_evidence: https://github.com/KARSIFT/vocanova-platform/pull/214#issuecomment-5491284830
+
 ehr: not-triggered
 blocking_reasons:
-  - independent-exact-plan-review-pending
-  - accountable-adoption-pending
+  - bookkeeping-revision-exact-review-pending
   - normal-reviewed-plan-merge-pending
   - implementation-exact-checks-and-reviews-pending
