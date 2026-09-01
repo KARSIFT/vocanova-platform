@@ -51,6 +51,103 @@ const futureMilestoneState = {
   live_activation: "unresolved-held",
   voc080_holds: ["VOC-080-HOLD-01", "VOC-080-HOLD-02"],
 };
+const preMilestoneState = {
+  f2_repository_local: "complete-effective",
+  f3_staging: "unresolved-held",
+  a1_authenticated_product_acceptance: "unresolved",
+  p1_plus_product_acceptance: "unresolved",
+  production: "held",
+  live_activation: "unresolved-held",
+  voc080_holds: ["VOC-080-HOLD-00", "VOC-080-HOLD-01", "VOC-080-HOLD-02"],
+};
+
+function exactJsonValue(value, expected) {
+  if (Array.isArray(expected))
+    return (
+      Array.isArray(value) &&
+      value.length === expected.length &&
+      expected.every((item, index) => exactJsonValue(value[index], item))
+    );
+  if (expected && typeof expected === "object")
+    return (
+      value &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === Object.keys(expected).length &&
+      Object.keys(expected).every(
+        (key) =>
+          Object.hasOwn(value, key) &&
+          exactJsonValue(value[key], expected[key]),
+      )
+    );
+  return value === expected;
+}
+
+function exactProfileForRecord(candidate) {
+  const matches = [
+    ["pre-voc105", preMilestoneState],
+    ["voc105", futureMilestoneState],
+  ].filter(([, profile]) =>
+    exactJsonValue(candidate?.milestone_state, profile),
+  );
+  assert.equal(
+    matches.length,
+    1,
+    "record must select one complete exact profile",
+  );
+  return matches[0][0];
+}
+const repositoryProfile = exactProfileForRecord(record);
+
+function injectDuplicateMilestoneMember(
+  candidate,
+  source,
+  key,
+  duplicateValue,
+) {
+  const profile = exactProfileForRecord(candidate);
+  const profileState =
+    profile === "pre-voc105" ? preMilestoneState : futureMilestoneState;
+  assert.ok(Object.hasOwn(profileState, key), `selected profile owns ${key}`);
+  const escapedKey = JSON.stringify(key);
+  const activeValue = JSON.stringify(profileState[key]);
+  const escapeExpression = (value) =>
+    value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const memberExpression = new RegExp(
+    `${escapeExpression(escapedKey)}[ \\t\\r\\n]*:[ \\t\\r\\n]*${escapeExpression(activeValue)}`,
+    "g",
+  );
+  const members = [...source.matchAll(memberExpression)];
+  assert.equal(members.length, 1, `fixture has one active ${key} member`);
+  const member = members[0][0];
+  const prefix = source.slice(0, members[0].index);
+  const suffix = source.slice(members[0].index + member.length);
+  const replacement = `${member},\n    ${escapedKey}: ${JSON.stringify(duplicateValue)}`;
+  const injected = `${prefix}${replacement}${suffix}`;
+  assert.equal(
+    injected,
+    `${prefix}${replacement}${suffix}`,
+    `fixture changes only the selected ${key} member`,
+  );
+  assert.equal(
+    injected.slice(0, prefix.length),
+    prefix,
+    `fixture preserves the ${key} source prefix byte-for-byte`,
+  );
+  assert.equal(
+    suffix ? injected.slice(-suffix.length) : "",
+    suffix,
+    `fixture preserves the ${key} source suffix byte-for-byte`,
+  );
+  assert.notEqual(injected, source, `fixture injects ${key}`);
+  assert.equal(
+    [...injected.matchAll(new RegExp(escapeExpression(escapedKey), "g"))]
+      .length,
+    2,
+    `fixture has two raw ${key} members`,
+  );
+  return { source: injected, prefix, suffix };
+}
 
 // These literals are copied from the adopted VOC-110 specification, not from
 // the validator contract or a preserved downstream worktree.
@@ -124,6 +221,89 @@ const planOwnedFutureMarkers = {
   },
 };
 
+// These are literal preserved sources from the adopted VOC-111 plan.  They are
+// deliberately not derived from the active checkout or validator exports.
+const planOwnedPreMarkers = {
+  "docs/README.md": [
+    "[VOC-081's F2 record](operations/voc-081-f2-evidence.md)",
+    "complete stack was integrated by PR #108 and passed post-merge revalidation",
+    "repository/local F2 is complete and effective",
+    "F3/staging, A1/P1+ acceptance",
+    "production, deployment, live activation",
+    "every inherited live-action hold\n  remain unresolved",
+  ],
+  "docs/operations/README.md": [
+    "active (repository/local F2 complete)",
+    "complete stack was integrated by PR #108 and passed post-merge",
+    "repository/local F2 is complete and effective",
+    "earlier integration-pending candidate state as history",
+    "does not claim F3,",
+    "A1/P1+ acceptance, staging, production, deployment, or live activation",
+  ],
+  "docs/operations/voc-081-f2-evidence.md": [
+    "This is the machine-checked active record",
+    "Repository/local F2 is complete and effective",
+    "## Exact integration evidence",
+    "## Historical candidate state",
+    "## No-live and later-gate state",
+    "F3/staging, A1/P1+ acceptance, production, live",
+    "remain unresolved/held",
+    "`VOC-080-HOLD-00`, `VOC-080-HOLD-01`, and `VOC-080-HOLD-02` remain held.",
+    "No deployment occurred and no deployment URL is expected.",
+  ],
+  "docs/product/README.md": [
+    "VOC-081 supplies the contributor-verifiable F2 foundation",
+    "integrated by PR #108 and passed post-merge revalidation",
+    "F2 complete and effective",
+    "preserving the earlier candidate state as history",
+    "F3, A1/P1+ acceptance, staging, production, deployment, and live activation remain",
+    "unresolved and are not implied",
+  ],
+  "docs/product/12-mvp-implementation-plan.md": [
+    "PR #108 integrated the complete VOC-081 stack and final evidence",
+    "Repository/local\nF2 is therefore complete and effective",
+    "candidate-era state remains historical evidence",
+    "F3 staging, A1/P1+",
+    "product acceptance, production, deployment, live activation, and",
+    "remain unresolved/held",
+    "`VOC-080-HOLD-00` through `HOLD-02` remain unresolved/held",
+  ],
+};
+const planOwnedF2SupportMarkers = [
+  "# VOC-081 F2 Repository/Local Evidence Record",
+  "## Acceptance boundary",
+  "## Exact task evidence",
+  "## Command and CI contract",
+  "## Local shape and limitations",
+  "## Rollback status",
+  "repository-local-f2-candidate-integration-pending",
+  "Native Windows behavior is not claimed",
+  ".wrangler/state/vocanova-local",
+  "a8694932671ad9c44fd2a97c128b14e6089e5faf",
+  "36d526bdec83e28b17aa30a6814d42b92f058ec1",
+  "5383790286",
+  "5385582178",
+  "5383822937",
+  "32612887965",
+  "32634344456",
+  "32612888017",
+  "32612888012",
+  "32634654242",
+  "32634654225",
+  "not-applicable-push-path-filter",
+  "32634654343",
+  "9b0e90fcd89469763c9874a5b0ef951e4d76149d",
+  "https://github.com/KARSIFT/vocanova-platform/pull/103",
+  "aae4473d1072517b40e42bbb0dc4e992c37c16b5",
+  "https://github.com/KARSIFT/vocanova-platform/pull/104",
+  "38d8c27b64557e8e8bc58bb05ea3c2cd858e1136",
+  "https://github.com/KARSIFT/vocanova-platform/pull/106",
+  "ca7596cb72128e5fa47483a65678773a6968dd79",
+  "https://github.com/KARSIFT/vocanova-platform/pull/107",
+  "VOC-080-HOLD-01",
+  "VOC-080-HOLD-02",
+];
+
 function normalizeAsciiWhitespace(source) {
   return source
     .replace(/\r\n?/g, "\n")
@@ -139,6 +319,38 @@ function whitespaceExpression(marker) {
 
 function removeNormalizedMarker(source, marker) {
   return source.replace(new RegExp(whitespaceExpression(marker), "g"), "");
+}
+
+function joinFixtureLines(lines) {
+  return `${[...new Set(lines)].join("\n")}\n`;
+}
+
+function planOwnedSource(surface, profile) {
+  const pre = planOwnedPreMarkers[surface.path];
+  const future = planOwnedFutureMarkers[surface.path].required;
+  const lines = (profile === "pre-voc105" ? pre : future).filter(
+    (line) =>
+      !(
+        surface.path === "docs/product/12-mvp-implementation-plan.md" &&
+        line === "remain unresolved/held"
+      ),
+  );
+  return joinFixtureLines(
+    surface.path === "docs/operations/voc-081-f2-evidence.md"
+      ? [
+          ...lines,
+          ...(profile === "voc105"
+            ? [
+                "This is the machine-checked active record",
+                "Repository/local F2 is complete and effective",
+                "## Exact integration evidence",
+                "## Historical candidate state",
+              ]
+            : []),
+          ...planOwnedF2SupportMarkers,
+        ]
+      : lines,
+  );
 }
 
 function futureSource(source, surface) {
@@ -159,31 +371,39 @@ function futureSource(source, surface) {
   return result;
 }
 
-function installFutureProfile(fixture, reorderObjectMembers = false) {
+function installSyntheticProfile(
+  fixture,
+  profile,
+  reorderObjectMembers = false,
+) {
   const futureRecord = clone(record);
-  futureRecord.milestone_state = reorderObjectMembers
-    ? {
-        voc080_holds: ["VOC-080-HOLD-01", "VOC-080-HOLD-02"],
-        live_activation: "unresolved-held",
-        production: "held",
-        p1_plus_product_acceptance: "unresolved",
-        a1_authenticated_product_acceptance: "unresolved",
-        f3_current_evidence: "docs/operations/voc-105-f3-evidence.json",
-        f3_staging: "complete-effective-under-voc-105-evidence",
-        f2_repository_local: "complete-effective",
-      }
-    : futureMilestoneState;
+  futureRecord.milestone_state =
+    profile === "voc105" && reorderObjectMembers
+      ? {
+          voc080_holds: ["VOC-080-HOLD-01", "VOC-080-HOLD-02"],
+          live_activation: "unresolved-held",
+          production: "held",
+          p1_plus_product_acceptance: "unresolved",
+          a1_authenticated_product_acceptance: "unresolved",
+          f3_current_evidence: "docs/operations/voc-105-f3-evidence.json",
+          f3_staging: "complete-effective-under-voc-105-evidence",
+          f2_repository_local: "complete-effective",
+        }
+      : clone(profile === "voc105" ? futureMilestoneState : preMilestoneState);
   writeFileSync(
     join(fixture, F2_RECORD_PATH),
     `${JSON.stringify(futureRecord, null, 2)}\n`,
   );
   for (const surface of humanSurfaces) {
-    const surfacePath = join(fixture, surface.path);
     writeFileSync(
-      surfacePath,
-      futureSource(readFileSync(surfacePath, "utf8"), surface),
+      join(fixture, surface.path),
+      planOwnedSource(surface, profile),
     );
   }
+}
+
+function installFutureProfile(fixture, reorderObjectMembers = false) {
+  installSyntheticProfile(fixture, "voc105", reorderObjectMembers);
 }
 
 // This negative-test corpus is intentionally owned by the test module rather
@@ -227,6 +447,17 @@ function repositoryFixture(mutate) {
   } finally {
     rmSync(fixture, { recursive: true, force: true });
   }
+}
+
+function syntheticRepositoryFixture(
+  profile,
+  mutate,
+  reorderObjectMembers = false,
+) {
+  return repositoryFixture((fixture) => {
+    installSyntheticProfile(fixture, profile, reorderObjectMembers);
+    mutate?.(fixture);
+  });
 }
 
 test("the accepted VOC-081 repository/local F2 record is internally consistent", () => {
@@ -294,19 +525,22 @@ test("the human record carries the exact boundary and limitation markers", () =>
 test("every designated living F2 surface has a precise active contract", () => {
   for (const surface of DESIGNATED_F2_SURFACES) {
     const source = readFileSync(resolve(repositoryRoot, surface.path), "utf8");
-    assert.deepEqual(inspectF2Surface(source, surface.path), []);
+    assert.deepEqual(
+      inspectF2Surface(source, surface.path, repositoryProfile),
+      [],
+    );
 
     for (const marker of [
       ...(surface.immutableRequired ?? []),
-      ...(surface.profiles["pre-voc105"]?.required ?? []),
+      ...(surface.profiles[repositoryProfile]?.required ?? []),
     ]) {
       const mutated = removeNormalizedMarker(source, marker);
       assert.notEqual(mutated, source);
-      const errors = inspectF2Surface(mutated, surface.path);
+      const errors = inspectF2Surface(mutated, surface.path, repositoryProfile);
       assert.ok(
         errors.some(
           (error) =>
-            error.includes("current pre-voc105 marker") ||
+            error.includes(`current ${repositoryProfile} marker`) ||
             error.includes("missing immutable F2 marker"),
         ),
         `${surface.path} must fail when marker ${marker} is removed`,
@@ -472,11 +706,14 @@ test("current and historical status conflation fails independently", () => {
 
 test("the exact adopted VOC-105 current-state profile passes atomically", () => {
   for (const reorderObjectMembers of [false, true]) {
-    const errors = repositoryFixture((fixture) => {
-      installFutureProfile(fixture, reorderObjectMembers);
-    });
+    const errors = syntheticRepositoryFixture(
+      "voc105",
+      undefined,
+      reorderObjectMembers,
+    );
     assert.deepEqual(errors, []);
   }
+  assert.deepEqual(syntheticRepositoryFixture("pre-voc105"), []);
 });
 
 test("current-state JSON accepts only the two exact profiles", () => {
@@ -517,43 +754,142 @@ test("current-state JSON accepts only the two exact profiles", () => {
   }
 });
 
-test("raw duplicate JSON keys and the VOC-105 evidence pointer fail before parsing", () => {
-  const duplicateBaseline = repositoryFixture((fixture) => {
-    const recordPath = join(fixture, F2_RECORD_PATH);
-    const source = readFileSync(recordPath, "utf8");
-    writeFileSync(
-      recordPath,
-      source.replace(
-        '"f3_staging": "unresolved-held",',
-        '"f3_staging": "unresolved-held",\n    "f3_staging": "passed",',
-      ),
+test("test-owned live-profile selection is complete, order-insensitive, and fail closed", () => {
+  const profiles = [
+    ["pre-voc105", preMilestoneState],
+    ["voc105", futureMilestoneState],
+  ];
+  const assertNoProfile = (label, milestone_state) =>
+    assert.throws(
+      () => exactProfileForRecord({ milestone_state }),
+      /one complete exact profile/,
+      label,
     );
-  });
-  assert.ok(
-    duplicateBaseline.some((error) =>
-      error.includes("duplicate raw JSON key is prohibited: f3_staging"),
-    ),
-  );
 
-  const duplicatePointer = repositoryFixture((fixture) => {
-    installFutureProfile(fixture);
-    const recordPath = join(fixture, F2_RECORD_PATH);
-    const source = readFileSync(recordPath, "utf8");
-    writeFileSync(
-      recordPath,
-      source.replace(
-        '"f3_current_evidence": "docs/operations/voc-105-f3-evidence.json",',
-        '"f3_current_evidence": "docs/operations/voc-105-f3-evidence.json",\n    "f3_current_evidence": "docs/operations/other.json",',
-      ),
+  for (const [profile, state] of profiles) {
+    assert.equal(exactProfileForRecord({ milestone_state: state }), profile);
+    assert.equal(
+      exactProfileForRecord({
+        milestone_state: Object.fromEntries(
+          [...Object.entries(state)].reverse(),
+        ),
+      }),
+      profile,
+      `${profile} object member order is non-semantic`,
     );
-  });
-  assert.ok(
-    duplicatePointer.some((error) =>
-      error.includes(
-        "duplicate raw JSON key is prohibited: f3_current_evidence",
+    for (const [key, value] of Object.entries(state)) {
+      const without = clone(state);
+      delete without[key];
+      assertNoProfile(`${profile} omits ${key}`, without);
+
+      const renamed = clone(state);
+      renamed[`renamed_${key}`] = renamed[key];
+      delete renamed[key];
+      assertNoProfile(`${profile} renames ${key}`, renamed);
+
+      const wrongType = clone(state);
+      wrongType[key] = Array.isArray(value) ? "wrong-type" : [value];
+      assertNoProfile(`${profile} changes ${key} type`, wrongType);
+
+      if (Array.isArray(value)) {
+        const reorderedHolds = clone(state);
+        reorderedHolds[key] = [...value].reverse();
+        assertNoProfile(`${profile} reorders ${key}`, reorderedHolds);
+
+        const changedHold = clone(state);
+        changedHold[key] = [...value];
+        changedHold[key][0] = "VOC-080-HOLD-XX";
+        assertNoProfile(`${profile} changes one ${key} value`, changedHold);
+      } else {
+        const wrongValue = clone(state);
+        wrongValue[key] = `${value}-wrong`;
+        assertNoProfile(`${profile} changes ${key} scalar value`, wrongValue);
+      }
+    }
+    const unknown = clone(state);
+    unknown.unknown = "held";
+    assertNoProfile(`${profile} adds an unknown key`, unknown);
+  }
+
+  for (const [label, milestone_state] of [
+    ["null", null],
+    ["array", []],
+    ["primitive", "pre-voc105"],
+    ["missing", undefined],
+  ])
+    assertNoProfile(`rejects ${label} milestone_state`, milestone_state);
+});
+
+test("plan-owned pre and VOC-105 sources pass, then fail one required marker at a time", () => {
+  for (const profile of ["pre-voc105", "voc105"]) {
+    const profileRecord = clone(record);
+    profileRecord.milestone_state = clone(
+      profile === "pre-voc105" ? preMilestoneState : futureMilestoneState,
+    );
+    for (const surface of humanSurfaces) {
+      const source = planOwnedSource(surface, profile);
+      assert.deepEqual(
+        inspectF2Surface(source, surface.path, profile),
+        [],
+        `${surface.path} ${profile} literal source must pass`,
+      );
+      if (surface.path === "docs/operations/voc-081-f2-evidence.md")
+        assert.deepEqual(inspectF2Document(source, profileRecord), []);
+      const required =
+        profile === "pre-voc105"
+          ? planOwnedPreMarkers[surface.path]
+          : planOwnedFutureMarkers[surface.path].required;
+      for (const marker of required) {
+        const mutated = removeNormalizedMarker(source, marker);
+        assert.notEqual(mutated, source, `${surface.path} removes ${marker}`);
+        assert.ok(
+          inspectF2Surface(mutated, surface.path, profile).some((error) =>
+            error.includes(`current ${profile} marker`),
+          ),
+          `${surface.path} ${profile} must reject removed ${marker}`,
+        );
+      }
+    }
+  }
+});
+
+test("raw duplicate JSON keys and the VOC-105 evidence pointer fail before parsing", () => {
+  for (const [profile, key, duplicateValue] of [
+    ["pre-voc105", "f3_staging", "passed"],
+    ["voc105", "f3_staging", "passed"],
+    ["voc105", "f3_current_evidence", "docs/operations/other.json"],
+  ]) {
+    const errors = syntheticRepositoryFixture(profile, (fixture) => {
+      const recordPath = join(fixture, F2_RECORD_PATH);
+      const source = readFileSync(recordPath, "utf8");
+      const candidate = JSON.parse(source);
+      const injection = injectDuplicateMilestoneMember(
+        candidate,
+        source,
+        key,
+        duplicateValue,
+      );
+      assert.equal(
+        injection.source.slice(0, injection.prefix.length),
+        injection.prefix,
+        `${profile} ${key} preserves the source prefix`,
+      );
+      assert.equal(
+        injection.suffix
+          ? injection.source.slice(-injection.suffix.length)
+          : "",
+        injection.suffix,
+        `${profile} ${key} preserves the source suffix`,
+      );
+      writeFileSync(recordPath, injection.source);
+    });
+    assert.ok(
+      errors.some((error) =>
+        error.includes(`duplicate raw JSON key is prohibited: ${key}`),
       ),
-    ),
-  );
+      `${profile} duplicate ${key} must fail before parsed record validation`,
+    );
+  }
 });
 
 test("current-state JSON rejects every key mutation class one invariant at a time", () => {
@@ -589,11 +925,7 @@ test("future markers are active-only, normalized, unique, and history exclusion 
     ({ path: surfacePath }) =>
       surfacePath === "docs/operations/voc-081-f2-evidence.md",
   );
-  const baseline = readFileSync(
-    resolve(repositoryRoot, f2Surface.path),
-    "utf8",
-  );
-  const future = futureSource(baseline, f2Surface);
+  const future = planOwnedSource(f2Surface, "voc105");
   const requiredMarker = planOwnedFutureMarkers[f2Surface.path].required[1];
   const withoutRequired = removeNormalizedMarker(future, requiredMarker);
   const historyStart = withoutRequired.indexOf("## Historical candidate state");
@@ -632,10 +964,7 @@ test("future markers are active-only, normalized, unique, and history exclusion 
   );
 
   for (const surface of humanSurfaces) {
-    const source = futureSource(
-      readFileSync(resolve(repositoryRoot, surface.path), "utf8"),
-      surface,
-    );
+    const source = planOwnedSource(surface, "voc105");
     const markers = planOwnedFutureMarkers[surface.path];
     assert.ok(
       inspectF2Surface(
@@ -655,10 +984,7 @@ test("future markers are active-only, normalized, unique, and history exclusion 
     );
   }
 
-  const normalizationBase = futureSource(
-    readFileSync(resolve(repositoryRoot, "docs/README.md"), "utf8"),
-    humanSurfaces[0],
-  );
+  const normalizationBase = planOwnedSource(humanSurfaces[0], "voc105");
   for (const replacement of [" \t\r\n", "\r", "\f", "\v"]) {
     assert.deepEqual(
       inspectF2Surface(
@@ -673,11 +999,8 @@ test("future markers are active-only, normalized, unique, and history exclusion 
 
 test("every human surface rejects profile hybrids in either direction", () => {
   for (const surface of humanSurfaces) {
-    const baseline = readFileSync(
-      resolve(repositoryRoot, surface.path),
-      "utf8",
-    );
-    const future = futureSource(baseline, surface);
+    const baseline = planOwnedSource(surface, "pre-voc105");
+    const future = planOwnedSource(surface, "voc105");
     const futureErrors = inspectF2Surface(future, surface.path, "voc105");
     assert.deepEqual(
       futureErrors,
@@ -697,7 +1020,7 @@ test("every human surface rejects profile hybrids in either direction", () => {
       `${surface.path} must reject one missing VOC-105 marker`,
     );
 
-    const preMarker = surface.profiles["pre-voc105"].required[0];
+    const preMarker = planOwnedPreMarkers[surface.path][0];
     const preToFuture = `${baseline}\n${futureMarker}\n`;
     assert.ok(
       inspectF2Surface(preToFuture, surface.path, "pre-voc105").some(
@@ -713,24 +1036,56 @@ test("every human surface rejects profile hybrids in either direction", () => {
 
 test("repository-wide profile hybrids fail one surface at a time in both directions", () => {
   for (const surface of humanSurfaces) {
-    const futureToPre = repositoryFixture((fixture) => {
-      installFutureProfile(fixture);
+    const futureToPre = syntheticRepositoryFixture("voc105", (fixture) => {
+      const before = Object.fromEntries(
+        humanSurfaces.map(({ path: surfacePath }) => [
+          surfacePath,
+          readFileSync(join(fixture, surfacePath), "utf8"),
+        ]),
+      );
       writeFileSync(
         join(fixture, surface.path),
-        readFileSync(resolve(repositoryRoot, surface.path), "utf8"),
+        planOwnedSource(surface, "pre-voc105"),
       );
+      assert.notEqual(
+        readFileSync(join(fixture, surface.path), "utf8"),
+        before[surface.path],
+      );
+      for (const other of humanSurfaces.filter(
+        ({ path }) => path !== surface.path,
+      ))
+        assert.equal(
+          readFileSync(join(fixture, other.path), "utf8"),
+          before[other.path],
+        );
     });
     assert.ok(
       futureToPre.some((error) => error.startsWith(`${surface.path}:`)),
       `${surface.path} stale pre-VOC-105 surface must fail the future repository`,
     );
 
-    const preToFuture = repositoryFixture((fixture) => {
-      const surfacePath = join(fixture, surface.path);
-      writeFileSync(
-        surfacePath,
-        futureSource(readFileSync(surfacePath, "utf8"), surface),
+    const preToFuture = syntheticRepositoryFixture("pre-voc105", (fixture) => {
+      const before = Object.fromEntries(
+        humanSurfaces.map(({ path: surfacePath }) => [
+          surfacePath,
+          readFileSync(join(fixture, surfacePath), "utf8"),
+        ]),
       );
+      writeFileSync(
+        join(fixture, surface.path),
+        planOwnedSource(surface, "voc105"),
+      );
+      assert.notEqual(
+        readFileSync(join(fixture, surface.path), "utf8"),
+        before[surface.path],
+      );
+      for (const other of humanSurfaces.filter(
+        ({ path }) => path !== surface.path,
+      ))
+        assert.equal(
+          readFileSync(join(fixture, other.path), "utf8"),
+          before[other.path],
+        );
     });
     assert.ok(
       preToFuture.some((error) => error.startsWith(`${surface.path}:`)),
