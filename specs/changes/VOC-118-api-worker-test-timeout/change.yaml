@@ -1,0 +1,214 @@
+schema_version: 1
+
+id: VOC-118
+slug: api-worker-test-timeout
+title: Bound the stale-reconciliation integration test timeout
+type: required-verifier-timeout-correction
+status: draft
+risk: R3
+planned_implementation_risk_floor: >-
+  R3 because the sole implementation path has an automated R1 floor but verifies
+  migration, stale-checkpoint, reconciliation, and D1 correctness. An overbroad
+  timeout or weakened assertion could conceal a required-control defect. The change
+  is finite, test-local, repository-only, reversible, and has no R4 consequence.
+canonical_path: specs/changes/VOC-118-api-worker-test-timeout
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/223
+failing_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
+failing_run: https://github.com/KARSIFT/vocanova-platform/actions/runs/33513868763
+failing_job: https://github.com/KARSIFT/vocanova-platform/actions/runs/33513868763/job/99876022617
+failing_head_sha: ad9edd7c9caa912d36d3885acd62d90e80bd2a84
+base_branch: develop
+base_sha: 1f535aacc48e199b222ce8f91e1f82c597666c5f
+plan_branch: plan/voc-118-api-worker-test-timeout
+target_branch: develop
+approved_candidate_sha: pending-independent-exact-revision-review-and-adoption
+approval_status: pending-independent-exact-revision-review-and-adoption
+implementation_authorized: false
+implementation_authority_status: >-
+  prohibited-until-exact-plan-review-accountable-adoption-complete-bookkeeping-and-
+  normal-non-author-plan-merge; issue-223-and-this-draft-grant-no-implementation-
+  review-approval-merge-settings-dispatch-deployment-or-live-system-authority
+implementation_pull_request_count: 1
+implementation_pull_request: pending-after-adoption
+multiple_pull_request_rationale: >-
+  One test-file PR keeps measurement, timeout, semantic preservation, validation,
+  rollback, and evidence in one required-verifier boundary. Splitting adds review,
+  branch, timing, and bookkeeping overhead with no releasable intermediate state.
+automatic_merge_allowed: true
+production_impact: none-repository-test-only
+rollback_required: true
+
+objective: >-
+  Preserve the complete stale-reconciliation correctness proof while giving exactly
+  that integration-heavy test finite hosted scheduling headroom, only after repeated
+  baseline measurement supports contention rather than a semantic defect.
+
+requirements:
+  - id: VOC-118-D00
+    statement: >-
+      Bind allocator evidence that VOC-116 is on develop, VOC-117 is reserved by open
+      plan PR #222, and no package, issue title, local/remote branch, or ref uses
+      VOC-118. Treat issue #223, PR #215, head
+      ad9edd7c9caa912d36d3885acd62d90e80bd2a84, run 33513868763, job 99876022617,
+      82/83 result, exact 5,000-ms timeout, focused 1.01-s/2.96-s evidence, and file
+      20/20 with 552-ms named/5.74-s tests as intake and measurement only; they grant
+      no implementation authority.
+  - id: VOC-118-D01
+    statement: >-
+      Preserve the planning measurements on exact base 1f535aacc48e199b222ce8f91e1f82c597666c5f:
+      three complete-file 20/20 passes with named durations 558/747/842 ms and three
+      complete-worker 99/99 passes with 749/839/813 ms. Record that contention is a
+      supported hypothesis, not a proven internal root cause.
+  - id: VOC-118-D02
+    statement: >-
+      Before implementation editing, sequentially repeat at least three verbose
+      complete-file and three complete-worker runs on the exact parent, capturing
+      named, aggregate, Vitest, and wall durations and all failure/skip/timeout state.
+  - id: VOC-118-D03
+    statement: >-
+      Stop without adding timeout headroom if measurement shows an assertion, D1,
+      reconciliation-lock, setup, deterministic-phase, or unrelated suite failure,
+      or requires a source/config/setup path outside the exact inventory.
+  - id: VOC-118-D04
+    statement: >-
+      Only after the measurement gate passes, attach one literal 10,000-ms timeout
+      to exactly the test named reruns a completed reconciliation instead of returning
+      a stale pass. Keep every other test at the existing default and add no global,
+      file-wide, describe, hook, worker, environment-derived, or config timeout.
+  - id: VOC-118-D05
+    statement: >-
+      Preserve the exact test body and causal evidence: full conversion/import,
+      initial pass reconciliation and release, post-checkpoint D1 mutation, restarted
+      pending state, final failing reconciliation, and final release. Preserve every
+      other test, fixture, helper bound, migration, and runtime source.
+  - id: VOC-118-D06
+    statement: >-
+      Add no retry, repeat-on-failure, catch-ignore, fake clock, skip/conditional,
+      fixture/chunk/page reduction, expected-status change, lock relaxation, extra
+      serialization, assertion weakening, or conversion/reconciliation behavior edit.
+  - id: VOC-118-D07
+    statement: >-
+      Use one task, one future implementation PR, and exactly
+      apps/api-worker/test/data-conversion.test.ts. Preserve Vitest config/setup,
+      package/lock/workflow/docs, data-conversion source/fixtures, and migrations.
+  - id: VOC-118-D08
+    statement: >-
+      Require repeated named, complete-file, complete-worker, ci:worker-api, workspace,
+      governance/risk/format/diff, exact path/preservation, rollback, and hosted checks.
+      Any final-SHA timeout or semantic failure blocks merge and never authorizes an
+      automatic increase beyond 10,000 ms.
+  - id: VOC-118-D09
+    statement: >-
+      Require exact-SHA independent cross-model R3 review by a distinct non-author,
+      separate non-author merge, complete revert capability, exact merge-SHA monitoring,
+      and new evidence after every edit. No EHR or founder/steward layer is inferred.
+  - id: VOC-118-D10
+    statement: >-
+      Keep the plan and implementation synthetic, credential-free, network-free, and
+      repository-only. Do not query or mutate settings, dispatch, deploy, access
+      Cloudflare/remote D1/production/learner data, change DNS/traffic, spend, release,
+      promote main, launch, or claim issue closure.
+
+owners:
+  decision: accountable-repository-change-owner-at-adoption
+  package_preparation: /root/voc115_plan_review
+  implementation: different-builder-actor-after-adoption
+  independent_cross_model_R3_verifier: different-non-author-distinct-model-actor
+  merge: separate-non-author-actor
+  post_merge_monitoring: accountable-repository-change-owner-recorded-at-adoption
+
+approvals:
+  independent_cross_model_R3_plan_review:
+    status: pending-distinct-non-author-exact-candidate-review
+    candidate_sha: pending
+    evidence: pending
+  adoption_decision:
+    status: pending
+    decision_id: pending
+    candidate_sha: pending
+    evidence: pending
+  independent_cross_model_R3_implementation_review:
+    status: blocked-until-adopted-plan-and-exact-implementation-candidate
+    candidate_sha: pending-future-implementation-sha
+    evidence: pending
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - apps/api-worker/test/data-conversion.test.ts
+  - required-api-worker-migration-and-reconciliation-verifier
+
+implementation_paths:
+  - apps/api-worker/test/data-conversion.test.ts
+
+preservation_surfaces:
+  - apps/api-worker/vitest.config.ts
+  - apps/api-worker/test/setup.ts
+  - apps/api-worker/package.json
+  - package.json
+  - pnpm-lock.yaml
+  - .github/workflows/ci.yml
+  - apps/api-worker/src/data-conversion
+  - apps/api-worker/test/fixtures/postgres-export-v1.ts
+  - apps/api-worker/migrations
+  - docs/development.md
+
+protected_areas:
+  - migration-and-stale-reconciliation-correctness-evidence
+  - D1-import-checkpoint-and-write-lock-semantics
+  - required-worker-test-fail-closed-behavior
+  - global-timeout-retry-and-assertion-strength
+  - production-and-learner-data-holds
+
+privilege_expansion_analysis:
+  classification: zero-authority-expansion
+  expands: []
+  does_not_expand:
+    - runtime-conversion-import-reconciliation-or-D1-behavior
+    - workflow-package-test-runner-or-global-timeout-configuration
+    - retry-skip-serialization-or-assertion-authority
+    - settings-secrets-network-cloudflare-production-or-data-access
+
+required_r3_evidence:
+  deterministic_evidence:
+    required: true
+    evidence: test-plan.md and exact local/hosted timing/results
+  protected_area_evidence:
+    required: true
+    evidence: impact-analysis.md and semantic-preservation/exact-diff audit
+  independent_exact_revision_evidence:
+    required: true
+    role: independent-cross-model-R3-verifier
+    status: pending-plan-review
+  contingency_and_rollback:
+    required: true
+    evidence: implementation-plan.md and release-plan.md
+  ehr: not-triggered-no-exceptional-condition-identified
+
+scope_boundary:
+  test_local_timeout_metadata: allowed-only-after-adoption-and-measurement-gate
+  runtime_config_global_timeout_retry_assertion_or_fixture_change: prohibited
+  external_or_live_action: prohibited
+
+rollback:
+  strategy: complete-reviewed-one-file-revert-to-actual-first-parent
+  partial_revert: prohibited
+  external_rollback: none-no-external-effect
+
+monitoring:
+  owner: accountable-repository-change-owner-recorded-at-adoption
+  signals:
+    - exact-merge-SHA-named-test-duration-and-result
+    - complete-file-and-worker-test-counts-and-results
+    - ci-required-and-hosted-aggregate-results
+    - timeout-semantic-lock-resource-or-scope-regression
+  failure_action: block-issue-closure-and-route-governed-correction-or-complete-revert
