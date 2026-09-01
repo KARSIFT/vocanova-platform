@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 import test from "node:test";
 
 import {
+  FOUNDATION_TIMEOUT_MINUTES,
   RETIRED_CONTROL_PLANE_WORKFLOWS,
   RETIRED_SERVER_WORKFLOWS,
   TARGET_WORKFLOWS,
@@ -134,10 +135,14 @@ test("common policy rejects write permission, unsafe triggers, and floating acti
 });
 
 test("target contract rejects removal of deterministic CI commands", () => {
-  const source = readFileSync(
+  const canonicalSource = readFileSync(
     resolve(workflowDirectory, "ci.yml"),
     "utf8",
-  ).replace("pnpm run ci:web", "pnpm run lint:web");
+  );
+  const source = canonicalSource.replace(
+    "pnpm run ci:web",
+    "pnpm run lint:web",
+  );
   assert.ok(
     inspectTargetWorkflow("ci.yml", source).some((error) =>
       error.includes("pnpm run ci:web"),
@@ -161,6 +166,140 @@ test("target contract rejects removal of deterministic CI commands", () => {
       source.replace("        local-stack,\n", ""),
     ).some((error) => error.includes("must need local-stack")),
   );
+  assert.deepEqual(inspectTargetWorkflow("ci.yml", canonicalSource), []);
+  assert.equal(FOUNDATION_TIMEOUT_MINUTES, 20);
+
+  const exactTimeoutError =
+    "foundation job timeout-minutes must be the exact unquoted integer 20";
+  const duplicateTimeoutError =
+    "foundation job must declare exactly one timeout-minutes scalar";
+  const duplicateFoundationError = "foundation job must appear exactly once";
+  const cases = [
+    {
+      name: "former timeout",
+      source: canonicalSource.replace(
+        "    timeout-minutes: 20",
+        "    timeout-minutes: 15",
+      ),
+      expected: exactTimeoutError,
+    },
+    {
+      name: "lower drift",
+      source: canonicalSource.replace(
+        "    timeout-minutes: 20",
+        "    timeout-minutes: 19",
+      ),
+      expected: exactTimeoutError,
+    },
+    {
+      name: "higher drift",
+      source: canonicalSource.replace(
+        "    timeout-minutes: 20",
+        "    timeout-minutes: 21",
+      ),
+      expected: exactTimeoutError,
+    },
+    {
+      name: "open ended drift",
+      source: canonicalSource.replace(
+        "    timeout-minutes: 20",
+        "    timeout-minutes: 30",
+      ),
+      expected: exactTimeoutError,
+    },
+    {
+      name: "decimal timeout",
+      source: canonicalSource.replace(
+        "    timeout-minutes: 20",
+        "    timeout-minutes: 20.0",
+      ),
+      expected: exactTimeoutError,
+    },
+    {
+      name: "quoted timeout",
+      source: canonicalSource.replace(
+        "    timeout-minutes: 20",
+        '    timeout-minutes: "20"',
+      ),
+      expected: exactTimeoutError,
+    },
+    {
+      name: "expression timeout",
+      source: canonicalSource.replace(
+        "    timeout-minutes: 20",
+        "    timeout-minutes: ${{ matrix.timeout }}",
+      ),
+      expected: exactTimeoutError,
+    },
+    {
+      name: "missing foundation timeout",
+      source: canonicalSource.replace("    timeout-minutes: 20\n", ""),
+      expected: duplicateTimeoutError,
+    },
+    {
+      name: "duplicate foundation timeout",
+      source: canonicalSource.replace(
+        "    timeout-minutes: 20\n",
+        "    timeout-minutes: 20\n    timeout-minutes: 20\n",
+      ),
+      expected: duplicateTimeoutError,
+    },
+    {
+      name: "duplicate foundation job",
+      source: canonicalSource.replace(
+        "\n  packages:\n",
+        "\n  foundation:\n    name: duplicate foundation\n    runs-on: ubuntu-24.04\n    timeout-minutes: 20\n    steps:\n      - run: true\n\n  packages:\n",
+      ),
+      expected: duplicateFoundationError,
+    },
+    {
+      name: "duplicate inline foundation job",
+      source: canonicalSource.replace(
+        "\n  packages:\n",
+        "\n  foundation: { runs-on: ubuntu-24.04, timeout-minutes: 20 }\n\n  packages:\n",
+      ),
+      expected: duplicateFoundationError,
+    },
+    {
+      name: "twenty on another job only",
+      source: canonicalSource
+        .replace("    timeout-minutes: 20", "    timeout-minutes: 15")
+        .replace(
+          "  packages:\n    name: packages\n    runs-on: ubuntu-24.04\n    timeout-minutes: 15",
+          "  packages:\n    name: packages\n    runs-on: ubuntu-24.04\n    timeout-minutes: 20",
+        ),
+      expected: exactTimeoutError,
+    },
+    {
+      name: "twenty on another job with foundation timeout absent",
+      source: canonicalSource
+        .replace("    timeout-minutes: 20\n", "")
+        .replace(
+          "  packages:\n    name: packages\n    runs-on: ubuntu-24.04\n    timeout-minutes: 15",
+          "  packages:\n    name: packages\n    runs-on: ubuntu-24.04\n    timeout-minutes: 20",
+        ),
+      expected: duplicateTimeoutError,
+    },
+    {
+      name: "twenty on another job with foundation job absent",
+      source: canonicalSource
+        .replace("  foundation:\n", "  renamed-foundation:\n")
+        .replace(
+          "  packages:\n    name: packages\n    runs-on: ubuntu-24.04\n    timeout-minutes: 15",
+          "  packages:\n    name: packages\n    runs-on: ubuntu-24.04\n    timeout-minutes: 20",
+        ),
+      expected: duplicateFoundationError,
+    },
+  ];
+
+  for (const fixture of cases) {
+    assert.ok(
+      inspectTargetWorkflow("ci.yml", fixture.source).some((error) =>
+        error.includes(fixture.expected),
+      ),
+      fixture.name,
+    );
+  }
 });
 
 test("required-job aggregation blocks a synthetic subsystem failure", () => {
@@ -182,6 +321,58 @@ test("required-job aggregation blocks a synthetic subsystem failure", () => {
   );
   assert.equal(blocked.status, 1);
   assert.match(blocked.stderr, /required jobs did not succeed/);
+
+  const workflowSource = readFileSync(
+    resolve(workflowDirectory, "ci.yml"),
+    "utf8",
+  );
+  assert.ok(
+    inspectTargetWorkflow(
+      "ci.yml",
+      workflowSource.replace(
+        "          FOUNDATION_RESULT: ${{ needs.foundation.result }}\n",
+        "",
+      ),
+    ).some((error) => error.includes("FOUNDATION_RESULT")),
+  );
+  assert.ok(
+    inspectTargetWorkflow(
+      "ci.yml",
+      workflowSource.replace('          "foundation=$FOUNDATION_RESULT"\n', ""),
+    ).some((error) => error.includes('"foundation=$FOUNDATION_RESULT"')),
+  );
+  const completePassing = spawnSync(
+    "bash",
+    [
+      script,
+      "cloudflare-delivery-policy=success",
+      "foundation=success",
+      "local-stack=success",
+      "packages=success",
+      "web=success",
+      "worker-api=success",
+    ],
+    { encoding: "utf8" },
+  );
+  assert.equal(completePassing.status, 0, completePassing.stderr);
+
+  for (const result of ["failure", "cancelled", "skipped", "", "unknown"]) {
+    const blocked = spawnSync(
+      "bash",
+      [
+        script,
+        "cloudflare-delivery-policy=success",
+        `foundation=${result}`,
+        "local-stack=success",
+        "packages=success",
+        "web=success",
+        "worker-api=success",
+      ],
+      { encoding: "utf8" },
+    );
+    assert.equal(blocked.status, 1, result || "empty");
+    assert.match(blocked.stderr, /required jobs did not succeed/);
+  }
 });
 
 test("final phase accepts the repository inventory after duplicate removal", () => {
