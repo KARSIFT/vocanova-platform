@@ -1,0 +1,351 @@
+schema_version: 1
+
+id: VOC-115
+slug: release-attempt-identity
+title: Make release-attempt identity retry-safe
+type: release-governance-and-adopted-package-correction
+status: draft
+risk: R4
+planned_implementation_risk_floor: >-
+  R4 because the correction changes DOC-15, DOC-16, AGENTS, protected-history
+  release rules, and two adopted R4 packages immediately before a main promotion.
+  A wrong rule can dead-end recovery, mutate an immutable ref, or promote the wrong
+  evidence set. Implementation remains repository-only and grants no release or
+  external authority.
+canonical_path: specs/changes/VOC-115-release-attempt-identity
+authority_model: voc-079-approval-neutral-active
+requirement_source: https://github.com/KARSIFT/vocanova-platform/issues/216
+blocking_review_evidence: https://github.com/KARSIFT/vocanova-platform/pull/215#issuecomment-5491674409
+related_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
+related_adopted_packages:
+  - VOC-106
+  - VOC-114
+base_branch: develop
+base_sha: dbe7bb5178e55939f1cdb359a7b70effa55fe8ce
+plan_branch: plan/voc-115-release-attempt-identity
+target_branch: develop
+approved_candidate_sha: pending-independent-review
+approval_status: pending-independent-review-and-adoption
+implementation_authorized: false
+implementation_authority_status: >-
+  prohibited-until-exact-plan-candidate-independent-specialist-and-cross-model-R4-
+  reviews-accountable-adoption-bookkeeping-fresh-exact-review-and-normal-plan-merge
+implementation_pull_request_count: 1
+implementation_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
+multiple_pull_request_rationale: >-
+  One corrected revision of draft PR #215 is the minimum coherent boundary. Its
+  seven living and nine VOC-106 paths implement adopted VOC-114 but are not on
+  develop; the nine adopted VOC-114 artifacts on develop define the defective rule.
+  A separate implementation PR would duplicate or split one naming, ownership,
+  retry, review, and rollback invariant. One 25-path revision avoids a contradictory
+  partial state and the extra coordination, elapsed-time, token/context, repeated-
+  check, exact-review, and bookkeeping overhead.
+automatic_merge_allowed: true
+production_impact: none-repository-policy-and-release-preparation-only
+rollback_required: true
+
+objective: >-
+  Correct the VOC-114/VOC-106 release-attempt contract so every immutable attempt is
+  exactly bound to frozen develop yet a new collision-free identity remains available
+  after invalidation at the same develop SHA, while preserving abandoned refs,
+  protected-history proofs, actor separation, and every no-live-action boundary.
+
+requirements:
+  - id: VOC-115-D00
+    statement: >-
+      Treat issue #216 and the exact specialist FAIL on PR #215 head
+      6e7a65aba933dee7701dfcd1481377f0a130374e, tree
+      b1dd5a1feea589cd3b82f286623bf15dfd98e368, base
+      dbe7bb5178e55939f1cdb359a7b70effa55fe8ce as intake. PR #215 stays draft and
+      blocked. The issue and review grant no plan adoption, implementation, ref,
+      settings, release, merge, deployment, or external-action authority.
+  - id: VOC-115-D01
+    statement: >-
+      Define every new release head exactly as release/voc-106-<full-sha>-attempt-<n>,
+      where <full-sha> is the 40-character lowercase hexadecimal frozen
+      origin/develop commit and <n> is a canonical positive base-10 integer with no
+      sign or leading zero. The complete head name, frozen SHA/tree, and binder must
+      agree; shortened, ambiguous, malformed, or mismatched identities fail closed.
+  - id: VOC-115-D02
+    statement: >-
+      Allocate <n> as one plus the greatest valid sequence ever observed across the
+      freshly fetched remote release-head namespace, every open/closed/merged pull-
+      request head name in the canonical repository, and valid append-only
+      voc-106-release-attempt-v1 records attached to issue #191 or a VOC-106 release
+      PR; use 1 only when that union is empty. Inventory is repository metadata, not a
+      repository-settings query. Record the inventory inputs, maximum, chosen
+      sequence, actor, timestamp, frozen refs/trees, and intended name before creation.
+  - id: VOC-115-D03
+    statement: >-
+      Create a new attempt only with GitHub's atomic create-ref operation at the exact
+      frozen develop SHA, never with an update or force-capable operation. Treat an
+      already-existing name or atomic collision as reserved regardless of its SHA,
+      owner, or PR state; do not adopt, overwrite, update, force, or delete it. Refresh
+      the complete inventory and allocate a higher sequence. A failed allocation is
+      recorded but is not an attempt because no new ref was created.
+  - id: VOC-115-D04
+    statement: >-
+      On successful atomic creation, immediately read back and record one immutable
+      ownership tuple: VOC-106, attempt sequence and head name, full frozen develop
+      SHA/tree, frozen main SHA/tree, creating actor, creation receipt/time, and draft
+      PR number/head/base when available. Continuation after interruption or an actor
+      handoff requires exact tuple equality and recorded handoff; it must not recreate
+      or update the ref. Missing, conflicting, or partial ownership evidence stops.
+  - id: VOC-115-D05
+    statement: >-
+      Preserve one complete invalidation domain: protected refs/trees, attempt ref,
+      ownership tuple, PR head/base/metadata, merge base/divergence/compare, checks,
+      policy evidence, and reviewed revision. Drift closes the draft PR, records the
+      reason, and abandons the attempt while retaining its ref unchanged. A retry,
+      including with unchanged frozen develop, performs a fresh inventory/allocation,
+      atomic creation, PR, checks, evidence, and exact reviews under a greater sequence.
+  - id: VOC-115-D06
+    statement: >-
+      Keep abandoned refs immutable and ineligible for automatic or manual deletion.
+      Existing automatic source deletion may remove only a successfully merged short-
+      lived release or synchronization head after its exact identity and nonexecuted
+      atomic recreation request are recorded. Unexpected absence or movement of an
+      abandoned/active ref stops release and routes governed investigation; recreation
+      is recovery, never a new attempt or permission to reuse a name.
+  - id: VOC-115-D07
+    statement: >-
+      Preserve frozen main as merge base, zero main-only commits, exact attempt-head/
+      develop SHA and tree equality, zero extra head content, aggregate compare,
+      prospective and actual release-merge tree equality, two separately reviewed
+      merge-commit PRs, synchronization, final ancestry/zero-behind proof, R4 evidence,
+      distinct reviewers, and separate authorized non-author mergers.
+  - id: VOC-115-D08
+    statement: >-
+      After adoption, amend draft PR #215 as one 25-path implementation: all seven
+      living release surfaces, all nine VOC-106 artifacts, and all nine VOC-114
+      artifacts listed in implementation_paths. Reconcile every naming, allocation,
+      ownership, collision, invalidation, recreation, test, evidence, rollback, and
+      monitoring statement and applicable living-document metadata/revision notes.
+      Preserve adopted candidate/review/approval records and explicitly historical
+      packages; no other path may change.
+  - id: VOC-115-D09
+    statement: >-
+      Provide ref-free deterministic positive fixtures for first allocation, same-
+      develop retry after invalidation, changed-develop next attempt, exact same-
+      attempt continuation, and merge-tree/recreation evidence. Provide one-mutation-
+      at-a-time negatives for malformed/mismatched identity, stale inventories,
+      current/historical/foreign collisions, reuse/adoption/update/deletion, broken
+      ownership or handoff, drift, topology/tree mismatch, and missing recovery proof.
+  - id: VOC-115-D10
+    statement: >-
+      Require exact path/OID/diff evidence, governance and risk validation, formatting/
+      link/reference checks, the complete synthetic topology matrix, hosted required
+      checks, exact release-governance/git-history specialist PASS, and a different
+      independent cross-model R4 PASS with zero blockers. A separate non-author merge
+      actor may merge the exact correction only after all gates and authority pass.
+  - id: VOC-115-D11
+    statement: >-
+      Under DOC-15 section 24.18, the adoption-recorded owner monitors from the
+      correction merge through exact merge-SHA hosted/develop readback and the first
+      corrected VOC-106 promotion/synchronization final readback. A real same-develop
+      invalidation, if it occurs, must prove the greater-sequence retry; otherwise the
+      deterministic same-develop fixture remains required. Any collision, mutation,
+      disappearance, ambiguity, or check/evidence failure stops release/closure and
+      routes a governed correction or reviewed integrated revert.
+  - id: VOC-115-D12
+    statement: >-
+      Prohibit repository-settings query or mutation, ref creation/update/deletion by
+      this correction implementation, manual branch deletion, force or force-with-
+      lease, workflow dispatch, release/synchronization execution, Cloudflare/DNS/
+      resource action, deployment, migration, secret or production/learner-data
+      access, traffic, spending, launch, self-review, self-approval, and self-merge.
+
+implementation_paths:
+  - .github/README.md
+  - AGENTS.md
+  - CONTRIBUTING.md
+  - docs/governance/16-autonomous-development-operating-model.md
+  - docs/governance/repository-settings.md
+  - docs/operations/10-development-workflow.md
+  - docs/operations/15-ai-native-product-and-engineering-operating-model.md
+  - specs/changes/VOC-106-release-promotion-sync/README.md
+  - specs/changes/VOC-106-release-promotion-sync/acceptance-criteria.md
+  - specs/changes/VOC-106-release-promotion-sync/change.yaml
+  - specs/changes/VOC-106-release-promotion-sync/impact-analysis.md
+  - specs/changes/VOC-106-release-promotion-sync/implementation-plan.md
+  - specs/changes/VOC-106-release-promotion-sync/release-plan.md
+  - specs/changes/VOC-106-release-promotion-sync/specification.md
+  - specs/changes/VOC-106-release-promotion-sync/tasks.md
+  - specs/changes/VOC-106-release-promotion-sync/test-plan.md
+  - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/README.md
+  - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/acceptance-criteria.md
+  - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/change.yaml
+  - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/impact-analysis.md
+  - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/implementation-plan.md
+  - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/release-plan.md
+  - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/specification.md
+  - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/tasks.md
+  - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/test-plan.md
+
+attempt_identity:
+  grammar: release/voc-106-<40-lowercase-hex-frozen-develop-sha>-attempt-<positive-decimal-sequence>
+  sequence_rule: >-
+    one-plus-greatest-valid-sequence-across-current-remote-release-refs-all-canonical-
+    repository-PR-heads-in-every-state-and-valid-append-only-voc-106-release-attempt-
+    v1-records-on-issue-191-or-release-PRs
+  creation: atomic-GitHub-create-ref-only-exact-frozen-develop-SHA
+  collision: reserve-never-adopt-update-force-or-delete-refresh-and-allocate-higher
+  ownership: exact-recorded-attempt-tuple-and-handoff-required-for-continuation
+  invalidation: close-draft-PR-record-reason-retain-ref-unchanged-fresh-greater-sequence
+  recreation: recorded-nonexecuted-atomic-create-request-for-successfully-merged-auto-deleted-head-only
+
+owners:
+  decision: accountable-repository-owner-operator-at-adoption
+  package_preparation: /root/voc115_planner
+  implementation: different-builder-actor-after-adoption
+  release_governance_specialist: different-non-author-exact-revision-reviewer
+  independent_cross_model_r4_verification: different-non-author-exact-revision-reviewer
+  merge: separate-authorized-non-author-merge-actor
+  monitoring: accountable-repository-owner-recorded-at-adoption
+
+plan_review_history: []
+approvals:
+  package_independent_verification:
+    status: pending
+  adoption_decision:
+    status: pending
+
+artifacts:
+  readme: README.md
+  specification: specification.md
+  acceptance_criteria: acceptance-criteria.md
+  impact_analysis: impact-analysis.md
+  implementation_plan: implementation-plan.md
+  tasks: tasks.md
+  test_plan: test-plan.md
+  release_plan: release-plan.md
+
+affected_areas:
+  - release-attempt-identity-and-allocation
+  - protected-main-and-develop-history
+  - automatic-short-lived-source-deletion-boundary
+  - adopted-VOC-106-and-VOC-114-package-truth
+protected_areas:
+  - DOC-15
+  - DOC-16
+  - AGENTS.md
+  - permanent-branch-history
+  - release-ref-integrity
+  - repository-settings-truth
+
+dependencies:
+  - id: VOC-115-DEP-00
+    status: intake-only
+    description: >-
+      Issue #216 and the exact PR #215 specialist FAIL prove the retry dead-end and
+      stop the draft implementation but grant no adoption or implementation authority.
+  - id: VOC-115-DEP-01
+    status: adopted-VOC-114-open-draft-implementation
+    description: >-
+      VOC-114 is adopted and PR #215 is its unmerged implementation; its SHA-only
+      naming requirement must be prospectively corrected, not silently weakened.
+  - id: VOC-115-DEP-02
+    status: adopted-VOC-106-held-release
+    description: >-
+      VOC-106 remains the repository-history action authority but is unusable until
+      the reviewed VOC-115 correction merges and its postmerge gates pass.
+
+required_r4_evidence:
+  decision_record:
+    required: true
+    evidence: specification.md and issue #216
+  impact_assessment:
+    required: true
+    evidence: impact-analysis.md
+  contingency_and_rollback:
+    required: true
+    evidence: implementation-plan.md and release-plan.md
+  deterministic_evidence:
+    required: true
+    evidence: test-plan.md and exact hosted results
+  specialist_evidence:
+    required: true
+    role: release-governance-and-git-history-specialist
+    status: pending
+  independent_exact_revision_evidence:
+    required: true
+    role: independent-cross-model-R4-verifier
+    status: pending
+  ehr: not-triggered
+
+implementation:
+  authorized: false
+  authority_usable_after: >-
+    exact-plan-reviews-adoption-bookkeeping-fresh-exact-bookkeeping-review-and-normal-
+    non-author-plan-merge-to-develop
+  task_count: 1
+  pull_request_count: 1
+  pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
+  branch: impl/voc-114-release-head-bookkeeping
+  exact_paths: implementation_paths
+  external_effects: prohibited
+
+action_specific_authority:
+  required: true
+  authorization_status: pending-plan-review-adoption-and-normal-plan-merge
+  actions:
+    - id: VOC-115-AUTH-00
+      action: merge-exact-reviewed-25-path-repository-correction-into-develop
+      accountable_role: separate-authorized-non-author-merge-actor
+      required_evidence: >-
+        adopted exact package, exact 25-path diff, deterministic and hosted checks,
+        complete R4 specialist and independent review evidence, zero blockers, and
+        read-only merge-eligibility report where applicable
+      completion_condition: exact correction merge and postmerge readback pass
+      expiry_condition: any head-base-path-evidence-review-check-drift-or-scope-expansion
+
+post_merge_monitoring:
+  governing_rule: DOC-15-section-24.18
+  owner: accountable-repository-owner-recorded-at-adoption
+  begins: corrected-PR-215-merge-event
+  ends: >-
+    exact-correction-merge-SHA-hosted-and-develop-readback-pass-plus-first-corrected-
+    VOC-106-promotion-and-synchronization-final-readback-and-required-same-develop-
+    retry-fixture-pass; if-a-real-same-develop-invalidation-occurs-its-greater-sequence-
+    immutable-ref-retry-readback-also-passes
+  stop: >-
+    any-check-or-semantic-failure-stale-allocation-collision-reuse-ref-movement-or-
+    disappearance-ownership-ambiguity-permanent-head-exposure-or-tree-mismatch-stops-
+    VOC-106-release-or-closure-and-routes-governed-remediation-or-reviewed-revert
+
+external_effects:
+  repository_settings: prohibited
+  settings_query: prohibited
+  ref_creation_by_correction: prohibited
+  ref_update_by_correction: prohibited
+  ref_deletion_by_correction: prohibited
+  manual_branch_deletion: prohibited
+  force_or_force_with_lease: prohibited
+  workflow_dispatch: prohibited
+  release_or_synchronization_execution: prohibited
+  cloudflare: prohibited
+  dns: prohibited
+  deployment: prohibited
+  migration: prohibited
+  production_data: prohibited
+  learner_data: prohibited
+  secrets: prohibited
+  traffic: prohibited
+  spending: prohibited
+  public_launch: prohibited
+
+release:
+  required: false
+  mode: repository-only-correction-precedes-separately-authorized-VOC-106-release
+  deployment: prohibited
+  rollback_required: true
+  issue_closure: after-monitoring-and-corrected-VOC-106-finalization-evidence
+
+repository_adoption_status: pending-independent-review-adoption-and-plan-merge
+ehr: not-triggered
+blocking_reasons:
+  - exact-plan-specialist-review-pending
+  - exact-plan-independent-cross-model-R4-review-pending
+  - accountable-adoption-bookkeeping-pending
+  - fresh-exact-bookkeeping-review-and-normal-plan-merge-pending
+  - implementation-exact-checks-and-reviews-pending
