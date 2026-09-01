@@ -37,6 +37,154 @@ const document = readFileSync(
   "utf8",
 );
 const clone = (value) => structuredClone(value);
+const humanSurfaces = DESIGNATED_F2_SURFACES.filter(
+  ({ path: surfacePath }) => surfacePath !== F2_RECORD_PATH,
+);
+
+const futureMilestoneState = {
+  f2_repository_local: "complete-effective",
+  f3_staging: "complete-effective-under-voc-105-evidence",
+  f3_current_evidence: "docs/operations/voc-105-f3-evidence.json",
+  a1_authenticated_product_acceptance: "unresolved",
+  p1_plus_product_acceptance: "unresolved",
+  production: "held",
+  live_activation: "unresolved-held",
+  voc080_holds: ["VOC-080-HOLD-01", "VOC-080-HOLD-02"],
+};
+
+// These literals are copied from the adopted VOC-110 specification, not from
+// the validator contract or a preserved downstream worktree.
+const planOwnedFutureMarkers = {
+  "docs/README.md": {
+    required: [
+      "The current [VOC-105 record](operations/voc-105-f3-evidence.md) validates every DOC-12 gate item and reports F3 staging foundation complete-effective.",
+      "A1/P1+ acceptance, production readiness and traffic, learner-data access, and public launch remain unresolved or held; `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.",
+    ],
+    prohibited: [
+      "F3/staging, A1/P1+ acceptance, production, deployment, live activation, and every inherited live-action hold remain unresolved.",
+    ],
+  },
+  "docs/operations/README.md": {
+    required: [
+      "| RECORD | [VOC-105 F3 staging-foundation evidence](voc-105-f3-evidence.md) | active (F3 complete-effective) | operator | DOC-12, VOC-105 |",
+      "The separate VOC-105 record validates every DOC-12 gate item and reports F3 staging foundation complete-effective.",
+      "A1/P1+ acceptance remains unresolved and separate.",
+      "Production readiness and traffic, learner-data access, and public launch remain unresolved or held; `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.",
+      "VOC-105 later records the exact successful delivery event as one input to the complete F3 gate decision; it performs no new live action.",
+    ],
+    prohibited: [
+      "The record preserves its earlier integration-pending candidate state as history and does not claim F3, A1/P1+ acceptance, staging, production, deployment, or live activation.",
+    ],
+  },
+  "docs/operations/voc-081-f2-evidence.md": {
+    required: [
+      "This F2 record does **not by itself** claim F3 staging, A1 authenticated-product acceptance, any P1+ product milestone, production readiness, or a public launch.",
+      "The later [VOC-105 record](voc-105-f3-evidence.md) validates the separate F3 gate and reports F3 staging foundation complete-effective.",
+      "A1/P1+ acceptance remains unresolved; production, learner data, and launch remain held or unresolved under `VOC-080-HOLD-01` and `VOC-080-HOLD-02`.",
+      "## No-live evidence and current later-gate state",
+      "No command or evidence step in this F2 record queried or mutated Cloudflare, DNS, a server, Sentry, repository settings, a secret, or production learner data.",
+      "No F2 deployment occurred and no F2 deployment URL was expected.",
+      "Later exact evidence in VOC-105 reports F3 staging foundation complete-effective.",
+      "A1/P1+ acceptance remains unresolved; production readiness and traffic, learner-data access, and public launch remain unresolved or held under `VOC-080-HOLD-01` and `VOC-080-HOLD-02`.",
+    ],
+    prohibited: [
+      "This record does **not** claim F3 staging, A1 authenticated-product acceptance, any P1+ product milestone, production readiness, a public launch, or a deployment.",
+      "`VOC-080-HOLD-00`, `VOC-080-HOLD-01`, and `VOC-080-HOLD-02` remain held.",
+      "## No-live and later-gate state",
+      "No command or evidence step queries or mutates Cloudflare, DNS, a server, Sentry, repository settings, a secret, or production learner data.",
+      "No deployment occurred and no deployment URL is expected.",
+      "F3/staging, A1/P1+ acceptance, production, live activation, and every inherited VOC-080 hold remain unresolved/held.",
+    ],
+  },
+  "docs/product/README.md": {
+    required: [
+      "The [VOC-105 evidence record](../operations/voc-105-f3-evidence.md) separately validates every DOC-12 F3 gate item and reports the F3 staging foundation complete-effective.",
+      "A1/P1+ acceptance remains unresolved and is a separate future outcome.",
+      "Production readiness and traffic, learner-data access, and public launch remain unresolved or held; `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.",
+    ],
+    prohibited: [
+      "F3, A1/P1+ acceptance, staging, production, deployment, and live activation remain unresolved and are not implied.",
+    ],
+  },
+  "docs/product/12-mvp-implementation-plan.md": {
+    required: [
+      "The current [VOC-105 evidence record](../operations/voc-105-f3-evidence.md) validates every F3 gate item and reports the F3 staging foundation complete-effective.",
+      "A1/P1+ product acceptance remains unresolved and is a separate future outcome.",
+      "Production readiness and traffic, learner-data access, and public launch remain unresolved or held; `VOC-080-HOLD-01` and `HOLD-02` remain held.",
+      "The later exact successful delivery event is recorded separately by VOC-105 and is only one input to its F3 gate decision.",
+      "`VOC-080-HOLD-01` and `HOLD-02` remain fully unresolved and unchanged.",
+      "VOC-105's separate gate evaluation reports F3 staging foundation complete-effective; the successful delivery run alone did not establish that result.",
+      "A1/P1+ acceptance remains unresolved.",
+      "Production readiness and traffic, learner-data access, and public launch remain unresolved or held under `VOC-080-HOLD-01` and `VOC-080-HOLD-02`.",
+    ],
+    prohibited: [
+      "At their remaining action boundaries, F3 staging, A1/P1+ product acceptance, production, deployment, live activation, and `VOC-080-HOLD-00` through `HOLD-02` remain unresolved/held.",
+      "F3, A1/P1+ acceptance beyond the Phase-1 resource/rollback proof, ordinary staging workflow delivery, production, and live product activation remain unresolved.",
+    ],
+  },
+};
+
+function normalizeAsciiWhitespace(source) {
+  return source
+    .replace(/\r\n?/g, "\n")
+    .replace(/[ \t\n\f\v]+/g, " ")
+    .replace(/^[ \t\n\f\v]+|[ \t\n\f\v]+$/g, "");
+}
+
+function whitespaceExpression(marker) {
+  return normalizeAsciiWhitespace(marker)
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    .replaceAll(" ", "[ \\t\\n\\f\\v]+");
+}
+
+function removeNormalizedMarker(source, marker) {
+  return source.replace(new RegExp(whitespaceExpression(marker), "g"), "");
+}
+
+function futureSource(source, surface) {
+  const markers = planOwnedFutureMarkers[surface.path];
+  let result = source;
+  for (const marker of markers.prohibited) {
+    result = removeNormalizedMarker(result, marker);
+  }
+  for (const marker of markers.required) {
+    if (
+      !normalizeAsciiWhitespace(result).includes(
+        normalizeAsciiWhitespace(marker),
+      )
+    ) {
+      result += `\n${marker}\n`;
+    }
+  }
+  return result;
+}
+
+function installFutureProfile(fixture, reorderObjectMembers = false) {
+  const futureRecord = clone(record);
+  futureRecord.milestone_state = reorderObjectMembers
+    ? {
+        voc080_holds: ["VOC-080-HOLD-01", "VOC-080-HOLD-02"],
+        live_activation: "unresolved-held",
+        production: "held",
+        p1_plus_product_acceptance: "unresolved",
+        a1_authenticated_product_acceptance: "unresolved",
+        f3_current_evidence: "docs/operations/voc-105-f3-evidence.json",
+        f3_staging: "complete-effective-under-voc-105-evidence",
+        f2_repository_local: "complete-effective",
+      }
+    : futureMilestoneState;
+  writeFileSync(
+    join(fixture, F2_RECORD_PATH),
+    `${JSON.stringify(futureRecord, null, 2)}\n`,
+  );
+  for (const surface of humanSurfaces) {
+    const surfacePath = join(fixture, surface.path);
+    writeFileSync(
+      surfacePath,
+      futureSource(readFileSync(surfacePath, "utf8"), surface),
+    );
+  }
+}
 
 // This negative-test corpus is intentionally owned by the test module rather
 // than generated from the validator's production patterns or examples.
@@ -69,7 +217,10 @@ const TEXT_VARIANT_CORPUS = [
 
 function repositoryFixture(mutate) {
   const fixture = mkdtempSync(join(tmpdir(), "voc086-f2-evidence-"));
-  cpSync(repositoryRoot, fixture, { recursive: true });
+  cpSync(repositoryRoot, fixture, {
+    recursive: true,
+    filter: (source) => source !== join(repositoryRoot, "node_modules"),
+  });
   try {
     mutate(fixture);
     return validateF2Evidence(fixture);
@@ -145,15 +296,19 @@ test("every designated living F2 surface has a precise active contract", () => {
     const source = readFileSync(resolve(repositoryRoot, surface.path), "utf8");
     assert.deepEqual(inspectF2Surface(source, surface.path), []);
 
-    for (const marker of surface.required) {
-      const mutated = source.replace(
-        marker,
-        "__VOC086_REQUIRED_MARKER_REMOVED__",
-      );
+    for (const marker of [
+      ...(surface.immutableRequired ?? []),
+      ...(surface.profiles["pre-voc105"]?.required ?? []),
+    ]) {
+      const mutated = removeNormalizedMarker(source, marker);
       assert.notEqual(mutated, source);
       const errors = inspectF2Surface(mutated, surface.path);
       assert.ok(
-        errors.some((error) => error.includes("missing active F2 marker")),
+        errors.some(
+          (error) =>
+            error.includes("current pre-voc105 marker") ||
+            error.includes("missing immutable F2 marker"),
+        ),
         `${surface.path} must fail when marker ${marker} is removed`,
       );
     }
@@ -312,6 +467,506 @@ test("current and historical status conflation fails independently", () => {
         "candidate-era status and condition must remain historical",
       ),
     ),
+  );
+});
+
+test("the exact adopted VOC-105 current-state profile passes atomically", () => {
+  for (const reorderObjectMembers of [false, true]) {
+    const errors = repositoryFixture((fixture) => {
+      installFutureProfile(fixture, reorderObjectMembers);
+    });
+    assert.deepEqual(errors, []);
+  }
+});
+
+test("current-state JSON accepts only the two exact profiles", () => {
+  const mutations = [
+    (value) => delete value.f3_current_evidence,
+    (value) => delete value.production,
+    (value) => {
+      value.unknown = "held";
+    },
+    (value) => {
+      value.f3_staging = "passed";
+    },
+    (value) => {
+      value.f3_current_evidence = "docs/operations/not-voc105.json";
+    },
+    (value) => {
+      value.voc080_holds = ["VOC-080-HOLD-02", "VOC-080-HOLD-01"];
+    },
+    (value) => {
+      value.voc080_holds = ["VOC-080-HOLD-01"];
+    },
+    (value) => {
+      value.voc080_holds = ["VOC-080-HOLD-02"];
+    },
+    (value) => {
+      value.production = ["held"];
+    },
+  ];
+  for (const mutate of mutations) {
+    const candidate = clone(record);
+    candidate.milestone_state = clone(futureMilestoneState);
+    mutate(candidate.milestone_state);
+    assert.ok(
+      inspectF2Record(candidate).some((error) =>
+        error.includes("milestone/hold"),
+      ),
+    );
+  }
+});
+
+test("raw duplicate JSON keys and the VOC-105 evidence pointer fail before parsing", () => {
+  const duplicateBaseline = repositoryFixture((fixture) => {
+    const recordPath = join(fixture, F2_RECORD_PATH);
+    const source = readFileSync(recordPath, "utf8");
+    writeFileSync(
+      recordPath,
+      source.replace(
+        '"f3_staging": "unresolved-held",',
+        '"f3_staging": "unresolved-held",\n    "f3_staging": "passed",',
+      ),
+    );
+  });
+  assert.ok(
+    duplicateBaseline.some((error) =>
+      error.includes("duplicate raw JSON key is prohibited: f3_staging"),
+    ),
+  );
+
+  const duplicatePointer = repositoryFixture((fixture) => {
+    installFutureProfile(fixture);
+    const recordPath = join(fixture, F2_RECORD_PATH);
+    const source = readFileSync(recordPath, "utf8");
+    writeFileSync(
+      recordPath,
+      source.replace(
+        '"f3_current_evidence": "docs/operations/voc-105-f3-evidence.json",',
+        '"f3_current_evidence": "docs/operations/voc-105-f3-evidence.json",\n    "f3_current_evidence": "docs/operations/other.json",',
+      ),
+    );
+  });
+  assert.ok(
+    duplicatePointer.some((error) =>
+      error.includes(
+        "duplicate raw JSON key is prohibited: f3_current_evidence",
+      ),
+    ),
+  );
+});
+
+test("current-state JSON rejects every key mutation class one invariant at a time", () => {
+  for (const key of Object.keys(futureMilestoneState)) {
+    for (const mutate of [
+      (value) => delete value[key],
+      (value) => {
+        value[`renamed_${key}`] = value[key];
+        delete value[key];
+      },
+      (value) => {
+        value[key] = Array.isArray(value[key]) ? [] : "wrong";
+      },
+      (value) => {
+        value[key] = [value[key]];
+      },
+    ]) {
+      const candidate = clone(record);
+      candidate.milestone_state = clone(futureMilestoneState);
+      mutate(candidate.milestone_state);
+      assert.ok(
+        inspectF2Record(candidate).some((error) =>
+          error.includes("milestone/hold"),
+        ),
+        `${key} mutation must fail`,
+      );
+    }
+  }
+});
+
+test("future markers are active-only, normalized, unique, and history exclusion is exact", () => {
+  const f2Surface = humanSurfaces.find(
+    ({ path: surfacePath }) =>
+      surfacePath === "docs/operations/voc-081-f2-evidence.md",
+  );
+  const baseline = readFileSync(
+    resolve(repositoryRoot, f2Surface.path),
+    "utf8",
+  );
+  const future = futureSource(baseline, f2Surface);
+  const requiredMarker = planOwnedFutureMarkers[f2Surface.path].required[1];
+  const withoutRequired = removeNormalizedMarker(future, requiredMarker);
+  const historyStart = withoutRequired.indexOf("## Historical candidate state");
+  const nextHeading = withoutRequired.indexOf("\n## ", historyStart + 1);
+  const onlyHistory = `${withoutRequired.slice(0, nextHeading)}\n${requiredMarker}${withoutRequired.slice(nextHeading)}`;
+  assert.ok(
+    inspectF2Surface(onlyHistory, f2Surface.path, "voc105").some((error) =>
+      error.includes("current voc105 marker"),
+    ),
+  );
+  const exactHistory = future.replace(
+    "## Historical candidate state",
+    "## Historical candidate state\nRepository/local F2 still pending integration.",
+  );
+  assert.deepEqual(
+    inspectF2Surface(exactHistory, f2Surface.path, "voc105"),
+    [],
+  );
+  const prohibitedInHistory = exactHistory.replace(
+    "Repository/local F2 still pending integration.",
+    `Repository/local F2 still pending integration.\n${planOwnedFutureMarkers[f2Surface.path].prohibited[0]}`,
+  );
+  assert.ok(
+    inspectF2Surface(prohibitedInHistory, f2Surface.path, "voc105").some(
+      (error) => error.includes("prohibited voc105 marker"),
+    ),
+  );
+  const nearHistory = exactHistory.replace(
+    "## Historical candidate state",
+    "## Historical candidate state (near match)",
+  );
+  assert.ok(
+    inspectF2Surface(nearHistory, f2Surface.path, "voc105").some((error) =>
+      error.includes("pending claim"),
+    ),
+  );
+
+  for (const surface of humanSurfaces) {
+    const source = futureSource(
+      readFileSync(resolve(repositoryRoot, surface.path), "utf8"),
+      surface,
+    );
+    const markers = planOwnedFutureMarkers[surface.path];
+    assert.ok(
+      inspectF2Surface(
+        `${source}\n${markers.required[0]}`,
+        surface.path,
+        "voc105",
+      ).some((error) => error.includes("must occur exactly once")),
+      `${surface.path} must reject a duplicate required marker`,
+    );
+    assert.ok(
+      inspectF2Surface(
+        `${source}\n${markers.prohibited[0]}`,
+        surface.path,
+        "voc105",
+      ).some((error) => error.includes("prohibited voc105 marker")),
+      `${surface.path} must reject a retained prohibited marker`,
+    );
+  }
+
+  const normalizationBase = futureSource(
+    readFileSync(resolve(repositoryRoot, "docs/README.md"), "utf8"),
+    humanSurfaces[0],
+  );
+  for (const replacement of [" \t\r\n", "\r", "\f", "\v"]) {
+    assert.deepEqual(
+      inspectF2Surface(
+        normalizationBase.replaceAll(" ", replacement),
+        "docs/README.md",
+        "voc105",
+      ),
+      [],
+    );
+  }
+});
+
+test("every human surface rejects profile hybrids in either direction", () => {
+  for (const surface of humanSurfaces) {
+    const baseline = readFileSync(
+      resolve(repositoryRoot, surface.path),
+      "utf8",
+    );
+    const future = futureSource(baseline, surface);
+    const futureErrors = inspectF2Surface(future, surface.path, "voc105");
+    assert.deepEqual(
+      futureErrors,
+      [],
+      `${surface.path} future profile must pass`,
+    );
+
+    const futureMarker =
+      planOwnedFutureMarkers[surface.path].required[
+        surface.path === "docs/operations/voc-081-f2-evidence.md" ? 1 : 0
+      ];
+    const futureToPre = removeNormalizedMarker(future, futureMarker);
+    assert.ok(
+      inspectF2Surface(futureToPre, surface.path, "voc105").some((error) =>
+        error.includes("current voc105 marker"),
+      ),
+      `${surface.path} must reject one missing VOC-105 marker`,
+    );
+
+    const preMarker = surface.profiles["pre-voc105"].required[0];
+    const preToFuture = `${baseline}\n${futureMarker}\n`;
+    assert.ok(
+      inspectF2Surface(preToFuture, surface.path, "pre-voc105").some(
+        (error) =>
+          error.includes("current pre-voc105 marker") ||
+          error.includes("prohibited"),
+      ),
+      `${surface.path} must reject a pre-VOC-105/VOC-105 hybrid`,
+    );
+    assert.notEqual(preMarker, futureMarker);
+  }
+});
+
+test("repository-wide profile hybrids fail one surface at a time in both directions", () => {
+  for (const surface of humanSurfaces) {
+    const futureToPre = repositoryFixture((fixture) => {
+      installFutureProfile(fixture);
+      writeFileSync(
+        join(fixture, surface.path),
+        readFileSync(resolve(repositoryRoot, surface.path), "utf8"),
+      );
+    });
+    assert.ok(
+      futureToPre.some((error) => error.startsWith(`${surface.path}:`)),
+      `${surface.path} stale pre-VOC-105 surface must fail the future repository`,
+    );
+
+    const preToFuture = repositoryFixture((fixture) => {
+      const surfacePath = join(fixture, surface.path);
+      writeFileSync(
+        surfacePath,
+        futureSource(readFileSync(surfacePath, "utf8"), surface),
+      );
+    });
+    assert.ok(
+      preToFuture.some((error) => error.startsWith(`${surface.path}:`)),
+      `${surface.path} VOC-105 surface must fail the pre-VOC-105 repository`,
+    );
+  }
+});
+
+function claimsFor(subjects, verbs, copulas = [""]) {
+  return subjects.flatMap((subject) =>
+    verbs.flatMap((verb) =>
+      copulas.map(
+        (copula) => `${subject} ${copula ? `${copula} ` : ""}${verb}.`,
+      ),
+    ),
+  );
+}
+
+test("the complete later-claim matrix fails once on every human surface", () => {
+  const f3Claims = claimsFor(
+    ["F3", "F3 staging", "staging"],
+    [
+      "complete",
+      "completed",
+      "passed",
+      "accepted",
+      "active",
+      "released",
+      "enabled",
+      "effective",
+      "resolved",
+    ],
+    ["", "is"],
+  );
+  const acceptanceClaims = claimsFor(
+    [
+      "A1",
+      "A1/P1",
+      "A1/P1+",
+      "A1 authenticated-product",
+      "P1",
+      "P1+",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P1-P5",
+      "P2-P5",
+      "P3-P5",
+      "P4-P5",
+      "P5-P5",
+    ]
+      .flatMap((identifier) => [
+        `${identifier} acceptance`,
+        `${identifier} product acceptance`,
+      ])
+      .concat(
+        ["R1", "R2", "L1"].flatMap((identifier) => [
+          `${identifier} acceptance`,
+          `${identifier} product acceptance`,
+        ]),
+      ),
+    [
+      "complete",
+      "completed",
+      "passed",
+      "accepted",
+      "active",
+      "effective",
+      "resolved",
+    ],
+    ["", "is"],
+  );
+  const productionClaims = claimsFor(
+    ["deployment", "production deployment", "production"],
+    [
+      "complete",
+      "completed",
+      "passed",
+      "accepted",
+      "active",
+      "enabled",
+      "released",
+      "effective",
+      "resolved",
+    ],
+    ["", "is"],
+  );
+  const liveClaims = claimsFor(
+    ["live activation", "live verification", "live system", "live service"],
+    [
+      "complete",
+      "completed",
+      "passed",
+      "accepted",
+      "active",
+      "enabled",
+      "released",
+      "verified",
+      "effective",
+      "resolved",
+    ],
+    ["", "is"],
+  );
+  const holdClaims = [
+    ...claimsFor(
+      [
+        "VOC-080 hold",
+        "VOC-080 holds",
+        "all VOC-080 hold",
+        "all VOC-080 holds",
+      ],
+      [
+        "released",
+        "cleared",
+        "lifted",
+        "complete",
+        "completed",
+        "passed",
+        "accepted",
+        "active",
+        "enabled",
+        "effective",
+        "resolved",
+      ],
+      ["", "are", "is"],
+    ),
+    ...claimsFor(
+      ["VOC-080-HOLD-00", "VOC-080-HOLD-01", "VOC-080-HOLD-02"],
+      [
+        "released",
+        "cleared",
+        "lifted",
+        "complete",
+        "completed",
+        "passed",
+        "accepted",
+        "active",
+        "enabled",
+        "effective",
+        "resolved",
+      ],
+      ["", "is"],
+    ),
+  ];
+  const f2Claims = ["", "is", "remains"].flatMap((copula) =>
+    ["", "still"].flatMap((still) =>
+      ["pending", "pending integration", "incomplete", "candidate"].map(
+        (state) =>
+          `Repository/local F2 ${copula ? `${copula} ` : ""}${still ? `${still} ` : ""}${state}.`,
+      ),
+    ),
+  );
+  const boundaryClaims = claimsFor(
+    [
+      "product acceptance",
+      "production readiness",
+      "production traffic",
+      "learner-data access",
+      "learner data access",
+      "public launch",
+    ],
+    [
+      "complete",
+      "completed",
+      "passed",
+      "accepted",
+      "active",
+      "enabled",
+      "released",
+      "verified",
+      "effective",
+      "resolved",
+    ],
+    ["", "is"],
+  );
+  const claims = [
+    ...f3Claims,
+    ...acceptanceClaims,
+    ...productionClaims,
+    ...liveClaims,
+    ...holdClaims,
+    ...f2Claims,
+    ...boundaryClaims,
+    "pRoDuCt AcCePtAnCe is ReSoLvEd.",
+    "a1 product acceptance is passed.",
+    "P1+ PrOdUcT AcCePtAnCe effective.",
+    "r2 AcCePtAnCe is completed.",
+    "Repository/local f2 remains still pending integration.",
+    "REPOSITORY/LOCAL F2 CANDIDATE.",
+    "PRODUCTION readiness EFFECTIVE.",
+    "Production Traffic is verified.",
+    "LeArNeR-DaTa AcCeSs active.",
+    "PUBLIC launch is complete.",
+  ];
+  for (const surface of humanSurfaces) {
+    const source = futureSource(
+      readFileSync(resolve(repositoryRoot, surface.path), "utf8"),
+      surface,
+    );
+    for (const claim of claims) {
+      assert.ok(
+        inspectF2Surface(`${source}\n${claim}`, surface.path, "voc105").some(
+          (error) => error.includes("claim is prohibited"),
+        ),
+        `${surface.path} must reject ${claim}`,
+      );
+    }
+  }
+});
+
+test("production claim matching excludes verified while live and generic checks retain it", () => {
+  const source = readFileSync(
+    resolve(repositoryRoot, "docs/README.md"),
+    "utf8",
+  );
+  assert.ok(
+    !inspectF2Surface(
+      `${source}\nProduction is verified.`,
+      "docs/README.md",
+    ).some((error) => error.includes("production/deployment claim")),
+  );
+  const future = futureSource(source, humanSurfaces[0]);
+  assert.ok(
+    inspectF2Surface(
+      `${future}\nLive service is verified.`,
+      "docs/README.md",
+      "voc105",
+    ).some((error) => error.includes("live-activation/verification claim")),
+  );
+  assert.ok(
+    inspectF2Surface(
+      `${future}\nProduction readiness is verified.`,
+      "docs/README.md",
+      "voc105",
+    ).some((error) => error.includes("later-milestone boundary claim")),
   );
 });
 
