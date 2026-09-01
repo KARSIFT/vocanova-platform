@@ -51,11 +51,12 @@ requirements:
       Treat issue #206 and preserved-candidate results as intake/reproduction evidence
       only. Bind exact base c94444bc74d3ed1b5ca0aca65141d0532f70fa11,
       reviewed VOC-110 implementation 66928cb432ace3440990514526cc3afc6262d3de,
-      preserved candidate fingerprint
-      8efd149cce12cbd8b20fd07c8c942faacdc028f9b316a2cdedd15768f9a28da1, passing
-      runtime validators, and focused 24/27 / ci:foundation 179/182 results with
-      exactly the same three failures. No implementation starts before reviewed
-      adoption and plan merge.
+      canonical current candidate manifest digest
+      7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43 under
+      VOC-111-CANDIDATE-MANIFEST-00, passing runtime validators, and focused 24/27 /
+      ci:foundation 179/182 results with exactly the same three failures. Record
+      8efd149c... only as the superseded pre-format historical fingerprint. No
+      implementation starts before reviewed adoption and plan merge.
   - id: VOC-111-D01
     statement: >-
       Determine repositoryRoot's current profile from the complete exact
@@ -107,9 +108,43 @@ requirements:
       The accountable owner recorded at adoption observes the first refreshed real
       VOC-105 candidate from VOC-111 implementation merge until both runtime
       validators, the VOC-081 focused suite, ci:foundation, and hosted required checks
-      pass, or until a governed VOC-105 abandonment/supersession. Any recurrence,
-      false/hybrid acceptance, or VOC-110/VOC-109 regression stops VOC-105 merge and
-      VOC-111 closure and routes linked remediation or repository revert.
+      pass, or until a governed VOC-105 abandonment/supersession. Execute the exact
+      TEST-00 canonical manifest command before and after reproduction and again before
+      and after observation. Any identity drift, recurrence, false/hybrid acceptance,
+      or VOC-110/VOC-109 regression stops VOC-105 merge and VOC-111 closure and routes
+      linked remediation or repository revert.
+
+candidate_manifest:
+  id: VOC-111-CANDIDATE-MANIFEST-00
+  base_sha: c94444bc74d3ed1b5ca0aca65141d0532f70fa11
+  ordered_paths:
+    - docs/README.md
+    - docs/operations/README.md
+    - docs/operations/cloudflare-delivery.md
+    - docs/operations/voc-081-f2-evidence.json
+    - docs/operations/voc-081-f2-evidence.md
+    - docs/operations/voc-105-f3-evidence.json
+    - docs/operations/voc-105-f3-evidence.md
+    - docs/product/12-mvp-implementation-plan.md
+    - docs/product/README.md
+    - package.json
+    - scripts/foundation/voc105-f3-evidence-policy.mjs
+    - scripts/foundation/voc105-f3-evidence-policy.test.mjs
+  algorithm: >-
+    for-each-fixed-lexicographically-sorted-path-emit-raw-UTF-8-path-bytes-NUL-git-
+    blob-OID-without-LF-NUL-then-SHA-256-the-concatenated-12-entry-stream
+  command: |-
+    for f in docs/README.md docs/operations/README.md docs/operations/cloudflare-delivery.md docs/operations/voc-081-f2-evidence.json docs/operations/voc-081-f2-evidence.md docs/operations/voc-105-f3-evidence.json docs/operations/voc-105-f3-evidence.md docs/product/12-mvp-implementation-plan.md docs/product/README.md package.json scripts/foundation/voc105-f3-evidence-policy.mjs scripts/foundation/voc105-f3-evidence-policy.test.mjs; do
+      test -f "$f" || exit 1
+      printf '%s\0' "$f"
+      git hash-object "$f" | tr -d '\n'
+      printf '\0'
+    done | sha256sum
+  expected_digest: 7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43
+  superseded_historical_pre_format_fingerprint: 8efd149cce12cbd8b20fd07c8c942faacdc028f9b316a2cdedd15768f9a28da1
+  execution: >-
+    TEST-00-and-EV-00-before-and-after-reproduction-and-reexecuted-by-TEST-06-before-
+    and-after-observation-with-EV-06-linkage
 
 owners:
   decision: accountable-repository-change-owner-at-adoption
@@ -173,8 +208,11 @@ dependencies:
     status: adopted-VOC-105-preserved-real-candidate
     description: >-
       The uncommitted 12-path VOC-105 candidate is read-only reproduction and future
-      observation evidence. Its content is not fixture authority and VOC-111 does not
-      authorize its implementation or merge.
+      observation evidence, bound currently only by VOC-111-CANDIDATE-MANIFEST-00 and
+      digest 7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43.
+      The 8efd149c... pre-format fingerprint is superseded history. Candidate content
+      is not fixture authority and VOC-111 does not authorize its implementation or
+      merge.
   - id: VOC-111-DEP-03
     status: implemented-VOC-109-command-contract
     description: >-

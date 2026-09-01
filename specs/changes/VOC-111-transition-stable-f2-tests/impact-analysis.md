@@ -43,6 +43,12 @@ source ownership.
 - `VOC-111-R07` — Rollback occurs after downstream VOC-105 merges. Mitigation: stop
   downstream merge on failure; otherwise revert VOC-105 first if necessary and then
   revert the single VOC-111 test file through separate reviewed PRs.
+- `VOC-111-R08` — Reproduction/observation silently uses a reformatted or otherwise
+  drifted candidate. Mitigation: bind exact base, fixed sorted 12 paths, path-NUL/blob-
+  OID-no-LF-NUL SHA-256 algorithm and exact command to current digest
+  `7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43`; execute it
+  before and after both phases. Treat `8efd149c...` only as superseded pre-format
+  history.
 
 ## Dependencies and authority
 

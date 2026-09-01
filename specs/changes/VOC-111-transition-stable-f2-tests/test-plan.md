@@ -7,12 +7,17 @@
   `automatic_merge_allowed: true`, one-task/one-PR shape, exact single-file future
   implementation inventory, dependency boundaries, and external exclusions. At exact
   base `c94444bc74d3ed1b5ca0aca65141d0532f70fa11`, record current validator/focused PASS.
-  Apply the preserved candidate read-only and record both runtime validators PASS and
-  its bound fingerprint, the focused 24/27 and `ci:foundation` 179/182 results with
-  failures only at current-surface profile selection, fixed-value duplicate injection,
-  and repository-derived pre hybrid construction.
-- Expected: issue #206 reproduces exactly and grants no authority; no dirty candidate
-  content changes; the package remains draft and implementation-unauthorized.
+  Prove the preserved worktree base, then run the exact canonical manifest command
+  below immediately before and after the reproduction commands. Both executions must
+  traverse the fixed lexicographically sorted 12 paths and yield
+  `7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43`. Apply the
+  preserved candidate read-only and record both runtime validators PASS, focused 24/27,
+  and `ci:foundation` 179/182 with failures only at current-surface profile selection,
+  fixed-value duplicate injection, and repository-derived pre hybrid construction.
+- Expected: issue #206 reproduces exactly and grants no authority; before/after base,
+  ordered inventory and current digest are identical; `8efd149c...` is recorded only
+  as superseded pre-format history; the package remains draft and implementation-
+  unauthorized.
 - Evidence: `VOC-111-EV-00`
 
 ## VOC-111-TEST-01 — Exact profile-selection matrix
@@ -115,12 +120,15 @@
 - Covers: `VOC-111-AC-06`
 - Procedure: after implementation merge, the accountable owner records the first
   refreshed real VOC-105 candidate's F2 and F3 runtime validators, VOC-081 focused
-  suite, `ci:foundation`, and hosted required checks. Record current-profile selection,
-  complete synthetic profiles, raw duplicates, both hybrid directions, the VOC-110
-  negative matrix, and VOC-109 tail. If VOC-105 is formally abandoned or superseded
-  first, record that governed disposition instead.
-- Expected: all checks pass with zero recurrence of issue #206 and no false/hybrid
-  acceptance. Any failure stops VOC-105 merge and VOC-111 closure and produces linked
+  suite, `ci:foundation`, and hosted required checks. Immediately before and after
+  those commands, re-run TEST-00's exact base/path/manifest procedure and require the
+  same current digest. Record current-profile selection, complete synthetic profiles,
+  raw duplicates, both hybrid directions, the VOC-110 negative matrix, and VOC-109
+  tail. If VOC-105 is formally abandoned or superseded first, record that governed
+  disposition instead.
+- Expected: all checks pass with zero recurrence of issue #206, no false/hybrid
+  acceptance, and identical current manifest identity before/after observation. Any
+  identity or test failure stops VOC-105 merge and VOC-111 closure and produces linked
   evidence for separate remediation or one-file revert.
 - Evidence: `VOC-111-EV-06`
 
@@ -135,14 +143,35 @@
 - `bash scripts/governance/classify-change-risk.sh`
 - `git diff --check`
 
+## Exact canonical candidate-manifest command
+
+After `git rev-parse HEAD` returns exact base
+`c94444bc74d3ed1b5ca0aca65141d0532f70fa11`, TEST-00 and TEST-06 run exactly:
+
+```bash
+for f in docs/README.md docs/operations/README.md docs/operations/cloudflare-delivery.md docs/operations/voc-081-f2-evidence.json docs/operations/voc-081-f2-evidence.md docs/operations/voc-105-f3-evidence.json docs/operations/voc-105-f3-evidence.md docs/product/12-mvp-implementation-plan.md docs/product/README.md package.json scripts/foundation/voc105-f3-evidence-policy.mjs scripts/foundation/voc105-f3-evidence-policy.test.mjs; do
+  test -f "$f" || exit 1
+  printf '%s\0' "$f"
+  git hash-object "$f" | tr -d '\n'
+  printf '\0'
+done | sha256sum
+```
+
+The command's inline inventory is the fixed lexicographically sorted 12-path list. For
+each path it emits raw UTF-8 path bytes, NUL, Git blob OID with no LF, NUL, then hashes
+the concatenation. The required first output field is
+`7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43`.
+
 No test runs Wrangler, dispatches a workflow, queries Cloudflare/GitHub settings,
 accesses secrets or production/learner data, deploys, migrates D1, changes traffic/DNS,
 spends, or launches.
 
 ## Evidence definitions
 
-- `VOC-111-EV-00`: exact base, issue reproduction, plan validation, path inventory,
-  review/adoption, and normal non-author plan merge evidence.
+- `VOC-111-EV-00`: exact base and fixed ordered path readback, exact manifest command/
+  algorithm, identical current digest outputs immediately before and after issue
+  reproduction, plan validation, review/adoption, and normal non-author plan merge
+  evidence; `8efd149c...` appears only as superseded pre-format history.
 - `VOC-111-EV-01`: complete exact profile-selector positives and one-mutation-at-a-
   time rejection plus current living-surface profile evidence.
 - `VOC-111-EV-02`: pre/future raw-member injection construction assertions and three
@@ -153,5 +182,6 @@ spends, or launches.
   regression results with no skips or weakened diagnostics.
 - `VOC-111-EV-05`: exact one-file diff, local/full/hosted checks, rollback proof,
   specialist and independent exact-SHA reviews, merge, and post-merge readback.
-- `VOC-111-EV-06`: accountable-owner bounded real-candidate observation and any
+- `VOC-111-EV-06`: TEST-00 manifest outputs immediately before/after accountable-owner
+  bounded real-candidate observation, linkage to EV-00, observed checks, and any
   triggered stop/remediation/revert or governed alternate disposition.

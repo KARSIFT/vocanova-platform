@@ -29,6 +29,12 @@ suite, `ci:foundation`, and hosted required checks. The signal includes exact li
 profile selection and continued pass/fail behavior for both profile fixtures,
 duplicates, hybrids, all VOC-110 negatives, and the VOC-109 tail.
 
+Immediately before and after observation, the owner re-executes TEST-00's exact
+manifest command at base `c94444bc74d3ed1b5ca0aca65141d0532f70fa11` over the fixed
+sorted 12 paths. Both outputs must be
+`7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43`; the superseded
+pre-format `8efd149c...` value is not accepted as current identity.
+
 Recurrence of any issue #206 failure, runtime/test disagreement, hybrid/false-profile
 acceptance, or protected-evidence regression stops VOC-105 merge and VOC-111 closure.
 The owner records linked evidence and routes a separately governed correction or

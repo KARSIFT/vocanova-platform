@@ -10,11 +10,13 @@
 
 The plan binds base `c94444bc74d3ed1b5ca0aca65141d0532f70fa11`, VOC-110 implementation
 `66928cb432ace3440990514526cc3afc6262d3de`, runtime-validator PASS/PASS, and focused
-24/27 / foundation 179/182 with exactly the three issue #206 failures, under preserved
-candidate fingerprint
-`8efd149cce12cbd8b20fd07c8c942faacdc028f9b316a2cdedd15768f9a28da1`. The package
-is R3, one task, one PR, `automatic_merge_allowed: true`, draft, and unauthorized.
-Exactly one future implementation path is declared and every external action remains
+24/27 / foundation 179/182 with exactly the three issue #206 failures. Current
+candidate identity is the exact base plus fixed sorted 12 paths and exact
+path-NUL/blob-OID-no-LF-NUL command in `VOC-111-CANDIDATE-MANIFEST-00`, yielding
+`7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43` both before and
+after reproduction; `8efd149c...` is superseded pre-format history. The package is R3,
+one task, one PR, `automatic_merge_allowed: true`, draft, and unauthorized. Exactly
+one future implementation path is declared and every external action remains
 prohibited.
 
 ## VOC-111-AC-01 — The live profile is selected exactly
@@ -99,6 +101,8 @@ PASS with zero blockers; a separate non-author performs any merge.
 The accountable owner records the first refreshed real VOC-105 candidate's two
 runtime validators, focused suite, `ci:foundation`, and hosted checks. Exact live
 profile selection and all protected transition/VOC-110/VOC-109 evidence remain green.
-Any recurrence or false acceptance stops VOC-105 merge and VOC-111 closure and invokes
-the linked remediation/revert disposition. A governed abandonment/supersession record
-is the only alternate end condition.
+The exact TEST-00 manifest command yields the same current digest immediately before
+and after observation. Any identity drift, recurrence, or false acceptance stops
+VOC-105 merge and VOC-111 closure and invokes the linked remediation/revert
+disposition. A governed abandonment/supersession record is the only alternate end
+condition.

@@ -17,10 +17,62 @@ the default `pre-voc105` surface profile, searches for one fixed old JSON value,
 uses mutable `repositoryRoot` content as its preserved pre-profile fixture. Issue
 #206 and the dirty worktree are diagnostic evidence only, not authority.
 
-The preserved candidate is bound by issue #206 fingerprint
-`8efd149cce12cbd8b20fd07c8c942faacdc028f9b316a2cdedd15768f9a28da1`. Its
+The current preserved candidate is bound by canonical manifest contract
+`VOC-111-CANDIDATE-MANIFEST-00` below. Digest
+`8efd149cce12cbd8b20fd07c8c942faacdc028f9b316a2cdedd15768f9a28da1` identifies
+only the superseded pre-format historical snapshot produced by an earlier ad hoc
+stream; it is not current candidate identity. The current candidate's
 `pnpm run ci:foundation` result is 179/182 with the same three focused failures and no
 additional failure class.
+
+### VOC-111-CANDIDATE-MANIFEST-00 — Canonical preserved-candidate identity
+
+The required base is exactly
+`c94444bc74d3ed1b5ca0aca65141d0532f70fa11`. The fixed path inventory is exactly these
+12 paths in this lexicographic order:
+
+```text
+docs/README.md
+docs/operations/README.md
+docs/operations/cloudflare-delivery.md
+docs/operations/voc-081-f2-evidence.json
+docs/operations/voc-081-f2-evidence.md
+docs/operations/voc-105-f3-evidence.json
+docs/operations/voc-105-f3-evidence.md
+docs/product/12-mvp-implementation-plan.md
+docs/product/README.md
+package.json
+scripts/foundation/voc105-f3-evidence-policy.mjs
+scripts/foundation/voc105-f3-evidence-policy.test.mjs
+```
+
+Run this exact credential-free command from the preserved VOC-105 worktree after
+proving `git rev-parse HEAD` equals the required base:
+
+```bash
+for f in docs/README.md docs/operations/README.md docs/operations/cloudflare-delivery.md docs/operations/voc-081-f2-evidence.json docs/operations/voc-081-f2-evidence.md docs/operations/voc-105-f3-evidence.json docs/operations/voc-105-f3-evidence.md docs/product/12-mvp-implementation-plan.md docs/product/README.md package.json scripts/foundation/voc105-f3-evidence-policy.mjs scripts/foundation/voc105-f3-evidence-policy.test.mjs; do
+  test -f "$f" || exit 1
+  printf '%s\0' "$f"
+  git hash-object "$f" | tr -d '\n'
+  printf '\0'
+done | sha256sum
+```
+
+For each fixed path, the byte stream is raw UTF-8 path bytes, one NUL byte, the file's
+Git blob object ID with no LF, and one NUL byte. SHA-256 is computed over the 12
+concatenated entries. This covers tracked and untracked files uniformly and is
+independent of patch context and order. The first output field must equal exactly
+`7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43`.
+Base, ordered inventory, command, framing algorithm, and digest are jointly required;
+none may substitute for another.
+
+`VOC-111-TEST-00` executes and records this command immediately before and immediately
+after reproduction commands, and `VOC-111-EV-00` contains both identical outputs plus
+the base/path readback. During bounded observation, `VOC-111-TEST-06` re-executes the
+same TEST-00 identity procedure immediately before and after observation commands;
+`VOC-111-EV-06` links those two outputs back to `VOC-111-EV-00`. Any base, path,
+existence, order, blob OID, framing, or digest mismatch stops reproduction/observation
+and requires refreshed governed evidence rather than relabeling the candidate.
 
 ## Requirements
 

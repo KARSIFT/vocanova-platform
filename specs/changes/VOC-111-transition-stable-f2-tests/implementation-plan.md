@@ -20,8 +20,12 @@ test file and performs no live or external action.
 ## Ordered implementation
 
 1. Record exact implementation base
-   `c94444bc74d3ed1b5ca0aca65141d0532f70fa11`. Reproduce current baseline PASS and the
-   preserved VOC-105 candidate's runtime PASS/PASS plus focused 24/27 three-failure
+   `c94444bc74d3ed1b5ca0aca65141d0532f70fa11`. Immediately before and after
+   reproduction, run the exact `VOC-111-CANDIDATE-MANIFEST-00` command over its fixed
+   sorted 12 paths and require digest
+   `7205f4856b2839f7302ab9a9fd9fbac57ee69942723f283241ac2970bb147e43`; never use the
+   superseded pre-format `8efd149c...` as current identity. Reproduce current baseline
+   PASS and preserved candidate runtime PASS/PASS plus focused 24/27 three-failure
    result without modifying either tree.
 2. Inventory every current focused test name and protected assertion group. Establish
    a before/after mapping proving no VOC-110 or VOC-109 positive/negative disappears,
@@ -50,7 +54,9 @@ test file and performs no live or external action.
    fresh checks/reviews; a separate non-author performs any merge.
 9. After merge, the accountable owner observes the first refreshed real VOC-105
    candidate through both runtime validators, the focused suite, `ci:foundation`, and
-   hosted required checks. Apply the stop/remediation/revert disposition on recurrence,
+   hosted required checks. Re-run the exact TEST-00 manifest command immediately before
+   and after observation and require the same base, inventory, framing, and current
+   digest. Apply the stop/remediation/revert disposition on identity drift, recurrence,
    false acceptance, or protected regression.
 
 ## Validation commands
@@ -65,6 +71,8 @@ test file and performs no live or external action.
 - `git diff --check`
 - exact changed-path audit against the adopted implementation base
 - disposable-worktree one-file revert and exact-tree comparison
+- exact `VOC-111-CANDIDATE-MANIFEST-00` command before/after reproduction and
+  observation
 
 The preserved candidate command is run only where its adopted validator exists. No
 command may run Wrangler, dispatch a workflow, contact Cloudflare, inspect/change
