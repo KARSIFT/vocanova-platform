@@ -36,8 +36,8 @@
 
 - Covers: `VOC-117-AC-04`
 - Preconditions: Clean disposable copy of the exact candidate; mutation commands recorded but never committed.
-- Procedure: One at a time: remove marker emission; rename marker; emit wrong/split marker; move marker before `process.on`; replace waiter call with `await delay(75)`; change expected 23 or 24. Run focused tests and source/order audit after each mutation, restoring from the clean copy.
-- Expected result: Missing/wrong/order mutations fail bounded readiness controls; delay mutation fails the no-fixed-delay audit; changed expected code fails the outcome assertion; clean candidate passes and no mutation remains.
+- Procedure: One at a time: remove marker emission; rename marker; emit the exact marker in two stdout chunks; emit a split marker with a missing/altered byte; move marker before `process.on`; replace waiter call with `await delay(75)`; change expected 23 or 24. Run focused tests and source/order audit after each mutation, restoring from the clean copy.
+- Expected result: Correctly split exact output passes; missing/wrong/altered/order mutations fail bounded readiness/order controls; delay mutation fails the no-fixed-delay audit; changed expected code fails the outcome assertion; clean candidate passes and no mutation remains.
 - Evidence: `VOC-117-EV-04`
 
 ## VOC-117-TEST-05 — Runtime, command, discovery, and exact path preservation

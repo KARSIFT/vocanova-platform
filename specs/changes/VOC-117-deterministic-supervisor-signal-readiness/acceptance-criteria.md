@@ -53,10 +53,12 @@ an active timer, listener, process, or port, and no internal retry masks the fai
 - Tests: `VOC-117-TEST-04`
 - Evidence: `VOC-117-EV-04`
 
-In a disposable copy, removing/renaming the marker, splitting it incorrectly,
-emitting it before handler installation, restoring the former fixed delay, or changing
-either expected exit code fails the corresponding readiness/order/no-fixed-delay/
-outcome control. The canonical candidate passes after the copy is discarded.
+In a disposable copy, removing/renaming the marker or splitting it with a missing or
+altered byte fails bounded readiness; correctly splitting the exact marker across
+stdout chunks passes; emitting it before handler installation fails the order check;
+restoring the former fixed delay fails the no-fixed-delay audit; and changing either
+expected exit code fails the outcome assertion. The canonical candidate passes after
+the copy is discarded.
 
 ## VOC-117-AC-05 — Runtime and foundation semantics are preserved
 

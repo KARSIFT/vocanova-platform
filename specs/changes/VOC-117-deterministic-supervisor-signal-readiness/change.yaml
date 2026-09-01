@@ -102,12 +102,14 @@ requirements:
   - id: VOC-117-D06
     statement: >-
       Add exact mutation coverage in an isolated disposable copy: remove or rename
-      the sentinel, split it across stdout chunks, move sentinel emission before
-      handler registration, replace the awaited waiter with the former 75-ms delay,
-      and change the expected SIGINT/SIGTERM exit code. The first three mutations
-      must fail bounded readiness/order checks, the delay replacement must fail the
-      no-fixed-delay/source audit, and changed expected codes must fail the outcome
-      assertion; the canonical candidate must pass with no mutation residue.
+      the sentinel, split the exact sentinel across stdout chunks, split it with a
+      missing/altered byte, move sentinel emission before handler registration,
+      replace the awaited waiter with the former 75-ms delay, and change the
+      expected SIGINT/SIGTERM exit code. Correctly split output must pass the waiter
+      contract; missing/altered/order mutations must fail bounded readiness/order
+      checks, the delay replacement must fail the no-fixed-delay/source audit, and
+      changed expected codes must fail the outcome assertion. The canonical
+      candidate must pass with no mutation residue.
   - id: VOC-117-D07
     statement: >-
       Keep the package and implementation to one minimum-sufficient task and one
