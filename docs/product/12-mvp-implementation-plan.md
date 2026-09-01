@@ -59,18 +59,21 @@ local-stack job. PR #108 integrated the complete VOC-081 stack and final evidenc
 revision into `develop`, and the required post-merge checks passed. Repository/local
 F2 is therefore complete and effective. Before that merge, the work remained an
 integration-pending candidate; that candidate-era state remains historical evidence,
-and a draft PR or task branch still cannot change milestone state. At their remaining
-action boundaries, F3 staging, A1/P1+
-product acceptance, production, deployment, live activation, and
-`VOC-080-HOLD-00` through `HOLD-02` remain unresolved/held. VOC-094 Phase-1 resource
-and rollback proof is the bounded exception described next.
+and a draft PR or task branch still cannot change milestone state. The current
+[VOC-105 evidence record](../operations/voc-105-f3-evidence.md) validates every F3
+gate item and reports the F3 staging foundation complete-effective. A1/P1+ product
+acceptance remains unresolved and is a separate future outcome. Production readiness
+and traffic, learner-data access, and public launch remain unresolved or held;
+`VOC-080-HOLD-01` and `HOLD-02` remain held.
 VOC-094 Phase 1 has separately created and rollback-proved the bounded synthetic
 staging resources, and Phase 2 external Ruflo verification is complete. VOC-100
 retains that tuple but prospectively replaces the custom binder with a standard
 protected-environment staging path. VOC-100 PR2 records that the separately authorized
 settings action created `cloudflare-staging` with exactly the two environment secret
 names, no matching repository or organization Actions secret names, and an explicitly
-accepted shared-identity residual. No dispatch or deployment occurred.
+accepted shared-identity residual. That settings action performed no dispatch or
+deployment. The later exact successful delivery event is recorded separately by
+VOC-105 and is only one input to its F3 gate decision.
 `VOC-080-HOLD-01` and `HOLD-02` remain fully unresolved and unchanged.
 
 ## 1. Product outcome
@@ -120,9 +123,11 @@ integrated VOC-081's complete stacked task chain and final evidence revision, fo
 by passing post-merge revalidation. The earlier integration-pending candidate state is
 preserved in the
 [VOC-081 F2 evidence record](../operations/voc-081-f2-evidence.md). Completion is bound
-to that exact evidence, not inferred from code presence or chat direction. F3, A1/P1+
-acceptance beyond the Phase-1 resource/rollback proof, ordinary staging workflow
-delivery, production, and live product activation remain unresolved.
+to that exact evidence, not inferred from code presence or chat direction. VOC-105's
+separate gate evaluation reports F3 staging foundation complete-effective; the
+successful delivery run alone did not establish that result. A1/P1+ acceptance remains
+unresolved. Production readiness and traffic, learner-data access, and public launch
+remain unresolved or held under `VOC-080-HOLD-01` and `VOC-080-HOLD-02`.
 
 ## 4. Roles (summary — authority comes from the [approval matrix](../governance/approval-matrix.md)
 

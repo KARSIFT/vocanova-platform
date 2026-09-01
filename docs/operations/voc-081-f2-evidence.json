@@ -128,12 +128,13 @@
   },
   "milestone_state": {
     "f2_repository_local": "complete-effective",
-    "f3_staging": "unresolved-held",
+    "f3_staging": "complete-effective-under-voc-105-evidence",
+    "f3_current_evidence": "docs/operations/voc-105-f3-evidence.json",
     "a1_authenticated_product_acceptance": "unresolved",
     "p1_plus_product_acceptance": "unresolved",
     "production": "held",
     "live_activation": "unresolved-held",
-    "voc080_holds": ["VOC-080-HOLD-00", "VOC-080-HOLD-01", "VOC-080-HOLD-02"]
+    "voc080_holds": ["VOC-080-HOLD-01", "VOC-080-HOLD-02"]
   },
   "external_effects": {
     "cloudflare_queried_or_mutated": false,

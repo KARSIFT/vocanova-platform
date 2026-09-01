@@ -11,6 +11,7 @@
 | RECORD  | [Server-runtime retirement and repository rollback](server-runtime-retirement.md)                            | active                                | operator | ADR-0003, VOC-080-T11           |
 | RECORD  | [VOC-080 repository transition](voc-080-transition-record.md)                                                | historical point-in-time evidence     | operator | ADR-0003, ADR-0004, VOC-080-T12 |
 | RECORD  | [VOC-081 F2 repository/local evidence](voc-081-f2-evidence.md)                                               | active (repository/local F2 complete) | operator | ADR-0003, VOC-081-T04           |
+| RECORD  | [VOC-105 F3 staging-foundation evidence](voc-105-f3-evidence.md)                                             | active (F3 complete-effective)        | operator | DOC-12, VOC-105                 |
 | VISUAL  | [VOC-080 architecture and evidence map](voc-080-architecture.html)                                           | active                                | operator | VOC-080-T12                     |
 
 The VOC-080 transition record is historical point-in-time evidence, not the current
@@ -20,8 +21,11 @@ deny-by-default installation. See [ADR-0003](../decisions/ADR-0003-cloudflare-na
 and [ADR-0004](../decisions/ADR-0004-external-ruflo-orchestration.md).
 VOC-081's complete stack was integrated by PR #108 and passed post-merge
 revalidation, so repository/local F2 is complete and effective. The record preserves
-its earlier integration-pending candidate state as history and does not claim F3,
-A1/P1+ acceptance, staging, production, deployment, or live activation.
+its earlier integration-pending candidate state as history. The separate VOC-105
+record validates every DOC-12 gate item and reports F3 staging foundation
+complete-effective. A1/P1+ acceptance remains unresolved and separate. Production
+readiness and traffic, learner-data access, and public launch remain unresolved or
+held; `VOC-080-HOLD-01` and `VOC-080-HOLD-02` remain held.
 
 VOC-100 replaces the prospective custom staging binder with a standard GitHub
 environment design. VOC-100 PR2 records that the separately authorized settings
@@ -29,7 +33,8 @@ action created `cloudflare-staging` with exactly the two environment secret name
 sole `develop` branch policy, disabled admin bypass, identity-layer self-review
 allowed, and no matching repository or organization secret names. No dispatch,
 deployment, production, DNS, billing, spending, learner-data, launch, or unrelated
-settings action occurred.
+settings action occurred. VOC-105 later records the exact successful delivery event
+as one input to the complete F3 gate decision; it performs no new live action.
 
 DOC-13 (F1 execution package, historical) and DOC-19 (governance reconciliation
 notes, historical since DOC-16 v2.0 folded its role in directly) have moved to
