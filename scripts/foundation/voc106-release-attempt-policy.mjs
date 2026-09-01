@@ -197,6 +197,19 @@ export function sha256(value) {
   return crypto.createHash("sha256").update(value).digest("hex");
 }
 
+export class LosslessInteger {
+  constructor(lexeme) {
+    this.lexeme = lexeme;
+    Object.freeze(this);
+  }
+}
+
+function decimalToken(value, validator, label) {
+  if (!(value instanceof LosslessInteger) || !validator(value.lexeme))
+    throw new TypeError(`${label}: canonical raw integer token required`);
+  return value.lexeme;
+}
+
 export function conflictDigest(numbers) {
   const canonical = [...numbers].map(String);
   if (canonical.some((number) => !validatePrDecimal(number)))
@@ -489,7 +502,7 @@ export function parseLosslessJson(raw) {
     if (token[0] === "null") return null;
     if (/[.eE]/u.test(token[0]))
       throw new SyntaxError("non-integer raw JSON number is unsafe");
-    return token[0];
+    return new LosslessInteger(token[0]);
   };
   const parsed = value();
   whitespace();
@@ -836,6 +849,217 @@ export function validateCanonicalPrRequest(value, context = {}) {
   return errors;
 }
 
+export const GITHUB_HEADERS = Object.freeze({
+  accept: "application/vnd.github+json",
+  "x-github-api-version": "2026-03-10",
+});
+
+function validateSourceHeaders(headers) {
+  return (
+    exactKeys(headers, Object.keys(GITHUB_HEADERS)) &&
+    headers.accept === GITHUB_HEADERS.accept &&
+    headers["x-github-api-version"] === GITHUB_HEADERS["x-github-api-version"]
+  );
+}
+
+function decodeRawUtf8(raw) {
+  if (!(raw instanceof Uint8Array))
+    throw new TypeError("exact raw UTF-8 bytes required");
+  const bytes = Buffer.from(raw.buffer, raw.byteOffset, raw.byteLength);
+  const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  if (!Buffer.from(text, "utf8").equals(bytes))
+    throw new TypeError("noncanonical UTF-8 bytes");
+  return { bytes, parsed: parseLosslessJson(text) };
+}
+
+function rawString(value, label, allowNull = false) {
+  if (allowNull && value === null) return null;
+  if (typeof value !== "string")
+    throw new TypeError(`${label}: raw string required`);
+  return value;
+}
+
+function rawIdentity(value, prefix) {
+  if (value === null)
+    return {
+      [`${prefix}_id`]: null,
+      [`${prefix}_login`]: null,
+      [`${prefix}_node_id`]: null,
+    };
+  if (value === null || typeof value !== "object" || Array.isArray(value))
+    throw new TypeError(`${prefix}: raw identity object/null required`);
+  return {
+    [`${prefix}_id`]: decimalToken(value.id, validateIdDecimal, `${prefix}.id`),
+    [`${prefix}_login`]: rawString(value.login, `${prefix}.login`),
+    [`${prefix}_node_id`]: rawString(value.node_id, `${prefix}.node_id`),
+  };
+}
+
+function projectPageItem(source, raw) {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw))
+    throw new TypeError(`${source}: raw item object required`);
+  if (source === "pulls") {
+    const head = raw.head;
+    if (head === null || typeof head !== "object" || Array.isArray(head))
+      throw new TypeError("pulls.head: raw object required");
+    return {
+      head_label: rawString(head.label, "pulls.head.label", true),
+      head_ref: rawString(head.ref, "pulls.head.ref", true),
+      head_repo_full_name:
+        head.repo === null
+          ? null
+          : rawString(head.repo?.full_name, "pulls.head.repo.full_name"),
+      node_id: rawString(raw.node_id, "pulls.node_id"),
+      number: decimalToken(raw.number, validatePrDecimal, "pulls.number"),
+      updated_at: rawString(raw.updated_at, "pulls.updated_at"),
+    };
+  }
+  if (source === "timeline") {
+    return {
+      ...rawIdentity(raw.actor, "actor"),
+      ...rawIdentity(raw.assignee, "assignee"),
+      commit_id: rawString(raw.commit_id, "timeline.commit_id", true),
+      created_at: rawString(raw.created_at, "timeline.created_at"),
+      event: rawString(raw.event, "timeline.event"),
+      id: decimalToken(raw.id, validateIdDecimal, "timeline.id"),
+      node_id: rawString(raw.node_id, "timeline.node_id", true),
+    };
+  }
+  if (source === "matching_refs") {
+    return {
+      name: rawString(raw.ref, "matching_refs.ref"),
+      sha: rawString(raw.object?.sha, "matching_refs.object.sha"),
+    };
+  }
+  if (source === "ruleset_history_list") {
+    return {
+      actor_id: decimalToken(
+        raw.actor?.id,
+        validateIdDecimal,
+        "history.actor.id",
+      ),
+      actor_type: rawString(raw.actor?.type, "history.actor.type"),
+      updated_at: rawString(raw.updated_at, "history.updated_at"),
+      version_id: decimalToken(raw.id, validateIdDecimal, "history.id"),
+    };
+  }
+  throw new TypeError("known page source required");
+}
+
+export function projectPageRaw(source, rawBytes, context = {}) {
+  if (!validateSourceHeaders(context.headers))
+    throw new TypeError("exact GitHub headers required");
+  const { bytes, parsed } = decodeRawUtf8(rawBytes);
+  if (!Array.isArray(parsed))
+    throw new TypeError("raw page must be a JSON array");
+  return { bytes, items: parsed.map((item) => projectPageItem(source, item)) };
+}
+
+function projectRulesetRaw(raw, historyVersion, includeHistory) {
+  const projected = {
+    bypass_actors: Array.isArray(raw.bypass_actors) ? raw.bypass_actors : null,
+    conditions: raw.conditions,
+    enforcement: rawString(raw.enforcement, "ruleset.enforcement"),
+    id: decimalToken(raw.id, validateIdDecimal, "ruleset.id"),
+    name: rawString(raw.name, "ruleset.name"),
+    rules: raw.rules,
+    source: rawString(raw.source, "ruleset.source"),
+    source_type: rawString(raw.source_type, "ruleset.source_type"),
+    target: rawString(raw.target, "ruleset.target"),
+  };
+  if (includeHistory) projected.history_version = historyVersion;
+  return projected;
+}
+
+export function projectObjectRaw(source, rawBytes, context = {}) {
+  if (!validateSourceHeaders(context.headers))
+    throw new TypeError("exact GitHub headers required");
+  const { bytes, parsed: raw } = decodeRawUtf8(rawBytes);
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw))
+    throw new TypeError("raw object response required");
+  let projection;
+  if (source === "ruleset")
+    projection = projectRulesetRaw(raw, context.historyVersion, true);
+  else if (source === "ruleset_history_version") {
+    projection = {
+      actor_id: decimalToken(
+        raw.actor?.id,
+        validateIdDecimal,
+        "version.actor.id",
+      ),
+      actor_type: rawString(raw.actor?.type, "version.actor.type"),
+      state: projectRulesetRaw(raw.state, null, false),
+      updated_at: rawString(raw.updated_at, "version.updated_at"),
+      version_id: decimalToken(raw.id, validateIdDecimal, "version.id"),
+    };
+  } else if (source === "protected_ref") {
+    const fullName = rawString(raw.ref, "protected_ref.ref");
+    const name =
+      fullName === "refs/heads/develop"
+        ? "develop"
+        : fullName === "refs/heads/main"
+          ? "main"
+          : null;
+    if (name === null)
+      throw new TypeError(
+        "protected_ref.ref: exact protected full ref required",
+      );
+    const sha = rawString(raw.object?.sha, "protected_ref.object.sha");
+    if (
+      !context.gitCommit ||
+      context.gitCommit.sha !== sha ||
+      validateProjection("git_commit", context.gitCommit).length
+    )
+      throw new TypeError(
+        "protected_ref: exact git-commit tree context required",
+      );
+    projection = { name, sha, tree: context.gitCommit.tree };
+  } else if (source === "git_commit") {
+    if (!Array.isArray(raw.parents))
+      throw new TypeError("git_commit.parents array required");
+    projection = {
+      parents: raw.parents.map((item) =>
+        rawString(item?.sha, "git_commit.parents.sha"),
+      ),
+      sha: rawString(raw.sha, "git_commit.sha"),
+      tree: rawString(raw.tree?.sha, "git_commit.tree.sha"),
+    };
+  } else if (source === "reserved_pr") {
+    projection = {
+      base_ref: rawString(raw.base?.ref, "reserved.base.ref"),
+      base_sha: rawString(raw.base?.sha, "reserved.base.sha"),
+      closed_at: rawString(raw.closed_at, "reserved.closed_at", true),
+      created_at: rawString(raw.created_at, "reserved.created_at"),
+      draft: raw.draft,
+      head_label: rawString(raw.head?.label, "reserved.head.label"),
+      head_ref: rawString(raw.head?.ref, "reserved.head.ref"),
+      head_repo_full_name: rawString(
+        raw.head?.repo?.full_name,
+        "reserved.head.repo.full_name",
+      ),
+      head_sha: rawString(raw.head?.sha, "reserved.head.sha"),
+      merge_commit_sha: rawString(
+        raw.merge_commit_sha,
+        "reserved.merge_commit_sha",
+        true,
+      ),
+      merged_at: rawString(raw.merged_at, "reserved.merged_at", true),
+      node_id: rawString(raw.node_id, "reserved.node_id"),
+      number: decimalToken(raw.number, validatePrDecimal, "reserved.number"),
+      state: rawString(raw.state, "reserved.state"),
+      updated_at: rawString(raw.updated_at, "reserved.updated_at"),
+      user_id: decimalToken(
+        raw.user?.id,
+        validateIdDecimal,
+        "reserved.user.id",
+      ),
+      user_login: rawString(raw.user?.login, "reserved.user.login"),
+      user_node_id: rawString(raw.user?.node_id, "reserved.user.node_id"),
+    };
+  } else throw new TypeError("known object source required");
+  return { bytes, projection };
+}
+
 const PAGE_KEYS = [
   "schema",
   "source",
@@ -943,7 +1167,7 @@ export function parseNextLink(rawLink, source, subject, currentPage) {
   return expected;
 }
 
-export function validatePageCapture(capture) {
+export function validatePageCapture(capture, context = {}) {
   const errors = [];
   if (!exactKeys(capture, PAGE_KEYS))
     return ["page-capture-v1: exact own keys required"];
@@ -998,8 +1222,15 @@ export function validatePageCapture(capture) {
   }
   if (capture.items_jcs_sha256 !== sha256(canonicalize(capture.items)))
     errors.push("page-capture-v1: items digest");
-  if (!validDigest(capture.raw_sha256))
-    errors.push("page-capture-v1: raw digest");
+  try {
+    const derived = projectPageRaw(capture.source, context.raw, context);
+    if (capture.raw_sha256 !== sha256(derived.bytes))
+      errors.push("page-capture-v1: exact raw byte digest mismatch");
+    if (canonicalize(capture.items) !== canonicalize(derived.items))
+      errors.push("page-capture-v1: raw/source projection mismatch");
+  } catch (error) {
+    errors.push(`page-capture-v1: raw projection: ${error.message}`);
+  }
   const preimage = { ...capture };
   delete preimage.capture_sha256;
   if (capture.capture_sha256 !== sha256(canonicalize(preimage)))
@@ -1039,7 +1270,6 @@ export function validateObjectCapture(capture, context = {}) {
   if (
     capture.http_status !== 200 ||
     !validTime(capture.captured_at) ||
-    !validDigest(capture.raw_sha256) ||
     typeof capture.endpoint !== "string" ||
     !(
       capture.etag === null ||
@@ -1096,6 +1326,19 @@ export function validateObjectCapture(capture, context = {}) {
     capture.projection_jcs_sha256 !== sha256(canonicalize(capture.projection))
   )
     errors.push("object-capture-v1: projection digest");
+  try {
+    const derived = projectObjectRaw(capture.source, context.raw, {
+      ...context,
+      historyVersion:
+        context.currentRuleset?.history_version ?? context.historyVersion,
+    });
+    if (capture.raw_sha256 !== sha256(derived.bytes))
+      errors.push("object-capture-v1: exact raw byte digest mismatch");
+    if (canonicalize(capture.projection) !== canonicalize(derived.projection))
+      errors.push("object-capture-v1: raw/source projection mismatch");
+  } catch (error) {
+    errors.push(`object-capture-v1: raw projection: ${error.message}`);
+  }
   const preimage = { ...capture };
   delete preimage.capture_sha256;
   if (capture.capture_sha256 !== sha256(canonicalize(preimage)))
@@ -1205,7 +1448,7 @@ function projectPageItems(pageCaptures, source) {
   throw new TypeError("known scan source required");
 }
 
-export function validateScanCapture(capture, pageCaptures) {
+export function validateScanCapture(capture, pageCaptures, pageContexts) {
   const errors = [];
   if (!exactKeys(capture, SCAN_KEYS))
     return ["scan-capture-v1: exact own keys required"];
@@ -1220,7 +1463,11 @@ export function validateScanCapture(capture, pageCaptures) {
     !/^(?:0|[1-9]\d*)$/u.test(capture.total_count)
   )
     errors.push("scan-capture-v1: domains");
-  const paginationErrors = validatePagination(pageCaptures, capture.source);
+  const paginationErrors = validatePagination(
+    pageCaptures,
+    capture.source,
+    pageContexts,
+  );
   errors.push(...paginationErrors);
   let projection = [];
   if (paginationErrors.length === 0)
@@ -1255,15 +1502,17 @@ export function validateScanCapture(capture, pageCaptures) {
   return errors;
 }
 
-export function validatePagination(pages, source) {
+export function validatePagination(pages, source, contexts) {
   const errors = [];
   if (!Array.isArray(pages) || pages.length === 0)
     return ["pagination: at least page 1 required"];
+  if (!Array.isArray(contexts) || contexts.length !== pages.length)
+    return ["pagination: exact raw context per page required"];
   let seenShort = false;
   let subject = null;
   const seenIds = new Set();
   pages.forEach((page, index) => {
-    errors.push(...validatePageCapture(page));
+    errors.push(...validatePageCapture(page, contexts[index]));
     if (page.source !== source)
       errors.push(`pagination: page ${index + 1} wrong source`);
     const parsed = parsePageEndpoint(source, page.endpoint);
@@ -1300,24 +1549,24 @@ export function validatePagination(pages, source) {
   return errors;
 }
 
-export function projectAllStatePulls(pages) {
-  const errors = validatePagination(pages, "pulls");
+export function projectAllStatePulls(pages, contexts) {
+  const errors = validatePagination(pages, "pulls", contexts);
   if (errors.length) throw new TypeError(errors.join("; "));
   return pages
     .flatMap((page) => page.items)
     .sort((a, b) => Number(BigInt(a.number) - BigInt(b.number)));
 }
 
-export function projectTimeline(pages) {
-  const errors = validatePagination(pages, "timeline");
+export function projectTimeline(pages, contexts) {
+  const errors = validatePagination(pages, "timeline", contexts);
   if (errors.length) throw new TypeError(errors.join("; "));
   return pages
     .flatMap((page) => page.items)
     .sort((a, b) => Number(BigInt(a.id) - BigInt(b.id)));
 }
 
-export function projectRulesetHistory(pages) {
-  const errors = validatePagination(pages, "ruleset_history_list");
+export function projectRulesetHistory(pages, contexts) {
+  const errors = validatePagination(pages, "ruleset_history_list", contexts);
   if (errors.length) throw new TypeError(errors.join("; "));
   const records = pages.flatMap((page) => page.items);
   if (records.length === 0)
@@ -1348,8 +1597,12 @@ export function selectLatestRulesetVersion(history) {
   );
 }
 
-export function reconcileRefs(lsRemote, matchingRefsPages) {
-  const errors = validatePagination(matchingRefsPages, "matching_refs");
+export function reconcileRefs(lsRemote, matchingRefsPages, contexts) {
+  const errors = validatePagination(
+    matchingRefsPages,
+    "matching_refs",
+    contexts,
+  );
   if (errors.length) return errors;
   const api = matchingRefsPages
     .flatMap((page) => page.items)
@@ -1814,7 +2067,11 @@ export function deriveExpectedPassMembers(stableState, registry) {
     const entry = entries.get(registryKey(descriptor));
     let errors = [];
     if (descriptor.kind === "scan") {
-      errors = validateScanCapture(entry.capture, entry.auxiliary?.pages);
+      errors = validateScanCapture(
+        entry.capture,
+        entry.auxiliary?.pages,
+        entry.auxiliary?.pageContexts,
+      );
       const projection = projectPageItems(
         entry.auxiliary?.pages ?? [],
         descriptor.source,
@@ -1842,6 +2099,7 @@ export function deriveExpectedPassMembers(stableState, registry) {
         stableState.ruleset_history,
       );
       errors = validateObjectCapture(entry.capture, {
+        ...entry.auxiliary,
         currentRuleset: stableState.ruleset,
         selectedHistory,
       });

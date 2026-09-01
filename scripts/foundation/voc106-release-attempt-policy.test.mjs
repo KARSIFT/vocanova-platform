@@ -26,8 +26,8 @@ import {
   deriveStableState,
   parseNextLink,
   parseLosslessJson,
-  projectRulesetHistory,
-  reconcileRefs,
+  projectRulesetHistory as projectRulesetHistoryRaw,
+  reconcileRefs as reconcileRefsRaw,
   renderAttemptBinder,
   selectLatestRulesetVersion,
   sha256,
@@ -40,14 +40,14 @@ import {
   validateCommandCapture,
   validateCurrentPolicySurfaces,
   validateFrontierName,
-  validatePageCapture,
-  validatePagination,
+  validatePageCapture as validatePageCaptureRaw,
+  validatePagination as validatePaginationRaw,
   validatePassCapture,
   validateRefFormatAndLength,
   validateReconciliation,
-  validateScanCapture,
+  validateScanCapture as validateScanCaptureRaw,
   validateStableState,
-  validateObjectCapture,
+  validateObjectCapture as validateObjectCaptureRaw,
   validatePrDecimal,
   validateProjection,
   validateRulesetFixture,
@@ -61,6 +61,12 @@ const TREE = "b".repeat(40);
 const DIGEST = "c".repeat(64);
 const TIME = "2026-09-01T00:00:00Z";
 const NODE = "PR_node";
+const HEADERS = Object.freeze({
+  accept: "application/vnd.github+json",
+  "x-github-api-version": "2026-03-10",
+});
+const PAGE_CONTEXTS = new WeakMap();
+const OBJECT_CONTEXTS = new WeakMap();
 
 function boundary(number) {
   return {
@@ -84,7 +90,54 @@ function endpoint(source, number, subject) {
   return `${root}/rulesets/${subject ?? "8"}/history?per_page=100&page=${number}`;
 }
 
+function rawPageItem(source, item) {
+  if (source === "pulls")
+    return {
+      head: {
+        label: item.head_label,
+        ref: item.head_ref,
+        repo:
+          item.head_repo_full_name === null
+            ? null
+            : { full_name: item.head_repo_full_name },
+      },
+      node_id: item.node_id,
+      number: Number(item.number),
+      updated_at: item.updated_at,
+    };
+  if (source === "timeline") {
+    const identity = (prefix) =>
+      item[`${prefix}_id`] === null
+        ? null
+        : {
+            id: Number(item[`${prefix}_id`]),
+            login: item[`${prefix}_login`],
+            node_id: item[`${prefix}_node_id`],
+          };
+    return {
+      actor: identity("actor"),
+      assignee: identity("assignee"),
+      commit_id: item.commit_id,
+      created_at: item.created_at,
+      event: item.event,
+      id: Number(item.id),
+      node_id: item.node_id,
+    };
+  }
+  if (source === "matching_refs")
+    return { ref: item.name, object: { sha: item.sha, type: "commit" } };
+  return {
+    actor: { id: Number(item.actor_id), type: item.actor_type },
+    id: Number(item.version_id),
+    updated_at: item.updated_at,
+  };
+}
+
 function page(source, number, items, next = null, subject) {
+  const raw = Buffer.from(
+    JSON.stringify(items.map((item) => rawPageItem(source, item))),
+    "utf8",
+  );
   const capture = {
     schema: "voc-106-page-capture-v1",
     source,
@@ -96,7 +149,7 @@ function page(source, number, items, next = null, subject) {
     per_page: "100",
     next_url: next,
     item_count: String(items.length),
-    raw_sha256: "d".repeat(64),
+    raw_sha256: sha256(raw),
     items,
     items_jcs_sha256: sha256(canonicalize(items)),
     capture_sha256: "",
@@ -104,7 +157,36 @@ function page(source, number, items, next = null, subject) {
   const preimage = { ...capture };
   delete preimage.capture_sha256;
   capture.capture_sha256 = sha256(canonicalize(preimage));
+  PAGE_CONTEXTS.set(capture, { raw, headers: HEADERS, subject });
   return capture;
+}
+
+function pageContext(capture) {
+  return PAGE_CONTEXTS.get(capture);
+}
+
+function validatePageCapture(capture, context = pageContext(capture)) {
+  return validatePageCaptureRaw(capture, context);
+}
+
+function validatePagination(pages, source, contexts = pages.map(pageContext)) {
+  return validatePaginationRaw(pages, source, contexts);
+}
+
+function projectRulesetHistory(pages, contexts = pages.map(pageContext)) {
+  return projectRulesetHistoryRaw(pages, contexts);
+}
+
+function reconcileRefs(git, pages, contexts = pages.map(pageContext)) {
+  return reconcileRefsRaw(git, pages, contexts);
+}
+
+function validateScanCapture(
+  capture,
+  pages,
+  contexts = pages.map(pageContext),
+) {
+  return validateScanCaptureRaw(capture, pages, contexts);
 }
 
 function ruleset() {
@@ -216,6 +298,61 @@ function objectCapture(source, projection) {
     git_commit: `${root}/git/commits/${projection.sha}`,
     reserved_pr: `${root}/pulls/${projection.number}`,
   };
+  let rawObject;
+  let sourceContext = { headers: HEADERS };
+  if (source === "ruleset") {
+    rawObject = { ...projection, id: Number(projection.id) };
+    delete rawObject.history_version;
+    sourceContext.historyVersion = projection.history_version;
+  } else if (source === "ruleset_history_version") {
+    rawObject = {
+      actor: { id: Number(projection.actor_id), type: projection.actor_type },
+      id: Number(projection.version_id),
+      state: { ...projection.state, id: Number(projection.state.id) },
+      updated_at: projection.updated_at,
+    };
+  } else if (source === "protected_ref") {
+    rawObject = {
+      ref: `refs/heads/${projection.name}`,
+      object: { sha: projection.sha, type: "commit" },
+    };
+    sourceContext = {
+      ...sourceContext,
+      name: projection.name,
+      gitCommit: { parents: [], sha: projection.sha, tree: projection.tree },
+    };
+  } else if (source === "git_commit") {
+    rawObject = {
+      parents: projection.parents.map((sha) => ({ sha })),
+      sha: projection.sha,
+      tree: { sha: projection.tree },
+    };
+  } else {
+    rawObject = {
+      base: { ref: projection.base_ref, sha: projection.base_sha },
+      closed_at: projection.closed_at,
+      created_at: projection.created_at,
+      draft: projection.draft,
+      head: {
+        label: projection.head_label,
+        ref: projection.head_ref,
+        repo: { full_name: projection.head_repo_full_name },
+        sha: projection.head_sha,
+      },
+      merge_commit_sha: projection.merge_commit_sha,
+      merged_at: projection.merged_at,
+      node_id: projection.node_id,
+      number: Number(projection.number),
+      state: projection.state,
+      updated_at: projection.updated_at,
+      user: {
+        id: Number(projection.user_id),
+        login: projection.user_login,
+        node_id: projection.user_node_id,
+      },
+    };
+  }
+  const raw = Buffer.from(JSON.stringify(rawObject), "utf8");
   const capture = {
     schema: "voc-106-object-capture-v1",
     source,
@@ -223,7 +360,7 @@ function objectCapture(source, projection) {
     http_status: 200,
     etag: null,
     captured_at: TIME,
-    raw_sha256: sha256(`${source}:${endpoints[source]}`),
+    raw_sha256: sha256(raw),
     projection,
     projection_jcs_sha256: sha256(canonicalize(projection)),
     capture_sha256: "",
@@ -231,7 +368,19 @@ function objectCapture(source, projection) {
   const preimage = { ...capture };
   delete preimage.capture_sha256;
   capture.capture_sha256 = sha256(canonicalize(preimage));
+  OBJECT_CONTEXTS.set(capture, { ...sourceContext, raw });
   return capture;
+}
+
+function objectContext(capture) {
+  return OBJECT_CONTEXTS.get(capture);
+}
+
+function validateObjectCapture(capture, context = {}) {
+  return validateObjectCaptureRaw(capture, {
+    ...objectContext(capture),
+    ...context,
+  });
 }
 
 function scanCapture(source, pages) {
@@ -321,21 +470,24 @@ function passContextFixture() {
       source: "ruleset_history_list",
       subject: "ruleset:8",
       capture: scanCapture("ruleset_history_list", historyPages),
-      auxiliary: { pages: historyPages },
+      auxiliary: {
+        pages: historyPages,
+        pageContexts: historyPages.map(pageContext),
+      },
     },
     {
       kind: "scan",
       source: "pulls",
       subject: REPOSITORY,
       capture: scanCapture("pulls", pullPages),
-      auxiliary: { pages: pullPages },
+      auxiliary: { pages: pullPages, pageContexts: pullPages.map(pageContext) },
     },
     {
       kind: "scan",
       source: "matching_refs",
       subject: "refs/heads/release/voc-106-",
       capture: scanCapture("matching_refs", refPages),
-      auxiliary: { pages: refPages },
+      auxiliary: { pages: refPages, pageContexts: refPages.map(pageContext) },
     },
     {
       kind: "command",
@@ -395,6 +547,8 @@ function passContextFixture() {
       auxiliary: {},
     },
   ];
+  for (const entry of registry.filter((item) => item.kind === "object"))
+    entry.auxiliary = objectContext(entry.capture);
   return { stableState, registry };
 }
 
@@ -492,7 +646,7 @@ test("lossless JSON rejects duplicate keys and unsafe numeric identifiers", () =
   );
   assert.throws(() => parseLosslessJson('{"a":1,"a":2}'), /duplicate raw key/u);
   assert.equal(
-    parseLosslessJson('{"id":9223372036854775807}').id,
+    parseLosslessJson('{"id":9223372036854775807}').id.lexeme,
     "9223372036854775807",
   );
   assert.throws(() => parseLosslessJson('{"id":1e16}'), /non-integer/u);
@@ -674,6 +828,282 @@ test("every object source binds exact endpoint, projection schema, and ruleset v
     validateObjectCapture(driftedVersion, fixtures[1][1]).join(";"),
     /state mismatch/u,
   );
+});
+
+test("every page source binds raw bytes, headers, lossless projection, digest, and source", () => {
+  const timeline = {
+    actor_id: "1",
+    actor_login: "actor",
+    actor_node_id: "ACTOR_node",
+    assignee_id: null,
+    assignee_login: null,
+    assignee_node_id: null,
+    commit_id: null,
+    created_at: TIME,
+    event: "closed",
+    id: "2",
+    node_id: null,
+  };
+  const ref = { name: `refs/heads/release/voc-106-submit-${DIGEST}`, sha: SHA };
+  const fixtures = [
+    page("pulls", 1, [boundary(1)]),
+    page("timeline", 1, [timeline], null, "7"),
+    page("matching_refs", 1, [ref]),
+    page("ruleset_history_list", 1, [historyRecord()], null, "8"),
+  ];
+  const mutateRequiredType = [
+    (raw) => {
+      raw[0].number = "1";
+    },
+    (raw) => {
+      raw[0].id = "2";
+    },
+    (raw) => {
+      raw[0].ref = 1;
+    },
+    (raw) => {
+      raw[0].id = "12";
+    },
+  ];
+  for (const [index, capture] of fixtures.entries()) {
+    const context = pageContext(capture);
+    assert.deepEqual(validatePageCaptureRaw(capture, context), []);
+    assert.notDeepEqual(validatePageCaptureRaw(capture, {}), []);
+    const whitespace = {
+      ...context,
+      raw: Buffer.concat([context.raw, Buffer.from(" ")]),
+    };
+    assert.match(
+      validatePageCaptureRaw(capture, whitespace).join(";"),
+      /raw byte digest/u,
+    );
+    const digestDrift = rehash({
+      ...structuredClone(capture),
+      raw_sha256: DIGEST,
+    });
+    assert.match(
+      validatePageCaptureRaw(digestDrift, context).join(";"),
+      /raw byte digest/u,
+    );
+    const projectionDrift = structuredClone(capture);
+    projectionDrift.items = [];
+    projectionDrift.item_count = "0";
+    projectionDrift.items_jcs_sha256 = sha256(canonicalize([]));
+    rehash(projectionDrift);
+    assert.match(
+      validatePageCaptureRaw(projectionDrift, context).join(";"),
+      /raw\/source projection/u,
+    );
+    const duplicate = { ...context, raw: Buffer.from('[{"dup":1,"dup":2}]') };
+    assert.match(
+      validatePageCaptureRaw(capture, duplicate).join(";"),
+      /duplicate raw key/u,
+    );
+    const unsafe = { ...context, raw: Buffer.from('[{"unsafe":1e16}]') };
+    assert.match(
+      validatePageCaptureRaw(capture, unsafe).join(";"),
+      /non-integer/u,
+    );
+    const wrongSource = {
+      ...context,
+      raw: pageContext(fixtures[(index + 1) % fixtures.length]).raw,
+    };
+    assert.notDeepEqual(validatePageCaptureRaw(capture, wrongSource), []);
+    const wrongType = JSON.parse(context.raw.toString("utf8"));
+    mutateRequiredType[index](wrongType);
+    assert.notDeepEqual(
+      validatePageCaptureRaw(capture, {
+        ...context,
+        raw: Buffer.from(JSON.stringify(wrongType)),
+      }),
+      [],
+    );
+    assert.match(
+      validatePageCaptureRaw(capture, {
+        ...context,
+        headers: { ...HEADERS, accept: "wrong" },
+      }).join(";"),
+      /headers/u,
+    );
+    assert.notDeepEqual(
+      validatePageCaptureRaw(capture, {
+        ...context,
+        raw: Buffer.from("{}"),
+      }),
+      [],
+    );
+  }
+});
+
+test("page and object raw numeric tokens preserve the full adopted decimal domain", () => {
+  const maximum = "9223372036854775807";
+  const item = {
+    actor_id: maximum,
+    actor_type: "User",
+    updated_at: TIME,
+    version_id: maximum,
+  };
+  const capture = page("ruleset_history_list", 1, [item], null, "8");
+  const raw = Buffer.from(
+    `[{"actor":{"id":${maximum},"type":"User"},"id":${maximum},"updated_at":"${TIME}"}]`,
+  );
+  capture.raw_sha256 = sha256(raw);
+  rehash(capture);
+  const context = { ...pageContext(capture), raw };
+  assert.deepEqual(validatePageCaptureRaw(capture, context), []);
+  assert.match(
+    validatePageCaptureRaw(capture, {
+      ...context,
+      raw: Buffer.from(
+        `[{"actor":{"id":9223372036854775808,"type":"User"},"id":${maximum},"updated_at":"${TIME}"}]`,
+      ),
+    }).join(";"),
+    /canonical raw integer token/u,
+  );
+  assert.match(
+    validatePageCaptureRaw(capture, {
+      ...context,
+      raw: Buffer.from(
+        `[{"actor":{"id":"${maximum}","type":"User"},"id":${maximum},"updated_at":"${TIME}"}]`,
+      ),
+    }).join(";"),
+    /canonical raw integer token/u,
+  );
+
+  const reservedProjection = {
+    ...stableWithPr().reserved_prs[0],
+    user_id: maximum,
+  };
+  const reservedCapture = objectCapture("reserved_pr", reservedProjection);
+  const reservedContext = objectContext(reservedCapture);
+  const reservedRaw = Buffer.from(
+    reservedContext.raw
+      .toString("utf8")
+      .replace(/"user":\{"id":\d+,/u, `"user":{"id":${maximum},`),
+  );
+  reservedCapture.raw_sha256 = sha256(reservedRaw);
+  rehash(reservedCapture);
+  assert.deepEqual(
+    validateObjectCaptureRaw(reservedCapture, {
+      ...reservedContext,
+      raw: reservedRaw,
+    }),
+    [],
+  );
+});
+
+test("every object source binds raw bytes, headers, projection, digest, and source context", () => {
+  const state = stableWithPr();
+  const current = state.ruleset;
+  const selectedHistory = historyRecord();
+  const versionState = { ...current };
+  delete versionState.history_version;
+  const version = { ...selectedHistory, state: versionState };
+  const fixtures = [
+    [
+      objectCapture("ruleset", current),
+      { currentRuleset: current, selectedHistory },
+    ],
+    [
+      objectCapture("ruleset_history_version", version),
+      { currentRuleset: current, selectedHistory },
+    ],
+    [objectCapture("protected_ref", state.protected_refs[0]), {}],
+    [objectCapture("git_commit", { parents: [], sha: SHA, tree: TREE }), {}],
+    [objectCapture("reserved_pr", state.reserved_prs[0]), {}],
+  ];
+  const mutateRequiredType = [
+    (raw) => {
+      raw.id = "8";
+    },
+    (raw) => {
+      raw.id = "12";
+    },
+    (raw) => {
+      raw.ref = 1;
+    },
+    (raw) => {
+      raw.sha = 1;
+    },
+    (raw) => {
+      raw.number = "7";
+    },
+  ];
+  for (const [index, [capture, join]] of fixtures.entries()) {
+    const context = { ...objectContext(capture), ...join };
+    assert.deepEqual(validateObjectCaptureRaw(capture, context), []);
+    assert.notDeepEqual(validateObjectCaptureRaw(capture, {}), []);
+    assert.match(
+      validateObjectCaptureRaw(capture, {
+        ...context,
+        raw: Buffer.concat([context.raw, Buffer.from(" ")]),
+      }).join(";"),
+      /raw byte digest/u,
+    );
+    const digestDrift = rehash({
+      ...structuredClone(capture),
+      raw_sha256: DIGEST,
+    });
+    assert.match(
+      validateObjectCaptureRaw(digestDrift, context).join(";"),
+      /raw byte digest/u,
+    );
+    const projectionDrift = structuredClone(capture);
+    projectionDrift.projection = { ...projectionDrift.projection, extra: true };
+    projectionDrift.projection_jcs_sha256 = sha256(
+      canonicalize(projectionDrift.projection),
+    );
+    rehash(projectionDrift);
+    assert.match(
+      validateObjectCaptureRaw(projectionDrift, context).join(";"),
+      /raw\/source projection/u,
+    );
+    const duplicateText = context.raw
+      .toString("utf8")
+      .replace("{", '{"dup":1,"dup":2,');
+    assert.match(
+      validateObjectCaptureRaw(capture, {
+        ...context,
+        raw: Buffer.from(duplicateText),
+      }).join(";"),
+      /duplicate raw key/u,
+    );
+    const unsafeText = context.raw
+      .toString("utf8")
+      .replace("{", '{"unsafe":1e16,');
+    assert.match(
+      validateObjectCaptureRaw(capture, {
+        ...context,
+        raw: Buffer.from(unsafeText),
+      }).join(";"),
+      /non-integer/u,
+    );
+    const wrongSource = {
+      ...context,
+      raw: objectContext(fixtures[(index + 1) % fixtures.length][0]).raw,
+    };
+    assert.notDeepEqual(validateObjectCaptureRaw(capture, wrongSource), []);
+    const wrongType = JSON.parse(context.raw.toString("utf8"));
+    mutateRequiredType[index](wrongType);
+    assert.notDeepEqual(
+      validateObjectCaptureRaw(capture, {
+        ...context,
+        raw: Buffer.from(JSON.stringify(wrongType)),
+      }),
+      [],
+    );
+    assert.match(
+      validateObjectCaptureRaw(capture, {
+        ...context,
+        headers: { ...HEADERS, "x-github-api-version": "wrong" },
+      }).join(";"),
+      /headers/u,
+    );
+    assert.notDeepEqual(
+      validateObjectCaptureRaw(capture, { ...context, raw: Buffer.from("[]") }),
+      [],
+    );
+  }
 });
 
 test("every frozen projection rejects each omitted key and every extra key", () => {
