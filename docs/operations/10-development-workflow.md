@@ -119,6 +119,7 @@ repo/org secret names absent. `main` and production retain no live effect and al
 production holds.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+
 The operator-revoked standing staging token remains valid until revoked. Its
 revocation/replacement procedure is an operator-controlled action independent of
 deployment. Ordinary staging dispatches, token revocations, and token replacements

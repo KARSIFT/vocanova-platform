@@ -277,6 +277,7 @@ environment approval, first-step approval-history validation, exact account/reso
 checks, and all production holds to remain intact before any live delivery claim.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+
 The account `0a9eda28b96d77c24dcde74f3e074d47` credential retains exactly
 `Workers Scripts Edit` and `D1 Edit` and no broader Cloudflare permission. This
 operator-revoked standing token is valid until revoked. `CLOUDFLARE_ACCOUNT_ID` and

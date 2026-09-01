@@ -102,6 +102,7 @@ Promotion, synchronization, settings, deployment, and live-system actions remain
 separate governed events.
 
 <!-- VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN -->
+
 VOC-101 changes only the token lifecycle: the least-privilege staging token is an
 operator-revoked standing credential valid until revoked. Mandatory triggers revoke
 first and keep staging disabled; voluntary replacement alone may preserve the prior
@@ -1710,7 +1711,7 @@ new implementation revision followed by complete checks and fresh independent re
 | Implement an adopted task                            | Implementer role, different from its reviewer                                                                             |
 | Independently verify a plan or implementation        | Reviewer role with no write access to the reviewed revision                                                               |
 | Merge into `develop`                                 | Separate authorized actor after deterministic checks, exact-revision review, risk evidence, and applicable authority pass |
-| Promote a frozen develop candidate to `main`        | Separately reviewed PR from its immutable short-lived exact alias; no current promotion workflow                           |
+| Promote a frozen develop candidate to `main`         | Separately reviewed PR from its immutable short-lived exact alias; no current promotion workflow                          |
 | Complete post-promotion history synchronization      | Separately reviewed short-lived-head PR merge-committed into `develop`; prove `main` ancestry and zero-behind readbacks   |
 | Deploy                                               | T10 held manual Cloudflare state machine exists; current manifest blocks before environment jobs/secrets                  |
 
