@@ -20,6 +20,8 @@ blocking_review_evidence:
   - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5491851011
   - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492103703
   - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492118325
+  - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492356136
+  - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492435728
 related_pull_request: https://github.com/KARSIFT/vocanova-platform/pull/215
 related_adopted_packages:
   - VOC-106
@@ -55,6 +57,20 @@ superseded_plan_candidates:
       - duplicate-activation-and-uncertain-PR-POST-recovery-incomplete
       - ref-PR-reconciliation-receipts-and-actor-mapping-incomplete
     review_transfer: prohibited-fresh-exact-candidate-reviews-required
+  - candidate_sha: ade2d6db3376b879c3f68d2bc23010b0c8894bed
+    tree_sha: 3ae4e2562637ce12470c4f6037a8441fce5ecf30
+    status: blocked-and-superseded
+    review_evidence:
+      - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492356136
+      - https://github.com/KARSIFT/vocanova-platform/pull/217#issuecomment-5492435728
+    reasons:
+      - identical-claim-value-does-not-identify-unique-caller
+      - deletable-claim-ref-and-unknown-absence-not-durably-reconstructible
+      - stale-different-topology-claim-has-no-terminal-semantics
+      - capture-timestamps-conflict-with-reconstructible-state-digest
+      - receipt-page-stable-view-schemas-and-algorithm-not-frozen
+      - merged-precedence-can-leave-nonmerged-duplicate-open
+    review_transfer: prohibited-fresh-exact-candidate-reviews-required
 implementation_authorized: false
 implementation_authority_status: >-
   prohibited-until-exact-plan-candidate-release-history-specialist-and-independent-
@@ -67,21 +83,23 @@ multiple_pull_request_rationale: >-
   living and nine VOC-106 paths, nine VOC-114 artifacts, and validator/test must agree.
   Splitting the 27 paths would publish contradictory or unenforced lifecycle rules and
   add coordination, context, repeated-check, exact-review, and bookkeeping overhead.
+  The held ruleset is a separately authorized settings prerequisite, not a second
+  implementation PR or authority granted by this package.
 automatic_merge_allowed: true
 production_impact: none-repository-policy-validation-and-release-preparation-only
 rollback_required: true
 
 objective: >-
-  Replace unsafe SHA-only and comment-ledger allocation with deterministic one-use
-  claim frontiers and GitHub's atomic create-ref arbiter, durable claim/PR history,
-  exhaustive reconstructible state, exact actors, immutable refs, and complete crash,
-  conflict, rollback, and no-live-action controls.
+  Replace unsafe SHA-only/comment/caller allocation with deterministic target-level
+  claim coalescence, SHA-bound attempts, a held server-enforced ref-immutability
+  prerequisite, exact stable-state reconstruction, stale/cardinality semantics,
+  actor/topology/rollback controls, and no implementation-time live action.
 
 requirements:
   - id: VOC-115-D00
     statement: >-
-      Treat issue #216, PR #215 specialist FAIL, and all four exact PR #217 candidate
-      FAIL reviews as intake. Preserve both candidate SHAs/trees as superseded evidence
+      Treat issue #216, PR #215 specialist FAIL, and all six exact PR #217 candidate
+      FAIL reviews as intake. Preserve all three candidate SHAs/trees as superseded evidence
       with no transfer. PR #215 stays draft. None grants plan adoption, implementation,
       ref/settings, release, merge, deployment, or external authority.
   - id: VOC-115-D01
@@ -92,50 +110,49 @@ requirements:
       digest, ASCII, length, and ref-format domains and fail-closed exhaustion.
   - id: VOC-115-D02
     statement: >-
-      For each frontier, require every contender to create one distinct canonical Git
-      commit with frozen-develop tree/parent, exact actor/topology/frontier fields, and a
-      256-bit OS-CSPRNG nonce, then issue one POST create-ref for the same claim name.
-      GitHub atomic unique-ref creation selects the winner. Exact GET proves own-target
-      win or other-target loss; absence after unknown response stops without repost.
-      The accepted immutable claim ref/commit is permanent allocation authority.
+      Hold VOC-106 until a separately authorized settings action installs and reads back
+      an active GitHub ruleset matching only claim/attempt patterns, allowing creation
+      while denying update/non-fast-forward/force/deletion with empty bypass including
+      administrators. Record exact ids/version/patterns/rules/enforcement/digest. VOC-115
+      implementation neither queries nor changes settings; unavailable capability holds.
   - id: VOC-115-D03
     statement: >-
-      Name the attempt ref with full frozen-develop SHA and winning claim-commit SHA.
-      Define state precedence: merged, conflict, closed-unmerged, open valid draft,
-      claimed-but-PR-unknown stopped, then empty. Closed PR advances retry; merged
-      closes allocation. Multiple matching PRs make none active; close all open/
-      unmerged duplicates and advance to the canonical conflict claim frontier.
+      Each contender POST-creates the same deterministic claim ref directly at frozen
+      develop. Atomic creation selects a target, not caller. Same-target duplicate/
+      replayed requests are one logical claim and every downstream operation coalesces;
+      different target loses. Exact readback classifies state. Absence permits at most
+      two byte-identical retries after stable reconciliation; never mutate/delete.
   - id: VOC-115-D04
     statement: >-
-      Freeze main/develop SHA/tree and fully reconcile before claim creation. Claim and
-      attempt refs use POST create-ref only. Unknown claim result: own exact target wins,
-      another valid target loses, absence stops without repost; attempt-ref unknown
-      resumes only on exact readback and otherwise stops. Mismatch/collision is never
-      adopted, updated, forced, or deleted. Accepted claims and bound attempt refs are
-      permanent, immutable, and manually/automatically undeletable.
+      Immediately after accepted claim and before attempt ref, freshly validate protected
+      main/develop SHA/tree and ruleset against frozen state. Exact equality proceeds.
+      Any drift is permanent stale-protected-topology, creates no attempt/PR, derives no
+      successor, and irrecoverably stops pending governed correction. Different-SHA
+      contention does not promise a usable winner. Accepted-ref disappearance under
+      authorized actions is excluded by the verified ruleset; unauthorized settings
+      mutation/control-plane failure is explicitly outside the guarantee.
   - id: VOC-115-D05
     statement: >-
-      Exhaustively paginate all-state repository PRs and every reserved PR issue
-      timeline at per_page=100 through final Link proof, locally filter the namespace,
-      and compare the complete reserved ref set from git ls-remote with fully paginated
-      GitHub matching-refs. Reject gaps, repeats, changing snapshots, malformed or
-      unmatched objects, source disagreement, or incomplete deleted-source evidence.
+      Freeze exact lossless JSON primitive domains and own-key/type/null/event schemas
+      for PR, timeline, ref, protected-ref, ruleset, page-capture, scan-capture, stable-
+      state, and reconciliation objects. Parse raw UTF-8 with duplicate-key rejection
+      and numeric-token preservation. Page captures include exact raw/projection/capture
+      digests and timestamps; capture-specific values are not stable-state equality.
   - id: VOC-115-D06
     statement: >-
-      Freeze JCS canonical voc-106-pr-scan-v1, timeline-scan-v1, ref-scan-v1, claim-
-      scan-v1, and reconciliation-v1 GET-derived projection schemas with exact fields,
-      counts, high-watermarks, SHA/tree/frontier/PR bindings, and non-self-referential
-      SHA256 digests. Receipts live in the binder and issue link as evidence only and
-      must be independently reconstructed at continuation/handoff. Body/comment edit,
-      deletion, absence, or mismatch stops but never resets durable state or authority.
+      Define exact complete-pass algorithm: exact all-state PR query and numbered short-
+      page termination, complete reserved timelines, dual equal release-ref sets, ruleset
+      and protected refs, full-repository PR boundary before local filtering, counts and
+      high-watermarks. Construct timestamp-free voc-106-stable-state-v1 JCS. Require two
+      byte-identical stable states, retry at most three pairs, then stop. Later actors
+      reproduce stable-state digest when state is unchanged, not capture timestamps.
   - id: VOC-115-D07
     statement: >-
-      After the unique claim winner creates the exact attempt ref, one draft PR POST is
-      allowed. 201 or 422 triggers full reconciliation. A timeout,
-      disconnect, or unknown response is never retried: zero matches stays stopped,
-      exactly one valid match recovers, and multiple matches enter complete conflict
-      closure. A failed/closed PR is never reopened. Every request/readback/binder/
-      closure boundary has the exact resume or fail-closed outcome in specification.md.
+      Name the attempt ref with full frozen-develop SHA and frontier suffix, POST-create
+      at exact frozen develop, and coalesce identical calls. Then allow one exact draft
+      PR POST. 201/422 reconcile; unknown PR result is never retried: zero remains a
+      durable protected-ref stop, one recovers, multiple enter cleanup. Freeze every
+      claim/attempt/PR/binder/closure crash outcome and never reopen a failed PR.
   - id: VOC-115-D08
     statement: >-
       Map mutation actor /root exactly to GitHub login m-e-h-r-d-a-a-d, numeric id
@@ -146,17 +163,16 @@ requirements:
   - id: VOC-115-D09
     statement: >-
       Same-develop retry requires the earlier closed-unmerged durable PR and immutable
-      claim/attempt refs, then a new PR-number claim frontier, accepted claim commit,
-      distinct attempt ref, and fresh PR/full binder,
-      checks, and reviews. Never rely on adjacent ordinals, editable comments, orphan
-      adoption, timeout expiry, branch-name reuse claims, manual deletion, or force.
+      protected claim/attempt refs, then a new prior-PR claim/attempt suffix and fresh
+      PR/full binder/checks/reviews. Never rely on caller uniqueness, adjacent ordinals,
+      comments, orphan adoption, timeout expiry, manual deletion, force, or branch reuse.
   - id: VOC-115-D10
     statement: >-
-      Accepted claim refs are permanent and never deletion eligible. Active and
-      abandoned attempt refs are immutable and ineligible for manual/automatic deletion.
-      Existing automatic deletion may affect only a successfully merged
-      short-lived release/sync head after exact identity and nonexecuted create-ref
-      recovery request evidence. Missing/moved bound refs stop governed investigation.
+      Evaluate PR multiplicity before merged precedence. Close and read back every
+      nonmerged duplicate before success. Exactly one valid merged plus only closed-
+      unmerged duplicates may close allocation; multiple/conflicting merges or failed
+      cleanup irrecoverably stop. With no merged PR, all closed duplicates advance to
+      the conflict digest; a single closed PR advances by number. All refs remain protected.
   - id: VOC-115-D11
     statement: >-
       Preserve frozen main as merge base, zero main-only commits, exact head/develop
@@ -171,11 +187,11 @@ requirements:
       path. The existing foundation glob auto-discovers the test; if disproved, stop.
   - id: VOC-115-D13
     statement: >-
-      Implement a network-free pure validator for claim/attempt/domain/ref validation,
-      canonical claim commits, complete pagination/projections/receipts, state/frontier
-      derivation, atomic claim outcomes, actor mapping, crash recovery, and surfaces.
-      Fixtures cover same/different-SHA races, duplicates, uncertain POST, every crash,
-      edit/delete, hostile input, incomplete scans, handoff, retry, topology, and refs.
+      Implement a network-free validator for ruleset, claim/attempt/domains, exact JSON
+      schemas, raw projections/capture versus stable digests, pagination/filter/equality,
+      state/frontier/cardinality, coalescence/stale outcome, actors/crashes, and surfaces.
+      Fixtures cover replay, same/different target, stale, ruleset drift, merged duplicate
+      cleanup, time variation, hostile ids/JSON, incomplete scans, handoff, retry/topology.
   - id: VOC-115-D14
     statement: >-
       Require exact path/OID/diff evidence, governance/risk/diff/format/link checks,
@@ -185,11 +201,11 @@ requirements:
   - id: VOC-115-D15
     statement: >-
       Monitor under DOC-15 section 24.18 through correction readback and first corrected
-      VOC-106 finalization, including synthetic races, uncertain response, deletion,
-      conflict, and same-D retry. Permit ordinary non-force updates only to PR #215's
-      scoped implementation head after adoption. Prohibit force/deletion, other ref or
-      settings mutation, release/sync, deployment, secrets/data, spending, launch,
-      self-review, self-approval, and self-merge.
+      VOC-106 finalization, including coalescence/different-target/stale, capture/stable,
+      uncertain response, ruleset drift, multiplicity cleanup, and same-D retry. Permit
+      ordinary non-force updates only to PR #215's scoped head after adoption. This
+      correction prohibits ref/settings/live actions; the separately authorized ruleset
+      prerequisite remains held. Prohibit self-review/approval/merge.
 
 implementation_paths:
   - .github/README.md
@@ -221,23 +237,42 @@ implementation_paths:
   - specs/changes/VOC-114-release-head-and-voc106-bookkeeping/test-plan.md
 
 attempt_identity:
-  arbiter: github-atomic-create-ref-for-one-deterministic-never-reused-claim-name
-  identity: frontier-name-plus-winning-claim-commit-SHA-plus-frozen-develop-SHA-tree
+  arbiter: github-atomic-create-ref-selects-one-target-not-one-caller
+  identity: claim-frontier-and-target-plus-SHA-bound-attempt-ref-plus-PR-number-node-id
   frontier_grammar: claim-genesis-or-claim-after-pr-number-or-claim-after-conflict-digest
+  same_target: one-logical-claim-all-identical-callers-coalesce-idempotently
+  different_target: losing-target-stops-and-stale-accepted-target-is-irrecoverable
   single_active: global-at-most-one-valid-open-draft-reserved-namespace-PR
   retry: closed-unmerged-PR-number-advances-to-new-claim-even-at-unchanged-develop
-  conflict: close-all-open-unmerged-matches-then-use-sorted-number-digest-frontier
-  uncertain_claim_ref_post: no-retry-own-target-wins-other-target-loses-absence-stops
+  conflict: cardinality-first-close-readback-all-nonmerged-then-merge-or-conflict-terminal
+  uncertain_claim_ref_post: bounded-byte-identical-retry-after-stable-absence-only
   uncertain_pr_post: never-retry-zero-stops-one-recovers-multiple-conflict-close
   comment_authority: none
 
 reconciliation:
-  pull_requests: exhaustive-all-state-per-page-100-through-final-Link-local-filter
-  timelines: exhaustive-every-reserved-PR-per-page-100-through-final-Link
-  claims: exact-GET-and-canonical-validation-of-every-claim-ref-and-commit
-  refs: full-git-ls-remote-set-equals-full-paginated-GitHub-matching-refs-set
-  receipts: JCS-GET-projections-non-self-referential-digests-counts-high-watermarks
+  pull_requests: exact-all-state-created-ascending-numbered-pages-through-short-page
+  timelines: exhaustive-every-reserved-PR-numbered-pages-through-short-page
+  refs: full-git-ls-remote-set-equals-full-numbered-GitHub-matching-refs-set
+  captures: exact-lossless-page-and-scan-schemas-with-times-etags-raw-digests
+  stable_state: timestamp-free-JCS-full-PR-boundary-ruleset-protected-PR-timeline-ref-view
+  equality: two-byte-identical-stable-states-at-most-three-pairs-then-stop
   storage: PR-binder-and-issue-191-link-evidence-only-reconstructed-before-action
+
+ruleset_prerequisite:
+  status: held-separate-settings-action-required
+  query_or_mutation_by_voc115_implementation: prohibited
+  include:
+    - refs/heads/release/voc-106-claim-*
+    - refs/heads/release/voc-106-*-attempt-*
+  exclude: []
+  required_rules:
+    - deletion
+    - non_fast_forward
+    - update-with-update_allows_fetch_and_merge-false
+  bypass_actors: []
+  enforcement: active
+  history_version_readback: required
+  unavailable_capability: voc106-remains-held
 
 actor_mapping:
   agent: /root
@@ -274,7 +309,8 @@ artifacts:
   release_plan: release-plan.md
 
 affected_areas:
-  - release-attempt-PR-arbitration-and-durable-frontier
+  - release-attempt-target-coalescence-and-protected-frontier
+  - held-GitHub-ruleset-prerequisite
   - protected-main-and-develop-history
   - automatic-short-lived-source-deletion-boundary
   - adopted-VOC-106-and-VOC-114-package-truth
@@ -291,7 +327,7 @@ dependencies:
   - id: VOC-115-DEP-00
     status: intake-only
     description: >-
-      Issue #216 and five exact FAIL records establish defects and stop conditions but
+      Issue #216 and seven exact FAIL records establish defects and stop conditions but
       grant no adoption or implementation authority.
   - id: VOC-115-DEP-01
     status: adopted-VOC-114-open-draft-implementation
@@ -302,7 +338,14 @@ dependencies:
     status: adopted-VOC-106-held-release
     description: >-
       VOC-106 remains repository-history action authority but is unusable until the
-      reviewed correction merges and postmerge gates pass.
+      reviewed correction merges, a separately authorized ruleset is installed/read
+      back/documented, and postmerge gates pass.
+  - id: VOC-115-DEP-03
+    status: held-separate-settings-action
+    description: >-
+      Exact no-bypass claim/attempt ref immutability requires a future explicitly
+      authorized GitHub ruleset action. This plan/implementation grants no authority to
+      query or mutate settings; unavailable exact capability keeps VOC-106 held.
 
 required_r4_evidence:
   decision_record:
@@ -358,16 +401,17 @@ post_merge_monitoring:
   owner: accountable-repository-owner-recorded-at-adoption
   begins: corrected-PR-215-merge-event
   ends: >-
-    exact correction readback, first corrected VOC-106 finalization, and complete
-    synthetic concurrency/unknown-response/deletion/conflict/same-D-retry matrix
+    exact correction and separately authorized ruleset readback, first corrected VOC-
+    106 finalization, and complete coalescence/stale/schema/cardinality/retry matrix
   stop: >-
-    concurrent active, false genesis, duplicate POST, incomplete reconciliation,
-    receipt, ref, ownership, topology, or check failure stops release and closure
+    missing/drifted ruleset, concurrent active, false genesis, unstable/incomplete view,
+    receipt, duplicate cleanup, ref, ownership, topology, or check failure
 
 external_effects:
   scoped_implementation_head_non_force_update: allowed-after-adoption-only
   repository_settings: prohibited
   settings_query: prohibited
+  future_voc106_ruleset_install_and_readback: separately-held-explicit-authority-required
   release_sync_permanent_foreign_ref_mutation_by_correction: prohibited
   force_or_force_with_lease: prohibited
   branch_deletion: prohibited

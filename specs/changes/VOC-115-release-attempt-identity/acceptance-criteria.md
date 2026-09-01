@@ -7,7 +7,7 @@
 - Evidence: `VOC-115-EV-00`
 - Result: pending
 
-Both superseded candidate SHAs/trees and all four exact FAIL reviews remain recorded
+All three superseded candidate SHAs/trees and all six exact FAIL reviews remain recorded
 with no transfer. PR #215 remains draft, and no adoption, review, ref, settings,
 release, merge, deployment, or external authority is inferred.
 
@@ -18,11 +18,11 @@ release, merge, deployment, or external authority is inferred.
 - Evidence: `VOC-115-EV-01`, `VOC-115-EV-02`
 - Result: pending
 
-The deterministic genesis/PR/conflict claim grammar, lossless numeric/digest domain,
-canonical same-tree claim commit, server-enforced create-ref arbiter, immutable accepted
-claim identity, attempt SHA/tree binding, state precedence, and globally at-most-one
-active attempt pass. Same/different-SHA races have one winner; duplicate PR activation
-has terminal conflict recovery.
+The deterministic claim/attempt grammar, lossless domains, verified no-bypass ruleset,
+server create-ref arbitration, same-target logical coalescence, attempt SHA/tree
+binding, and globally at-most-one active attempt pass. A different-target race either
+selects still-current topology or reaches the specified irrecoverable stale terminal;
+it does not promise a usable caller winner. PR multiplicity cleans up before success.
 
 ## VOC-115-AC-02 — History and receipts are exhaustive and reconstructible
 
@@ -31,11 +31,10 @@ has terminal conflict recovery.
 - Evidence: `VOC-115-EV-03`
 - Result: pending
 
-Full all-state PR pagination, every reserved PR timeline, claim commit, and equal
-complete ref sets reconstruct genesis/frontier/state. Exact JCS PR/timeline/ref/claim/
-reconciliation receipts,
-projections, high-watermarks, bindings, and non-self-referential digests reproduce from
-GET data. Body/comment edit or deletion fails evidence but cannot erase durable state.
+Full all-state PR pagination, every reserved timeline, equal complete ref sets, ruleset,
+and protected refs reconstruct state. Exact own-key/type/null/id/event/page schemas and
+lossless raw-to-projection rules pass. Capture timestamps/ETags/raw digests may change;
+the timestamp-free JCS stable-state digest reproduces when authoritative state is equal.
 
 ## VOC-115-AC-03 — Every race, crash, collision, and retry is representable
 
@@ -44,10 +43,11 @@ GET data. Body/comment edit or deletion fails evidence but cannot erase durable 
 - Evidence: `VOC-115-EV-04`, `VOC-115-EV-05`
 - Result: pending
 
-Every boundary has one exact resume or fail-closed state. Unknown claim/attempt-ref POST
-absence and uncertain PR POST are never retried; an accepted claim is one-use forever.
-Closed-unmerged PRs durably advance same-develop retry without moving/deleting earlier
-refs. Collisions, hostile inputs, or unmatched objects never adopt.
+Every boundary has an exact bounded idempotent resume or fail-closed state. Unknown ref
+creation may repeat only byte-identically under the bounded rule; uncertain PR POST is
+never retried and remains durably anchored by protected refs. Closed PRs advance same-D
+retry. Stale accepted topology is irrecoverable. Authorized deletion/update is denied
+by prerequisite readback; unauthorized settings mutation is explicitly out of scope.
 
 ## VOC-115-AC-04 — Actor and release topology controls remain exact
 
@@ -82,6 +82,6 @@ cross-model R4 reviews have zero blockers, and a separate non-author merges.
 - Result: pending
 
 DOC-15 §24.18 evidence covers correction postmerge and first VOC-106 finalization.
-Synthetic concurrency, unknown-response, deletion, conflict, and same-develop retry
-remain passing; a real retry additionally proves the prior ref unchanged and the new
-durable PR identity before related issues close.
+Synthetic same/different-target concurrency, coalescence, stale terminal, unknown
+responses, ruleset drift, multiplicity cleanup, and same-D retry remain passing. A real
+retry additionally proves prior refs unchanged and the new identity before issue close.

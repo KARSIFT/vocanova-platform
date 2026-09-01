@@ -2,23 +2,25 @@
 
 Issue [#216](https://github.com/KARSIFT/vocanova-platform/issues/216) and the
 [PR #215 specialist FAIL](https://github.com/KARSIFT/vocanova-platform/pull/215#issuecomment-5491674409)
-prove that adopted VOC-114 cannot retry at unchanged `develop`. PR #217's first two
-candidates are also rejected and transfer no review: `f7abcc8` used a racy client
-sequence and incomplete comment ledger; `535bcd4` still treated non-atomic editable
-comments as allocation authority and specified unreconstructible receipts.
+prove that adopted VOC-114 cannot retry at unchanged `develop`. PR #217's first three
+candidates are rejected with no review transfer: `f7abcc8` used a racy client sequence,
+`535bcd4` used editable-comment authority, and `ade2d6d` serialized a value but not a
+caller, relied on deletable refs, and underspecified stale state, receipts, and PR
+cardinality.
 
-The replacement removes comment-ledger authority. For each deterministic frontier,
-contenders create distinct canonical same-tree claim commits and race one GitHub
-POST-create-ref. The fixed claim name is an atomic first-writer lock; the winning
-never-deleted claim ref/commit is durable identity and binds frozen `develop` before an
-exact attempt ref/PR exists. Closed-unmerged PRs advance the frontier, merged closes
-allocation, and any impossible duplicates all close before a conflict frontier.
+The replacement removes caller-winner identity. Contenders race one deterministic claim
+ref directly at frozen `develop`; identical-target requests coalesce, while atomic
+create-ref selects between different targets. An exact SHA-bound attempt ref and
+durable PR complete identity. A verified no-bypass GitHub ruleset denying update,
+force, and deletion on claim/attempt refs is a separately authorized held prerequisite;
+VOC-115 neither queries nor changes settings. Stale protected topology is an explicit
+irrecoverable terminal. PR multiplicity always cleans up before terminal success.
 
-Exhaustive all-state PR, full timeline, claim-commit, and dual-source ref scans
-reconstruct state.
-Canonical non-self-referential scan receipts are evidence only. Unknown PR POST results
-are never retried, comment/body loss cannot recreate genesis, and exact actor-to-login
-mapping prevents inferred takeover.
+Exhaustive all-state PR/timeline and dual-source ref scans reconstruct state. Exact
+lossless page-capture schemas separate capture timestamps/ETags/raw bytes from a
+timestamp-free JCS stable-state digest. Unknown PR POST results are never retried,
+protected refs prevent false genesis under authorized actions, and exact actor mapping
+prevents inferred takeover.
 
 After reviewed adoption, one corrected revision of draft PR
 [#215](https://github.com/KARSIFT/vocanova-platform/pull/215) changes exactly 27 paths:

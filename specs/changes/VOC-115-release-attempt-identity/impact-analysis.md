@@ -16,31 +16,33 @@
 
 ## Security, privacy, and privilege
 
-The immutable one-use claim ref/commit and atomic unique-ref creation replace editable
-comments and client scans as authority. Exhaustive PR/timeline/claim/ref reconciliation,
-non-self-referential receipts, immutable ref rules, and no-POST-retry after uncertainty
-prevent duplicate attempts and false genesis. The exact `/root` to authenticated login
-mapping prevents inferred takeover. The later VOC-106 operator needs already-bounded
-ref/PR authority; VOC-115 executes none and accesses no credential, personal/learner/
-production data, Cloudflare resource, setting, or live system.
+Atomic unique-ref creation selects a topology value; same-target callers coalesce.
+Durability depends on a separately authorized exact no-bypass ruleset readback, not
+policy prose. Complete PR/timeline/ref reconstruction, timestamp-free stable digests,
+bounded ref retries, no PR-POST retry, and cardinality cleanup prevent duplicates and
+false genesis under authorized actions. Unauthorized ruleset mutation is outside the
+guarantee and stops on readback. VOC-115 itself accesses no credential, setting,
+personal/production data, Cloudflare resource, or live system.
 
 ## Risks and mitigations
 
 - `R00` same-SHA retry dead-end: closed PR number advances to a fresh claim frontier.
-- `R01` concurrent actives: one fixed claim name and GitHub atomic create-ref selects
-  one immutable winner; consumed claim refs are never reused.
+- `R01` concurrent actives: atomic fixed-name create-ref selects one target; identical
+  requests coalesce and downstream mutations are idempotent/server-serialized.
 - `R02` impossible duplicates: close every open/unmerged match, prove closure, and
   advance to the canonical conflict-digest frontier; none is active meanwhile.
-- `R03` deletion recreates genesis: permanent one-use claim refs plus complete durable
-  PR/timeline objects, not comments, are frontier authority.
-- `R04` crash creates duplicates: unknown claim/attempt-ref absence and PR POST are
-  never retried; stopped states remain stopped.
-- `R05` incomplete discovery: all-state PR/timeline/claim pagination plus two equal full
-  ref enumerations, canonical receipts, counts, high-watermarks, and bindings.
-- `R06` actor takeover: exact GitHub login/id/node-id mapping; no current handoff.
-- `R07` collision/ref mutation: create/read only; no adopt, update, force, or deletion.
-- `R08` policy drift: one 27-path correction and executable semantic validator.
-- `R09` correction mistaken for release: scoped ordinary PR-head update only and an
+- `R03` deletion recreates genesis: execution is held until an active no-bypass ruleset
+  denies claim/attempt update and deletion; every action freshly reads it.
+- `R04` stale topology: mandatory post-claim protected readback and explicit
+  irrecoverable terminal; no false usable-winner promise.
+- `R05` crash duplicates: bounded byte-identical ref retry is safe; PR POST is never
+  retried and protected refs retain the stopped state.
+- `R06` incomplete discovery: exact page schemas, full-boundary two-pass equality,
+  timelines, dual ref enumeration, stable digest, counts, and high-watermarks.
+- `R07` merged duplicate survives: multiplicity cleanup/readback precedes success.
+- `R08` actor/ref takeover: exact actor mapping, create/read only, and ruleset.
+- `R09` policy drift: one 27-path correction and executable semantic validator.
+- `R10` correction mistaken for release: scoped ordinary PR-head update only and an
   explicit no-ref/settings/live-action audit.
 
 ## Coherent unit and dependencies
@@ -55,6 +57,6 @@ repeated-check, exact-review, and bookkeeping overhead without a safe partial st
 
 Before merge, PR #215 remains draft/closable for zero protected effect. After merge, a
 different builder prepares a separately reviewed complete revert of the actual 27-path
-merge to its first parent. Never partially restore either failed candidate, reset,
+merge to its first parent. Never partially restore any failed candidate, reset,
 force, delete a bound branch, change settings, or use a live action. Any PR/ref/
 timeline/receipt/owner/topology ambiguity stops VOC-106 and preserves durable evidence.

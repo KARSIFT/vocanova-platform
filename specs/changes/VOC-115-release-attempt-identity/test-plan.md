@@ -3,120 +3,118 @@
 ## VOC-115-TEST-00 — Intake, scope, and authority
 
 - Covers: `VOC-115-AC-00`
-- Procedure: inspect issue #216, PR #215 FAIL, all four exact plan-candidate FAILs,
-  VOC-106/VOC-114, DOC-15/DOC-16, current surfaces, paths, and action wording.
-- Expected: both candidates are superseded/no-transfer; PR #215 draft; 27 paths exact;
-  ordinary scoped head updates only after adoption; no other authority.
+- Procedure: inspect #216, PR #215 FAIL, all six exact plan-candidate FAILs,
+  VOC-106/VOC-114, policy, surfaces, paths, and action wording.
+- Expected: three candidates superseded/no-transfer; PR #215 draft; 27 paths exact;
+  ruleset action held/separate; no implementation/ref/settings/release authority.
 - Evidence: `VOC-115-EV-00`
 
-## VOC-115-TEST-01 — Claim/attempt grammar and durable identity
+## VOC-115-TEST-01 — Ruleset, claim, attempt, and domains
 
 - Covers: `VOC-115-AC-01`
-- Procedure: validate genesis, prior-PR, and conflict claim names; canonical same-tree
-  one-parent claim commits/message/actor/nonce; attempt name; decimal/BigInt bounds;
-  digest construction; byte limits; and check-ref-format. Bind winning claim SHA and
-  attempt head SHA/tree to frozen develop.
-- Negatives: zero/sign/leading-zero/decimal/above-max/unsafe Number, short/mixed digest,
-  Unicode/control/traversal, wrong prefix/frontier/SHA/tree, overlength, invalid ref,
-  reused identity, and exhaustion.
-- Expected: exact inputs pass; every mutation stops without fallback.
+- Procedure: validate exact no-bypass active ruleset fixture, genesis/pr/conflict claim
+  names, SHA-bound attempt names, decimal/BigInt/node/SHA/digest/time/URL domains, byte
+  lengths, and `check-ref-format`.
+- Negatives: absent/disabled/wrong-target/wrong-pattern/exclude/bypass/missing rule;
+  zero/sign/leading-zero/above-max/unsafe Number; Unicode/control/traversal; wrong SHA/
+  digest/frontier; overlength/invalid ref; unauthorized settings claim.
+- Expected: only exact fixture/domain passes; unavailable capability holds VOC-106.
 - Evidence: `VOC-115-EV-01`
 
-## VOC-115-TEST-02 — Atomic claim concurrency and terminal states
+## VOC-115-TEST-02 — Atomic coalescence and stale terminal
 
 - Covers: `VOC-115-AC-01`
-- Procedure: race distinct canonical claim commits from same-SHA and different-SHA
-  contenders on the same fixed claim ref; fixture server accepts exactly one target.
-  Cover unknown response with own/other/absent/malformed readback, stale consumed claim,
-  genesis, active, closed-unmerged, merged, and impossible multiple matching PRs.
-- Expected: one immutable claim winner alone may create attempt ref/PR; loser performs
-  no further mutation and absence after unknown is never reposted. Closed PR advances,
-  merged closes allocation, and duplicates close before the conflict claim frontier.
+- Procedure: race same-target duplicate/replayed requests and different-target requests
+  on one claim name with 201/422/timeout/readback permutations. Repeat downstream
+  attempt-ref/PR calls from same logical claim. Mutate develop/main SHA/tree after claim.
+- Expected: identical target is one logical claim/attempt, not multiple caller winners;
+  downstream creates coalesce. Different target loses. Fresh matching topology proceeds;
+  any post-claim drift is permanent `stale-protected-topology`, creates no attempt/PR,
+  derives no frontier, and intentionally requires governed correction.
 - Evidence: `VOC-115-EV-02`
 
-## VOC-115-TEST-03 — Complete scans and reconstructible receipts
+## VOC-115-TEST-03 — Exact JSON, page captures, and stable view
 
 - Covers: `VOC-115-AC-02`
-- Procedure: build 0/1/99/100/101/multipage all-state PR/timeline fixtures, canonical
-  claim commits, and dual-source ref sets. Reconstruct every JCS projection, count,
-  high-watermark, binding, and non-self-referential digest after a simulated handoff.
-- Negatives: filtered-only scan, missing/repeated/out-of-order/changed/truncated pages,
-  incomplete Link traversal, duplicate ids, malformed fields, ref-source disagreement,
-  orphan ref/PR, missing deleted-source state, self-referential/POST-response digest,
-  stale count/high-watermark, body/comment edit/deletion, and hostile JSON/Unicode.
-- Expected: authoritative GET state reconstructs identical receipts; evidence loss
-  stops but cannot reset genesis/frontier or change authority.
+- Procedure: mutate every exact own key/type/null/enum/id/domain of PR, timeline, ref,
+  protected, ruleset, page-capture, scan-capture, stable-state, and reconciliation
+  schemas. Parse raw JSON with duplicate keys/large ids. Test 0/1/99/100/101 pages,
+  explicit empty sentinel, exact Link/query order, local filtering, counts, and
+  high-watermarks. Re-fetch equal state with different timestamps/ETags/raw bytes.
+- Expected: capture digest changes while timestamp-free stable-state digest reproduces.
+  Missing/extra/wrong fields, unsafe numbers, unknown timeline event, raw/projection
+  mismatch, gaps/repeats/truncation, wrong filter/boundary/count/high-watermark fail.
 - Evidence: `VOC-115-EV-03`
 
-## VOC-115-TEST-04 — Complete crash and uncertain-response matrix
+## VOC-115-TEST-04 — Stable algorithm and crash matrix
 
 - Covers: `VOC-115-AC-03`
-- Procedure: crash before/after freeze, claim commit POST, claim-ref POST/readback,
-  attempt-ref POST/readback, PR POST/readback, binder edit, conflict close, ordinary
-  invalidation close, and receipt storage. Test `201`, `422`, timeout, disconnect, and
-  malformed response.
-- Expected: own accepted claim resumes, another valid target loses, absence after
-  unknown stops without repost, and mismatch stops. Unknown PR POST: zero stops with no
-  retry, one recovers, duplicates enter conflict closure. Exact readback alone resumes.
+- Procedure: build two identical complete passes and mutations before/between/after
+  passes in protected refs, ruleset, any repository PR boundary, reserved PR/timeline,
+  and either ref source. Exercise claim/attempt-ref POST before/after response/readback,
+  byte-identical retry limits, PR POST unknown, binder, closure, and owner loss.
+- Expected: comparison is exact JCS stable-state equality, never capture equality;
+  unstable pairs discard/retry at most three pairs. Ref recovery is bounded and exact.
+  Unknown PR POST never retries: one recovers, zero remains protected/stopped, multiple
+  enter cleanup. No authorized deletion can pass the ruleset fixture.
 - Evidence: `VOC-115-EV-04`
 
-## VOC-115-TEST-05 — Collision, deletion, and same-develop retry
+## VOC-115-TEST-05 — Cardinality, deletion boundary, and same-D retry
 
 - Covers: `VOC-115-AC-03`
-- Procedure: close attempt PR A unmerged while preserving claim/attempt refs A, derive
-  the PR-A-number claim frontier at unchanged develop, atomically accept claim B, then
-  create PR B. Interpose comment/body deletion, attempts to delete/recreate consumed
-  claims, source-branch deletion before/after PR, wrong-target collision, unmatched
-  objects, duplicate candidate commits, and multiple PRs.
-- Expected: durable claim/PR history prevents false genesis; B has a distinct accepted
-  claim and attempt identity; A's refs remain immutable. Consumed claims cannot be
-  recreated. Collision is never adopted/updated/deleted.
+- Procedure: fixtures cover zero/one/multiple matching PRs, none/one/two merged, open/
+  closed/reopened duplicates, wrong merge SHA/tree, and failed close/readback. Close PR
+  A unmerged, preserve claim/attempt refs, then create after-PR-A claim/attempt at same D.
+  Simulate body/comment deletion, attempted ref update/delete denied by ruleset, and an
+  explicitly unauthorized settings mutation outside the safety guarantee.
+- Expected: multiplicity precedes merged. Every nonmerged duplicate closes/readbacks
+  before one valid merge can succeed; multiple/conflicting merges stop. No merged case
+  advances conflict frontier. With no merge, all closed duplicates advance conflict
+  digest. Same-D retry is distinct and old refs immutable. Body/comment loss grants no
+  state; ruleset mutation stops and does not pretend deletion resistance.
 - Evidence: `VOC-115-EV-05`
 
 ## VOC-115-TEST-06 — Actor, topology, and recovery regression
 
 - Covers: `VOC-115-AC-04`
 - Procedure: enforce `/root` -> `m-e-h-r-d-a-a-d`/`7955432`/
-  `MDQ6VXNlcjc5NTU0MzI=`. Test owner resume and a hypothetical separately adopted
-  mapping plus durable assignment. Disposable Git topology proves merge base,
-  zero-main-only, head/develop SHA/tree, compare, prospective/actual tree, separate
-  reviewed promotion/sync merges, permanent refs, ancestry/zero-behind, deletion
-  eligibility, and recovery request.
-- Negatives: subagent mutation, wrong author/id/node id, self-asserted/unmapped handoff,
-  unauthorized assignment/reopen, and every wrong ref/tree/PR/review/merge/sync/
-  ancestry/delete/recovery/action mutation.
-- Expected: current handoff is impossible; exact topology passes and one mutation stops.
+  `MDQ6VXNlcjc5NTU0MzI=` and no current handoff. Disposable Git topology proves merge
+  base, zero-main-only, head/develop SHA/tree, compare, prospective/actual tree,
+  separately reviewed promotion/sync merges, permanent refs, ancestry/zero-behind,
+  ruleset survival, and recovery request.
+- Negatives: wrong actor/id/node, subagent mutation, self-asserted/unmapped handoff,
+  unauthorized assignment/settings, and every wrong topology/review/merge/recovery.
+- Expected: exact topology passes; one mutation stops.
 - Evidence: `VOC-115-EV-06`
 
 ## VOC-115-TEST-07 — Validator discovery and focused suite
 
 - Covers: `VOC-115-AC-05`
-- Procedure: run the validator/test directly and through the committed foundation glob;
-  inspect exports, mutation-fixture isolation, network denial, and path diagnostics.
-- Expected: every specification case executes, test is auto-discovered, no package
-  script changes, no credential/network/real-ref operation, and each negative fails
-  for its intended invariant.
+- Procedure: run validator/test directly and through foundation glob; inspect exports,
+  fixture isolation, network denial, and path diagnostics.
+- Expected: every case executes, auto-discovery passes, no package script change, no
+  network/credential/real-ref/settings operation, and each negative fails correctly.
 - Evidence: `VOC-115-EV-07`
 
 ## VOC-115-TEST-08 — Exact paths, reviews, and rollback
 
 - Covers: `VOC-115-AC-05`
-- Procedure: compare expected/actual 27 paths and OIDs; audit 25 current text surfaces;
-  preserve adoption/history; run governance/risk/diff/format/link, foundation, and
-  hosted checks. Reverse the full actual diff in a disposable worktree. Bind fresh
-  exact specialist and different cross-model R4 reviews after every edit.
-- Expected: no other path/current contradiction; all checks/reviews zero-blocker;
-  exact parent tree restores; separate non-author merge.
+- Procedure: audit exact 27 paths/OIDs and 25 textual surfaces; preserve adoption and
+  failed-review history; run governance/risk/diff/format/link/foundation/hosted checks;
+  reverse full diff in disposable worktree; bind fresh exact specialist and different
+  cross-model R4 reviews after every edit.
+- Expected: no other path/contradiction; zero blockers; exact parent tree restores;
+  separate non-author merge. Ruleset remains a held external prerequisite, not executed.
 - Evidence: `VOC-115-EV-08`
 
 ## VOC-115-TEST-09 — DOC-15 section 24.18 monitoring
 
 - Covers: `VOC-115-AC-06`
-- Procedure: adoption owner observes exact correction merge/readback, validator/full
-  matrix, then first corrected VOC-106 promotion/sync. Retain synthetic concurrency,
-  unknown-response, deletion/conflict, and same-D retry; inspect a real retry if any.
-- Expected: no concurrent active, false genesis, duplicate POST, receipt, ownership,
-  ref, or topology recurrence before #216/#213/#191 close.
+- Procedure: observe correction merge/readback, separately authorized ruleset evidence,
+  then first corrected VOC-106 finalization. Retain coalescence/different-target/stale,
+  capture/stable, unknown-response, ruleset drift, multiplicity, and same-D fixtures.
+- Expected: no duplicate active, false genesis under authorized actions, schema,
+  ownership, ref, or topology recurrence before #216/#213/#191 closure.
 - Evidence: `VOC-115-EV-09`
 
 ## Commands
@@ -129,18 +127,18 @@
 - `git diff --check`
 - exact path/OID/surface audits and disposable topology/rollback fixtures
 
-No test uses network, GitHub/Cloudflare/settings APIs, credentials, real refs, push,
-force, deletion, dispatch, deployment, migration, data, DNS/traffic, spending, or launch.
+No test uses network, APIs, credentials, real refs/settings, push, force, deletion,
+dispatch, deployment, migration, data, DNS/traffic, spending, or launch.
 
 ## Evidence definitions
 
-- `VOC-115-EV-00`: intake, superseded reviews, scope, and authority evidence.
-- `VOC-115-EV-01`: frontier grammar, numeric/digest domain, and identity bindings.
-- `VOC-115-EV-02`: atomic same/different-SHA race and terminal conflict matrix.
-- `VOC-115-EV-03`: complete scans and reconstructed canonical receipts.
-- `VOC-115-EV-04`: every-boundary crash/unknown-response recovery matrix.
-- `VOC-115-EV-05`: collision/deletion/same-D immutable retry matrix.
-- `VOC-115-EV-06`: actor mapping, topology, deletion, and recovery regression.
-- `VOC-115-EV-07`: validator exports, discovery, isolation, and focused results.
-- `VOC-115-EV-08`: paths/OIDs, surfaces, checks, reviews, rollback, and merge.
-- `VOC-115-EV-09`: bounded postmerge/first-use monitoring and issue disposition.
+- `VOC-115-EV-00`: intake, all superseded reviews, scope, and authority.
+- `VOC-115-EV-01`: ruleset, claim/attempt grammar, and primitive domains.
+- `VOC-115-EV-02`: coalesced races and explicit stale terminal matrix.
+- `VOC-115-EV-03`: exact schemas, page captures, and stable state.
+- `VOC-115-EV-04`: stable equality and every crash/unknown-response boundary.
+- `VOC-115-EV-05`: cardinality cleanup, deletion boundary, and same-D retry.
+- `VOC-115-EV-06`: actor, topology, settings hold, and recovery regression.
+- `VOC-115-EV-07`: validator discovery/isolation/focused results.
+- `VOC-115-EV-08`: paths/OIDs, checks, reviews, rollback, and merge.
+- `VOC-115-EV-09`: bounded postmerge/ruleset/first-use monitoring.

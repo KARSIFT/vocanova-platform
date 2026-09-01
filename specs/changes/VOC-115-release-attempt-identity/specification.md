@@ -3,13 +3,43 @@
 ## Objective and failed evidence
 
 Issue #216 and PR #215's exact specialist FAIL prove that a head named only by frozen
-`develop` cannot retry at unchanged `develop`. PR #217 candidates `f7abcc894bab3f2bc0c1dba633b800f1c51825cd`
-and `535bcd47e1d82236e1e5b46dc1317ca66c4893e6` are superseded blocked evidence; their
-four exact FAIL verdicts transfer nowhere. Editable comments, stable GET scans, and an
-open-PR check are not atomic mutual exclusion. VOC-115 instead uses GitHub's atomic
-create-ref primitive and immutable, never-reused claim refs.
+`develop` cannot retry at unchanged `develop`. PR #217 candidates `f7abcc894bab3f2bc0c1dba633b800f1c51825cd`,
+`535bcd47e1d82236e1e5b46dc1317ca66c4893e6`, and
+`ade2d6db3376b879c3f68d2bc23010b0c8894bed` are superseded blocked evidence. Their
+exact FAIL verdicts transfer nowhere. Editable comments and scans are not locks; a
+client nonce/commit serializes a value, not a caller; and policy prose cannot make a
+deletable ref durable. This replacement removes caller uniqueness and makes server-
+enforced ref immutability a held execution prerequisite.
 
-## Deterministic frontier and atomic claim
+## Held server-enforced immutability prerequisite
+
+VOC-115 implementation changes repository content only. It does not query or change
+settings and grants no such authority. Before any corrected VOC-106 attempt, a
+separately authorized settings action must install and read back an active GitHub
+ruleset that matches exactly:
+
+```text
+refs/heads/release/voc-106-claim-*
+refs/heads/release/voc-106-*-attempt-*
+```
+
+For matching refs it must deny update, force/non-fast-forward update, and deletion,
+allow creation, have no actor/team/app bypass, and apply to administrators. Exact
+repository id, ruleset id and latest history version, target, enforcement, include/
+exclude patterns, rules, bypass array, creator/action authority, timestamp, and GET
+response digests must
+be recorded in a separately governed current-settings record. If GitHub cannot express
+or read back every invariant, VOC-106 remains held. A later setting change/disable is a
+new separately authorized action and invalidates every in-progress attempt.
+
+No deletion-resistance claim extends to unauthorized settings mutation or GitHub
+control-plane failure. Under the verified ruleset, an accepted claim/attempt ref cannot
+disappear; without it no claim creation, PR, release, or recovery is allowed.
+The frozen external contract is GitHub's official
+[repository-rules REST API](https://docs.github.com/en/rest/repos/rules?apiVersion=2026-03-10),
+including the `update`, `deletion`, `non_fast_forward`, history, and version endpoints.
+
+## Deterministic frontier and atomic topology claim
 
 The current claim ref is exactly one of:
 
@@ -19,183 +49,237 @@ release/voc-106-claim-after-pr-<prior-pr-number>
 release/voc-106-claim-after-conflict-<64-lowercase-hex-digest>
 ```
 
-Genesis is valid only when exhaustive PR/timeline/ref reconciliation finds no VOC-106
-claim, attempt, or merged history. A valid closed-unmerged attempt PR advances to its
-PR-number frontier. A valid merged attempt permanently closes allocation. If a claim
-ever has multiple matching PRs, none is active: close every open/unmerged duplicate,
-prove terminal states, and derive the conflict frontier. Its digest is SHA-256 of the
-UTF-8 ascending numeric PR-number strings joined by LF and terminated by LF.
+Genesis is valid only when exhaustive stable reconciliation finds no claim, attempt,
+or reserved PR history. One valid closed-unmerged attempt PR advances to its number.
+One valid merged attempt closes allocation only after duplicate cleanup below. The
+conflict digest is SHA-256 of ascending numeric matching PR-number strings joined by LF
+and terminated by LF.
 
-For one frontier, each contender creates one unreferenced claim commit through the
-GitHub Git Commit API. Its tree equals frozen `develop`, its sole parent is frozen
-`develop`, and its exact LF-terminated ASCII message is:
+Every contender freezes `origin/develop` and `origin/main`, proves the ruleset and
+stable view, then calls GitHub `POST /git/refs` for the same frontier claim ref with
+target equal to its frozen `develop` SHA. Atomic unique-ref creation chooses one target,
+not one caller. Exact same-target contenders are deliberately one logical claim and
+all downstream operations are idempotent/server-serialized; there is no caller-winner
+predicate. A different-target contender loses and performs no mutation.
 
-```text
-voc-106-claim-v1
-actor=/root
-github_login=m-e-h-r-d-a-a-d
-github_numeric_id=7955432
-github_node_id=MDQ6VXNlcjc5NTU0MzI=
-frozen_develop_sha=<40-lowercase-hex>
-frozen_develop_tree=<40-lowercase-hex>
-frozen_main_sha=<40-lowercase-hex>
-frozen_main_tree=<40-lowercase-hex>
-frontier=<exact-claim-ref-without-refs/heads/>
-nonce=<64-lowercase-hex-CSPRNG-value>
-```
+After `201`, `422`, timeout, or disconnect, GET the exact claim ref and commit/tree:
 
-Author and committer are exactly `VocaNova release operator`, noreply address
-`7955432+m-e-h-r-d-a-a-d@users.noreply.github.com`, and the same UTC RFC3339-seconds
-timestamp. Unknown/extra headers, signatures, encoding headers, extra parents, changed
-tree, non-LF framing, or noncanonical fields invalidate the candidate. The nonce is 32
-bytes from the operating-system CSPRNG and never a counter, timestamp, JS number, or
-secret. A contender keeps its candidate commit SHA and message as local recovery input.
+- target equals the frozen SHA/tree: this logical claim may continue;
+- another valid target: this contender loses;
+- absent: repeat at most twice only the byte-identical create-ref request with the same
+  frozen target after a complete stable reconciliation; then stop;
+- malformed/wrong/unreconstructible state: stop; never adopt, update, force, or delete.
 
-Each contender then calls GitHub `POST /git/refs` once for the same absent exact claim
-ref and its own candidate commit SHA. GitHub's atomic unique-ref creation selects one
-winner. `201`, `422`, timeout, or disconnect all lead to exact GET/readback:
+The accepted claim is the immutable ref target, not a response recipient. Replayed or
+duplicate requests for the same target coalesce and cannot create a second identity.
+The verified ruleset makes accepted absence impossible under authorized actions.
 
-- target equals this contender's valid candidate commit: it is the winner and resumes;
-- target is another valid candidate for the same frontier/frozen topology: it is the
-  loser and performs no further mutation;
-- ref absent after an unknown result: allocation remains stopped; never repeat POST;
-- malformed/wrong target, pre-existing unvalidated object, or multiple frontier claims:
-  stop for governed correction; never adopt, update, force, or delete.
+Immediately after claim acceptance and before attempt-ref creation, take two consecutive
+fresh reads of `origin/develop`, `origin/main`, and both trees. The reads must equal
+each other and all four values must equal the claim's frozen stable view. If any differs,
+the accepted protected claim ref itself records a permanent
+`stale-protected-topology` terminal and the entire VOC-106 operation is irrecoverably
+stopped pending a new governed correction. It does not derive another frontier and no
+attempt ref/PR may be created. Existing protected-main/develop non-force history makes
+return to the old exact SHA impossible under authorized actions; a ref rewind is an
+out-of-bound settings/history violation and never revives the claim. Acceptance
+criteria/tests intentionally do not promise a usable winner for different topology.
 
-The accepted claim ref and commit are immutable, permanent, and never deletion-
-eligible. Therefore a consumed frontier cannot be won again by a stale process, and
-deleted comments/bodies cannot recreate genesis or absence. Unreferenced losing commit
-objects grant no identity or authority.
+## SHA-bound attempt identity
 
-## Collision-free attempt identity and ref
-
-The winner's release head is exactly:
+The valid claim's attempt head is exactly:
 
 ```text
-release/voc-106-<frozen-develop-sha>-attempt-<winning-claim-commit-sha>
+release/voc-106-<40-lowercase-hex-frozen-develop-sha>-attempt-genesis
+release/voc-106-<40-lowercase-hex-frozen-develop-sha>-attempt-after-pr-<prior-pr-number>
+release/voc-106-<40-lowercase-hex-frozen-develop-sha>-attempt-after-conflict-<64-hex-digest>
 ```
 
-Both SHAs are 40 lowercase hex. Identity is the tuple of frontier claim-ref name,
-winning immutable claim-commit SHA, and frozen-develop SHA/tree. Atomic one-use claim
-refs make accepted identities collision-free even if a theoretical hash collision or
-duplicate candidate is presented: any ambiguous/non-unique object equality stops.
-Same-develop retry uses a new frontier and claim commit, so its attempt ref is distinct
-while the old claim/attempt refs remain immutable.
+It is POST-created once at exact frozen `develop`. Same-target contenders coalesce on
+the same name/target. Claim frontier, claim target SHA/tree, attempt name/target, and
+the later server PR number/node id form one identity. Same-develop retry has a new
+prior-PR frontier/name while every earlier ref stays immutable.
 
-PR numbers match `[1-9][0-9]{0,9}` and are at most `2147483647`, handled only as
-strings/`BigInt`. Claim/attempt heads are safe ASCII, at most 105 bytes, full refs at
-most 116 bytes, and must pass `git check-ref-format --branch`. Invalid/exhausted input
-stops without truncation or fallback.
+PR numbers are canonical decimal strings `[1-9][0-9]{0,9}` not exceeding
+`2147483647`. GitHub ids are canonical `[1-9][0-9]{0,18}` not exceeding
+`9223372036854775807`. Parse/compare with `BigInt`, never JSON `Number`. SHAs/digests
+are 40/64 lowercase hex. Node ids are nonempty 1–256-byte ASCII `[A-Za-z0-9_=-]+`.
+Names are safe ASCII, at most 124 bytes including `refs/heads/`, and pass
+`git check-ref-format --branch`. Invalid/exhausted input stops without fallback.
 
-Only the claim winner may atomically POST-create the absent attempt ref at exact frozen
-`develop`. A lost response recovers only by exact ref SHA/tree readback plus claim
-ownership. Absence after unknown response remains stopped and is never reposted;
-mismatch/collision is never adopted, moved, forced, or deleted. Bound active and
-abandoned attempt refs are permanent. Existing automatic deletion may affect only a
-successfully merged short-lived head after recovery evidence is recorded; claim refs
-are never eligible.
+Unknown attempt-ref POST uses the same bounded byte-identical retry/readback rule as
+the claim ref. Exact target resumes; other/malformed target stops. Update, force,
+force-with-lease, and deletion are forbidden. Claim and active/abandoned attempt refs
+are never automatic-deletion eligible. A successfully merged short-lived attempt ref
+also remains protected under this design; recovery records a nonexecuted POST request
+but never relies on source deletion.
 
-## PR lifecycle and uncertain responses
+## PR creation and cardinality-first lifecycle
 
-Only the claim winner posts one draft PR with exact attempt head, `base=main`, frozen
-head/base SHA/tree, and canonical binder. After `201` or `422`, fully reconcile. After
-timeout, disconnect, or unknown result, never retry the PR POST:
+After final protected-ref readback, contenders may send the same exact draft PR POST
+with attempt head and `base=main`. GitHub open-head/base uniqueness coalesces concurrent
+requests. After `201` or `422`, reconcile. After timeout/disconnect/unknown result,
+never retry the PR POST: retain the protected refs and scan only. Exactly one valid
+match recovers; zero is a durable stopped claim/ref state; multiplicity enters conflict.
 
-- exactly one valid matching PR recovers the attempt;
-- zero matching PRs leaves allocation permanently stopped pending governed correction;
-- multiple matching PRs are conflict: none is active, close every open/unmerged match,
-  prove closure, and derive the conflict frontier.
+Cardinality is evaluated before terminal precedence for all PRs mapped to one claim/
+attempt identity:
 
-A valid open draft PR backed by the unique winning claim is the sole active attempt. A
-closed-unmerged PR is durable abandonment and is never reopened. A merged PR is
-terminal success. The complete issue timeline must prove state, closure, merge,
-assignment, head deletion, and absence of reopen/unauthorized transfer. State
-precedence is merged; conflict; closed-unmerged; open valid draft; claimed but PR-
-unknown/stopped; empty. Invalid objects never degrade into a lower valid state.
+1. With more than one matching PR, state is `conflict-cleanup` regardless of merge.
+   Close every open/unmerged duplicate, fetch every complete timeline and PR readback,
+   and require every nonmerged PR closed-unmerged. No release/sync action occurs during
+   cleanup.
+2. After cleanup, exactly one valid merged PR plus only closed-unmerged duplicates is
+   terminal success. More than one merged PR, conflicting merge SHA/tree, a reopened/
+   unclosed duplicate, or failed readback is irrecoverably stopped.
+3. With no merged PR, all closed-unmerged matches form conflict abandonment and advance
+   to the conflict-digest frontier over every matching PR number.
+4. With exactly one matching open draft PR, it alone is active. Exactly one closed-
+   unmerged PR advances to its number. A failed/closed PR is never reopened.
 
-## Exhaustive reconciliation
+The complete PR timeline must prove closure, reopen absence, merge, assignment, head
+deletion, and transfer. State precedence after cardinality cleanup is merged terminal;
+conflict abandonment; single closed abandonment; single open active; protected claimed-
+but-PR-unknown stopped; empty. Invalid states never degrade into a lower valid state.
 
-Every decision repeats until two consecutive complete projections are identical:
+## Lossless JSON and exact projections
 
-1. paginate `GET /repos/KARSIFT/vocanova-platform/pulls?state=all&per_page=100`
-   through final `Link` proof and locally filter the reserved namespace;
-2. paginate every reserved PR issue timeline at `per_page=100` through final `Link`;
-3. enumerate all `refs/heads/release/voc-106-*` through both `git ls-remote --heads`
-   and fully paginated GitHub matching-refs, requiring byte-identical sets; and
-4. GET every claim commit and every matching PR/ref object referenced by projections.
+All response JSON is parsed from UTF-8 bytes with duplicate-key rejection and lossless
+numeric-token capture before any conversion. Unknown/missing keys in a frozen receipt
+object fail. Nullable means JSON `null`; otherwise null is forbidden. Booleans are JSON
+booleans. Times are `YYYY-MM-DDTHH:MM:SSZ`. URLs are canonical HTTPS API URLs with
+query keys in the exact order stated. Lists are arrays, never maps. Every GitHub REST
+request uses `Accept: application/vnd.github+json` and
+`X-GitHub-Api-Version: 2026-03-10`; an unavailable/incompatible version stops.
 
-Reject gaps, repeats, reordered/changed page snapshots, missing final proof, duplicate
-ids, malformed fields, hostile input, source disagreement, or unmatched objects. Every
-claim ref maps to its canonical commit and zero or more fully modeled PR outcomes;
-every attempt ref maps to exactly one claim and PR history, or the one current
-PR-unknown stopped claim. A PR maps to its ref or an explicit GitHub deleted-source
-state permitted only after successful merge. No filtered-only search proves absence.
+Exact projection own-key sets are:
 
-## Reconstructible canonical receipts
-
-Receipts are evidence, not state authority. Each is RFC 8785/JCS UTF-8 JSON with exact
-own-key sets, canonical strings, UTC seconds, counts/high-watermarks, and a lowercase
-SHA-256 over the object with only its `digest` field omitted:
-
-- `voc-106-pr-scan-v1`: repository/endpoint/query/per-page/page-count/total-count/
-  highest-number/fetched-at and PR-number-sorted projections containing number/node-id,
-  state/draft, author login/id/node-id, head ref/SHA, base ref/SHA, timestamps, merge SHA.
-- `voc-106-timeline-scan-v1`: repository/PR identity/endpoint/per-page/page-count/
-  total-count/highest-event-id/fetched-at and event-id-sorted projections containing
-  id/node-id, event, actor and assignee login/id/node-id, commit-id, created-at.
-- `voc-106-ref-scan-v1`: repository, exact ls-remote command and API endpoint/page-
-  count, fetched-at, ref-name-sorted `{ref,sha}` arrays from both sources, set equality.
-- `voc-106-claim-scan-v1`: claim ref/commit SHA, complete canonical commit projection,
-  validation result, frozen topology, and fetched-at.
-- `voc-106-reconciliation-v1`: both stable-pass timestamps, all four projection
-  digests/counts/high-watermarks, frozen main/develop SHA/tree, frontier, claim SHA,
-  attempt ref, PR number/node-id or null, and derived state.
-
-Receipts and binder live in the attempt PR body and an issue-#191 evidence link, but
-body/comments are editable/deletable and grant nothing. Every continuation/handoff
-re-fetches authoritative GET objects and reconstructs identical receipts. Missing or
-mismatched evidence stops; raw POST response bytes and self-referential digests are
-forbidden.
-
-## Actors and handoff
-
-The only mapped mutation operator is agent `/root`, authenticated as GitHub login
-`m-e-h-r-d-a-a-d`, numeric id `7955432`, node id `MDQ6VXNlcjc5NTU0MzI=`. The
-authenticated response identity, claim commit fields, PR author, and receipt actor must
-all match. Delegated planners/builders/reviewers have no GitHub mutation authority;
-`/root` may attach their attributable evidence.
-
-No current handoff exists. Future handoff requires a separately adopted actor/login/
-id/node-id mapping and durable PR assignment by the current owner, plus reconstructed
-receipts. It transfers preparation only, never review, merge, settings, deployment, or
-external authority. A claim before PR cannot be handed off. Owner loss, inactivity,
-self-asserted prose, or unmapped assignment stops for EHR/governed correction.
-
-## Crash matrix
-
-| Boundary | Exact recovery |
+| Projection | Keys and domains |
 | --- | --- |
-| freeze/scans | repeat complete stable projections; changed frozen input restarts before mutation |
-| claim-commit POST unknown | local exact candidate SHA plus GET may recover object only; no claim authority yet |
-| claim-ref POST unknown | exact ref/commit readback: own target wins, other target loses, absence stops with no repost |
-| attempt-ref POST unknown | exact readback plus winning claim may resume; absence/mismatch stops with no repost |
-| PR POST unknown | never retry; one valid PR recovers, zero stops, duplicates close into conflict frontier |
-| binder/readback | reconstruct every authoritative view; exact state resumes, mismatch stops |
-| drift/check/review failure | close draft unmerged, prove timeline and ref immutability, derive PR-number frontier |
-| competing PRs | close all open/unmerged matches, prove terminals, derive conflict frontier |
-| owner loss | mapped owner resumes; post-PR separately adopted assignment may hand off; otherwise stop |
+| `pr-v1` | `base_ref:string`, `base_sha:sha40`, `closed_at:time|null`, `created_at:time`, `draft:boolean`, `head_ref:string`, `head_repo_full_name:"KARSIFT/vocanova-platform"`, `head_sha:sha40`, `merge_commit_sha:sha40|null`, `merged_at:time|null`, `node_id:node`, `number:pr-decimal`, `state:"open"|"closed"`, `updated_at:time`, `user_id:id-decimal`, `user_login:string`, `user_node_id:node` |
+| `timeline-v1` | `actor_id:id-decimal|null`, `actor_login:string|null`, `actor_node_id:node|null`, `assignee_id:id-decimal|null`, `assignee_login:string|null`, `assignee_node_id:node|null`, `commit_id:sha40|null`, `created_at:time`, `event:timeline-event`, `id:id-decimal`, `node_id:node|null` |
+| `ref-v1` | `name:string`, `sha:sha40` |
+| `protected-v1` | `name:"develop"|"main"`, `sha:sha40`, `tree:sha40` |
+| `ruleset-history-v1` | `actor_id:id-decimal`, `actor_type:"User"`, `updated_at:time`, `version_id:id-decimal` |
+| `ruleset-v1` | `bypass_actors:[]`, `conditions:{ref_name:{exclude:[],include:[exact-two-patterns]}}`, `enforcement:"active"`, `history_version:id-decimal`, `id:id-decimal`, `name:"VOC-106 immutable release attempt refs"`, `rules:[{type:"deletion"},{type:"non_fast_forward"},{parameters:{update_allows_fetch_and_merge:false},type:"update"}]`, `source:"KARSIFT/vocanova-platform"`, `source_type:"Repository"`, `target:"branch"` |
 
-## Preserved topology and action boundaries
+`history_version` is projected from the numeric-max exact ruleset-history record. Fetch
+that exact version and require its `state` projection byte-equal the current ruleset
+projection after omitting only `history_version`. The remaining ruleset keys come from
+the exact ruleset GET. For raw GET arrays, the
+lossless parser validates every listed source path and projects
+only these exact keys; unrelated documented API response keys do not enter policy state.
+Missing, duplicate, lossy, or wrong-type source values fail. Numeric source tokens are
+converted directly to canonical decimal strings; nullable source paths map only to the
+specified null. `items_jcs_sha256` is computed after this deterministic projection.
+
+`timeline-event` is exactly one of `assigned`, `unassigned`, `closed`, `reopened`,
+`merged`, `head_ref_deleted`, `head_ref_restored`, `base_ref_changed`, `renamed`,
+`locked`, `unlocked`, `labeled`, `unlabeled`, `milestoned`, `demilestoned`,
+`review_requested`, `review_request_removed`, `review_dismissed`, `ready_for_review`,
+`convert_to_draft`, `auto_merge_enabled`, `auto_merge_disabled`,
+`added_to_merge_queue`, `removed_from_merge_queue`, `committed`, `reviewed`, `commented`,
+`referenced`, `cross-referenced`, `connected`, `disconnected`, `subscribed`,
+`unsubscribed`, `marked_as_duplicate`, `unmarked_as_duplicate`, `transferred`,
+`converted_note_to_issue`, `deployed`, or `deployment_environment_changed`. A new event
+enum stops for governed schema revision rather than being ignored.
+
+## Capture receipts and stable state
+
+Each fetched page produces `voc-106-page-capture-v1` with exactly:
+
+`schema` (that literal), `source` (`pulls|timeline|matching_refs`), `endpoint` (exact
+page URL), `http_status` (JSON integer 200), `etag` (ASCII string or null), `captured_at`
+(time), `page` (id-decimal), `per_page` (string `"100"`), `next_url` (canonical URL or
+null), `item_count` (decimal string `0..100`), `raw_sha256` (digest64), `items` (array of
+the source projection), `items_jcs_sha256` (digest64), and `capture_sha256` (digest64).
+`capture_sha256` hashes RFC 8785/JCS of the object with only itself omitted;
+`items_jcs_sha256` hashes JCS `items`. Raw digest covers exact response bytes. Capture
+timestamps/ETags/raw bytes are deliberately capture-specific and need not reproduce.
+
+Each non-page GET produces `voc-106-object-capture-v1` with exactly `schema`, `source`
+(`ruleset|ruleset_history|protected_ref|git_object`), `endpoint`, `http_status` (200),
+`etag` (ASCII string or null), `captured_at`, `raw_sha256`, `projection` (the exact
+ruleset/protected/ref object), `projection_jcs_sha256`, and `capture_sha256`. The
+projection digest hashes only JCS `projection`; the capture digest hashes the whole
+object with only `capture_sha256` omitted. Capture-specific fields are excluded from
+stable state.
+
+One source scan produces `voc-106-scan-capture-v1` with exact keys `schema`, `source`,
+`started_at`, `completed_at`, `pages`, `page_count`, `total_count`, `high_watermark`,
+`capture_sha256`, and `state_projection_sha256`. Counts/page numbers are canonical
+decimal strings. Pull/timeline high watermark is id-decimal or `"0"`; matching-ref
+high watermark is its last UTF-8 ref name or null. `pages` is ordered page-
+capture digests. Its capture digest omits only itself. The state digest excludes all
+capture times, ETags, page boundaries, raw digests, and capture digests.
+`state_projection_sha256` hashes JCS of the complete concatenated source projections:
+PRs sorted by numeric number, timeline events by numeric id, or refs by UTF-8 name.
+
+`voc-106-stable-state-v1` has exactly `schema`, `repository`, `ruleset`,
+`protected_refs`, `counts`, `high_watermarks`, `all_pr_boundary`, `reserved_prs`,
+`timelines`, and `refs`.
+`repository` is `KARSIFT/vocanova-platform`; `ruleset` is `ruleset-v1`;
+`protected_refs` sorts by name; `all_pr_boundary` contains exact
+`{node_id,number,updated_at}` for every repository PR sorted by numeric number;
+`reserved_prs` contains full `pr-v1` objects selected by exact
+`head_repo_full_name == repository` and head-ref grammar after the full scan, sorted by
+number; `timelines` is sorted objects `{events,pr_number}` with events by numeric id;
+`refs` is the equal full reserved `ref-v1` set sorted by UTF-8 ref name. `counts` has
+exact decimal-string keys `all_prs`, `refs`, `reserved_prs`, `timeline_events`, and
+`timelines`. `high_watermarks` has `all_pr_number` (id-decimal or `"0"`), `refs` (last
+UTF-8 name or null), and `timelines` (PR-number-sorted exact objects
+`{event_id,pr_number}`, where empty event id is `"0"`). The state
+digest is SHA-256 of its JCS bytes and is what a later actor must reproduce when state
+has not changed. A separate `voc-106-reconciliation-v1` has exact keys `schema`,
+`pass_1_capture_sha256`, `pass_2_capture_sha256`, `stable_state_sha256`,
+`frozen_develop_sha`, `frozen_develop_tree`, `frozen_main_sha`, `frozen_main_tree`,
+`frontier`, `claim_sha`, `attempt_ref`, `pr_number`, `pr_node_id`. Their exact field
+domains are: `frontier` and `attempt_ref` are valid ref-name strings or null,
+`claim_sha` is sha40 or null, `pr_number` is PR-decimal or null, and `pr_node_id` is
+node or null. Capture digests/times may change; stable-state digest must not.
+
+## Exact stable-view algorithm
+
+For each pass, with no mutation by the actor:
+
+1. GET/read back ruleset, its latest history version, and protected SHA/tree.
+2. Request all PR pages using exact query
+   `state=all&sort=created&direction=asc&per_page=100&page=<n>`. Start at page 1,
+   require Link next URL to equal page `n+1` when present, and always fetch successive
+   numbered pages until one has fewer than 100 items (including an empty sentinel after
+   a full page). Reject repeats/gaps and compute full count/highest PR number before
+   applying the exact reserved filter.
+3. For every reserved PR, fetch timeline pages with `per_page=100&page=<n>` under the
+   same page rule. Reject duplicate ids and compute highest event id.
+4. Enumerate reserved refs through full `git ls-remote --heads origin
+   'refs/heads/release/voc-106-*'` and numbered GitHub matching-ref pages until short;
+   require byte-identical sorted sets and exact object/tree readback.
+5. Construct the timestamp-free stable state and digest.
+
+Run two complete passes. Equality means byte-equal JCS stable-state objects, including
+full-repository PR boundary vectors, protected refs, ruleset, reserved PR/timelines,
+and refs; it is evaluated after full-page completeness but before any mutation. Page
+capture metadata is not compared. Any outside-namespace PR create/update changes
+`all_pr_boundary` and destabilizes the pair. Discard unequal pairs and retry from pass
+1, at most three pairs; then stop. After claim acceptance, protected/ruleset readback
+is mandatory again as specified above. Any pagination/API/schema incompatibility stops.
+
+## Actors, topology, and action boundary
+
+The only mapped mutation operator is `/root`, GitHub login `m-e-h-r-d-a-a-d`, id
+`7955432`, node id `MDQ6VXNlcjc5NTU0MzI=`. Same-identity concurrent calls coalesce;
+delegated agents/reviewers cannot mutate GitHub. No current handoff exists. Future
+handoff requires separately adopted mapping, durable PR assignment by the current
+owner, and stable-state reconstruction; claim-before-PR cannot transfer.
 
 Frozen `main` remains merge base with zero main-only commits. Attempt head equals frozen
-`develop` SHA/tree with no extra compare content; the claim commit is never a release
-head or merge input. Prospective/actual release trees equal frozen `develop`. Promotion
-and synchronization remain separately reviewed merge-commit PRs with permanent refs,
-ancestry/zero-behind, reviewer separation, non-author merge, rollback, and R4 evidence.
+`develop` SHA/tree; prospective/actual release trees equal it. Promotion/sync remain
+separately reviewed merge-commit PRs with permanent refs, ancestry/zero-behind,
+reviewer separation, non-author merge, rollback, and R4 evidence.
 
-One corrected revision of draft PR #215 changes exactly 27 paths: seven living
-surfaces, nine VOC-106, nine VOC-114, and a network-free validator/test. Ordinary non-
-force commits may update only that implementation head after adoption. The correction
-itself creates no claim/release/sync/permanent/foreign ref, queries/changes no setting,
-and performs no release, deployment, Cloudflare/DNS, secret/data, migration, traffic,
-spending, or launch action.
+One corrected PR #215 revision changes exactly 27 paths: seven living, nine VOC-106,
+nine VOC-114, and validator/test. Ordinary non-force commits may update only that head
+after adoption. The correction itself creates no claim/attempt/release/sync/permanent/
+foreign ref and performs no setting query/change, release, deployment, Cloudflare/DNS,
+secret/data, migration, traffic, spending, or launch action. The separate ruleset
+prerequisite remains held until explicit authority and exact readback evidence exist.
