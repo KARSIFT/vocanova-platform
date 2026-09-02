@@ -30,7 +30,7 @@ Feedback uses one of three learning statuses:
 - `needs_improvement`: the meaning is understandable but a focused correction helps.
 - `incorrect`: the word meaning or sentence use is substantially wrong or unclear.
 
-A successful result increments `daily_activity_summaries.sentences_submitted` and awards the configured
+A successful result increments `daily_activity_summaries.sentences_submitted` and awards the
 sentence and feedback rewards. It does not currently complete a daily mission; the response always has
 `missionCompleted: false`.
 
