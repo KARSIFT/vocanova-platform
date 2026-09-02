@@ -59,7 +59,7 @@ export default defineConfig({
       },
     },
     {
-      // DOC-03 §10 mobile-first minimum.
+      // Mobile-first minimum from the UI/UX design.
       name: "mobile-360",
       use: {
         ...devices["Pixel 5"],
@@ -68,7 +68,7 @@ export default defineConfig({
       },
     },
     {
-      // DOC-03 §10 larger mobile breakpoint.
+      // Larger mobile breakpoint from the UI/UX design.
       name: "mobile-430",
       use: {
         ...devices["Pixel 5"],

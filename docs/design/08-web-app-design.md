@@ -2,9 +2,8 @@
 
 ## Current runtime
 
-[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) keeps the
-Next.js 16 App Router, Server Components, SSR, middleware, and current UI behavior,
-but replaces standalone Docker hosting with OpenNext on a Cloudflare Worker. The web
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) defines the
+Next.js 16 App Router, Server Components, SSR, middleware, and OpenNext Cloudflare Worker runtime. The web
 calls the Hono API Worker through a service binding where practical and never accesses
 D1 directly. Compatibility is proven under workerd; `next build` alone is not evidence.
 
@@ -25,10 +24,10 @@ Form + Zod. Vitest, React Testing Library, Playwright.
 ## Architecture
 
 ```text
-app/                # routes and layouts
-src/features/       # product feature modules
-src/shared/          # shared components, API client, utilities
-tests/e2e/
+apps/web/src/app/         # routes, layouts, and route-local components
+apps/web/src/lib/         # cookies, environment, session, and API transport
+apps/web/tests/e2e/       # browser and accessibility coverage
+apps/web/tests/lighthouse/ # performance budgets and runner
 ```
 
 Feature areas: auth, onboarding, dashboard, discovery, words, reviews, sentences, progress,
@@ -36,19 +35,19 @@ settings.
 
 ## Routing
 
-Route groups: `(public)`, `(onboarding)`, `(app)`.
+Authenticated product routes use the `(app)` group. Public, authentication, and onboarding routes
+live directly under `app/`.
 
 ```text
 /
-/login
-/magic-link
+/signin
+/auth/magic
 /onboarding
 /home
 /discover
-/words
-/words/[userWordId]
-/review
-/review/session
+/discover/[situation]
+/discover/[situation]/[word]
+/reviews
 /progress
 /settings
 /settings/account
@@ -102,5 +101,5 @@ accessibility, loading/error states, tests, Worker compatibility, and overengine
 
 Authentication, onboarding, home mission loop, discovery, saved words, review, sentence feedback,
 progress, settings/account management all work; CI contract checks exist; critical flows are tested.
-(Matches [DOC-01](../product/01-mvp-prd.md) §3 — restated here only as the web-app-specific checklist,
+(Matches the [MVP PRD](../product/01-mvp-prd.md) §3 — restated here only as the web-app-specific checklist,
 not a separate decision.)

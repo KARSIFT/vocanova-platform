@@ -1,14 +1,10 @@
 // mock API server for the
 // e2e harness.
 //
-// The server supplies the canned JSON each browser-tested page
-// needs to render, including every
-// remaining core-loop page (Discover, Discover/[situation],
-// Discover/[situation]/[word], Reviews, Progress, Onboarding,
-// Settings, Settings/account) could render with deterministic
-// fixture data; accessibility scans do not exercise form submissions
-// or POST endpoints, so that server returned read-only fixtures
-// and 404'd on writes.
+// The server supplies deterministic JSON fixtures for every browser-tested
+// core-loop page: Discover, Word Detail, Reviews, Progress, Onboarding,
+// Settings, and Account Settings. Accessibility scans use the read paths;
+// unsupported writes return 404.
 //
 // The full-flow suite extends the server with the mutation
 // surface the end-to-end flow needs against the same

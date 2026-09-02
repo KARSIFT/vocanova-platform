@@ -1,6 +1,7 @@
 # Lighthouse tests
 
-The Lighthouse suite checks representative VocaNova screens against the budgets in `budget.json`.
+The Lighthouse suite checks representative VocaNova screens against the thresholds in
+`assertions.mjs`.
 
 ## Run
 

@@ -23,7 +23,7 @@
 //   sidesteps LHCI's server-management entirely.
 // - LHCI's diff/reporting infrastructure is the only feature
 //   that is genuinely easier in LHCI than in a plain script.
-//   This suite checks that scores meet the DOC-08 thresholds; it does
+//   This suite checks that scores meet the configured thresholds; it does
 //   not track score regression over time, so
 //   the diff feature is not in scope here.
 // - The score calculation is identical (same engine, same audit
@@ -32,7 +32,7 @@
 //
 // The CI workflow that calls this script (`.github/workflows/
 // quality.yml`, lighthouse job) reports a stable check. The script exits with code 0 if every
-// (screen, layout) audit meets every DOC-08 threshold, and
+// (screen, layout) audit meets every configured threshold, and
 // exits with code 1 otherwise, so a missed threshold is a hard
 // CI failure (a missed threshold is never silently lowered or
 // skipped.
@@ -44,7 +44,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  DOC_08_THRESHOLDS,
+  LIGHTHOUSE_THRESHOLDS,
   assertScores,
   formatCategoryScoreRow,
 } from "./assertions.mjs";
@@ -71,7 +71,7 @@ const CHROME_FLAGS = [
   "--disable-dev-shm-usage",
 ];
 
-// DOC-03 §10 + DOC-08: the three "supported layouts" are 360px,
+// The three supported layouts are 360px,
 // 430px, and one representative desktop width >=1024px. The
 // desktop width 1280 is the same representative desktop width
 // home-accessibility.spec.ts uses, so the
@@ -113,10 +113,10 @@ const LAYOUTS = [
   },
 ];
 
-// DOC-08: Home, Discover, Reviews, and Progress are the four
+// Home, Discover, Reviews, and Progress are the four
 // screens covered by the performance suite. Discover has
 // nested routes (Discover/[situation], Discover/[situation]/
-// [word]); the top-level /discover is what DOC-08's "Discover"
+// [word]); the top-level /discover is what the design's "Discover"
 // performance target refers to, and it's the entry point for
 // the mobile-first journey - testing the subroutes would
 // measure the same shell (the (app) layout) with different
@@ -131,7 +131,7 @@ const SCREENS = [
 // --- Helpers ---------------------------------------------------
 
 function buildLighthouseSettings({ layout, screen }) {
-  // DOC-08's thresholds (Performance 85+ / Accessibility 95+ /
+  // The thresholds (Performance 85+ / Accessibility 95+ /
   // Best Practices 90+) are the ones the runner asserts. The
   // throttling method is `simulate` (Lantern), which works
   // against a fixed local server without touching the network
@@ -247,7 +247,7 @@ async function main() {
     `  layouts:    ${LAYOUTS.map((l) => l.name).join(", ")}\n`,
   );
   process.stdout.write(
-    `  thresholds: performance>=${DOC_08_THRESHOLDS.performance} accessibility>=${DOC_08_THRESHOLDS.accessibility} best-practices>=${DOC_08_THRESHOLDS["best-practices"]}\n`,
+    `  thresholds: performance>=${LIGHTHOUSE_THRESHOLDS.performance} accessibility>=${LIGHTHOUSE_THRESHOLDS.accessibility} best-practices>=${LIGHTHOUSE_THRESHOLDS["best-practices"]}\n`,
   );
   process.stdout.write("\n");
 
@@ -292,7 +292,7 @@ async function main() {
 
         for (const category of ["performance", "accessibility", "best-practices"]) {
           const score = result.scores[category];
-          const threshold = DOC_08_THRESHOLDS[category];
+          const threshold = LIGHTHOUSE_THRESHOLDS[category];
           const failure = failures.find((f) => f.category === category);
           process.stdout.write(
             formatCategoryScoreRow({

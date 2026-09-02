@@ -2,8 +2,8 @@
 //
 // This helper combines the WCAG 2.2 AA axe scan and violation formatter with
 // explicit keyboard-reachability and
-// non-color-only-feedback assertions, because DOC-03 §10 and
-// DOC-08 quality standards require more than a clean axe run
+// non-color-only-feedback assertions, because the UI and web quality
+// standards require more than a clean axe run
 // (axe covers most contrast / labelling / structure rules but
 // does not exhaustively check WCAG 1.4.1 "Use of Color" or
 // keyboard reachability across a page in the way the
@@ -48,7 +48,7 @@ const WCAG_22_AA_TAGS = [
  * Callers MUST assert the empty-set property on
  * `result.criticalOrSerious` for the test to pass; checking only
  * `result.violations` would let moderate/minor axe findings
- * silently ship, which DOC-03 §10 explicitly disallows at the
+ * silently ship, which the UI/UX design explicitly disallows at the
  * serious-or-worse threshold.
  */
 export async function scanForAxeViolations(

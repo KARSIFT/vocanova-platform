@@ -10,8 +10,8 @@ import { CSRF_COOKIE_NAME, deleteCookie, SESSION_COOKIE_NAME } from "./cookies";
  * server.
  *
  * Every client component that makes an authenticated request MUST run this
- * check on its catch path so the session-expiry mid-flow guarantee
- * guarantee holds: when a 401 comes back mid-review-session,
+ * check on its catch path so the session-expiry mid-flow guarantee holds:
+ * when a 401 comes back mid-review-session,
  * mid-sentence-submission, mid-onboarding, mid-settings-write, or
  * mid-account-deletion, the learner is consistently routed to re-auth
  * instead of seeing a generic "try again" message that hides the real

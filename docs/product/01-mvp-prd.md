@@ -3,7 +3,7 @@
 ## 1. Product baseline
 
 The product vision, target learner, learning loop, gamification, spaced repetition, and AI-feedback
-principles are defined in [DOC-00](00-product-bible.md). This PRD defines the bounded MVP surface and
+principles are defined in the [Product Bible](00-product-bible.md). This PRD defines the bounded MVP surface and
 completion criteria.
 
 ## 2. MVP core screens (3-tab navigation)
@@ -39,4 +39,4 @@ The MVP is done when an authenticated A2–B1 learner can, on a responsive mobil
 Native mobile app (React Native/Expo — architected for, not built), leaderboards, badges, social
 challenges, rewards store, subscriptions/monetization, teacher dashboards, multi-provider AI
 routing, model fine-tuning, complex microservices, message queues without a proven need. Full list
-in [DOC-12](12-mvp-implementation-plan.md) §10.
+in the [MVP implementation plan](12-mvp-implementation-plan.md) §10.

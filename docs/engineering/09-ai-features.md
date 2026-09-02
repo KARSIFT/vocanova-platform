@@ -5,9 +5,8 @@
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) moves the
 provider boundary, validation, persistence, mission updates, rate/cost controls, and
 privacy-safe telemetry into the Hono API Worker. The web Worker never calls an AI
-provider directly. D1 replaced PostgreSQL for runtime persistence after parity. The
-product, teaching, safety, evaluation, privacy, and failure requirements below remain
-unchanged; preserved references to the Go backend or PostgreSQL are historical context.
+provider directly. D1 stores runtime state. The product, teaching, safety, evaluation, privacy,
+and failure requirements below are current.
 Normal CI remains deterministic and never calls a paid provider.
 
 ## 1. Purpose and product principle
@@ -226,10 +225,9 @@ All AI orchestration lives in the API Worker; the frontend never knows the provi
 credentials, constructs prompts, calls moderation directly, interprets raw output, or determines
 mission completion. Request lifecycle: authenticate → authorize attempt ownership → load
 authoritative target/learner data → normalize → validate → rate-limit → idempotency/dedup check →
-safety checks → build provider-neutral task → call provider → validate/normalize output → persist
-
-- update mission transactionally → emit privacy-safe telemetry → return backend-confirmed result.
-  Synchronous request-response (no queue) — output is short and learners expect immediate feedback.
+safety checks → build provider-neutral task → call provider → validate/normalize output → persist →
+update mission transactionally → emit privacy-safe telemetry → return backend-confirmed result.
+Synchronous request-response (no queue) — output is short and learners expect immediate feedback.
 
 Use a **narrow** feedback-provider interface and a separate moderation interface — not a vague
 generic `Generate(ctx, input any)` interface. Provider SDK types stay inside the adapter layer. One

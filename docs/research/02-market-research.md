@@ -30,7 +30,7 @@ categories.
 
 This document is the first in the corpus to use the term **Confidence Points** as the name for
 Vocanova's point/reward system (earlier docs used only generic gamification language). The term is
-adopted as settled product vocabulary in [DOC-01](../product/01-mvp-prd.md) and used consistently
+adopted as settled product vocabulary in the [MVP PRD](../product/01-mvp-prd.md) and used consistently
 throughout the rest of these documents.
 
 ## Target learner validation

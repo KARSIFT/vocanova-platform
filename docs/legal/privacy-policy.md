@@ -13,8 +13,9 @@ publication.
 
 ## 2. Data We Collect
 
-Based on the current implemented product design (`DOC-05`, `DOC-06`, `DOC-07`,
-`DOC-09`), VocaNova may process the following categories of data:
+Based on the current [database](../engineering/05-database-design.md),
+[backend](../engineering/06-backend-design.md), [API](../engineering/07-api-contract-and-dto-design.md),
+and [AI](../engineering/09-ai-features.md) designs, VocaNova may process the following categories of data:
 
 - Account and identity data:
   - Email address (when provided)
@@ -60,7 +61,7 @@ minimum data needed for the task, such as:
 - Target word or phrase and related learning metadata
 - The learner sentence submitted for feedback
 
-Per current engineering policy (`DOC-09`), provider requests should not
+Per the current [AI design](../engineering/09-ai-features.md), provider requests should not
 intentionally include unrelated account history or unnecessary identifiers.
 
 ## 5. Cookies and Session Data
@@ -90,7 +91,7 @@ requirements are finalized. Current design references include:
 - Learning and account-related records retained while an account is active
 - Structured operational records retained for bounded periods
 - Account deletion workflows that deactivate access immediately and then perform a
-  staged, verified purge/anonymization flow (`DOC-05`, `DOC-06`, `DOC-09`)
+  staged, verified purge/anonymization flow described by the database, backend, and AI designs
 
 Final retention periods and legal bases must be founder-reviewed before
 publication.

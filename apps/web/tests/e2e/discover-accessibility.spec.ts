@@ -3,7 +3,7 @@
 // (the Word Detail screen, which also embeds the sentence feedback
 // widget from sentence-feedback.tsx).
 //
-// DOC-03 §10 requires the full mobile-first journey to be
+// The UI/UX design requires the full mobile-first journey to be
 // accessible at the three supported layouts. The Word Detail
 // screen is the screen where most of the saved-words interaction
 // happens (the Save button + the sentence feedback widget), so it

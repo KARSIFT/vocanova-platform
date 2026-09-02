@@ -108,7 +108,7 @@ Required for every screen with dynamic content:
   blank area.
 - **Loading** — calm, non-jarring; sentence-feedback pending state specifically must preserve the
   learner's typed input and disable duplicate submission (see [09](../engineering/09-ai-features.md) §5).
-  **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
+- **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
   input or falsely imply something completed. AI feedback failures specifically must never claim
   mission completion (see [09](../engineering/09-ai-features.md) §5 and §8).
 
@@ -117,7 +117,8 @@ Required for every screen with dynamic content:
 Target: WCAG 2.2 AA. Keyboard operability, visible focus states, screen-reader-friendly labels on
 forms and icon-only controls, sufficient color contrast, and no information conveyed by color alone
 (e.g. correct/incorrect review feedback must also use an icon or text label, not just a color
-change). Full testing requirements are in 10.
+change). Automated coverage is documented in the [browser-test guide](../../apps/web/tests/e2e/README.md)
+and [Lighthouse guide](../../apps/web/tests/lighthouse/README.md).
 
 ## 11. Visual design direction
 
@@ -143,5 +144,5 @@ the AI tone rules in [09](../engineering/09-ai-features.md) §13 ("Great use of 
 
 The MVP UX is deliberately narrow: three tabs, one focused daily mission, one reusable sentence-
 practice component reachable from three entry points, and a simple progress view. Nothing in this
-document introduces a screen or flow beyond what [DOC-01](../product/01-mvp-prd.md) §2 and §3 already
+document introduces a screen or flow beyond what the [MVP PRD](../product/01-mvp-prd.md) §2 and §3 already
 scope as MVP-complete.

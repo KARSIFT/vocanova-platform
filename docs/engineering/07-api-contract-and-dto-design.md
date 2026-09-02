@@ -2,12 +2,10 @@
 
 ## Current contract
 
-The public `/api/v1` OpenAPI contract and observable behavior are the migration seam
-defined by [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md).
-Hono and schema-driven TypeScript DTOs are the runtime implementation. The frozen parity snapshot
-replaced the former Go/Huma oracle after deterministic drift
-and parity tests passed. No
-endpoint may silently change because its storage moves from PostgreSQL to D1.
+The public `/api/v1` OpenAPI contract and observable behavior are defined by
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md). Hono and schema-driven
+TypeScript DTOs are the runtime implementation. A frozen compatibility snapshot and deterministic
+drift tests prevent accidental endpoint changes.
 
 ## Core API decisions
 
@@ -18,7 +16,7 @@ Google OAuth + email magic link. Secure HttpOnly session cookie. CSRF via double
 
 ## API principles
 
-Never expose Ent models directly — always explicit request/response DTOs. Keep contracts
+Never expose persistence models directly — always use explicit request/response DTOs. Keep contracts
 frontend-friendly. Strict validation, reject unknown fields. Standard error responses. OpenAPI is
 the contract source. Avoid unnecessary MVP complexity.
 
@@ -121,7 +119,7 @@ auth, CSRF, cross-user, atomicity, consistency, and idempotency tests.
 
 ## Implementation order
 
-Implement DTOs first → never expose Ent models → add auth/CSRF/idempotency middleware → implement
+Implement DTOs first → never expose persistence models → add auth/CSRF/idempotency middleware → implement
 routes per the approved contract → tests before acceptance → export OpenAPI artifacts.
 
 ## Review checklist

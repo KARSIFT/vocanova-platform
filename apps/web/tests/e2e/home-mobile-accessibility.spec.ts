@@ -1,6 +1,6 @@
 // Home accessibility scan at the two mobile viewports
 // (360px, 430px). The desktop spec covers /home at 1280x720.
-// This file covers the mobile breakpoints required by DOC-03 §10,
+// This file covers the mobile breakpoints required by the UI/UX design,
 // including keyboard reachability and non-color-only feedback in
 // addition to the axe scan.
 

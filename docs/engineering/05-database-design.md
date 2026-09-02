@@ -2,13 +2,10 @@
 
 ## Current data-platform
 
-[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) replaces
-PostgreSQL/Ent/Atlas as the final runtime target with Cloudflare D1 and forward-only
-Wrangler migrations. That former runtime was retired after parity. The tables,
-ownership, product invariants, retention rules, and
-domain semantics in this document remain requirements. PostgreSQL-specific types and
-mechanics in the preserved v1.0 body describe the migration source, not the final D1
-encoding. Repository tests use synthetic conversion data and never production data.
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) defines Cloudflare D1 with
+forward-only Wrangler migrations as the data platform. The tables, ownership, product invariants,
+retention rules, and domain semantics in this document are current requirements. Repository tests
+use synthetic conversion data and never production data.
 
 ## 1. Direction
 

@@ -1,6 +1,6 @@
 // Lighthouse score thresholds and assertion helpers.
 //
-// DOC-08 ("Quality standards") records the three performance
+// The web application design records the three performance
 // budgets for the VocaNova web app:
 //
 //   Performance    >= 85
@@ -12,15 +12,12 @@
 // three supported layouts (360px, 430px, one representative
 // desktop width >=1024px) - 12 audits in total.
 //
-// Thresholds are mirrored verbatim here from DOC-08. The constants are the single
-// source of truth in this repository: a change to either DOC-08
-// must be reflected here and in the matching test in
-// `scripts/foundation/mock-inventory.test.mjs` (which loads
-// `budget.json` and asserts these exact values are present).
-// Lowering a threshold here without a matching DOC-08 update would
+// Thresholds are mirrored verbatim here from the web application design. These
+// constants are the executable source of truth for the runner.
+// Lowering a threshold here without a matching design update would
 // silently weaken the quality bar.
 
-export const DOC_08_THRESHOLDS = Object.freeze({
+export const LIGHTHOUSE_THRESHOLDS = Object.freeze({
   performance: 85,
   accessibility: 95,
   "best-practices": 90,
@@ -53,7 +50,7 @@ export function formatCategoryScoreRow({
 
 /**
  * assertScores compares the lighthouse category scores against
- * DOC-08 thresholds and returns the list of failing
+ * configured thresholds and returns the list of failing
  * (category, actual, threshold) entries. An empty list means
  * every category met its threshold.
  *
@@ -66,7 +63,7 @@ export function assertScores({ screen, layout, scores }) {
   for (const category of LIGHTHOUSE_CATEGORIES) {
     const raw = scores?.[category];
     const score = typeof raw === "number" ? raw : null;
-    const threshold = DOC_08_THRESHOLDS[category];
+    const threshold = LIGHTHOUSE_THRESHOLDS[category];
     if (score === null) {
       failures.push({ category, actual: null, threshold, screen, layout });
       continue;

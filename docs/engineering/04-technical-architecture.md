@@ -3,12 +3,9 @@
 ## Current architecture
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) is the current
-runtime and data direction. VocaNova targets Next.js through OpenNext on a Cloudflare
-Web Worker, a TypeScript/Hono Cloudflare API Worker, and Cloudflare D1. The existing
-Go/PostgreSQL/Docker implementation served as a staged parity reference and was removed from the
-active tree after contract, domain, data, workerd, and rollback gates passed. Where the preserved v1.0 body names Go, Ent, PostgreSQL, Docker,
-Render, or an owned server as the final target, ADR-0003 supersedes that runtime choice
-without changing the product behavior or domain boundaries documented here.
+runtime and data direction. VocaNova uses Next.js through OpenNext on a Cloudflare
+Web Worker, a TypeScript/Hono Cloudflare API Worker, and Cloudflare D1. Compact contract and schema
+snapshots preserve compatibility and synthetic conversion checks without retaining the retired server runtime.
 
 ## 1. Purpose and goals
 

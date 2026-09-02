@@ -6,7 +6,7 @@ export interface CurrentUser {
   /**
    * Additive field. Always present in the response.
    * The Next.js middleware uses it to gate the core-loop routes
-   * on whether the learner has completed onboarding (DOC-03 §3).
+   * on whether the learner has completed onboarding.
    */
   onboardingStatus: "not_started" | "in_progress" | "completed";
 }
@@ -290,7 +290,7 @@ export interface Settings {
 /**
  * The partial-update payload for
  * PATCH /api/v1/settings. Every field is optional; the API
- * only writes the fields the caller supplies. The DOC-07 §3
+ * only writes the fields the caller supplies. The API contract's
  * "no-op PATCH is a well-formed read" rule is honored, so
  * an empty body returns the current state.
  */
@@ -769,7 +769,7 @@ export class VocanovaClient {
   /**
    * Deactivate the requester's account and
    * schedule anonymization. Requires a CSRF token and a
-   * unique Idempotency-Key (DOC-07). A replay with the same
+   * unique Idempotency-Key. A replay with the same
    * key returns the existing row with `replayed: true`, so
    * the frontend can suppress duplicate "your account was
    * deleted" toasts on a retry. The user is already

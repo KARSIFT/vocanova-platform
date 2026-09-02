@@ -2,13 +2,10 @@
 
 ## Current backend
 
-[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) makes a
-TypeScript Module Worker using Hono, generated bindings, typed repositories, and D1
-the target backend. The former Go/Huma/Ent/PostgreSQL behavioral oracle was removed
-from the active tree after parity; compact contract/schema snapshots retain the
-migration evidence. The feature boundaries, workflows,
-authorization rules, idempotency, and observable `/api/v1` behavior below remain
-requirements; Go- or PostgreSQL-specific implementation directions are transitional.
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) defines a
+TypeScript Module Worker using Hono, generated bindings, typed repositories, and D1 as the backend.
+The feature boundaries, workflows, authorization rules, idempotency, and observable `/api/v1`
+behavior below are current requirements.
 
 ## 1. Overview
 
@@ -31,14 +28,13 @@ coordination happens through services, not direct cross-module table access.
 ## 4. Project structure
 
 ```text
-apps/worker-api/
-  src/{app,foundation,business}/
-  src/business/{identity,users,content,learning,reviews,missions,gamification,writingai,accounts}/
-  src/foundation/{database,auth,web,idempotency,audit,clock,timezone,config,log}/
+apps/api-worker/
+  src/{identity,content,missions,ai-feedback,repositories,domain,http,data-conversion}/
+  src/{app,config,index}.ts
   migrations/
-  test/{unit,workerd,parity}/
-
-apps/api-worker/ # Hono/D1 runtime
+  openapi/
+  scripts/
+  test/
 ```
 
 ## 5. API design
@@ -78,7 +74,7 @@ progress) returns `409`.
 
 ## 10. Core learning workflows
 
-**Review ratings (canonical — see reconciliation note above): Again / Hard / Good / Easy.** Result
+**Review ratings: Again / Hard / Good / Easy.** Result
 and rating are distinct. Objective incorrect answers record `Again`; objective correct answers
 allow Hard/Good/Easy; self-check result is derived from the rating. MVP movement: Again → step back
 with a floor of 0; two consecutive incorrect/Again attempts → reset to step 0; Hard → same step;
