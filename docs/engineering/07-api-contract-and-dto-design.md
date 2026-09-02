@@ -59,7 +59,7 @@ GET  /api/v1/reviews/due
 POST /api/v1/reviews/submissions
 ```
 
-Prompt types: `meaning_choice`, `word_choice`, `self_check` (see [05](05-database-design.md) §9 for the
+Prompt types: `multiple_choice`, `self_check` (see [05](05-database-design.md) §9 for the
 full prompt-type list including `typing`/`sentence_usage`, which are a later superset — these three
 were the initial MVP set). `result` and `rating` are distinct. Objective incorrect answers record
 `Again`; objective correct answers allow Hard/Good/Easy; self-check result derives from the rating.

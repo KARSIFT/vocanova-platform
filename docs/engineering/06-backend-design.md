@@ -127,8 +127,8 @@ learner. Legal review is required before production; see [05](05-database-design
 
 ## 15. Background jobs
 
-No queue system in MVP — synchronous workflows. Lightweight cleanup only: expired sessions, expired
-magic links, old idempotency keys.
+There is no background-job runner or queue in the current application. Workflows are synchronous,
+and cleanup is not currently automated.
 
 ## 16. Security and observability
 
