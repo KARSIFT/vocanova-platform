@@ -21,8 +21,8 @@ POST /api/v1/sentence-feedback/{attemptId}/reports
 
 Submission includes `sentenceText`, its product `source`, and an eligible `attemptId`. The backend
 loads the authoritative word and learner level. Input must contain at least 3 words, be at most 300
-characters, be primarily English, contain the target word or an accepted form, and belong to the
-authenticated learner.
+characters, pass the current Latin-script guard, contain the target word or an accepted form, and
+belong to the authenticated learner.
 
 Feedback uses one of three learning statuses:
 
@@ -31,7 +31,7 @@ Feedback uses one of three learning statuses:
 - `incorrect`: the word meaning or sentence use is substantially wrong or unclear.
 
 A successful result increments `daily_activity_summaries.sentences_submitted` and awards the configured
-sentence/feedback rewards. It does not currently complete a daily mission; the response always has
+sentence and feedback rewards. It does not currently complete a daily mission; the response always has
 `missionCompleted: false`.
 
 ## 3. Validation and safety
