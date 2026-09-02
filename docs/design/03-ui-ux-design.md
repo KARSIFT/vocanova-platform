@@ -1,26 +1,3 @@
----
-id: DOC-03
-title: VocaNova UI/UX Design
-version: 1.0
-document_type: ui-ux-design
-status: approved
-owner: founder
-canonical_path: docs/design/03-ui-ux-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-00
-  - DOC-01
-  - DOC-08
-  - DOC-09
-related_decisions: []
-adoption_change: VOC-008
-source_files:
-  - path: 03-ui-ux-design.md
-    sha256: f3f37beea86bc29a5230f66731730ab28a07635546d60084e49f954e53b30ed4
----
 # 03 — VocaNova UI/UX Design
 
 ## 1. UX purpose and principles
@@ -51,16 +28,13 @@ Three-tab bottom navigation:
 
 Sentence practice is a **reusable component**, not a fourth tab or standalone route — it is invoked
 from Home, Word Detail, and Review Completion. This is a deliberate MVP scoping decision: it keeps
-the tab bar simple and treats "write a sentence" as something the learner does *in the middle of*
+the tab bar simple and treats "write a sentence" as something the learner does _in the middle of_
 another activity, not as its own destination.
 
 There is **no dedicated Sentence History screen.** History is retained in the backend
 (`learner_sentences` / `ai_feedback_attempts` — see [05](../engineering/05-database-design.md) §11) for future use, but
-is not surfaced as its own MVP UI. (This reverses an earlier PRD draft that listed a "Sentence
-History Page" — see
-[the migration notes](../archive/README-migration-notes.md#4-sentence-history-screen-conflict).
-Treat "sentence-history insights" as a named post-MVP opportunity,
-not a cut corner.)
+is not surfaced as its own MVP UI. Treat "sentence-history insights" as a named post-MVP
+opportunity, not a cut corner.
 
 ## 3. Onboarding flow
 
@@ -75,7 +49,7 @@ not to gate access behind a long survey.
 1. **Home** shows the day's mission (review target, progress toward it), current streak, and a
    route into Journey/Discover if the learner wants new words.
 2. **Review** is a focused, single-item-at-a-time session: show the prompt, learner responds
-   (multiple-choice, self-check, or typed depending on prompt type — see
+   (multiple-choice or self-check — see
    [05](../engineering/05-database-design.md) §9), reveal correctness, then record a rating. Objective
    incorrect answers record `Again`; objective correct answers allow Hard/Good/Easy. Self-check
    prompts derive correctness from the learner's selected rating. Then advance. No competing UI
@@ -98,7 +72,7 @@ Discovery is organized by real-life situation (Airport, Restaurant, Hotel Check-
 Daily Conversation, Work Meeting, University Class, etc. — see [05](../engineering/05-database-design.md) §8 for the
 full `journey_situations` model), not by grammar topic or difficulty tier alone. Within a situation,
 words are shown one at a time or as a short scannable list; the backend controls ordering
-(core words first, then display order, then relevance — see [05](../engineering/05-database-design.md) §8). A word
+(display order followed by stable meaning ID — see [05](../engineering/05-database-design.md) §8). A word
 already in the learner's saved list is visually marked and excluded from "new" recommendations.
 Saving must succeed against the backend before the UI reflects it as saved — no optimistic-only
 save state that could desync from the backend.
@@ -114,11 +88,9 @@ rather than treating Word Detail as purely a content-browsing page.
 
 ## 7. Review UX detail
 
-Ratings surface as **Again / Hard / Good / Easy** (see
-[the migration notes](../archive/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how this was reconciled
-against three other rating-scale drafts found in earlier documents). The review screen must remain
-usable one-handed on a phone: large touch targets (44px minimum per [08](08-web-app-design.md)), no
-required typing unless the prompt type is explicitly typing/sentence-usage.
+Ratings surface as **Again / Hard / Good / Easy**. The review screen must remain usable one-handed
+on a phone, with large touch targets (44px minimum per [08](08-web-app-design.md)) and no required
+typing in the implemented review modes.
 
 ## 8. Progress, Streak, Confidence Points, and celebration moments
 
@@ -135,41 +107,42 @@ Required for every screen with dynamic content:
   (e.g. empty Progress screen invites the learner to complete their first mission), not just show a
   blank area.
 - **Loading** — calm, non-jarring; sentence-feedback pending state specifically must preserve the
-  learner's typed input and disable duplicate submission (see [09](../engineering/09-ai-features.md) §5).
-  **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
+  learner's typed input and disable duplicate submission (see [09](../engineering/09-ai-features.md) §2).
+- **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
   input or falsely imply something completed. AI feedback failures specifically must never claim
-  mission completion (see [09](../engineering/09-ai-features.md) §5 and §8).
+  mission completion (see [09](../engineering/09-ai-features.md) §2 and §9).
 
 ## 10. Accessibility
 
 Target: WCAG 2.2 AA. Keyboard operability, visible focus states, screen-reader-friendly labels on
 forms and icon-only controls, sufficient color contrast, and no information conveyed by color alone
 (e.g. correct/incorrect review feedback must also use an icon or text label, not just a color
-change). Full testing requirements are in [10](../operations/10-development-workflow.md).
+change). Automated coverage is documented in the [browser-test guide](../../apps/web/tests/e2e/README.md)
+and [Lighthouse guide](../../apps/web/tests/lighthouse/README.md).
 
 ## 11. Visual design direction
 
 Clean, calm, encouraging visual tone — not exam-like, not childish. Tailwind CSS with shadcn/ui-style
 components (see [08](08-web-app-design.md) for the exact frontend stack). Avoid visual patterns that
 read as "grading" (red X marks, harsh error colors) in favor of supportive framing, consistent with
-the AI tone rules in [09](../engineering/09-ai-features.md) §13 ("Great use of this word," "Almost right," never
+the AI tone rules in [09](../engineering/09-ai-features.md) §5 ("Great use of this word," "Almost right," never
 "Your English is bad").
 
 ## 12. UX risks and mitigations
 
 - **Risk: AI feedback UI reads as a test/grade, discouraging learners.** Mitigation: encouraging
-  copy rules (§11 above and [09](../engineering/09-ai-features.md) §13), always show the original sentence, avoid
+  copy rules (§11 above and [09](../engineering/09-ai-features.md) §5), always show the original sentence, avoid
   inventing corrections for already-correct sentences.
 - **Risk: Review sessions feel like a chore.** Mitigation: keep sessions short by default (backend
   daily target, not an open-ended queue), show visible progress within the session.
 - **Risk: Mobile one-handed usability failures.** Mitigation: 44px minimum touch targets, bottom
   navigation reachable by thumb, no required multi-step gestures.
 - **Risk: Learner distrust of AI feedback correctness.** Mitigation: visible "AI can make mistakes"
-  disclaimer and a report-feedback action on every result (see [09](../engineering/09-ai-features.md) §16).
+  disclaimer and a report-feedback action on every result (see [09](../engineering/09-ai-features.md) §8).
 
 ## 13. Final MVP UX summary
 
 The MVP UX is deliberately narrow: three tabs, one focused daily mission, one reusable sentence-
 practice component reachable from three entry points, and a simple progress view. Nothing in this
-document introduces a screen or flow beyond what [DOC-01](../product/01-mvp-prd.md) §2 and §3 already
+document introduces a screen or flow beyond what the [MVP PRD](../product/01-mvp-prd.md) §2 and §3 already
 scope as MVP-complete.

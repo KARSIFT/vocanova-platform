@@ -1,4 +1,4 @@
-// VOC-073-T00 accessibility scan for /signin.
+// Accessibility scan for /signin.
 //
 // The sign-in page is a public route (no auth cookie required).
 // It renders an OAuth button, a magic-link email form, and
@@ -14,7 +14,7 @@ import {
   scanForAxeViolations,
 } from "./axe-helper.js";
 
-test.describe("Sign-in accessibility (VOC-073-T00)", () => {
+test.describe("Sign-in accessibility", () => {
   test("/signin renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based labels", async ({
     page,
   }, testInfo) => {

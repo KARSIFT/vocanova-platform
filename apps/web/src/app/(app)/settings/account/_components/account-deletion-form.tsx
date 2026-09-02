@@ -81,7 +81,7 @@ export function AccountDeletionForm() {
       }
       router.refresh();
     } catch (error) {
-      // T06: a 401 mid-account-deletion means the session expired
+      // A 401 mid-account-deletion means the session expired
       // before the deactivation was issued. We never want to claim
       // an account is deactivated when the server rejected the
       // request; handleApiError routes the learner to re-auth and

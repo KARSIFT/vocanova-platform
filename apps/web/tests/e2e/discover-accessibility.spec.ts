@@ -1,9 +1,9 @@
-// VOC-031-T07b accessibility scans for the Discover journey tree:
+// Accessibility scans for the Discover journey tree:
 // /discover, /discover/[situation], and /discover/[situation]/[word]
 // (the Word Detail screen, which also embeds the sentence feedback
 // widget from sentence-feedback.tsx).
 //
-// DOC-03 §10 requires the full mobile-first journey to be
+// The UI/UX design requires the full mobile-first journey to be
 // accessible at the three supported layouts. The Word Detail
 // screen is the screen where most of the saved-words interaction
 // happens (the Save button + the sentence feedback widget), so it
@@ -23,7 +23,7 @@ import {
   scanForAxeViolations,
 } from "./axe-helper.js";
 
-test.describe("Discover accessibility (VOC-031-T07b)", () => {
+test.describe("Discover accessibility", () => {
   test("/discover renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
   }) => {
@@ -280,8 +280,8 @@ test.describe("Discover accessibility (VOC-031-T07b)", () => {
         "Expected the Playwright project to configure use.baseURL so the stateful Word Detail session can be scoped to it.",
       );
     }
-    const sessionValue = `voc088-session-${randomUUID()}`;
-    const csrfValue = `voc088-csrf-${randomUUID()}`;
+    const sessionValue = `vocanova-session-${randomUUID()}`;
+    const csrfValue = `vocanova-csrf-${randomUUID()}`;
     await page.context().addCookies([
       { name: "vocanova_session", value: sessionValue, url: baseURL },
       { name: "vocanova_csrf", value: csrfValue, url: baseURL },
@@ -318,7 +318,7 @@ test.describe("Discover accessibility (VOC-031-T07b)", () => {
       }),
     ).toBeVisible();
 
-    const failingSession = `voc088-failure-${randomUUID()}`;
+    const failingSession = `vocanova-failure-${randomUUID()}`;
     await page.context().addCookies([
       { name: "vocanova_session", value: failingSession, url: baseURL },
       { name: "vocanova_csrf", value: csrfValue, url: baseURL },

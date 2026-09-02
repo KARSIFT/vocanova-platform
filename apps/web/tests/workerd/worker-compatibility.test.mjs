@@ -158,7 +158,7 @@ test("compatibility dry run receives only local execution environment", () => {
 });
 
 function artifactFixture(t, workerSource) {
-  const root = mkdtempSync(join(tmpdir(), "voc083-artifacts-"));
+  const root = mkdtempSync(join(tmpdir(), "vocanova-artifacts-"));
   t.after(() => rmSync(root, { force: true, recursive: true }));
   const openNext = join(root, ".open-next");
   const dryRun = join(root, ".wrangler", "dry-run");

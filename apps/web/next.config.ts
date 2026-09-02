@@ -1,6 +1,6 @@
 // apps/web/next.config.ts
 //
-// VOC-080-T03: OpenNext owns the standalone intermediate it needs while
+// OpenNext owns the standalone intermediate it needs while
 // transforming this application for workerd. A plain `next build` remains
 // useful for fast UI checks, but it is no longer deployment evidence.
 // `initOpenNextCloudflareForDev` exposes locally simulated bindings only to
@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === "development") {
   void initOpenNextCloudflareForDev();
 }
 
-// VOC-081-T00: Next 16.3 otherwise creates nested AGENTS.md/CLAUDE.md files
+// Next 16.3 otherwise creates nested AGENTS.md/CLAUDE.md files
 // when an AI coding agent is detected. Repository authority is maintained at
 // the repository root, so local development must never generate replacements.
 const nextConfig = {

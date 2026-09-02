@@ -1,5 +1,3 @@
-# Research Documentation
+# Research documentation
 
-| ID | Document | Status | Owner | Related |
-|---|---|---|---|---|
-| DOC-02 | [Market Research](02-market-research.md) | approved | founder | DOC-00, DOC-01 |
+- [Market research](02-market-research.md)

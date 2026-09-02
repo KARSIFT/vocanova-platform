@@ -1,44 +1,11 @@
----
-id: DOC-04
-title: VocaNova Technical Architecture
-version: 1.1
-document_type: technical-architecture
-status: approved
-owner: founder
-canonical_path: docs/engineering/04-technical-architecture.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-05
-  - DOC-06
-  - DOC-07
-  - DOC-08
-  - DOC-09
-  - DOC-10
-  - DOC-11
-  - DOC-17
-related_decisions:
-  - ADR-0003
-adoption_change: VOC-008
-source_files:
-  - path: 04-technical-architecture.md
-    sha256: 50ba0901ee5e877e98e7071c6930f809b0ebc6074858fd20e1ac7deae12403dc
----
-
 # 04 — VocaNova Technical Architecture
 
-## Active VOC-080 architecture amendment
+## Current architecture
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) is the current
-runtime and data direction. VocaNova targets Next.js through OpenNext on a Cloudflare
-Web Worker, a TypeScript/Hono Cloudflare API Worker, and Cloudflare D1. The existing
-Go/PostgreSQL/Docker implementation served as the staged parity reference through
-T10; T11 removed it from the active tree after contract, domain, data, workerd, and
-rollback gates passed. Where the preserved v1.0 body names Go, Ent, PostgreSQL, Docker,
-Render, or an owned server as the final target, ADR-0003 supersedes that runtime choice
-without changing the product behavior or domain boundaries documented here.
+runtime and data direction. VocaNova uses Next.js through OpenNext on a Cloudflare
+Web Worker, a TypeScript/Hono Cloudflare API Worker, and Cloudflare D1. Compact contract and schema
+snapshots preserve compatibility and synthetic conversion checks without retaining the retired server runtime.
 
 ## 1. Purpose and goals
 
@@ -54,8 +21,8 @@ habit.
 ## 3. Architecture principles
 
 Modular monolith first; frontend/backend separated; business logic stays transport- and
-storage-independent behind the `/api/v1` contract; D1 becomes the relational source of truth after
-parity and separately authorized cutover. Prefer simple stable technologies, avoid premature
+storage-independent behind the `/api/v1` contract; D1 is the relational source of truth. Prefer
+simple stable technologies, avoid premature
 microservices, design for future mobile clients, keep explicit domain boundaries and testable
 behavior, and record important choices as ADRs.
 
@@ -79,9 +46,7 @@ Future mobile: Next.js Web + Expo Mobile both call the same `/api/v1` Worker con
 
 ## 5. Repository architecture
 
-Single monorepo, `vocanova-platform` (see
-[the migration notes](../archive/README-migration-notes.md#5-repository-name-conflict) for why this
-name, not `vocanova`):
+Single monorepo, `vocanova-platform`:
 
 ```text
 vocanova-platform/
@@ -95,37 +60,35 @@ packages/
   eslint-config/
   typescript-config/
 docs/
-infrastructure/ # held Cloudflare delivery/retirement manifests
 scripts/
 .github/
 ```
 
 ## 6. Frontend architecture
 
-Next.js (App Router) + React + TypeScript + Tailwind + shadcn/ui + TanStack Query + React Hook Form
-
-- Zod + Vitest + React Testing Library + Playwright + pnpm. OpenNext adapts the app to Workers.
-  The web Worker never accesses D1 directly; the `/api/v1` API Worker remains the business authority;
-  server state uses TanStack Query.
+Next.js App Router, React, TypeScript, Tailwind, Server Components, route-local client components,
+React state and native forms, Playwright, and Node-based middleware and compatibility tests. OpenNext
+adapts the app to Workers. The web Worker never accesses D1 directly; the `/api/v1` API Worker remains
+the business authority.
 
 ## 7. Backend architecture
 
 TypeScript Module Worker + Hono + schema-driven validation/OpenAPI + typed D1 repositories and
-generated Cloudflare binding types. The modular-monolith business modules remain `auth`, `user`,
-`settings`, `vocabulary`, `journey`, `review`, `sentence`, `aifeedback`, `mission`, `progress`, and
-`streak`. Business logic must not depend directly on Hono, D1, auth SDKs, or AI SDKs.
+generated Cloudflare binding types. The implementation is organized into `identity`, `content`,
+`missions`, `ai-feedback`, `repositories`, `domain`, `http`, and `data-conversion` modules. Domain
+logic stays independent of Hono, D1, and provider SDK types.
 
 ## 8. API architecture
 
-REST, JSON, versioned under `/api/v1`. The committed OpenAPI 3.1 artifact and generated API client
-are the migration seam. The Worker API generates and compares its contract deterministically against
-the committed reference; [06](06-backend-design.md) and [07](07-api-contract-and-dto-design.md)
-define stability rules. Hono handles Worker routing and middleware.
+REST, JSON, versioned under `/api/v1`. The Worker generates and compares its OpenAPI 3.1 contract
+deterministically against the committed artifact and compatibility snapshot. The hand-maintained
+typed client is checked for route coverage; [06](06-backend-design.md) and
+[07](07-api-contract-and-dto-design.md) define stability rules. Hono handles routing and middleware.
 
 ## 9. Authentication
 
 Google OAuth + email magic link, no password login in MVP. Internal identity tables
-(`users`, `user_identities`/`external_identities`) decouple business data from the external identity
+(`users` and `external_identities`) decouple business data from the external identity
 provider — business tables reference Vocanova user IDs, never provider IDs directly.
 
 ## 10. Database architecture
@@ -138,22 +101,19 @@ the retired PostgreSQL schema snapshot remains only a synthetic conversion oracl
 ## 11. Spaced repetition
 
 Deterministic stage-based scheduling (not FSRS in MVP). Rating scale, exact step mechanics, and
-reset rule are canonical in [05](05-database-design.md) §9 — see
-[the migration notes](../archive/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how the various
-draft rating scales across documents were reconciled into one. Future algorithms can replace the
+reset rule are canonical in [05](05-database-design.md) §9. Future algorithms can replace the
 scheduler behind a stable interface.
 
 ## 12. Daily mission
 
-A stable daily snapshot (user, local date, review target, selected items, completion status, policy
+A stable daily snapshot (user, local date, review target, counters, completion status, policy
 version). Settings changes apply from the next local day, not retroactively.
 
 ## 13. AI feedback architecture
 
 AI purpose: help learners use vocabulary correctly. Canonical statuses are `correct` /
-`needs_improvement` / `incorrect` (see
-[the migration notes](../archive/README-migration-notes.md#1-ai-feedback-label-conflict) — this document originally used different
-example labels; the authoritative model lives in [09](09-ai-features.md), not here). Architecture:
+`needs_improvement` / `incorrect`; the authoritative model lives in [09](09-ai-features.md).
+Architecture:
 Business Service → Feedback Provider Interface → AI Provider. Rules: save the sentence before the AI
 call, validate structured output, retry safely (bounded), store feedback history, control cost.
 
@@ -166,46 +126,41 @@ behavior (grace days).
 
 ## 15. Background jobs
 
-No Kafka, no complex queue in MVP. Simple synchronous workflows; lightweight cleanup jobs only
-(expired sessions, expired magic links, old idempotency keys). Future: Temporal for long workflows,
-transactional outbox for reliable events, if actually needed.
+There is no background-job runner or queue in the current application. Workflows are synchronous;
+add asynchronous processing only after a measured requirement.
 
 ## 16. Security baseline
 
 HTTPS only, strict CORS, security headers, input validation, authorization checks on every
-learner-owned resource, rate limiting, secret management, secure database roles, privacy-aware
+learner-owned resource, rate limiting, secret bindings, privacy-aware
 logging (no learner sentence text, no tokens/secrets in logs).
 
 ## 17. Observability
 
-Structured logging, request IDs, OpenTelemetry, metrics, error tracking. Monitor API latency,
-errors, database health, AI usage, job failures.
+Structured API request logs, request IDs, health/config endpoints, and redacted Sentry error
+reporting provide the current observability surface.
 
 ## 18. Testing strategy
 
 API: unit, workerd, local D1 migration/repository, contract-snapshot, authorization, atomicity, and
-consistency tests. Frontend: Vitest, React
-Testing Library, Playwright, accessibility, Lighthouse, OpenNext build/dry-run, and workerd requests.
+consistency tests. Frontend: Node middleware tests, Playwright, accessibility, Lighthouse, OpenNext
+build/dry-run, and workerd requests.
 AI: fake-provider tests and evaluation fixtures; never a paid provider in normal CI. Coverage is
 risk-based, not a flat percentage target.
 
 ## 19. GitHub workflow
 
-The repository uses `develop` and `main` as permanent branches with short-lived working
-branches and governed pull requests. Exact merge, approval, and release authority is defined only by
-[DOC-16](../governance/16-autonomous-development-operating-model.md) (a single,
-self-contained document as of its v3.3 revision) and the
-[approval matrix](../governance/approval-matrix.md). Governance permission does not imply that
-automatic merge or deployment is technically active.
+The repository uses `main` as its only long-lived branch. Work is delivered through
+focused short-lived branches, pull requests, product CI, review, and squash merges.
+Large architectural changes are discussed in an issue first.
 
 ## 20. CI/CD
 
-Backend/frontend tests, type checks, security checks, generated-code checks, Worker dry runs, and
-D1 migration/parity checks belong in CI. T10 adds a held manual Cloudflare state machine after
-parity, but live deployment remains blocked by its committed manifest and the applicable action
-hold. See [10](../operations/10-development-workflow.md) for the full pipeline and
-the [canonical governance index](../governance/README.md) for merge/deploy authority, with
-[DOC-19](../archive/19-governance-reconciliation-notes.md) available as historical orientation.
+Backend/frontend tests, type checks, security checks, generated-code checks, Worker dry
+runs, and D1 migration/parity checks belong in CI. Pull-request automation is
+credential-free and does not deploy. A future remote-delivery workflow must keep
+environment credentials isolated and document migration, smoke-test, and rollback
+behavior.
 
 ## 21. Scalability strategy
 
@@ -219,7 +174,7 @@ postponed until then.
 
 ## Final technology stack
 
-Frontend: Next.js, TypeScript, Tailwind, shadcn/ui, OpenNext, Cloudflare Workers. Backend:
+Frontend: Next.js, React, TypeScript, Tailwind, OpenNext, Cloudflare Workers. Backend:
 TypeScript, Hono, generated bindings, D1. Auth: Google OAuth + email magic link. AI: provider abstraction, one provider operated at
 a time. Infrastructure: managed Cloudflare Workers/D1 with no owned server. Future: Expo; async
 Cloudflare capabilities only after a measured requirement.

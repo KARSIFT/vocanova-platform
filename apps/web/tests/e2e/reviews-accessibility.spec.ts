@@ -1,13 +1,12 @@
-// VOC-031-T07b accessibility scan for /reviews. The fixture data
+// Accessibility scan for /reviews. The fixture data
 // the mock API server returns has no due words, so the page
 // renders the "all caught up" empty state. That state is the
 // real-world landing state for any learner who has finished their
 // reviews for the day, and the accessibility bar (axe scan +
 // keyboard reachability + non-color-only feedback) applies to it
 // the same way it applies to the active review session. The
-// active session UI is functionally tested by T08 (the
-// DOC-10 §7 full-flow E2E suite), not by the T07b accessibility
-// scans.
+// active session UI is functionally tested by the full-flow E2E
+// suite, not by these accessibility scans.
 
 import { expect, test } from "@playwright/test";
 
@@ -18,7 +17,7 @@ import {
   scanForAxeViolations,
 } from "./axe-helper.js";
 
-test.describe("Reviews accessibility (VOC-031-T07b)", () => {
+test.describe("Reviews accessibility", () => {
   test("/reviews renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
   }) => {

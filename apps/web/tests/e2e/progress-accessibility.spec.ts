@@ -1,9 +1,9 @@
-// VOC-031-T07b accessibility scan for /progress.
+// Accessibility scan for /progress.
 //
 // The progress page is the most state-heavy screen in the core
 // loop - the "Done" / "Rest" day pills and the streak text both
 // use colour AND text. The non-color-only assertion specifically
-// targets those text labels, which is the T07b acceptance
+// targets those text labels, which is the accessibility
 // criterion's "non-color-only feedback is asserted explicitly,
 // not only inferred from a clean axe run" requirement for
 // mission/streak state.
@@ -153,7 +153,7 @@ const truncatedSavedWordsResponse = {
   nextCursor: "e2e-saved-words-after-10",
 };
 
-test.describe("Progress accessibility (VOC-031-T07b)", () => {
+test.describe("Progress accessibility", () => {
   test("/progress renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
   }) => {

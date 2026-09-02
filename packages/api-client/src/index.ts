@@ -4,9 +4,9 @@ export interface CurrentUser {
   avatarUrl?: string;
   emailVerifiedAt?: string;
   /**
-   * VOC-031-T01 additive field. Always present in the response.
+   * Additive field. Always present in the response.
    * The Next.js middleware uses it to gate the core-loop routes
-   * on whether the learner has completed onboarding (DOC-03 §3).
+   * on whether the learner has completed onboarding.
    */
   onboardingStatus: "not_started" | "in_progress" | "completed";
 }
@@ -267,15 +267,14 @@ export type ReviewIntervalPreset =
   "vocanova_default" | "wordup_like" | "custom";
 
 /**
- * VOC-031-T02 additive type. The persisted app language
- * preference; only "en" is accepted at launch (VOC-031-D06),
+ * The persisted app language preference; only "en" is accepted at launch,
  * because no i18n infrastructure exists in this repository
  * today.
  */
 export type AppLanguage = "en";
 
 /**
- * VOC-031-T02. The public Settings projection returned by
+ * The public Settings projection returned by
  * GET /api/v1/settings. The /api/v1/settings/account frontend
  * reads this for every editable Settings field.
  */
@@ -289,9 +288,9 @@ export interface Settings {
 }
 
 /**
- * VOC-031-T02. The partial-update payload for
+ * The partial-update payload for
  * PATCH /api/v1/settings. Every field is optional; the API
- * only writes the fields the caller supplies. The DOC-07 §3
+ * only writes the fields the caller supplies. The API contract's
  * "no-op PATCH is a well-formed read" rule is honored, so
  * an empty body returns the current state.
  */
@@ -305,21 +304,21 @@ export interface UpdateSettingsBody {
 }
 
 /**
- * VOC-031-T03. The request body for
+ * The request body for
  * POST /api/v1/settings/email-change-links. The new email is
  * the destination the requester wants to switch to; the
  * current sign-in address is taken from the session and is
  * never trusted from the body. The request is unconditionally
  * generic on the server side, so the registration status of
  * the new address is never observable through the request
- * outcome (anti-enumeration posture, VOC-031-D05).
+ * outcome (anti-enumeration posture).
  */
 export interface RequestEmailChangeLinkBody {
   newEmail: string;
 }
 
 /**
- * VOC-031-T03. The request body for
+ * The request body for
  * POST /api/v1/settings/email-change-links/consume. The token
  * is the only form the requester supplies; the API never sees
  * the email itself at consume time (the server resolved it
@@ -330,7 +329,7 @@ export interface ConsumeEmailChangeLinkBody {
 }
 
 /**
- * VOC-031-T03. The post-confirm response from
+ * The post-confirm response from
  * POST /api/v1/settings/email-change-links/consume. The
  * server returns the new email and the previous email so the
  * frontend can show the learner which address the security
@@ -344,7 +343,7 @@ export interface ConsumeEmailChangeLinkResult {
 }
 
 /**
- * VOC-031-T04. The post-deactivation response from
+ * The post-deactivation response from
  * POST /api/v1/account-deletion-requests. The user is already
  * deactivated at this point: status is 'deactivated', every
  * active session and every unconsumed auth/email-change
@@ -682,7 +681,7 @@ export class VocanovaClient {
   }
 
   /**
-   * VOC-031-T02. Get the requester's settings. The response is
+   * Get the requester's settings. The response is
    * a stable Settings projection — every field is always
    * present, with schema defaults for any unset value.
    */
@@ -701,7 +700,7 @@ export class VocanovaClient {
   }
 
   /**
-   * VOC-031-T02. Update the requester's settings via a partial
+   * Update the requester's settings via a partial
    * PATCH. Only the fields supplied in `body` are written; every
    * other field is preserved. An empty body is a well-formed
    * no-op read and returns the current state. The `init.headers`
@@ -722,9 +721,9 @@ export class VocanovaClient {
   }
 
   /**
-   * VOC-031-T03. Request a single-use email-change link. The
+   * Request a single-use email-change link. The
    * request is unconditionally generic on the server side
-   * (anti-enumeration posture, VOC-031-D05): whether the
+   * (anti-enumeration posture): whether the
    * requested new email is already registered is never
    * observable through this response. The `init.headers` are
    * forwarded so the caller can attach a CSRF token.
@@ -743,7 +742,7 @@ export class VocanovaClient {
   }
 
   /**
-   * VOC-031-T03. Consume a single-use email-change link. The
+   * Consume a single-use email-change link. The
    * server validates the token's hash, expiry, single-use
    * `consumed_at`, and environment, re-checks new-email
    * uniqueness atomically at confirm time, and updates
@@ -768,9 +767,9 @@ export class VocanovaClient {
   }
 
   /**
-   * VOC-031-T04. Deactivate the requester's account and
+   * Deactivate the requester's account and
    * schedule anonymization. Requires a CSRF token and a
-   * unique Idempotency-Key (DOC-07). A replay with the same
+   * unique Idempotency-Key. A replay with the same
    * key returns the existing row with `replayed: true`, so
    * the frontend can suppress duplicate "your account was
    * deleted" toasts on a retry. The user is already

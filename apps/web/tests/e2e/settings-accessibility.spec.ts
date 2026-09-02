@@ -1,11 +1,10 @@
-// VOC-031-T07b accessibility scan for /settings.
+// Accessibility scan for /settings.
 //
 // /settings is the screen that renders every editable Settings
 // field (daily review target, review rhythm, app language,
 // notifications, marketing emails, display name) and the
 // "Manage account" link to the deeper account sub-screen.
-// /settings/account coverage lives in settings-account-accessibility.spec.ts
-// (VOC-073-T03).
+// /settings/account coverage lives in settings-account-accessibility.spec.ts.
 
 import { expect, test } from "@playwright/test";
 
@@ -16,7 +15,7 @@ import {
   scanForAxeViolations,
 } from "./axe-helper.js";
 
-test.describe("Settings accessibility (VOC-031-T07b)", () => {
+test.describe("Settings accessibility", () => {
   test("/settings renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
   }) => {

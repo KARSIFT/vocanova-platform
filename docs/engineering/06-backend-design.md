@@ -1,40 +1,11 @@
----
-id: DOC-06
-title: VocaNova Backend Design
-version: 1.1
-document_type: backend-design
-status: approved
-owner: founder
-canonical_path: docs/engineering/06-backend-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-04
-  - DOC-05
-  - DOC-07
-  - DOC-09
-  - DOC-10
-related_decisions:
-  - ADR-0003
-adoption_change: VOC-008
-source_files:
-  - path: 06-backend-design.md
-    sha256: f2f5dd0159cbefc96df37d9a1fd78adb34e22680fa18fe356973ec76a69d2578
----
-
 # 06 — VocaNova Backend Design
 
-## Active VOC-080 backend amendment
+## Current backend
 
-[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) makes a
-TypeScript Module Worker using Hono, generated bindings, typed repositories, and D1
-the target backend. T11 removed the former Go/Huma/Ent/PostgreSQL behavioral oracle
-from the active tree after parity; compact contract/schema snapshots retain the
-migration evidence. The feature boundaries, workflows,
-authorization rules, idempotency, and observable `/api/v1` behavior below remain
-requirements; Go- or PostgreSQL-specific implementation directions are transitional.
+[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) defines a
+TypeScript Module Worker using Hono, generated bindings, typed repositories, and D1 as the backend.
+The feature boundaries, workflows, authorization rules, idempotency, and observable `/api/v1`
+behavior below are current requirements.
 
 ## 1. Overview
 
@@ -49,22 +20,25 @@ boundaries, idempotent important writes, secure-by-default, and no premature ser
 
 ## 3. Backend modules
 
-Business: `identity`, `users`, `content`, `learning`, `reviews`, `missions`, `gamification`,
-`writingai`, `accounts`. Infrastructure: `foundation`, `app`. Rules: business may import foundation;
-foundation must never import business; writes belong to their owning module; cross-module
-coordination happens through services, not direct cross-module table access.
+The code is organized around the modules that exist in `src/`: `identity` owns authentication,
+sessions, settings, and account lifecycle; `content` owns vocabulary, journeys, saved words, and
+reviews; `missions` owns daily progress, points, and streaks; and `ai-feedback` owns sentence
+evaluation and reporting. `repositories` contains D1 platform persistence, `domain` contains shared
+types and rules, and `http` contains middleware and problem responses. `data-conversion` is limited
+to synthetic conversion tooling. `app.ts`, `index.ts`, and `config.ts` compose the Worker and its
+runtime configuration. Route and service modules use repository/domain boundaries instead of
+exposing D1 rows as public API objects.
 
 ## 4. Project structure
 
 ```text
-apps/worker-api/
-  src/{app,foundation,business}/
-  src/business/{identity,users,content,learning,reviews,missions,gamification,writingai,accounts}/
-  src/foundation/{database,auth,web,idempotency,audit,clock,timezone,config,log}/
+apps/api-worker/
+  src/{identity,content,missions,ai-feedback,repositories,domain,http,data-conversion}/
+  src/{app,config,index}.ts
   migrations/
-  test/{unit,workerd,parity}/
-
-apps/api-worker/ # Hono/D1 runtime
+  openapi/
+  scripts/
+  test/
 ```
 
 ## 5. API design
@@ -96,15 +70,15 @@ Object requires a measured invariant that an atomic batch cannot safely represen
 
 ## 9. Idempotency
 
-Required for: review submission, adding words, learner sentences, AI feedback, account deletion.
-Storage: idempotency key + authenticated-user scope + operation scope + request fingerprint,
-unique on `(user_id, scope, key)`. The same key from different users is isolated. Duplicate
-processing for the same user and scope (reused key with a different fingerprint or still in
-progress) returns `409`.
+Required for review submission, adding words, sentence feedback, and account deletion.
+Storage: idempotency key + authenticated user + operation + request fingerprint, unique on
+`(user_id, operation, key)`. The same key from different users is isolated. Reusing a key for the
+same user and operation with a different fingerprint returns `409`. AI generation concurrency is
+controlled separately by generation leases.
 
 ## 10. Core learning workflows
 
-**Review ratings (canonical — see reconciliation note above): Again / Hard / Good / Easy.** Result
+**Review ratings: Again / Hard / Good / Easy.** Result
 and rating are distinct. Objective incorrect answers record `Again`; objective correct answers
 allow Hard/Good/Easy; self-check result is derived from the rating. MVP movement: Again → step back
 with a floor of 0; two consecutive incorrect/Again attempts → reset to step 0; Hard → same step;
@@ -138,15 +112,15 @@ days, maximum balance 2 (matches `grace_day_ledger` semantics).
 ## 12. AI feedback
 
 Workflow: save learner sentence → request AI feedback → store feedback attempt → reward completion.
-Provider abstraction: `FeedbackProvider` interface. Rules: 8-second provider timeout and 10-second
-total request budget (see [09](09-ai-features.md) §18, the authoritative timeout/retry policy), no
-real AI calls in CI, fake provider for tests, rate limits applied.
+Provider abstraction: `FeedbackProvider` interface. The configured provider timeout is 10 seconds
+(see [09](09-ai-features.md) §7); CI makes no real AI calls, tests use a fake provider, and rate
+limits apply.
 
 ## 13. Timezone
 
 Store timestamps in UTC; store user timezone as an IANA string; calculate daily logic from local
-date. Timezone resolution priority: user settings → onboarding answer → browser timezone → UTC
-fallback.
+date. Timezone resolution priority: a non-UTC stored user setting → client/browser timezone →
+UTC fallback.
 
 ## 14. Account deletion
 
@@ -157,12 +131,12 @@ learner. Legal review is required before production; see [05](05-database-design
 
 ## 15. Background jobs
 
-No queue system in MVP — synchronous workflows. Lightweight cleanup only: expired sessions, expired
-magic links, old idempotency keys.
+There is no background-job runner or queue in the current application. Workflows are synchronous,
+and cleanup is not currently automated.
 
 ## 16. Security and observability
 
-`log/slog`, request IDs, structured logs. Never log tokens, secrets, or private learner content.
+Structured JSON logs and request IDs. Never log tokens, secrets, or private learner content.
 HTTPS, CSRF protection, CORS allowlist, secure cookies, hashed tokens, input validation.
 
 ## 17. Testing
@@ -171,11 +145,9 @@ Required target evidence: unit, service, HTTP, workerd, local D1 repository/migr
 parity, authorization, atomicity/consistency, security, contract-snapshot, and
 retired-source conversion tests.
 
-## 18. VOC-080 implementation order
+## 18. Domain implementation order
 
 Worker/backend foundation → D1 foundation → authentication → user profile/settings →
-content/discovery → user words → daily missions → review engine → gamification → AI feedback →
-account lifecycle → held production hardening. Phase-based, with GitHub PRs and different-role
-exact-revision review. Exact review and merge authority per risk class comes from the
-[canonical governance index](../governance/README.md), not this backend design; [DOC-19](../archive/19-governance-reconciliation-notes.md)
-provides non-authoritative orientation.
+content/discovery → user words → daily missions → review engine → gamification → AI
+feedback → account lifecycle → production hardening. Deliver coherent changes through
+focused GitHub pull requests with relevant tests.

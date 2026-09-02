@@ -409,7 +409,7 @@ export function validateLocalDevelopmentSources(sources) {
     "LOCAL_STACK_TIMEOUT_MS = 12 * 60_000",
     "LOCAL_STACK_PREPARATION_TIMEOUT_MS = 6 * 60_000",
     "LOCAL_STACK_MIGRATION_TIMEOUT_MS = 2 * 60_000",
-    'LOCAL_STACK_MARKER = "voc081-local-stack-v1"',
+    'LOCAL_STACK_MARKER = "vocanova-local-stack-v1"',
     'mkdtempSync(resolve(tmpdir(), "vocanova-local-stack-"))',
     'purpose: "test"',
     "runMigrations(stateDirectory, runMigration)",

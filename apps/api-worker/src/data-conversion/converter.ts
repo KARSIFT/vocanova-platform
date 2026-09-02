@@ -370,7 +370,7 @@ function validateDocument(input: unknown): SourceExport {
   }
   if (input.source.synthetic !== true) {
     throw new Error(
-      "data conversion: production data remains held by VOC-080-HOLD-02",
+      "data conversion: only synthetic source exports are accepted",
     );
   }
   normalizeTimestamp(input.source.exported_at, "source.exported_at");

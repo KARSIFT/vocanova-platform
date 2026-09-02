@@ -175,7 +175,7 @@ export function OnboardingForm({
       router.push("/home");
       router.refresh();
     } catch (error) {
-      // T06: a 401 mid-onboarding means the session expired before the
+      // A 401 mid-onboarding means the session expired before the
       // answers were saved. handleApiError routes the learner to
       // re-auth; the per-step answers are still in component state so
       // they survive the page transition. We never claim onboarding is

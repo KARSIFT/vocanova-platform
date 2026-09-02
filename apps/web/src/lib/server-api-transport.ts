@@ -6,7 +6,7 @@ const INTERNAL_API_ORIGIN = "https://vocanova-api.internal";
  * Send a server-side API request through the Cloudflare service binding when
  * the app is running under OpenNext/workerd. The ordinary fetch fallback keeps
  * `next dev`, `next start`, and the pre-existing Node test harness usable while
- * the Worker API is introduced in later VOC-080 tasks.
+ * the Worker API is unavailable during local fallback development.
  */
 export function fetchApiFromServer(
   input: RequestInfo | URL,

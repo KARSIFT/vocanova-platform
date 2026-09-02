@@ -49,7 +49,7 @@ export default {
         newWordsCompleted: 1,
         sentencePracticeTarget: 3,
         sentencePracticesCompleted: 0,
-        policyVersion: "voc080-t03-workerd",
+        policyVersion: "vocanova-workerd-v1",
         status: "open",
         graceApplied: false,
         streak: {

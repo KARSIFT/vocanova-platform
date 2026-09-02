@@ -1,6 +1,6 @@
-// VOC-073-T03 accessibility scan for /settings/account.
+// Accessibility scan for /settings/account.
 //
-// Extracted from settings-accessibility.spec.ts (VOC-031-T07b) so issue #536's
+// Extracted from settings-accessibility.spec.ts so issue #536's
 // dedicated spec file per entry route is satisfied without duplicating CI time.
 // /settings/account renders the email-change form, the current email, and the
 // account-deletion form — the highest-stakes settings sub-screen. Keyboard-
@@ -18,7 +18,7 @@ import {
   scanForAxeViolations,
 } from "./axe-helper.js";
 
-test.describe("Settings account accessibility (VOC-073-T03)", () => {
+test.describe("Settings account accessibility", () => {
   test("/settings/account renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
   }, testInfo) => {

@@ -1,9 +1,6 @@
-# Design Documentation
+# Design documentation
 
-| ID     | Document                                       | Status   | Owner   | Related                        |
-| ------ | ---------------------------------------------- | -------- | ------- | ------------------------------ |
-| DOC-03 | [UI/UX Design](03-ui-ux-design.md)             | approved | founder | DOC-00, DOC-01, DOC-08, DOC-09 |
-| DOC-08 | [Web Application Design](08-web-app-design.md) | approved | founder | DOC-03, DOC-04, DOC-07, DOC-09 |
+- [UI/UX design](03-ui-ux-design.md)
+- [Web application design](08-web-app-design.md)
 
-DOC-08's active runtime is Next.js through OpenNext on Cloudflare Workers under
-[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md).
+The web application runs on Next.js through OpenNext on Cloudflare Workers.

@@ -90,8 +90,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(signInUrl);
   }
 
-  // Parse the additive onboardingStatus field introduced by
-  // VOC-031-T01. Treat a missing/malformed field as "not_started" so
+  // Treat a missing or malformed onboardingStatus field as "not_started" so
   // the conservative gate wins (any authenticated learner who
   // hasn't been grandfathered past onboarding is funneled through it).
   let onboardingStatus: "not_started" | "in_progress" | "completed" =

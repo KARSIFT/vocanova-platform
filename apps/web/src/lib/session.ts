@@ -10,8 +10,8 @@ import { CSRF_COOKIE_NAME, deleteCookie, SESSION_COOKIE_NAME } from "./cookies";
  * server.
  *
  * Every client component that makes an authenticated request MUST run this
- * check on its catch path so the T06 "session-expiry mid-flow" cross-cutting
- * guarantee holds: when a 401 comes back mid-review-session,
+ * check on its catch path so the session-expiry mid-flow guarantee holds:
+ * when a 401 comes back mid-review-session,
  * mid-sentence-submission, mid-onboarding, mid-settings-write, or
  * mid-account-deletion, the learner is consistently routed to re-auth
  * instead of seeing a generic "try again" message that hides the real
@@ -29,7 +29,7 @@ export function isSessionExpiredError(error: unknown): boolean {
  * after re-authentication the learner lands back where they were.
  *
  * Components must NOT catch a 401 silently and continue: the cross-cutting
- * property T06 guarantees is that the learner is never left looking at a
+ * guarantee is that the learner is never left looking at a
  * screen that claims an action succeeded when the server rejected it, and
  * is never shown a generic error in place of a clear "please sign in again"
  * affordance.
@@ -47,7 +47,7 @@ export function handleSessionExpired(currentPath?: string): void {
 }
 
 /**
- * handleApiError is the T06 cross-cutting catch-path helper for every
+ * handleApiError is the cross-cutting catch-path helper for every
  * authenticated client request. It detects a 401 and routes the learner to
  * re-authentication; for every other error it returns the error to the
  * caller so the existing per-screen error display can render a stable

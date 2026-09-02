@@ -1,6 +1,6 @@
-// VOC-073-T02 accessibility scan for /auth/magic.
+// Accessibility scan for /auth/magic.
 //
-// Scan states (VOC-073-DEP-01): the success path redirects to /home
+// The success path redirects to /home
 // before a post-success scan is practical, so this spec exercises
 // only the stable incomplete-link error surface — navigating to
 // /auth/magic without `token` and `email` query params renders
@@ -16,7 +16,7 @@ import {
   scanForAxeViolations,
 } from "./axe-helper.js";
 
-test.describe("Auth magic-link accessibility (VOC-073-T02)", () => {
+test.describe("Auth magic-link accessibility", () => {
   test("/auth/magic incomplete link renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based error feedback", async ({
     page,
   }, testInfo) => {

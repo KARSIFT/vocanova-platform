@@ -1,20 +1,18 @@
-// VOC-031-T08 - Full core-loop end-to-end Playwright suite.
+// Full core-loop end-to-end Playwright suite.
 //
-// This is the DOC-10 §7-documented end-to-end flow, built for
-// the first time on the T07 Playwright install. The flow is the
-// the functional-correctness counterpart to the T07a/T07b
-// accessibility scans: every step is exercised against real
+// This is the product's complete browser end-to-end flow and the
+// functional-correctness counterpart to the accessibility scans.
+// Every step is exercised against real
 // client components, real network calls, and the real Next.js
 // auth-gate middleware, with the mock API server (see
 // mock-api-server.mjs) standing in for the API contract boundary
-// the same way it does for the T07 scans.
+// the same way it does for the accessibility scans.
 //
 // Flow (one Playwright test, one browser context):
 //
 //   1.  Set the session + CSRF cookies so the learner is
-//       authenticated without going through the magic-link UI
-//       (the magic-link UI is a separate A1 component surface;
-//       T08's "auth" step is "be authenticated", satisfied by
+//       authenticated without going through the magic-link UI;
+//       the flow's auth precondition is satisfied by
 //       the session cookie). Set e2e_onboarding_status =
 //       not_started so the auth-gate middleware funnels the
 //       learner into /onboarding.
@@ -26,9 +24,9 @@
 //       cafe -> /discover/ordering-at-a-cafe/pour.
 //
 //   4.  Save: click the Save button on the Word Detail screen,
-//       wait for the button to read "Saved" (the T07b
-//       accessibility scan already covered the static
-//       keyboard/color-only surfaces; T08 covers the actual
+//       wait for the button to read "Saved" (the accessibility
+//       scan already covered the static
+//       keyboard/color-only surfaces; this test covers the actual
 //       save -> saved transition).
 //
 //   5.  Review: /reviews, complete the one due card via the
@@ -40,7 +38,7 @@
 //       Detail screen, type a sentence containing the target
 //       word, click Check, wait for the deterministic mock
 //       feedback. The mock returns "correct" without calling a
-//       paid/nondeterministic provider (DOC-10 §7).
+//       paid or nondeterministic provider.
 //
 //   7.  Progress update: /home -> verify the daily-mission
 //       counter now shows the review counted.
@@ -53,19 +51,18 @@
 //
 //   10. Unauthenticated-access rejection: set
 //       e2e_unauthenticated=1 (the same kind of test-only cookie
-//       the T07b onboarding scan uses, see mock-api-server.mjs),
+//       the onboarding scan uses, see mock-api-server.mjs),
 //       navigate to /home, expect the auth-gate middleware to
 //       redirect to /signin.
 //
-// Project scope: T08 follows the T07a "one representative
-// desktop width" pattern - mobile-360 / mobile-430 are
-// accessibility-only, exercised by T07b. The functional flow
+// Project scope: the functional flow uses one representative
+// desktop width; mobile-360 / mobile-430 are accessibility-only. The functional flow
 // runs on home-desktop-1280 only. The test self-skips on the
 // mobile projects so adding the mobile projects to the
-// Playwright config (T07b) does not silently expand T08's
+// Playwright config does not silently expand the functional test's
 // scope. Running the full functional flow on three projects
 // would triple test time without coverage gain beyond what
-// T07b's mobile accessibility scans already provide.
+// the mobile accessibility scans already provide.
 
 import { randomUUID } from "node:crypto";
 
@@ -74,14 +71,14 @@ import { expect, test } from "@playwright/test";
 const ONBOARDING_COOKIE_VALUE = "not_started";
 const CORE_LOOP_TEST_TIMEOUT_MS = 90_000;
 
-test.describe("Core loop end-to-end (VOC-031-T08)", () => {
+test.describe("Core loop end-to-end", () => {
   test("auth -> onboarding -> discover -> save -> review -> sentence -> AI feedback -> progress -> settings -> logout -> rejection", async ({
     page,
     context,
   }, testInfo) => {
     test.skip(
       testInfo.project.name !== "home-desktop-1280",
-      "T08 scope is one representative desktop width >=1024px (mirrors T07a); mobile projects are T07b's accessibility scope.",
+      "The functional flow covers one representative desktop width; mobile projects are accessibility-only.",
     );
     test.setTimeout(CORE_LOOP_TEST_TIMEOUT_MS);
 
@@ -89,7 +86,7 @@ test.describe("Core loop end-to-end (VOC-031-T08)", () => {
     //
     // The session cookie value is unique per test run so this
     // test's in-memory mock state does not collide with the
-    // T07a/T07b scans, which use the mock's default session
+    // accessibility scans, which use the mock's default session
     // (no vocanova_session cookie). The CSRF cookie is set to
     // a value the test will echo as the X-CSRF-Token header on
     // every mutation; the mock's CSRF check requires the two
@@ -193,7 +190,7 @@ test.describe("Core loop end-to-end (VOC-031-T08)", () => {
 
     // The mock's /api/v1/onboarding endpoint honors the
     // e2e_onboarding_status cookie as an unconditional override
-    // (the T07b scan depends on that behavior to land on the
+    // (the accessibility scan depends on that behavior to land on the
     // onboarding form). The override would otherwise keep
     // /me returning onboardingStatus=not_started forever, and
     // the form's post-submit router.push("/home") would loop
@@ -275,7 +272,7 @@ test.describe("Core loop end-to-end (VOC-031-T08)", () => {
     // ----- 6. Sentence feedback + deterministic AI.
     //
     // The mock's evaluateSentenceFeedback is the deterministic
-    // AI adapter DOC-10 §7 requires for CI: the same sentence
+    // AI adapter used in CI: the same sentence
     // always produces the same feedback. A sentence containing
     // the target word "pour" and >= 3 words returns
     // { status: "correct", explanation: <fixed> }.

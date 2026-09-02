@@ -70,7 +70,7 @@ export function SentenceFeedback({
       onFeedbackSubmitted?.(data);
     } catch (error) {
       setResult(null);
-      // T06: a 401 here means the session expired mid-sentence-submission.
+      // A 401 here means the session expired mid-sentence-submission.
       // Never lose the learner's sentence — the textarea stays populated
       // (controlled by component state) and we route to re-auth. The
       // learner can copy their text and resume after sign-in.
@@ -111,7 +111,7 @@ export function SentenceFeedback({
       setReported(true);
       setReportStatus("idle");
     } catch (error) {
-      // T06: a 401 on a report submission routes the learner to
+      // A 401 on a report submission routes the learner to
       // re-auth. The text is in component state and the feedback
       // result is still visible — nothing is lost.
       if (

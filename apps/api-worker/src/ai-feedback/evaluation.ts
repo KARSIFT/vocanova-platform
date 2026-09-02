@@ -219,7 +219,7 @@ function buildCasesForTarget(target: EvaluationTarget): EvaluationCase[] {
     ...tags: string[]
   ) => {
     cases.push({
-      id: `voc028-eval-${target.word}-${category}-${cases.length}`,
+      id: `vocanova-eval-${target.word}-${category}-${cases.length}`,
       targetWord: target.word,
       partOfSpeech: target.partOfSpeech,
       wordType: target.wordType,

@@ -1,17 +1,13 @@
-// VOC-031-T07a + VOC-031-T07b + VOC-031-T08 mock API server for the
+// mock API server for the
 // e2e harness.
 //
-// T07a added the minimum canned JSON the Home page server
-// component needs to render. T07b extended the server so every
-// remaining core-loop page (Discover, Discover/[situation],
-// Discover/[situation]/[word], Reviews, Progress, Onboarding,
-// Settings, Settings/account) could render with deterministic
-// fixture data - the T07b scans do not exercise form submissions
-// or POST endpoints, so that server returned read-only fixtures
-// and 404'd on writes.
+// The server supplies deterministic JSON fixtures for every browser-tested
+// core-loop page: Discover, Word Detail, Reviews, Progress, Onboarding,
+// Settings, and Account Settings. Accessibility scans use the read paths;
+// unsupported writes return 404.
 //
-// T08 (this task) extends the server with the full mutation
-// surface the DOC-10 §7 end-to-end flow needs against the same
+// The full-flow suite extends the server with the mutation
+// surface the end-to-end flow needs against the same
 // Playwright install: magic-link request/consume (issuing a
 // session cookie + double-submit CSRF cookie), onboarding
 // completion, save / unsave, review submission, deterministic
@@ -26,24 +22,23 @@
 // State (saved words, completed onboarding, per-session
 // settings, per-session progress) is tracked in memory keyed by
 // the session cookie value. The server is single-process and
-// the T08 suite runs as a single worker (`workers: 1` in
+// the full-flow suite runs as a single worker (`workers: 1` in
 // playwright.config.ts), so the in-memory state is consistent
 // across the test run and is reset on server restart. The
-// existing T07a/T07b scan specs do not mutate state, so the
+// accessibility scan specs do not mutate state, so the
 // per-session default fixtures continue to apply to them.
 //
 // AI feedback is deterministic: a fixed rule table based on the
 // input sentence (length, presence of the target word, blank).
-// This is the "deterministic AI adapter, not a
-// paid/nondeterministic provider call" pattern DOC-10 §7
-// requires for CI.
+// This is a deterministic AI adapter, not a paid or
+// nondeterministic provider call.
 //
 // Endpoints:
 //
 //   GET    /healthz                                 -> 200 { status: "ok" }
 //
 //   GET    /api/v1/me                                -> 200 CurrentUser
-//             401 if ?fail=me (T07b auth-gate path)
+//             401 if ?fail=me (auth-gate test path)
 //             onboardingStatus overridden by the
 //             `e2e_onboarding_status` cookie when present
 //
@@ -157,7 +152,7 @@ const DEFAULT_DAILY_MISSION = {
   newWordsCompleted: 0,
   sentencePracticeTarget: 3,
   sentencePracticesCompleted: 0,
-  policyVersion: "t08-fixture-v1",
+  policyVersion: "core-loop-fixture-v1",
   status: "open",
   graceApplied: false,
   streak: DEFAULT_PROGRESS.streak,
@@ -851,12 +846,12 @@ const server = createServer(async (req, res) => {
       return;
     }
     if (cookies.e2e_unauthenticated === "1") {
-      // T08: the unauthenticated-access rejection step sets this
+      // The unauthenticated-access rejection step sets this
       // cookie after logout to make /api/v1/me return 401, so the
       // Next.js auth-gate middleware (apps/web/src/middleware.ts)
       // routes the learner to /signin. The cookie is unset by the
       // test before the next test that needs an authenticated
-      // session, so the existing T07a/T07b scans continue to see
+      // session, so the accessibility scans continue to see
       // a 200 here without changing their own setup.
       logLine(req, 401, { reason: "e2e-unauthenticated-override" });
       jsonResponse(res, 401, { error: "unauthorized" });
@@ -910,7 +905,7 @@ const server = createServer(async (req, res) => {
     }
     state.onboardingCompleted = true;
     if (typeof body.dailyReviewTarget === "number") {
-      // VOC-031-D04 seed rule: only seed dailyReviewTarget when no
+      // seed rule: only seed dailyReviewTarget when no
       // customized value exists yet. The mock starts with the
       // schema default (20) for every fresh session, so the seed
       // fires for the very first onboarding write.
@@ -1048,7 +1043,7 @@ const server = createServer(async (req, res) => {
       answeredAt: new Date().toISOString(),
     });
     // The API contract advances the word's review schedule but
-    // keeps it in the saved set; the T08 "review -> sentence"
+    // keeps it in the saved set; the full-flow "review -> sentence"
     // step relies on the word remaining in savedMeaningIds after
     // the review submission so the sentence-feedback widget on
     // /discover/.../[word] still renders the saved meaning.

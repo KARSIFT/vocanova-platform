@@ -1,0 +1,24 @@
+name: Pull request title
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+
+jobs:
+  title:
+    name: Conventional title
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Validate title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if [[ ! "$PR_TITLE" =~ ^(feat|fix|docs|refactor|test|build|ci|chore|perf|revert)(\([a-z0-9._/-]+\))?!?:[[:space:]].+ ]]; then
+            echo "Use a Conventional Commit title, for example: fix: handle expired sessions" >&2
+            exit 1
+          fi

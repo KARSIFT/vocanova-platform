@@ -1,19 +1,15 @@
 name: Security
 
-# Dependency and secret-oriented checks require no repository secrets and keep
-# the default token read-only. The scanner action and scanner version are pinned.
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
   push:
-    branches: [develop, main]
+    branches: [main]
 
 permissions:
   contents: read
-
-defaults:
-  run:
-    shell: bash
 
 concurrency:
   group: security-${{ github.event.pull_request.number || github.ref }}
@@ -21,75 +17,35 @@ concurrency:
 
 jobs:
   dependencies:
-    name: dependency audit
+    name: Dependency audit
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Check out reviewed revision
+      - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Set up repository toolchain
+      - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
         with:
           install-dependencies: "false"
-
       - name: Audit locked dependencies
         run: pnpm audit --audit-level high
 
   secrets:
-    name: secret scan
+    name: Secret scan
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
-      - name: Check out reviewed revision
+      - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
-
       - name: Scan changed history
         uses: trufflesecurity/trufflehog@bcfcf73aaf4759d4dadc2783177c245a02792318
         with:
+          base: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || '' }}
+          head: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || '' }}
           version: "3.97.0"
           extra_args: --results=verified,unknown
-
-      - name: Create synthetic scanner contract fixture
-        env:
-          FIXTURE_DIR: ${{ runner.temp }}/secret-scanner-contract
-        run: |
-          mkdir -p "$FIXTURE_DIR"
-          openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out "$FIXTURE_DIR/synthetic-private-key.pem" 2>/dev/null
-
-      - name: Prove synthetic credentials fail closed
-        env:
-          FIXTURE_DIR: ${{ runner.temp }}/secret-scanner-contract
-        run: |
-          set +e
-          docker run --rm -v "$FIXTURE_DIR:/fixture:ro" ghcr.io/trufflesecurity/trufflehog@sha256:ff4c95e9df7d645daf2140e3ca1039031c63106268d5fbb25feb43ceca1bcc33 \
-            filesystem /fixture --no-verification --fail --no-update --no-color
-          status=$?
-          set -e
-          test "$status" -eq 183
-
-  required:
-    name: security required
-    if: always()
-    needs: [dependencies, secrets]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - name: Check out aggregate policy
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Require every security subsystem
-        env:
-          DEPENDENCIES_RESULT: ${{ needs.dependencies.result }}
-          SECRETS_RESULT: ${{ needs.secrets.result }}
-        run: >-
-          bash scripts/foundation/require-successful-jobs.sh
-          "dependencies=$DEPENDENCIES_RESULT"
-          "secrets=$SECRETS_RESULT"

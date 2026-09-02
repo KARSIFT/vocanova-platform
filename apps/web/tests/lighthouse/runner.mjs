@@ -1,21 +1,20 @@
-// VOC-031-T09 Lighthouse runner.
+// VocaNova Lighthouse runner.
 //
-// The runner is the engine behind the T09 acceptance criterion's
-// "Lighthouse CI runs against a production build at the three
-// supported layouts" requirement. It uses the `lighthouse` npm
+// The runner runs Lighthouse against a production build at the three
+// supported layouts. It uses the `lighthouse` npm
 // package (the same engine `@lhci/cli` wraps, so the scores it
 // produces are byte-identical to a full LHCI run) and runs one
 // audit per (screen, layout) combination: 4 screens x 3 layouts
 // = 12 audits, all against a fixed local production build (the
 // Next.js production server the CI workflow starts before
 // invoking this script), never the dev server, never a live
-// network target. This is the `VOC-031-R04` "no hot-reload
+// network target. This enforces the "no hot-reload
 // variance in CI" requirement.
 //
 // Why `lighthouse` directly and not `@lhci/cli`:
 //
 // - LHCI is built around a single `startServerCommand` that owns
-//   one server process. Our T07a / T07b / T08 harness already
+//   one server process. The browser-test harness already
 //   boots two cooperating processes (the mock API server + the
 //   Next.js production server) - reusing that pattern in a
 //   single command is awkward and would either fork the
@@ -24,21 +23,18 @@
 //   sidesteps LHCI's server-management entirely.
 // - LHCI's diff/reporting infrastructure is the only feature
 //   that is genuinely easier in LHCI than in a plain script.
-//   T09's acceptance criterion is "scores meet the DOC-08
-//   thresholds", not "track score regression over time", so
+//   This suite checks that scores meet the configured thresholds; it does
+//   not track score regression over time, so
 //   the diff feature is not in scope here.
 // - The score calculation is identical (same engine, same audit
 //   set, same category weights); LHCI is a thin CI wrapper
 //   over `lighthouse`.
 //
 // The CI workflow that calls this script (`.github/workflows/
-// quality.yml`, lighthouse job) feeds the workflow's stable `quality required`
-// aggregate for the T09 acceptance criterion. The script exits with code 0 if every
-// (screen, layout) audit meets every DOC-08 threshold, and
+// quality.yml`, lighthouse job) reports a stable check. The script exits with code 0 if every
+// (screen, layout) audit meets every configured threshold, and
 // exits with code 1 otherwise, so a missed threshold is a hard
-// CI failure (a missed threshold is never silently lowered or
-// skipped - the T09 acceptance criterion's explicit "honest
-// limitation" requirement).
+// CI failure and is never silently lowered or skipped.
 
 import { launch } from "chrome-launcher";
 import lighthouse from "lighthouse";
@@ -47,7 +43,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import {
-  DOC_08_THRESHOLDS,
+  LIGHTHOUSE_THRESHOLDS,
   assertScores,
   formatCategoryScoreRow,
 } from "./assertions.mjs";
@@ -74,10 +70,10 @@ const CHROME_FLAGS = [
   "--disable-dev-shm-usage",
 ];
 
-// DOC-03 §10 + DOC-08: the three "supported layouts" are 360px,
+// The three supported layouts are 360px,
 // 430px, and one representative desktop width >=1024px. The
 // desktop width 1280 is the same representative desktop width
-// the T07a home-accessibility.spec.ts test uses, so the
+// home-accessibility.spec.ts uses, so the
 // accessibility and performance harnesses agree on which
 // desktop width counts as the "supported" one.
 const LAYOUTS = [
@@ -116,10 +112,10 @@ const LAYOUTS = [
   },
 ];
 
-// DOC-08: Home, Discover, Reviews, and Progress are the four
-// screens the T09 acceptance criterion names. Discover has
+// Home, Discover, Reviews, and Progress are the four
+// screens covered by the performance suite. Discover has
 // nested routes (Discover/[situation], Discover/[situation]/
-// [word]); the top-level /discover is what DOC-08's "Discover"
+// [word]); the top-level /discover is what the design's "Discover"
 // performance target refers to, and it's the entry point for
 // the mobile-first journey - testing the subroutes would
 // measure the same shell (the (app) layout) with different
@@ -134,11 +130,11 @@ const SCREENS = [
 // --- Helpers ---------------------------------------------------
 
 function buildLighthouseSettings({ layout, screen }) {
-  // DOC-08's thresholds (Performance 85+ / Accessibility 95+ /
+  // The thresholds (Performance 85+ / Accessibility 95+ /
   // Best Practices 90+) are the ones the runner asserts. The
   // throttling method is `simulate` (Lantern), which works
   // against a fixed local server without touching the network
-  // - this is the `VOC-031-R04` "no live network target" rule.
+  // — this is the "no live network target" rule.
   // Using `devtools` throttling instead would issue real
   // requests to the local server, which is unnecessary and
   // adds flakiness from the throttling proxy itself.
@@ -168,8 +164,8 @@ function buildLighthouseSettings({ layout, screen }) {
     // default for each `formFactor` so the audit
     // results match a stock Lighthouse run.
     extraHeaders: {
-      "X-Lighthouse-T09-Screen": screen.name,
-      "X-Lighthouse-T09-Layout": layout.name,
+      "X-Lighthouse-Screen": screen.name,
+      "X-Lighthouse-Layout": layout.name,
     },
   };
 }
@@ -240,7 +236,7 @@ async function waitForServer(url, timeoutMs = 60000) {
 
 async function main() {
   const startedAt = new Date().toISOString();
-  process.stdout.write(`VOC-031-T09 Lighthouse runner\n`);
+  process.stdout.write(`VocaNova Lighthouse runner\n`);
   process.stdout.write(`  started_at: ${startedAt}\n`);
   process.stdout.write(`  url_prefix: ${URL_PREFIX}\n`);
   process.stdout.write(
@@ -250,7 +246,7 @@ async function main() {
     `  layouts:    ${LAYOUTS.map((l) => l.name).join(", ")}\n`,
   );
   process.stdout.write(
-    `  thresholds: performance>=${DOC_08_THRESHOLDS.performance} accessibility>=${DOC_08_THRESHOLDS.accessibility} best-practices>=${DOC_08_THRESHOLDS["best-practices"]}\n`,
+    `  thresholds: performance>=${LIGHTHOUSE_THRESHOLDS.performance} accessibility>=${LIGHTHOUSE_THRESHOLDS.accessibility} best-practices>=${LIGHTHOUSE_THRESHOLDS["best-practices"]}\n`,
   );
   process.stdout.write("\n");
 
@@ -295,7 +291,7 @@ async function main() {
 
         for (const category of ["performance", "accessibility", "best-practices"]) {
           const score = result.scores[category];
-          const threshold = DOC_08_THRESHOLDS[category];
+          const threshold = LIGHTHOUSE_THRESHOLDS[category];
           const failure = failures.find((f) => f.category === category);
           process.stdout.write(
             formatCategoryScoreRow({
@@ -316,7 +312,7 @@ async function main() {
   }
 
   const finishedAt = new Date().toISOString();
-  process.stdout.write(`\nVOC-031-T09 summary\n`);
+  process.stdout.write(`\nLighthouse summary\n`);
   process.stdout.write(`  started_at:  ${startedAt}\n`);
   process.stdout.write(`  finished_at: ${finishedAt}\n`);
   process.stdout.write(`  total audits:        ${SCREENS.length * LAYOUTS.length}\n`);
@@ -335,13 +331,13 @@ async function main() {
 
   if (allFailures.length === 0) {
     process.stdout.write(
-      "\nVOC-031-T09 PASS: every screen met every DOC-08 threshold at every supported layout.\n",
+      "\nPASS: every screen met every performance threshold at every supported layout.\n",
     );
     process.exit(0);
   }
 
   process.stdout.write(
-    "\nVOC-031-T09 FAIL: at least one (screen, layout, category) did not meet its DOC-08 threshold.\n",
+    "\nFAIL: at least one screen, layout, or category missed its performance threshold.\n",
   );
   process.stdout.write("Failures (screen / layout / category / actual / threshold):\n");
   for (const failure of allFailures) {
@@ -353,14 +349,14 @@ async function main() {
     );
   }
   process.stdout.write(
-    "\nThe T09 acceptance criterion records that any threshold not yet met must be reported as an explicit, honestly-reported limitation, not silently lowered or skipped. Open a follow-up issue and update specs/changes/VOC-031-begin-milestone-p5-integrated-core-loop/staging-evidence.md EV-38 accordingly.\n",
+    "\nDo not silently lower or skip a threshold. Open a follow-up issue describing any accepted limitation.\n",
   );
   process.exit(1);
 }
 
 main().catch((error) => {
   process.stderr.write(
-    `VOC-031-T09 runner error: ${error?.stack ?? error?.message ?? String(error)}\n`,
+    `Lighthouse runner error: ${error?.stack ?? error?.message ?? String(error)}\n`,
   );
   process.exit(2);
 });

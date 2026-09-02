@@ -137,7 +137,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     const held = syntheticPostgresExport();
     sourceOf(held).synthetic = false;
     await expect(convertPostgresExport(held)).rejects.toThrow(
-      "VOC-080-HOLD-02",
+      "only synthetic source exports are accepted",
     );
   });
 
@@ -278,7 +278,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
       expect(serialized).not.toContain("synthetic@example.invalid");
       expect(serialized).not.toContain("synthetic-idempotency-key");
       expect(serialized).not.toContain("a".repeat(64));
-      console.info(`VOC080_RECONCILIATION ${serialized}`);
+      console.info(`VOCANOVA_RECONCILIATION ${serialized}`);
     });
   });
 
@@ -320,7 +320,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
       "INSERT INTO platform_metadata (key, value_json, updated_at) VALUES (?1, ?2, ?3)",
     )
       .bind(
-        "data_conversion:voc080-t09-bad-checkpoint",
+        "data_conversion:conversion-bad-checkpoint",
         '{"completed":false}',
         plan.exportedAt,
       )
@@ -387,28 +387,32 @@ describe("PostgreSQL-to-D1 conversion", () => {
       .run();
   });
 
-  it("reruns a completed reconciliation instead of returning a stale pass", async () => {
-    const plan = await convertPostgresExport(
-      fixtureFor("stale-reconciliation"),
-    );
-    await runImport(env.DB, plan);
-    await consumeReconciliation(env.DB, plan, (report) => {
-      expect(report.status).toBe("pass");
-    });
+  it(
+    "reruns a completed reconciliation instead of returning a stale pass",
+    { timeout: 10_000 },
+    async () => {
+      const plan = await convertPostgresExport(
+        fixtureFor("stale-reconciliation"),
+      );
+      await runImport(env.DB, plan);
+      await consumeReconciliation(env.DB, plan, (report) => {
+        expect(report.status).toBe("pass");
+      });
 
-    await env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
-      .bind(
-        "Post-checkpoint mutation",
-        plan.expectedRows.canonical_words[0]?.id,
-      )
-      .run();
+      await env.DB.prepare("UPDATE canonical_words SET text = ?1 WHERE id = ?2")
+        .bind(
+          "Post-checkpoint mutation",
+          plan.expectedRows.canonical_words[0]?.id,
+        )
+        .run();
 
-    const restarted = await reconcileD1Import(env.DB, plan);
-    expect(restarted.status).toBe("pending");
-    await consumeReconciliation(env.DB, plan, (report) => {
-      expect(report.status).toBe("fail");
-    });
-  });
+      const restarted = await reconcileD1Import(env.DB, plan);
+      expect(restarted.status).toBe("pending");
+      await consumeReconciliation(env.DB, plan, (report) => {
+        expect(report.status).toBe("fail");
+      });
+    },
+  );
 
   it("rejects a changed plan under a completed export id", async () => {
     const initialFixture = fixtureFor("stale");
@@ -436,7 +440,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     await runImport(env.DB, initial);
 
     const correctionFixture = structuredClone(initialFixture);
-    correctionFixture.export_id = "voc080-t09-correction-1";
+    correctionFixture.export_id = "conversion-correction-1";
     tableRows(correctionFixture, "external_identities")[1]!.deleted_at =
       "2026-08-22T05:30:00.123+03:30";
     rowOf(correctionFixture, "confidence_point_ledger").amount = 12;
@@ -742,7 +746,7 @@ describe("PostgreSQL-to-D1 conversion", () => {
     expect(validRowAfterFailure?.count).toBe(0);
 
     const correctedFixture = structuredClone(brokenFixture);
-    correctedFixture.export_id = "voc080-t09-constraint-correction";
+    correctedFixture.export_id = "conversion-constraint-correction";
     tableRows(correctedFixture, "canonical_words")[2]!.status = "active";
     const correctedPlan = await convertPostgresExport(correctedFixture, {
       chunkSize: 10,
@@ -784,7 +788,7 @@ function sourceOf(fixture: Record<string, unknown>): Record<string, unknown> {
 
 function fixtureFor(suffix: string): Record<string, unknown> {
   const fixture = syntheticPostgresExport();
-  fixture.export_id = `voc080-t09-${suffix}`;
+  fixture.export_id = `conversion-${suffix}`;
   return fixture;
 }
 

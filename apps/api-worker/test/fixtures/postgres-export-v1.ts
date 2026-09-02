@@ -18,7 +18,7 @@ export function syntheticPostgresExport(): Record<string, unknown> {
 
   return {
     schema_version: DATA_EXPORT_SCHEMA_VERSION,
-    export_id: "voc080-t09-synthetic-v1",
+    export_id: "conversion-synthetic-v1",
     source: {
       dialect: "postgresql",
       synthetic: true,

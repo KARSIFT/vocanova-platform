@@ -3,7 +3,7 @@ import { env, exports } from "cloudflare:workers";
 
 import { createApp } from "../src/app.js";
 
-describe("Worker API migration target", () => {
+describe("Worker API", () => {
   it("reports D1 health without exposing configuration", async () => {
     const response = await exports.default.fetch(
       "https://api.example.test/healthz",

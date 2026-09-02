@@ -1,11 +1,7 @@
-// VOC-031-T07a + VOC-031-T07b Playwright config.
+// Playwright config.
 //
-// T07a wired one project ("home-desktop-1280") that scans a single
-// screen (Home) at one representative desktop width as the
-// end-to-end proof the accessibility harness worked. T07b extends
-// the matrix to every remaining core-loop screen at the three
-// supported layouts: 360px, 430px, and the desktop width T07a
-// already covered.
+// The matrix covers the core-loop screens at 360px, 430px, and a
+// representative 1280px desktop width.
 //
 // webServer runs two processes: this harness's mock API server
 // (so each server component can render without the real
@@ -15,12 +11,8 @@
 // first because the Next.js server's SSR path makes
 // /api/v1/me + the per-screen data reads during page rendering.
 //
-// T07a scope discipline: the T07a home-accessibility.spec.ts test
-// self-skips on the two mobile projects (T07a's own scope is
-// "ONE representative desktop width >=1024px") so the addition
-// of mobile projects does not silently expand T07a. T07b's own
-// home-mobile-accessibility.spec.ts covers the 360 and 430
-// viewports for the same screen.
+// home-accessibility.spec.ts is desktop-only; the mobile companion
+// covers the 360px and 430px viewports for the same screen.
 
 import { defineConfig, devices } from "@playwright/test";
 
@@ -58,10 +50,7 @@ export default defineConfig({
   },
   projects: [
     {
-      // T07a: keep the original desktop-1280 project name. The
-      // T07a test in home-accessibility.spec.ts self-skips on the
-      // mobile projects below, so this project remains the one
-      // T07a actually runs in.
+      // Representative desktop layout.
       name: "home-desktop-1280",
       use: {
         ...devices["Desktop Chrome"],
@@ -70,9 +59,7 @@ export default defineConfig({
       },
     },
     {
-      // T07b: 360px mobile (DOC-03 §10 mobile-first minimum).
-      // No test runs in only this project - T07a skips itself
-      // here, and every T07b spec runs across all three projects.
+      // Mobile-first minimum from the UI/UX design.
       name: "mobile-360",
       use: {
         ...devices["Pixel 5"],
@@ -81,7 +68,7 @@ export default defineConfig({
       },
     },
     {
-      // T07b: 430px mobile (DOC-03 §10 larger mobile breakpoint).
+      // Larger mobile breakpoint from the UI/UX design.
       name: "mobile-430",
       use: {
         ...devices["Pixel 5"],

@@ -1,22 +1,22 @@
-// VOC-031-T07a + VOC-031-T07b axe-core / accessibility helpers.
+// axe-core / accessibility helpers.
 //
-// T07a added the WCAG 2.2 AA axe scan + violation formatter. T07b
-// extends the helper with explicit keyboard-reachability and
-// non-color-only-feedback assertions, because DOC-03 §10 and
-// DOC-08 quality standards require more than a clean axe run
+// This helper combines the WCAG 2.2 AA axe scan and violation formatter with
+// explicit keyboard-reachability and
+// non-color-only-feedback assertions, because the UI and web quality
+// standards require more than a clean axe run
 // (axe covers most contrast / labelling / structure rules but
 // does not exhaustively check WCAG 1.4.1 "Use of Color" or
 // keyboard reachability across a page in the way the
 // acceptance criterion requires).
 //
 // What this file owns:
-//   - scanForAxeViolations / formatViolations   (T07a, unchanged)
-//   - countFocusableElements                    (T07b, keyboard)
-//   - assertKeyboardReachable                   (T07b, keyboard)
-//   - assertNonColorOnlyFeedback                (T07b, non-color-only)
+//   - scanForAxeViolations / formatViolations
+//   - countFocusableElements
+//   - assertKeyboardReachable
+//   - assertNonColorOnlyFeedback
 //
 // Do not add rule suppressions or rule-set restrictions to
-// scanForAxeViolations without updating the T07a acceptance
+// scanForAxeViolations without updating the accessibility acceptance
 // criterion (zero critical/serious axe violations) and the
 // corresponding documentation - this helper is the single place
 // that defines what "zero critical/serious violations" means.
@@ -43,13 +43,12 @@ const WCAG_22_AA_TAGS = [
 /**
  * scanForAxeViolations runs axe-core against the current page with
  * the WCAG 2.2 AA rule set and returns both the raw violations and
- * the subset whose impact is "critical" or "serious" (the T07a
- * acceptance bar).
+ * the subset whose impact is "critical" or "serious".
  *
  * Callers MUST assert the empty-set property on
  * `result.criticalOrSerious` for the test to pass; checking only
  * `result.violations` would let moderate/minor axe findings
- * silently ship, which DOC-03 §10 explicitly disallows at the
+ * silently ship, which the UI/UX design explicitly disallows at the
  * serious-or-worse threshold.
  */
 export async function scanForAxeViolations(
@@ -87,7 +86,7 @@ export function formatViolations(violations: AxeViolation[]): string[] {
   });
 }
 
-// --- T07b: keyboard reachability + non-color-only feedback -----
+// --- Keyboard reachability + non-color-only feedback -----------
 
 const FOCUSABLE_SELECTOR = [
   "a[href]",
@@ -149,7 +148,7 @@ export async function countFocusableElements(page: Page): Promise<number> {
  * least `options.minTabStops` (defaults to `options.minFocusable`)
  * distinct Tab stops are reachable by pressing Tab sequentially.
  * This is the explicit, screen-by-screen
- * keyboard-reachability check the T07b acceptance criterion
+ * keyboard-reachability check the accessibility criteria
  * requires (axe-core alone does not exhaustively verify
  * tab order across a page).
  *
@@ -238,7 +237,7 @@ export interface NonColorOnlyFeedbackOptions {
    * assertion fails if any matching element's trimmed text
    * content is empty - a status conveyed by color alone fails
    * WCAG 1.4.1 "Use of Color" and is the kind of regression
-   * the T07b acceptance criterion calls out explicitly.
+   * the accessibility criteria call out explicitly.
    */
   requireText: string[];
   /**
@@ -252,7 +251,7 @@ export interface NonColorOnlyFeedbackOptions {
  * assertNonColorOnlyFeedback walks the selectors in
  * `options.requireText` and asserts that every matching element
  * has non-empty text content. This is the explicit, screen-by-
- * screen non-color-only check the T07b acceptance criterion
+ * screen non-color-only check the accessibility criteria
  * requires. Axe-core covers `color-contrast` and most labelling
  * rules but does not exhaustively verify that "state conveyed
  * by a colored background" always has a text equivalent, so

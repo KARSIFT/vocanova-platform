@@ -91,7 +91,7 @@ export function ReviewSession({
         }
       })
       .catch((error) => {
-        // T06: a 401 here means the session expired mid-review-session;
+        // A 401 here means the session expired mid-review-session;
         // route the learner to re-auth instead of leaving them looking at
         // an error on a frozen card.
         setErrorMessage(
@@ -152,7 +152,7 @@ export function ReviewSession({
       setRemainingCount((count) => Math.max(0, count - 1));
       advance();
     } catch (error) {
-      // T06: a 401 mid-review-session is the documented
+      // A 401 mid-review-session is the documented
       // session-expiry mid-flow case — never claim a card was
       // reviewed when the server rejected it. handleApiError routes
       // the learner to re-auth instead.
@@ -189,7 +189,7 @@ export function ReviewSession({
           // /onboarding's page.tsx - tokens.generated.css's --spacing-md
           // (16px) shadows the intended 28rem max-w-md container size,
           // which otherwise collapses this section to a near-zero-width
-          // column (confirmed via VOC-031-T08's core-loop test: the
+          // column (confirmed via core-loop test: the
           // "Practice with pour" heading word-wrapped to 0px measured
           // width and Playwright reported it as hidden).
           <div className="mt-[var(--spacing-lg)] w-full max-w-[28rem] text-left">

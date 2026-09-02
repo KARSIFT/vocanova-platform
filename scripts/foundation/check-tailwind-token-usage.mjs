@@ -5,7 +5,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 // Deterministic, cheap checks for two specific mistakes independent AI
-// review caught by hand on VOC-019-T00 (2026-07-24) - catching them here
+// review once caught by hand - catching them here
 // means CI fails fast, before an expensive independent-review cycle ever
 // spends tokens re-discovering the same two things. Not a general-purpose
 // Tailwind linter: narrowly targets patterns with no legitimate exception,
@@ -28,7 +28,7 @@ const errors = [];
 // --ease-* - those only work as arbitrary-value utilities
 // (duration-[var(--duration-fast)]). A bare `duration-fast` class matches
 // no Tailwind candidate and silently emits no rule - the exact bug found
-// live on VOC-019-T00's first attempt.
+// live on an earlier implementation attempt.
 const bareDurationPattern =
   /(?<!--)\bduration-(instant|fast|base|slow|slower)\b(?!\])/;
 

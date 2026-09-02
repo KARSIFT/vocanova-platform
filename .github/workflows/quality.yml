@@ -1,10 +1,8 @@
 name: Quality
 
-# Browser-heavy accessibility and Lighthouse checks run only when web-facing
-# source, shared packages, their locked dependencies, or this workflow changes.
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [main]
     paths:
       - apps/web/**
       - packages/**
@@ -13,52 +11,41 @@ on:
       - pnpm-workspace.yaml
       - .github/actions/setup-toolchain/**
       - .github/workflows/quality.yml
-      - scripts/foundation/require-successful-jobs.sh
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
 
-defaults:
-  run:
-    shell: bash
-
 concurrency:
-  group: quality-${{ github.event.pull_request.number }}
+  group: quality-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   accessibility:
-    name: accessibility
+    name: Accessibility
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - name: Check out reviewed revision
+      - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Set up repository toolchain
+      - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
-
       - name: Build shared packages
         run: pnpm run build:packages
-
       - name: Build web application
         env:
           API_BASE_URL: http://127.0.0.1:8080
           NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8080
         run: pnpm --filter @vocanova/web build
-
       - name: Install Chromium
-        # ubuntu-24.04 already carries the browser system libraries. Avoid
-        # re-running apt here: the browser binary remains pinned by Playwright.
         run: pnpm --filter @vocanova/web exec playwright install chromium
-
       - name: Run accessibility suite
         env:
           CI: "1"
         run: pnpm --filter @vocanova/web test:e2e
-
       - name: Upload Playwright report on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -68,42 +55,26 @@ jobs:
           if-no-files-found: ignore
           retention-days: 3
 
-      - name: Upload Playwright results on failure
-        if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: quality-playwright-results
-          path: apps/web/test-results/
-          if-no-files-found: ignore
-          retention-days: 3
-
   lighthouse:
-    name: lighthouse
+    name: Lighthouse
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
-      - name: Check out reviewed revision
+      - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Set up repository toolchain
+      - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
-
       - name: Build shared packages
         run: pnpm run build:packages
-
       - name: Build web application
         env:
           API_BASE_URL: http://127.0.0.1:8080
           NEXT_PUBLIC_API_BASE_URL: http://127.0.0.1:8080
         run: pnpm --filter @vocanova/web build
-
       - name: Install Chromium
-        # ubuntu-24.04 already carries the browser system libraries. Avoid
-        # re-running apt here: the browser binary remains pinned by Playwright.
         run: pnpm --filter @vocanova/web exec playwright install chromium
-
       - name: Start local test servers
         env:
           API_BASE_URL: http://127.0.0.1:8080
@@ -113,29 +84,25 @@ jobs:
           echo $! > "$RUNNER_TEMP/mock-api.pid"
           pnpm --filter @vocanova/web start --port 3000 &
           echo $! > "$RUNNER_TEMP/web.pid"
-
       - name: Run Lighthouse suite
         env:
           CI: "1"
           LIGHTHOUSE_URL_PREFIX: http://127.0.0.1:3000
         run: |
-          mapfile -t lighthouse_chrome_paths < <(
+          mapfile -t chrome_candidates < <(
             find "$HOME/.cache/ms-playwright" -path '*/chrome-linux*/chrome' -type f -print
           )
-          if [[ "${#lighthouse_chrome_paths[@]}" -ne 1 ]]; then
-            echo "Expected exactly one Playwright Chrome binary; found ${#lighthouse_chrome_paths[@]}." >&2
-            printf 'Candidate: %s\n' "${lighthouse_chrome_paths[@]}" >&2
+          if [[ "${#chrome_candidates[@]}" -ne 1 ]]; then
+            echo "Expected exactly one Playwright Chrome binary; found ${#chrome_candidates[@]}." >&2
             exit 1
           fi
-          export LIGHTHOUSE_CHROME_PATH="${lighthouse_chrome_paths[0]}"
+          export LIGHTHOUSE_CHROME_PATH="${chrome_candidates[0]}"
           pnpm --filter @vocanova/web test:lighthouse
-
       - name: Stop local test servers
         if: always()
         run: |
           test ! -f "$RUNNER_TEMP/mock-api.pid" || kill "$(cat "$RUNNER_TEMP/mock-api.pid")" 2>/dev/null || true
           test ! -f "$RUNNER_TEMP/web.pid" || kill "$(cat "$RUNNER_TEMP/web.pid")" 2>/dev/null || true
-
       - name: Upload Lighthouse reports on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
@@ -144,24 +111,3 @@ jobs:
           path: apps/web/lighthouse-reports/
           if-no-files-found: ignore
           retention-days: 3
-
-  required:
-    name: quality required
-    if: always()
-    needs: [accessibility, lighthouse]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - name: Check out aggregate policy
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Require every quality subsystem
-        env:
-          ACCESSIBILITY_RESULT: ${{ needs.accessibility.result }}
-          LIGHTHOUSE_RESULT: ${{ needs.lighthouse.result }}
-        run: >-
-          bash scripts/foundation/require-successful-jobs.sh
-          "accessibility=$ACCESSIBILITY_RESULT"
-          "lighthouse=$LIGHTHOUSE_RESULT"
