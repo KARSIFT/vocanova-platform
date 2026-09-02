@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug VocaNova local stack",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm dev",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug VocaNova web",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm --filter @vocanova/web dev",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

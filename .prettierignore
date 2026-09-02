@@ -5,6 +5,7 @@ out
 build
 dist
 coverage
+.claude/settings.local.json
 pnpm-lock.yaml
 *.min.js
 *.min.css

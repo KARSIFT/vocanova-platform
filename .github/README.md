@@ -14,10 +14,10 @@ VocaNova uses a conventional protected-trunk workflow:
 - `ISSUE_TEMPLATE/`: bug, feature, and private-security intake.
 - `pull_request_template.md`: concise scope and validation record.
 - `actions/setup-toolchain/`: pinned Node/pnpm setup with frozen dependencies.
-- `workflows/ci.yml`: application, package, Worker API, and local-stack checks.
-- `workflows/quality.yml`: path-scoped accessibility and Lighthouse checks.
+- `workflows/ci.yml`: application, package, Worker API, local-stack, harness, architecture, and workflow checks.
+- `workflows/quality.yml`: accessibility and Lighthouse check contexts for every pull request and merge-queue revision, with heavy work selected inside the workflow.
 - `workflows/security.yml`: dependency audit and secret scanning.
 - `workflows/pr-title.yml`: Conventional Commit title validation.
 - `dependabot.yml`: weekly dependency and GitHub Actions updates.
 
-Pull-request workflows use read-only tokens and do not deploy or receive Cloudflare credentials.
+Pull-request workflows use read-only tokens and do not deploy or receive Cloudflare credentials. Repository-owned workflow validation requires full-SHA action pins, bounded job timeouts, non-persisted checkout credentials, and merge-queue-safe cancellation.

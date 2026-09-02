@@ -1,16 +1,10 @@
 name: Quality
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
-    paths:
-      - apps/web/**
-      - packages/**
-      - package.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - .github/actions/setup-toolchain/**
-      - .github/workflows/quality.yml
   merge_group:
     types: [checks_requested]
 
@@ -19,11 +13,53 @@ permissions:
 
 concurrency:
   group: quality-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name != 'merge_group' }}
 
 jobs:
+  changes:
+    name: Quality scope
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      web: ${{ steps.scope.outputs.web }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Detect web and package changes
+        id: scope
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MERGE_BASE_SHA: ${{ github.event.merge_group.base_sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          case "$EVENT_NAME" in
+            pull_request) base="$PR_BASE_SHA" ;;
+            merge_group) base="$MERGE_BASE_SHA" ;;
+            push) base="$PUSH_BEFORE_SHA" ;;
+            *) echo "Unsupported event: $EVENT_NAME" >&2; exit 1 ;;
+          esac
+
+          if [[ -z "$base" || "$base" =~ ^0+$ ]]; then
+            echo "web=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git diff --name-only -z "$base" "$GITHUB_SHA" > "$RUNNER_TEMP/quality-paths"
+          if grep -zEq '^(apps/web/|packages/|package\.json$|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|\.github/actions/setup-toolchain/|\.github/workflows/quality\.yml$)' "$RUNNER_TEMP/quality-paths"; then
+            echo "web=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "web=false" >> "$GITHUB_OUTPUT"
+          fi
+
   accessibility:
     name: Accessibility
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -57,6 +93,8 @@ jobs:
 
   lighthouse:
     name: Lighthouse
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:

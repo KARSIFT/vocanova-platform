@@ -1,0 +1,11 @@
+[tools]
+node = "24.18.0"
+pnpm = "11.14.0"
+jq = "1.8.1"
+ripgrep = "15.1.0"
+uv = "0.11.21"
+"pipx:pre-commit" = { version = "4.6.0", depends = "uv" }
+
+[env]
+NODE_OPTIONS = "--dns-result-order=ipv4first"
+_.path = ["./node_modules/.bin"]

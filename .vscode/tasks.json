@@ -1,0 +1,35 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "VocaNova: initialize local D1",
+      "type": "shell",
+      "command": "pnpm dev:init",
+      "problemMatcher": []
+    },
+    {
+      "label": "VocaNova: start local stack",
+      "type": "shell",
+      "command": "pnpm dev",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "VocaNova: validate",
+      "type": "shell",
+      "command": "pnpm validate",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "VocaNova: Playwright",
+      "type": "shell",
+      "command": "pnpm --filter @vocanova/web test:e2e",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}

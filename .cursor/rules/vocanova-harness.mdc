@@ -1,0 +1,11 @@
+---
+description: VocaNova repository guidance and shared development-skill routing.
+globs: "**/*"
+alwaysApply: true
+---
+
+# VocaNova harness
+
+Follow `AGENTS.md` as the repository-wide engineering guide. Reusable workflows live in `.agents/skills/<name>/SKILL.md`; start with `.agents/skills/using-agent-skills/SKILL.md` when routing is unclear.
+
+Use the smallest applicable skill, preserve unrelated changes, run repository-owned validation, and do not deploy or mutate remote systems without explicit authority for that action.
