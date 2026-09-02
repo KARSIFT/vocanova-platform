@@ -14,7 +14,7 @@
     "dev:workers": "node scripts/foundation/local-development-supervisor.mjs workers",
     "test:local-stack": "node scripts/foundation/local-stack-smoke.mjs",
     "validate": "pnpm run validate:workspace && pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
-    "ci:foundation": "pnpm run validate:workspace && pnpm run format:check && node --test scripts/foundation/*.test.mjs",
+    "ci:foundation": "pnpm run validate:workspace && pnpm run format:check && pnpm run build:packages && node --test scripts/foundation/*.test.mjs",
     "ci:packages": "pnpm run lint:packages && pnpm run typecheck:packages && pnpm run build:packages && pnpm --filter @vocanova/api-client test",
     "ci:web": "pnpm run build:packages && pnpm run lint:web && pnpm run typecheck:web && pnpm --filter @vocanova/web test:middleware && pnpm --filter @vocanova/web test:sentry && pnpm --filter @vocanova/web cloudflare:build && pnpm --filter @vocanova/web cloudflare:compatibility && pnpm --filter @vocanova/web cloudflare:typecheck && pnpm --filter @vocanova/web cloudflare:dry-run && pnpm --filter @vocanova/web cloudflare:limits && pnpm --filter @vocanova/web cloudflare:preview:test",
     "ci:worker-api": "pnpm --filter @vocanova/api-client test && pnpm --filter @vocanova/api-worker run ci",
