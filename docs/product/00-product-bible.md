@@ -1,29 +1,3 @@
----
-id: DOC-00
-title: VocaNova Product Bible
-version: 1.0
-document_type: product-bible
-status: approved
-owner: founder
-canonical_path: docs/product/00-product-bible.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-08-23
-review_cycle: semiannual
-supersedes: null
-related_documents:
-  - DOC-01
-  - DOC-02
-  - DOC-03
-  - DOC-05
-  - DOC-09
-  - DOC-12
-related_decisions:
-  - ADR-0005
-source_files:
-  - path: 01-product-bible-and-prd.md
-    sha256: ffafedf6bb6e1ff6c7e04f8ce67c23478592dd099a543a648d970bf5733f8009
----
-
 # 00 — VocaNova Product Bible
 
 ## 1. What Vocanova is
@@ -69,9 +43,7 @@ narrowly focused on correct use of the one target word, not general essay gradin
 MVP uses deterministic, step-based scheduling (steps 0–7), not a probabilistic algorithm like FSRS —
 that's an explicit future swap point behind a stable scheduling interface, not an MVP requirement.
 Learner-facing rating scale, exact schedule mechanics, and the reset rule are defined precisely in
-[05](../engineering/05-database-design.md) §9, and [08](../design/08-web-app-design.md). See
-the migration notes for how the four
-different rating-scale drafts across the source docs were reconciled — the two-word summary is:
+[05](../engineering/05-database-design.md) §9 and [08](../design/08-web-app-design.md). The settled rule is:
 **"Again / Hard / Good / Easy" ratings, `review_step` 0–7, two consecutive incorrect answers reset to
 step 0.**
 
@@ -81,8 +53,7 @@ One learner-facing AI capability in MVP: evaluate one learner-written sentence u
 target word/phrase and return a status of `correct`, `needs_improvement`, or `incorrect`, plus a
 short explanation and (when needed) a corrected sentence. Full behavior, safety rules, prompt
 architecture, and evaluation thresholds are in [09](../engineering/09-ai-features.md) — that document is the single
-source of truth for AI behavior; don't restate feedback-label wording elsewhere (see
-the migration notes).
+source of truth for AI behavior; don't restate feedback-label wording elsewhere.
 
 Explicit MVP non-goals: open-ended AI chat, general AI tutor, essay correction, pronunciation
 scoring, speech recognition, roleplay, AI-generated vocabulary as the authoritative content source,

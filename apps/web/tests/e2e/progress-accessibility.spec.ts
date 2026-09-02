@@ -3,7 +3,7 @@
 // The progress page is the most state-heavy screen in the core
 // loop - the "Done" / "Rest" day pills and the streak text both
 // use colour AND text. The non-color-only assertion specifically
-// targets those text labels, which is the T07b acceptance
+// targets those text labels, which is the accessibility
 // criterion's "non-color-only feedback is asserted explicitly,
 // not only inferred from a clean axe run" requirement for
 // mission/streak state.

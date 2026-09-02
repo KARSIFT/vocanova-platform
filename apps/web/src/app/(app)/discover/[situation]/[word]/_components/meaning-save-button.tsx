@@ -57,7 +57,7 @@ export function MeaningSaveButton({
     } catch (error) {
       setStatus("error");
       // handleApiError detects 401 and routes the learner to
-      // re-authentication (T06: session-expiry mid-flow). For any
+      // re-authentication (session expiry mid-flow). For any
       // other failure it returns a stable, caller-supplied message.
       setErrorMessage(
         handleApiError(

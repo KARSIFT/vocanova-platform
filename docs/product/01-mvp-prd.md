@@ -1,27 +1,3 @@
----
-id: DOC-01
-title: VocaNova MVP PRD
-version: 1.0
-document_type: product-requirements
-status: approved
-owner: founder
-canonical_path: docs/product/01-mvp-prd.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
-review_cycle: monthly
-supersedes: null
-related_documents:
-  - DOC-00
-  - DOC-03
-  - DOC-08
-  - DOC-09
-  - DOC-12
-related_decisions: []
-source_files:
-  - path: 01-product-bible-and-prd.md
-    sha256: ffafedf6bb6e1ff6c7e04f8ce67c23478592dd099a543a648d970bf5733f8009
----
-
 # 01 — VocaNova MVP PRD
 
 ## 1. Product baseline
@@ -41,10 +17,8 @@ completion criteria.
 Sentence practice is **not** a fourth tab — it's a reusable component surfaced from Home, Word
 Detail, and Review Completion. See [03](../design/03-ui-ux-design.md).
 
-There is **no dedicated sentence-history screen in MVP.** (Doc 01 originally listed one; doc 03 and
-doc 08 later dropped it in favor of storing history in the backend without a dedicated UI. See
-the migration notes.) Sentence-history
-insights are a named post-MVP opportunity, not cut work.
+There is **no dedicated sentence-history screen in MVP.** History is stored by the backend without
+a dedicated UI. Sentence-history insights are a named post-MVP opportunity, not cut work.
 
 ## 3. MVP completion criteria
 

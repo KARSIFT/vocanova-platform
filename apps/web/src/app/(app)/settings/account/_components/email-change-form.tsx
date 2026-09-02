@@ -49,7 +49,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
       );
       setPhase({ type: "pending", newEmail: trimmed });
     } catch (error) {
-      // T06: a 401 mid-email-change-request routes the learner to
+      // A 401 mid-email-change-request routes the learner to
       // re-auth. The newEmail value is preserved in the form's
       // controlled input so the learner does not need to retype it
       // after re-authentication.
@@ -93,7 +93,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
       setToken("");
       setNewEmail("");
     } catch (error) {
-      // T06: a 401 mid-consume routes the learner to re-auth.
+      // A 401 mid-consume routes the learner to re-auth.
       // The token is preserved in the form's controlled input so the
       // learner does not need to recover it from email after
       // re-authentication.

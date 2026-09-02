@@ -1,11 +1,8 @@
 // Home accessibility scan at the two mobile viewports
-// (360px, 430px). T07a already covers /home at the 1280x720
-// representative desktop width in home-accessibility.spec.ts; this
-// file extends the coverage to the mobile breakpoints DOC-03 §10
-// requires. The T07b acceptance criterion calls out that this
-// coverage must add explicit keyboard-reachability and
-// non-color-only-feedback assertions on top of the axe scan, not
-// only infer them from a clean axe run.
+// (360px, 430px). The desktop spec covers /home at 1280x720.
+// This file covers the mobile breakpoints required by DOC-03 §10,
+// including keyboard reachability and non-color-only feedback in
+// addition to the axe scan.
 
 import { expect, test } from "@playwright/test";
 
@@ -20,12 +17,10 @@ test.describe("Home accessibility (mobile)", () => {
   test("Home renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state at 360 / 430", async ({
     page,
   }, testInfo) => {
-    // T07b's home-mobile scan is intentionally scoped to the
-    // mobile projects. The 1280x720 desktop scan is T07a's
-    // home-accessibility.spec.ts.
+    // This scan is intentionally scoped to the mobile projects.
     test.skip(
       testInfo.project.name === "home-desktop-1280",
-      "T07b mobile scan is scoped to mobile-360 / mobile-430; desktop is T07a's home-accessibility.spec.ts.",
+      "The mobile scan is scoped to mobile-360 and mobile-430; desktop coverage has its own spec.",
     );
 
     await page.goto("/home");

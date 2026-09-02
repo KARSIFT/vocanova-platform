@@ -1,27 +1,3 @@
----
-id: DOC-08
-title: VocaNova Web Application Design
-version: 1.1
-document_type: web-application-design
-status: approved
-owner: founder
-canonical_path: docs/design/08-web-app-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-03
-  - DOC-04
-  - DOC-07
-  - DOC-09
-related_decisions:
-  - ADR-0003
-source_files:
-  - path: 08-web-app-design.md
-    sha256: da9154f1962e52f5046c712e581f5627122f48aec86684b24f69de1b9ee129d5
----
-
 # 08 — VocaNova Web Application Design
 
 ## Current runtime
@@ -78,9 +54,8 @@ Route groups: `(public)`, `(onboarding)`, `(app)`.
 /settings/account
 ```
 
-Note: there is deliberately **no** sentence-history route (see [03](03-ui-ux-design.md) §2 and
-the migration notes) —
-sentence practice is a component, not a route.
+There is deliberately **no** sentence-history route (see [03](03-ui-ux-design.md) §2): sentence
+practice is a component, not a route.
 
 ## Core UX decisions
 

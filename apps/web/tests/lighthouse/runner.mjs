@@ -1,8 +1,7 @@
 // VocaNova Lighthouse runner.
 //
-// The runner is the engine behind the T09 acceptance criterion's
-// "Lighthouse CI runs against a production build at the three
-// supported layouts" requirement. It uses the `lighthouse` npm
+// The runner runs Lighthouse against a production build at the three
+// supported layouts. It uses the `lighthouse` npm
 // package (the same engine `@lhci/cli` wraps, so the scores it
 // produces are byte-identical to a full LHCI run) and runs one
 // audit per (screen, layout) combination: 4 screens x 3 layouts
@@ -15,7 +14,7 @@
 // Why `lighthouse` directly and not `@lhci/cli`:
 //
 // - LHCI is built around a single `startServerCommand` that owns
-//   one server process. Our T07a / T07b / T08 harness already
+//   one server process. The browser-test harness already
 //   boots two cooperating processes (the mock API server + the
 //   Next.js production server) - reusing that pattern in a
 //   single command is awkward and would either fork the
@@ -24,21 +23,19 @@
 //   sidesteps LHCI's server-management entirely.
 // - LHCI's diff/reporting infrastructure is the only feature
 //   that is genuinely easier in LHCI than in a plain script.
-//   T09's acceptance criterion is "scores meet the DOC-08
-//   thresholds", not "track score regression over time", so
+//   This suite checks that scores meet the DOC-08 thresholds; it does
+//   not track score regression over time, so
 //   the diff feature is not in scope here.
 // - The score calculation is identical (same engine, same audit
 //   set, same category weights); LHCI is a thin CI wrapper
 //   over `lighthouse`.
 //
 // The CI workflow that calls this script (`.github/workflows/
-// quality.yml`, lighthouse job) feeds the workflow's stable `quality required`
-// aggregate for the T09 acceptance criterion. The script exits with code 0 if every
+// quality.yml`, lighthouse job) reports a stable check. The script exits with code 0 if every
 // (screen, layout) audit meets every DOC-08 threshold, and
 // exits with code 1 otherwise, so a missed threshold is a hard
 // CI failure (a missed threshold is never silently lowered or
-// skipped - the T09 acceptance criterion's explicit "honest
-// limitation" requirement).
+// skipped.
 
 import { launch } from "chrome-launcher";
 import lighthouse from "lighthouse";
@@ -77,7 +74,7 @@ const CHROME_FLAGS = [
 // DOC-03 §10 + DOC-08: the three "supported layouts" are 360px,
 // 430px, and one representative desktop width >=1024px. The
 // desktop width 1280 is the same representative desktop width
-// the T07a home-accessibility.spec.ts test uses, so the
+// home-accessibility.spec.ts uses, so the
 // accessibility and performance harnesses agree on which
 // desktop width counts as the "supported" one.
 const LAYOUTS = [
@@ -117,7 +114,7 @@ const LAYOUTS = [
 ];
 
 // DOC-08: Home, Discover, Reviews, and Progress are the four
-// screens the T09 acceptance criterion names. Discover has
+// screens covered by the performance suite. Discover has
 // nested routes (Discover/[situation], Discover/[situation]/
 // [word]); the top-level /discover is what DOC-08's "Discover"
 // performance target refers to, and it's the entry point for
@@ -168,8 +165,8 @@ function buildLighthouseSettings({ layout, screen }) {
     // default for each `formFactor` so the audit
     // results match a stock Lighthouse run.
     extraHeaders: {
-      "X-Lighthouse-T09-Screen": screen.name,
-      "X-Lighthouse-T09-Layout": layout.name,
+      "X-Lighthouse-Screen": screen.name,
+      "X-Lighthouse-Layout": layout.name,
     },
   };
 }

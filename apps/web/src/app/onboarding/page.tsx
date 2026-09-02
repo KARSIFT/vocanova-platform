@@ -19,7 +19,7 @@ export default async function OnboardingPage() {
     requireAuthRedirect(error, "/onboarding");
   }
 
-  // T01 gating: a learner whose onboarding is already completed is
+  // A learner whose onboarding is already completed is
   // redirected away from /onboarding to /home so the form never
   // re-opens for an already-finished account.
   if (meResponse.data.onboardingStatus === "completed") {

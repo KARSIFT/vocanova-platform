@@ -96,7 +96,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       });
       setStatus({ type: "saved" });
     } catch (error) {
-      // T06: a 401 mid-settings-write is the documented
+      // A 401 mid-settings-write is the documented
       // session-expiry mid-flow case. handleApiError routes the
       // learner to re-auth; the form state is preserved on the
       // controlled inputs so the learner does not need to retype

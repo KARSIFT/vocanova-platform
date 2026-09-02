@@ -84,7 +84,7 @@ export const OPENAPI_DOCUMENT_CONFIG = {
   openapi: "3.1.0" as const,
   info: {
     title: "VocaNova Worker API",
-    version: "1.0.0",
+    version: "0.1.0",
     description:
       "Operational VocaNova API running on Cloudflare Workers and D1.",
   },

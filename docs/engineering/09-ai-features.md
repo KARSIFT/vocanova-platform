@@ -1,29 +1,3 @@
----
-id: DOC-09
-title: VocaNova AI Features
-version: 1.2
-document_type: ai-feature-design
-status: approved
-owner: founder
-canonical_path: docs/engineering/09-ai-features.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-08-24
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-00
-  - DOC-01
-  - DOC-04
-  - DOC-05
-  - DOC-06
-  - DOC-07
-related_decisions:
-  - ADR-0003
-source_files:
-  - path: 09-ai-features.md
-    sha256: 57e798e3f2d259b18a1710e6c5a67a3a1c2d790133501d6aa9bf785ed7f61f74
----
-
 # 09 — VocaNova AI Features
 
 ## Current runtime
@@ -31,8 +5,7 @@ source_files:
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) moves the
 provider boundary, validation, persistence, mission updates, rate/cost controls, and
 privacy-safe telemetry into the Hono API Worker. The web Worker never calls an AI
-provider directly. D1 replaced PostgreSQL for runtime persistence after parity and
-T11 retirement. The
+provider directly. D1 replaced PostgreSQL for runtime persistence after parity. The
 product, teaching, safety, evaluation, privacy, and failure requirements below remain
 unchanged; preserved references to the Go backend or PostgreSQL are historical context.
 Normal CI remains deterministic and never calls a paid provider.
@@ -103,8 +76,7 @@ failures never call the model and never complete the mission.
 
 ## 7. Feedback classifications
 
-See the migration notes for
-the source conflict this enum resolves.
+This enum is the canonical learner-feedback classification.
 
 Exactly three learning statuses, separate from operational/validation/safety outcomes:
 
@@ -423,9 +395,7 @@ disabled.
 ## 26. Post-MVP opportunities (not cut work, just not MVP)
 
 Edit-and-resubmit comparison, optional second example, repeated-error personalization, collocation
-coaching, feedback-language localization, guided hints, **sentence-history insights** (see
-the migration notes —
-this is where the removed MVP "Sentence History Page" belongs instead), teacher dashboards,
+coaching, feedback-language localization, guided hints, **sentence-history insights**, teacher dashboards,
 guided AI tutor, roleplay, speaking/pronunciation, listening/writing practice, grammar coaching,
 adaptive learning paths, learner-owned vocabulary import. Track each as a separate product issue before implementation.
 

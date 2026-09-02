@@ -1,28 +1,3 @@
----
-id: DOC-04
-title: VocaNova Technical Architecture
-version: 1.1
-document_type: technical-architecture
-status: approved
-owner: founder
-canonical_path: docs/engineering/04-technical-architecture.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-05
-  - DOC-06
-  - DOC-07
-  - DOC-08
-  - DOC-09
-related_decisions:
-  - ADR-0003
-source_files:
-  - path: 04-technical-architecture.md
-    sha256: 50ba0901ee5e877e98e7071c6930f809b0ebc6074858fd20e1ac7deae12403dc
----
-
 # 04 — VocaNova Technical Architecture
 
 ## Current architecture
@@ -30,9 +5,8 @@ source_files:
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) is the current
 runtime and data direction. VocaNova targets Next.js through OpenNext on a Cloudflare
 Web Worker, a TypeScript/Hono Cloudflare API Worker, and Cloudflare D1. The existing
-Go/PostgreSQL/Docker implementation served as the staged parity reference through
-T10; T11 removed it from the active tree after contract, domain, data, workerd, and
-rollback gates passed. Where the preserved v1.0 body names Go, Ent, PostgreSQL, Docker,
+Go/PostgreSQL/Docker implementation served as a staged parity reference and was removed from the
+active tree after contract, domain, data, workerd, and rollback gates passed. Where the preserved v1.0 body names Go, Ent, PostgreSQL, Docker,
 Render, or an owned server as the final target, ADR-0003 supersedes that runtime choice
 without changing the product behavior or domain boundaries documented here.
 
@@ -131,9 +105,7 @@ the retired PostgreSQL schema snapshot remains only a synthetic conversion oracl
 ## 11. Spaced repetition
 
 Deterministic stage-based scheduling (not FSRS in MVP). Rating scale, exact step mechanics, and
-reset rule are canonical in [05](05-database-design.md) §9 — see
-the migration notes for how the various
-draft rating scales across documents were reconciled into one. Future algorithms can replace the
+reset rule are canonical in [05](05-database-design.md) §9. Future algorithms can replace the
 scheduler behind a stable interface.
 
 ## 12. Daily mission
@@ -144,9 +116,8 @@ version). Settings changes apply from the next local day, not retroactively.
 ## 13. AI feedback architecture
 
 AI purpose: help learners use vocabulary correctly. Canonical statuses are `correct` /
-`needs_improvement` / `incorrect` (see
-the migration notes — this document originally used different
-example labels; the authoritative model lives in [09](09-ai-features.md), not here). Architecture:
+`needs_improvement` / `incorrect`; the authoritative model lives in [09](09-ai-features.md).
+Architecture:
 Business Service → Feedback Provider Interface → AI Provider. Rules: save the sentence before the AI
 call, validate structured output, retry safely (bounded), store feedback history, control cost.
 

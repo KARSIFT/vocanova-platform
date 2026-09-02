@@ -34,7 +34,7 @@ export function AppHeader() {
       deleteCookie(CSRF_COOKIE_NAME);
       window.location.href = "/signin";
     } catch (error) {
-      // T06: a 401 on logout is the documented "session already
+      // A 401 on logout is the documented "session already
       // expired" case — clear the local session cookie anyway and
       // route the learner to sign in, matching the same
       // session-expiry mid-flow handler used by the core loop.

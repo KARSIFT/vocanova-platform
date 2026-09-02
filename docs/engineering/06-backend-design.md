@@ -1,34 +1,10 @@
----
-id: DOC-06
-title: VocaNova Backend Design
-version: 1.1
-document_type: backend-design
-status: approved
-owner: founder
-canonical_path: docs/engineering/06-backend-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-04
-  - DOC-05
-  - DOC-07
-  - DOC-09
-related_decisions:
-  - ADR-0003
-source_files:
-  - path: 06-backend-design.md
-    sha256: f2f5dd0159cbefc96df37d9a1fd78adb34e22680fa18fe356973ec76a69d2578
----
-
 # 06 — VocaNova Backend Design
 
 ## Current backend
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) makes a
 TypeScript Module Worker using Hono, generated bindings, typed repositories, and D1
-the target backend. T11 removed the former Go/Huma/Ent/PostgreSQL behavioral oracle
+the target backend. The former Go/Huma/Ent/PostgreSQL behavioral oracle was removed
 from the active tree after parity; compact contract/schema snapshots retain the
 migration evidence. The feature boundaries, workflows,
 authorization rules, idempotency, and observable `/api/v1` behavior below remain

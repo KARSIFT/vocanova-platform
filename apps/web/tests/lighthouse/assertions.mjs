@@ -7,23 +7,18 @@
 //   Accessibility  >= 95
 //   Best Practices >= 90
 //
-// T09 ("Performance automation") enforces these thresholds
-// programmatically across the four screens the T09 acceptance
-// criterion names (Home, Discover, Reviews, Progress) at the
+// This suite enforces the thresholds programmatically across four
+// screens (Home, Discover, Reviews, Progress) at the
 // three supported layouts (360px, 430px, one representative
 // desktop width >=1024px) - 12 audits in total.
 //
-// Thresholds are mirrored verbatim here from DOC-08 and from
-// the T09 acceptance criterion. The constants are the single
+// Thresholds are mirrored verbatim here from DOC-08. The constants are the single
 // source of truth in this repository: a change to either DOC-08
-// or to the T09 acceptance criterion must be reflected here
-// AND in the matching test in
+// must be reflected here and in the matching test in
 // `scripts/foundation/mock-inventory.test.mjs` (which loads
 // `budget.json` and asserts these exact values are present).
-// Lowering a threshold here without a matching DOC-08 / T09
-// update would be a `never self-approve or weaken a check` event
-// per `AGENTS.md` and is exactly the failure mode T09 is
-// designed to make visible.
+// Lowering a threshold here without a matching DOC-08 update would
+// silently weaken the quality bar.
 
 export const DOC_08_THRESHOLDS = Object.freeze({
   performance: 85,

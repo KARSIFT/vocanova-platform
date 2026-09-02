@@ -1,36 +1,11 @@
----
-id: DOC-07
-title: VocaNova API Contract and DTO Design
-version: 1.1
-document_type: api-contract
-status: approved
-owner: founder
-canonical_path: docs/engineering/07-api-contract-and-dto-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-04
-  - DOC-05
-  - DOC-06
-  - DOC-08
-  - DOC-09
-related_decisions:
-  - ADR-0003
-source_files:
-  - path: 07-api-contract-and-dto-design.md
-    sha256: c1b44de8d2edd02a98098b03b6839f553c594a8225e7371952751a8e19f6883e
----
-
 # 07 — VocaNova API Contract and DTO Design
 
 ## Current contract
 
 The public `/api/v1` OpenAPI contract and observable behavior are the migration seam
 defined by [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md).
-Hono and schema-driven TypeScript DTOs are the runtime implementation. T11 replaced
-the former Go/Huma oracle with the frozen parity snapshot after deterministic drift
+Hono and schema-driven TypeScript DTOs are the runtime implementation. The frozen parity snapshot
+replaced the former Go/Huma oracle after deterministic drift
 and parity tests passed. No
 endpoint may silently change because its storage moves from PostgreSQL to D1.
 

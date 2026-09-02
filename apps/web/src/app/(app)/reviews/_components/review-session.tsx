@@ -91,7 +91,7 @@ export function ReviewSession({
         }
       })
       .catch((error) => {
-        // T06: a 401 here means the session expired mid-review-session;
+        // A 401 here means the session expired mid-review-session;
         // route the learner to re-auth instead of leaving them looking at
         // an error on a frozen card.
         setErrorMessage(
@@ -152,7 +152,7 @@ export function ReviewSession({
       setRemainingCount((count) => Math.max(0, count - 1));
       advance();
     } catch (error) {
-      // T06: a 401 mid-review-session is the documented
+      // A 401 mid-review-session is the documented
       // session-expiry mid-flow case — never claim a card was
       // reviewed when the server rejected it. handleApiError routes
       // the learner to re-auth instead.

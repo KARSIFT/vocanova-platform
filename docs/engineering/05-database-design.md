@@ -1,34 +1,10 @@
----
-id: DOC-05
-title: VocaNova Database Design
-version: 1.1
-document_type: database-design
-status: approved
-owner: founder
-canonical_path: docs/engineering/05-database-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-08-22
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-04
-  - DOC-06
-  - DOC-07
-  - DOC-09
-related_decisions:
-  - ADR-0003
-source_files:
-  - path: 05-database-design.md
-    sha256: cc2efd5b6356f41bfc9075bd58297b301e6274a708943c16369600e6f0d5d1c9
----
-
 # 05 — VocaNova Database Design
 
 ## Current data-platform
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) replaces
 PostgreSQL/Ent/Atlas as the final runtime target with Cloudflare D1 and forward-only
-Wrangler migrations. T11 retired that former runtime after parity. The tables,
+Wrangler migrations. That former runtime was retired after parity. The tables,
 ownership, product invariants, retention rules, and
 domain semantics in this document remain requirements. PostgreSQL-specific types and
 mechanics in the preserved v1.0 body describe the migration source, not the final D1
@@ -182,9 +158,7 @@ default 0` **(check between 0 and 7)**, `next_review_at`, `last_reviewed_at`, `l
 `total_review_count`), `added_at`, `mastered_at`, `ignored_at`, `deleted_at`. Unique on
 `(user_id, meaning_id) where deleted_at is null`.
 
-**Review-step rule** (see
-the migration notes
-for why this table was selected over other drafts):
+**Review-step rule:**
 `result` records objective correctness while `rating` records the scheduling choice. For objective
 prompts, an incorrect answer records `Again`; a correct answer permits Hard/Good/Easy. For
 self-check prompts, the selected rating derives the result (`Again` is incorrect; Hard/Good/Easy
@@ -259,8 +233,7 @@ characters — see [07](07-api-contract-and-dto-design.md) and [09](09-ai-featur
 `error_message`, `started_at`, `completed_at` (required when `status='succeeded'`; `error_code`
 required when `status='failed'`).
 
-**Feedback status model** (see
-the migration notes): the
+**Feedback status model:** the
 attempt status is operational (`pending`/`succeeded`/`failed`/`cancelled`). The public processing
 status maps to `pending`/`completed`/`failed`/`skipped`; only a completed response carries the
 learning result `correct`/`needs_improvement`/`incorrect`. These layers are defined precisely in
@@ -373,7 +346,7 @@ Versioned SQL under the Worker API workspace defines D1 directly. Application-ge
 (prefer UUIDv7) are created before insert. Shared repository helpers may standardize IDs, timestamps,
 and soft-delete predicates, but each table keeps explicit status checks. SQLite indexes, expression
 indexes such as `lower(email)`, checks, foreign keys, JSON validation, and conditional uniqueness are
-written and tested explicitly. T11 retired Ent and the PostgreSQL runtime from the active tree.
+written and tested explicitly. Ent and the PostgreSQL runtime are retired from the active tree.
 
 ## 18. Migration strategy
 

@@ -1,26 +1,3 @@
----
-id: DOC-03
-title: VocaNova UI/UX Design
-version: 1.0
-document_type: ui-ux-design
-status: approved
-owner: founder
-canonical_path: docs/design/03-ui-ux-design.md
-approved_at: 2026-07-21
-last_reviewed_at: 2026-07-21
-review_cycle: quarterly
-supersedes: null
-related_documents:
-  - DOC-00
-  - DOC-01
-  - DOC-08
-  - DOC-09
-related_decisions: []
-source_files:
-  - path: 03-ui-ux-design.md
-    sha256: f3f37beea86bc29a5230f66731730ab28a07635546d60084e49f954e53b30ed4
----
-
 # 03 — VocaNova UI/UX Design
 
 ## 1. UX purpose and principles
@@ -56,11 +33,8 @@ another activity, not as its own destination.
 
 There is **no dedicated Sentence History screen.** History is retained in the backend
 (`learner_sentences` / `ai_feedback_attempts` — see [05](../engineering/05-database-design.md) §11) for future use, but
-is not surfaced as its own MVP UI. (This reverses an earlier PRD draft that listed a "Sentence
-History Page" — see
-the migration notes.
-Treat "sentence-history insights" as a named post-MVP opportunity,
-not a cut corner.)
+is not surfaced as its own MVP UI. Treat "sentence-history insights" as a named post-MVP
+opportunity, not a cut corner.
 
 ## 3. Onboarding flow
 
@@ -114,9 +88,7 @@ rather than treating Word Detail as purely a content-browsing page.
 
 ## 7. Review UX detail
 
-Ratings surface as **Again / Hard / Good / Easy** (see
-the migration notes for how this was reconciled
-against three other rating-scale drafts found in earlier documents). The review screen must remain
+Ratings surface as **Again / Hard / Good / Easy**. The review screen must remain
 usable one-handed on a phone: large touch targets (44px minimum per [08](08-web-app-design.md)), no
 required typing unless the prompt type is explicitly typing/sentence-usage.
 
