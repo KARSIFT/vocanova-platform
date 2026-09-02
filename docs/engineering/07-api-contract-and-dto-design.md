@@ -2,126 +2,74 @@
 
 ## Current contract
 
-The public `/api/v1` OpenAPI contract and observable behavior are defined by
-[ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md). Hono and schema-driven
-TypeScript DTOs are the runtime implementation. A frozen compatibility snapshot and deterministic
-drift tests prevent accidental endpoint changes.
+The committed OpenAPI 3.1 artifact at
+`apps/api-worker/openapi/worker-foundation.openapi.json` describes the public `/api/v1` API. Hono
+routes and Zod schemas implement it, and the API client and drift checks keep the generated surface
+aligned. Read that artifact or `packages/api-client/src/index.ts` for exact fields; this document
+explains the conventions.
 
-## Core API decisions
+## Transport and identity
 
-REST base path `/api/v1`. TypeScript Module Worker + Hono + generated OpenAPI. D1-backed typed
-repositories and server-managed D1 sessions.
-Google OAuth + email magic link. Secure HttpOnly session cookie. CSRF via double-submit cookie
-(`X-CSRF-Token`). UUIDv7-preferred IDs. RFC3339 UTC timestamps. IANA timezone names.
+The API is a Cloudflare TypeScript Module Worker using Hono and D1. It supports Google OAuth and
+email magic links, server-managed sessions, secure HttpOnly cookies, UUID identifiers, RFC 3339 UTC
+timestamps, and IANA timezone names.
 
-## API principles
+Authenticated unsafe requests require the double-submit CSRF token in `X-CSRF-Token`.
+Session-establishment auth endpoints are intentionally exempt. Operations that create
+retry-sensitive records also require `Idempotency-Key`: adding user words, review submissions,
+sentence-feedback submissions, and account-deletion requests. Keys are scoped by authenticated user
+and operation.
 
-Never expose persistence models directly — always use explicit request/response DTOs. Keep contracts
-frontend-friendly. Strict validation, reject unknown fields. Standard error responses. OpenAPI is
-the contract source. Avoid unnecessary MVP complexity.
+## DTO and response conventions
 
-## Response standards
+Routes expose explicit DTOs rather than persistence rows. Validation is defined by each route's Zod
+schema; clients must not rely on undeclared fields being retained. Paginated responses contain
+`items` and may contain `nextCursor`.
 
-Success responses are direct DTOs. Lists use:
-
-```json
-{ "items": [], "nextCursor": null, "hasMore": false }
-```
-
-Errors:
+Request failures use a problem-details-shaped response:
 
 ```json
 {
-  "code": "validation_failed",
-  "message": "Some request fields are invalid.",
-  "fieldErrors": [],
-  "requestId": "01J2XYZ",
-  "retryable": false
+  "type": "about:blank",
+  "title": "Request Failed",
+  "status": 422,
+  "detail": "The request is invalid.",
+  "requestId": "01J2XYZ"
 }
 ```
 
-Pagination: cursor-based, default limit 20, max 50, opaque cursors, no generic sorting in MVP.
+Some sentence-feedback validation, moderation, provider, and crisis outcomes are successful HTTP
+responses with business-level `errorCode`, `errorMessage`, `canRetry`, or
+`crisisResourceMessage` fields. Callers must handle both HTTP problems and these result outcomes.
 
-## Security rules
+## Main route groups
 
-**CSRF**: `X-CSRF-Token` required for POST/PATCH/DELETE.
+- Authentication, current-user settings, onboarding, and account lifecycle
+- Vocabulary discovery, journeys, saved words, and review submissions
+- Daily mission, progress, points, and streaks
+- Sentence feedback and feedback reports
 
-**Idempotency** (header `Idempotency-Key`, 24h retention) is scoped to the authenticated user and
-operation; the same key used by different users must remain isolated. It is required for:
-`POST /api/v1/user-words`,
-`POST /api/v1/reviews/submissions`, `POST /api/v1/learner-sentences`,
-`POST /api/v1/account-deletion-requests`.
+Review prompts currently use `multiple_choice` and `self_check`. `result` and `rating` are distinct;
+the backend owns review-step and scheduling rules.
 
-## Review system
-
-```text
-GET  /api/v1/reviews/due
-POST /api/v1/reviews/submissions
-```
-
-The implemented MVP prompt types are `multiple_choice` and `self_check` (see
-[05](05-database-design.md) §9). `result` and `rating` are distinct. Objective incorrect answers record
-`Again`; objective correct answers allow Hard/Good/Easy; self-check result derives from the rating.
-Again steps back with a floor of 0, two consecutive incorrect/Again attempts reset to 0, Hard stays,
-and Good/Easy step forward with a cap of 7. The backend owns scheduling logic.
-
-## Daily mission
+Sentence feedback is synchronous at the API boundary:
 
 ```text
-GET /api/v1/daily-mission
+POST /api/v1/sentence-feedback
+POST /api/v1/sentence-feedback/{attemptId}/reports
 ```
 
-The persisted snapshot always contains a review target/counter and policy version. New-word and
-sentence-practice targets/counters are optional bonuses and do not block core completion unless a
-later policy version says otherwise. Uses learner-local dates and timezone.
+A stored learning result may have status `correct`, `needs_improvement`, or `incorrect`. The result
+also reports retryability, report state, and optional business-error fields. Provider names,
+prompts, token usage, and costs are not public. See [09](09-ai-features.md) §9–10.
 
-## Progress and gamification
+Account deletion immediately deactivates the user and revokes sessions. Its response contains the
+deletion request identifier, timestamps, and replay state; it does not expose internal purge-job
+progress.
 
-Included: Confidence Points, streaks, daily mission completion, progress counts/history. Not
-included in MVP: leaderboards, badges, social challenges, rewards store.
+## Contract maintenance
 
-## Learner sentences and AI feedback
-
-```text
-POST /api/v1/learner-sentences
-GET  /api/v1/learner-sentences
-GET  /api/v1/learner-sentences/{id}
-```
-
-Feedback is async-capable. Public processing statuses are
-`pending`/`completed`/`failed`/`skipped`; only `completed` carries a learning result of
-`correct`/`needs_improvement`/`incorrect`. Persistence uses attempt states
-`pending`/`succeeded`/`failed`/`cancelled`. The frontend never sees model names, prompts, or
-token/cost data. The full field contract is defined in
-[09](09-ai-features.md) §9–10 — that is the canonical source, not restated here.
-
-## Account deletion
-
-The API immediately deactivates the account and revokes sessions, then reports progress for a
-staged, retryable purge/anonymization. It must not promise synchronous completion. Learner content,
-AI feedback, reports, and identifiers are deleted or irreversibly anonymized; only de-identified,
-unlinkable aggregates may remain, subject to legal review.
-
-## OpenAPI rules
-
-The generated operational OpenAPI 3.1 artifact is committed at
-`apps/api-worker/openapi/worker-foundation.openapi.json`; CI compares it with the
-frozen retired-source contract snapshot and API client.
-Operation IDs: `<Verb><Resource>` (e.g. `GetCurrentUser`, `SubmitReview`,
-`CreateLearnerSentence`). Must include examples, validation metadata, error responses, stable
-operation IDs.
-
-## Testing requirements
-
-Unit, handler, service, workerd, contract-snapshot, OpenAPI golden-file, local D1 integration/migration,
-auth, CSRF, cross-user, atomicity, consistency, and idempotency tests.
-
-## Implementation order
-
-Implement DTOs first → never expose persistence models → add auth/CSRF/idempotency middleware → implement
-routes per the approved contract → tests before acceptance → export OpenAPI artifacts.
-
-## Review checklist
-
-DTO correctness, contract compliance, security middleware, OpenAPI changes, test coverage, no leaked
-internal data.
+Route definitions provide stable operation IDs and schemas to the OpenAPI generator. Any observable
+change must update the route/schema, committed OpenAPI artifact, API client, and relevant tests
+together. Validation covers contract drift, authentication, CSRF, cross-user isolation,
+idempotency, D1 behavior, and Worker execution.

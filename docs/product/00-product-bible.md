@@ -57,7 +57,7 @@ source of truth for AI behavior; don't restate feedback-label wording elsewhere.
 
 Explicit MVP non-goals: open-ended AI chat, general AI tutor, essay correction, pronunciation
 scoring, speech recognition, roleplay, AI-generated vocabulary as the authoritative content source,
-user-selectable models. Full non-goal list in [09](../engineering/09-ai-features.md) §4.
+user-selectable models. See [09](../engineering/09-ai-features.md) §1.
 
 ## 6. Product decisions
 

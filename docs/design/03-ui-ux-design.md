@@ -49,7 +49,7 @@ not to gate access behind a long survey.
 1. **Home** shows the day's mission (review target, progress toward it), current streak, and a
    route into Journey/Discover if the learner wants new words.
 2. **Review** is a focused, single-item-at-a-time session: show the prompt, learner responds
-   (multiple-choice, self-check, or typed depending on prompt type — see
+   (multiple-choice or self-check — see
    [05](../engineering/05-database-design.md) §9), reveal correctness, then record a rating. Objective
    incorrect answers record `Again`; objective correct answers allow Hard/Good/Easy. Self-check
    prompts derive correctness from the learner's selected rating. Then advance. No competing UI
@@ -88,9 +88,9 @@ rather than treating Word Detail as purely a content-browsing page.
 
 ## 7. Review UX detail
 
-Ratings surface as **Again / Hard / Good / Easy**. The review screen must remain
-usable one-handed on a phone: large touch targets (44px minimum per [08](08-web-app-design.md)), no
-required typing unless the prompt type is explicitly typing/sentence-usage.
+Ratings surface as **Again / Hard / Good / Easy**. The review screen must remain usable one-handed
+on a phone, with large touch targets (44px minimum per [08](08-web-app-design.md)) and no required
+typing in the implemented review modes.
 
 ## 8. Progress, Streak, Confidence Points, and celebration moments
 
@@ -107,10 +107,10 @@ Required for every screen with dynamic content:
   (e.g. empty Progress screen invites the learner to complete their first mission), not just show a
   blank area.
 - **Loading** — calm, non-jarring; sentence-feedback pending state specifically must preserve the
-  learner's typed input and disable duplicate submission (see [09](../engineering/09-ai-features.md) §5).
+  learner's typed input and disable duplicate submission (see [09](../engineering/09-ai-features.md) §2).
 - **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
   input or falsely imply something completed. AI feedback failures specifically must never claim
-  mission completion (see [09](../engineering/09-ai-features.md) §5 and §8).
+  mission completion (see [09](../engineering/09-ai-features.md) §2 and §9).
 
 ## 10. Accessibility
 
@@ -125,20 +125,20 @@ and [Lighthouse guide](../../apps/web/tests/lighthouse/README.md).
 Clean, calm, encouraging visual tone — not exam-like, not childish. Tailwind CSS with shadcn/ui-style
 components (see [08](08-web-app-design.md) for the exact frontend stack). Avoid visual patterns that
 read as "grading" (red X marks, harsh error colors) in favor of supportive framing, consistent with
-the AI tone rules in [09](../engineering/09-ai-features.md) §13 ("Great use of this word," "Almost right," never
+the AI tone rules in [09](../engineering/09-ai-features.md) §5 ("Great use of this word," "Almost right," never
 "Your English is bad").
 
 ## 12. UX risks and mitigations
 
 - **Risk: AI feedback UI reads as a test/grade, discouraging learners.** Mitigation: encouraging
-  copy rules (§11 above and [09](../engineering/09-ai-features.md) §13), always show the original sentence, avoid
+  copy rules (§11 above and [09](../engineering/09-ai-features.md) §5), always show the original sentence, avoid
   inventing corrections for already-correct sentences.
 - **Risk: Review sessions feel like a chore.** Mitigation: keep sessions short by default (backend
   daily target, not an open-ended queue), show visible progress within the session.
 - **Risk: Mobile one-handed usability failures.** Mitigation: 44px minimum touch targets, bottom
   navigation reachable by thumb, no required multi-step gestures.
 - **Risk: Learner distrust of AI feedback correctness.** Mitigation: visible "AI can make mistakes"
-  disclaimer and a report-feedback action on every result (see [09](../engineering/09-ai-features.md) §16).
+  disclaimer and a report-feedback action on every result (see [09](../engineering/09-ai-features.md) §8).
 
 ## 13. Final MVP UX summary
 

@@ -55,9 +55,9 @@ exist.
 ## 5. Settings and account lifecycle
 
 `user_settings` is one-to-one with `users` and stores timezone, review target, review rhythm,
-notification choices, application language, and display name. Account deletion first deactivates
-the user, revokes access, and records an idempotent deletion request; later anonymization requires a
-separately implemented and operated process.
+notification choices, and application language. Display name belongs to `users`. Account deletion
+first deactivates the user, revokes access, and records an idempotent deletion request; later
+anonymization requires a separately implemented and operated process.
 
 ## 6. Onboarding
 
@@ -71,8 +71,8 @@ settings but does not create a second source of truth for later preference chang
 speech; `word_examples` and `usage_notes` attach ordered teaching material to a meaning.
 
 `user_words` links a learner to a meaning and stores status, source, review step, next-review time,
-review counters, and soft-delete/mastery state. A partial unique index prevents more than one active
-saved row for the same learner and meaning.
+review counters, and soft-delete/mastery state. A partial unique index prevents more than one
+non-deleted saved row for the same learner and meaning.
 
 ## 8. Journey discovery
 
@@ -101,7 +101,7 @@ same logical write as the attempt.
 
 `daily_mission_snapshots` freezes a learner's targets, counters, policy version, timezone, local
 date, and completion state for one day. Preference changes affect future snapshots, not an existing
-day. `daily_activity_summaries` stores daily aggregate progress for the Progress screen.
+day. `daily_activity_summaries` stores daily activity aggregates.
 
 ## 11. Learner sentences and AI feedback
 

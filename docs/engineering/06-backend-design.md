@@ -20,10 +20,14 @@ boundaries, idempotent important writes, secure-by-default, and no premature ser
 
 ## 3. Backend modules
 
-Business: `identity`, `users`, `content`, `learning`, `reviews`, `missions`, `gamification`,
-`writingai`, `accounts`. Infrastructure: `foundation`, `app`. Rules: business may import foundation;
-foundation must never import business; writes belong to their owning module; cross-module
-coordination happens through services, not direct cross-module table access.
+The code is organized around the modules that exist in `src/`: `identity` owns authentication,
+sessions, settings, and account lifecycle; `content` owns vocabulary, journeys, saved words, and
+reviews; `missions` owns daily progress, points, and streaks; and `ai-feedback` owns sentence
+evaluation and reporting. `repositories` contains D1 platform persistence, `domain` contains shared
+types and rules, and `http` contains middleware and problem responses. `data-conversion` is limited
+to synthetic conversion tooling. `app.ts`, `index.ts`, and `config.ts` compose the Worker and its
+runtime configuration. Route and service modules use repository/domain boundaries instead of
+exposing D1 rows as public API objects.
 
 ## 4. Project structure
 
@@ -66,11 +70,11 @@ Object requires a measured invariant that an atomic batch cannot safely represen
 
 ## 9. Idempotency
 
-Required for: review submission, adding words, learner sentences, AI feedback, account deletion.
-Storage: idempotency key + authenticated-user scope + operation scope + request fingerprint,
-unique on `(user_id, scope, key)`. The same key from different users is isolated. Duplicate
-processing for the same user and scope (reused key with a different fingerprint or still in
-progress) returns `409`.
+Required for review submission, adding words, sentence feedback, and account deletion.
+Storage: idempotency key + authenticated user + operation + request fingerprint, unique on
+`(user_id, operation, key)`. The same key from different users is isolated. Reusing a key for the
+same user and operation with a different fingerprint returns `409`. AI generation concurrency is
+controlled separately by generation leases.
 
 ## 10. Core learning workflows
 
@@ -108,15 +112,15 @@ days, maximum balance 2 (matches `grace_day_ledger` semantics).
 ## 12. AI feedback
 
 Workflow: save learner sentence → request AI feedback → store feedback attempt → reward completion.
-Provider abstraction: `FeedbackProvider` interface. Rules: 8-second provider timeout and 10-second
-total request budget (see [09](09-ai-features.md) §18, the authoritative timeout/retry policy), no
-real AI calls in CI, fake provider for tests, rate limits applied.
+Provider abstraction: `FeedbackProvider` interface. The configured provider timeout is 10 seconds
+(see [09](09-ai-features.md) §7); CI makes no real AI calls, tests use a fake provider, and rate
+limits apply.
 
 ## 13. Timezone
 
 Store timestamps in UTC; store user timezone as an IANA string; calculate daily logic from local
-date. Timezone resolution priority: user settings → onboarding answer → browser timezone → UTC
-fallback.
+date. Timezone resolution priority: a non-UTC stored user setting → client/browser timezone →
+UTC fallback.
 
 ## 14. Account deletion
 

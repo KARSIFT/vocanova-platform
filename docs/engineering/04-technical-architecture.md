@@ -21,8 +21,8 @@ habit.
 ## 3. Architecture principles
 
 Modular monolith first; frontend/backend separated; business logic stays transport- and
-storage-independent behind the `/api/v1` contract; D1 becomes the relational source of truth after
-parity and separately authorized cutover. Prefer simple stable technologies, avoid premature
+storage-independent behind the `/api/v1` contract; D1 is the relational source of truth. Prefer
+simple stable technologies, avoid premature
 microservices, design for future mobile clients, keep explicit domain boundaries and testable
 behavior, and record important choices as ADRs.
 
@@ -88,7 +88,7 @@ typed client is checked for route coverage; [06](06-backend-design.md) and
 ## 9. Authentication
 
 Google OAuth + email magic link, no password login in MVP. Internal identity tables
-(`users`, `user_identities`/`external_identities`) decouple business data from the external identity
+(`users` and `external_identities`) decouple business data from the external identity
 provider — business tables reference Vocanova user IDs, never provider IDs directly.
 
 ## 10. Database architecture
@@ -106,7 +106,7 @@ scheduler behind a stable interface.
 
 ## 12. Daily mission
 
-A stable daily snapshot (user, local date, review target, selected items, completion status, policy
+A stable daily snapshot (user, local date, review target, counters, completion status, policy
 version). Settings changes apply from the next local day, not retroactively.
 
 ## 13. AI feedback architecture
