@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-const LOCAL_STACK_MARKER = "voc081-local-stack-v1";
+const LOCAL_STACK_MARKER = "vocanova-local-stack-v1";
 const INTERNAL_CONFIG_URL = "https://vocanova-api.internal/configz";
 
 export const dynamic = "force-dynamic";

@@ -71,6 +71,10 @@ pnpm --filter @vocanova/api-worker openapi:check
 pnpm --filter @vocanova/api-worker contract:check
 ```
 
+The data-conversion command is synthetic-only. See the
+[conversion guide](operations/data-conversion.md) for its checkpoint, retry, and
+reconciliation behavior.
+
 Wrangler `dry-run` scripts build local, staging, and production configurations without uploading or provisioning resources.
 
 ## Troubleshooting

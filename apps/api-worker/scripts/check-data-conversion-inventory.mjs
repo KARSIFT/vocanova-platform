@@ -26,7 +26,7 @@ assert.equal(
   sourceManifest.schema_version,
   "vocanova-postgresql-source-schema-v1",
 );
-assert.equal(sourceManifest.retired_at_task, "VOC-080-T11");
+assert.equal(sourceManifest.retired_on, "2026-08-22");
 assert.match(sourceManifest.retired_source_revision, /^[0-9a-f]{40}$/);
 assert.equal(
   sourceManifest.canonical_tables_sha256,

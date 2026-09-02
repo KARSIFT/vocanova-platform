@@ -1,4 +1,4 @@
-// VOC-031-T07a Home accessibility scan.
+// Home accessibility scan.
 //
 // This is the SINGLE accessibility scan T07a adds. It proves the
 // Playwright + axe-core harness is wired end-to-end (Playwright
@@ -27,7 +27,7 @@ import {
   scanForAxeViolations,
 } from "./axe-helper.js";
 
-test.describe("Home accessibility (VOC-031-T07a)", () => {
+test.describe("Home accessibility", () => {
   test("Home renders with zero critical or serious axe-core violations at 1280x720", async ({
     page,
   }, testInfo) => {

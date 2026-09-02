@@ -6,7 +6,7 @@ Describe the problem and the resulting behavior in one or two sentences.
 
 ## Related issue
 
-Closes #
+<!-- Optional: Closes #123 -->
 
 ## Checklist
 

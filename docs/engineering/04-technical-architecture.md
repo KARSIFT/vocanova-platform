@@ -16,9 +16,6 @@ related_documents:
   - DOC-07
   - DOC-08
   - DOC-09
-  - DOC-10
-  - DOC-11
-  - DOC-17
 related_decisions:
   - ADR-0003
 source_files:
@@ -78,9 +75,7 @@ Future mobile: Next.js Web + Expo Mobile both call the same `/api/v1` Worker con
 
 ## 5. Repository architecture
 
-Single monorepo, `vocanova-platform` (see
-the migration notes for why this
-name, not `vocanova`):
+Single monorepo, `vocanova-platform`:
 
 ```text
 vocanova-platform/
@@ -94,7 +89,6 @@ packages/
   eslint-config/
   typescript-config/
 docs/
-infrastructure/ # held Cloudflare delivery/retirement manifests
 scripts/
 .github/
 ```

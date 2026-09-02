@@ -3,7 +3,7 @@
   "retired_source_path": "apps/api/openapi/vocanova.openapi.json",
   "retired_source_revision": "203ac878d7a054de0826188924446e5d24a6dd43",
   "retired_source_sha256": "18905f12ffd371bf2eaa4da23af3531bf296cb62e8e223c9c7a2fcea022e0715",
-  "retired_at_task": "VOC-080-T11",
+  "retired_on": "2026-08-22",
   "clientExceptions": {
     "/api/v1/auth/oauth/google/callback": "OAuth provider redirect target; navigated by the browser/provider rather than VocanovaClient"
   },

@@ -144,12 +144,12 @@ operation IDs.
 Unit, handler, service, workerd, contract-snapshot, OpenAPI golden-file, local D1 integration/migration,
 auth, CSRF, cross-user, atomicity, consistency, and idempotency tests.
 
-## Builder handoff
+## Implementation order
 
 Implement DTOs first → never expose Ent models → add auth/CSRF/idempotency middleware → implement
 routes per the approved contract → tests before acceptance → export OpenAPI artifacts.
 
-## Independent review
+## Review checklist
 
 DTO correctness, contract compliance, security middleware, OpenAPI changes, test coverage, no leaked
-internal data. The reviewer must be a different participant from the builder; no vendor is permanent.
+internal data.

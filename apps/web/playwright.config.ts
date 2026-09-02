@@ -1,4 +1,4 @@
-// VOC-031-T07a + VOC-031-T07b Playwright config.
+// Playwright config.
 //
 // T07a wired one project ("home-desktop-1280") that scans a single
 // screen (Home) at one representative desktop width as the

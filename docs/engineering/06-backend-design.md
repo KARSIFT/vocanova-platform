@@ -15,7 +15,6 @@ related_documents:
   - DOC-05
   - DOC-07
   - DOC-09
-  - DOC-10
 related_decisions:
   - ADR-0003
 source_files:

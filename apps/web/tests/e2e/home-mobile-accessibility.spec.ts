@@ -1,4 +1,4 @@
-// VOC-031-T07b Home accessibility scan at the two mobile viewports
+// Home accessibility scan at the two mobile viewports
 // (360px, 430px). T07a already covers /home at the 1280x720
 // representative desktop width in home-accessibility.spec.ts; this
 // file extends the coverage to the mobile breakpoints DOC-03 §10
@@ -16,7 +16,7 @@ import {
   scanForAxeViolations,
 } from "./axe-helper.js";
 
-test.describe("Home accessibility (VOC-031-T07b mobile)", () => {
+test.describe("Home accessibility (mobile)", () => {
   test("Home renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state at 360 / 430", async ({
     page,
   }, testInfo) => {

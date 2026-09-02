@@ -901,7 +901,7 @@ describe("VocanovaClient", () => {
     assert.equal(data.purgeAfter, "2026-08-26T12:00:00Z");
   });
 
-  // VOC-031-T06: the session-expiry mid-flow handler at
+  // The session-expiry mid-flow handler at
   // apps/web/src/lib/session.ts is a thin wrapper around
   // ApiResponseError.status === 401. The cross-cutting
   // guarantee (TEST-29) depends on this detection being

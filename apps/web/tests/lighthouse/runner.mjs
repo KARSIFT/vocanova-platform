@@ -9,7 +9,7 @@
 // = 12 audits, all against a fixed local production build (the
 // Next.js production server the CI workflow starts before
 // invoking this script), never the dev server, never a live
-// network target. This is the `VOC-031-R04` "no hot-reload
+// network target. This enforces the "no hot-reload
 // variance in CI" requirement.
 //
 // Why `lighthouse` directly and not `@lhci/cli`:
@@ -138,7 +138,7 @@ function buildLighthouseSettings({ layout, screen }) {
   // Best Practices 90+) are the ones the runner asserts. The
   // throttling method is `simulate` (Lantern), which works
   // against a fixed local server without touching the network
-  // - this is the `VOC-031-R04` "no live network target" rule.
+  // — this is the "no live network target" rule.
   // Using `devtools` throttling instead would issue real
   // requests to the local server, which is unnecessary and
   // adds flakiness from the throttling proxy itself.

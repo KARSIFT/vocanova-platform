@@ -12,7 +12,7 @@ assert.equal(
   "vocanova-retired-api-contract-v1",
   "retired API contract snapshot schema drifted",
 );
-assert.equal(baseline.retired_at_task, "VOC-080-T11");
+assert.equal(baseline.retired_on, "2026-08-22");
 assert.match(baseline.retired_source_revision, /^[0-9a-f]{40}$/);
 assert.match(baseline.retired_source_sha256, /^[0-9a-f]{64}$/);
 const operations = baseline.operations;

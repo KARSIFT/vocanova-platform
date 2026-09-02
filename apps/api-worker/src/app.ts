@@ -83,10 +83,10 @@ const configRoute = createRoute({
 export const OPENAPI_DOCUMENT_CONFIG = {
   openapi: "3.1.0" as const,
   info: {
-    title: "VocaNova Worker API migration target",
-    version: "0.1.0",
+    title: "VocaNova Worker API",
+    version: "1.0.0",
     description:
-      "Operational Worker/D1 migration target. Every public API operation now has Worker parity evidence; the Go OpenAPI document remains the behavioral oracle until final runtime retirement.",
+      "Operational VocaNova API running on Cloudflare Workers and D1.",
   },
 };
 

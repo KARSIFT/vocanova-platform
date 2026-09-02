@@ -1,4 +1,4 @@
-// VOC-031-T09 Lighthouse score thresholds and assertion helpers.
+// Lighthouse score thresholds and assertion helpers.
 //
 // DOC-08 ("Quality standards") records the three performance
 // budgets for the VocaNova web app:

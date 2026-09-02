@@ -1,4 +1,4 @@
-// VOC-031-T07b accessibility scan for /onboarding.
+// Accessibility scan for /onboarding.
 //
 // The onboarding page is gated by /api/v1/me's `onboardingStatus`
 // field. The mock fixture returns `onboardingStatus: "completed"`
@@ -36,7 +36,7 @@ import {
   scanForAxeViolations,
 } from "./axe-helper.js";
 
-test.describe("Onboarding accessibility (VOC-031-T07b)", () => {
+test.describe("Onboarding accessibility", () => {
   test("/onboarding renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state on step 1", async ({
     page,
   }, testInfo) => {

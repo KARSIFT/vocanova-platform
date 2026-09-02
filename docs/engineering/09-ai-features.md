@@ -384,47 +384,25 @@ Maintain a stable **golden regression set** (~50 cases, versioned `golden-set-v1
 correctness, common errors, false-correction risks, meaning preservation, regional variants, prompt
 injection, safety, and past regressions — don't remove a case just because the current model
 performs poorly on it. Every material AI change records dataset/golden-set/prompt/schema versions,
-provider, model, config, commit, scores, critical failures, latency, cost, reviewer approval. Normal
+provider, model, config, commit, scores, critical failures, latency, cost, and review outcome. Normal
 CI never depends on a paid provider.
 
-## 24. Builder and independent-reviewer responsibilities
+## 24. Implementation and review checklist
 
-The **builder role** implements domain types/persistence/migrations, deterministic validation, target-form
-matching, feedback-provider and moderation interfaces, mock provider, one production adapter,
-prompt/versioning package, structured-output validator, orchestration service, transaction-safe
-mission completion, rate limiting, idempotency/dedup, stable REST behavior, frontend integration,
-reporting, observability, evaluation fixtures/tooling, tests, operational docs. Ordered
-implementation-component sequence inside the default coherent P3/AI pull request:
-(1) AI domain and persistence, (2) validation and orchestration foundation,
-(3) prompt and production provider, (4) safety and moderation,
-(5) API and frontend integration, (6) evaluation and observability. A future adopted
-package may use multiple P3/AI PRs only when it records a concrete boundary,
-partial-state coherence, integration/rollback explanation, and the tradeoff against
-coordination, elapsed time, token/context, repeated checks, exact-review cycles, and
-bookkeeping overhead.
+Implement domain persistence and migrations, deterministic validation, feedback-provider and moderation interfaces, a mock provider, any selected production adapter, prompt and schema versioning, structured-output validation, orchestration, transaction-safe mission completion, rate limits, idempotency, stable REST behavior, frontend integration, reporting, observability, evaluation fixtures, tests, and operational documentation.
 
-Coding begins only after this document is approved, API-contract alignment is checked, database
-support is confirmed, provider candidates are evaluated, provider privacy settings are verified,
-secrets/environments are defined, and initial evaluation fixtures exist.
+Use this implementation sequence:
 
-The **different-participant independent-reviewer role** reviews architecture (backend owns
-orchestration, frontend never calls providers,
-thin handlers, no SDK-type leakage, no generic AI platform), domain (processing vs. learning states
-separated, invariants enforced, failure states can't complete missions), security (session identity
-authoritative, ownership enforced, keys backend-only, injection handled, no cross-user access, rate
-limits/idempotency can't be bypassed), privacy (minimized input, no learner text in logs/analytics,
-no raw-payload retention by default, deletion covers AI content), prompt (system/developer separation,
-untrusted learner content, correct A2/B1 behavior, regional variants respected, versions recorded),
-reliability (cancellation, bounded timeout/retry, one logical operation per duplicate set,
-persistence before success, transactional mission updates, outage doesn't fail core health, rollback
-works), safety (sensitive content allowed appropriately, misuse blocked, self-harm flow interrupts,
-refusals hidden, blocked attempts don't complete missions), cost (validation before paid calls,
-dedup works, output limits exist, usage measured, no accidental fallback provider), testing
-(comprehensive mock failures, DB rollback tested, contracts prevent leakage, explicit privacy tests,
-evaluation tooling has cost limits, production bugs become regression fixtures). Outcome:
-`approve` / `approve_with_follow_up` / `request_changes`; critical privacy/security/safety/
-persistence/authorization issues require a failing verdict. Humans or AI agents may fill either
-role; this document does not assign permanent authority to a vendor.
+1. AI domain and persistence.
+2. Validation and orchestration.
+3. Prompt and production provider.
+4. Safety and moderation.
+5. API and frontend integration.
+6. Evaluation and observability.
+
+Before enabling a paid provider, confirm API-contract and database support, evaluate provider quality and privacy settings, define environment secrets, and create evaluation fixtures.
+
+Review architecture boundaries, domain invariants, authorization, privacy, prompt separation, reliability, safety, cost controls, tests, and rollback. Critical privacy, security, safety, persistence, or authorization findings block release until resolved.
 
 ## 25. Rollout and rollback
 
@@ -449,7 +427,7 @@ coaching, feedback-language localization, guided hints, **sentence-history insig
 the migration notes —
 this is where the removed MVP "Sentence History Page" belongs instead), teacher dashboards,
 guided AI tutor, roleplay, speaking/pronunciation, listening/writing practice, grammar coaching,
-adaptive learning paths, learner-owned vocabulary import. Each requires separate approval.
+adaptive learning paths, learner-owned vocabulary import. Track each as a separate product issue before implementation.
 
 ## 27. Final principle
 

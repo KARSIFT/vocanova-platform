@@ -112,17 +112,16 @@ keyboard support, focus management, screen-reader-friendly forms. Performance: l
 dependencies, route-level code splitting, Lighthouse targets Performance 85+ / Accessibility 95+ /
 Best Practices 90+.
 
-## Builder handoff order
+## Implementation order
 
 OpenNext/workerd adaptation → UI foundation → OpenAPI/API client parity → TanStack Query →
 routes/layouts → authentication → onboarding → core learning loop → tests, accessibility,
 Lighthouse, dry-run, size, and startup evidence.
 
-## Independent review
+## Review checklist
 
 Architecture boundaries, API contract usage, security, auth/session behavior, CSRF/idempotency,
-accessibility, loading/error states, tests, Worker compatibility, and overengineering. The reviewer
-must be a different participant from the builder; no vendor is permanent.
+accessibility, loading/error states, tests, Worker compatibility, and overengineering.
 
 ## MVP completion criteria
 

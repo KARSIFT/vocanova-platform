@@ -1,4 +1,4 @@
-// VOC-031-T07a + VOC-031-T07b + VOC-031-T08 mock API server for the
+// mock API server for the
 // e2e harness.
 //
 // T07a added the minimum canned JSON the Home page server
@@ -10,8 +10,8 @@
 // or POST endpoints, so that server returned read-only fixtures
 // and 404'd on writes.
 //
-// T08 (this task) extends the server with the full mutation
-// surface the DOC-10 §7 end-to-end flow needs against the same
+// The full-flow suite extends the server with the mutation
+// surface the end-to-end flow needs against the same
 // Playwright install: magic-link request/consume (issuing a
 // session cookie + double-submit CSRF cookie), onboarding
 // completion, save / unsave, review submission, deterministic
@@ -34,9 +34,8 @@
 //
 // AI feedback is deterministic: a fixed rule table based on the
 // input sentence (length, presence of the target word, blank).
-// This is the "deterministic AI adapter, not a
-// paid/nondeterministic provider call" pattern DOC-10 §7
-// requires for CI.
+// This is a deterministic AI adapter, not a paid or
+// nondeterministic provider call.
 //
 // Endpoints:
 //
@@ -910,7 +909,7 @@ const server = createServer(async (req, res) => {
     }
     state.onboardingCompleted = true;
     if (typeof body.dailyReviewTarget === "number") {
-      // VOC-031-D04 seed rule: only seed dailyReviewTarget when no
+      // seed rule: only seed dailyReviewTarget when no
       // customized value exists yet. The mock starts with the
       // schema default (20) for every fresh session, so the seed
       // fires for the very first onboarding write.

@@ -150,8 +150,8 @@ describe("Worker content, learning, and review parity", () => {
   });
 
   it("isolates canonical Word Detail state through two real session cookies", async () => {
-    const tokenA = "voc088-user-a-session";
-    const tokenB = "voc088-user-b-session";
+    const tokenA = "vocanova-user-a-session";
+    const tokenB = "vocanova-user-b-session";
     await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW, 0, null, "new");
     await insertUserWord(
       "50000000-0000-4000-8000-000000000005",

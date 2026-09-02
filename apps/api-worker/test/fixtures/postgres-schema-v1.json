@@ -2,7 +2,7 @@
   "schema_version": "vocanova-postgresql-source-schema-v1",
   "retired_source_path": "apps/api/migrations",
   "retired_source_revision": "203ac878d7a054de0826188924446e5d24a6dd43",
-  "retired_at_task": "VOC-080-T11",
+  "retired_on": "2026-08-22",
   "canonical_tables_sha256": "16d005036fcf164ebdf9998007c62e314e179205f368ff65c4fad4a8b30c257f",
   "tables": {
     "account_deletion_requests": {

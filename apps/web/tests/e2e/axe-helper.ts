@@ -1,4 +1,4 @@
-// VOC-031-T07a + VOC-031-T07b axe-core / accessibility helpers.
+// axe-core / accessibility helpers.
 //
 // T07a added the WCAG 2.2 AA axe scan + violation formatter. T07b
 // extends the helper with explicit keyboard-reachability and

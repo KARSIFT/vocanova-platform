@@ -1,7 +1,6 @@
-// VOC-031-T08 - Full core-loop end-to-end Playwright suite.
+// Full core-loop end-to-end Playwright suite.
 //
-// This is the DOC-10 §7-documented end-to-end flow, built for
-// the first time on the T07 Playwright install. The flow is the
+// This is the product's complete browser end-to-end flow. It is
 // the functional-correctness counterpart to the T07a/T07b
 // accessibility scans: every step is exercised against real
 // client components, real network calls, and the real Next.js
@@ -40,7 +39,7 @@
 //       Detail screen, type a sentence containing the target
 //       word, click Check, wait for the deterministic mock
 //       feedback. The mock returns "correct" without calling a
-//       paid/nondeterministic provider (DOC-10 §7).
+//       paid or nondeterministic provider.
 //
 //   7.  Progress update: /home -> verify the daily-mission
 //       counter now shows the review counted.
@@ -74,7 +73,7 @@ import { expect, test } from "@playwright/test";
 const ONBOARDING_COOKIE_VALUE = "not_started";
 const CORE_LOOP_TEST_TIMEOUT_MS = 90_000;
 
-test.describe("Core loop end-to-end (VOC-031-T08)", () => {
+test.describe("Core loop end-to-end", () => {
   test("auth -> onboarding -> discover -> save -> review -> sentence -> AI feedback -> progress -> settings -> logout -> rejection", async ({
     page,
     context,
@@ -275,7 +274,7 @@ test.describe("Core loop end-to-end (VOC-031-T08)", () => {
     // ----- 6. Sentence feedback + deterministic AI.
     //
     // The mock's evaluateSentenceFeedback is the deterministic
-    // AI adapter DOC-10 §7 requires for CI: the same sentence
+    // AI adapter used in CI: the same sentence
     // always produces the same feedback. A sentence containing
     // the target word "pour" and >= 3 words returns
     // { status: "correct", explanation: <fixed> }.

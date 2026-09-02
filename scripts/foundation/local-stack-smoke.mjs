@@ -27,7 +27,7 @@ export const LOCAL_STACK_TIMEOUT_MS = 12 * 60_000;
 export const LOCAL_STACK_PROBE_TIMEOUT_MS = 5_000;
 export const LOCAL_STACK_PREPARATION_TIMEOUT_MS = 6 * 60_000;
 export const LOCAL_STACK_MIGRATION_TIMEOUT_MS = 2 * 60_000;
-export const LOCAL_STACK_MARKER = "voc081-local-stack-v1";
+export const LOCAL_STACK_MARKER = "vocanova-local-stack-v1";
 export const LOCAL_STACK_SHUTDOWN_GRACE_MS = SHUTDOWN_GRACE_MS;
 
 const repositoryRoot = resolve(import.meta.dirname, "../..");
