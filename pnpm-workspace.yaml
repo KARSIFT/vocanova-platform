@@ -3,22 +3,19 @@ packages:
   - apps/api-worker
   - packages/*
 
-# Forces patched versions of two transitive high-severity advisories `pnpm
-# audit` reports (both several levels deep in build-time-only dependency
-# chains, not the runtime request path): brace-expansion (DoS via unbounded
-# expansion, GHSA-mh99-v99m-4gvg / GHSA-rgw5-rvv9-x895, pulled in by
-# @sentry/nextjs's bundler/webpack plugins via glob>minimatch) and nanoid
-# (infinite loop on a zero-size custom generator, GHSA-2v37-7h3g-55p8,
-# pulled in by @tailwindcss/postcss via postcss). Neither is a direct
-# dependency of this repo. docs/development.md's `pnpm audit` policy fails
-# on high/critical; these were the three high-severity entries.
+# Security and compatibility pins for transitive build dependencies.
 overrides:
+  # Patched releases for GHSA-mh99-v99m-4gvg and GHSA-rgw5-rvv9-x895.
   brace-expansion: ">=5.0.9"
   # OpenNext still carries minimatch 8.0.7, whose legacy import shape is not
   # compatible with brace-expansion 5.x. Keep only that edge on the patched
   # 2.x line while the repository-wide override protects newer consumers.
   "minimatch@8.0.7>brace-expansion": "2.1.4"
+  # Patched release for GHSA-2v37-7h3g-55p8.
   nanoid: ">=3.3.18"
+  # Patched release for GHSA-fxqj-rqcc-2cmp.
+  postcss: ">=8.5.23"
+  # Wrangler's embedded JavaScript API needs the esbuild deadlock fix.
   "wrangler>esbuild": "0.28.2"
 
 allowBuilds:
