@@ -17,9 +17,9 @@ receive lightweight AI feedback → build daily habit.
 
 Next.js App Router + TypeScript, transformed by `@opennextjs/cloudflare` and executed on Workers.
 The Hono `/api/v1` Worker is the backend authority. Single repo,
-frontend under `apps/web` per [04](../engineering/04-technical-architecture.md) §5. pnpm. Tailwind +
-shadcn/ui-style components. TanStack Query for server state, React state for UI state. React Hook
-Form + Zod. Vitest, React Testing Library, Playwright.
+frontend under `apps/web` per [04](../engineering/04-technical-architecture.md) §5. pnpm, Tailwind,
+Server Components, route-local client components, React state and native forms, Playwright, and
+Node-based middleware and compatibility tests.
 
 ## Architecture
 
@@ -75,9 +75,10 @@ practice is a component, not a route.
 
 ## API integration
 
-Generated API client against `/api/v1`, `credentials: "include"`, `X-CSRF-Token` on unsafe methods,
-`Idempotency-Key` support, and no frontend token storage. TypeScript types derive from the committed
-OpenAPI contract; Worker generation and client artifacts fail closed on drift.
+The shared hand-maintained TypeScript client in `packages/api-client` calls `/api/v1` with
+`credentials: "include"`, `X-CSRF-Token` on unsafe methods, `Idempotency-Key` support, and no
+frontend token storage. Contract-drift tests compare Worker operations, the committed OpenAPI
+artifact, the compatibility snapshot, and client route coverage.
 
 ## Quality standards
 
