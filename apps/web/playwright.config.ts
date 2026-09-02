@@ -5,7 +5,7 @@
 //
 // webServer runs two processes: this harness's mock API server
 // (so each server component can render without the real
-// Go/Postgres backend) and the Next.js production build (so the
+// Hono/D1 API Worker) and the Next.js production build (so the
 // test is running the same bundle CI will ship, not the dev
 // server's hot-reload variant). The mock API server is started
 // first because the Next.js server's SSR path makes

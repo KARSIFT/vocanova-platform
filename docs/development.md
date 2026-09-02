@@ -5,6 +5,12 @@
 - Node.js `24.18.0`
 - pnpm `11.14.0`
 
+The same versions are available through [Mise](https://mise.jdx.dev/):
+
+```bash
+mise install
+```
+
 Install the frozen workspace from the repository root:
 
 ```bash
@@ -47,18 +53,21 @@ pnpm audit --audit-level high
 
 Focused root commands:
 
-| Command               | Purpose                                             |
-| --------------------- | --------------------------------------------------- |
-| `pnpm lint`           | Lint web, Worker API, and packages                  |
-| `pnpm typecheck`      | Type-check all workspaces                           |
-| `pnpm test`           | Run foundation and workspace tests                  |
-| `pnpm build`          | Build packages, web, and Worker API                 |
-| `pnpm format:check`   | Check formatting                                    |
-| `pnpm ci:foundation`  | Validate repository and local-development utilities |
-| `pnpm ci:packages`    | Validate shared packages                            |
-| `pnpm ci:web`         | Validate Next.js/OpenNext/workerd behavior          |
-| `pnpm ci:worker-api`  | Validate Hono, D1, contracts, and Worker builds     |
-| `pnpm ci:local-stack` | Validate the disposable two-Worker stack            |
+| Command                   | Purpose                                             |
+| ------------------------- | --------------------------------------------------- |
+| `pnpm lint`               | Lint web, Worker API, and packages                  |
+| `pnpm typecheck`          | Type-check all workspaces                           |
+| `pnpm test`               | Run foundation and workspace tests                  |
+| `pnpm build`              | Build packages, web, and Worker API                 |
+| `pnpm format:check`       | Check formatting                                    |
+| `pnpm ci:foundation`      | Validate repository and local-development utilities |
+| `pnpm harness:check`      | Validate shared agent guides and tool adapters      |
+| `pnpm architecture:check` | Enforce workspace import boundaries                 |
+| `pnpm workflows:check`    | Validate GitHub Actions security and event coverage |
+| `pnpm ci:packages`        | Validate shared packages                            |
+| `pnpm ci:web`             | Validate Next.js/OpenNext/workerd behavior          |
+| `pnpm ci:worker-api`      | Validate Hono, D1, contracts, and Worker builds     |
+| `pnpm ci:local-stack`     | Validate the disposable two-Worker stack            |
 
 Useful workspace commands:
 
@@ -76,6 +85,24 @@ The data-conversion command is synthetic-only. See the
 reconciliation behavior.
 
 Wrangler `dry-run` scripts build local, staging, and production configurations without uploading or provisioning resources.
+
+## Development harness
+
+The repository follows [Kandev's](https://github.com/kdlbs/kandev) portable-harness shape with VocaNova-specific content:
+
+- `.agents/skills` is the shared, tool-neutral task-guide library.
+- `.claude`, `.codex`, `.cursor`, and `.opencode` adapt that library without duplicating policy.
+- `.playwright/cli.config.json` gives interactive browser tools a predictable Chromium default.
+- `.vscode/tasks.json` and `.vscode/launch.json` expose the same root commands used by contributors and CI.
+- `mise.toml` pins optional local tools, and `.pre-commit-config.yaml` runs fast formatting and harness checks.
+
+Install the optional hooks after `mise install`:
+
+```bash
+pre-commit install
+```
+
+The hooks are convenience feedback. CI remains authoritative and runs the same repository-owned validators.
 
 ## Troubleshooting
 

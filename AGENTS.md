@@ -45,6 +45,10 @@ pnpm audit --audit-level high
 
 Use the narrower scripts in `package.json` while iterating. Before handoff, run the checks relevant to the affected workspace. See `docs/development.md` for local runtime details and troubleshooting.
 
+## Agent guides
+
+Reusable task guides live in `.agents/skills`. Use the smallest guide that covers the request and keep work in the user-started conversation unless the user explicitly asks for delegation. `.claude`, `.codex`, `.cursor`, and `.opencode` are thin adapters to this guide and the shared skills; they must not introduce conflicting repository policy.
+
 ## Cloudflare and external effects
 
 Pull-request checks are credential-free. Do not deploy, mutate remote D1 data, change DNS, expose secrets, or perform another production action unless the user explicitly requests that exact external action. Keep environment-specific identifiers and credentials out of tracked files.

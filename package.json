@@ -13,13 +13,16 @@
     "dev:init": "pnpm --filter @vocanova/api-worker run migrate:local",
     "dev:workers": "node scripts/foundation/local-development-supervisor.mjs workers",
     "test:local-stack": "node scripts/foundation/local-stack-smoke.mjs",
-    "validate": "pnpm run validate:workspace && pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
-    "ci:foundation": "pnpm run validate:workspace && pnpm run format:check && pnpm run build:packages && node --test scripts/foundation/*.test.mjs",
+    "validate": "pnpm run validate:workspace && pnpm run harness:check && pnpm run architecture:check && pnpm run workflows:check && pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
+    "ci:foundation": "pnpm run validate:workspace && pnpm run harness:check && pnpm run architecture:check && pnpm run workflows:check && pnpm run format:check && pnpm run build:packages && node --test scripts/foundation/*.test.mjs",
     "ci:packages": "pnpm run lint:packages && pnpm run typecheck:packages && pnpm run build:packages && pnpm --filter @vocanova/api-client test",
     "ci:web": "pnpm run build:packages && pnpm run lint:web && pnpm run typecheck:web && pnpm --filter @vocanova/web test:middleware && pnpm --filter @vocanova/web test:sentry && pnpm --filter @vocanova/web cloudflare:build && pnpm --filter @vocanova/web cloudflare:compatibility && pnpm --filter @vocanova/web cloudflare:typecheck && pnpm --filter @vocanova/web cloudflare:dry-run && pnpm --filter @vocanova/web cloudflare:limits && pnpm --filter @vocanova/web cloudflare:preview:test",
     "ci:worker-api": "pnpm --filter @vocanova/api-client test && pnpm --filter @vocanova/api-worker run ci",
     "ci:local-stack": "node --test scripts/foundation/local-stack-smoke.test.mjs && pnpm run test:local-stack",
     "validate:workspace": "node scripts/foundation/validate-workspace.mjs",
+    "harness:check": "node scripts/foundation/validate-agent-harness.mjs",
+    "architecture:check": "node scripts/foundation/validate-architecture.mjs",
+    "workflows:check": "node scripts/foundation/validate-workflows.mjs",
     "lint": "pnpm run lint:web && pnpm run lint:packages && pnpm run lint:worker-api",
     "lint:web": "pnpm --filter @vocanova/web lint && node scripts/foundation/check-tailwind-token-usage.mjs",
     "lint:packages": "eslint packages eslint.config.js",
@@ -34,14 +37,15 @@
     "build:web": "pnpm --filter @vocanova/web build",
     "build:worker-api": "pnpm --filter @vocanova/api-worker build",
     "build:packages": "tsc -b packages/api-client packages/design-tokens --pretty false",
-    "format:check": "prettier --check package.json pnpm-workspace.yaml eslint.config.js apps/web apps/api-worker packages scripts/foundation docs/development.md",
-    "format": "prettier --write package.json pnpm-workspace.yaml eslint.config.js apps/web apps/api-worker packages scripts/foundation docs/development.md",
+    "format:check": "prettier --check --ignore-unknown package.json pnpm-workspace.yaml eslint.config.js apps/web apps/api-worker packages scripts/foundation docs AGENTS.md CLAUDE.md CONTRIBUTING.md README.md SECURITY.md .agents .claude .codex .cursor .opencode .playwright .vscode .github mise.toml .pre-commit-config.yaml",
+    "format": "prettier --write --ignore-unknown package.json pnpm-workspace.yaml eslint.config.js apps/web apps/api-worker packages scripts/foundation docs AGENTS.md CLAUDE.md CONTRIBUTING.md README.md SECURITY.md .agents .claude .codex .cursor .opencode .playwright .vscode .github mise.toml .pre-commit-config.yaml",
     "audit": "pnpm audit --audit-level high"
   },
   "devDependencies": {
     "@vocanova/design-tokens": "workspace:*",
     "eslint": "10.8.0",
     "prettier": "3.9.6",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "yaml": "2.9.0"
   }
 }

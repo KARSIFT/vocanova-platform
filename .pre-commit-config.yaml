@@ -1,0 +1,29 @@
+repos:
+  - repo: local
+    hooks:
+      - id: prettier
+        name: Format staged repository files
+        entry: pnpm exec prettier --write --ignore-unknown
+        language: system
+        files: '\.(css|js|json|jsx|md|mdc|mjs|ts|tsx|yaml|yml)$'
+
+      - id: harness-check
+        name: Validate agent harness
+        entry: pnpm harness:check
+        language: system
+        pass_filenames: false
+        files: '^(\.agents/|\.claude/|\.codex/|\.cursor/|\.opencode/|\.playwright/|\.vscode/|AGENTS\.md|CLAUDE\.md|scripts/foundation/validate-agent-harness)'
+
+      - id: architecture-check
+        name: Validate workspace boundaries
+        entry: pnpm architecture:check
+        language: system
+        pass_filenames: false
+        files: '^(apps|packages)/.*\.(js|jsx|mjs|ts|tsx)$|^scripts/foundation/validate-architecture'
+
+      - id: workflow-check
+        name: Validate GitHub Actions
+        entry: pnpm workflows:check
+        language: system
+        pass_filenames: false
+        files: '^\.github/(actions|workflows)/|^scripts/foundation/validate-workflows'
