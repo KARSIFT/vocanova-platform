@@ -132,7 +132,7 @@ magic links, old idempotency keys.
 
 ## 16. Security and observability
 
-`log/slog`, request IDs, structured logs. Never log tokens, secrets, or private learner content.
+Structured JSON logs and request IDs. Never log tokens, secrets, or private learner content.
 HTTPS, CSRF protection, CORS allowlist, secure cookies, hashed tokens, input validation.
 
 ## 17. Testing

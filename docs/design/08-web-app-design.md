@@ -89,8 +89,8 @@ Best Practices 90+.
 
 ## Implementation order
 
-OpenNext/workerd adaptation → UI foundation → OpenAPI/API client parity → TanStack Query →
-routes/layouts → authentication → onboarding → core learning loop → tests, accessibility,
+OpenNext/workerd adaptation → UI foundation → OpenAPI/API client parity → routes/layouts →
+authentication → onboarding → core learning loop → tests, accessibility,
 Lighthouse, dry-run, size, and startup evidence.
 
 ## Review checklist

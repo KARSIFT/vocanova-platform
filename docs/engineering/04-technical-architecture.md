@@ -66,25 +66,24 @@ scripts/
 
 ## 6. Frontend architecture
 
-Next.js (App Router) + React + TypeScript + Tailwind + shadcn/ui + TanStack Query + React Hook Form
-
-- Zod + Vitest + React Testing Library + Playwright + pnpm. OpenNext adapts the app to Workers.
-  The web Worker never accesses D1 directly; the `/api/v1` API Worker remains the business authority;
-  server state uses TanStack Query.
+Next.js App Router, React, TypeScript, Tailwind, Server Components, route-local client components,
+React state and native forms, Playwright, and Node-based middleware and compatibility tests. OpenNext
+adapts the app to Workers. The web Worker never accesses D1 directly; the `/api/v1` API Worker remains
+the business authority.
 
 ## 7. Backend architecture
 
 TypeScript Module Worker + Hono + schema-driven validation/OpenAPI + typed D1 repositories and
-generated Cloudflare binding types. The modular-monolith business modules remain `auth`, `user`,
-`settings`, `vocabulary`, `journey`, `review`, `sentence`, `aifeedback`, `mission`, `progress`, and
-`streak`. Business logic must not depend directly on Hono, D1, auth SDKs, or AI SDKs.
+generated Cloudflare binding types. The implementation is organized into `identity`, `content`,
+`missions`, `ai-feedback`, `repositories`, `domain`, `http`, and `data-conversion` modules. Domain
+logic stays independent of Hono, D1, and provider SDK types.
 
 ## 8. API architecture
 
-REST, JSON, versioned under `/api/v1`. The committed OpenAPI 3.1 artifact and generated API client
-are the migration seam. The Worker API generates and compares its contract deterministically against
-the committed reference; [06](06-backend-design.md) and [07](07-api-contract-and-dto-design.md)
-define stability rules. Hono handles Worker routing and middleware.
+REST, JSON, versioned under `/api/v1`. The Worker generates and compares its OpenAPI 3.1 contract
+deterministically against the committed artifact and compatibility snapshot. The hand-maintained
+typed client is checked for route coverage; [06](06-backend-design.md) and
+[07](07-api-contract-and-dto-design.md) define stability rules. Hono handles routing and middleware.
 
 ## 9. Authentication
 
@@ -127,26 +126,25 @@ behavior (grace days).
 
 ## 15. Background jobs
 
-No Kafka, no complex queue in MVP. Simple synchronous workflows; lightweight cleanup jobs only
-(expired sessions, expired magic links, old idempotency keys). Future: Temporal for long workflows,
-transactional outbox for reliable events, if actually needed.
+There is no background-job runner or queue in the current application. Workflows are synchronous;
+add asynchronous processing only after a measured requirement.
 
 ## 16. Security baseline
 
 HTTPS only, strict CORS, security headers, input validation, authorization checks on every
-learner-owned resource, rate limiting, secret management, secure database roles, privacy-aware
+learner-owned resource, rate limiting, secret bindings, privacy-aware
 logging (no learner sentence text, no tokens/secrets in logs).
 
 ## 17. Observability
 
-Structured logging, request IDs, OpenTelemetry, metrics, error tracking. Monitor API latency,
-errors, database health, AI usage, job failures.
+Structured API request logs, request IDs, health/config endpoints, and redacted Sentry error
+reporting provide the current observability surface.
 
 ## 18. Testing strategy
 
 API: unit, workerd, local D1 migration/repository, contract-snapshot, authorization, atomicity, and
-consistency tests. Frontend: Vitest, React
-Testing Library, Playwright, accessibility, Lighthouse, OpenNext build/dry-run, and workerd requests.
+consistency tests. Frontend: Node middleware tests, Playwright, accessibility, Lighthouse, OpenNext
+build/dry-run, and workerd requests.
 AI: fake-provider tests and evaluation fixtures; never a paid provider in normal CI. Coverage is
 risk-based, not a flat percentage target.
 
@@ -176,7 +174,7 @@ postponed until then.
 
 ## Final technology stack
 
-Frontend: Next.js, TypeScript, Tailwind, shadcn/ui, OpenNext, Cloudflare Workers. Backend:
+Frontend: Next.js, React, TypeScript, Tailwind, OpenNext, Cloudflare Workers. Backend:
 TypeScript, Hono, generated bindings, D1. Auth: Google OAuth + email magic link. AI: provider abstraction, one provider operated at
 a time. Infrastructure: managed Cloudflare Workers/D1 with no owned server. Future: Expo; async
 Cloudflare capabilities only after a measured requirement.

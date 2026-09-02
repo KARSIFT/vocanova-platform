@@ -343,15 +343,15 @@ Versioned SQL under the Worker API workspace defines D1 directly. Application-ge
 (prefer UUIDv7) are created before insert. Shared repository helpers may standardize IDs, timestamps,
 and soft-delete predicates, but each table keeps explicit status checks. SQLite indexes, expression
 indexes such as `lower(email)`, checks, foreign keys, JSON validation, and conditional uniqueness are
-written and tested explicitly. Ent and the PostgreSQL runtime are retired from the active tree.
+written and tested explicitly.
 
 ## 18. Migration strategy
 
 Forward-only Wrangler D1 migrations with an explicit apply step; **no environment mutates schema at
 Worker startup**. Safety evidence includes fresh-D1 apply, repeated-state behavior, upgrade paths,
 prepared-statement/constraint tests, atomicity and consistency failure injection, seed rerun, and
-PostgreSQL-to-D1 parity/reconciliation. GitHub Actions and automated tests are deterministic gates;
-independent semantic review is separate. Use expand/migrate/contract for breaking changes.
+PostgreSQL-to-D1 parity/reconciliation. CI runs deterministic checks; pull-request review covers
+semantic changes. Use expand/migrate/contract for breaking changes.
 
 The versioned normalized export contract binds all 25 source PostgreSQL tables and
 their D1 destination columns. Synthetic conversion lowercases UUID/bytea representations,

@@ -34,8 +34,7 @@
 // quality.yml`, lighthouse job) reports a stable check. The script exits with code 0 if every
 // (screen, layout) audit meets every configured threshold, and
 // exits with code 1 otherwise, so a missed threshold is a hard
-// CI failure (a missed threshold is never silently lowered or
-// skipped.
+// CI failure and is never silently lowered or skipped.
 
 import { launch } from "chrome-launcher";
 import lighthouse from "lighthouse";
