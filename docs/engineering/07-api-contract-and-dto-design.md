@@ -18,7 +18,6 @@ related_documents:
   - DOC-09
 related_decisions:
   - ADR-0003
-adoption_change: VOC-008
 source_files:
   - path: 07-api-contract-and-dto-design.md
     sha256: c1b44de8d2edd02a98098b03b6839f553c594a8225e7371952751a8e19f6883e
@@ -26,7 +25,7 @@ source_files:
 
 # 07 — VocaNova API Contract and DTO Design
 
-## Active VOC-080 contract amendment
+## Current contract
 
 The public `/api/v1` OpenAPI contract and observable behavior are the migration seam
 defined by [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md).

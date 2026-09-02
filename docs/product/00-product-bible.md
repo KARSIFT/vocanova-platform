@@ -19,7 +19,6 @@ related_documents:
   - DOC-12
 related_decisions:
   - ADR-0005
-adoption_change: VOC-008
 source_files:
   - path: 01-product-bible-and-prd.md
     sha256: ffafedf6bb6e1ff6c7e04f8ce67c23478592dd099a543a648d970bf5733f8009
@@ -71,7 +70,7 @@ MVP uses deterministic, step-based scheduling (steps 0–7), not a probabilistic
 that's an explicit future swap point behind a stable scheduling interface, not an MVP requirement.
 Learner-facing rating scale, exact schedule mechanics, and the reset rule are defined precisely in
 [05](../engineering/05-database-design.md) §9, and [08](../design/08-web-app-design.md). See
-[the migration notes](../archive/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how the four
+the migration notes for how the four
 different rating-scale drafts across the source docs were reconciled — the two-word summary is:
 **"Again / Hard / Good / Easy" ratings, `review_step` 0–7, two consecutive incorrect answers reset to
 step 0.**
@@ -83,24 +82,15 @@ target word/phrase and return a status of `correct`, `needs_improvement`, or `in
 short explanation and (when needed) a corrected sentence. Full behavior, safety rules, prompt
 architecture, and evaluation thresholds are in [09](../engineering/09-ai-features.md) — that document is the single
 source of truth for AI behavior; don't restate feedback-label wording elsewhere (see
-[the migration notes](../archive/README-migration-notes.md#1-ai-feedback-label-conflict)).
+the migration notes).
 
 Explicit MVP non-goals: open-ended AI chat, general AI tutor, essay correction, pronunciation
 scoring, speech recognition, roleplay, AI-generated vocabulary as the authoritative content source,
 user-selectable models. Full non-goal list in [09](../engineering/09-ai-features.md) §4.
 
-## 6. Product authority boundary
+## 6. Product decisions
 
-The founder/product owner retains accountable product-decision authority. Delivery uses
-an accountable decision owner, planner, builder, independent reviewer, and non-author
-merge-audit roles; each capable technical role may be filled by an attributable human
-or separately instantiated AI actor. GitHub is the repository system of record and
-GitHub Actions provides deterministic automation. A model, provider, tool, or runtime
-is optional provenance or evidence hardening, never permanent delivery assignment or
-authority. See [DOC-16](../governance/16-autonomous-development-operating-model.md) and
-[ADR-0005](../decisions/ADR-0005-provider-neutral-distinct-agent-role-separation.md).
-
-Product vision and material scope require the authority defined by the
-[canonical governance index](../governance/README.md). [DOC-19](../operations/19-governance-reconciliation-notes.md)
-is a non-authoritative orientation note that explains the reconciliation without restating a
-competing approval model.
+The founder/product owner sets product vision and material scope. GitHub issues and
+pull requests record implementation decisions, review, and validation. Contributors
+may propose improvements directly; large product or architectural changes should be
+discussed in an issue before implementation.

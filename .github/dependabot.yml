@@ -1,37 +1,16 @@
-# No dependabot.yml existed before 2026-08-08 - Dependabot was running on
-# GitHub's zero-config defaults, which target the repository's DEFAULT
-# branch (main) directly, bypassing this repo's entire governed
-# plan/adopt/implement/review flow and landing unreviewed dependency
-# updates straight on the production branch. Confirmed live: PR #371
-# (a real Next.js security patch) targeted main with no risk
-# classification, no independent review path, and no relationship to any
-# adopted change package. `target-branch: develop` below routes every
-# future Dependabot PR through the same branch this repo's own human/agent
-# work goes through, so it flows through the normal CI/Governance
-# checks (and, once merged, the normal release path) instead of a separate
-# direct-to-main channel.
-#
-# KNOWN GAP: governance.yml requires a "Risk classification: R#"
-# line in the PR body for changes to certain paths - Dependabot does not
-# support injecting custom body text, so its PRs will still fail that
-# check until a human or agent adds the line; VOC-078-T04 deliberately
-# removed the repository-writing Dependabot classifier. This remains a
-# manual PR-record step, not an authorization bypass.
 version: 2
 updates:
-  - package-ecosystem: "npm"
-    directory: "/"
-    target-branch: "develop"
+  - package-ecosystem: npm
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
     open-pull-requests-limit: 10
     groups:
       minor-and-patch:
-        update-types: ["minor", "patch"]
+        update-types: [minor, patch]
 
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    target-branch: "develop"
+  - package-ecosystem: github-actions
+    directory: /
     schedule:
-      interval: "weekly"
+      interval: weekly
     open-pull-requests-limit: 5

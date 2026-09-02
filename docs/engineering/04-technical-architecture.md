@@ -21,7 +21,6 @@ related_documents:
   - DOC-17
 related_decisions:
   - ADR-0003
-adoption_change: VOC-008
 source_files:
   - path: 04-technical-architecture.md
     sha256: 50ba0901ee5e877e98e7071c6930f809b0ebc6074858fd20e1ac7deae12403dc
@@ -29,7 +28,7 @@ source_files:
 
 # 04 — VocaNova Technical Architecture
 
-## Active VOC-080 architecture amendment
+## Current architecture
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) is the current
 runtime and data direction. VocaNova targets Next.js through OpenNext on a Cloudflare
@@ -80,7 +79,7 @@ Future mobile: Next.js Web + Expo Mobile both call the same `/api/v1` Worker con
 ## 5. Repository architecture
 
 Single monorepo, `vocanova-platform` (see
-[the migration notes](../archive/README-migration-notes.md#5-repository-name-conflict) for why this
+the migration notes for why this
 name, not `vocanova`):
 
 ```text
@@ -139,7 +138,7 @@ the retired PostgreSQL schema snapshot remains only a synthetic conversion oracl
 
 Deterministic stage-based scheduling (not FSRS in MVP). Rating scale, exact step mechanics, and
 reset rule are canonical in [05](05-database-design.md) §9 — see
-[the migration notes](../archive/README-migration-notes.md#2-review-rating-and-scheduling-conflict) for how the various
+the migration notes for how the various
 draft rating scales across documents were reconciled into one. Future algorithms can replace the
 scheduler behind a stable interface.
 
@@ -152,7 +151,7 @@ version). Settings changes apply from the next local day, not retroactively.
 
 AI purpose: help learners use vocabulary correctly. Canonical statuses are `correct` /
 `needs_improvement` / `incorrect` (see
-[the migration notes](../archive/README-migration-notes.md#1-ai-feedback-label-conflict) — this document originally used different
+the migration notes — this document originally used different
 example labels; the authoritative model lives in [09](09-ai-features.md), not here). Architecture:
 Business Service → Feedback Provider Interface → AI Provider. Rules: save the sentence before the AI
 call, validate structured output, retry safely (bounded), store feedback history, control cost.
@@ -191,25 +190,17 @@ risk-based, not a flat percentage target.
 
 ## 19. GitHub workflow
 
-The repository uses `develop` and `main` as permanent branches with short-lived working
-branches and governed pull requests. Exact merge, approval, and release authority is defined only by
-[DOC-16](../governance/16-autonomous-development-operating-model.md) (a single,
-self-contained document as of its v3.3 revision) and the
-[approval matrix](../governance/approval-matrix.md). Governance permission does not imply that
-automatic merge or deployment is technically active.
+The repository uses `main` as its only long-lived branch. Work is delivered through
+focused short-lived branches, pull requests, product CI, review, and squash merges.
+Large architectural changes are discussed in an issue first.
 
 ## 20. CI/CD
 
-Backend/frontend tests, type checks, security checks, generated-code checks, Worker dry runs, and
-D1 migration/parity checks belong in CI. VOC-100 standardizes the future staging path
-as a manual, SHA-bound `develop` dispatch through a protected GitHub environment,
-with a fresh non-author AI review decision, mechanical approval proxy, and first-step
-approval-history validation before credentials. PR2 records the separately authorized
-`cloudflare-staging` environment and its two environment secret names; no dispatch or
-deployment occurred. Production remains held. See
-[10](../operations/10-development-workflow.md) for the full pipeline and
-the [canonical governance index](../governance/README.md) for merge/deploy authority, with
-[DOC-19](../archive/19-governance-reconciliation-notes.md) available as historical orientation.
+Backend/frontend tests, type checks, security checks, generated-code checks, Worker dry
+runs, and D1 migration/parity checks belong in CI. Pull-request automation is
+credential-free and does not deploy. A future remote-delivery workflow must keep
+environment credentials isolated and document migration, smoke-test, and rollback
+behavior.
 
 ## 21. Scalability strategy
 

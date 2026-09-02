@@ -1,7 +1,6 @@
 # Terms of Service (Draft for Founder Review)
 
 **Status:** Draft, not yet approved for publication  
-**Prepared under:** `VOC-037-T02`  
 **Last updated:** 2026-08-01
 
 ## 1. Acceptance of Terms

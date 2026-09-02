@@ -17,7 +17,6 @@ related_documents:
   - DOC-09
 related_decisions:
   - ADR-0003
-adoption_change: VOC-008
 source_files:
   - path: 08-web-app-design.md
     sha256: da9154f1962e52f5046c712e581f5627122f48aec86684b24f69de1b9ee129d5
@@ -25,7 +24,7 @@ source_files:
 
 # 08 — VocaNova Web Application Design
 
-## Active VOC-080 runtime amendment
+## Current runtime
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) keeps the
 Next.js 16 App Router, Server Components, SSR, middleware, and current UI behavior,
@@ -80,7 +79,7 @@ Route groups: `(public)`, `(onboarding)`, `(app)`.
 ```
 
 Note: there is deliberately **no** sentence-history route (see [03](03-ui-ux-design.md) §2 and
-[the migration notes](../archive/README-migration-notes.md#4-sentence-history-screen-conflict)) —
+the migration notes) —
 sentence practice is a component, not a route.
 
 ## Core UX decisions

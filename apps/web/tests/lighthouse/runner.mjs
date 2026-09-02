@@ -1,4 +1,4 @@
-// VOC-031-T09 Lighthouse runner.
+// VocaNova Lighthouse runner.
 //
 // The runner is the engine behind the T09 acceptance criterion's
 // "Lighthouse CI runs against a production build at the three
@@ -240,7 +240,7 @@ async function waitForServer(url, timeoutMs = 60000) {
 
 async function main() {
   const startedAt = new Date().toISOString();
-  process.stdout.write(`VOC-031-T09 Lighthouse runner\n`);
+  process.stdout.write(`VocaNova Lighthouse runner\n`);
   process.stdout.write(`  started_at: ${startedAt}\n`);
   process.stdout.write(`  url_prefix: ${URL_PREFIX}\n`);
   process.stdout.write(
@@ -316,7 +316,7 @@ async function main() {
   }
 
   const finishedAt = new Date().toISOString();
-  process.stdout.write(`\nVOC-031-T09 summary\n`);
+  process.stdout.write(`\nLighthouse summary\n`);
   process.stdout.write(`  started_at:  ${startedAt}\n`);
   process.stdout.write(`  finished_at: ${finishedAt}\n`);
   process.stdout.write(`  total audits:        ${SCREENS.length * LAYOUTS.length}\n`);
@@ -335,13 +335,13 @@ async function main() {
 
   if (allFailures.length === 0) {
     process.stdout.write(
-      "\nVOC-031-T09 PASS: every screen met every DOC-08 threshold at every supported layout.\n",
+      "\nPASS: every screen met every performance threshold at every supported layout.\n",
     );
     process.exit(0);
   }
 
   process.stdout.write(
-    "\nVOC-031-T09 FAIL: at least one (screen, layout, category) did not meet its DOC-08 threshold.\n",
+    "\nFAIL: at least one screen, layout, or category missed its performance threshold.\n",
   );
   process.stdout.write("Failures (screen / layout / category / actual / threshold):\n");
   for (const failure of allFailures) {
@@ -353,14 +353,14 @@ async function main() {
     );
   }
   process.stdout.write(
-    "\nThe T09 acceptance criterion records that any threshold not yet met must be reported as an explicit, honestly-reported limitation, not silently lowered or skipped. Open a follow-up issue and update specs/changes/VOC-031-begin-milestone-p5-integrated-core-loop/staging-evidence.md EV-38 accordingly.\n",
+    "\nDo not silently lower or skip a threshold. Open a follow-up issue describing any accepted limitation.\n",
   );
   process.exit(1);
 }
 
 main().catch((error) => {
   process.stderr.write(
-    `VOC-031-T09 runner error: ${error?.stack ?? error?.message ?? String(error)}\n`,
+    `Lighthouse runner error: ${error?.stack ?? error?.message ?? String(error)}\n`,
   );
   process.exit(2);
 });

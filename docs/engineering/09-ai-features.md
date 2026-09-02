@@ -19,7 +19,6 @@ related_documents:
   - DOC-07
 related_decisions:
   - ADR-0003
-adoption_change: VOC-008
 source_files:
   - path: 09-ai-features.md
     sha256: 57e798e3f2d259b18a1710e6c5a67a3a1c2d790133501d6aa9bf785ed7f61f74
@@ -27,7 +26,7 @@ source_files:
 
 # 09 — VocaNova AI Features
 
-## Active VOC-080 runtime amendment
+## Current runtime
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) moves the
 provider boundary, validation, persistence, mission updates, rate/cost controls, and
@@ -104,7 +103,7 @@ failures never call the model and never complete the mission.
 
 ## 7. Feedback classifications
 
-See [the migration notes](../archive/README-migration-notes.md#1-ai-feedback-label-conflict) for
+See the migration notes for
 the source conflict this enum resolves.
 
 Exactly three learning statuses, separate from operational/validation/safety outcomes:
@@ -447,7 +446,7 @@ disabled.
 
 Edit-and-resubmit comparison, optional second example, repeated-error personalization, collocation
 coaching, feedback-language localization, guided hints, **sentence-history insights** (see
-[the migration notes](../archive/README-migration-notes.md#4-sentence-history-screen-conflict) —
+the migration notes —
 this is where the removed MVP "Sentence History Page" belongs instead), teacher dashboards,
 guided AI tutor, roleplay, speaking/pronunciation, listening/writing practice, grammar coaching,
 adaptive learning paths, learner-owned vocabulary import. Each requires separate approval.

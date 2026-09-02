@@ -1,6 +1,6 @@
 {
   "$schema": "https://raw.githubusercontent.com/GoogleChrome/lighthouse-ci/main/docs/configuration.md",
-  "_comment": "VOC-031-T09: DOC-08 performance budgets, mirrored verbatim from tests/lighthouse/assertions.mjs's DOC_08_THRESHOLDS. The mock-inventory test in scripts/foundation/mock-inventory.test.mjs loads this file and asserts these exact threshold values, so a change here must be matched by an equal change in assertions.mjs (and by an update to DOC-08 / the T09 acceptance criterion). Lowering a threshold here without those updates would be a 'weaken a check' event per AGENTS.md.",
+  "_comment": "Performance budgets mirrored by tests/lighthouse/assertions.mjs. Update both files together and do not lower a threshold merely to hide a regression.",
   "version": 1,
   "budgets": [
     {

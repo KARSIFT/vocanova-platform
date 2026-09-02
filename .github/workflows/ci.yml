@@ -1,430 +1,85 @@
 name: CI
-run-name: >-
-  CI ${{ github.event.inputs.delivery_environment || github.event_name }}
-  ${{ github.event.inputs.delivery_operation || 'validation' }}
 
-# Repository checks are credential-free. Manual staging delivery is separately
-# protected by exact event, live environment, approval-receipt, and resource gates.
-# VOC-101-STAGING-CREDENTIAL-POLICY-BEGIN
-# The operator-revoked standing staging token is valid until revoked.
-# Mandatory triggers revoke first and keep staging disabled until inactive-token
-# verification and a protected replacement check pass. Voluntary replacement may
-# retain the prior token only through those checks. This comment changes no dispatch
-# or secret access.
-# VOC-101-STAGING-CREDENTIAL-POLICY-END
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [main]
   push:
-    branches: [develop, main]
-  workflow_dispatch:
-    inputs:
-      delivery_environment:
-        description: Staging is enabled only after its live environment is exact; production remains held
-        required: true
-        type: choice
-        options: [staging, production]
-      delivery_operation:
-        description: Deploy or run the protected no-write check for standing-token replacement
-        required: true
-        type: choice
-        options: [deploy, credential-check]
-      confirmation:
-        description: Exact `DEPLOY staging <event-sha>` or `CHECK staging <event-sha>` acknowledgement
-        required: true
-        type: string
+    branches: [main]
 
 permissions:
   contents: read
 
-defaults:
-  run:
-    shell: bash
-
 concurrency:
-  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}-${{ github.event.inputs.delivery_environment || 'validation' }}
-  cancel-in-progress: ${{ github.event_name != 'workflow_dispatch' }}
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   foundation:
-    name: foundation
+    name: Foundation
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - name: Check out reviewed revision
+      - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Set up repository toolchain
+      - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
-
-      - name: Validate foundation
+      - name: Validate repository foundation
         run: pnpm run ci:foundation
 
   packages:
-    name: packages
+    name: Packages
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - name: Check out reviewed revision
+      - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Set up repository toolchain
+      - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
-
       - name: Validate shared packages
         run: pnpm run ci:packages
 
   web:
-    name: web
+    name: Web
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
-      - name: Check out reviewed revision
+      - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Set up repository toolchain
+      - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
-
       - name: Validate web application
         run: pnpm run ci:web
 
   worker-api:
-    name: worker api
+    name: Worker API
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
-      - name: Check out reviewed revision
+      - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Set up repository toolchain
+      - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
-
       - name: Validate Worker API and local D1
         run: pnpm run ci:worker-api
 
   local-stack:
-    name: local stack
+    name: Local stack
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - name: Check out reviewed revision
+      - name: Check out
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      - name: Set up repository toolchain
+      - name: Set up toolchain
         uses: ./.github/actions/setup-toolchain
-
       - name: Validate disposable local Workers stack
         run: pnpm run ci:local-stack
-
-  cloudflare-delivery-policy:
-    name: cloudflare delivery policy
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    steps:
-      - name: Check out exact delivery policy
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Set up repository toolchain
-        uses: ./.github/actions/setup-toolchain
-        with:
-          install-dependencies: "false"
-
-      - name: Validate standard Cloudflare delivery policy
-        run: pnpm run ci:delivery
-
-  required:
-    name: ci required
-    if: always()
-    needs:
-      [
-        foundation,
-        packages,
-        web,
-        worker-api,
-        local-stack,
-        cloudflare-delivery-policy,
-      ]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - name: Check out aggregate policy
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Require every subsystem
-        env:
-          FOUNDATION_RESULT: ${{ needs.foundation.result }}
-          PACKAGES_RESULT: ${{ needs.packages.result }}
-          WEB_RESULT: ${{ needs.web.result }}
-          WORKER_API_RESULT: ${{ needs.worker-api.result }}
-          LOCAL_STACK_RESULT: ${{ needs.local-stack.result }}
-          DELIVERY_POLICY_RESULT: ${{ needs.cloudflare-delivery-policy.result }}
-        run: >-
-          bash scripts/foundation/require-successful-jobs.sh
-          "cloudflare-delivery-policy=$DELIVERY_POLICY_RESULT"
-          "foundation=$FOUNDATION_RESULT"
-          "local-stack=$LOCAL_STACK_RESULT"
-          "packages=$PACKAGES_RESULT"
-          "web=$WEB_RESULT"
-          "worker-api=$WORKER_API_RESULT"
-
-  delivery-gate:
-    name: cloudflare delivery gate
-    if: github.event_name == 'workflow_dispatch'
-    needs: [required]
-    permissions:
-      actions: read
-      contents: read
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    outputs:
-      environment: ${{ steps.gate.outputs.environment }}
-      operation: ${{ steps.gate.outputs.operation }}
-      api_url: ${{ steps.gate.outputs.api_url }}
-      web_url: ${{ steps.gate.outputs.web_url }}
-      max_smoke_attempts: ${{ steps.gate.outputs.max_smoke_attempts }}
-      max_smoke_seconds: ${{ steps.gate.outputs.max_smoke_seconds }}
-    steps:
-      - name: Check out exact event revision
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          ref: ${{ github.sha }}
-
-      - name: Set up repository toolchain
-        uses: ./.github/actions/setup-toolchain
-        with:
-          install-dependencies: "false"
-
-      - name: Enforce exact event and live environment protection
-        id: gate
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_TRIGGERING_ACTOR: ${{ github.triggering_actor }}
-          REQUIRED_RESULT: ${{ needs.required.result }}
-        run: >-
-          node scripts/foundation/cloudflare-delivery-policy.mjs
-          --event-path "$GITHUB_EVENT_PATH"
-
-  cloudflare-staging:
-    name: cloudflare staging
-    if: >-
-      github.event_name == 'workflow_dispatch' &&
-      needs.required.result == 'success' &&
-      needs.delivery-gate.result == 'success' &&
-      needs.delivery-gate.outputs.environment == 'staging'
-    needs: [required, delivery-gate]
-    permissions:
-      actions: read
-      contents: read
-    environment: cloudflare-staging
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - name: Validate exact current-attempt AI approval receipt
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          response_file="${RUNNER_TEMP}/cloudflare-approval-history.json"
-          curl --fail --silent --show-error --proto '=https' --max-redirs 0 \
-            --connect-timeout 5 --max-time 15 \
-            --header "Accept: application/vnd.github+json" \
-            --header "Authorization: Bearer ${GITHUB_TOKEN}" \
-            --header "X-GitHub-Api-Version: 2022-11-28" \
-            "${GITHUB_API_URL}/repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}/approvals" \
-            --output "$response_file"
-          jq -e \
-            --arg login "m-e-h-r-d-a-a-d" \
-            --argjson login_id 7955432 \
-            --arg run_id "$GITHUB_RUN_ID" \
-            --argjson run_attempt "$GITHUB_RUN_ATTEMPT" \
-            --arg sha "$GITHUB_SHA" '
-              if length != 1 then false else
-              .[0] as $approval |
-              $approval.comment as $receipt |
-              ($receipt | fromjson) as $r |
-              $receipt == ($r | to_entries | sort_by(.key) | from_entries | tojson) and
-              $approval.state == "approved" and
-              $approval.user.login == $login and $approval.user.id == $login_id and
-              ($approval.environments | length) == 1 and
-              $approval.environments[0].name == "cloudflare-staging" and
-              ($r | keys | sort) == ([
-                "checks_reviewed", "coordinator_model", "environment_id",
-                "environment_name", "exact_sha_author",
-                "no_cloudflare_secret_access", "participant_id",
-                "reviewer_model", "reviewer_received_approval_credentials",
-                "run_attempt", "run_id", "schema_version", "sha", "task_id",
-                "verdict"
-              ] | sort) and
-              $r.schema_version == "vocanova-cloudflare-ai-deployment-review-v1" and
-              ($r.participant_id | test("^[A-Za-z0-9_./:@-]{1,160}$")) and
-              ($r.task_id | test("^[A-Za-z0-9_./:@-]{1,160}$")) and
-              ($r.reviewer_model | test("^[A-Za-z0-9_./:@-]{1,160}$")) and
-              ($r.coordinator_model | test("^[A-Za-z0-9_./:@-]{1,160}$")) and
-              ($r.coordinator_model == "human-not-applicable" or
-                $r.coordinator_model != $r.reviewer_model) and
-              $r.run_id == $run_id and $r.run_attempt == $run_attempt and
-              $r.sha == $sha and
-              $r.environment_id == $approval.environments[0].id and
-              $r.environment_name == "cloudflare-staging" and
-              $r.checks_reviewed == ["ci required"] and
-              $r.verdict == "PASS" and $r.exact_sha_author == false and
-              $r.no_cloudflare_secret_access == true and
-              $r.reviewer_received_approval_credentials == false
-              end
-            ' "$response_file" >/dev/null
-          echo "Exact current-attempt AI approval receipt validated."
-
-      - name: Check out exact event revision
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-          ref: ${{ github.sha }}
-
-      - name: Set up repository toolchain
-        uses: ./.github/actions/setup-toolchain
-
-      - name: Build exact API and web releases without credentials
-        if: inputs.delivery_operation == 'deploy'
-        run: pnpm run build:packages && pnpm run build:worker-api && pnpm --filter @vocanova/web cloudflare:build
-
-      - name: Read exact current deployments before any write
-        id: prewrite
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          test -n "$CLOUDFLARE_API_TOKEN"
-          test "$CLOUDFLARE_ACCOUNT_ID" = "0a9eda28b96d77c24dcde74f3e074d47"
-          identity="$(pnpm --filter @vocanova/api-worker exec wrangler whoami --json --config wrangler.jsonc)"
-          printf '%s' "$identity" | node scripts/foundation/cloudflare-delivery-policy.mjs --verify-account-id "0a9eda28b96d77c24dcde74f3e074d47" >/dev/null
-          if test "${{ inputs.delivery_operation }}" = "credential-check"; then
-            echo "No-write staging credential check passed."
-            exit 0
-          fi
-          api_deployment="$(pnpm --filter @vocanova/api-worker exec wrangler deployments status --env staging --json --config wrangler.jsonc)"
-          web_deployment="$(pnpm --filter @vocanova/web exec wrangler deployments status --env staging --json --config wrangler.jsonc)"
-          api_rollback_version_id="$(printf '%s' "$api_deployment" | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-current-deployment)"
-          web_rollback_version_id="$(printf '%s' "$web_deployment" | node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-current-deployment)"
-          echo "api_rollback_version_id=$api_rollback_version_id" >> "$GITHUB_OUTPUT"
-          echo "web_rollback_version_id=$web_rollback_version_id" >> "$GITHUB_OUTPUT"
-          echo "Current single-version 100% staging rollback targets captured."
-
-      - name: Apply ordered compatible staging D1 migrations
-        if: inputs.delivery_operation == 'deploy'
-        id: migrate
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: >-
-          pnpm --filter @vocanova/api-worker exec wrangler d1 migrations apply DB --remote --env staging --config wrangler.jsonc
-
-      - name: Upload immutable staging Worker versions
-        if: inputs.delivery_operation == 'deploy'
-        id: versions
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          api_versions_file=""
-          web_versions_file=""
-          cleanup_version_files() {
-            if test -n "$api_versions_file"; then
-              rm -f -- "$api_versions_file" || true
-            fi
-            if test -n "$web_versions_file"; then
-              rm -f -- "$web_versions_file" || true
-            fi
-          }
-          trap cleanup_version_files EXIT
-          api_versions_file="$(mktemp "$RUNNER_TEMP/vocanova-api-versions.XXXXXX")"
-          web_versions_file="$(mktemp "$RUNNER_TEMP/vocanova-web-versions.XXXXXX")"
-          tag="sha-${GITHUB_SHA:0:12}-run-${GITHUB_RUN_ID}-attempt-${GITHUB_RUN_ATTEMPT}"
-          pnpm --filter @vocanova/api-worker exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging API ${GITHUB_SHA}" --var "RELEASE:${GITHUB_SHA}" --config wrangler.jsonc
-          pnpm --filter @vocanova/web exec wrangler versions upload --env staging --strict --tag "$tag" --message "VocaNova staging web ${GITHUB_SHA}" --config wrangler.jsonc
-          pnpm --filter @vocanova/api-worker exec wrangler versions list --env staging --json --config wrangler.jsonc > "$api_versions_file"
-          api_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag" < "$api_versions_file")"
-          pnpm --filter @vocanova/web exec wrangler versions list --env staging --json --config wrangler.jsonc > "$web_versions_file"
-          web_version_id="$(node scripts/foundation/cloudflare-delivery-policy.mjs --resolve-version-tag "$tag" < "$web_versions_file")"
-          echo "api_version_id=$api_version_id" >> "$GITHUB_OUTPUT"
-          echo "web_version_id=$web_version_id" >> "$GITHUB_OUTPUT"
-
-      - name: Promote exact staging Worker versions
-        if: inputs.delivery_operation == 'deploy'
-        id: promote
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          pnpm --filter @vocanova/api-worker exec wrangler versions deploy "${{ steps.versions.outputs.api_version_id }}@100%" --env staging --yes --message "Promote reviewed API ${GITHUB_SHA}" --config wrangler.jsonc
-          pnpm --filter @vocanova/web exec wrangler versions deploy "${{ steps.versions.outputs.web_version_id }}@100%" --env staging --yes --message "Promote reviewed web ${GITHUB_SHA}" --config wrangler.jsonc
-
-      - name: Smoke exact promoted versions
-        if: inputs.delivery_operation == 'deploy'
-        id: smoke
-        run: >-
-          node scripts/foundation/cloudflare-delivery-smoke.mjs
-          --environment staging
-          --release "$GITHUB_SHA"
-          --api-url "${{ needs.delivery-gate.outputs.api_url }}"
-          --web-url "${{ needs.delivery-gate.outputs.web_url }}"
-          --attempts "${{ needs.delivery-gate.outputs.max_smoke_attempts }}"
-          --timeout-seconds "${{ needs.delivery-gate.outputs.max_smoke_seconds }}"
-
-      - name: Roll back exact staging Worker versions after promotion failure
-        if: failure() && inputs.delivery_operation == 'deploy' && steps.promote.outcome != 'skipped'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set +e
-          api_rollback_status=0
-          web_rollback_status=0
-          pnpm --filter @vocanova/api-worker exec wrangler rollback "${{ steps.prewrite.outputs.api_rollback_version_id }}" --env staging --yes --message "Rollback failed staging API ${GITHUB_SHA}" --config wrangler.jsonc || api_rollback_status=$?
-          pnpm --filter @vocanova/web exec wrangler rollback "${{ steps.prewrite.outputs.web_rollback_version_id }}" --env staging --yes --message "Rollback failed staging web ${GITHUB_SHA}" --config wrangler.jsonc || web_rollback_status=$?
-          if ((api_rollback_status != 0 || web_rollback_status != 0)); then
-            echo "One or more staging Worker rollbacks failed; both were attempted." >&2
-            exit 1
-          fi
-
-      - name: Record sanitized delivery outcome
-        if: always()
-        run: |
-          {
-            echo "## Cloudflare staging ${{ inputs.delivery_operation }}"
-            echo "- Revision: ${GITHUB_SHA}"
-            echo "- API version: ${{ steps.versions.outputs.api_version_id }}"
-            echo "- Web version: ${{ steps.versions.outputs.web_version_id }}"
-            echo "- Previous API version: ${{ steps.prewrite.outputs.api_rollback_version_id }}"
-            echo "- Previous web version: ${{ steps.prewrite.outputs.web_rollback_version_id }}"
-            echo "- Migration: ${{ steps.migrate.outcome }}"
-            echo "- Promotion: ${{ steps.promote.outcome }}"
-            echo "- Smoke: ${{ steps.smoke.outcome }}"
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  cloudflare-production:
-    name: cloudflare production
-    if: >-
-      github.event_name == 'workflow_dispatch' &&
-      inputs.delivery_environment == 'production'
-    needs: [required, delivery-gate]
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    steps:
-      - name: Keep production external effects held
-        run: |
-          echo "VOC-080-HOLD-01 and VOC-080-HOLD-02 remain active." >&2
-          exit 1

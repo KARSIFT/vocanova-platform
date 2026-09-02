@@ -17,7 +17,6 @@ related_documents:
   - DOC-09
 related_decisions:
   - ADR-0003
-adoption_change: VOC-008
 source_files:
   - path: 05-database-design.md
     sha256: cc2efd5b6356f41bfc9075bd58297b301e6274a708943c16369600e6f0d5d1c9
@@ -25,7 +24,7 @@ source_files:
 
 # 05 — VocaNova Database Design
 
-## Active VOC-080 data-platform amendment
+## Current data-platform
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) replaces
 PostgreSQL/Ent/Atlas as the final runtime target with Cloudflare D1 and forward-only
@@ -33,7 +32,7 @@ Wrangler migrations. T11 retired that former runtime after parity. The tables,
 ownership, product invariants, retention rules, and
 domain semantics in this document remain requirements. PostgreSQL-specific types and
 mechanics in the preserved v1.0 body describe the migration source, not the final D1
-encoding. Production data is not accessed until `VOC-080-HOLD-02` is satisfied.
+encoding. Repository tests use synthetic conversion data and never production data.
 
 ## 1. Direction
 
@@ -184,7 +183,7 @@ default 0` **(check between 0 and 7)**, `next_review_at`, `last_reviewed_at`, `l
 `(user_id, meaning_id) where deleted_at is null`.
 
 **Review-step rule** (see
-[the migration notes](../archive/README-migration-notes.md#2-review-rating-and-scheduling-conflict)
+the migration notes
 for why this table was selected over other drafts):
 `result` records objective correctness while `rating` records the scheduling choice. For objective
 prompts, an incorrect answer records `Again`; a correct answer permits Hard/Good/Easy. For
@@ -261,7 +260,7 @@ characters — see [07](07-api-contract-and-dto-design.md) and [09](09-ai-featur
 required when `status='failed'`).
 
 **Feedback status model** (see
-[the migration notes](../archive/README-migration-notes.md#1-ai-feedback-label-conflict)): the
+the migration notes): the
 attempt status is operational (`pending`/`succeeded`/`failed`/`cancelled`). The public processing
 status maps to `pending`/`completed`/`failed`/`skipped`; only a completed response carries the
 learning result `correct`/`needs_improvement`/`incorrect`. These layers are defined precisely in
@@ -384,15 +383,14 @@ prepared-statement/constraint tests, atomicity and consistency failure injection
 PostgreSQL-to-D1 parity/reconciliation. GitHub Actions and automated tests are deterministic gates;
 independent semantic review is separate. Use expand/migrate/contract for breaking changes.
 
-VOC-080-T09 binds a versioned normalized export contract to all 25 active PostgreSQL tables and
+The versioned normalized export contract binds all 25 source PostgreSQL tables and
 their D1 destination columns. Synthetic conversion lowercases UUID/bytea representations,
 canonicalizes UTC timestamps and JSON, converts booleans, rejects unsafe integers, orders foreign
 keys, and applies bounded local-D1 batches with checksum-bound atomic checkpoints. Reconciliation
 compares per-table counts/checksums, foreign keys, and exact domain aggregates without exposing
 learner content or authentication material. A plan-bound D1 write guard freezes converted tables
 across the bounded multi-invocation page chain and is explicitly released only after completed
-evidence is recorded. The active recovery and authority boundary is documented in
-the [PostgreSQL-to-D1 conversion runbook](../operations/postgresql-to-d1-conversion.md).
+evidence is recorded.
 
 Migration order: extensions → users → external_identities → user_onboarding_profiles →
 user_settings → sessions → magic_links → oauth_states → email_change_links →

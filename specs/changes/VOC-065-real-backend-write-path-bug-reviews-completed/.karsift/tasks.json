@@ -1,4 +1,0 @@
-[
-{"task_id": "VOC-065-T00", "issue": 506, "depends_on": []},
-{"task_id": "VOC-065-T01", "issue": 507, "depends_on": ["VOC-065-T00"]},
-{"task_id": "VOC-065-T02", "issue": 509, "depends_on": ["VOC-065-T01"]}]

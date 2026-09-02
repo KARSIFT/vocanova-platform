@@ -18,7 +18,6 @@ related_documents:
   - DOC-10
 related_decisions:
   - ADR-0003
-adoption_change: VOC-008
 source_files:
   - path: 06-backend-design.md
     sha256: f2f5dd0159cbefc96df37d9a1fd78adb34e22680fa18fe356973ec76a69d2578
@@ -26,7 +25,7 @@ source_files:
 
 # 06 — VocaNova Backend Design
 
-## Active VOC-080 backend amendment
+## Current backend
 
 [ADR-0003](../decisions/ADR-0003-cloudflare-native-runtime-and-data.md) makes a
 TypeScript Module Worker using Hono, generated bindings, typed repositories, and D1
@@ -171,11 +170,9 @@ Required target evidence: unit, service, HTTP, workerd, local D1 repository/migr
 parity, authorization, atomicity/consistency, security, contract-snapshot, and
 retired-source conversion tests.
 
-## 18. VOC-080 implementation order
+## 18. Domain implementation order
 
 Worker/backend foundation → D1 foundation → authentication → user profile/settings →
-content/discovery → user words → daily missions → review engine → gamification → AI feedback →
-account lifecycle → held production hardening. Phase-based, with GitHub PRs and different-role
-exact-revision review. Exact review and merge authority per risk class comes from the
-[canonical governance index](../governance/README.md), not this backend design; [DOC-19](../archive/19-governance-reconciliation-notes.md)
-provides non-authoritative orientation.
+content/discovery → user words → daily missions → review engine → gamification → AI
+feedback → account lifecycle → production hardening. Deliver coherent changes through
+focused GitHub pull requests with relevant tests.

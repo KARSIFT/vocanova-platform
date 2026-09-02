@@ -14,11 +14,11 @@ related_documents:
   - DOC-00
   - DOC-01
 related_decisions: []
-adoption_change: VOC-008
 source_files:
   - path: 02-market-research.md
     sha256: 6de75b467781bb90297b2a663c16be613cddd24b0efafa58cefe6de395e314c5
 ---
+
 # 02 — VocaNova Market Research
 
 ## Positioning
@@ -53,7 +53,7 @@ This document is the first in the corpus to use the term **Confidence Points** a
 Vocanova's point/reward system (earlier docs used only generic gamification language). The term is
 adopted as settled product vocabulary in [DOC-01](../product/01-mvp-prd.md) and used consistently
 throughout the rest of these documents — see
-[the migration notes](../archive/README-migration-notes.md#3-confidence-points-origin) for detail.
+the migration notes for detail.
 
 ## Target learner validation
 
