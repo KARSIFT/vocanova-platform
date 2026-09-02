@@ -19,6 +19,7 @@ overrides:
   # 2.x line while the repository-wide override protects newer consumers.
   "minimatch@8.0.7>brace-expansion": "2.1.4"
   nanoid: ">=3.3.18"
+  postcss: ">=8.5.23"
   "wrangler>esbuild": "0.28.2"
 
 allowBuilds:
