@@ -45,5 +45,7 @@ jobs:
       - name: Scan changed history
         uses: trufflesecurity/trufflehog@bcfcf73aaf4759d4dadc2783177c245a02792318
         with:
+          base: ${{ github.event_name == 'merge_group' && github.event.merge_group.base_sha || '' }}
+          head: ${{ github.event_name == 'merge_group' && github.event.merge_group.head_sha || '' }}
           version: "3.97.0"
           extra_args: --results=verified,unknown
