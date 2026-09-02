@@ -49,7 +49,7 @@ tables reference VocaNova user IDs rather than provider IDs. `sessions`, `magic_
 
 `email_change_links` supports single-use address changes. `account_deletion_requests` records the
 deactivation and scheduled purge state. `auth_rate_limits` stores bounded authentication buckets.
-The optional synthetic-test-account flag is constrained so at most one active synthetic account can
+The optional synthetic-test-account flag is constrained so at most one synthetic account can
 exist.
 
 ## 5. Settings and account lifecycle
@@ -78,8 +78,7 @@ saved row for the same learner and meaning.
 
 `journey_situations` stores the discoverable situation, slug, level band, category, status, and
 display order. `journey_words` links meanings into a situation with relevance, core-word, and display
-ordering. Discovery ordering is deterministic: core entries first, then explicit display order,
-then relevance and stable identifiers.
+ordering. The implemented discovery order is explicit display order followed by stable meaning ID.
 
 ## 9. Saved-word reviews and scheduling
 

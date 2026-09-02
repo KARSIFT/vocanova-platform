@@ -72,7 +72,7 @@ Discovery is organized by real-life situation (Airport, Restaurant, Hotel Check-
 Daily Conversation, Work Meeting, University Class, etc. — see [05](../engineering/05-database-design.md) §8 for the
 full `journey_situations` model), not by grammar topic or difficulty tier alone. Within a situation,
 words are shown one at a time or as a short scannable list; the backend controls ordering
-(core words first, then display order, then relevance — see [05](../engineering/05-database-design.md) §8). A word
+(display order followed by stable meaning ID — see [05](../engineering/05-database-design.md) §8). A word
 already in the learner's saved list is visually marked and excluded from "new" recommendations.
 Saving must succeed against the backend before the UI reflects it as saved — no optimistic-only
 save state that could desync from the backend.
