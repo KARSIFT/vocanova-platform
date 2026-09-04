@@ -86,6 +86,47 @@ reconciliation behavior.
 
 Wrangler `dry-run` scripts build local, staging, and production configurations without uploading or provisioning resources.
 
+## GitHub workflow
+
+Start each change from the current `main` branch and keep the branch focused on one
+logical outcome:
+
+```bash
+git switch main
+git pull --ff-only
+git switch -c docs/describe-change
+```
+
+Make the change, run the narrowest relevant checks, and inspect the diff before
+committing. For a documentation or repository-harness change, for example:
+
+```bash
+pnpm run ci:foundation
+git diff --check
+git status --short
+git diff
+git add docs/development.md
+git commit -m "docs: describe change"
+```
+
+Push the branch and open a pull request that links its issue when one exists:
+
+```bash
+git push -u origin HEAD
+gh pr create --title "docs: describe change" --body "Closes #123"
+gh pr checks --watch
+```
+
+Resolve actionable review findings and wait for every required check to pass. Then
+squash-merge the pull request (or enqueue it when `main` requires the merge queue):
+
+```bash
+gh pr merge --squash
+```
+
+These commands only update Git and GitHub repository state. They do not deploy the
+application or access Cloudflare production resources.
+
 ## Development harness
 
 The repository follows [Kandev's](https://github.com/kdlbs/kandev) portable-harness shape with VocaNova-specific content:
