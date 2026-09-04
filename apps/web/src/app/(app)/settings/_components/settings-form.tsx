@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Settings, UpdateSettingsBody } from "@vocanova/api-client";
 
@@ -44,6 +44,7 @@ type FormState = Omit<Settings, "displayName" | "reviewIntervalPreset"> & {
 };
 
 export function SettingsForm({ initialSettings }: SettingsFormProps) {
+  const savedSettings = useRef<Settings>(initialSettings);
   const [state, setState] = useState<FormState>({
     dailyReviewTarget: initialSettings.dailyReviewTarget,
     reviewIntervalPreset: initialSettings.reviewIntervalPreset,
@@ -74,7 +75,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       return;
     }
 
-    const body = buildUpdateBody(state, initialSettings);
+    const body = buildUpdateBody(state, savedSettings.current);
     if (Object.keys(body).length === 0) {
       setStatus({ type: "saved" });
       return;
@@ -86,6 +87,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       const { data } = await client.updateSettings(body, {
         headers: { "X-CSRF-Token": csrfToken },
       });
+      savedSettings.current = data;
       setState({
         dailyReviewTarget: data.dailyReviewTarget,
         reviewIntervalPreset: data.reviewIntervalPreset,

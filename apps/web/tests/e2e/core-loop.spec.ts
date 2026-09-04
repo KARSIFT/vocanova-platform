@@ -301,7 +301,7 @@ test.describe("Core loop end-to-end", () => {
       page.getByText(/1 of 20 words reviewed today/),
     ).toBeVisible();
 
-    // ----- 8. Settings change.
+    // ----- 8. Settings change and revert.
     await page.goto("/settings");
     await expect(
       page.getByRole("heading", { name: "Settings", level: 1 }),
@@ -318,6 +318,13 @@ test.describe("Core loop end-to-end", () => {
     // the form re-reads the response and the input now shows
     // the new value.
     await expect(displayNameInput).toHaveValue("Core Loop Fixture Updated");
+    await displayNameInput.fill("Core Loop Fixture");
+    await page.getByRole("button", { name: "Save settings" }).click();
+    await expect(
+      page.getByText("Your settings have been saved."),
+    ).toBeVisible();
+    await page.reload();
+    await expect(displayNameInput).toHaveValue("Core Loop Fixture");
 
     // ----- 9. Logout.
     //
