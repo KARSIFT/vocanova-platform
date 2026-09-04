@@ -105,7 +105,7 @@ pnpm run ci:foundation
 git diff --check
 git status --short
 git diff
-git add docs/development.md
+git add --patch
 git commit -m "docs: describe change"
 ```
 
@@ -124,8 +124,8 @@ squash-merge the pull request (or enqueue it when `main` requires the merge queu
 gh pr merge --squash
 ```
 
-These commands only update Git and GitHub repository state. They do not deploy the
-application or access Cloudflare production resources.
+This workflow does not deploy the application or access Cloudflare production
+resources.
 
 ## Development harness
 
