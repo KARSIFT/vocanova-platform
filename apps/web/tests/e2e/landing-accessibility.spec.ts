@@ -1,8 +1,7 @@
 // Accessibility scan for / (landing).
 //
-// The root page is a public placeholder with no auth cookie
-// required. Remediation stays within accessibility fixes on
-// the current copy — not a marketing rewrite.
+// The root page is public and gives prospective learners a clear,
+// accessible entry to the existing sign-in flow.
 
 import { expect, test } from "@playwright/test";
 
@@ -20,8 +19,14 @@ test.describe("Landing accessibility", () => {
     await page.goto("/");
 
     await expect(
-      page.getByText("Vocanova web foundation is running."),
+      page.getByRole("heading", {
+        name: "Practical English, every day",
+        level: 1,
+      }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Get started" }),
+    ).toHaveAttribute("href", "/signin");
 
     const { criticalOrSerious } = await scanForAxeViolations(page);
     expect(
@@ -31,15 +36,18 @@ test.describe("Landing accessibility", () => {
       ).join("\n")}`,
     ).toEqual([]);
 
-    // The landing placeholder is read-only with no interactive
-    // controls — the correct posture for a static status page.
-    await assertKeyboardReachable(page, { minFocusable: 0 });
+    await assertKeyboardReachable(page, { minFocusable: 1 });
 
     await assertNonColorOnlyFeedback(page, {
       contextLabel: "/",
-      requireText: ["text=Vocanova web foundation is running."],
+      requireText: [
+        "text=Practical English, every day",
+        "text=Build confidence with short, focused vocabulary practice.",
+      ],
     });
 
-    expect(testInfo.project.name).toMatch(/^(home-desktop-1280|mobile-360|mobile-430)$/);
+    expect(testInfo.project.name).toMatch(
+      /^(home-desktop-1280|mobile-360|mobile-430)$/,
+    );
   });
 });

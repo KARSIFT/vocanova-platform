@@ -73,6 +73,12 @@
 //   GET    /api/v1/journey-situations                -> 200 { items: [...] }
 //   GET    /api/v1/journey-situations/:slug          -> 200 SituationResponse
 //   GET    /api/v1/canonical-words/:slug             -> 200 WordDetailResponse
+//             one 500 per session for discovery or reviews when the
+//             `e2e_read_failure` cookie names that fixture; used to prove
+//             route-boundary retry behavior against a real recovered request
+//             holds one discovery or review read per session when the
+//             `e2e_read_hold` cookie names that fixture; the E2E-only
+//             release endpoint makes loading-state assertions deterministic
 //
 //   GET    /api/v1/settings                          -> 200 Settings
 //   PATCH  /api/v1/settings                          -> 200 Settings
@@ -538,12 +544,14 @@ function createInitialState() {
     progress: cloneProgress(DEFAULT_PROGRESS),
     dailyMission: { ...DEFAULT_DAILY_MISSION },
     reviewAttempts: [],
+    reviewAttemptsByClientAttemptId: new Map(),
     sentenceAttempts: [],
     lastReviewAttemptId: null,
     sentenceCount: 0,
     reviewedCount: 0,
     consumedReadFailureFixtures: new Set(),
     readFailureFixtureAttempts: new Map(),
+    readHolds: new Map(),
     completionSummaryDueFetches: 0,
   };
 }
@@ -558,6 +566,35 @@ function consumeReadFailureFixture(state, cookies, fixture, after = 0) {
   state.readFailureFixtureAttempts.set(fixture, attempts);
   if (attempts <= after) return false;
   state.consumedReadFailureFixtures.add(fixture);
+  return true;
+}
+
+function waitForReadHold(state, cookies, fixture) {
+  if (cookies.e2e_read_hold !== fixture) {
+    return null;
+  }
+
+  let hold = state.readHolds.get(fixture);
+  if (!hold) {
+    let release;
+    const promise = new Promise((resolve) => {
+      release = resolve;
+    });
+    hold = { promise, release, released: false };
+    state.readHolds.set(fixture, hold);
+  }
+
+  return hold.released ? null : hold.promise;
+}
+
+function releaseReadHold(state, fixture) {
+  const hold = state.readHolds.get(fixture);
+  if (!hold || hold.released) {
+    return false;
+  }
+
+  hold.released = true;
+  hold.release();
   return true;
 }
 
@@ -723,6 +760,10 @@ function generateId(prefix) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
 }
 
+function reviewRewardForRating(rating) {
+  return { again: 1, hard: 2, good: 5, easy: 6 }[rating] ?? 0;
+}
+
 // --- deterministic AI feedback --------------------------------
 
 function evaluateSentenceFeedback({ sentence, targetWord }) {
@@ -874,6 +915,24 @@ const server = createServer(async (req, res) => {
   if (req.method === "GET" && url.pathname === "/healthz") {
     logLine(req, 200);
     jsonResponse(res, 200, { status: "ok" });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/__e2e/release-read") {
+    const fixture = url.searchParams.get("fixture");
+    if (fixture !== "discover" && fixture !== "reviews") {
+      logLine(req, 400, { reason: "invalid-read-hold-fixture" });
+      jsonResponse(res, 400, { error: "invalid_fixture" });
+      return;
+    }
+
+    const released = releaseReadHold(getSessionState(cookies), fixture);
+    logLine(req, released ? 204 : 409, { fixture, action: "release-read" });
+    if (released) {
+      emptyResponse(res, 204);
+    } else {
+      jsonResponse(res, 409, { error: "read_not_held" });
+    }
     return;
   }
 
@@ -1116,6 +1175,15 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/reviews/due") {
     const state = getSessionState(cookies);
+    const readHold = waitForReadHold(state, cookies, "reviews");
+    if (readHold) {
+      await readHold;
+    }
+    if (consumeReadFailureFixture(state, cookies, "reviews")) {
+      logLine(req, 500, { reason: "fixture-read-failure", fixture: "reviews" });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const data = buildDueWords(state, cookies.e2e_review_fixture);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
@@ -1135,12 +1203,24 @@ const server = createServer(async (req, res) => {
       return;
     }
     const state = getSessionState(cookies);
+    const priorAttempt = state.reviewAttemptsByClientAttemptId.get(
+      body.clientAttemptId,
+    );
+    if (priorAttempt) {
+      logLine(req, 200, {
+        action: "replay-review",
+        meaningId: priorAttempt.meaningId,
+      });
+      jsonResponse(res, 200, priorAttempt.response);
+      return;
+    }
     const attemptId = generateId("att");
     const reviewedMeaningId = body.meaningId;
     if (reviewedMeaningId) {
       state.reviewedMeaningIds.add(reviewedMeaningId);
     }
     state.reviewedCount += 1;
+    state.progress.confidencePointsBalance += reviewRewardForRating(body.rating);
     state.lastReviewAttemptId = attemptId;
     state.reviewAttempts.push({
       attemptId,
@@ -1159,7 +1239,7 @@ const server = createServer(async (req, res) => {
       meaningId: reviewedMeaningId,
       reviewedCount: state.reviewedCount,
     });
-    jsonResponse(res, 200, {
+    const response = {
       attemptId,
       userWordId: body.userWordId,
       meaningId: body.meaningId,
@@ -1176,7 +1256,12 @@ const server = createServer(async (req, res) => {
       source: body.source ?? "review_session",
       clientAttemptId: body.clientAttemptId,
       nextReviewAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    };
+    state.reviewAttemptsByClientAttemptId.set(body.clientAttemptId, {
+      meaningId: reviewedMeaningId,
+      response,
     });
+    jsonResponse(res, 200, response);
     return;
   }
 
@@ -1273,6 +1358,19 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/v1/journey-situations") {
+    const state = getSessionState(cookies);
+    const readHold = waitForReadHold(state, cookies, "discover");
+    if (readHold) {
+      await readHold;
+    }
+    if (consumeReadFailureFixture(state, cookies, "discover")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "discover",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     logLine(req, 200);
     jsonResponse(res, 200, buildJourneySituations());
     return;
@@ -1282,6 +1380,15 @@ const server = createServer(async (req, res) => {
     req.method === "GET" &&
     url.pathname.startsWith("/api/v1/journey-situations/")
   ) {
+    const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "discover")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "discover",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const slug = decodeURIComponent(
       url.pathname.slice("/api/v1/journey-situations/".length),
     );
@@ -1304,6 +1411,14 @@ const server = createServer(async (req, res) => {
       url.pathname.slice("/api/v1/canonical-words/".length),
     );
     const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "discover")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "discover",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const response = buildWordDetailResponse(
       state,
       slug,

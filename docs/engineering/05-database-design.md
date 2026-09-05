@@ -151,10 +151,11 @@ Collect only data needed for authentication, learning, safety, and product opera
 raw session, magic-link, OAuth, or provider tokens. Do not put learner sentence text or private
 provider payloads in logs or analytics. Learner-owned rows remain isolated by `user_id`.
 
-Account deletion currently deactivates access and records a purge deadline. A complete irreversible
-purge/anonymization worker is not present in this repository; it must be implemented, legally
-reviewed, tested against every learner-data table, and operationally authorized before production
-claims promise completed erasure.
+Account deletion deactivates access and records a purge deadline. The repository provides a bounded,
+operator-invoked local D1 anonymization processor with dry-run default; it is neither a public route
+nor a scheduler. It deletes account-linked records atomically per learner and preserves only shared,
+non-attributable data. Production operation and legal authorization remain separate; see
+[account anonymization](../operations/account-anonymization.md).
 
 ## 17. Migration workflow
 

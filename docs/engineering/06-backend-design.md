@@ -125,9 +125,10 @@ UTC fallback.
 ## 14. Account deletion
 
 Immediately deactivate the account and revoke all sessions, then complete a staged, retryable,
-verified purge/anonymization. Delete or irreversibly anonymize identifiers, learner-generated text,
-AI feedback, and reports. Retain history only when de-identified and no longer linkable to the
-learner. Legal review is required before production; see [05](05-database-design.md) §16.
+verified purge/anonymization. The internal bounded processor is operator-invoked against local D1
+with dry-run default, not a public endpoint or scheduled job. It deletes identifiers,
+learner-generated text, AI feedback, reports, and account-linked operational records atomically per
+account. Legal review is required before production; see [05](05-database-design.md) §16.
 
 ## 15. Background jobs
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { SentenceFeedbackResult } from "@vocanova/api-client";
 
@@ -18,6 +18,9 @@ interface SentenceFeedbackProps {
 
 const AI_LIMITATION_COPY =
   "AI feedback can make mistakes. Use your own judgment and your teacher's guidance when learning.";
+
+const PRIVACY_REMINDER_COPY =
+  "Please do not include personal information in your sentence.";
 
 const RETRY_MESSAGE =
   "Vocanova could not check this sentence right now. Your sentence is still here, so you can try again.";
@@ -37,6 +40,7 @@ export function SentenceFeedback({
   const [reportStatus, setReportStatus] = useState<
     "idle" | "loading" | "error"
   >("idle");
+  const feedbackVersion = useRef(0);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -96,6 +100,7 @@ export function SentenceFeedback({
       return;
     }
 
+    const reportVersion = feedbackVersion.current;
     setReportStatus("loading");
 
     const client = createApiClient();
@@ -108,9 +113,15 @@ export function SentenceFeedback({
         },
         { headers: { "X-CSRF-Token": csrfToken } },
       );
+      if (feedbackVersion.current !== reportVersion) {
+        return;
+      }
       setReported(true);
       setReportStatus("idle");
     } catch (error) {
+      if (feedbackVersion.current !== reportVersion) {
+        return;
+      }
       // A 401 on a report submission routes the learner to
       // re-auth. The text is in component state and the feedback
       // result is still visible — nothing is lost.
@@ -160,15 +171,34 @@ export function SentenceFeedback({
           <textarea
             id={`sentence-input-${attemptId}`}
             name="sentence"
+            aria-describedby={`sentence-privacy-${attemptId} sentence-count-${attemptId}`}
             value={sentence}
-            onChange={(event) => setSentence(event.target.value)}
+            onChange={(event) => {
+              setSentence(event.target.value);
+              if (result) {
+                feedbackVersion.current += 1;
+                setResult(null);
+                setErrorMessage(null);
+                setReported(false);
+                setReportStatus("idle");
+              }
+            }}
             disabled={isLoading}
             maxLength={300}
             rows={3}
             placeholder={`Type a sentence using "${targetWord}"...`}
             className="w-full rounded-md border border-neutral-300 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base text-neutral-900 placeholder:text-neutral-500 focus:border-primary-500 focus:outline focus:outline-2 focus:outline-primary-500/20 disabled:cursor-not-allowed disabled:opacity-60"
           />
-          <p className="mt-[var(--spacing-xs)] text-right text-sm text-neutral-600">
+          <p
+            id={`sentence-privacy-${attemptId}`}
+            className="mt-[var(--spacing-xs)] text-sm text-neutral-600"
+          >
+            {PRIVACY_REMINDER_COPY}
+          </p>
+          <p
+            id={`sentence-count-${attemptId}`}
+            className="mt-[var(--spacing-xs)] text-right text-sm text-neutral-600"
+          >
             {sentence.length}/300
           </p>
         </div>

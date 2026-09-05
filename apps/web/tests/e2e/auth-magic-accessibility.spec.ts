@@ -17,6 +17,33 @@ import {
 } from "./axe-helper.js";
 
 test.describe("Auth magic-link accessibility", () => {
+  test("announces verification while the magic-link content is loading", async ({
+    page,
+  }) => {
+    let releaseScripts!: () => void;
+    const scriptsReleased = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+
+    await page.route("**/_next/static/**/*.js", async (route) => {
+      await scriptsReleased;
+      await route.continue();
+    });
+
+    const navigation = page.goto("/auth/magic");
+    await expect(
+      page.getByRole("status", { name: "Verifying sign-in link" }),
+    ).toBeVisible();
+
+    releaseScripts();
+    await navigation;
+    await expect(
+      page.getByText(
+        "This sign-in link is incomplete. Please request a new one.",
+      ),
+    ).toBeVisible();
+  });
+
   test("/auth/magic incomplete link renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based error feedback", async ({
     page,
   }, testInfo) => {
@@ -48,6 +75,8 @@ test.describe("Auth magic-link accessibility", () => {
       ],
     });
 
-    expect(testInfo.project.name).toMatch(/^(home-desktop-1280|mobile-360|mobile-430)$/);
+    expect(testInfo.project.name).toMatch(
+      /^(home-desktop-1280|mobile-360|mobile-430)$/,
+    );
   });
 });

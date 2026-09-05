@@ -362,7 +362,9 @@ export async function probeLocalStack(fetchImpl = fetch) {
   );
   requireStatus("Web static route", staticResponse, 200);
   if (
-    !(await readBoundedText(staticResponse)).includes("Vocanova web foundation")
+    !(await readBoundedText(staticResponse)).includes(
+      "Practical English, every day",
+    )
   ) {
     throw new Error("Web static route returned unexpected content");
   }

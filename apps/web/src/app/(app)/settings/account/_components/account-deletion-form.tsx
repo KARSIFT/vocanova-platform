@@ -115,8 +115,7 @@ export function AccountDeletionForm() {
             that, your data is gone for good.
           </p>
           <p className="mt-[var(--spacing-sm)]">
-            You can sign in again before then to reactivate, and your data will
-            be restored.
+            You will not be able to reactivate this account by signing in.
           </p>
         </div>
         <a
@@ -152,8 +151,8 @@ export function AccountDeletionForm() {
             30 days.
           </p>
           <p className="mt-[var(--spacing-xs)] text-base text-neutral-800">
-            You can sign in again before then to reactivate, but after 30 days
-            this is irreversible.
+            You will not be able to reactivate your account by signing in. After
+            30 days this is irreversible.
           </p>
           <p className="mt-[var(--spacing-sm)] text-base text-neutral-900">
             To continue, type{" "}

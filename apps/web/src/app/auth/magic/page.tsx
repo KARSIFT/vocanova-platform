@@ -16,7 +16,11 @@ export default function MagicLinkPage() {
             <h1 className="text-2xl font-semibold text-neutral-900">
               Sign in link
             </h1>
-            <p className="mt-[var(--spacing-md)] text-base text-neutral-700">
+            <p
+              role="status"
+              aria-label="Verifying sign-in link"
+              className="mt-[var(--spacing-md)] text-base text-neutral-700"
+            >
               Verifying your sign-in link...
             </p>
           </div>

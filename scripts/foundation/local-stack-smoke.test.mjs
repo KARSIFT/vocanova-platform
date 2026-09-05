@@ -143,7 +143,7 @@ test("local probes cover direct API, static, SSR, middleware, and service bindin
     }
     if (url.pathname === "/") {
       return Promise.resolve(
-        new Response("Vocanova web foundation", { status: 200 }),
+        new Response("Practical English, every day", { status: 200 }),
       );
     }
     if (url.pathname === "/signin") {
