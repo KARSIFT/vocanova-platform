@@ -88,8 +88,14 @@
 //
 //   POST   /api/v1/settings/email-change-links       -> 204
 //   POST   /api/v1/settings/email-change-links/consume -> 200 ConsumeEmailChangeLinkResult
+//             the `e2e_email_change_failure=retry` fixture fails each write
+//             once per session; `e2e_email_change_hold=request` holds the
+//             first request until the E2E-only release endpoint is called
 //
 //   POST   /api/v1/account-deletion-requests         -> 200 CreateAccountDeletionRequestResult
+//             `e2e_account_deletion_failure=retry` fails the first deletion
+//             write per session; `e2e_account_deletion_hold=1` holds it until
+//             the E2E-only release endpoint is called
 //
 // Anything else returns 404. Mutations without a matching
 // X-CSRF-Token return 403 (matches the Worker API contract).
@@ -557,6 +563,10 @@ function createInitialState() {
     readHolds: new Map(),
     consumedSettingsPatchFailure: false,
     settingsPatchHold: null,
+    consumedAccountDeletionFailure: false,
+    accountDeletionHold: null,
+    consumedEmailChangeFailures: new Set(),
+    emailChangeHolds: new Map(),
     completionSummaryDueFetches: 0,
   };
 }
@@ -621,6 +631,75 @@ function waitForSettingsPatchHold(state, cookies) {
 
 function releaseSettingsPatchHold(state) {
   const hold = state.settingsPatchHold;
+  if (!hold || hold.released) {
+    return false;
+  }
+  hold.released = true;
+  hold.release();
+  return true;
+}
+
+function waitForAccountDeletionHold(state, cookies) {
+  if (cookies.e2e_account_deletion_hold !== "1") {
+    return null;
+  }
+
+  if (!state.accountDeletionHold) {
+    let release;
+    const promise = new Promise((resolve) => {
+      release = resolve;
+    });
+    state.accountDeletionHold = { promise, release, released: false };
+  }
+
+  return state.accountDeletionHold.released
+    ? null
+    : state.accountDeletionHold.promise;
+}
+
+function releaseAccountDeletionHold(state) {
+  const hold = state.accountDeletionHold;
+  if (!hold || hold.released) {
+    return false;
+  }
+
+  hold.released = true;
+  hold.release();
+  return true;
+}
+
+function consumeEmailChangeFailure(state, cookies, phase) {
+  if (
+    cookies.e2e_email_change_failure !== "retry" ||
+    state.consumedEmailChangeFailures.has(phase)
+  ) {
+    return false;
+  }
+
+  state.consumedEmailChangeFailures.add(phase);
+  return true;
+}
+
+function waitForEmailChangeHold(state, cookies, phase) {
+  if (cookies.e2e_email_change_hold !== phase) {
+    return null;
+  }
+
+  let hold = state.emailChangeHolds.get(phase);
+  if (!hold) {
+    let release;
+    const promise = new Promise((resolve) => {
+      release = resolve;
+    });
+    hold = { promise, release, released: false };
+    state.emailChangeHolds.set(phase, hold);
+  }
+
+  return hold.released ? null : hold.promise;
+}
+
+function releaseEmailChangeHold(state, phase) {
+  const hold = state.emailChangeHolds.get(phase);
   if (!hold || hold.released) {
     return false;
   }
@@ -822,6 +901,14 @@ function evaluateSentenceFeedback({ sentence, targetWord }) {
       errorMessage: "Your sentence is too long. Keep it under 300 characters.",
     };
   }
+  if (/unsafe feedback fixture/i.test(trimmed)) {
+    return {
+      status: "incorrect",
+      errorCode: "SAFETY_BLOCKED",
+      errorMessage:
+        "This sentence cannot be checked. Please try a different sentence.",
+    };
+  }
   const containsTarget = targetWord
     ? new RegExp(`\\b${targetWord}\\b`, "i").test(trimmed)
     : true;
@@ -975,6 +1062,39 @@ const server = createServer(async (req, res) => {
       emptyResponse(res, 204);
     } else {
       jsonResponse(res, 409, { error: "settings_patch_not_held" });
+    }
+    return;
+  }
+
+  if (
+    req.method === "POST" &&
+    url.pathname === "/__e2e/release-account-deletion"
+  ) {
+    const released = releaseAccountDeletionHold(getSessionState(cookies));
+    logLine(req, released ? 204 : 409, { action: "release-account-deletion" });
+    if (released) {
+      emptyResponse(res, 204);
+    } else {
+      jsonResponse(res, 409, { error: "account_deletion_not_held" });
+    }
+    return;
+  }
+
+  if (
+    req.method === "POST" &&
+    url.pathname === "/__e2e/release-email-change-request"
+  ) {
+    const released = releaseEmailChangeHold(
+      getSessionState(cookies),
+      "request",
+    );
+    logLine(req, released ? 204 : 409, {
+      action: "release-email-change-request",
+    });
+    if (released) {
+      emptyResponse(res, 204);
+    } else {
+      jsonResponse(res, 409, { error: "email_change_request_not_held" });
     }
     return;
   }
@@ -1263,7 +1383,9 @@ const server = createServer(async (req, res) => {
       state.reviewedMeaningIds.add(reviewedMeaningId);
     }
     state.reviewedCount += 1;
-    state.progress.confidencePointsBalance += reviewRewardForRating(body.rating);
+    state.progress.confidencePointsBalance += reviewRewardForRating(
+      body.rating,
+    );
     state.lastReviewAttemptId = attemptId;
     state.reviewAttempts.push({
       attemptId,
@@ -1355,7 +1477,10 @@ const server = createServer(async (req, res) => {
         evaluation.status === "needs_improvement"
           ? "Try using the target word naturally in your sentence."
           : undefined,
-      missionCompleted: !evaluation.errorCode,
+      // Sentence feedback can award sentence activity, but it never completes a
+      // daily mission. Keep this deterministic browser fixture aligned with the
+      // public API contract in docs/engineering/09-ai-features.md §2.
+      missionCompleted: false,
       canRetry: Boolean(evaluation.errorCode),
       reported: false,
       errorCode: evaluation.errorCode,
@@ -1541,6 +1666,16 @@ const server = createServer(async (req, res) => {
     if (!checkCsrf(req, cookies, res, logLine)) {
       return;
     }
+    const state = getSessionState(cookies);
+    const hold = waitForEmailChangeHold(state, cookies, "request");
+    if (hold) {
+      await hold;
+    }
+    if (consumeEmailChangeFailure(state, cookies, "request")) {
+      logLine(req, 500, { reason: "fixture-email-change-request-failure" });
+      jsonResponse(res, 500, { error: "fixture_email_change_request_failure" });
+      return;
+    }
     logLine(req, 204, { action: "request-email-change" });
     emptyResponse(res, 204);
     return;
@@ -1551,6 +1686,12 @@ const server = createServer(async (req, res) => {
     url.pathname === "/api/v1/settings/email-change-links/consume"
   ) {
     if (!checkCsrf(req, cookies, res, logLine)) {
+      return;
+    }
+    const state = getSessionState(cookies);
+    if (consumeEmailChangeFailure(state, cookies, "consume")) {
+      logLine(req, 500, { reason: "fixture-email-change-consume-failure" });
+      jsonResponse(res, 500, { error: "fixture_email_change_consume_failure" });
       return;
     }
     logLine(req, 200, { action: "consume-email-change" });
@@ -1567,6 +1708,20 @@ const server = createServer(async (req, res) => {
     url.pathname === "/api/v1/account-deletion-requests"
   ) {
     if (!checkCsrf(req, cookies, res, logLine)) {
+      return;
+    }
+    const state = getSessionState(cookies);
+    const hold = waitForAccountDeletionHold(state, cookies);
+    if (hold) {
+      await hold;
+    }
+    if (
+      cookies.e2e_account_deletion_failure === "retry" &&
+      !state.consumedAccountDeletionFailure
+    ) {
+      state.consumedAccountDeletionFailure = true;
+      logLine(req, 500, { reason: "fixture-account-deletion-failure" });
+      jsonResponse(res, 500, { error: "fixture_account_deletion_failure" });
       return;
     }
     const sessionId = cookies[SESSION_COOKIE_NAME];

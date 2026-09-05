@@ -359,6 +359,81 @@ describe("Worker AI feedback parity", () => {
     ).first<{ count: number }>();
     expect(reportCount?.count).toBe(1);
   });
+
+  it("does not disclose cross-user feedback targets or attempts through HTTP routes", async () => {
+    const service = createService(new ScriptedProvider(() => validFeedback()));
+    const owner = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "owner-feedback",
+    );
+    const ownerRowsBefore = await Promise.all([
+      env.DB.prepare("SELECT * FROM learner_sentences WHERE id = ?1")
+        .bind(owner.result.sentenceId)
+        .first<Record<string, string | number | null>>(),
+      env.DB.prepare("SELECT * FROM ai_feedback_attempts WHERE id = ?1")
+        .bind(owner.result.attemptId)
+        .first<Record<string, string | number | null>>(),
+    ]);
+    const app = createApp({
+      createPlatformRepository: () => ({
+        checkHealth: () => Promise.resolve({ database: "ok" }),
+        getMetadata: () => Promise.resolve(null),
+        putMetadata: () => Promise.resolve(),
+      }),
+      createIdentityService: () => fakeIdentity(USER_B),
+      createAIFeedbackService: () => service,
+    });
+    const headers = {
+      "content-type": "application/json",
+      cookie: "vocanova_session=session; vocanova_csrf=csrf-test",
+      "x-csrf-token": "csrf-test",
+    };
+    const target = await app.request(
+      "https://worker.test/api/v1/sentence-feedback",
+      {
+        method: "POST",
+        headers: { ...headers, "idempotency-key": "cross-user-target" },
+        body: JSON.stringify(submission("I work every day.")),
+      },
+      env,
+    );
+    expect(target.status).toBe(404);
+    const reportContext = createExecutionContext();
+    const report = await app.fetch(
+      new Request(
+        `https://worker.test/api/v1/sentence-feedback/${owner.result.attemptId}/reports`,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({ reason: "Cross user" }),
+        },
+      ),
+      env,
+      reportContext,
+    );
+    expect(report.status).toBe(404);
+    await expect(waitOnExecutionContext(reportContext)).rejects.toMatchObject({
+      code: "attempt_not_found",
+    });
+    expect(await counts()).toMatchObject({ sentences: 1, attempts: 1 });
+    expect(
+      (
+        await env.DB.prepare(
+          "SELECT count(*) AS count FROM ai_feedback_reports",
+        ).first<{ count: number }>()
+      )?.count,
+    ).toBe(0);
+    const ownerRowsAfter = await Promise.all([
+      env.DB.prepare("SELECT * FROM learner_sentences WHERE id = ?1")
+        .bind(owner.result.sentenceId)
+        .first<Record<string, string | number | null>>(),
+      env.DB.prepare("SELECT * FROM ai_feedback_attempts WHERE id = ?1")
+        .bind(owner.result.attemptId)
+        .first<Record<string, string | number | null>>(),
+    ]);
+    expect(ownerRowsAfter).toEqual(ownerRowsBefore);
+  });
 });
 
 describe("Worker provider, email, and observability boundaries", () => {
@@ -653,11 +728,11 @@ function validFeedbackWire() {
   };
 }
 
-function fakeIdentity(): IdentityService {
+function fakeIdentity(userId = USER_A): IdentityService {
   return {
     authenticate: () =>
       Promise.resolve({
-        id: USER_A,
+        id: userId,
         email: "learner@example.test",
         displayName: "Learner",
         avatarUrl: "",
