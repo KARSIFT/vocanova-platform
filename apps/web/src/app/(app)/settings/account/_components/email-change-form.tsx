@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { ApiResponseError } from "@vocanova/api-client";
+
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
 import { handleApiError } from "@/lib/session";
@@ -10,10 +12,17 @@ interface EmailChangeFormProps {
   currentEmail: string;
 }
 
+function getEmailChangeError(error: unknown, fallbackMessage: string): string {
+  if (error instanceof ApiResponseError && error.status >= 500) {
+    return fallbackMessage;
+  }
+  return handleApiError(error, fallbackMessage);
+}
+
 type EmailPhase =
   | { type: "idle" }
   | { type: "requesting" }
-  | { type: "pending"; newEmail: string }
+  | { type: "pending"; newEmail: string; error?: string }
   | { type: "completed"; newEmail: string; previousEmail: string }
   | { type: "error"; message: string };
 
@@ -60,7 +69,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
       // re-auth. The newEmail value is preserved in the form's
       // controlled input so the learner does not need to retype it
       // after re-authentication.
-      const message = handleApiError(
+      const message = getEmailChangeError(
         error,
         "We couldn't send the confirmation email. Please try again.",
       );
@@ -104,11 +113,15 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
       // The token is preserved in the form's controlled input so the
       // learner does not need to recover it from email after
       // re-authentication.
-      const message = handleApiError(
+      const message = getEmailChangeError(
         error,
         "We couldn't confirm that link. Please try again.",
       );
-      setPhase({ type: "error", message });
+      setPhase((current) =>
+        current.type === "pending"
+          ? { ...current, error: message }
+          : { type: "error", message },
+      );
     } finally {
       setIsConsuming(false);
     }
@@ -161,6 +174,15 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
             expires in 15 minutes. Paste the link&apos;s token below to finish
             the change.
           </p>
+          {phase.error ? (
+            <p
+              role="alert"
+              aria-live="assertive"
+              className="rounded-md border border-red-300 bg-red-50 p-[var(--spacing-sm)] text-base text-red-800"
+            >
+              {phase.error}
+            </p>
+          ) : null}
           <form
             onSubmit={handleConsume}
             aria-label="Confirm new sign-in email"

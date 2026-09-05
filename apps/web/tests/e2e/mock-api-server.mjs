@@ -85,6 +85,9 @@
 //
 //   POST   /api/v1/settings/email-change-links       -> 204
 //   POST   /api/v1/settings/email-change-links/consume -> 200 ConsumeEmailChangeLinkResult
+//             the `e2e_email_change_failure=retry` fixture fails each write
+//             once per session; `e2e_email_change_hold=request` holds the
+//             first request until the E2E-only release endpoint is called
 //
 //   POST   /api/v1/account-deletion-requests         -> 200 CreateAccountDeletionRequestResult
 //
@@ -552,6 +555,8 @@ function createInitialState() {
     consumedReadFailureFixtures: new Set(),
     readFailureFixtureAttempts: new Map(),
     readHolds: new Map(),
+    consumedEmailChangeFailures: new Set(),
+    emailChangeHolds: new Map(),
     completionSummaryDueFetches: 0,
   };
 }
@@ -589,6 +594,47 @@ function waitForReadHold(state, cookies, fixture) {
 
 function releaseReadHold(state, fixture) {
   const hold = state.readHolds.get(fixture);
+  if (!hold || hold.released) {
+    return false;
+  }
+
+  hold.released = true;
+  hold.release();
+  return true;
+}
+
+function consumeEmailChangeFailure(state, cookies, phase) {
+  if (
+    cookies.e2e_email_change_failure !== "retry" ||
+    state.consumedEmailChangeFailures.has(phase)
+  ) {
+    return false;
+  }
+
+  state.consumedEmailChangeFailures.add(phase);
+  return true;
+}
+
+function waitForEmailChangeHold(state, cookies, phase) {
+  if (cookies.e2e_email_change_hold !== phase) {
+    return null;
+  }
+
+  let hold = state.emailChangeHolds.get(phase);
+  if (!hold) {
+    let release;
+    const promise = new Promise((resolve) => {
+      release = resolve;
+    });
+    hold = { promise, release, released: false };
+    state.emailChangeHolds.set(phase, hold);
+  }
+
+  return hold.released ? null : hold.promise;
+}
+
+function releaseEmailChangeHold(state, phase) {
+  const hold = state.emailChangeHolds.get(phase);
   if (!hold || hold.released) {
     return false;
   }
@@ -944,6 +990,25 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (
+    req.method === "POST" &&
+    url.pathname === "/__e2e/release-email-change-request"
+  ) {
+    const released = releaseEmailChangeHold(
+      getSessionState(cookies),
+      "request",
+    );
+    logLine(req, released ? 204 : 409, {
+      action: "release-email-change-request",
+    });
+    if (released) {
+      emptyResponse(res, 204);
+    } else {
+      jsonResponse(res, 409, { error: "email_change_request_not_held" });
+    }
+    return;
+  }
+
   // ----- auth (CSRF-exempt) ----------------------------------
 
   if (req.method === "POST" && url.pathname === "/api/v1/auth/magic-links") {
@@ -1228,7 +1293,9 @@ const server = createServer(async (req, res) => {
       state.reviewedMeaningIds.add(reviewedMeaningId);
     }
     state.reviewedCount += 1;
-    state.progress.confidencePointsBalance += reviewRewardForRating(body.rating);
+    state.progress.confidencePointsBalance += reviewRewardForRating(
+      body.rating,
+    );
     state.lastReviewAttemptId = attemptId;
     state.reviewAttempts.push({
       attemptId,
@@ -1493,6 +1560,16 @@ const server = createServer(async (req, res) => {
     if (!checkCsrf(req, cookies, res, logLine)) {
       return;
     }
+    const state = getSessionState(cookies);
+    const hold = waitForEmailChangeHold(state, cookies, "request");
+    if (hold) {
+      await hold;
+    }
+    if (consumeEmailChangeFailure(state, cookies, "request")) {
+      logLine(req, 500, { reason: "fixture-email-change-request-failure" });
+      jsonResponse(res, 500, { error: "fixture_email_change_request_failure" });
+      return;
+    }
     logLine(req, 204, { action: "request-email-change" });
     emptyResponse(res, 204);
     return;
@@ -1503,6 +1580,12 @@ const server = createServer(async (req, res) => {
     url.pathname === "/api/v1/settings/email-change-links/consume"
   ) {
     if (!checkCsrf(req, cookies, res, logLine)) {
+      return;
+    }
+    const state = getSessionState(cookies);
+    if (consumeEmailChangeFailure(state, cookies, "consume")) {
+      logLine(req, 500, { reason: "fixture-email-change-consume-failure" });
+      jsonResponse(res, 500, { error: "fixture_email_change_consume_failure" });
       return;
     }
     logLine(req, 200, { action: "consume-email-change" });
