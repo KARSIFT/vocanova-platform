@@ -87,6 +87,39 @@ test.describe("Discover accessibility", () => {
     });
   });
 
+  test("Journey recommendations exclude saved meanings while retaining remaining new meanings", async ({
+    page,
+  }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) {
+      throw new Error("Expected the Playwright project to configure use.baseURL.");
+    }
+    const sessionValue = `vocanova-session-${randomUUID()}`;
+    const csrfValue = `vocanova-csrf-${randomUUID()}`;
+    await page.context().addCookies([
+      { name: "vocanova_session", value: sessionValue, url: baseURL },
+      { name: "vocanova_csrf", value: csrfValue, url: baseURL },
+    ]);
+
+    await page.goto("/discover/ordering-at-a-cafe/pour");
+    await page
+      .getByRole("button", {
+        name: /^Save pour: to make liquid flow into a container$/,
+      })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Remove pour from saved words" }),
+    ).toBeVisible();
+
+    await page.goto("/discover/ordering-at-a-cafe");
+    await expect(
+      page.getByRole("link", { name: /pour/i }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: /counter/i }),
+    ).toBeVisible();
+  });
+
   test("/discover/[situation]/[word] (Word Detail + sentence feedback) renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
   }) => {
