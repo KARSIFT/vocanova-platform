@@ -3,7 +3,6 @@ import test from "node:test";
 
 import {
   validateActionPins,
-  validateStagingDeploymentWorkflow,
   validateWorkflowFile,
   validateYamlSyntax,
 } from "./validate-workflows.mjs";
@@ -113,79 +112,4 @@ test("rejects malformed workflow and composite-action YAML", () => {
       item.includes("invalid YAML"),
     ),
   );
-});
-
-const validStagingDeployment = `name: Deploy staging
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-permissions:
-  contents: read
-concurrency:
-  group: staging-deployment
-  cancel-in-progress: false
-jobs:
-  validate:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - run: pnpm validate
-  deploy:
-    needs: validate
-    environment:
-      name: staging
-      url: https://stag.vocanova.site
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          persist-credentials: false
-      - run: test "$GITHUB_REF" = refs/heads/main
-      - run: pnpm exec wrangler deploy --env staging
-        env:
-          CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      - run: node scripts/foundation/smoke-staging.mjs "$GITHUB_SHA"
-`;
-
-test("accepts the narrow staging deployment contract", () => {
-  assert.deepEqual(
-    validateStagingDeploymentWorkflow(
-      ".github/workflows/deploy-staging.yml",
-      validStagingDeployment,
-    ),
-    [],
-  );
-});
-
-test("rejects an unsafe staging deployment contract", () => {
-  const invalid = validStagingDeployment
-    .replace("branches: [main]", "branches: [release]")
-    .replace("cancel-in-progress: false", "cancel-in-progress: true")
-    .replace("name: staging", "name: production")
-    .replace("needs: validate", "needs: build")
-    .replace("--env staging", "--env production")
-    .replaceAll("CLOUDFLARE_API_TOKEN", "PRODUCTION_TOKEN");
-  const violations = validateStagingDeploymentWorkflow(
-    ".github/workflows/deploy-staging.yml",
-    invalid,
-  );
-  for (const expected of [
-    "push only main",
-    "must not cancel",
-    "staging environment",
-    "must depend on validation",
-    "only deploy the staging Wrangler environment",
-    "unsupported Actions secret",
-  ]) {
-    assert(
-      violations.some((item) => item.includes(expected)),
-      expected,
-    );
-  }
 });

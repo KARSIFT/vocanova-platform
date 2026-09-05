@@ -9,11 +9,6 @@ const REQUIRED_MERGE_QUEUE_WORKFLOWS = [
   "quality.yml",
   "security.yml",
 ];
-const STAGING_DEPLOYMENT_WORKFLOW = ".github/workflows/deploy-staging.yml";
-const STAGING_SECRET_NAMES = new Set([
-  "CLOUDFLARE_ACCOUNT_ID",
-  "CLOUDFLARE_API_TOKEN",
-]);
 
 export function validateYamlSyntax(relativePath, content) {
   const document = parseDocument(content, { uniqueKeys: true });
@@ -56,63 +51,6 @@ export function validateActionPins(relativePath, content) {
   return violations;
 }
 
-export function validateStagingDeploymentWorkflow(relativePath, content) {
-  const violations = [];
-  const report = (message) => violations.push(`${relativePath}: ${message}`);
-
-  if (!/^  push:\n    branches: \[main\]\s*$/m.test(content)) {
-    report("staging deployment must push only main");
-  }
-  if (!/^  workflow_dispatch:\s*$/m.test(content)) {
-    report("staging deployment must support manual recovery dispatch");
-  }
-  if (
-    /^  (?:pull_request|pull_request_target|merge_group|schedule):/m.test(
-      content,
-    )
-  ) {
-    report("staging deployment must not run for untrusted or scheduled events");
-  }
-  if (!/^  group: staging-deployment\s*$/m.test(content)) {
-    report(
-      "staging deployment must use the staging-deployment concurrency group",
-    );
-  }
-  if (!/^  cancel-in-progress: false\s*$/m.test(content)) {
-    report("staging deployment must not cancel an in-progress deployment");
-  }
-  if (!/^      name: staging\s*$/m.test(content)) {
-    report("deployment job must use the staging environment");
-  }
-  if (!/^    needs: validate\s*$/m.test(content)) {
-    report("deployment job must depend on validation");
-  }
-  if (!/test [^\n]*GITHUB_REF[^\n]*refs\/heads\/main/.test(content)) {
-    report("manual deployment must reject refs other than main");
-  }
-  if (!/pnpm (?:run )?validate/.test(content)) {
-    report(
-      "staging deployment must validate the exact revision before mutation",
-    );
-  }
-  if (!/smoke-staging\.mjs[^\n]*GITHUB_SHA/.test(content)) {
-    report("staging deployment must smoke-test the expected release");
-  }
-  if (/wrangler[^\n]*(?:--env[= ]+production|--env[= ]+'')/.test(content)) {
-    report(
-      "deployment commands must only deploy the staging Wrangler environment",
-    );
-  }
-
-  for (const match of content.matchAll(/secrets(?:\.|\[['"])([A-Z0-9_]+)/g)) {
-    if (!STAGING_SECRET_NAMES.has(match[1])) {
-      report(`unsupported Actions secret: ${match[1]}`);
-    }
-  }
-
-  return violations;
-}
-
 export function validateWorkflowFile(relativePath, content) {
   const document = parseDocument(content, { uniqueKeys: true });
   const violations = document.errors.map(
@@ -133,10 +71,7 @@ export function validateWorkflowFile(relativePath, content) {
   if (document.errors.length === 0 && hasWritePermission(document.toJS())) {
     report("credential-free workflows must not request write permission");
   }
-  if (
-    relativePath !== STAGING_DEPLOYMENT_WORKFLOW &&
-    /\bsecrets\s*(?:\.|\[)/.test(content)
-  ) {
+  if (/\bsecrets\s*(?:\.|\[)/.test(content)) {
     report("credential-free workflows must not interpolate Actions secrets");
   }
   if (!/^permissions:\n\s+contents:\s+read\s*$/m.test(content)) {
@@ -179,12 +114,6 @@ export function validateWorkflowFile(relativePath, content) {
         `runner job ${lines[start].trim().replace(":", "")} must declare exactly one timeout-minutes`,
       );
     }
-  }
-
-  if (relativePath === STAGING_DEPLOYMENT_WORKFLOW) {
-    violations.push(
-      ...validateStagingDeploymentWorkflow(relativePath, content),
-    );
   }
 
   return violations;

@@ -1,9 +1,8 @@
 # Operations
 
-Pull-request workflows are credential-free and validate local builds only. A push
-to `main` deploys the validated revision to staging after the required GitHub
-environment and Cloudflare credentials have been configured. Production delivery
-is not automated.
+Pull-request workflows are credential-free and validate local builds only.
+Cloudflare Workers Builds deploys a validated push to `main` to staging after its
+repository trigger has been configured. Production delivery is not automated.
 
 The [staging deployment runbook](staging-deployment.md) documents setup,
 verification, recovery, and the boundary between staging delivery and feature
