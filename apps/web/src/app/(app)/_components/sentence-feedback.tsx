@@ -263,6 +263,22 @@ export function SentenceFeedback({
             </div>
           ) : null}
 
+          <div
+            role="group"
+            aria-labelledby={`sentence-feedback-original-heading-${attemptId}`}
+            className="rounded-md bg-neutral-50 p-[var(--spacing-md)]"
+          >
+            <p
+              id={`sentence-feedback-original-heading-${attemptId}`}
+              className="text-sm font-medium text-neutral-700"
+            >
+              Your sentence
+            </p>
+            <p className="mt-[var(--spacing-xs)] text-base text-neutral-900">
+              {result.originalSentence}
+            </p>
+          </div>
+
           {result.correctedSentence ? (
             <div className="rounded-md bg-neutral-50 p-[var(--spacing-md)]">
               <p className="text-sm font-medium text-neutral-700">
