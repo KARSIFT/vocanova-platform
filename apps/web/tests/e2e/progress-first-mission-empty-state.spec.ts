@@ -22,7 +22,13 @@ test("explains genuinely empty progress without inventing history and keeps Home
   const confidencePoints = page
     .getByText("Confidence Points", { exact: true })
     .locator("..");
-  await expect(confidencePoints).toContainText("0");
+  await expect(confidencePoints.getByText("0", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(
+      "No saved words yet. Save words from a journey to track your vocabulary here.",
+      { exact: true },
+    ),
+  ).toBeVisible();
   await expect(page.getByText("0-day streak", { exact: true })).toBeVisible();
   await expect(
     page.getByText("Longest streak: 0 days", { exact: true }),
