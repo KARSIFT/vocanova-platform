@@ -229,6 +229,65 @@ describe("identity and account parity", () => {
     expect(await preserved.json()).toMatchObject({ dailyReviewTarget: 35 });
   });
 
+  it("requires CSRF to logout and revokes only the supplied session", async () => {
+    const first = await signedIn("logout@example.test");
+    const second = await signedIn("logout@example.test");
+
+    const missingCsrf = await first.app.request(
+      "http://worker.test/api/v1/auth/logout",
+      { method: "POST", headers: { Cookie: first.cookie } },
+      env,
+    );
+    expect(missingCsrf.status).toBe(403);
+    await expect(
+      first.service.authenticate(first.token),
+    ).resolves.toMatchObject({
+      id: first.userId,
+    });
+
+    const mismatchedCsrf = await first.app.request(
+      "http://worker.test/api/v1/auth/logout",
+      withAuth({ method: "POST" }, first.cookie, "wrong-csrf"),
+      env,
+    );
+    expect(mismatchedCsrf.status).toBe(403);
+    await expect(
+      first.service.authenticate(first.token),
+    ).resolves.toMatchObject({
+      id: first.userId,
+    });
+
+    const loggedOut = await first.app.request(
+      "http://worker.test/api/v1/auth/logout",
+      withAuth({ method: "POST" }, first.cookie, first.csrf),
+      env,
+    );
+    expect(loggedOut.status).toBe(204);
+    expect(cookieHeader(loggedOut)).toContain(
+      "vocanova_session=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax",
+    );
+    await expect(first.service.authenticate(first.token)).rejects.toMatchObject(
+      {
+        code: "authentication_required",
+      },
+    );
+    const revokedMe = await first.app.request(
+      "http://worker.test/api/v1/me",
+      { headers: { Cookie: first.cookie } },
+      env,
+    );
+    expect(revokedMe.status).toBe(401);
+    const survivingMe = await second.app.request(
+      "http://worker.test/api/v1/me",
+      { headers: { Cookie: second.cookie } },
+      env,
+    );
+    expect(survivingMe.status).toBe(200);
+    expect(await survivingMe.json()).toMatchObject({
+      email: "logout@example.test",
+    });
+  });
+
   it("binds OAuth state to its cookie, rejects replay, and creates a verified session", async () => {
     const app = identityApp();
     const started = await app.request(
