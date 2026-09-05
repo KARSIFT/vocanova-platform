@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 
 test.describe("Sentence feedback report errors", () => {
-  test("announces a failed report and keeps the retry action available", async ({
+  test("announces a failed report and safely retries it", async ({
     page,
     context,
   }, testInfo) => {
@@ -31,16 +31,23 @@ test.describe("Sentence feedback report errors", () => {
     await page.getByRole("button", { name: "Check my sentence" }).click();
     await expect(page.getByText("Correct", { exact: true })).toBeVisible();
 
+    let reportRequestCount = 0;
     await page.route("**/api/v1/sentence-feedback/*/reports", async (route) => {
-      await route.fulfill({
-        status: 503,
-        contentType: "application/problem+json",
-        body: JSON.stringify({
-          type: "https://vocanova.test/problems/unavailable",
-          title: "Service unavailable",
+      reportRequestCount += 1;
+      if (reportRequestCount === 1) {
+        await route.fulfill({
           status: 503,
-        }),
-      });
+          contentType: "application/problem+json",
+          body: JSON.stringify({
+            type: "https://vocanova.test/problems/unavailable",
+            title: "Service unavailable",
+            status: 503,
+          }),
+        });
+        return;
+      }
+
+      await route.continue();
     });
 
     await page.getByRole("button", { name: "Report a problem" }).click();
@@ -52,5 +59,10 @@ test.describe("Sentence feedback report errors", () => {
     await expect(
       page.getByRole("button", { name: "Report a problem" }),
     ).toBeEnabled();
+
+    await page.getByRole("button", { name: "Report a problem" }).click();
+    await expect(page.getByText("Reported", { exact: true })).toBeVisible();
+    await expect(reportFailure).toBeHidden();
+    expect(reportRequestCount).toBe(2);
   });
 });
