@@ -379,6 +379,34 @@ describe("Worker content, learning, and review parity", () => {
     });
   });
 
+  it("traverses tied discovery display orders once in stable ID order", async () => {
+    const situationC = "40000000-0000-4000-8000-000000000003";
+    await env.DB.batch([
+      env.DB.prepare(
+        "UPDATE journey_situations SET display_order = 10 WHERE id IN (?1, ?2)",
+      ).bind(SITUATION_A, SITUATION_B),
+      env.DB.prepare(
+        `INSERT INTO journey_situations
+           (id, slug, title, short_description, level_band, category, status, display_order, created_at, updated_at)
+           VALUES (?1, 'at-the-library', 'At the library', 'Borrow a book.', 'a1_a2', 'daily_life', 'active', 10, ?2, ?2)`,
+      ).bind(situationC, NOW),
+    ]);
+
+    const ids: string[] = [];
+    let cursor = "";
+    let pages = 0;
+    do {
+      const page = await repository.listSituations(cursor, 1);
+      ids.push(...page.items.map((item) => item.id));
+      cursor = page.nextCursor ?? "";
+      pages += 1;
+    } while (cursor);
+
+    expect(ids).toEqual([SITUATION_A, SITUATION_B, situationC]);
+    expect(new Set(ids).size).toBe(3);
+    expect(pages).toBe(4);
+  });
+
   it("saves, replays, paginates, unsaves, restores, and isolates learner state", async () => {
     const savedA = await repository.saveUserWord(
       USER_A,
