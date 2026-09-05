@@ -428,7 +428,7 @@ function registerIdentityOpenApi(
       name: "Idempotency-Key",
       in: "header" as const,
       required: true,
-      schema: { type: "string" as const },
+      schema: { type: "string" as const, minLength: 1, maxLength: 200 },
     },
   ];
   const operations = [

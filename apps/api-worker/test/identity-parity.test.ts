@@ -538,6 +538,27 @@ describe("identity and account parity", () => {
     expect(response.status).toBe(422);
   });
 
+  it("enforces the account-deletion idempotency key length boundary", async () => {
+    const accepted = await signedIn("accepted-key@example.test");
+    await expect(
+      accepted.service.deleteAccount(
+        accepted.userId,
+        "a".repeat(200),
+        accepted.token,
+        "test-ip",
+      ),
+    ).resolves.toMatchObject({ status: "deactivated" });
+    const rejected = await signedIn("rejected-key@example.test");
+    await expect(
+      rejected.service.deleteAccount(
+        rejected.userId,
+        "b".repeat(201),
+        rejected.token,
+        "test-ip",
+      ),
+    ).rejects.toMatchObject({ code: "invalid_idempotency" });
+  });
+
   it("rolls back the deletion record when a later deactivation mutation fails", async () => {
     const { app, cookie, csrf, userId, token, service } = await signedIn(
       "rollback-delete@example.test",

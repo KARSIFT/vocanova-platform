@@ -99,7 +99,7 @@ export function registerAIFeedbackRoutes(
         name: "Idempotency-Key",
         in: "header",
         required: true,
-        schema: { type: "string" },
+        schema: { type: "string", minLength: 1, maxLength: 200 },
       },
     ],
     request: { body: { content: json(SubmitInput) } },
