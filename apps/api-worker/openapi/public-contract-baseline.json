@@ -13,7 +13,9 @@
       "operationId": "CompleteOnboarding",
       "path": "/api/v1/onboarding",
       "successStatus": 200,
-      "parameters": [{ "in": "header", "name": "X-CSRF-Token", "required": true }],
+      "parameters": [
+        { "in": "header", "name": "X-CSRF-Token", "required": true }
+      ],
       "request": {
         "properties": [
           "dailyReviewTarget",
@@ -48,7 +50,9 @@
       "operationId": "ConsumeEmailChangeLink",
       "path": "/api/v1/settings/email-change-links/consume",
       "successStatus": 200,
-      "parameters": [{ "in": "header", "name": "X-CSRF-Token", "required": true }],
+      "parameters": [
+        { "in": "header", "name": "X-CSRF-Token", "required": true }
+      ],
       "request": { "properties": ["token"], "required": ["token"] },
       "response": {
         "properties": ["changedAt", "email", "previousEmail"],
@@ -339,7 +343,9 @@
       "operationId": "RequestEmailChangeLink",
       "path": "/api/v1/settings/email-change-links",
       "successStatus": 204,
-      "parameters": [{ "in": "header", "name": "X-CSRF-Token", "required": true }],
+      "parameters": [
+        { "in": "header", "name": "X-CSRF-Token", "required": true }
+      ],
       "request": { "properties": ["newEmail"], "required": ["newEmail"] },
       "response": null
     },
@@ -521,7 +527,9 @@
       "operationId": "UpdateSettings",
       "path": "/api/v1/settings",
       "successStatus": 200,
-      "parameters": [{ "in": "header", "name": "X-CSRF-Token", "required": true }],
+      "parameters": [
+        { "in": "header", "name": "X-CSRF-Token", "required": true }
+      ],
       "request": {
         "properties": [
           "appLanguage",
