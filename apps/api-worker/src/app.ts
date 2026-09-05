@@ -171,13 +171,10 @@ export function createApp(
     identityFactory,
     (env) => new D1ContentLearningRepository(env.DB),
   );
-  registerMissionsRoutes(
-    app,
-    identityFactory,
-    (env) =>
-      dependencies.createMissionsRepository
-        ? dependencies.createMissionsRepository(env)
-        : new D1MissionsRepository(env.DB),
+  registerMissionsRoutes(app, identityFactory, (env) =>
+    dependencies.createMissionsRepository
+      ? dependencies.createMissionsRepository(env)
+      : new D1MissionsRepository(env.DB),
   );
   registerAIFeedbackRoutes(app, identityFactory, (env) => {
     if (dependencies.createAIFeedbackService)
