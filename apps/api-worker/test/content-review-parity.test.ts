@@ -221,6 +221,48 @@ describe("Worker content, learning, and review parity", () => {
     expect(JSON.stringify(bodyB)).not.toContain(USER_WORD_A);
   });
 
+  it("rejects malformed pagination limits on every documented list route", async () => {
+    const token = "invalid-page-limit-session";
+    await env.DB.prepare(
+      `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at)
+       VALUES (?1, ?2, ?3, ?4, '9999-12-31T23:59:59.999Z')`,
+    )
+      .bind(
+        "90000000-0000-4000-8000-000000000006",
+        USER_A,
+        await hashToken(token),
+        NOW,
+      )
+      .run();
+    const app = createApp();
+
+    for (const malformedLimit of [
+      "not-a-number",
+      "",
+      "  ",
+      "1.5",
+      "Infinity",
+    ]) {
+      for (const route of [
+        "/api/v1/journey-situations",
+        "/api/v1/user-words",
+        "/api/v1/reviews/due",
+      ]) {
+        const path = `${route}?limit=${encodeURIComponent(malformedLimit)}`;
+        const response = await app.request(
+          `http://worker.test${path}`,
+          { headers: { cookie: `vocanova_session=${token}` } },
+          env,
+        );
+
+        expect(response.status, path).toBe(400);
+        await expect(response.json()).resolves.toMatchObject({
+          detail: "invalid request",
+        });
+      }
+    }
+  });
+
   it("publishes reviewState as one required nullable OpenAPI enum", () => {
     const document = createOpenApiDocument() as CanonicalWordOpenApi;
     const meaningSchema =
@@ -351,6 +393,127 @@ describe("Worker content, learning, and review parity", () => {
     );
     expect(restored.userWordId).toBe(savedA.userWordId);
     expect(restored.source).toBe("search");
+  });
+
+  it("resets a restored word into the due queue without erasing review evidence", async () => {
+    const saved = await repository.saveUserWord(
+      USER_A,
+      MEANING_A,
+      "manual",
+      "restore-schedule-save",
+    );
+    await repository.submitReview(
+      USER_A,
+      review({
+        userWordId: saved.userWordId,
+        clientAttemptId: "restore-schedule-review",
+      }),
+      "restore-schedule-review",
+    );
+    await env.DB.prepare(
+      `UPDATE user_words
+       SET status = 'mastered', review_step = 7, mastered_at = ?1, ignored_at = NULL
+       WHERE id = ?2`,
+    )
+      .bind(NOW, saved.userWordId)
+      .run();
+    await repository.unsaveUserWord(USER_A, MEANING_A);
+    await repository.saveUserWord(
+      USER_A,
+      MEANING_A,
+      "search",
+      "restore-schedule-resave",
+    );
+    const ignored = await repository.saveUserWord(
+      USER_A,
+      MEANING_B,
+      "manual",
+      "restore-ignored-save",
+    );
+    await env.DB.prepare(
+      `UPDATE user_words
+       SET status = 'ignored', ignored_at = ?1, mastered_at = NULL
+       WHERE id = ?2`,
+    )
+      .bind(NOW, ignored.userWordId)
+      .run();
+    await repository.unsaveUserWord(USER_A, MEANING_B);
+    await repository.saveUserWord(
+      USER_A,
+      MEANING_B,
+      "search",
+      "restore-ignored-resave",
+    );
+
+    expect(
+      (await repository.getWord(USER_A, "flat-white")).word.meanings[0],
+    ).toMatchObject({ saved: true, reviewState: "due" });
+    expect(
+      (await repository.listDueWords(USER_A, "", 20)).items.map(
+        (item) => item.userWordId,
+      ),
+    ).toContain(saved.userWordId);
+    expect(
+      await env.DB.prepare(
+        `SELECT status, review_step, next_review_at, last_reviewed_at, total_review_count,
+                correct_review_count, consecutive_correct_count,
+                consecutive_incorrect_count, mastered_at, ignored_at
+         FROM user_words WHERE id = ?1`,
+      )
+        .bind(saved.userWordId)
+        .first<{
+          status: string;
+          review_step: number;
+          next_review_at: string | null;
+          last_reviewed_at: string | null;
+          total_review_count: number;
+          correct_review_count: number;
+          consecutive_correct_count: number;
+          consecutive_incorrect_count: number;
+          mastered_at: string | null;
+          ignored_at: string | null;
+        }>(),
+    ).toEqual({
+      status: "new",
+      review_step: 0,
+      next_review_at: null,
+      last_reviewed_at: NOW,
+      total_review_count: 1,
+      correct_review_count: 1,
+      consecutive_correct_count: 0,
+      consecutive_incorrect_count: 0,
+      mastered_at: null,
+      ignored_at: null,
+    });
+    await expect(
+      env.DB.prepare(
+        "SELECT status, review_step, next_review_at, mastered_at, ignored_at FROM user_words WHERE id = ?1",
+      )
+        .bind(ignored.userWordId)
+        .first(),
+    ).resolves.toEqual({
+      status: "new",
+      review_step: 0,
+      next_review_at: null,
+      mastered_at: null,
+      ignored_at: null,
+    });
+    expect(
+      (
+        await env.DB.prepare(
+          "SELECT count(*) AS count FROM review_attempts WHERE user_word_id = ?1",
+        )
+          .bind(saved.userWordId)
+          .first<{ count: number }>()
+      )?.count,
+    ).toBe(1);
+    expect(
+      (
+        await env.DB.prepare(
+          "SELECT count(*) AS count FROM confidence_point_ledger WHERE reason = 'word_added'",
+        ).first<{ count: number }>()
+      )?.count,
+    ).toBe(2);
   });
 
   it("rolls back the entire save batch when its idempotency record fails", async () => {

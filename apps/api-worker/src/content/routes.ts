@@ -301,7 +301,12 @@ export function registerContentLearningRoutes(
 }
 
 function numberQuery(value: string | undefined): number {
-  return value === undefined ? 20 : Number(value);
+  if (value === undefined) return 20;
+  if (!value.trim()) throw new ContentLearningError("invalid_input");
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed))
+    throw new ContentLearningError("invalid_input");
+  return parsed;
 }
 
 function routeProblem(
