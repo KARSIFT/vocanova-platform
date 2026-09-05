@@ -238,7 +238,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           <ToggleRow
             id="notifications-enabled"
             label="Daily review reminders"
-            description="We will send a gentle reminder when your reviews are waiting."
+            description="Reminder emails are not available yet. Your saved preference is retained."
+            disabled
             checked={state.notificationsEnabled}
             onChange={(value) => patch("notificationsEnabled", value)}
           />
@@ -339,6 +340,7 @@ interface ToggleRowProps {
   label: string;
   description: string;
   checked: boolean;
+  disabled?: boolean;
   onChange: (next: boolean) => void;
 }
 
@@ -347,6 +349,7 @@ function ToggleRow({
   label,
   description,
   checked,
+  disabled = false,
   onChange,
 }: ToggleRowProps) {
   return (
@@ -355,7 +358,10 @@ function ToggleRow({
         <label htmlFor={id} className="text-base font-medium text-neutral-900">
           {label}
         </label>
-        <p className="mt-[var(--spacing-xs)] text-sm text-neutral-700">
+        <p
+          id={`${id}-description`}
+          className="mt-[var(--spacing-xs)] text-sm text-neutral-700"
+        >
           {description}
         </p>
       </div>
@@ -366,6 +372,8 @@ function ToggleRow({
           type="button"
           role="switch"
           aria-checked={checked}
+          aria-describedby={`${id}-description`}
+          disabled={disabled}
           onClick={() => onChange(!checked)}
           className={`relative inline-flex h-[var(--spacing-xl)] w-[var(--spacing-2xl)] items-center rounded-full transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 ${
             checked ? "bg-primary-600" : "bg-neutral-300"
@@ -381,7 +389,7 @@ function ToggleRow({
           />
         </button>
         <span className="text-sm text-neutral-700" aria-hidden="true">
-          {checked ? "On" : "Off"}
+          {disabled ? "Unavailable" : checked ? "On" : "Off"}
         </span>
       </div>
     </div>
