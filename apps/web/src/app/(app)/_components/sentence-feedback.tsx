@@ -274,7 +274,7 @@ export function SentenceFeedback({
             >
               Your sentence
             </p>
-            <p className="mt-[var(--spacing-xs)] text-base text-neutral-900">
+            <p className="mt-[var(--spacing-xs)] break-all text-base text-neutral-900">
               {result.originalSentence}
             </p>
           </div>
@@ -284,7 +284,7 @@ export function SentenceFeedback({
               <p className="text-sm font-medium text-neutral-700">
                 Corrected sentence
               </p>
-              <p className="mt-[var(--spacing-xs)] text-base text-neutral-900">
+              <p className="mt-[var(--spacing-xs)] break-all text-base text-neutral-900">
                 {result.correctedSentence}
               </p>
             </div>
