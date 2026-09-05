@@ -628,7 +628,9 @@ function waitForSettingsPatchHold(state, cookies) {
     state.settingsPatchHold = { promise, release, released: false };
   }
 
-  return state.settingsPatchHold.released ? null : state.settingsPatchHold.promise;
+  return state.settingsPatchHold.released
+    ? null
+    : state.settingsPatchHold.promise;
 }
 
 function releaseSettingsPatchHold(state) {
@@ -868,9 +870,15 @@ function buildSituationResponse(slug, selectedFixture) {
   };
 }
 
-function buildJourneySituations(fixture) {
+function buildJourneySituations(fixture, after) {
   if (fixture === "empty") {
     return { items: [] };
+  }
+  if (fixture === "paginated") {
+    if (after === "e2e-journey-page-2") {
+      return { items: [JOURNEY_SITUATIONS[1]] };
+    }
+    return { items: [JOURNEY_SITUATIONS[0]], nextCursor: "e2e-journey-page-2" };
   }
   return { items: JOURNEY_SITUATIONS.map((s) => ({ ...s })) };
 }
@@ -1063,7 +1071,10 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === "POST" && url.pathname === "/__e2e/release-settings-patch") {
+  if (
+    req.method === "POST" &&
+    url.pathname === "/__e2e/release-settings-patch"
+  ) {
     const released = releaseSettingsPatchHold(getSessionState(cookies));
     logLine(req, released ? 204 : 409, { action: "release-settings-patch" });
     if (released) {
@@ -1548,7 +1559,14 @@ const server = createServer(async (req, res) => {
       return;
     }
     logLine(req, 200);
-    jsonResponse(res, 200, buildJourneySituations(cookies.e2e_journey_fixture));
+    jsonResponse(
+      res,
+      200,
+      buildJourneySituations(
+        cookies.e2e_journey_fixture,
+        url.searchParams.get("after"),
+      ),
+    );
     return;
   }
 
@@ -1568,7 +1586,10 @@ const server = createServer(async (req, res) => {
     const slug = decodeURIComponent(
       url.pathname.slice("/api/v1/journey-situations/".length),
     );
-    const response = buildSituationResponse(slug, cookies.e2e_situation_fixture);
+    const response = buildSituationResponse(
+      slug,
+      cookies.e2e_situation_fixture,
+    );
     if (!response) {
       logLine(req, 404, { slug });
       jsonResponse(res, 404, { error: "not_found", slug });
