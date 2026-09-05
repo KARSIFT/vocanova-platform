@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import type { OpenAPIHono } from "@hono/zod-openapi";
 
+import { SESSION_COOKIE_SECURITY } from "../http/openapi.js";
 import {
   ContentLearningError,
   type ReviewSubmission,
@@ -357,6 +358,12 @@ function registerOpenApi(app: OpenAPIHono<VocaNovaWorkerEnvironment>): void {
       schema: { type: "string" as const, minLength: 1, maxLength: 200 },
     },
   ];
+  const csrf = {
+    name: "X-CSRF-Token",
+    in: "header" as const,
+    required: true,
+    schema: { type: "string" as const },
+  };
   const operations = [
     [
       "get",
@@ -476,7 +483,11 @@ function registerOpenApi(app: OpenAPIHono<VocaNovaWorkerEnvironment>): void {
       path,
       operationId,
       tags: ["Content and learning"],
-      parameters: [...parameters],
+      security: [{ [SESSION_COOKIE_SECURITY]: [] }],
+      parameters: [
+        ...parameters,
+        ...(["post", "delete"].includes(method) ? [csrf] : []),
+      ],
       ...(request && { request: { body: { content: json(request) } } }),
       responses: {
         [status]: {

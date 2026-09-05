@@ -108,6 +108,70 @@ describe("Worker API", () => {
     ]);
   });
 
+  it("publishes the existing session and CSRF requirements", () => {
+    const document = createOpenApiDocument() as {
+      components: { securitySchemes: Record<string, unknown> };
+      paths: Record<
+        string,
+        Record<
+          string,
+          {
+            security?: unknown;
+            parameters?: Array<{
+              name: string;
+              in: string;
+              required?: boolean;
+            }>;
+          }
+        >
+      >;
+    };
+    expect(document.components.securitySchemes.SessionCookie).toMatchObject({
+      type: "apiKey",
+      in: "cookie",
+      name: "vocanova_session",
+    });
+
+    const protectedOperations = [
+      ["/api/v1/me", "get"],
+      ["/api/v1/auth/logout", "post"],
+      ["/api/v1/onboarding", "get"],
+      ["/api/v1/onboarding", "post"],
+      ["/api/v1/settings", "get"],
+      ["/api/v1/settings", "patch"],
+      ["/api/v1/settings/email-change-links", "post"],
+      ["/api/v1/settings/email-change-links/consume", "post"],
+      ["/api/v1/account-deletion-requests", "post"],
+      ["/api/v1/journey-situations", "get"],
+      ["/api/v1/journey-situations/{slug}", "get"],
+      ["/api/v1/canonical-words/{wordSlug}", "get"],
+      ["/api/v1/user-words", "get"],
+      ["/api/v1/user-words", "post"],
+      ["/api/v1/user-words/{meaningId}", "delete"],
+      ["/api/v1/reviews/due", "get"],
+      ["/api/v1/reviews/submissions", "post"],
+      ["/api/v1/daily-mission", "get"],
+      ["/api/v1/progress", "get"],
+      ["/api/v1/sentence-feedback", "post"],
+      ["/api/v1/sentence-feedback/{attemptId}/reports", "post"],
+    ] as const;
+    for (const [path, method] of protectedOperations)
+      expect(document.paths[path]![method]!.security).toEqual([
+        { SessionCookie: [] },
+      ]);
+
+    const csrfOperations = protectedOperations.filter(([, method]) =>
+      ["post", "patch", "delete"].includes(method),
+    );
+    for (const [path, method] of csrfOperations)
+      expect(document.paths[path]![method]!.parameters).toContainEqual({
+        name: "X-CSRF-Token",
+        in: "header",
+        required: true,
+        schema: { type: "string" },
+      });
+  });
+
   it("publishes AI feedback HTTP problem responses with the shared schema", () => {
     const document = createOpenApiDocument() as {
       paths: Record<

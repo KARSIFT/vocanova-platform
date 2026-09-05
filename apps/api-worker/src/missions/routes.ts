@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import type { OpenAPIHono } from "@hono/zod-openapi";
 
+import { SESSION_COOKIE_SECURITY } from "../http/openapi.js";
 import { MissionsError } from "../domain/missions.js";
 import type { VocaNovaWorkerEnvironment } from "../http/middleware.js";
 import { problemResponse } from "../http/problem.js";
@@ -97,6 +98,7 @@ export function registerMissionsRoutes(
     path: "/api/v1/daily-mission",
     operationId: "GetDailyMission",
     tags: ["Missions"],
+    security: [{ [SESSION_COOKIE_SECURITY]: [] }],
     parameters: timezoneParameter,
     responses: {
       200: {
@@ -110,6 +112,7 @@ export function registerMissionsRoutes(
     path: "/api/v1/progress",
     operationId: "GetProgress",
     tags: ["Missions"],
+    security: [{ [SESSION_COOKIE_SECURITY]: [] }],
     parameters: timezoneParameter,
     responses: {
       200: {

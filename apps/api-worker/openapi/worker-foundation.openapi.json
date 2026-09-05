@@ -102,6 +102,14 @@
         ],
         "type": "object"
       }
+    },
+    "securitySchemes": {
+      "SessionCookie": {
+        "description": "Server-managed authenticated session cookie.",
+        "in": "cookie",
+        "name": "vocanova_session",
+        "type": "apiKey"
+      }
     }
   },
   "info": {
@@ -122,6 +130,14 @@
             "schema": {
               "maxLength": 200,
               "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -172,6 +188,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Identity and account"
         ]
@@ -184,7 +205,7 @@
           {
             "in": "header",
             "name": "X-CSRF-Token",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -195,6 +216,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Identity and account"
         ]
@@ -550,6 +576,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Content and learning"
         ]
@@ -664,6 +695,11 @@
             "description": "Today's daily mission projection"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Missions"
         ]
@@ -749,6 +785,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Content and learning"
         ]
@@ -860,6 +901,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Content and learning"
         ]
@@ -909,6 +955,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Identity and account"
         ]
@@ -986,12 +1037,27 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Identity and account"
         ]
       },
       "post": {
         "operationId": "CompleteOnboarding",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1119,6 +1185,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Identity and account"
         ]
@@ -1206,6 +1277,11 @@
             "description": "Progress projection"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Missions"
         ]
@@ -1306,6 +1382,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Content and learning"
         ]
@@ -1322,6 +1403,14 @@
             "schema": {
               "maxLength": 200,
               "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -1522,6 +1611,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Content and learning"
         ]
@@ -1538,6 +1632,14 @@
             "schema": {
               "maxLength": 200,
               "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -1711,6 +1813,11 @@
             "description": "Unexpected server error"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "AI Feedback"
         ]
@@ -1726,6 +1833,14 @@
             "required": true,
             "schema": {
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -1817,6 +1932,11 @@
             "description": "Unexpected server error"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "AI Feedback"
         ]
@@ -1877,12 +1997,27 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Identity and account"
         ]
       },
       "patch": {
         "operationId": "UpdateSettings",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1976,6 +2111,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Identity and account"
         ]
@@ -1984,6 +2124,16 @@
     "/api/v1/settings/email-change-links": {
       "post": {
         "operationId": "RequestEmailChangeLink",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2008,6 +2158,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Identity and account"
         ]
@@ -2016,6 +2171,16 @@
     "/api/v1/settings/email-change-links/consume": {
       "post": {
         "operationId": "ConsumeEmailChangeLink",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2067,6 +2232,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Identity and account"
         ]
@@ -2172,6 +2342,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Content and learning"
         ]
@@ -2186,6 +2361,14 @@
             "schema": {
               "maxLength": 200,
               "minLength": 1,
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
               "type": "string"
             }
           }
@@ -2281,6 +2464,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Content and learning"
         ]
@@ -2298,6 +2486,14 @@
               "format": "uuid",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2305,6 +2501,11 @@
             "description": "Successful response"
           }
         },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
         "tags": [
           "Content and learning"
         ]
