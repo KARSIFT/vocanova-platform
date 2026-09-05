@@ -912,6 +912,55 @@ describe("Worker content, learning, and review parity", () => {
     expect(await response.json()).toMatchObject({ detail: "invalid request" });
   });
 
+  it("replays a client attempt over HTTP without repeating its schedule", async () => {
+    const token = "review-replay-session";
+    const csrf = "review-replay-csrf";
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    await env.DB.prepare(
+      `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at)
+       VALUES (?1, ?2, ?3, ?4, '9999-12-31T23:59:59.999Z')`,
+    )
+      .bind(
+        "90000000-0000-4000-8000-000000000004",
+        USER_A,
+        await hashToken(token),
+        NOW,
+      )
+      .run();
+    const submit = (
+      key: string,
+      body = review({ clientAttemptId: "http-replay" }),
+    ) =>
+      createApp().request(
+        "http://worker.test/api/v1/reviews/submissions",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            cookie: `vocanova_session=${token}; vocanova_csrf=${csrf}`,
+            "x-csrf-token": csrf,
+            "idempotency-key": key,
+          },
+          body: JSON.stringify(body),
+        },
+        env,
+      );
+    const first = await submit("http-replay-one");
+    const replay = await submit("http-replay-two");
+    expect(first.status).toBe(200);
+    expect(await replay.json()).toEqual(await first.json());
+    const state = await env.DB.prepare(
+      "SELECT total_review_count, review_step FROM user_words WHERE id = ?1",
+    )
+      .bind(USER_WORD_A)
+      .first<{ total_review_count: number; review_step: number }>();
+    expect(state).toEqual({ total_review_count: 1, review_step: 1 });
+    const attempts = await env.DB.prepare(
+      "SELECT count(*) AS count FROM review_attempts",
+    ).first<{ count: number }>();
+    expect(attempts?.count).toBe(1);
+  });
+
   it("rolls back attempt and schedule together when the review batch fails", async () => {
     await insertUserWord(
       USER_WORD_A,
