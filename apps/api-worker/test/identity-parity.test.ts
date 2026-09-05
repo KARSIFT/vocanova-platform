@@ -367,6 +367,8 @@ describe("identity and account parity", () => {
       env,
     );
     expect(expired.status).toBe(401);
+    expect(cookieHeader(expired)).not.toContain("vocanova_session=");
+    expect(cookieHeader(expired)).not.toContain("vocanova_csrf=");
     const stateRow = await env.DB.prepare(
       "SELECT consumed_at FROM oauth_states WHERE token_hash = ?1",
     )
@@ -379,6 +381,30 @@ describe("identity and account parity", () => {
       ).first<{ count: number }>();
       expect(row?.count).toBe(0);
     }
+
+    const freshStart = await app.request(
+      "http://worker.test/api/v1/auth/oauth/google/start",
+      json({ redirectUri: "http://127.0.0.1:3000/home" }),
+      env,
+    );
+    const freshState = new URL(
+      (await freshStart.json<{ url: string }>()).url,
+    ).searchParams.get("state")!;
+    const callback = await app.request(
+      `http://worker.test/api/v1/auth/oauth/google/callback?code=valid-code&state=${encodeURIComponent(freshState)}`,
+      {
+        headers: { Cookie: `vocanova_oauth_state=${freshState}` },
+        redirect: "manual",
+      },
+      env,
+    );
+    expect(callback.status).toBe(302);
+    const callbackCookies = cookieHeader(callback);
+    expect(callbackCookies).toContain(
+      "vocanova_oauth_state=; Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure",
+    );
+    expect(callbackCookies).toContain("vocanova_session=");
+    expect(callbackCookies).toContain("vocanova_csrf=");
   });
 
   it("creates no partial identity or session for provider failure or unverified email", async () => {
