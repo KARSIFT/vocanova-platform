@@ -50,8 +50,8 @@ export default async function DiscoverPage() {
             No journeys available yet
           </h2>
           <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-            New situations will appear here when they are ready. Return to
-            today&apos;s mission and check back later.
+            There are no journeys to explore right now. Return to today&apos;s
+            mission.
           </p>
           <Link
             href="/home"

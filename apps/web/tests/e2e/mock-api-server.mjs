@@ -73,6 +73,7 @@
 //   GET    /api/v1/journey-situations                -> 200 { items: [...] }
 //             `e2e_journey_fixture=empty` returns an empty catalog
 //   GET    /api/v1/journey-situations/:slug          -> 200 SituationResponse
+//             `e2e_situation_fixture=empty` returns an empty word list
 //   GET    /api/v1/canonical-words/:slug             -> 200 WordDetailResponse
 //             one 500 per session for discovery or reviews when the
 //             `e2e_read_failure` cookie names that fixture; used to prove
@@ -742,14 +743,17 @@ function buildWordDetailResponse(state, slug, selectedFixture) {
   };
 }
 
-function buildSituationResponse(slug) {
-  const fixture = SITUATIONS_BY_SLUG[slug];
-  if (!fixture) {
+function buildSituationResponse(slug, selectedFixture) {
+  const situationFixture = SITUATIONS_BY_SLUG[slug];
+  if (!situationFixture) {
     return null;
   }
   return {
-    situation: fixture.situation,
-    meanings: fixture.meanings.map((meaning) => ({ ...meaning })),
+    situation: situationFixture.situation,
+    meanings:
+      selectedFixture === "empty"
+        ? []
+        : situationFixture.meanings.map((meaning) => ({ ...meaning })),
   };
 }
 
@@ -1407,7 +1411,7 @@ const server = createServer(async (req, res) => {
     const slug = decodeURIComponent(
       url.pathname.slice("/api/v1/journey-situations/".length),
     );
-    const response = buildSituationResponse(slug);
+    const response = buildSituationResponse(slug, cookies.e2e_situation_fixture);
     if (!response) {
       logLine(req, 404, { slug });
       jsonResponse(res, 404, { error: "not_found", slug });
