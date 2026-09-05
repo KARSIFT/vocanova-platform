@@ -47,85 +47,105 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
       </div>
 
       <section className="mt-[var(--spacing-lg)]">
-        <h2 className="text-xl font-semibold text-neutral-900">Meanings</h2>
-        <ul className="mt-[var(--spacing-sm)] space-y-[var(--spacing-md)]">
-          {wordData.meanings.map((meaning) => (
-            <li
-              key={meaning.id}
-              className="rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)] shadow-sm"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-[var(--spacing-md)]">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-neutral-900">
-                    {meaning.partOfSpeech}
-                  </p>
-                  <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-                    {meaning.shortDefinition}
-                  </p>
-                  {meaning.learnerDefinition ? (
-                    <p className="mt-[var(--spacing-xs)] text-base text-neutral-600">
-                      {meaning.learnerDefinition}
-                    </p>
-                  ) : null}
-                  {meaning.reviewState ? (
-                    <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-                      Review state: {reviewStateLabel(meaning.reviewState)}
-                    </p>
-                  ) : null}
-                </div>
-                <MeaningSaveButton
-                  meaningId={meaning.id}
-                  source="journey"
-                  initialSaved={meaning.saved}
-                  wordText={wordData.text}
-                  shortDefinition={meaning.shortDefinition}
-                />
-              </div>
-
-              {meaning.examples.length > 0 ? (
-                <div className="mt-[var(--spacing-md)]">
-                  <h3 className="text-base font-semibold text-neutral-900">
-                    Example sentences
-                  </h3>
-                  <ul className="mt-[var(--spacing-xs)] list-disc space-y-[var(--spacing-xs)] pl-[var(--spacing-lg)] text-base text-neutral-700">
-                    {meaning.examples.map((example) => (
-                      <li key={example.id}>{example.exampleText}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-
-              {meaning.usageNotes.length > 0 ? (
-                <div className="mt-[var(--spacing-md)]">
-                  <h3 className="text-base font-semibold text-neutral-900">
-                    Usage notes
-                  </h3>
-                  <ul className="mt-[var(--spacing-xs)] space-y-[var(--spacing-sm)]">
-                    {meaning.usageNotes.map((note) => (
-                      <li key={note.id}>
-                        <h4 className="text-sm font-semibold text-neutral-800">
-                          {formatNoteType(note.noteType)}
-                        </h4>
-                        <p className="text-base text-neutral-700">
-                          {note.noteText}
+        {wordData.meanings.length > 0 ? (
+          <>
+            <h2 className="text-xl font-semibold text-neutral-900">Meanings</h2>
+            <ul className="mt-[var(--spacing-sm)] space-y-[var(--spacing-md)]">
+              {wordData.meanings.map((meaning) => (
+                <li
+                  key={meaning.id}
+                  className="rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)] shadow-sm"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-[var(--spacing-md)]">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-neutral-900">
+                        {meaning.partOfSpeech}
+                      </p>
+                      <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+                        {meaning.shortDefinition}
+                      </p>
+                      {meaning.learnerDefinition ? (
+                        <p className="mt-[var(--spacing-xs)] text-base text-neutral-600">
+                          {meaning.learnerDefinition}
                         </p>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
+                      ) : null}
+                      {meaning.reviewState ? (
+                        <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+                          Review state: {reviewStateLabel(meaning.reviewState)}
+                        </p>
+                      ) : null}
+                    </div>
+                    <MeaningSaveButton
+                      meaningId={meaning.id}
+                      source="journey"
+                      initialSaved={meaning.saved}
+                      wordText={wordData.text}
+                      shortDefinition={meaning.shortDefinition}
+                    />
+                  </div>
 
-              {meaning.saved && meaning.userWordId ? (
-                <SentenceFeedback
-                  targetWord={wordData.text}
-                  attemptId={meaning.userWordId}
-                  source="word_detail"
-                  shortDefinition={meaning.shortDefinition}
-                />
-              ) : null}
-            </li>
-          ))}
-        </ul>
+                  {meaning.examples.length > 0 ? (
+                    <div className="mt-[var(--spacing-md)]">
+                      <h3 className="text-base font-semibold text-neutral-900">
+                        Example sentences
+                      </h3>
+                      <ul className="mt-[var(--spacing-xs)] list-disc space-y-[var(--spacing-xs)] pl-[var(--spacing-lg)] text-base text-neutral-700">
+                        {meaning.examples.map((example) => (
+                          <li key={example.id}>{example.exampleText}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  {meaning.usageNotes.length > 0 ? (
+                    <div className="mt-[var(--spacing-md)]">
+                      <h3 className="text-base font-semibold text-neutral-900">
+                        Usage notes
+                      </h3>
+                      <ul className="mt-[var(--spacing-xs)] space-y-[var(--spacing-sm)]">
+                        {meaning.usageNotes.map((note) => (
+                          <li key={note.id}>
+                            <h4 className="text-sm font-semibold text-neutral-800">
+                              {formatNoteType(note.noteType)}
+                            </h4>
+                            <p className="text-base text-neutral-700">
+                              {note.noteText}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  {meaning.saved && meaning.userWordId ? (
+                    <SentenceFeedback
+                      targetWord={wordData.text}
+                      attemptId={meaning.userWordId}
+                      source="word_detail"
+                      shortDefinition={meaning.shortDefinition}
+                    />
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : (
+          <div
+            aria-labelledby="word-meanings-empty-heading"
+            className="rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)]"
+          >
+            <h2
+              id="word-meanings-empty-heading"
+              className="text-lg font-semibold text-neutral-900"
+            >
+              No meanings available yet
+            </h2>
+            <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+              This word has no meanings available right now. Return to the
+              journey to explore another word.
+            </p>
+          </div>
+        )}
       </section>
     </div>
   );
