@@ -142,6 +142,49 @@ describe("Worker API", () => {
     expect(preflight.headers.get("access-control-allow-methods")).toContain(
       "GET",
     );
+
+    const unsafePreflight = await exports.default.fetch(
+      new Request("https://api.example.test/api/v1/reviews/submissions", {
+        method: "OPTIONS",
+        headers: {
+          Origin: "http://127.0.0.1:3000",
+          "Access-Control-Request-Method": "POST",
+          "Access-Control-Request-Headers":
+            "Content-Type, X-CSRF-Token, Idempotency-Key",
+        },
+      }),
+    );
+    expect(unsafePreflight.status).toBe(204);
+    expect(unsafePreflight.headers.get("access-control-allow-origin")).toBe(
+      "http://127.0.0.1:3000",
+    );
+    expect(
+      unsafePreflight.headers.get("access-control-allow-credentials"),
+    ).toBe("true");
+    expect(
+      unsafePreflight.headers.get("access-control-allow-methods"),
+    ).toContain("POST");
+    expect(unsafePreflight.headers.get("access-control-allow-headers")).toBe(
+      "Content-Type, X-CSRF-Token, Idempotency-Key",
+    );
+
+    const deniedUnsafePreflight = await exports.default.fetch(
+      new Request("https://api.example.test/api/v1/reviews/submissions", {
+        method: "OPTIONS",
+        headers: {
+          Origin: "https://attacker.example",
+          "Access-Control-Request-Method": "POST",
+          "Access-Control-Request-Headers": "X-CSRF-Token, Idempotency-Key",
+        },
+      }),
+    );
+    expect(deniedUnsafePreflight.status).toBe(204);
+    expect(
+      deniedUnsafePreflight.headers.get("access-control-allow-origin"),
+    ).toBeNull();
+    expect(
+      deniedUnsafePreflight.headers.get("access-control-allow-credentials"),
+    ).toBeNull();
   });
 
   it("returns redacted problem details and structured allowlisted logs", async () => {
