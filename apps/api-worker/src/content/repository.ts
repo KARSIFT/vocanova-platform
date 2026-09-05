@@ -271,7 +271,14 @@ export class D1ContentLearningRepository {
         ),
       );
     }
-    await this.database.batch(statements);
+    try {
+      await this.database.batch(statements);
+    } catch (error) {
+      if (!isActiveUserWordConflict(error)) throw error;
+      const saved = await this.savedMeaning(userId, meaningId);
+      await this.recordIdempotency(userId, "user_words:save", key, fingerprint);
+      return saved;
+    }
     return this.savedMeaning(userId, meaningId);
   }
 
@@ -515,6 +522,8 @@ export class D1ContentLearningRepository {
         ]);
       } catch (error) {
         if (isReviewStateVersionConflict(error) && retry < 2) continue;
+        if (isInactiveSavedWordReview(error))
+          throw new ContentLearningError("user_word_not_found");
         throw error;
       }
       return (await this.attemptByClientId(
@@ -967,12 +976,26 @@ function requireKey(key: string): void {
     throw new ContentLearningError("invalid_idempotency");
 }
 
+function isActiveUserWordConflict(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("user_words.user_id, user_words.meaning_id")
+  );
+}
+
 function isReviewStateVersionConflict(error: unknown): boolean {
   return (
     error instanceof Error &&
     error.message.includes(
       "review_state_reservations.user_word_id, review_state_reservations.state_version",
     )
+  );
+}
+
+function isInactiveSavedWordReview(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("review attempt requires an active saved word")
   );
 }
 async function sha256(value: string): Promise<string> {
