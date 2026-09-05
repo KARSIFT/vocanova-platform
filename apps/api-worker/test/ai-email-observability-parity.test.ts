@@ -424,6 +424,20 @@ describe("Worker AI feedback parity", () => {
     expect(sharedCostProvider.generateCalls).toBe(1);
     await expect(
       env.DB.prepare(
+        `SELECT
+           (SELECT count(*) FROM learner_sentences WHERE user_id = ?1) AS sentences,
+           (SELECT count(*)
+            FROM ai_feedback_attempts
+            JOIN learner_sentences
+              ON learner_sentences.id = ai_feedback_attempts.learner_sentence_id
+            WHERE learner_sentences.user_id = ?1) AS attempts,
+           (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?1) AS rewards`,
+      )
+        .bind(USER_B)
+        .first<{ sentences: number; attempts: number; rewards: number }>(),
+    ).resolves.toEqual({ sentences: 0, attempts: 0, rewards: 0 });
+    await expect(
+      env.DB.prepare(
         "SELECT request_count, estimated_cost_cents FROM ai_usage_counters WHERE scope = 'global_month' AND subject = 'global'",
       ).first<{ request_count: number; estimated_cost_cents: number }>(),
     ).resolves.toEqual({ request_count: 1, estimated_cost_cents: 1 });
