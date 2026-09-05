@@ -34,10 +34,19 @@ maintain the existing Worker routes, and edit D1. Cloudflare's automatically
 generated default build token does not include D1, so add that permission or
 select the existing staging token if it remains active.
 
-Cloudflare attaches a build to one Worker and injects
-`WRANGLER_CI_OVERRIDE_NAME`. The repository entry point deliberately removes that
-override before deploying, allowing the two checked-in Wrangler staging
-environments to select `vocanova-api-staging` and `vocanova-web-staging` exactly.
+Cloudflare attaches a build to one Worker and injects both
+`WRANGLER_CI_OVERRIDE_NAME` and `WRANGLER_CI_MATCH_TAG`. The latter identifies the
+connected Worker independently of its name. Removing the name override alone
+does not allow the API deployment: Wrangler would compare the API identity with
+the web identity and reject it.
+
+Before migrations, the entry point uses Cloudflare's injected account ID and
+build API token to read both existing staging Workers' identity tags. It verifies
+that this build is connected to `vocanova-web-staging`, supplies the API tag only
+to API commands, and retains the web tag for the web deployment. The name override
+is removed so the checked-in staging configurations select their own names.
+Wrangler's Worker identity and account checks remain enabled. Missing credentials,
+failed lookups, or a wrong connected Worker stop delivery before migrations.
 
 ## Deployment sequence
 
@@ -46,10 +55,11 @@ For each push to `main`, Cloudflare runs:
 1. `pnpm validate` against the exact checked-out revision.
 2. The OpenNext web build with staging API origins and the Cloudflare-provided
    `WORKERS_CI_COMMIT_SHA` as its release.
-3. Pending compatible migrations against `vocanova-staging` D1.
-4. The API Worker deployment with `RELEASE` set to that Git SHA.
-5. The web Worker deployment from the previously built OpenNext artifact.
-6. Bounded smoke checks against API health, D1 health, the reported release, and
+3. Verify both staging Worker identities and dry-run the API deployment.
+4. Pending compatible migrations against `vocanova-staging` D1.
+5. The API Worker deployment with `RELEASE` set to that Git SHA.
+6. The web Worker deployment from the previously built OpenNext artifact.
+7. Bounded smoke checks against API health, D1 health, the reported release, and
    the public web origin.
 
 The entry point fails closed unless `WORKERS_CI=1`, the branch is exactly `main`,
