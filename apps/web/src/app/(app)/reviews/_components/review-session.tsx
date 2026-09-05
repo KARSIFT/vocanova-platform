@@ -305,13 +305,13 @@ export function ReviewSession({
 
       <div className="mt-[var(--spacing-md)] rounded-md border border-neutral-200 bg-white p-[var(--spacing-md)] shadow-sm">
         <div className="mb-[var(--spacing-lg)] text-center">
-          <span className="inline-block rounded-full bg-neutral-100 px-[var(--spacing-sm)] py-[var(--spacing-xs)] text-sm text-neutral-700">
+          <span className="inline-block max-w-full wrap-break-word rounded-full bg-neutral-100 px-[var(--spacing-sm)] py-[var(--spacing-xs)] text-sm text-neutral-700">
             {currentCard.partOfSpeech}
           </span>
           <h2
             ref={currentCardHeadingRef}
             tabIndex={-1}
-            className="mt-[var(--spacing-sm)] text-3xl font-semibold text-neutral-900"
+            className="mt-[var(--spacing-sm)] wrap-break-word text-3xl font-semibold text-neutral-900"
           >
             {currentCard.wordText}
           </h2>
@@ -330,14 +330,14 @@ export function ReviewSession({
         {promptType === "self_check" && phase === "rate" ? (
           <div className="mb-[var(--spacing-lg)] rounded-md bg-primary-50 p-[var(--spacing-md)] text-center">
             <p className="text-sm font-medium text-primary-900">Answer</p>
-            <p className="mt-[var(--spacing-xs)] text-lg text-primary-900">
+            <p className="mt-[var(--spacing-xs)] wrap-break-word text-lg text-primary-900">
               {currentCard.shortDefinition}
             </p>
           </div>
         ) : null}
 
         {promptType === "multiple_choice" && options ? (
-          <fieldset className="mb-[var(--spacing-lg)]">
+          <fieldset className="mb-[var(--spacing-lg)] min-w-0">
             <legend className="sr-only">
               Choose the meaning for {currentCard.wordText}
             </legend>
@@ -367,7 +367,9 @@ export function ReviewSession({
                           : "border-neutral-200 bg-neutral-50 text-neutral-900 hover:bg-neutral-100"
                     }`}
                   >
-                    <span className="font-medium">{option.label}</span>
+                    <span className="wrap-break-word font-medium">
+                      {option.label}
+                    </span>
                     {showCorrectness && isCorrect ? (
                       <span className="ml-[var(--spacing-sm)] text-sm">
                         (correct)
@@ -394,7 +396,7 @@ export function ReviewSession({
         {phase === "feedback" && isMultipleChoiceIncorrect ? (
           <div className="mb-[var(--spacing-lg)] rounded-md border border-red-200 bg-red-50 p-[var(--spacing-md)]">
             <p className="font-medium text-red-900">Not quite</p>
-            <p className="mt-[var(--spacing-xs)] text-base text-red-800">
+            <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-red-800">
               The correct answer was: {currentCard.shortDefinition}
             </p>
             <button
