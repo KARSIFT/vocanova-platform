@@ -43,6 +43,12 @@ test("keeps a 300-character sentence feedback result inside the viewport", async
   await expect(
     page.getByText("Corrected sentence", { exact: true }),
   ).toBeVisible();
+  await expect(
+    page
+      .getByText("Corrected sentence", { exact: true })
+      .locator("..")
+      .getByText(sentence, { exact: true }),
+  ).toBeVisible();
   await expect
     .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
     .toBeLessThanOrEqual(page.viewportSize()?.width ?? 0);
