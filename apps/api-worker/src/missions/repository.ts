@@ -91,7 +91,17 @@ export class D1MissionsRepository {
   }
 
   async getProgress(userId: string, clientTimezone: string): Promise<Progress> {
-    await this.resolveSettings(userId, clientTimezone);
+    const settings = await this.resolveSettings(userId, clientTimezone);
+    const today = localDate(this.now(), settings.timezone);
+    const timestamp = this.now().toISOString();
+    await this.database
+      .prepare(
+        `UPDATE daily_mission_snapshots SET status = 'missed', updated_at = ?1
+         WHERE user_id = ?2 AND local_date < ?3 AND status = 'open'`,
+      )
+      .bind(timestamp, userId, today)
+      .run();
+    await this.reconcile(userId, settings.timezone, today, false);
     const [balance, streak, history] = await Promise.all([
       this.database
         .prepare(
@@ -238,11 +248,25 @@ export class D1MissionsRepository {
              WHERE user_id = ?2 AND idempotency_key = ?10
            )
            ON CONFLICT(user_id) DO UPDATE SET
-             current_streak_count = excluded.current_streak_count,
-             longest_streak_count = excluded.longest_streak_count,
-             last_completed_local_date = excluded.last_completed_local_date,
-             last_activity_local_date = excluded.last_activity_local_date,
-             timezone = excluded.timezone, status = excluded.status, updated_at = excluded.updated_at`,
+           current_streak_count = excluded.current_streak_count,
+           longest_streak_count = excluded.longest_streak_count,
+           last_completed_local_date = excluded.last_completed_local_date,
+           last_activity_local_date = excluded.last_activity_local_date,
+           timezone = excluded.timezone, status = excluded.status, updated_at = excluded.updated_at
+           WHERE (
+             ?10 IS NOT NULL AND EXISTS (
+               SELECT 1 FROM confidence_point_ledger
+               WHERE user_id = ?2 AND idempotency_key = ?10
+             )
+           ) OR (
+             ?10 IS NULL AND ?11 IS NOT NULL
+             AND streak_states.current_streak_count IS ?12
+             AND streak_states.longest_streak_count IS ?13
+             AND streak_states.last_completed_local_date IS ?14
+             AND streak_states.last_activity_local_date IS ?15
+             AND streak_states.timezone IS ?16
+             AND streak_states.status IS ?17
+           )`,
         )
         .bind(
           crypto.randomUUID(),
@@ -255,6 +279,13 @@ export class D1MissionsRepository {
           result.state.status,
           timestamp,
           completionGuardKey ?? null,
+          stateRow?.id ?? null,
+          state.current,
+          state.longest,
+          state.lastCompleted,
+          state.lastActivity,
+          state.timezone,
+          state.status,
         ),
     ];
     let balance = Number(graceRow?.balance_after ?? 0);
@@ -391,7 +422,10 @@ function reconcileStreak(
   }
   const gap = daysBetween(today, lastGood);
   if (gap <= 0) {
-    if (gap < 0) throw new Error("last completion is after current local date");
+    if (gap < 0)
+      return {
+        state: { ...state, timezone: output.timezone, status: "active" },
+      };
     return { state: output };
   }
   if (gap === 1) {
