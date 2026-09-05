@@ -19,12 +19,12 @@ const REVIEW_INTERVAL_PRESETS = [
   {
     value: "wordup_like",
     label: "Faster reminders",
-    helper: "Words come back sooner — useful before an exam or trip.",
+    helper: "Not available. Reviews currently use the default schedule.",
   },
   {
     value: "custom",
     label: "Custom",
-    helper: "A later custom preset. We will add it here when it ships.",
+    helper: "Not available. Custom review schedules are not supported.",
   },
 ] as const;
 
@@ -162,8 +162,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           Review rhythm
         </legend>
         <p className="text-base text-neutral-700">
-          Pick the reminder rhythm that fits your schedule.
+          All reviews currently use the Vocanova default schedule.
         </p>
+        {state.reviewIntervalPreset !== "vocanova_default" ? (
+          <p className="text-sm text-neutral-700">
+            Your saved preference is retained, but it does not change the
+            current schedule.
+          </p>
+        ) : null}
         <div
           role="radiogroup"
           aria-label="Review rhythm preset"
@@ -171,10 +177,11 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         >
           {REVIEW_INTERVAL_PRESETS.map((preset) => {
             const checked = state.reviewIntervalPreset === preset.value;
+            const unavailable = preset.value !== "vocanova_default";
             return (
               <label
                 key={preset.value}
-                className={`flex min-h-[var(--spacing-2xl)] cursor-pointer items-start gap-[var(--spacing-sm)] rounded-md border p-[var(--spacing-md)] transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] ${
+                className={`flex min-h-[var(--spacing-2xl)] ${unavailable ? "cursor-not-allowed" : "cursor-pointer"} items-start gap-[var(--spacing-sm)] rounded-md border p-[var(--spacing-md)] transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] ${
                   checked
                     ? "border-primary-600 bg-primary-50"
                     : "border-neutral-200 bg-white hover:border-primary-300"
@@ -185,6 +192,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
                   name="reviewIntervalPreset"
                   value={preset.value}
                   checked={checked}
+                  disabled={unavailable}
                   onChange={() => patch("reviewIntervalPreset", preset.value)}
                   className="mt-[var(--spacing-xs)] size-4 accent-primary-600"
                 />
@@ -238,7 +246,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           <ToggleRow
             id="notifications-enabled"
             label="Daily review reminders"
-            description="We will send a gentle reminder when your reviews are waiting."
+            description="Reminder emails are not available yet. Your saved preference is retained."
+            disabled
             checked={state.notificationsEnabled}
             onChange={(value) => patch("notificationsEnabled", value)}
           />
@@ -339,6 +348,7 @@ interface ToggleRowProps {
   label: string;
   description: string;
   checked: boolean;
+  disabled?: boolean;
   onChange: (next: boolean) => void;
 }
 
@@ -347,6 +357,7 @@ function ToggleRow({
   label,
   description,
   checked,
+  disabled = false,
   onChange,
 }: ToggleRowProps) {
   return (
@@ -355,7 +366,10 @@ function ToggleRow({
         <label htmlFor={id} className="text-base font-medium text-neutral-900">
           {label}
         </label>
-        <p className="mt-[var(--spacing-xs)] text-sm text-neutral-700">
+        <p
+          id={`${id}-description`}
+          className="mt-[var(--spacing-xs)] text-sm text-neutral-700"
+        >
           {description}
         </p>
       </div>
@@ -366,6 +380,8 @@ function ToggleRow({
           type="button"
           role="switch"
           aria-checked={checked}
+          aria-describedby={`${id}-description`}
+          disabled={disabled}
           onClick={() => onChange(!checked)}
           className={`relative inline-flex h-[var(--spacing-xl)] w-[var(--spacing-2xl)] items-center rounded-full transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 ${
             checked ? "bg-primary-600" : "bg-neutral-300"
@@ -381,7 +397,7 @@ function ToggleRow({
           />
         </button>
         <span className="text-sm text-neutral-700" aria-hidden="true">
-          {checked ? "On" : "Off"}
+          {disabled ? "Unavailable" : checked ? "On" : "Off"}
         </span>
       </div>
     </div>

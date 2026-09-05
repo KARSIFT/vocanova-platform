@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { DueWord, SubmitReviewBody } from "@vocanova/api-client";
 
@@ -44,6 +44,7 @@ export function ReviewSession({
   const [isRefetching, setIsRefetching] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [completed, setCompleted] = useState(false);
+  const [completedReviewCount, setCompletedReviewCount] = useState(0);
   const [phase, setPhase] = useState<PromptPhase>("prompt");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<number>(Date.now());
@@ -53,6 +54,7 @@ export function ReviewSession({
   const [lastReviewAttemptId, setLastReviewAttemptId] = useState<string | null>(
     null,
   );
+  const submissionInFlight = useRef(false);
 
   const currentCard = dueWords[currentIndex];
 
@@ -115,7 +117,7 @@ export function ReviewSession({
     rating: Rating;
     selectedOptionMeaningId?: string;
   }) => {
-    if (!currentCard) {
+    if (!currentCard || submissionInFlight.current) {
       return;
     }
 
@@ -126,6 +128,7 @@ export function ReviewSession({
     }
 
     setIsSubmitting(true);
+    submissionInFlight.current = true;
     setErrorMessage(null);
 
     const client = createApiClient();
@@ -152,6 +155,7 @@ export function ReviewSession({
       });
       setLastReviewedCard(currentCard);
       setLastReviewAttemptId(data.attemptId);
+      setCompletedReviewCount((count) => count + 1);
       setRemainingCount((count) => Math.max(0, count - 1));
       advance();
     } catch (error) {
@@ -166,6 +170,7 @@ export function ReviewSession({
         ),
       );
     } finally {
+      submissionInFlight.current = false;
       setIsSubmitting(false);
     }
   };
@@ -180,6 +185,10 @@ export function ReviewSession({
         </h2>
         <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">
           No words are due for review right now.
+        </p>
+        <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+          You completed {completedReviewCount} review
+          {completedReviewCount === 1 ? "" : "s"} in this session.
         </p>
         <Link
           href="/home"

@@ -544,6 +544,7 @@ function createInitialState() {
     reviewedCount: 0,
     consumedReadFailureFixtures: new Set(),
     readFailureFixtureAttempts: new Map(),
+    completionSummaryDueFetches: 0,
   };
 }
 
@@ -620,6 +621,20 @@ function buildSavedWords(state) {
 }
 
 function buildDueWords(state, fixture) {
+  if (fixture === "completion-summary") {
+    const page = state.completionSummaryDueFetches;
+    state.completionSummaryDueFetches += 1;
+    const start = page * 2;
+    const items = MULTIPLE_CHOICE_DUE_WORDS.slice(start, start + 2);
+    return {
+      items,
+      nextCursor:
+        start + items.length < MULTIPLE_CHOICE_DUE_WORDS.length
+          ? `completion-summary-${page + 1}`
+          : undefined,
+      totalCount: Math.max(0, MULTIPLE_CHOICE_DUE_WORDS.length - start),
+    };
+  }
   if (fixture === "multiple-choice") {
     return {
       items: MULTIPLE_CHOICE_DUE_WORDS,

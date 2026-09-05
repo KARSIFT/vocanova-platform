@@ -266,6 +266,11 @@ test.describe("Core loop end-to-end", () => {
       page.getByRole("heading", { name: "You're all caught up", level: 2 }),
     ).toBeVisible();
     await expect(
+      page.getByText("You completed 1 review in this session.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
       page.getByRole("heading", { name: /Practice with pour/ }),
     ).toBeVisible();
 
