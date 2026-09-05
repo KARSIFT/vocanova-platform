@@ -3,6 +3,12 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { createApp } from "../src/app.js";
 import type { EmailMessage, OAuthProvider } from "../src/domain/identity.js";
+import {
+  CSRF_COOKIE,
+  OAUTH_STATE_COOKIE,
+  readCookie,
+  SESSION_COOKIE,
+} from "../src/identity/cookies.js";
 import { hashToken, issueOpaqueToken } from "../src/identity/crypto.js";
 import { D1IdentityRepository } from "../src/identity/repository.js";
 import {
@@ -71,6 +77,29 @@ beforeEach(async () => {
 });
 
 describe("identity and account parity", () => {
+  it("treats malformed percent-encoded security cookies as absent", () => {
+    const request = new Request("http://worker.test", {
+      headers: {
+        Cookie: `${SESSION_COOKIE}=%; ${CSRF_COOKIE}=%; ${OAUTH_STATE_COOKIE}=%`,
+      },
+    });
+
+    expect(readCookie(request, SESSION_COOKIE)).toBe("");
+    expect(readCookie(request, CSRF_COOKIE)).toBe("");
+    expect(readCookie(request, OAUTH_STATE_COOKIE)).toBe("");
+  });
+
+  it("treats malformed session cookie encoding as unauthenticated", async () => {
+    const response = await identityApp().request(
+      "http://worker.test/api/v1/me",
+      {
+        headers: { Cookie: "vocanova_session=%" },
+      },
+      env,
+    );
+    expect(response.status).toBe(401);
+  });
+
   it("stores only a hash, consumes a magic link once, and issues secure-shape cookies", async () => {
     const app = identityApp();
     const requested = await app.request(
