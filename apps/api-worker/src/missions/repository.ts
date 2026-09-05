@@ -248,11 +248,25 @@ export class D1MissionsRepository {
              WHERE user_id = ?2 AND idempotency_key = ?10
            )
            ON CONFLICT(user_id) DO UPDATE SET
-             current_streak_count = excluded.current_streak_count,
-             longest_streak_count = excluded.longest_streak_count,
-             last_completed_local_date = excluded.last_completed_local_date,
-             last_activity_local_date = excluded.last_activity_local_date,
-             timezone = excluded.timezone, status = excluded.status, updated_at = excluded.updated_at`,
+           current_streak_count = excluded.current_streak_count,
+           longest_streak_count = excluded.longest_streak_count,
+           last_completed_local_date = excluded.last_completed_local_date,
+           last_activity_local_date = excluded.last_activity_local_date,
+           timezone = excluded.timezone, status = excluded.status, updated_at = excluded.updated_at
+           WHERE (
+             ?10 IS NOT NULL AND EXISTS (
+               SELECT 1 FROM confidence_point_ledger
+               WHERE user_id = ?2 AND idempotency_key = ?10
+             )
+           ) OR (
+             ?10 IS NULL AND ?11 IS NOT NULL
+             AND streak_states.current_streak_count IS ?12
+             AND streak_states.longest_streak_count IS ?13
+             AND streak_states.last_completed_local_date IS ?14
+             AND streak_states.last_activity_local_date IS ?15
+             AND streak_states.timezone IS ?16
+             AND streak_states.status IS ?17
+           )`,
         )
         .bind(
           crypto.randomUUID(),
@@ -265,6 +279,13 @@ export class D1MissionsRepository {
           result.state.status,
           timestamp,
           completionGuardKey ?? null,
+          stateRow?.id ?? null,
+          state.current,
+          state.longest,
+          state.lastCompleted,
+          state.lastActivity,
+          state.timezone,
+          state.status,
         ),
     ];
     let balance = Number(graceRow?.balance_after ?? 0);
