@@ -54,7 +54,13 @@ test("keeps an authenticated learner on page after logout fails, then retries", 
       (cookie) => cookie.name === "vocanova_csrf" && cookie.value === csrf,
     ),
   ).toBe(true);
+  const retryResponse = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/v1/auth/logout" &&
+      response.request().method() === "POST",
+  );
   await page.getByRole("button", { name: "Log out" }).click();
+  expect((await retryResponse).status()).toBe(204);
   await expect(page).toHaveURL(/\/signin/);
   expect(
     (await context.cookies()).some((cookie) => cookie.name === "vocanova_csrf"),
