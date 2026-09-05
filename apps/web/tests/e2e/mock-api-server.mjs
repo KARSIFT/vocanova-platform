@@ -69,6 +69,8 @@
 //
 //   GET    /api/v1/daily-mission                     -> 200 DailyMission
 //   GET    /api/v1/progress                          -> 200 Progress
+//             `e2e_progress_fixture=first-mission` returns authoritative
+//             zero totals and no completion history for first-time progress
 //
 //   GET    /api/v1/journey-situations                -> 200 { items: [...] }
 //             `e2e_journey_fixture=empty` returns an empty catalog
@@ -162,6 +164,17 @@ const DEFAULT_PROGRESS = {
     { localDate: "2026-01-06", completed: false },
     { localDate: "2026-01-07", completed: false },
   ],
+};
+
+const FIRST_MISSION_PROGRESS = {
+  confidencePointsBalance: 0,
+  streak: {
+    currentStreakCount: 0,
+    longestStreakCount: 0,
+    status: "broken",
+    graceDayBalance: 0,
+  },
+  completionHistory: [],
 };
 
 const DEFAULT_DAILY_MISSION = {
@@ -628,7 +641,9 @@ function waitForSettingsPatchHold(state, cookies) {
     state.settingsPatchHold = { promise, release, released: false };
   }
 
-  return state.settingsPatchHold.released ? null : state.settingsPatchHold.promise;
+  return state.settingsPatchHold.released
+    ? null
+    : state.settingsPatchHold.promise;
 }
 
 function releaseSettingsPatchHold(state) {
@@ -1063,7 +1078,10 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  if (req.method === "POST" && url.pathname === "/__e2e/release-settings-patch") {
+  if (
+    req.method === "POST" &&
+    url.pathname === "/__e2e/release-settings-patch"
+  ) {
     const released = releaseSettingsPatchHold(getSessionState(cookies));
     logLine(req, released ? 204 : 409, { action: "release-settings-patch" });
     if (released) {
@@ -1528,8 +1546,12 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 500, { error: "fixture_read_failure" });
       return;
     }
+    const progress =
+      cookies.e2e_progress_fixture === "first-mission"
+        ? FIRST_MISSION_PROGRESS
+        : buildProgress(state);
     logLine(req, 200, { reviewedCount: state.reviewedCount });
-    jsonResponse(res, 200, buildProgress(state));
+    jsonResponse(res, 200, progress);
     return;
   }
 
@@ -1568,7 +1590,10 @@ const server = createServer(async (req, res) => {
     const slug = decodeURIComponent(
       url.pathname.slice("/api/v1/journey-situations/".length),
     );
-    const response = buildSituationResponse(slug, cookies.e2e_situation_fixture);
+    const response = buildSituationResponse(
+      slug,
+      cookies.e2e_situation_fixture,
+    );
     if (!response) {
       logLine(req, 404, { slug });
       jsonResponse(res, 404, { error: "not_found", slug });
