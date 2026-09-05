@@ -15,7 +15,14 @@ describe("D1 platform repository", () => {
     const migrationCount = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM d1_migrations",
     ).first<{ count: number }>();
-    expect(migrationCount?.count).toBe(7);
+    expect(migrationCount?.count).toBe(8);
+    const reservationTable = await env.DB.prepare(
+      "SELECT name, sql FROM sqlite_master WHERE type = 'table' AND name = ?1",
+    )
+      .bind("review_state_reservations")
+      .first<{ name: string; sql: string }>();
+    expect(reservationTable?.name).toBe("review_state_reservations");
+    expect(reservationTable?.sql).toContain("STRICT");
   });
 
   it("binds dynamic values instead of interpolating SQL", async () => {
