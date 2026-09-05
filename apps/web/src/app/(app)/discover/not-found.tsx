@@ -1,0 +1,21 @@
+import Link from "next/link";
+
+export default function DiscoverNotFound() {
+  return (
+    <div className="p-[var(--spacing-lg)]">
+      <h1 className="text-xl font-semibold text-neutral-900">
+        Journey item not found
+      </h1>
+      <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">
+        This journey item is no longer available. Choose another journey to
+        continue learning.
+      </p>
+      <Link
+        href="/discover"
+        className="mt-[var(--spacing-lg)] inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50"
+      >
+        Back to Journey
+      </Link>
+    </div>
+  );
+}
