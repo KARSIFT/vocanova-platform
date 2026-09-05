@@ -28,7 +28,7 @@ export function MagicLinkForm({
 
     const client = createApiClient();
     try {
-      await client.requestMagicLink({ email });
+      await client.requestMagicLink({ email, returnTo });
       setStatus({
         type: "success",
         message: `If ${email} is valid, a sign-in link has been sent. Check your email and return to ${returnTo}.`,

@@ -35,7 +35,7 @@ test.describe("Expired magic-link recovery", () => {
     const retry = page.getByRole("link", { name: "Back to sign in" });
     await expect(retry).toHaveAttribute(
       "href",
-      `/signin?email=${encodeURIComponent(email)}`,
+      `/signin?email=${encodeURIComponent(email)}&returnTo=%2Fhome`,
     );
     await expect(retry).not.toHaveAttribute("href", /expired-token/);
     await retry.click();
@@ -44,7 +44,7 @@ test.describe("Expired magic-link recovery", () => {
     await expect(emailInput).toHaveValue(email);
     await page.getByRole("button", { name: "Send sign-in link" }).click();
 
-    expect(replacementRequest).toEqual({ email });
+    expect(replacementRequest).toEqual({ email, returnTo: "/home" });
     await expect(page.getByRole("status")).toContainText(
       "a sign-in link has been sent",
     );

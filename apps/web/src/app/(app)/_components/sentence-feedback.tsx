@@ -288,7 +288,14 @@ export function SentenceFeedback({
               <p className="text-sm text-neutral-600">{AI_LIMITATION_COPY}</p>
               <div className="mt-[var(--spacing-sm)] flex items-center gap-[var(--spacing-md)]">
                 {reported ? (
-                  <span className="text-sm text-neutral-600">Reported</span>
+                  <span
+                    role="status"
+                    aria-live="polite"
+                    aria-label="Feedback report submitted"
+                    className="text-sm text-neutral-600"
+                  >
+                    Reported
+                  </span>
                 ) : (
                   <button
                     type="button"

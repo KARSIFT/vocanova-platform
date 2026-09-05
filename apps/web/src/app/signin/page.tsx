@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { normalizeReturnTo } from "@/lib/return-to";
+
 import { MagicLinkForm, OAuthButton } from "./_components/auth-forms";
 
 export const metadata: Metadata = {
@@ -49,7 +51,6 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
     </main>
   );
 }
-
 function normalizeRecoveryEmail(value: unknown): string {
   if (typeof value !== "string") {
     return "";
@@ -58,19 +59,4 @@ function normalizeRecoveryEmail(value: unknown): string {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254
     ? email
     : "";
-}
-
-function normalizeReturnTo(value: unknown): string {
-  if (!value || typeof value !== "string") {
-    return "/home";
-  }
-  const trimmed = value.trim();
-  if (!trimmed.startsWith("/")) {
-    return "/home";
-  }
-  // Reject URLs that include a scheme or host to prevent open redirects.
-  if (trimmed.includes("://") || trimmed.includes("//")) {
-    return "/home";
-  }
-  return trimmed;
 }

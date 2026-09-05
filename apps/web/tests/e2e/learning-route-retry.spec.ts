@@ -42,11 +42,12 @@ async function releaseRead(page: Page, fixture: "discover" | "reviews") {
 
 async function expectRecoveredRoute(
   page: Page,
+  errorHeading: string,
   errorCopy: string,
   recoveredHeading: string,
 ) {
   await expect(
-    page.getByRole("heading", { name: "Something went wrong", level: 1 }),
+    page.getByRole("heading", { name: errorHeading, level: 1 }),
   ).toBeVisible();
   await expect(page.getByText(errorCopy, { exact: true })).toBeVisible();
 
@@ -112,6 +113,7 @@ test.describe("Learning route retry boundaries", () => {
     await page.goto("/discover");
     await expectRecoveredRoute(
       page,
+      "Something went wrong",
       "We couldn't load your journey. Please try again.",
       "Journey",
     );
@@ -130,7 +132,8 @@ test.describe("Learning route retry boundaries", () => {
     await page.goto("/discover/ordering-at-a-cafe/pour");
     await expectRecoveredRoute(
       page,
-      "We couldn't load your journey. Please try again.",
+      "We couldn't load this word",
+      "Please try again. Your saved words and review progress are still safe.",
       "pour",
     );
   });
@@ -148,6 +151,7 @@ test.describe("Learning route retry boundaries", () => {
     await page.goto("/reviews");
     await expectRecoveredRoute(
       page,
+      "Something went wrong",
       "We couldn't load your review. Please try again.",
       "Review",
     );

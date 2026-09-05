@@ -61,7 +61,9 @@ test.describe("Sentence feedback report errors", () => {
     ).toBeEnabled();
 
     await page.getByRole("button", { name: "Report a problem" }).click();
-    await expect(page.getByText("Reported", { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("status", { name: "Feedback report submitted" }),
+    ).toBeVisible();
     await expect(reportFailure).toBeHidden();
     expect(reportRequestCount).toBe(2);
   });

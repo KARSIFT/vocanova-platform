@@ -134,6 +134,54 @@ describe("identity and account parity", () => {
     expect(cookieHeader(consumed)).toContain("Secure");
   });
 
+  it("uses production cookie lifetimes, visibility, and clearing semantics", async () => {
+    const production = {
+      ...config,
+      environment: "production" as const,
+      secureCookies: true,
+    };
+    const app = identityApp(production);
+    await app.request(
+      "http://worker.test/api/v1/auth/magic-links",
+      json({ email: "cookie-contract@example.test" }),
+      env,
+    );
+    const token = messageToken(messages.at(-1)!);
+    const consumed = await app.request(
+      "http://worker.test/api/v1/auth/magic-links/consume",
+      json({ token, email: "cookie-contract@example.test" }),
+      env,
+    );
+    const cookies = splitCookies(cookieHeader(consumed));
+    const session = cookies.find((cookie) =>
+      cookie.startsWith("vocanova_session="),
+    );
+    const csrf = cookies.find((cookie) => cookie.startsWith("vocanova_csrf="));
+    expect(session).toContain(
+      "Path=/; Max-Age=2592000; HttpOnly; SameSite=Lax; Secure",
+    );
+    expect(csrf).toContain("Path=/; Max-Age=2592000; SameSite=Lax; Secure");
+    expect(csrf).not.toContain("HttpOnly");
+
+    const loggedOut = await app.request(
+      "http://worker.test/api/v1/auth/logout",
+      withAuth(
+        { method: "POST" },
+        cookiePairs(cookieHeader(consumed)),
+        namedCookie(cookieHeader(consumed), "vocanova_csrf"),
+      ),
+      env,
+    );
+    expect(loggedOut.status).toBe(204);
+    const cleared = splitCookies(cookieHeader(loggedOut));
+    expect(
+      cleared.find((cookie) => cookie.startsWith("vocanova_session=")),
+    ).toContain("Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure");
+    expect(
+      cleared.find((cookie) => cookie.startsWith("vocanova_csrf=")),
+    ).toContain("Path=/; Max-Age=0; SameSite=Lax; Secure");
+  });
+
   it("authenticates requester scope and enforces double-submit CSRF on settings and onboarding", async () => {
     const { app, cookie, csrf } = await signedIn("settings@example.test");
     const me = await app.request(
@@ -325,6 +373,73 @@ describe("identity and account parity", () => {
       env,
     );
     expect(replay.status).toBe(401);
+  });
+
+  it("round-trips supported local OAuth returns and rejects unsafe destinations", async () => {
+    const service = identityService();
+    const returnUrl = "http://127.0.0.1:3000/discover/coffee?level=b1";
+    const credentialedReturnUrl = new URL(returnUrl);
+    credentialedReturnUrl.username = "test-user";
+    credentialedReturnUrl.password = "test-password";
+    const started = await service.startOAuth(returnUrl, "oauth-local-route");
+    const finished = await service.finishOAuth(
+      "valid-code",
+      started.state,
+      started.state,
+      "oauth-local-route",
+    );
+    expect(finished.returnUrl).toBe(returnUrl);
+    for (const invalid of [
+      "https://evil.example.test/home",
+      credentialedReturnUrl.toString(),
+      "http://127.0.0.1:3000/unknown",
+      "http://127.0.0.1:3000/discover\\escape",
+      "http://127.0.0.1:3000/reviews%0Aevil",
+    ]) {
+      await expect(
+        service.startOAuth(invalid, `oauth-${invalid}`),
+      ).rejects.toMatchObject({
+        code: "oauth_invalid",
+      });
+    }
+  });
+
+  it("carries a supported magic-link return query and falls back for invalid input", async () => {
+    const service = identityService();
+    await service.requestMagicLink(
+      "return@example.test",
+      "magic-return",
+      "/reviews?mode=due",
+    );
+    expect(messages.at(-1)?.text).toContain("returnTo=%2Freviews%3Fmode%3Ddue");
+    await service.requestMagicLink(
+      "fallback@example.test",
+      "magic-fallback",
+      "https://evil.example.test/home",
+    );
+    expect(messages.at(-1)?.text).toContain("returnTo=%2Fhome");
+  });
+
+  it("wires safe magic-link return targets through the HTTP request DTO", async () => {
+    const app = identityApp();
+    for (const [returnTo, expected] of [
+      [undefined, "/home"],
+      ["/settings/account?tab=security", "/settings/account?tab=security"],
+      ["//evil.example.test/home", "/home"],
+      ["https://evil.example.test/home", "/home"],
+      ["/discover\\escape", "/home"],
+      ["/unknown", "/home"],
+    ] as const) {
+      const response = await app.request(
+        "http://worker.test/api/v1/auth/magic-links",
+        json({ email: `route-${messages.length}@example.test`, returnTo }),
+        env,
+      );
+      expect(response.status).toBe(204);
+      expect(messages.at(-1)?.text).toContain(
+        `returnTo=${encodeURIComponent(expected)}`,
+      );
+    }
   });
 
   it("creates no partial identity or session for provider failure or unverified email", async () => {
@@ -538,6 +653,32 @@ describe("identity and account parity", () => {
     expect(response.status).toBe(422);
   });
 
+  it("enforces the account-deletion idempotency key length boundary", async () => {
+    const accepted = await signedIn("accepted-key@example.test");
+    await expect(
+      accepted.service.deleteAccount(
+        accepted.userId,
+        "a".repeat(200),
+        accepted.token,
+        "test-ip",
+      ),
+    ).resolves.toMatchObject({ status: "deactivated" });
+    const rejected = await signedIn("rejected-key@example.test");
+    await expect(
+      rejected.service.deleteAccount(
+        rejected.userId,
+        "b".repeat(201),
+        rejected.token,
+        "test-ip",
+      ),
+    ).rejects.toMatchObject({ code: "invalid_idempotency" });
+    await expect(
+      env.DB.prepare("SELECT status FROM users WHERE id = ?1")
+        .bind(rejected.userId)
+        .first<{ status: string }>(),
+    ).resolves.toEqual({ status: "active" });
+  });
+
   it("rolls back the deletion record when a later deactivation mutation fails", async () => {
     const { app, cookie, csrf, userId, token, service } = await signedIn(
       "rollback-delete@example.test",
@@ -745,6 +886,111 @@ describe("identity and account parity", () => {
     );
     expect(blocked.status).toBe(429);
   });
+
+  it("rejects an expired session without renewing it or applying a write", async () => {
+    const { app, cookie, csrf, userId } = await signedIn(
+      "expired@example.test",
+    );
+    // Age the original 30-day session so an accidental sliding renewal
+    // would change its expiry even though the test clock is deterministic.
+    await env.DB.prepare(
+      "UPDATE sessions SET created_at = '2026-07-24T12:00:00.000Z', expires_at = '2026-08-23T12:00:00.000Z' WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
+    const activeExpiry = await env.DB.prepare(
+      "SELECT expires_at FROM sessions WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .first<{ expires_at: string }>();
+    expect(
+      (
+        await app.request(
+          "http://worker.test/api/v1/me",
+          { headers: { Cookie: cookie } },
+          env,
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await app.request(
+          "http://worker.test/api/v1/settings",
+          withAuth(
+            json({ displayName: "Active write" }, "PATCH"),
+            cookie,
+            csrf,
+          ),
+          env,
+        )
+      ).status,
+    ).toBe(200);
+    await expect(
+      env.DB.prepare("SELECT expires_at FROM sessions WHERE user_id = ?1")
+        .bind(userId)
+        .first<{ expires_at: string }>(),
+    ).resolves.toEqual(activeExpiry);
+    await env.DB.prepare(
+      "UPDATE sessions SET created_at = '2026-08-01T00:00:00.000Z', expires_at = '2026-08-02T00:00:00.000Z' WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
+    const me = await app.request(
+      "http://worker.test/api/v1/me",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
+    expect(me.status).toBe(401);
+    const write = await app.request(
+      "http://worker.test/api/v1/settings",
+      withAuth(
+        json({ displayName: "Should not persist" }, "PATCH"),
+        cookie,
+        csrf,
+      ),
+      env,
+    );
+    expect(write.status).toBe(401);
+    await expect(
+      env.DB.prepare("SELECT expires_at FROM sessions WHERE user_id = ?1")
+        .bind(userId)
+        .first<{ expires_at: string }>(),
+    ).resolves.toEqual({ expires_at: "2026-08-02T00:00:00.000Z" });
+    const settings = await env.DB.prepare(
+      "SELECT display_name FROM users WHERE id = ?1",
+    )
+      .bind(userId)
+      .first<{ display_name: string }>();
+    expect(settings?.display_name).toBe("Active write");
+  });
+
+  it("isolates exhausted magic-link rate buckets by connecting client", async () => {
+    const app = identityApp();
+    const request = (email: string, ip: string) =>
+      app.request(
+        "http://worker.test/api/v1/auth/magic-links",
+        {
+          ...json({ email }),
+          headers: {
+            "content-type": "application/json",
+            "cf-connecting-ip": ip,
+          },
+        },
+        env,
+      );
+    for (let index = 0; index < 10; index += 1)
+      expect(
+        (await request(`bucket-${index}@example.test`, "203.0.113.10")).status,
+      ).toBe(204);
+    expect((await request("blocked@example.test", "203.0.113.10")).status).toBe(
+      429,
+    );
+    expect((await request("other@example.test", "203.0.113.11")).status).toBe(
+      204,
+    );
+  });
 });
 
 function identityApp(
@@ -830,6 +1076,10 @@ function headers(value: HeadersInit | undefined): Record<string, string> {
 
 function cookieHeader(response: Response): string {
   return response.headers.get("set-cookie") ?? "";
+}
+
+function splitCookies(header: string): string[] {
+  return header.split(", ").filter(Boolean);
 }
 
 function cookiePairs(header: string): string {

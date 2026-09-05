@@ -2,7 +2,11 @@
 
 import { useRef, useState } from "react";
 
-import { Settings, UpdateSettingsBody } from "@vocanova/api-client";
+import {
+  ApiResponseError,
+  Settings,
+  UpdateSettingsBody,
+} from "@vocanova/api-client";
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
@@ -103,10 +107,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       // learner to re-auth; the form state is preserved on the
       // controlled inputs so the learner does not need to retype
       // their changes after re-authentication.
-      const message = handleApiError(
-        error,
-        "We couldn't save your settings. Please try again.",
-      );
+      const message = getSettingsSaveError(error);
       setStatus({ type: "error", message });
     }
   }
@@ -315,6 +316,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       </div>
     </form>
   );
+}
+
+function getSettingsSaveError(error: unknown): string {
+  const fallbackMessage = "We couldn't save your settings. Please try again.";
+  if (error instanceof ApiResponseError && error.status >= 500) {
+    return fallbackMessage;
+  }
+  return handleApiError(error, fallbackMessage);
 }
 
 function buildUpdateBody(

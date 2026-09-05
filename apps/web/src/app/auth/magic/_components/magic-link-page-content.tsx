@@ -7,13 +7,16 @@ import { useEffect, useState } from "react";
 import { ApiResponseError } from "@vocanova/api-client";
 
 import { createApiClient } from "@/lib/api";
+import { normalizeReturnTo } from "@/lib/return-to";
 
 export function MagicLinkPageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const email = searchParams.get("email") ?? "";
+  const returnTo = normalizeReturnTo(searchParams.get("returnTo"));
   const signInSearchParams = new URLSearchParams();
   if (email) signInSearchParams.set("email", email);
+  signInSearchParams.set("returnTo", returnTo);
   const signInHref = signInSearchParams.size
     ? `/signin?${signInSearchParams.toString()}`
     : "/signin";
@@ -38,7 +41,7 @@ export function MagicLinkPageContent() {
     void client
       .consumeMagicLink({ token, email })
       .then(() => {
-        window.location.href = "/home";
+        window.location.href = returnTo;
       })
       .catch((error: unknown) => {
         const message =
@@ -47,7 +50,7 @@ export function MagicLinkPageContent() {
             : "This sign-in link is invalid or has expired. Please request a new one.";
         setStatus({ type: "error", message });
       });
-  }, [token, email]);
+  }, [token, email, returnTo]);
 
   return (
     <main className="grid min-h-screen place-items-center p-6">

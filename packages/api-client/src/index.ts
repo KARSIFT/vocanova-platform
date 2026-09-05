@@ -38,6 +38,7 @@ export interface CompleteOnboardingBody {
 
 export interface RequestMagicLinkBody {
   email: string;
+  returnTo?: string;
 }
 
 export interface ConsumeMagicLinkBody {
@@ -836,8 +837,11 @@ export class VocanovaClient {
 async function parseProblemDetails(
   response: Response,
 ): Promise<ApiError | null> {
-  const contentType = response.headers.get("Content-Type") ?? "";
-  if (!contentType.includes("application/problem+json")) {
+  const mediaType = (response.headers.get("Content-Type") ?? "")
+    .split(";", 1)[0]
+    ?.trim()
+    .toLowerCase();
+  if (mediaType !== "application/problem+json") {
     return null;
   }
   try {
