@@ -1,19 +1,32 @@
 import { randomUUID } from "node:crypto";
 
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Page, type Response } from "@playwright/test";
 
-async function completeSelfCheck(page: Page) {
-  await page.getByRole("button", { name: "Show answer" }).click();
-  await page.getByRole("button", { name: "Good", exact: true }).click();
+function waitForSuccessfulReview(page: Page): Promise<Response> {
+  return page.waitForResponse(
+    (response) =>
+      response.url().includes("/api/v1/reviews/submissions") &&
+      response.request().method() === "POST" &&
+      response.status() === 200,
+  );
 }
 
-test("counts only successful reviews across fetched due-word pages", async ({
+async function completeSelfCheck(page: Page): Promise<Response> {
+  const submitted = waitForSuccessfulReview(page);
+  await page.getByRole("button", { name: "Show answer" }).click();
+  await page.getByRole("button", { name: "Good", exact: true }).click();
+  return submitted;
+}
+
+test("hands sentence practice to the final successful review across fetched due-word pages", async ({
   page,
   context,
 }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL;
   if (!baseURL) {
-    throw new Error("Expected the Playwright project to configure use.baseURL.");
+    throw new Error(
+      "Expected the Playwright project to configure use.baseURL.",
+    );
   }
 
   const csrfToken = `review-count-csrf-${randomUUID()}`;
@@ -77,10 +90,12 @@ test("counts only successful reviews across fetched due-word pages", async ({
   await expect(firstGoodRating).toBeEnabled();
   expect(submissionCount).toBe(1);
 
+  const firstSuccessfulSubmission = waitForSuccessfulReview(page);
   await firstGoodRating.click();
+  const firstSuccessfulAttempt = await firstSuccessfulSubmission;
   await completeSelfCheck(page);
   await completeSelfCheck(page);
-  await completeSelfCheck(page);
+  const lastSuccessfulAttempt = await completeSelfCheck(page);
 
   await expect(
     page.getByText("You completed 4 reviews in this session.", {
@@ -88,4 +103,32 @@ test("counts only successful reviews across fetched due-word pages", async ({
     }),
   ).toBeVisible();
   expect(submissionCount).toBe(5);
+  const firstSuccessfulAttemptId = (
+    (await firstSuccessfulAttempt.json()) as { attemptId: string }
+  ).attemptId;
+  const lastSuccessfulAttemptId = (
+    (await lastSuccessfulAttempt.json()) as { attemptId: string }
+  ).attemptId;
+
+  await expect(
+    page.getByRole("heading", { name: /Practice with departure/ }),
+  ).toBeVisible();
+
+  await page
+    .getByRole("textbox", { name: /Write a sentence using departure/ })
+    .fill("The departure board changed this morning.");
+  const sentenceSubmitted = page.waitForRequest(
+    (request) =>
+      request.url().includes("/api/v1/sentence-feedback") &&
+      request.method() === "POST",
+  );
+  await page.getByRole("button", { name: "Check my sentence" }).click();
+  const sentenceRequest = await sentenceSubmitted;
+
+  expect(sentenceRequest.postDataJSON()).toEqual({
+    sentenceText: "The departure board changed this morning.",
+    source: "review",
+    attemptId: lastSuccessfulAttemptId,
+  });
+  expect(lastSuccessfulAttemptId).not.toBe(firstSuccessfulAttemptId);
 });
