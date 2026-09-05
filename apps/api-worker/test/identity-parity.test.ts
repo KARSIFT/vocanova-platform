@@ -152,13 +152,34 @@ describe("identity and account parity", () => {
       json({ token, email: "cookie-contract@example.test" }),
       env,
     );
-    const cookies = cookieHeader(consumed);
-    expect(cookies).toContain("vocanova_session=");
-    expect(cookies).toContain("vocanova_csrf=");
-    expect(cookies).toContain("Path=/; Max-Age=2592000");
-    expect(cookies).toContain("HttpOnly; SameSite=Lax; Secure");
-    expect(cookies).toContain("SameSite=Lax; Secure");
-    expect(cookies).not.toMatch(/vocanova_csrf=[^;]*;[^\n]*HttpOnly/);
+    const cookies = splitCookies(cookieHeader(consumed));
+    const session = cookies.find((cookie) =>
+      cookie.startsWith("vocanova_session="),
+    );
+    const csrf = cookies.find((cookie) => cookie.startsWith("vocanova_csrf="));
+    expect(session).toContain(
+      "Path=/; Max-Age=2592000; HttpOnly; SameSite=Lax; Secure",
+    );
+    expect(csrf).toContain("Path=/; Max-Age=2592000; SameSite=Lax; Secure");
+    expect(csrf).not.toContain("HttpOnly");
+
+    const loggedOut = await app.request(
+      "http://worker.test/api/v1/auth/logout",
+      withAuth(
+        { method: "POST" },
+        cookiePairs(cookieHeader(consumed)),
+        namedCookie(cookieHeader(consumed), "vocanova_csrf"),
+      ),
+      env,
+    );
+    expect(loggedOut.status).toBe(204);
+    const cleared = splitCookies(cookieHeader(loggedOut));
+    expect(
+      cleared.find((cookie) => cookie.startsWith("vocanova_session=")),
+    ).toContain("Path=/; Max-Age=0; HttpOnly; SameSite=Lax; Secure");
+    expect(
+      cleared.find((cookie) => cookie.startsWith("vocanova_csrf=")),
+    ).toContain("Path=/; Max-Age=0; SameSite=Lax; Secure");
   });
 
   it("authenticates requester scope and enforces double-submit CSRF on settings and onboarding", async () => {
@@ -857,6 +878,10 @@ function headers(value: HeadersInit | undefined): Record<string, string> {
 
 function cookieHeader(response: Response): string {
   return response.headers.get("set-cookie") ?? "";
+}
+
+function splitCookies(header: string): string[] {
+  return header.split(", ").filter(Boolean);
 }
 
 function cookiePairs(header: string): string {
