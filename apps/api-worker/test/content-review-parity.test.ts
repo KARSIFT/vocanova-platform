@@ -946,19 +946,37 @@ describe("Worker content, learning, and review parity", () => {
         env,
       );
     const first = await submit("http-replay-one");
-    const replay = await submit("http-replay-two");
     expect(first.status).toBe(200);
-    expect(await replay.json()).toEqual(await first.json());
-    const state = await env.DB.prepare(
-      "SELECT total_review_count, review_step FROM user_words WHERE id = ?1",
+    const firstBody = await first.json();
+    const snapshot = await env.DB.prepare(
+      `SELECT (SELECT count(*) FROM review_attempts) AS attempts,
+              (SELECT total_review_count FROM user_words WHERE id = ?1) AS reviews,
+              (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?2) AS ledger`,
     )
-      .bind(USER_WORD_A)
-      .first<{ total_review_count: number; review_step: number }>();
-    expect(state).toEqual({ total_review_count: 1, review_step: 1 });
-    const attempts = await env.DB.prepare(
-      "SELECT count(*) AS count FROM review_attempts",
-    ).first<{ count: number }>();
-    expect(attempts?.count).toBe(1);
+      .bind(USER_WORD_A, USER_A)
+      .first();
+    const replay = await submit("http-replay-two");
+    expect(replay.status).toBe(200);
+    expect(await replay.json()).toEqual(firstBody);
+    expect(
+      await env.DB.prepare(
+        `SELECT (SELECT count(*) FROM review_attempts) AS attempts, (SELECT total_review_count FROM user_words WHERE id = ?1) AS reviews, (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?2) AS ledger`,
+      )
+        .bind(USER_WORD_A, USER_A)
+        .first(),
+    ).toEqual(snapshot);
+    const conflict = await submit(
+      "http-replay-three",
+      review({ clientAttemptId: "http-replay", rating: "easy" }),
+    );
+    expect(conflict.status).toBe(409);
+    expect(
+      await env.DB.prepare(
+        `SELECT (SELECT count(*) FROM review_attempts) AS attempts, (SELECT total_review_count FROM user_words WHERE id = ?1) AS reviews, (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?2) AS ledger`,
+      )
+        .bind(USER_WORD_A, USER_A)
+        .first(),
+    ).toEqual(snapshot);
   });
 
   it("rolls back attempt and schedule together when the review batch fails", async () => {
