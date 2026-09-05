@@ -55,7 +55,7 @@ For each push to `main`, Cloudflare runs:
 1. `pnpm validate` against the exact checked-out revision.
 2. The OpenNext web build with staging API origins and the Cloudflare-provided
    `WORKERS_CI_COMMIT_SHA` as its release.
-3. Verify both staging Worker identities and dry-run the API deployment.
+3. Verify both staging Worker identities and dry-run both deployments.
 4. Pending compatible migrations against `vocanova-staging` D1.
 5. The API Worker deployment with `RELEASE` set to that Git SHA.
 6. The web Worker deployment from the previously built OpenNext artifact.
@@ -65,6 +65,15 @@ For each push to `main`, Cloudflare runs:
 The entry point fails closed unless `WORKERS_CI=1`, the branch is exactly `main`,
 and the release is a 40-character Git SHA. It also verifies the OpenNext Worker
 artifact exists before beginning remote mutation.
+
+The web deployment sets `OPEN_NEXT_DEPLOY=true`, the flag OpenNext itself uses
+when invoking Wrangler, to upload the prepared Worker directly. The build's
+canonicalization removes OpenNext's temporary compiled configuration; allowing
+Wrangler to hand deployment back to OpenNext would fail with “Could not find
+compiled Open Next config.” The flag is scoped to web commands and does not
+disable Wrangler's Worker identity checks. This direct-artifact path assumes the
+current storage-free OpenNext configuration; adding persistent cache bindings
+requires revisiting OpenNext's cache-population deployment steps.
 
 ## Verify a release
 
