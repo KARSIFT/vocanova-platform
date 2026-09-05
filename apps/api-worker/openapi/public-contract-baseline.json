@@ -13,7 +13,7 @@
       "operationId": "CompleteOnboarding",
       "path": "/api/v1/onboarding",
       "successStatus": 200,
-      "parameters": [],
+      "parameters": [{ "in": "header", "name": "X-CSRF-Token", "required": true }],
       "request": {
         "properties": [
           "dailyReviewTarget",
@@ -48,7 +48,7 @@
       "operationId": "ConsumeEmailChangeLink",
       "path": "/api/v1/settings/email-change-links/consume",
       "successStatus": 200,
-      "parameters": [],
+      "parameters": [{ "in": "header", "name": "X-CSRF-Token", "required": true }],
       "request": { "properties": ["token"], "required": ["token"] },
       "response": {
         "properties": ["changedAt", "email", "previousEmail"],
@@ -82,7 +82,8 @@
       "path": "/api/v1/account-deletion-requests",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "Idempotency-Key", "required": true }
+        { "in": "header", "name": "Idempotency-Key", "required": true },
+        { "in": "header", "name": "X-CSRF-Token", "required": true }
       ],
       "request": null,
       "response": {
@@ -291,7 +292,7 @@
       "path": "/api/v1/auth/logout",
       "successStatus": 204,
       "parameters": [
-        { "in": "header", "name": "X-CSRF-Token", "required": false }
+        { "in": "header", "name": "X-CSRF-Token", "required": true }
       ],
       "request": null,
       "response": null
@@ -323,7 +324,10 @@
       "operationId": "ReportSentenceFeedback",
       "path": "/api/v1/sentence-feedback/{attemptId}/reports",
       "successStatus": 204,
-      "parameters": [{ "in": "path", "name": "attemptId", "required": true }],
+      "parameters": [
+        { "in": "header", "name": "X-CSRF-Token", "required": true },
+        { "in": "path", "name": "attemptId", "required": true }
+      ],
       "request": {
         "properties": ["classification", "reason"],
         "required": ["reason"]
@@ -335,7 +339,7 @@
       "operationId": "RequestEmailChangeLink",
       "path": "/api/v1/settings/email-change-links",
       "successStatus": 204,
-      "parameters": [],
+      "parameters": [{ "in": "header", "name": "X-CSRF-Token", "required": true }],
       "request": { "properties": ["newEmail"], "required": ["newEmail"] },
       "response": null
     },
@@ -354,7 +358,8 @@
       "path": "/api/v1/user-words",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "Idempotency-Key", "required": true }
+        { "in": "header", "name": "Idempotency-Key", "required": true },
+        { "in": "header", "name": "X-CSRF-Token", "required": true }
       ],
       "request": {
         "properties": ["meaningId", "source"],
@@ -395,7 +400,8 @@
       "path": "/api/v1/reviews/submissions",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "Idempotency-Key", "required": true }
+        { "in": "header", "name": "Idempotency-Key", "required": true },
+        { "in": "header", "name": "X-CSRF-Token", "required": true }
       ],
       "request": {
         "properties": [
@@ -467,7 +473,8 @@
       "path": "/api/v1/sentence-feedback",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "Idempotency-Key", "required": true }
+        { "in": "header", "name": "Idempotency-Key", "required": true },
+        { "in": "header", "name": "X-CSRF-Token", "required": true }
       ],
       "request": {
         "properties": ["attemptId", "sentenceText", "source"],
@@ -502,7 +509,10 @@
       "operationId": "UnsaveUserWord",
       "path": "/api/v1/user-words/{meaningId}",
       "successStatus": 204,
-      "parameters": [{ "in": "path", "name": "meaningId", "required": true }],
+      "parameters": [
+        { "in": "header", "name": "X-CSRF-Token", "required": true },
+        { "in": "path", "name": "meaningId", "required": true }
+      ],
       "request": null,
       "response": null
     },
@@ -511,7 +521,7 @@
       "operationId": "UpdateSettings",
       "path": "/api/v1/settings",
       "successStatus": 200,
-      "parameters": [],
+      "parameters": [{ "in": "header", "name": "X-CSRF-Token", "required": true }],
       "request": {
         "properties": [
           "appLanguage",
