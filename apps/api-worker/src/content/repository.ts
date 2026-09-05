@@ -867,7 +867,7 @@ function attemptFromRow(row: Row): ReviewAttempt {
     attemptType: String(row.attempt_type),
     promptType: String(row.prompt_type),
     result: String(row.result),
-    rating: row.rating === null ? "" : String(row.rating),
+    ...(row.rating !== null && { rating: String(row.rating) }),
     reviewStepBefore: Number(row.review_step_before),
     reviewStepAfter: Number(row.review_step_after),
     answeredAt: String(row.answered_at),
@@ -1014,7 +1014,7 @@ function attemptMatches(
     attempt.attemptType === input.attemptType &&
     attempt.promptType === input.promptType &&
     attempt.result === input.result &&
-    attempt.rating === input.rating &&
+    (attempt.rating ?? "") === input.rating &&
     attempt.answeredAt === input.answeredAt &&
     attempt.responseTimeMs === input.responseTimeMs &&
     (attempt.selectedOptionMeaningId ?? "") ===

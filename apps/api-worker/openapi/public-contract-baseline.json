@@ -451,7 +451,6 @@
           "meaningId",
           "nextReviewAt",
           "promptType",
-          "rating",
           "responseTimeMs",
           "result",
           "reviewStepAfter",

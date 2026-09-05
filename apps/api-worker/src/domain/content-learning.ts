@@ -109,7 +109,7 @@ export interface ReviewAttempt {
   attemptType: string;
   promptType: string;
   result: string;
-  rating: string;
+  rating?: string;
   reviewStepBefore: number;
   reviewStepAfter: number;
   answeredAt: string;

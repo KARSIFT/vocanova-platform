@@ -395,6 +395,50 @@ describe("VocanovaClient", () => {
     assert.equal(data.nextReviewAt, "2026-07-25T13:00:00Z");
   });
 
+  it("accepts skipped review responses without a rating", async () => {
+    const fetch = (): Promise<Response> =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            attemptId: "00000000-0000-0000-0000-000000000001",
+            userWordId: "00000000-0000-0000-0000-000000000002",
+            meaningId: "00000000-0000-0000-0000-000000000003",
+            attemptType: "review",
+            promptType: "multiple_choice",
+            result: "skipped",
+            reviewStepBefore: 0,
+            reviewStepAfter: 0,
+            answeredAt: "2026-07-25T12:00:00Z",
+            responseTimeMs: 1234,
+            wasHintUsed: false,
+            source: "review",
+            clientAttemptId: "ca-skip",
+            nextReviewAt: "2026-07-25T13:00:00Z",
+          }),
+          { headers: { "Content-Type": "application/json" }, status: 200 },
+        ),
+      );
+    const client = new VocanovaClient({
+      baseURL: "https://api.example.com",
+      fetch: fetch as typeof globalThis.fetch,
+    });
+
+    const { data } = await client.submitReview(
+      {
+        userWordId: "00000000-0000-0000-0000-000000000002",
+        meaningId: "00000000-0000-0000-0000-000000000003",
+        promptType: "multiple_choice",
+        result: "skipped",
+        answeredAt: "2026-07-25T12:00:00Z",
+        clientAttemptId: "ca-skip",
+      },
+      "idem-skip",
+    );
+
+    assert.equal(data.result, "skipped");
+    assert.equal("rating" in data, false);
+  });
+
   it("sends POST /api/v1/sentence-feedback with Idempotency-Key", async () => {
     const fetch = (url: string, init: RequestInit): Promise<Response> => {
       assert.equal(url, "https://api.example.com/api/v1/sentence-feedback");
