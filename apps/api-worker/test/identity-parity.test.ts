@@ -448,6 +448,10 @@ describe("identity and account parity", () => {
     )
       .bind("google-subject-1")
       .first<{ user_id: string; count: number }>();
+    expect(identitiesBeforeRejectedCallback).toEqual({
+      user_id: user?.id,
+      count: 1,
+    });
 
     const secondStart = await app.request(
       "http://worker.test/api/v1/auth/oauth/google/start",
