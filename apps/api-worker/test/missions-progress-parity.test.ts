@@ -27,6 +27,16 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     );
   });
 
+  it("reconciles a missed local day when progress is read without daily mission", async () => {
+    const today = "2026-08-22";
+    await env.DB.batch([
+      mission(addDays(today, -1), "open", NOW),
+      env.DB.prepare(`INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 3, 3, ?3, ?3, 'UTC', 'active', ?4, ?4)`).bind(crypto.randomUUID(), USER, addDays(today, -2), NOW),
+    ]);
+    const progress = await new D1MissionsRepository(env.DB, () => new Date("2026-08-22T12:00:00.000Z")).getProgress(USER, "UTC");
+    expect(progress.streak).toMatchObject({ currentStreakCount: 0, status: "broken" });
+  });
+
   it("freezes today's snapshot while settings apply on the next local day", async () => {
     let current = new Date("2026-08-22T12:00:00.000Z");
     const repository = new D1MissionsRepository(env.DB, () => current);

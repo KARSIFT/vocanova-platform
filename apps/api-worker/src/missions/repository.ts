@@ -91,7 +91,17 @@ export class D1MissionsRepository {
   }
 
   async getProgress(userId: string, clientTimezone: string): Promise<Progress> {
-    await this.resolveSettings(userId, clientTimezone);
+    const settings = await this.resolveSettings(userId, clientTimezone);
+    const today = localDate(this.now(), settings.timezone);
+    const timestamp = this.now().toISOString();
+    await this.database
+      .prepare(
+        `UPDATE daily_mission_snapshots SET status = 'missed', updated_at = ?1
+         WHERE user_id = ?2 AND local_date < ?3 AND status = 'open'`,
+      )
+      .bind(timestamp, userId, today)
+      .run();
+    await this.reconcile(userId, settings.timezone, today, false);
     const [balance, streak, history] = await Promise.all([
       this.database
         .prepare(
