@@ -77,6 +77,8 @@
 //   GET    /api/v1/journey-situations/:slug          -> 200 SituationResponse
 //             `e2e_situation_fixture=empty` returns an empty word list
 //   GET    /api/v1/canonical-words/:slug             -> 200 WordDetailResponse
+//             `e2e_word_detail_fixture=empty-meanings` returns a valid word
+//             with no meanings
 //             one 500 per session for discovery or reviews when the
 //             `e2e_read_failure` cookie names that fixture; used to prove
 //             route-boundary retry behavior against a real recovered request
@@ -836,7 +838,7 @@ function buildDueWords(state, fixture) {
   };
 }
 
-function buildWordDetailResponse(state, slug, selectedFixture) {
+function buildWordDetailResponse(state, slug, selectedFixture, wordFixture) {
   const word = CANONICAL_WORDS[slug];
   if (!word) {
     return null;
@@ -845,22 +847,25 @@ function buildWordDetailResponse(state, slug, selectedFixture) {
   const selectedReviewState = hasSelectedFixture
     ? WORD_DETAIL_REVIEW_STATES.get(selectedFixture)
     : undefined;
-  const meanings = word.meanings.map((meaning) => {
-    const statefulSaved = state.savedMeaningIds.has(meaning.id);
-    const saved = hasSelectedFixture
-      ? selectedReviewState !== null
-      : statefulSaved;
-    return {
-      ...meaning,
-      saved,
-      userWordId: saved ? `uw-${meaning.id}` : undefined,
-      reviewState: hasSelectedFixture
-        ? selectedReviewState
-        : statefulSaved
-          ? "due"
-          : null,
-    };
-  });
+  const meanings =
+    wordFixture === "empty-meanings"
+      ? []
+      : word.meanings.map((meaning) => {
+          const statefulSaved = state.savedMeaningIds.has(meaning.id);
+          const saved = hasSelectedFixture
+            ? selectedReviewState !== null
+            : statefulSaved;
+          return {
+            ...meaning,
+            saved,
+            userWordId: saved ? `uw-${meaning.id}` : undefined,
+            reviewState: hasSelectedFixture
+              ? selectedReviewState
+              : statefulSaved
+                ? "due"
+                : null,
+          };
+        });
   return {
     word: {
       ...word,
@@ -1624,6 +1629,7 @@ const server = createServer(async (req, res) => {
       state,
       slug,
       cookies.e2e_word_detail_review_state,
+      cookies.e2e_word_detail_fixture,
     );
     if (!response) {
       logLine(req, 404, { slug });
