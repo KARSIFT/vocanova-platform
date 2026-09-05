@@ -161,7 +161,15 @@ export function SentenceFeedback({
             id={`sentence-input-${attemptId}`}
             name="sentence"
             value={sentence}
-            onChange={(event) => setSentence(event.target.value)}
+            onChange={(event) => {
+              setSentence(event.target.value);
+              if (result) {
+                setResult(null);
+                setErrorMessage(null);
+                setReported(false);
+                setReportStatus("idle");
+              }
+            }}
             disabled={isLoading}
             maxLength={300}
             rows={3}
