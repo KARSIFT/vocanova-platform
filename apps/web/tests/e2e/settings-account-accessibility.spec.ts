@@ -19,6 +19,43 @@ import {
 } from "./axe-helper.js";
 
 test.describe("Settings account accessibility", () => {
+  test("moves keyboard focus to the deletion confirmation phrase", async ({
+    page,
+  }) => {
+    await page.goto("/settings/account");
+    await page
+      .getByRole("button", { name: "I want to delete my account" })
+      .focus();
+    await page.keyboard.press("Enter");
+
+    await expect(
+      page.getByRole("textbox", { name: "Type the confirmation phrase" }),
+    ).toBeFocused();
+  });
+
+  test("returns keyboard focus to the deletion trigger after cancellation", async ({
+    page,
+  }) => {
+    await page.goto("/settings/account");
+    const deleteTrigger = page.getByRole("button", {
+      name: "I want to delete my account",
+    });
+    await deleteTrigger.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("textbox", { name: "Type the confirmation phrase" }),
+    ).toBeFocused();
+
+    await page.getByRole("button", { name: "Cancel" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(deleteTrigger).toBeFocused();
+
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("textbox", { name: "Type the confirmation phrase" }),
+    ).toBeFocused();
+  });
+
   test("moves keyboard focus to the confirmation token after requesting an email change", async ({
     page,
   }, testInfo) => {

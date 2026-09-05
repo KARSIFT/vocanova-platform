@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { ApiResponseError } from "@vocanova/api-client";
@@ -37,10 +37,24 @@ export function AccountDeletionForm() {
   const [phase, setPhase] = useState<DeletionPhase>({ type: "idle" });
   const [typedPhrase, setTypedPhrase] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const confirmationInputRef = useRef<HTMLInputElement>(null);
+  const deletionTriggerRef = useRef<HTMLButtonElement>(null);
+  const previousPhaseRef = useRef(phase.type);
   const [completed, setCompleted] = useState<{
     requestedAt: string;
     purgeAfter: string;
   } | null>(null);
+
+  useEffect(() => {
+    const previousPhase = previousPhaseRef.current;
+    previousPhaseRef.current = phase.type;
+
+    if (phase.type === "confirming") {
+      confirmationInputRef.current?.focus();
+    } else if (phase.type === "idle" && previousPhase === "confirming") {
+      deletionTriggerRef.current?.focus();
+    }
+  }, [phase.type]);
 
   async function handleDelete() {
     if (typedPhrase.trim() !== CONFIRMATION_PHRASE) {
@@ -142,6 +156,7 @@ export function AccountDeletionForm() {
     <div className="mt-[var(--spacing-md)] space-y-[var(--spacing-md)]">
       {phase.type === "idle" ? (
         <button
+          ref={deletionTriggerRef}
           type="button"
           onClick={() => setPhase({ type: "confirming" })}
           className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center rounded-md border border-red-300 bg-white px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-red-800 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-red-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-700"
@@ -175,6 +190,7 @@ export function AccountDeletionForm() {
             Type the confirmation phrase
           </label>
           <input
+            ref={confirmationInputRef}
             id="delete-confirmation"
             name="confirmation"
             type="text"
