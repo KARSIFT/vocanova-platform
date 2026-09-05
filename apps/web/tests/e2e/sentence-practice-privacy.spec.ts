@@ -17,7 +17,7 @@ async function expectPrivacyReminder(page: Page) {
     practice.getByText(PRIVACY_REMINDER, { exact: true }),
   ).toBeVisible();
   await expect(sentenceInput).toHaveAccessibleDescription(
-    new RegExp(PRIVACY_REMINDER),
+    `${PRIVACY_REMINDER} 0/300`,
   );
 }
 
