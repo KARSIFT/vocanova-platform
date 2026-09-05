@@ -39,6 +39,7 @@ export function AccountDeletionForm() {
   const [isDeleting, setIsDeleting] = useState(false);
   const confirmationInputRef = useRef<HTMLInputElement>(null);
   const deletionTriggerRef = useRef<HTMLButtonElement>(null);
+  const completionHeadingRef = useRef<HTMLHeadingElement>(null);
   const previousPhaseRef = useRef(phase.type);
   const [completed, setCompleted] = useState<{
     requestedAt: string;
@@ -55,6 +56,12 @@ export function AccountDeletionForm() {
       deletionTriggerRef.current?.focus();
     }
   }, [phase.type]);
+
+  useEffect(() => {
+    if (completed) {
+      completionHeadingRef.current?.focus();
+    }
+  }, [completed]);
 
   async function handleDelete() {
     if (typedPhrase.trim() !== CONFIRMATION_PHRASE) {
@@ -129,9 +136,13 @@ export function AccountDeletionForm() {
         className="mt-[var(--spacing-md)] space-y-[var(--spacing-md)]"
       >
         <div className="rounded-md border border-red-300 bg-white p-[var(--spacing-md)] text-base text-neutral-900">
-          <p className="font-semibold text-red-900">
+          <h3
+            ref={completionHeadingRef}
+            tabIndex={-1}
+            className="font-semibold text-red-900"
+          >
             Your account has been deactivated.
-          </p>
+          </h3>
           <p className="mt-[var(--spacing-xs)]">
             We&apos;ll permanently anonymize your saved words, reviews, and
             practice history on{" "}

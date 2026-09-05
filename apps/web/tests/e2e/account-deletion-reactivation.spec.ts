@@ -44,6 +44,9 @@ test.describe("Account deletion", () => {
       page.getByText("Your account has been deactivated.", { exact: true }),
     ).toBeVisible();
     await expect(
+      page.getByRole("heading", { name: "Your account has been deactivated." }),
+    ).toBeFocused();
+    await expect(
       page.getByText(
         "You will not be able to reactivate this account by signing in.",
         { exact: true },
