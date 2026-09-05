@@ -820,6 +820,85 @@ describe("identity and account parity", () => {
     expect(blocked.status).toBe(429);
   });
 
+  it("rejects an expired session without renewing it or applying a write", async () => {
+    const { app, cookie, csrf, userId } = await signedIn(
+      "expired@example.test",
+    );
+    // Age the original 30-day session so an accidental sliding renewal
+    // would change its expiry even though the test clock is deterministic.
+    await env.DB.prepare(
+      "UPDATE sessions SET created_at = '2026-07-24T12:00:00.000Z', expires_at = '2026-08-23T12:00:00.000Z' WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
+    const activeExpiry = await env.DB.prepare(
+      "SELECT expires_at FROM sessions WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .first<{ expires_at: string }>();
+    expect(
+      (
+        await app.request(
+          "http://worker.test/api/v1/me",
+          { headers: { Cookie: cookie } },
+          env,
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await app.request(
+          "http://worker.test/api/v1/settings",
+          withAuth(
+            json({ displayName: "Active write" }, "PATCH"),
+            cookie,
+            csrf,
+          ),
+          env,
+        )
+      ).status,
+    ).toBe(200);
+    await expect(
+      env.DB.prepare("SELECT expires_at FROM sessions WHERE user_id = ?1")
+        .bind(userId)
+        .first<{ expires_at: string }>(),
+    ).resolves.toEqual(activeExpiry);
+    await env.DB.prepare(
+      "UPDATE sessions SET created_at = '2026-08-01T00:00:00.000Z', expires_at = '2026-08-02T00:00:00.000Z' WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
+    const me = await app.request(
+      "http://worker.test/api/v1/me",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
+    expect(me.status).toBe(401);
+    const write = await app.request(
+      "http://worker.test/api/v1/settings",
+      withAuth(
+        json({ displayName: "Should not persist" }, "PATCH"),
+        cookie,
+        csrf,
+      ),
+      env,
+    );
+    expect(write.status).toBe(401);
+    await expect(
+      env.DB.prepare("SELECT expires_at FROM sessions WHERE user_id = ?1")
+        .bind(userId)
+        .first<{ expires_at: string }>(),
+    ).resolves.toEqual({ expires_at: "2026-08-02T00:00:00.000Z" });
+    const settings = await env.DB.prepare(
+      "SELECT display_name FROM users WHERE id = ?1",
+    )
+      .bind(userId)
+      .first<{ display_name: string }>();
+    expect(settings?.display_name).toBe("Active write");
+  });
+
   it("isolates exhausted magic-link rate buckets by connecting client", async () => {
     const app = identityApp();
     const request = (email: string, ip: string) =>
