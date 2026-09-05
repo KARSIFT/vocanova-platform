@@ -404,6 +404,76 @@ describe("identity and account parity", () => {
     expect(replay.status).toBe(401);
   });
 
+  it("rejects a new OAuth session after its linked account is deactivated", async () => {
+    const app = identityApp();
+    const firstStart = await app.request(
+      "http://worker.test/api/v1/auth/oauth/google/start",
+      json({ redirectUri: "http://127.0.0.1:3000/home" }),
+      env,
+    );
+    const firstState = new URL(
+      (await firstStart.json<{ url: string }>()).url,
+    ).searchParams.get("state")!;
+    const firstCallback = await app.request(
+      `http://worker.test/api/v1/auth/oauth/google/callback?code=valid-code&state=${encodeURIComponent(firstState)}`,
+      {
+        headers: {
+          Cookie: `vocanova_oauth_state=${namedCookie(cookieHeader(firstStart), "vocanova_oauth_state")}`,
+        },
+        redirect: "manual",
+      },
+      env,
+    );
+    expect(firstCallback.status).toBe(302);
+    const user = await env.DB.prepare("SELECT id FROM users WHERE email = ?1")
+      .bind("oauth@example.test")
+      .first<{ id: string }>();
+
+    const deleted = await app.request(
+      "http://worker.test/api/v1/account-deletion-requests",
+      withAuth(
+        { method: "POST", headers: { "Idempotency-Key": "delete-oauth" } },
+        cookiePairs(cookieHeader(firstCallback)),
+        namedCookie(cookieHeader(firstCallback), "vocanova_csrf"),
+      ),
+      env,
+    );
+    expect(deleted.status).toBe(200);
+
+    const secondStart = await app.request(
+      "http://worker.test/api/v1/auth/oauth/google/start",
+      json({ redirectUri: "http://127.0.0.1:3000/home" }),
+      env,
+    );
+    const secondState = new URL(
+      (await secondStart.json<{ url: string }>()).url,
+    ).searchParams.get("state")!;
+    const rejected = await app.request(
+      `http://worker.test/api/v1/auth/oauth/google/callback?code=valid-code&state=${encodeURIComponent(secondState)}`,
+      {
+        headers: {
+          Cookie: `vocanova_oauth_state=${namedCookie(cookieHeader(secondStart), "vocanova_oauth_state")}`,
+        },
+        redirect: "manual",
+      },
+      env,
+    );
+    expect(rejected.status).toBe(401);
+    expect(cookieHeader(rejected)).not.toContain("vocanova_session=");
+    const account = await env.DB.prepare(
+      "SELECT status, email FROM users WHERE id = ?1",
+    )
+      .bind(user?.id)
+      .first<{ status: string; email: string | null }>();
+    const sessionRows = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM sessions WHERE user_id = ?1",
+    )
+      .bind(user?.id)
+      .first<{ count: number }>();
+    expect(account).toEqual({ status: "deleted", email: null });
+    expect(sessionRows?.count).toBe(1);
+  });
+
   it("rejects expired OAuth state without consuming it and scopes its production cookie", async () => {
     const app = identityApp({
       ...config,
