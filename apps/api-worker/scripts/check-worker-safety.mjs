@@ -35,11 +35,13 @@ for (const file of migrationFiles) {
       `${path.relative(root, file)}: destructive migration statement`,
     );
   }
-  for (const marker of ["STRICT", "CHECK"]) {
-    if (!source.includes(marker)) {
-      findings.push(
-        `${path.relative(root, file)}: missing ${marker} constraint`,
-      );
+  if (/\bCREATE\s+TABLE\b/i.test(source)) {
+    for (const marker of ["STRICT", "CHECK"]) {
+      if (!source.includes(marker)) {
+        findings.push(
+          `${path.relative(root, file)}: missing ${marker} constraint`,
+        );
+      }
     }
   }
   if (

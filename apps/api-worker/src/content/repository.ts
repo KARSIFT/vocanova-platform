@@ -521,6 +521,8 @@ export class D1ContentLearningRepository {
         ]);
       } catch (error) {
         if (isReviewStateVersionConflict(error) && retry < 2) continue;
+        if (isInactiveSavedWordReview(error))
+          throw new ContentLearningError("user_word_not_found");
         throw error;
       }
       return (await this.attemptByClientId(
@@ -986,6 +988,13 @@ function isReviewStateVersionConflict(error: unknown): boolean {
     error.message.includes(
       "review_state_reservations.user_word_id, review_state_reservations.state_version",
     )
+  );
+}
+
+function isInactiveSavedWordReview(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("review attempt requires an active saved word")
   );
 }
 async function sha256(value: string): Promise<string> {
