@@ -140,6 +140,8 @@ const DEFAULT_USER = {
   emailVerifiedAt: "2026-01-01T00:00:00Z",
 };
 
+const LONG_ACCOUNT_EMAIL = `${"a".repeat(64)}@example.test`;
+
 const DEFAULT_SETTINGS = {
   dailyReviewTarget: 20,
   reviewIntervalPreset: "vocanova_default",
@@ -752,9 +754,12 @@ function cloneProgress(progress) {
   };
 }
 
-function buildCurrentUser(state) {
+function buildCurrentUser(state, cookies = {}) {
   return {
-    email: DEFAULT_USER.email,
+    email:
+      cookies.e2e_account_email_fixture === "long"
+        ? LONG_ACCOUNT_EMAIL
+        : DEFAULT_USER.email,
     displayName: state.settings.displayName,
     emailVerifiedAt: DEFAULT_USER.emailVerifiedAt,
     onboardingStatus: state.onboardingCompleted ? "completed" : "not_started",
@@ -1258,7 +1263,7 @@ const server = createServer(async (req, res) => {
     }
     const accountHold = waitForReadHoldAfter(state, cookies, "account", 1);
     if (accountHold) await accountHold;
-    const user = buildCurrentUser(state);
+    const user = buildCurrentUser(state, cookies);
     logLine(req, 200, { onboardingStatus: user.onboardingStatus });
     jsonResponse(res, 200, user);
     return;
