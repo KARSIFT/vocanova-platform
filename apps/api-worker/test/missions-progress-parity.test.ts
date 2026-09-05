@@ -29,15 +29,110 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
 
   it("handles a valid timezone change that moves the local date backward", async () => {
     await setSettings("Pacific/Honolulu", 5);
-    await env.DB.prepare(`INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 1, 1, '2026-08-23', '2026-08-23', 'Pacific/Kiritimati', 'active', ?3, ?3)`).bind(crypto.randomUUID(), USER, NOW).run();
-    const repository = new D1MissionsRepository(env.DB, () => new Date("2026-08-22T12:00:00.000Z"));
-    await expect(repository.getProgress(USER, "")).resolves.toMatchObject({ streak: { currentStreakCount: 1, status: "active" } });
-    await expect(repository.getProgress(USER, "")).resolves.toMatchObject({ streak: { currentStreakCount: 1, status: "active" } });
+    await env.DB.prepare(
+      `INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 1, 1, '2026-08-23', '2026-08-23', 'Pacific/Kiritimati', 'active', ?3, ?3)`,
+    )
+      .bind(crypto.randomUUID(), USER, NOW)
+      .run();
+    const repository = new D1MissionsRepository(
+      env.DB,
+      () => new Date("2026-08-22T12:00:00.000Z"),
+    );
+    await expect(repository.getProgress(USER, "")).resolves.toMatchObject({
+      streak: { currentStreakCount: 1, status: "active" },
+    });
+    await expect(repository.getProgress(USER, "")).resolves.toMatchObject({
+      streak: { currentStreakCount: 1, status: "active" },
+    });
     await expect(repository.getDailyMission(USER, "")).resolves.toMatchObject({
       localDate: "2026-08-22",
       streak: { currentStreakCount: 1, status: "active" },
     });
     expect(await pointBalance()).toBe(0);
+  });
+
+  it("completes a rollback-day mission once without rewriting historical streak state", async () => {
+    await setSettings("Pacific/Honolulu", 5);
+    await env.DB.prepare(
+      `INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 1, 1, '2026-08-23', '2026-08-23', 'Pacific/Kiritimati', 'active', ?3, ?3)`,
+    )
+      .bind(crypto.randomUUID(), USER, NOW)
+      .run();
+    await env.DB.prepare(
+      `INSERT INTO daily_mission_snapshots
+       (id, user_id, local_date, timezone, review_target, reviews_completed,
+        policy_version, status, completed_at, grace_applied, created_at, updated_at)
+       VALUES (?1, ?2, '2026-08-23', 'Pacific/Kiritimati', 5, 5,
+        'p4-mission-policy-v1', 'completed', ?3, 0, ?3, ?3)`,
+    )
+      .bind(crypto.randomUUID(), USER, NOW)
+      .run();
+    const content = new D1ContentLearningRepository(
+      env.DB,
+      () => new Date("2026-08-22T12:00:00.000Z"),
+    );
+    const saved = await content.saveUserWord(
+      USER,
+      MEANING,
+      "manual",
+      "rollback-save",
+    );
+    let fifthReview: ReturnType<typeof review> | undefined;
+    let fifthResponse:
+      Awaited<ReturnType<typeof content.submitReview>> | undefined;
+    for (let index = 0; index < 5; index += 1) {
+      const clientAttemptId = `rollback-${index}`;
+      const request = review(saved.userWordId, clientAttemptId);
+      const response = await content.submitReview(
+        USER,
+        request,
+        clientAttemptId,
+      );
+      if (index === 4) {
+        fifthReview = request;
+        fifthResponse = response;
+      }
+    }
+    expect(await pointBalance()).toBe(37);
+    expect(fifthReview).toBeDefined();
+    expect(fifthResponse).toBeDefined();
+    await expect(
+      content.submitReview(USER, fifthReview!, "rollback-4"),
+    ).resolves.toEqual(fifthResponse);
+    expect(await pointBalance()).toBe(37);
+    expect(
+      (
+        await env.DB.prepare(
+          "SELECT count(*) AS count FROM confidence_point_ledger WHERE reason = 'daily_mission_completed'",
+        ).first<{ count: number }>()
+      )?.count,
+    ).toBe(1);
+    expect(
+      (
+        await env.DB.prepare(
+          "SELECT last_completed_local_date FROM streak_states WHERE user_id = ?1",
+        )
+          .bind(USER)
+          .first<{ last_completed_local_date: string }>()
+      )?.last_completed_local_date,
+    ).toBe("2026-08-23");
+    expect(
+      await env.DB.prepare(
+        `SELECT local_date, timezone, status
+         FROM daily_mission_snapshots
+         WHERE user_id = ?1 AND local_date = '2026-08-23'`,
+      )
+        .bind(USER)
+        .first<{
+          local_date: string;
+          timezone: string;
+          status: string;
+        }>(),
+    ).toEqual({
+      local_date: "2026-08-23",
+      timezone: "Pacific/Kiritimati",
+      status: "completed",
+    });
   });
 
   it("reconciles a missed local day when progress is read without daily mission", async () => {
