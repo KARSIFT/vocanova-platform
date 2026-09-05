@@ -380,7 +380,7 @@ describe("Worker content, learning, and review parity", () => {
   });
 
   it("traverses tied discovery display orders once in stable ID order", async () => {
-    const situationC = "40000000-0000-4000-8000-000000000003";
+    const situationC = "40000000-0000-4000-8000-000000000000";
     await env.DB.batch([
       env.DB.prepare(
         "UPDATE journey_situations SET display_order = 10 WHERE id IN (?1, ?2)",
@@ -403,16 +403,36 @@ describe("Worker content, learning, and review parity", () => {
       pages += 1;
     } while (cursor);
 
-    expect(ids).toEqual([SITUATION_A, SITUATION_B, situationC]);
+    expect(ids).toEqual([situationC, SITUATION_A, SITUATION_B]);
     expect(new Set(ids).size).toBe(3);
 
     await env.DB.prepare(
-      `INSERT INTO journey_words
-       (id, journey_situation_id, meaning_id, display_order, created_at, updated_at)
-       VALUES (?1, ?2, ?3, 1, ?4, ?4)`,
+      "DELETE FROM journey_words WHERE journey_situation_id = ?1 AND meaning_id = ?2",
     )
-      .bind("60000000-0000-4000-8000-000000000003", SITUATION_A, MEANING_B, NOW)
+      .bind(SITUATION_A, MEANING_A)
       .run();
+    await env.DB.batch([
+      env.DB.prepare(
+        `INSERT INTO journey_words
+         (id, journey_situation_id, meaning_id, display_order, created_at, updated_at)
+         VALUES (?1, ?2, ?3, 1, ?4, ?4)`,
+      ).bind(
+        "60000000-0000-4000-8000-000000000003",
+        SITUATION_A,
+        MEANING_B,
+        NOW,
+      ),
+      env.DB.prepare(
+        `INSERT INTO journey_words
+         (id, journey_situation_id, meaning_id, display_order, created_at, updated_at)
+         VALUES (?1, ?2, ?3, 1, ?4, ?4)`,
+      ).bind(
+        "60000000-0000-4000-8000-000000000004",
+        SITUATION_A,
+        MEANING_A,
+        NOW,
+      ),
+    ]);
     const situation = await repository.getSituation(USER_A, "at-the-cafe");
     expect(situation.meanings.map((meaning) => meaning.meaningId)).toEqual([
       MEANING_A,
