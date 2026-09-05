@@ -155,7 +155,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
           <button
             type="button"
             onClick={handleStartOver}
-            className="mt-[var(--spacing-sm)] text-sm font-medium text-primary-700 underline hover:text-primary-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+            className="mt-[var(--spacing-sm)] inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center px-[var(--spacing-sm)] text-sm font-medium text-primary-700 underline hover:text-primary-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
           >
             Change to another address
           </button>
