@@ -189,7 +189,10 @@ export function ReviewSession({
       advance();
     } catch (error) {
       setErrorMessage(
-        handleApiError(error, "Unable to submit your answer. Please try again."),
+        handleApiError(
+          error,
+          "Unable to submit your answer. Please try again.",
+        ),
       );
     } finally {
       submissionInFlight.current = false;
