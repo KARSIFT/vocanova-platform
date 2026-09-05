@@ -92,6 +92,60 @@ describe("VocanovaClient", () => {
     });
   });
 
+  it("preserves problem-details validation text with mixed-case media types", async () => {
+    const fetch = (): Promise<Response> =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({ detail: "daily review target is invalid" }),
+          {
+            headers: {
+              "Content-Type": "Application/Problem+Json; Charset=UTF-8",
+            },
+            status: 422,
+          },
+        ),
+      );
+    const client = new VocanovaClient({
+      baseURL: "https://api.example.com",
+      fetch: fetch as typeof globalThis.fetch,
+    });
+
+    await assert.rejects(client.getCurrentUser(), (error: unknown) => {
+      if (!(error instanceof ApiResponseError)) {
+        return false;
+      }
+      assert.equal(error.status, 422);
+      assert.equal(error.message, "daily review target is invalid");
+      return true;
+    });
+  });
+
+  it("does not treat look-alike JSON media types as problem details", async () => {
+    const fetch = (): Promise<Response> =>
+      Promise.resolve(
+        new Response(
+          JSON.stringify({ detail: "not a declared problem response" }),
+          {
+            headers: { "Content-Type": "application/problem+jsonish" },
+            status: 422,
+          },
+        ),
+      );
+    const client = new VocanovaClient({
+      baseURL: "https://api.example.com",
+      fetch: fetch as typeof globalThis.fetch,
+    });
+
+    await assert.rejects(client.getCurrentUser(), (error: unknown) => {
+      if (!(error instanceof ApiResponseError)) {
+        return false;
+      }
+      assert.equal(error.status, 422);
+      assert.equal(error.message, "HTTP 422");
+      return true;
+    });
+  });
+
   it("sends GET /api/v1/journey-situations", async () => {
     const fetch = (url: string, init: RequestInit): Promise<Response> => {
       assert.equal(url, "https://api.example.com/api/v1/journey-situations");
