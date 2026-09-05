@@ -44,6 +44,11 @@ for (const ratingCase of ratingCases) {
     });
 
     await page.goto("/reviews");
+    for (const rating of ["Again", "Hard", "Good", "Easy"]) {
+      await expect(
+        page.getByRole("button", { name: rating, exact: true }),
+      ).toHaveCount(0);
+    }
     await page.getByRole("button", { name: "Show answer" }).click();
     await expect(page.getByText("Answer", { exact: true })).toBeVisible();
     await expect(
