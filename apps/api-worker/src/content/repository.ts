@@ -407,6 +407,13 @@ export class D1ContentLearningRepository {
       .first<Row>();
     if (!word || word.meaning_id !== normalized.meaningId)
       throw new ContentLearningError("user_word_not_found");
+    if (
+      normalized.promptType === "multiple_choice" &&
+      normalized.result !== "skipped" &&
+      (normalized.result === "correct") !==
+        (normalized.selectedOptionMeaningId === word.meaning_id)
+    )
+      throw new ContentLearningError("invalid_input");
     const schedule = applyReview(
       {
         step: Number(word.review_step),
@@ -1000,7 +1007,12 @@ function validateReview(input: ReviewSubmission): void {
     (input.result === "skipped" && rating !== "")
   )
     throw new ContentLearningError("invalid_input");
-  if (input.selectedOptionMeaningId && !zUuid(input.selectedOptionMeaningId))
+  if (
+    (input.promptType === "multiple_choice" &&
+      input.result !== "skipped" &&
+      !input.selectedOptionMeaningId) ||
+    (input.selectedOptionMeaningId && !zUuid(input.selectedOptionMeaningId))
+  )
     throw new ContentLearningError("invalid_input");
 }
 
