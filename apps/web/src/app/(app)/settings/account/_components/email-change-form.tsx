@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
@@ -22,6 +22,13 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
   const [token, setToken] = useState("");
   const [isConsuming, setIsConsuming] = useState(false);
   const [phase, setPhase] = useState<EmailPhase>({ type: "idle" });
+  const confirmationTokenRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (phase.type === "pending") {
+      confirmationTokenRef.current?.focus();
+    }
+  }, [phase]);
 
   async function handleRequest(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -166,6 +173,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
               Confirmation token
             </label>
             <input
+              ref={confirmationTokenRef}
               id="email-change-token"
               name="token"
               type="text"
