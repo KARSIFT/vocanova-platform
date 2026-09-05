@@ -352,6 +352,79 @@ describe("Worker content, learning, and review parity", () => {
     expect(restored.source).toBe("search");
   });
 
+  it("resets a restored word into the due queue without erasing review evidence", async () => {
+    const saved = await repository.saveUserWord(
+      USER_A,
+      MEANING_A,
+      "manual",
+      "restore-schedule-save",
+    );
+    await repository.submitReview(
+      USER_A,
+      review({
+        userWordId: saved.userWordId,
+        clientAttemptId: "restore-schedule-review",
+      }),
+      "restore-schedule-review",
+    );
+    await repository.unsaveUserWord(USER_A, MEANING_A);
+    await repository.saveUserWord(
+      USER_A,
+      MEANING_A,
+      "search",
+      "restore-schedule-resave",
+    );
+
+    expect(
+      (await repository.getWord(USER_A, "flat-white")).word.meanings[0],
+    ).toMatchObject({ saved: true, reviewState: "due" });
+    expect(
+      (await repository.listDueWords(USER_A, "", 20)).items.map(
+        (item) => item.userWordId,
+      ),
+    ).toContain(saved.userWordId);
+    expect(
+      await env.DB.prepare(
+        `SELECT next_review_at, last_reviewed_at, total_review_count,
+                correct_review_count, consecutive_correct_count,
+                consecutive_incorrect_count
+         FROM user_words WHERE id = ?1`,
+      )
+        .bind(saved.userWordId)
+        .first<{
+          next_review_at: string | null;
+          last_reviewed_at: string | null;
+          total_review_count: number;
+          correct_review_count: number;
+          consecutive_correct_count: number;
+          consecutive_incorrect_count: number;
+        }>(),
+    ).toEqual({
+      next_review_at: null,
+      last_reviewed_at: null,
+      total_review_count: 0,
+      correct_review_count: 0,
+      consecutive_correct_count: 0,
+      consecutive_incorrect_count: 0,
+    });
+    expect(
+      (
+        await env.DB.prepare(
+          "SELECT count(*) AS count FROM review_attempts WHERE user_word_id = ?1",
+        )
+          .bind(saved.userWordId)
+          .first<{ count: number }>()
+      )?.count,
+    ).toBe(1);
+    expect(
+      (
+        await env.DB.prepare(
+          "SELECT count(*) AS count FROM confidence_point_ledger WHERE reason = 'word_added'",
+        ).first<{ count: number }>()
+      )?.count,
+    ).toBe(1);
+  });
+
   it("rolls back the entire save batch when its idempotency record fails", async () => {
     await env.DB.prepare(
       `CREATE TRIGGER fail_save_idempotency BEFORE INSERT ON idempotency_keys

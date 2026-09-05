@@ -237,7 +237,11 @@ export class D1ContentLearningRepository {
         : this.database
             .prepare(
               `UPDATE user_words SET deleted_at = NULL, status = 'new', source = ?1,
-                 review_step = 0, added_at = ?2, updated_at = ?2 WHERE id = ?3`,
+                 review_step = 0, next_review_at = NULL, last_reviewed_at = NULL,
+                 last_result = NULL, last_rating = NULL, consecutive_correct_count = 0,
+                 consecutive_incorrect_count = 0, total_review_count = 0,
+                 correct_review_count = 0, mastered_at = NULL, ignored_at = NULL,
+                 added_at = ?2, updated_at = ?2 WHERE id = ?3`,
             )
             .bind(source, timestamp, wordId)
       : this.database
