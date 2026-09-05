@@ -48,6 +48,19 @@ describe("VocanovaClient", () => {
     assert.equal(response.status, 204);
   });
 
+  it("sends the optional local return path when requesting a magic link", async () => {
+    const body = { email: "user@example.com", returnTo: "/reviews?mode=due" };
+    const fetch = (_url: string, init: RequestInit): Promise<Response> => {
+      assert.deepEqual(JSON.parse(String(init.body)), body);
+      return Promise.resolve(new Response(null, { status: 204 }));
+    };
+    const client = new VocanovaClient({
+      baseURL: "https://api.example.com",
+      fetch: fetch as typeof globalThis.fetch,
+    });
+    assert.equal((await client.requestMagicLink(body)).response.status, 204);
+  });
+
   it("sends CSRF header on logout", async () => {
     const fetch = (url: string, init: RequestInit): Promise<Response> => {
       assert.equal(url, "https://api.example.com/api/v1/auth/logout");
