@@ -271,7 +271,14 @@ export class D1ContentLearningRepository {
         ),
       );
     }
-    await this.database.batch(statements);
+    try {
+      await this.database.batch(statements);
+    } catch (error) {
+      if (!isActiveUserWordConflict(error)) throw error;
+      const saved = await this.savedMeaning(userId, meaningId);
+      await this.recordIdempotency(userId, "user_words:save", key, fingerprint);
+      return saved;
+    }
     return this.savedMeaning(userId, meaningId);
   }
 
@@ -942,6 +949,13 @@ function zUuid(value: string): boolean {
 function requireKey(key: string): void {
   if (!key || key.length > 200)
     throw new ContentLearningError("invalid_idempotency");
+}
+
+function isActiveUserWordConflict(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("user_words.user_id, user_words.meaning_id")
+  );
 }
 async function sha256(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest(
