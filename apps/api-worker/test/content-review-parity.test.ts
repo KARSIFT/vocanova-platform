@@ -948,35 +948,42 @@ describe("Worker content, learning, and review parity", () => {
     const first = await submit("http-replay-one");
     expect(first.status).toBe(200);
     const firstBody = await first.json();
-    const snapshot = await env.DB.prepare(
-      `SELECT (SELECT count(*) FROM review_attempts) AS attempts,
-              (SELECT total_review_count FROM user_words WHERE id = ?1) AS reviews,
-              (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?2) AS ledger`,
-    )
-      .bind(USER_WORD_A, USER_A)
-      .first();
+    const readState = async () => ({
+      attempts: (
+        await env.DB.prepare(
+          "SELECT * FROM review_attempts WHERE user_id = ?1 ORDER BY id",
+        )
+          .bind(USER_A)
+          .all()
+      ).results,
+      word: await env.DB.prepare("SELECT * FROM user_words WHERE id = ?1")
+        .bind(USER_WORD_A)
+        .first(),
+      ledger: (
+        await env.DB.prepare(
+          "SELECT * FROM confidence_point_ledger WHERE user_id = ?1 ORDER BY id",
+        )
+          .bind(USER_A)
+          .all()
+      ).results,
+    });
+    const snapshot = await readState();
+    expect(snapshot.attempts).toHaveLength(1);
+    expect(snapshot.word).toMatchObject({
+      total_review_count: 1,
+      review_step: 1,
+    });
+    expect(snapshot.ledger.length).toBeGreaterThan(0);
     const replay = await submit("http-replay-two");
     expect(replay.status).toBe(200);
     expect(await replay.json()).toEqual(firstBody);
-    expect(
-      await env.DB.prepare(
-        `SELECT (SELECT count(*) FROM review_attempts) AS attempts, (SELECT total_review_count FROM user_words WHERE id = ?1) AS reviews, (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?2) AS ledger`,
-      )
-        .bind(USER_WORD_A, USER_A)
-        .first(),
-    ).toEqual(snapshot);
+    expect(await readState()).toEqual(snapshot);
     const conflict = await submit(
       "http-replay-three",
       review({ clientAttemptId: "http-replay", rating: "easy" }),
     );
     expect(conflict.status).toBe(409);
-    expect(
-      await env.DB.prepare(
-        `SELECT (SELECT count(*) FROM review_attempts) AS attempts, (SELECT total_review_count FROM user_words WHERE id = ?1) AS reviews, (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?2) AS ledger`,
-      )
-        .bind(USER_WORD_A, USER_A)
-        .first(),
-    ).toEqual(snapshot);
+    expect(await readState()).toEqual(snapshot);
   });
 
   it("rolls back attempt and schedule together when the review batch fails", async () => {
