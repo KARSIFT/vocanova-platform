@@ -298,11 +298,12 @@ export async function authenticated(
 }
 
 export function requireCsrf(request: Request): void {
+  const cookieToken = readCookie(request, CSRF_COOKIE);
+  const headerToken = request.headers.get("x-csrf-token") ?? "";
   if (
-    !constantTimeEqual(
-      readCookie(request, CSRF_COOKIE),
-      request.headers.get("x-csrf-token") ?? "",
-    )
+    !cookieToken ||
+    !headerToken ||
+    !constantTimeEqual(cookieToken, headerToken)
   ) {
     throw new IdentityError("csrf_invalid");
   }
