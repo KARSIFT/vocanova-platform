@@ -1210,6 +1210,15 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 401, { error: "unauthorized" });
       return;
     }
+    const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "onboarding", 1)) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "onboarding",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const onboardingStatusOverride = cookies.e2e_onboarding_status;
     if (ONBOARDING_STATUSES.has(onboardingStatusOverride)) {
       logLine(req, 200, { onboardingStatus: onboardingStatusOverride });
@@ -1219,7 +1228,6 @@ const server = createServer(async (req, res) => {
       });
       return;
     }
-    const state = getSessionState(cookies);
     if (consumeReadFailureFixture(state, cookies, "account", 1)) {
       logLine(req, 500, { reason: "fixture-read-failure", fixture: "account" });
       jsonResponse(res, 500, { error: "fixture_read_failure" });
