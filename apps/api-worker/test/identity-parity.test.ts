@@ -317,6 +317,7 @@ describe("identity and account parity", () => {
 
   it("does not return settings after deletion wins during a stale update", async () => {
     const { userId } = await signedIn("settings-race@example.test");
+    await new D1IdentityRepository(env.DB).getSettings(userId, now.toISOString());
     let reached!: () => void;
     let release!: () => void;
     const read = new Promise<void>((resolve) => {
