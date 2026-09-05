@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 const LONG_SAVED_CONTENT = "a".repeat(300);
 const LONG_WORD = `word-${LONG_SAVED_CONTENT}`;
 const LONG_PART_OF_SPEECH = `part-${LONG_SAVED_CONTENT}`;
-const LONG_DEFINITION = `definition-${LONG_SAVED_CONTENT}`;
+const LONG_DEFINITION = `A definition containing ${LONG_SAVED_CONTENT}.`;
 
 for (const pathname of ["/home", "/progress"]) {
   test(`keeps long saved content within the viewport on ${pathname}`, async ({

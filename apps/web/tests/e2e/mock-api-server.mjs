@@ -344,7 +344,7 @@ const LONG_SAVED_WORDS_RESPONSE = {
       ...TRUNCATED_SAVED_WORDS_RESPONSE.items[0],
       wordText: `word-${LONG_SAVED_CONTENT}`,
       partOfSpeech: `part-${LONG_SAVED_CONTENT}`,
-      shortDefinition: `definition-${LONG_SAVED_CONTENT}`,
+      shortDefinition: `A definition containing ${LONG_SAVED_CONTENT}.`,
     },
   ],
 };
