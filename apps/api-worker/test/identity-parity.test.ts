@@ -750,6 +750,13 @@ describe("identity and account parity", () => {
     const { app, cookie, csrf, userId } = await signedIn(
       "expired@example.test",
     );
+    // Age the original 30-day session so an accidental sliding renewal
+    // would change its expiry even though the test clock is deterministic.
+    await env.DB.prepare(
+      "UPDATE sessions SET created_at = '2026-07-24T12:00:00.000Z', expires_at = '2026-08-23T12:00:00.000Z' WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
     const activeExpiry = await env.DB.prepare(
       "SELECT expires_at FROM sessions WHERE user_id = ?1",
     )
