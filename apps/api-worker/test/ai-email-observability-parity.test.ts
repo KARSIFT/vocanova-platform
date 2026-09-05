@@ -149,6 +149,18 @@ describe("Worker AI feedback parity", () => {
     expect(provider.generateCalls).toBe(1);
   });
 
+  it("enforces the idempotency key length before provider work", async () => {
+    const provider = new ScriptedProvider(() => validFeedback());
+    const service = createService(provider);
+    await expect(
+      service.submit(USER_A, submission("I work every day."), "a".repeat(200)),
+    ).resolves.toMatchObject({ result: { status: "correct" } });
+    await expect(
+      service.submit(USER_A, submission("I work every day."), "b".repeat(201)),
+    ).rejects.toMatchObject({ code: "invalid_idempotency" });
+    expect(provider.generateCalls).toBe(1);
+  });
+
   it("runs deterministic safety before moderation and treats injection as learner data", async () => {
     const provider = new ScriptedProvider(() => validFeedback());
     const service = createService(provider);
