@@ -367,6 +367,14 @@ describe("Worker AI feedback parity", () => {
       submission("I work every day."),
       "owner-feedback",
     );
+    const ownerRowsBefore = await Promise.all([
+      env.DB.prepare("SELECT * FROM learner_sentences WHERE id = ?1")
+        .bind(owner.result.sentenceId)
+        .first<Record<string, string | number | null>>(),
+      env.DB.prepare("SELECT * FROM ai_feedback_attempts WHERE id = ?1")
+        .bind(owner.result.attemptId)
+        .first<Record<string, string | number | null>>(),
+    ]);
     const app = createApp({
       createPlatformRepository: () => ({
         checkHealth: () => Promise.resolve({ database: "ok" }),
@@ -416,6 +424,15 @@ describe("Worker AI feedback parity", () => {
         ).first<{ count: number }>()
       )?.count,
     ).toBe(0);
+    const ownerRowsAfter = await Promise.all([
+      env.DB.prepare("SELECT * FROM learner_sentences WHERE id = ?1")
+        .bind(owner.result.sentenceId)
+        .first<Record<string, string | number | null>>(),
+      env.DB.prepare("SELECT * FROM ai_feedback_attempts WHERE id = ?1")
+        .bind(owner.result.attemptId)
+        .first<Record<string, string | number | null>>(),
+    ]);
+    expect(ownerRowsAfter).toEqual(ownerRowsBefore);
   });
 });
 
