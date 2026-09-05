@@ -14,17 +14,26 @@ test("keeps an authenticated learner on page after logout fails, then retries", 
   await page.route("**/api/v1/auth/logout", async (route) => {
     calls += 1;
     if (calls === 1) {
-      await route.fulfill({ status: 503, contentType: "application/problem+json", body: JSON.stringify({ detail: "temporarily unavailable" }) });
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await route.fulfill({
+        status: 503,
+        contentType: "application/problem+json",
+        body: JSON.stringify({ detail: "temporarily unavailable" }),
+      });
       return;
     }
     await route.continue();
   });
   await page.getByRole("button", { name: "Log out" }).click();
-  await expect(page.getByText("temporarily unavailable")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Signing out..." })).toBeDisabled();
+  await page.getByRole("button", { name: "Signing out..." }).click({ force: true });
+  expect(calls).toBe(1);
+  await expect(page.getByText("Unable to log out. Please try again.")).toBeVisible();
   await expect(page).toHaveURL(/\/home/);
   await expect(page.getByRole("button", { name: "Log out" })).toBeEnabled();
   expect((await context.cookies()).some((cookie) => cookie.name === "vocanova_csrf" && cookie.value === csrf)).toBe(true);
   await page.getByRole("button", { name: "Log out" }).click();
   await expect(page).toHaveURL(/\/signin/);
+  expect((await context.cookies()).some((cookie) => cookie.name === "vocanova_csrf")).toBe(false);
   expect(calls).toBe(2);
 });
