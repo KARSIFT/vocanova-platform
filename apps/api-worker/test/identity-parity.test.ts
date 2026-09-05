@@ -315,6 +315,105 @@ describe("identity and account parity", () => {
     expect(await preserved.json()).toMatchObject({ dailyReviewTarget: 35 });
   });
 
+  it("does not return settings after deletion wins during a stale update", async () => {
+    const { userId } = await signedIn("settings-race@example.test");
+    await new D1IdentityRepository(env.DB).getSettings(
+      userId,
+      now.toISOString(),
+    );
+    await env.DB.batch([
+      env.DB.prepare(
+        "UPDATE user_settings SET daily_review_target = ?1 WHERE user_id = ?2",
+      ).bind(17, userId),
+      env.DB.prepare("UPDATE users SET display_name = ?1 WHERE id = ?2").bind(
+        "Established",
+        userId,
+      ),
+    ]);
+    let reached!: () => void;
+    let release!: () => void;
+    const read = new Promise<void>((resolve) => {
+      reached = resolve;
+    });
+    const resume = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let paused = false;
+    const database = new Proxy(env.DB, {
+      get(target, property, receiver) {
+        if (property !== "prepare")
+          return Reflect.get(target, property, receiver);
+        return (sql: string) => {
+          const statement = target.prepare(sql);
+          if (paused || !sql.startsWith("SELECT id, email, display_name"))
+            return statement;
+          return new Proxy(statement, {
+            get(prepared, key, receiver) {
+              if (key !== "bind") return Reflect.get(prepared, key, receiver);
+              return (...values: unknown[]) => {
+                const bound = prepared.bind(...values);
+                return new Proxy(bound, {
+                  get(value, boundKey, boundReceiver) {
+                    if (boundKey !== "first")
+                      return Reflect.get(value, boundKey, boundReceiver);
+                    return async <T>(): Promise<T | null> => {
+                      const row = await value.first<T>();
+                      paused = true;
+                      reached();
+                      await resume;
+                      return row;
+                    };
+                  },
+                });
+              };
+            },
+          });
+        };
+      },
+    }) as D1Database;
+    const repository = new D1IdentityRepository(database);
+    const update = repository.updateSettings(
+      userId,
+      {
+        dailyReviewTarget: 30,
+        reviewIntervalPreset: "balanced",
+        appLanguage: "en",
+        notificationsEnabled: true,
+        marketingEmailsEnabled: false,
+        displayName: "Stale",
+      },
+      now.toISOString(),
+    );
+    await read;
+    const settingsBefore = await env.DB.prepare(
+      "SELECT daily_review_target FROM user_settings WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .first();
+    const userBefore = await env.DB.prepare(
+      "SELECT display_name FROM users WHERE id = ?1",
+    )
+      .bind(userId)
+      .first();
+    await env.DB.prepare("UPDATE users SET status = 'deleted' WHERE id = ?1")
+      .bind(userId)
+      .run();
+    release();
+    await expect(update).resolves.toBeNull();
+    await expect(
+      env.DB.prepare(
+        "SELECT daily_review_target FROM user_settings WHERE user_id = ?1",
+      )
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual(settingsBefore);
+    await expect(
+      env.DB.prepare("SELECT display_name FROM users WHERE id = ?1")
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual(userBefore);
+  });
+
   it("keeps today's mission snapshot when Settings and client timezone change", async () => {
     const app = identityApp(config, oauth, () => now);
     const { cookie, csrf } = await signedIn(
