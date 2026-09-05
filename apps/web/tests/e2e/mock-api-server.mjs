@@ -73,6 +73,9 @@
 //   GET    /api/v1/journey-situations                -> 200 { items: [...] }
 //   GET    /api/v1/journey-situations/:slug          -> 200 SituationResponse
 //   GET    /api/v1/canonical-words/:slug             -> 200 WordDetailResponse
+//             one 500 per session for discovery or reviews when the
+//             `e2e_read_failure` cookie names that fixture; used to prove
+//             route-boundary retry behavior against a real recovered request
 //
 //   GET    /api/v1/settings                          -> 200 Settings
 //   PATCH  /api/v1/settings                          -> 200 Settings
@@ -94,7 +97,11 @@ import { createServer } from "node:http";
 const PORT = Number(process.env.MOCK_API_PORT ?? 8080);
 const HOST = process.env.MOCK_API_HOST ?? "127.0.0.1";
 
-const ONBOARDING_STATUSES = new Set(["not_started", "in_progress", "completed"]);
+const ONBOARDING_STATUSES = new Set([
+  "not_started",
+  "in_progress",
+  "completed",
+]);
 const WORD_DETAIL_REVIEW_STATES = new Map([
   ["unsaved", null],
   ["due", "due"],
@@ -491,7 +498,20 @@ function createInitialState() {
     lastReviewAttemptId: null,
     sentenceCount: 0,
     reviewedCount: 0,
+    consumedReadFailureFixtures: new Set(),
   };
+}
+
+function consumeReadFailureFixture(state, cookies, fixture) {
+  if (
+    cookies.e2e_read_failure !== fixture ||
+    state.consumedReadFailureFixtures.has(fixture)
+  ) {
+    return false;
+  }
+
+  state.consumedReadFailureFixtures.add(fixture);
+  return true;
 }
 
 function cloneProgress(progress) {
@@ -759,7 +779,10 @@ const server = createServer(async (req, res) => {
     res.setHeader("Vary", "Origin");
   }
   if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PATCH, DELETE, OPTIONS",
+    );
     // Every custom header @vocanova/api-client ever sets
     // (packages/api-client/src/index.ts) - Idempotency-Key was
     // missing here initially and only surfaced once a mutation that
@@ -774,7 +797,10 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const url = new URL(req.url, `http://${req.headers.host ?? `${HOST}:${PORT}`}`);
+  const url = new URL(
+    req.url,
+    `http://${req.headers.host ?? `${HOST}:${PORT}`}`,
+  );
   const cookies = parseCookies(req.headers.cookie);
 
   if (req.method === "GET" && url.pathname === "/healthz") {
@@ -909,7 +935,9 @@ const server = createServer(async (req, res) => {
       // customized value exists yet. The mock starts with the
       // schema default (20) for every fresh session, so the seed
       // fires for the very first onboarding write.
-      if (state.settings.dailyReviewTarget === DEFAULT_SETTINGS.dailyReviewTarget) {
+      if (
+        state.settings.dailyReviewTarget === DEFAULT_SETTINGS.dailyReviewTarget
+      ) {
         state.settings.dailyReviewTarget = body.dailyReviewTarget;
       }
     }
@@ -1009,6 +1037,11 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/reviews/due") {
     const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "reviews")) {
+      logLine(req, 500, { reason: "fixture-read-failure", fixture: "reviews" });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const data = buildDueWords(state);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
@@ -1113,11 +1146,13 @@ const server = createServer(async (req, res) => {
       attemptId: body.attemptId,
       status: evaluation.status,
       originalSentence: body.sentenceText,
-      correctedSentence: evaluation.status === "correct" ? body.sentenceText : undefined,
+      correctedSentence:
+        evaluation.status === "correct" ? body.sentenceText : undefined,
       explanation: evaluation.explanation,
-      improvementTip: evaluation.status === "needs_improvement"
-        ? "Try using the target word naturally in your sentence."
-        : undefined,
+      improvementTip:
+        evaluation.status === "needs_improvement"
+          ? "Try using the target word naturally in your sentence."
+          : undefined,
       missionCompleted: !evaluation.errorCode,
       canRetry: Boolean(evaluation.errorCode),
       reported: false,
@@ -1156,6 +1191,15 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/v1/journey-situations") {
+    const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "discover")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "discover",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     logLine(req, 200);
     jsonResponse(res, 200, buildJourneySituations());
     return;
@@ -1165,6 +1209,15 @@ const server = createServer(async (req, res) => {
     req.method === "GET" &&
     url.pathname.startsWith("/api/v1/journey-situations/")
   ) {
+    const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "discover")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "discover",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const slug = decodeURIComponent(
       url.pathname.slice("/api/v1/journey-situations/".length),
     );
@@ -1187,6 +1240,14 @@ const server = createServer(async (req, res) => {
       url.pathname.slice("/api/v1/canonical-words/".length),
     );
     const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "discover")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "discover",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const response = buildWordDetailResponse(
       state,
       slug,
@@ -1276,7 +1337,9 @@ const server = createServer(async (req, res) => {
     }
     logLine(req, 200, { action: "account-deletion" });
     const requestedAt = new Date();
-    const purgeAfter = new Date(requestedAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const purgeAfter = new Date(
+      requestedAt.getTime() + 30 * 24 * 60 * 60 * 1000,
+    );
     jsonResponse(
       res,
       200,
