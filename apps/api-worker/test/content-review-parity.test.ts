@@ -31,6 +31,19 @@ beforeEach(async () => {
 });
 
 describe("Worker content, learning, and review parity", () => {
+  it("requires a session before listing discovery situations", async () => {
+    const response = await createApp().request(
+      "http://worker.test/api/v1/journey-situations",
+      undefined,
+      env,
+    );
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toMatchObject({
+      detail: "authentication required",
+    });
+  });
+
   it("projects every Word Detail review state and fails closed on unknown persisted status", () => {
     const cases = [
       ["new", null, "due"],
