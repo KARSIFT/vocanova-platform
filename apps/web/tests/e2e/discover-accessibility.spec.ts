@@ -8,9 +8,7 @@
 // screen is the screen where most of the saved-words interaction
 // happens (the Save button + the sentence feedback widget), so it
 // is also where colour-only feedback and keyboard reachability
-// regressions are most likely to land. The non-color-only
-// assertion specifically targets the "Saved" badge and the
-// meaning-by-meaning card structure on the situation page.
+// regressions are most likely to land.
 
 import { randomUUID } from "node:crypto";
 
@@ -76,19 +74,50 @@ test.describe("Discover accessibility", () => {
       ).join("\n")}`,
     ).toEqual([]);
 
-    // Each meaning is an anchor; the back link is also focusable.
+    // Each recommended meaning is an anchor; the back link is also focusable.
     // Fixture has two meanings, so at least 3 focusable elements.
     await assertKeyboardReachable(page, { minFocusable: 3 });
 
     await assertNonColorOnlyFeedback(page, {
       contextLabel: "/discover/[situation]",
       requireText: [
-        // The "Saved" indicator on already-saved meanings is the
-        // most likely colour-only regression on this screen.
-        "text=Saved",
+        "text=Explore a new word for this situation.",
         "text=Back to Journey",
       ],
     });
+  });
+
+  test("Journey recommendations exclude saved meanings while retaining remaining new meanings", async ({
+    page,
+  }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) {
+      throw new Error("Expected the Playwright project to configure use.baseURL.");
+    }
+    const sessionValue = `vocanova-session-${randomUUID()}`;
+    const csrfValue = `vocanova-csrf-${randomUUID()}`;
+    await page.context().addCookies([
+      { name: "vocanova_session", value: sessionValue, url: baseURL },
+      { name: "vocanova_csrf", value: csrfValue, url: baseURL },
+    ]);
+
+    await page.goto("/discover/ordering-at-a-cafe/pour");
+    await page
+      .getByRole("button", {
+        name: /^Save pour: to make liquid flow into a container$/,
+      })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Remove pour from saved words" }),
+    ).toBeVisible();
+
+    await page.goto("/discover/ordering-at-a-cafe");
+    await expect(
+      page.getByRole("link", { name: /pour/i }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: /counter/i }),
+    ).toBeVisible();
   });
 
   test("/discover/[situation]/[word] (Word Detail + sentence feedback) renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({

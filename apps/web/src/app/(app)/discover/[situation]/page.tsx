@@ -26,6 +26,7 @@ export default async function SituationDiscoverPage({
   }
 
   const { situation: situationData, meanings } = response.data;
+  const recommendedMeanings = meanings.filter((meaning) => !meaning.saved);
 
   return (
     <div className="p-[var(--spacing-lg)]">
@@ -34,12 +35,12 @@ export default async function SituationDiscoverPage({
         {situationData.title}
       </h1>
       <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-        Words already saved are marked below.
+        Explore a new word for this situation.
       </p>
 
-      {meanings.length > 0 ? (
+      {recommendedMeanings.length > 0 ? (
         <ul className="mt-[var(--spacing-lg)] space-y-[var(--spacing-md)]">
-          {meanings.map((meaning) => (
+          {recommendedMeanings.map((meaning) => (
             <li key={meaning.meaningId}>
               <Link
                 href={`/discover/${situation}/${meaning.wordSlug}`}
@@ -54,11 +55,6 @@ export default async function SituationDiscoverPage({
                       {meaning.shortDefinition}
                     </p>
                   </div>
-                  {meaning.saved ? (
-                    <span className="shrink-0 rounded-full bg-primary-100 px-[var(--spacing-sm)] py-[var(--spacing-xs)] text-sm font-semibold text-primary-800">
-                      <span aria-hidden="true">✓</span> Saved
-                    </span>
-                  ) : null}
                 </div>
               </Link>
             </li>

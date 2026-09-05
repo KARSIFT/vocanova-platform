@@ -442,6 +442,15 @@ const SITUATIONS_BY_SLUG = {
         shortDefinition: "to make liquid flow into a container",
         saved: false,
       },
+      {
+        meaningId: "mean-counter",
+        wordId: "word-counter",
+        wordSlug: "counter",
+        wordText: "counter",
+        partOfSpeech: "noun",
+        shortDefinition: "a long flat surface for service",
+        saved: false,
+      },
     ],
   },
   "navigating-an-airport": {
@@ -881,7 +890,7 @@ function buildWordDetailResponse(state, slug, selectedFixture, wordFixture) {
   };
 }
 
-function buildSituationResponse(slug, selectedFixture) {
+function buildSituationResponse(state, slug, selectedFixture) {
   const situationFixture = SITUATIONS_BY_SLUG[slug];
   if (!situationFixture) {
     return null;
@@ -891,7 +900,10 @@ function buildSituationResponse(slug, selectedFixture) {
     meanings:
       selectedFixture === "empty"
         ? []
-        : situationFixture.meanings.map((meaning) => ({ ...meaning })),
+        : situationFixture.meanings.map((meaning) => ({
+            ...meaning,
+            saved: state.savedMeaningIds.has(meaning.meaningId),
+          })),
   };
 }
 
@@ -1634,6 +1646,7 @@ const server = createServer(async (req, res) => {
       url.pathname.slice("/api/v1/journey-situations/".length),
     );
     const response = buildSituationResponse(
+      state,
       slug,
       cookies.e2e_situation_fixture,
     );
