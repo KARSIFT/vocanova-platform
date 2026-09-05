@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
 
-import { smokeStaging } from "./smoke-staging.mjs";
+import { runSmokeCli, smokeStaging } from "./smoke-staging.mjs";
 
 function response(body, status = 200) {
   return new Response(body === null ? null : JSON.stringify(body), {
@@ -13,6 +13,11 @@ function response(body, status = 200) {
 
 test("accepts healthy staging for the expected release", async () => {
   const requested = [];
+  const timeoutDurations = [];
+  const timeoutSignal = (duration) => {
+    timeoutDurations.push(duration);
+    return new AbortController().signal;
+  };
   const fetchImpl = async (url, options) => {
     requested.push({ url, options });
     if (url.endsWith("/healthz")) {
@@ -24,7 +29,7 @@ test("accepts healthy staging for the expected release", async () => {
     return response(null);
   };
 
-  await smokeStaging("abc123", fetchImpl);
+  await smokeStaging("abc123", fetchImpl, timeoutSignal);
   assert.deepEqual(
     requested.map(({ url }) => url),
     [
@@ -38,6 +43,7 @@ test("accepts healthy staging for the expected release", async () => {
     assert(options.signal instanceof AbortSignal);
     assert.equal(options.signal.aborted, false);
   }
+  assert.deepEqual(timeoutDurations, [10_000, 10_000, 10_000]);
 });
 
 test("rejects a deployment whose API reports another release", async () => {
@@ -94,7 +100,17 @@ test("rejects an unavailable web origin", async () => {
   await assert.rejects(smokeStaging("abc123", fetchImpl), /\/.*503/);
 });
 
-test("CLI rejects an invalid SHA before starting smoke requests", () => {
+test("CLI rejects an invalid SHA before starting smoke requests", async () => {
+  let requests = 0;
+  await assert.rejects(
+    runSmokeCli("invalid", async () => {
+      requests += 1;
+      return response(null);
+    }),
+    /40-character-git-sha/,
+  );
+  assert.equal(requests, 0);
+
   const result = spawnSync(
     process.execPath,
     ["scripts/foundation/smoke-staging.mjs", "invalid"],
