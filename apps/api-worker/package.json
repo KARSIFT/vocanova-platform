@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc -p tsconfig.build.json --pretty false",
+    "anonymize:local": "node scripts/account-anonymization-local.mjs",
     "ci": "pnpm run lint && pnpm run types:check && pnpm run typecheck && pnpm run safety:check && pnpm run data-conversion:inventory && pnpm run test && pnpm run openapi:check && pnpm run contract:check && pnpm run dry-run",
     "contract:check": "node scripts/check-contract-drift.mjs",
     "data-conversion:inventory": "pnpm run build && node scripts/check-data-conversion-inventory.mjs",
