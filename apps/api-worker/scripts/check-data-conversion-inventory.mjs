@@ -56,6 +56,7 @@ const allowedD1OnlyTables = [
   "ai_usage_counters",
   "auth_rate_limits",
   "platform_metadata",
+  "review_state_reservations",
 ];
 assert.deepEqual(
   [...d1Tables.keys()].sort(),

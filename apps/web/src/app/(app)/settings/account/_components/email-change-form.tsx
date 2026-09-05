@@ -153,12 +153,16 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
         >
           <p className="font-semibold">Your sign-in email was updated.</p>
           <p className="mt-[var(--spacing-xs)]">
-            New address: <span className="font-medium">{phase.newEmail}</span>
+            New address:{" "}
+            <span className="break-all font-medium">{phase.newEmail}</span>
             {phase.previousEmail ? (
               <>
                 {" "}
                 (previously{" "}
-                <span className="font-medium">{phase.previousEmail}</span>)
+                <span className="break-all font-medium">
+                  {phase.previousEmail}
+                </span>
+                )
               </>
             ) : null}
           </p>
@@ -180,9 +184,9 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
             className="rounded-md border border-primary-300 bg-primary-50 p-[var(--spacing-md)] text-base text-primary-900"
           >
             We sent a confirmation link to{" "}
-            <span className="font-medium">{phase.newEmail}</span>. The link
-            expires in 15 minutes. Paste the link&apos;s token below to finish
-            the change.
+            <span className="break-all font-medium">{phase.newEmail}</span>. The
+            link expires in 15 minutes. Paste the link&apos;s token below to
+            finish the change.
           </p>
           {phase.error ? (
             <p
@@ -304,7 +308,10 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
       {currentEmail ? (
         <p className="text-sm text-neutral-700">
           Your current sign-in address is{" "}
-          <span className="font-medium text-neutral-900">{currentEmail}</span>.
+          <span className="break-all font-medium text-neutral-900">
+            {currentEmail}
+          </span>
+          .
         </p>
       ) : null}
     </div>

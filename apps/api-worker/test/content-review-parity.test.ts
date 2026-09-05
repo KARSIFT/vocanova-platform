@@ -547,22 +547,21 @@ describe("Worker content, learning, and review parity", () => {
       () => new Date(NOW),
     );
 
-    await expect(
-      Promise.all([
-        concurrentRepository.saveUserWord(
-          USER_A,
-          MEANING_A,
-          "journey",
-          "concurrent-save-one",
-        ),
-        concurrentRepository.saveUserWord(
-          USER_A,
-          MEANING_A,
-          "journey",
-          "concurrent-save-two",
-        ),
-      ]),
-    ).resolves.toEqual([
+    const saves = await Promise.all([
+      concurrentRepository.saveUserWord(
+        USER_A,
+        MEANING_A,
+        "journey",
+        "concurrent-save-one",
+      ),
+      concurrentRepository.saveUserWord(
+        USER_A,
+        MEANING_A,
+        "journey",
+        "concurrent-save-two",
+      ),
+    ]);
+    expect(saves).toEqual([
       expect.objectContaining({ meaningId: MEANING_A }),
       expect.objectContaining({ meaningId: MEANING_A }),
     ]);
@@ -571,6 +570,11 @@ describe("Worker content, learning, and review parity", () => {
     )
       .bind(USER_A, MEANING_A)
       .first<{ count: number }>();
+    const activeWord = await env.DB.prepare(
+      "SELECT id FROM user_words WHERE user_id = ?1 AND meaning_id = ?2 AND deleted_at IS NULL",
+    )
+      .bind(USER_A, MEANING_A)
+      .first<{ id: string }>();
     const addRewards = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM confidence_point_ledger WHERE user_id = ?1 AND reason = 'word_added'",
     )
@@ -582,6 +586,9 @@ describe("Worker content, learning, and review parity", () => {
       .bind(USER_A)
       .first<{ count: number }>();
     expect(activeWords?.count).toBe(1);
+    expect(saves[0].userWordId).toBe(activeWord?.id);
+    expect(saves[1].userWordId).toBe(activeWord?.id);
+    expect(saves[0].userWordId).toBe(saves[1].userWordId);
     expect(addRewards?.count).toBe(1);
     expect(keys?.count).toBe(2);
   });
@@ -825,6 +832,137 @@ describe("Worker content, learning, and review parity", () => {
       review_step: 3,
       total_review_count: 1,
       correct_review_count: 1,
+    });
+  });
+
+  it("keeps two concurrent distinct reviews from losing a scheduler transition", async () => {
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+
+    let reads = 0;
+    let releaseFirstRead!: () => void;
+    const firstReadIsHeld = new Promise<void>((resolve) => {
+      releaseFirstRead = resolve;
+    });
+    let firstReadReached!: () => void;
+    const firstRead = new Promise<void>((resolve) => {
+      firstReadReached = resolve;
+    });
+    const concurrentDatabase = new Proxy(env.DB, {
+      get(target, property, receiver) {
+        if (property !== "prepare")
+          return Reflect.get(target, property, receiver);
+        return (query: string) => {
+          const statement = target.prepare(query);
+          if (
+            !query.includes(
+              "FROM user_words WHERE id = ?1 AND user_id = ?2 AND deleted_at IS NULL",
+            )
+          )
+            return statement;
+          return new Proxy(statement, {
+            get(prepared, preparedProperty, preparedReceiver) {
+              if (preparedProperty !== "bind")
+                return Reflect.get(
+                  prepared,
+                  preparedProperty,
+                  preparedReceiver,
+                );
+              return (...values: unknown[]) => {
+                const bound = prepared.bind(...values);
+                return new Proxy(bound, {
+                  get(boundStatement, boundProperty, boundReceiver) {
+                    if (boundProperty !== "first")
+                      return Reflect.get(
+                        boundStatement,
+                        boundProperty,
+                        boundReceiver,
+                      );
+                    return async <T>(): Promise<T | null> => {
+                      const row = await boundStatement.first<T>();
+                      reads += 1;
+                      if (reads === 1) {
+                        firstReadReached();
+                        await firstReadIsHeld;
+                      }
+                      return row;
+                    };
+                  },
+                });
+              };
+            },
+          });
+        };
+      },
+    });
+    const concurrentRepository = new D1ContentLearningRepository(
+      concurrentDatabase,
+      () => new Date(NOW),
+    );
+
+    const first = concurrentRepository.submitReview(
+      USER_A,
+      review({ clientAttemptId: "concurrent-review-one" }),
+      "concurrent-review-one",
+    );
+    await firstRead;
+    await expect(
+      concurrentRepository.submitReview(
+        USER_A,
+        review({ clientAttemptId: "concurrent-review-two" }),
+        "concurrent-review-two",
+      ),
+    ).resolves.toMatchObject({ clientAttemptId: "concurrent-review-two" });
+    releaseFirstRead();
+    await expect(first).resolves.toMatchObject({
+      clientAttemptId: "concurrent-review-one",
+    });
+
+    const attempts = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM review_attempts WHERE user_word_id = ?1",
+    )
+      .bind(USER_WORD_A)
+      .first<{ count: number }>();
+    const state = await env.DB.prepare(
+      "SELECT review_step, total_review_count, correct_review_count FROM user_words WHERE id = ?1",
+    )
+      .bind(USER_WORD_A)
+      .first<{
+        review_step: number;
+        total_review_count: number;
+        correct_review_count: number;
+      }>();
+    const idempotency = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM idempotency_keys WHERE user_id = ?1 AND operation = 'reviews:submit'",
+    )
+      .bind(USER_A)
+      .first<{ count: number }>();
+    const activity = await env.DB.prepare(
+      "SELECT reviews_attempted, reviews_correct FROM daily_activity_summaries WHERE user_id = ?1",
+    )
+      .bind(USER_A)
+      .first<{ reviews_attempted: number; reviews_correct: number }>();
+    const rewards = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM confidence_point_ledger WHERE user_id = ?1 AND reason = 'review_correct'",
+    )
+      .bind(USER_A)
+      .first<{ count: number }>();
+    const reservations = await env.DB.prepare(
+      "SELECT state_version FROM review_state_reservations WHERE user_word_id = ?1 ORDER BY state_version",
+    )
+      .bind(USER_WORD_A)
+      .all<{ state_version: number }>();
+    expect(attempts?.count).toBe(2);
+    expect(idempotency?.count).toBe(2);
+    expect(activity).toEqual({ reviews_attempted: 2, reviews_correct: 2 });
+    expect(rewards?.count).toBe(2);
+    expect(reservations.results).toEqual([
+      { state_version: 0 },
+      { state_version: 1 },
+    ]);
+    expect(state).toEqual({
+      review_step: 2,
+      total_review_count: 2,
+      correct_review_count: 2,
     });
   });
 

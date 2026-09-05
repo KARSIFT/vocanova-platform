@@ -26,14 +26,15 @@ actions and are not automated by pull-request workflows.
 
 ## 3. Table inventory
 
-The seven current migrations create 31 tables:
+The eight current migrations create 32 tables:
 
 - Foundation: `platform_metadata`.
 - Identity and accounts: `users`, `external_identities`, `sessions`, `magic_links`, `oauth_states`,
   `user_settings`, `user_onboarding_profiles`, `email_change_links`,
   `account_deletion_requests`, `auth_rate_limits`.
 - Content, learning, and reviews: `canonical_words`, `word_meanings`, `word_examples`, `usage_notes`,
-  `journey_situations`, `journey_words`, `user_words`, `idempotency_keys`, `review_attempts`.
+  `journey_situations`, `journey_words`, `user_words`, `idempotency_keys`, `review_attempts`,
+  `review_state_reservations`.
 - Missions and gamification: `daily_mission_snapshots`, `daily_activity_summaries`,
   `confidence_point_ledger`, `streak_states`, `grace_day_ledger`.
 - Sentences and AI: `learner_sentences`, `ai_feedback_attempts`, `ai_feedback_reports`,
@@ -95,7 +96,10 @@ The current scheduler uses steps `0..7` and ratings **Again / Hard / Good / Easy
 
 Objective result and scheduling rating remain separate. The implemented prompt types are
 `multiple_choice` and `self_check`. `user_words.next_review_at` and review counters are updated in the
-same logical write as the attempt.
+same logical write as the attempt. `review_state_reservations` is a D1-only runtime table that
+reserves each learner-word transition before that write. Its `(user_word_id, state_version)` key
+causes a concurrent stale submission to abort atomically and retry from fresh state, preserving
+append-only attempts and preventing lost scheduler transitions.
 
 ## 10. Missions and daily activity
 
@@ -130,6 +134,9 @@ activity, points, and streak updates that belong to one user action are applied 
 Reusing the same key for a different payload fails. Review, save-word, sentence-feedback, mission,
 points, and account-lifecycle writes use D1 prepared statements and atomic `batch()` boundaries where
 one invariant spans several statements.
+For distinct concurrent reviews of one saved word, the transition reservation is part of the same
+batch as the attempt, idempotency, schedule, mission, activity, and point writes; a reservation
+conflict rolls the complete batch back before bounded retry.
 
 ## 14. Ownership and integrity
 
