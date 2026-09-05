@@ -12,7 +12,7 @@ const EXACT_PROTECTED_PATHS = new Set([
 
 const DISCOVER_PATH = /^\/discover\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)?$/;
 const UNSAFE_CHARACTER = new RegExp(
-  `[\\\\${String.fromCharCode(0)}-${String.fromCharCode(32)}${String.fromCharCode(127)}]`,
+  `[\\\\${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
 );
 const ENCODED_UNSAFE_PATH_CHARACTER = /%(?:2f|5c|0[0-9a-f]|1[0-9a-f]|7f)/i;
 

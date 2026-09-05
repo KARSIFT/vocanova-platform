@@ -5,6 +5,7 @@ import { normalizeReturnTo } from "../../src/lib/return-to";
 
 it("keeps documented protected local paths and their query strings", () => {
   assert.equal(normalizeReturnTo("/reviews?tab=due"), "/reviews?tab=due");
+  assert.equal(normalizeReturnTo("/reviews?q=two%20words"), "/reviews?q=two%20words");
   assert.equal(
     normalizeReturnTo("/reviews?next=%2Fdiscover"),
     "/reviews?next=%2Fdiscover",

@@ -345,7 +345,7 @@
       "path": "/api/v1/auth/magic-links",
       "successStatus": 204,
       "parameters": [],
-      "request": { "properties": ["email"], "required": ["email"] },
+      "request": { "properties": ["email", "returnTo"], "required": ["email"] },
       "response": null
     },
     {
