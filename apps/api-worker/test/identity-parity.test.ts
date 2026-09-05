@@ -404,6 +404,82 @@ describe("identity and account parity", () => {
     expect(replay.status).toBe(401);
   });
 
+  it("links verified OAuth to the user created by a magic link", async () => {
+    const app = identityApp();
+    const email = "OAuth@Example.Test";
+    const requested = await app.request(
+      "http://worker.test/api/v1/auth/magic-links",
+      json({ email }),
+      env,
+    );
+    expect(requested.status).toBe(204);
+    const magicToken = messageToken(messages.at(-1)!);
+    const magic = await app.request(
+      "http://worker.test/api/v1/auth/magic-links/consume",
+      json({ token: magicToken, email }),
+      env,
+    );
+    expect(magic.status).toBe(200);
+    const originalUser = await env.DB.prepare(
+      "SELECT id FROM users WHERE email = ?1",
+    )
+      .bind("oauth@example.test")
+      .first<{ id: string }>();
+    expect(originalUser?.id).toBeDefined();
+
+    const started = await app.request(
+      "http://worker.test/api/v1/auth/oauth/google/start",
+      json({ redirectUri: "http://127.0.0.1:3000/home" }),
+      env,
+    );
+    const state = new URL(
+      (await started.json<{ url: string }>()).url,
+    ).searchParams.get("state")!;
+    const callback = await app.request(
+      `http://worker.test/api/v1/auth/oauth/google/callback?code=valid-code&state=${encodeURIComponent(state)}`,
+      {
+        headers: {
+          Cookie: `vocanova_oauth_state=${namedCookie(cookieHeader(started), "vocanova_oauth_state")}`,
+        },
+        redirect: "manual",
+      },
+      env,
+    );
+    expect(callback.status).toBe(302);
+    const oauthSession = await app.request(
+      "http://worker.test/api/v1/me",
+      { headers: { Cookie: cookiePairs(cookieHeader(callback)) } },
+      env,
+    );
+    expect(oauthSession.status).toBe(200);
+    expect(await oauthSession.json()).toMatchObject({
+      email: "oauth@example.test",
+    });
+
+    const users = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM users WHERE email = ?1",
+    )
+      .bind("oauth@example.test")
+      .first<{ count: number }>();
+    const identity = await env.DB.prepare(
+      `SELECT user_id, provider, provider_subject
+       FROM external_identities
+       WHERE provider = 'google'`,
+    ).first<{ user_id: string; provider: string; provider_subject: string }>();
+    const sessions = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM sessions WHERE user_id = ?1",
+    )
+      .bind(originalUser?.id)
+      .first<{ count: number }>();
+    expect(users?.count).toBe(1);
+    expect(sessions?.count).toBe(2);
+    expect(identity).toMatchObject({
+      user_id: originalUser?.id,
+      provider: "google",
+    });
+    expect(identity?.provider_subject).toMatch(/^google-subject-/);
+  });
+
   it("rejects expired OAuth state without consuming it and scopes its production cookie", async () => {
     const app = identityApp({
       ...config,
