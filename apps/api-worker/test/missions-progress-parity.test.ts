@@ -30,7 +30,14 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
   it("handles a valid timezone change that moves the local date backward", async () => {
     await setSettings("Pacific/Honolulu", 5);
     await env.DB.prepare(`INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 1, 1, '2026-08-23', '2026-08-23', 'Pacific/Kiritimati', 'active', ?3, ?3)`).bind(crypto.randomUUID(), USER, NOW).run();
-    await expect(new D1MissionsRepository(env.DB, () => new Date("2026-08-22T12:00:00.000Z")).getProgress(USER, "")).rejects.toThrow("last completion is after current local date");
+    const repository = new D1MissionsRepository(env.DB, () => new Date("2026-08-22T12:00:00.000Z"));
+    await expect(repository.getProgress(USER, "")).resolves.toMatchObject({ streak: { currentStreakCount: 1, status: "active" } });
+    await expect(repository.getProgress(USER, "")).resolves.toMatchObject({ streak: { currentStreakCount: 1, status: "active" } });
+    await expect(repository.getDailyMission(USER, "")).resolves.toMatchObject({
+      localDate: "2026-08-22",
+      streak: { currentStreakCount: 1, status: "active" },
+    });
+    expect(await pointBalance()).toBe(0);
   });
 
   it("reconciles a missed local day when progress is read without daily mission", async () => {

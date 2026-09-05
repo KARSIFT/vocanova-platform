@@ -401,7 +401,10 @@ function reconcileStreak(
   }
   const gap = daysBetween(today, lastGood);
   if (gap <= 0) {
-    if (gap < 0) throw new Error("last completion is after current local date");
+    if (gap < 0)
+      return {
+        state: { ...state, timezone: output.timezone, status: "active" },
+      };
     return { state: output };
   }
   if (gap === 1) {
