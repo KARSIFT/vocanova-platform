@@ -550,19 +550,21 @@ function createInitialState() {
     sentenceCount: 0,
     reviewedCount: 0,
     consumedReadFailureFixtures: new Set(),
+    readFailureFixtureAttempts: new Map(),
     readHolds: new Map(),
     completionSummaryDueFetches: 0,
   };
 }
 
-function consumeReadFailureFixture(state, cookies, fixture) {
+function consumeReadFailureFixture(state, cookies, fixture, after = 0) {
   if (
     cookies.e2e_read_failure !== fixture ||
     state.consumedReadFailureFixtures.has(fixture)
-  ) {
+  )
     return false;
-  }
-
+  const attempts = (state.readFailureFixtureAttempts.get(fixture) ?? 0) + 1;
+  state.readFailureFixtureAttempts.set(fixture, attempts);
+  if (attempts <= after) return false;
   state.consumedReadFailureFixtures.add(fixture);
   return true;
 }
@@ -1018,6 +1020,11 @@ const server = createServer(async (req, res) => {
       return;
     }
     const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "account", 1)) {
+      logLine(req, 500, { reason: "fixture-read-failure", fixture: "account" });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const user = buildCurrentUser(state);
     logLine(req, 200, { onboardingStatus: user.onboardingStatus });
     jsonResponse(res, 200, user);
@@ -1080,10 +1087,16 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
+    const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "home")) {
+      logLine(req, 500, { reason: "fixture-read-failure", fixture: "home" });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const data =
       cookies.e2e_saved_words_fixture === "truncated-page"
         ? TRUNCATED_SAVED_WORDS_RESPONSE
-        : buildSavedWords(getSessionState(cookies));
+        : buildSavedWords(state);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
@@ -1331,6 +1344,14 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/progress") {
     const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "progress")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "progress",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     logLine(req, 200, { reviewedCount: state.reviewedCount });
     jsonResponse(res, 200, buildProgress(state));
     return;
@@ -1415,6 +1436,14 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/settings") {
     const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "settings")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "settings",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     logLine(req, 200);
     jsonResponse(res, 200, buildSettings(state));
     return;
