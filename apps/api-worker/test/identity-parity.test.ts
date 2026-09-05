@@ -439,6 +439,15 @@ describe("identity and account parity", () => {
       env,
     );
     expect(deleted.status).toBe(200);
+    const usersBeforeRejectedCallback = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM users",
+    ).first<{ count: number }>();
+    const identitiesBeforeRejectedCallback = await env.DB.prepare(
+      `SELECT user_id, COUNT(*) AS count FROM external_identities
+       WHERE provider = 'google' AND provider_subject = ?1`,
+    )
+      .bind("google-subject-1")
+      .first<{ user_id: string; count: number }>();
 
     const secondStart = await app.request(
       "http://worker.test/api/v1/auth/oauth/google/start",
@@ -470,8 +479,21 @@ describe("identity and account parity", () => {
     )
       .bind(user?.id)
       .first<{ count: number }>();
+    const usersAfterRejectedCallback = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM users",
+    ).first<{ count: number }>();
+    const identitiesAfterRejectedCallback = await env.DB.prepare(
+      `SELECT user_id, COUNT(*) AS count FROM external_identities
+       WHERE provider = 'google' AND provider_subject = ?1`,
+    )
+      .bind("google-subject-1")
+      .first<{ user_id: string; count: number }>();
     expect(account).toEqual({ status: "deleted", email: null });
     expect(sessionRows?.count).toBe(1);
+    expect(usersAfterRejectedCallback).toEqual(usersBeforeRejectedCallback);
+    expect(identitiesAfterRejectedCallback).toEqual(
+      identitiesBeforeRejectedCallback,
+    );
   });
 
   it("rejects expired OAuth state without consuming it and scopes its production cookie", async () => {
