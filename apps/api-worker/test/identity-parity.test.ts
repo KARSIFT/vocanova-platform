@@ -750,6 +750,38 @@ describe("identity and account parity", () => {
     const { app, cookie, csrf, userId } = await signedIn(
       "expired@example.test",
     );
+    const activeExpiry = await env.DB.prepare(
+      "SELECT expires_at FROM sessions WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .first<{ expires_at: string }>();
+    expect(
+      (
+        await app.request(
+          "http://worker.test/api/v1/me",
+          { headers: { Cookie: cookie } },
+          env,
+        )
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await app.request(
+          "http://worker.test/api/v1/settings",
+          withAuth(
+            json({ displayName: "Active write" }, "PATCH"),
+            cookie,
+            csrf,
+          ),
+          env,
+        )
+      ).status,
+    ).toBe(200);
+    await expect(
+      env.DB.prepare("SELECT expires_at FROM sessions WHERE user_id = ?1")
+        .bind(userId)
+        .first<{ expires_at: string }>(),
+    ).resolves.toEqual(activeExpiry);
     await env.DB.prepare(
       "UPDATE sessions SET created_at = '2026-08-01T00:00:00.000Z', expires_at = '2026-08-02T00:00:00.000Z' WHERE user_id = ?1",
     )
@@ -783,7 +815,7 @@ describe("identity and account parity", () => {
     )
       .bind(userId)
       .first<{ display_name: string }>();
-    expect(settings?.display_name).toBe("");
+    expect(settings?.display_name).toBe("Active write");
   });
 });
 
