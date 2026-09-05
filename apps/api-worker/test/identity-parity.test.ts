@@ -360,6 +360,26 @@ describe("identity and account parity", () => {
     });
   });
 
+  it("rejects invalid IANA timezones across mission reads", async () => {
+    const { app, cookie } = await signedIn("invalid-timezone@example.test");
+    for (const route of ["daily-mission", "progress"]) {
+      const response = await app.request(
+        `http://worker.test/api/v1/${route}?timezone=Mars%2FOlympus`,
+        { headers: { Cookie: cookie } },
+        env,
+      );
+      expect(response.status, route).toBe(400);
+      await expect(response.json()).resolves.toMatchObject({
+        detail: "invalid IANA timezone",
+      });
+    }
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM daily_mission_snapshots",
+      ).first<{ count: number }>(),
+    ).resolves.toEqual({ count: 0 });
+  });
+
   it("requires CSRF to logout and revokes only the supplied session", async () => {
     const first = await signedIn("logout@example.test");
     const second = await signedIn("logout@example.test");
