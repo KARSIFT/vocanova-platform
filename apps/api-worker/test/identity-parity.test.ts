@@ -668,6 +668,34 @@ describe("identity and account parity", () => {
     expect(link?.consumed_at).toBeNull();
   });
 
+  it("rejects missing or empty CSRF pairs without applying a settings write", async () => {
+    const { app, token, userId } = await signedIn("csrf-required@example.test");
+    const csrfHeaders: Array<Record<string, string>> = [
+      { Cookie: `vocanova_session=${token}` },
+      {
+        Cookie: `vocanova_session=${token}; vocanova_csrf=`,
+        "X-CSRF-Token": "",
+      },
+    ];
+    for (const headers of csrfHeaders) {
+      const response = await app.request(
+        "http://worker.test/api/v1/settings",
+        {
+          ...json({ displayName: "Rejected CSRF write" }, "PATCH"),
+          headers: { "Content-Type": "application/json", ...headers },
+        },
+        env,
+      );
+      expect(response.status).toBe(403);
+      const user = await env.DB.prepare(
+        "SELECT display_name FROM users WHERE id = ?1",
+      )
+        .bind(userId)
+        .first<{ display_name: string }>();
+      expect(user?.display_name).toBe("");
+    }
+  });
+
   it("rejects an expired email-change token without changing the account or notifying it", async () => {
     const { app, cookie, csrf, userId } = await signedIn(
       "expiry-owner@example.test",
