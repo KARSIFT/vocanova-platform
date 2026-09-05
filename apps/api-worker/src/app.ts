@@ -93,6 +93,7 @@ export const OPENAPI_DOCUMENT_CONFIG = {
 export interface AppDependencies {
   createPlatformRepository(database: D1Database): PlatformRepository;
   createIdentityService?(env: CloudflareEnv): IdentityService;
+  createMissionsRepository?(env: CloudflareEnv): D1MissionsRepository;
   createAIFeedbackService?(env: CloudflareEnv): AIFeedbackService;
 }
 
@@ -173,7 +174,10 @@ export function createApp(
   registerMissionsRoutes(
     app,
     identityFactory,
-    (env) => new D1MissionsRepository(env.DB),
+    (env) =>
+      dependencies.createMissionsRepository
+        ? dependencies.createMissionsRepository(env)
+        : new D1MissionsRepository(env.DB),
   );
   registerAIFeedbackRoutes(app, identityFactory, (env) => {
     if (dependencies.createAIFeedbackService)
