@@ -175,14 +175,14 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
   };
   requireSuccess(runLocalD1Migrations(options), "empty initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 9,
+    migrationCount: 10,
     health: "ok",
     rollbackTable: undefined,
   });
 
   requireSuccess(runLocalD1Migrations(options), "repeated initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 9,
+    migrationCount: 10,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -197,7 +197,7 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
     "isolated initialization",
   );
   assert.deepEqual(databaseEvidence(isolatedState), {
-    migrationCount: 9,
+    migrationCount: 10,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -242,17 +242,17 @@ test("a failed forward migration rolls back while prior migrations survive", (t)
   };
   requireSuccess(runLocalD1Migrations(options), "fixture initialization");
   writeFileSync(
-    join(migrationsDirectory, "0010_intentional_failure.sql"),
+    join(migrationsDirectory, "0011_intentional_failure.sql"),
     "CREATE TABLE should_rollback (id INTEGER PRIMARY KEY);\nTHIS IS NOT VALID SQL;\n",
   );
   const failed = runLocalD1Migrations(options);
   assert.notEqual(failed.status, 0);
   assert.match(
     `${failed.stdout}\n${failed.stderr}`,
-    /0010_intentional_failure|syntax error/i,
+    /0011_intentional_failure|syntax error/i,
   );
   assert.deepEqual(databaseEvidence(stateDirectory), {
-    migrationCount: 9,
+    migrationCount: 10,
     health: "ok",
     rollbackTable: undefined,
   });

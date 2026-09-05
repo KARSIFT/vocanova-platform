@@ -174,6 +174,8 @@ export class AIFeedbackService {
       );
     } catch (error) {
       await this.repository.release(userId, reservation.leaseId);
+      if (isInactiveWordTarget(error))
+        throw new AIFeedbackError("target_not_found");
       throw error;
     }
 
@@ -267,6 +269,13 @@ export class AIFeedbackService {
       ...(learningStatus && { learningStatus }),
     });
   }
+}
+
+function isInactiveWordTarget(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes("learner sentence requires an active word target")
+  );
 }
 
 export function defaultAIFeedbackConfig(): AIFeedbackServiceConfig {

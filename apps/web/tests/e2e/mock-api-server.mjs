@@ -143,6 +143,7 @@ const DEFAULT_USER = {
 const LONG_CONTENT_TOKEN = "a".repeat(300);
 
 const LONG_WORD_DETAIL_TARGET = `word-${"a".repeat(289)}`;
+const LONG_REVIEW_CONTENT = "a".repeat(300);
 const LONG_ACCOUNT_EMAIL = `${"a".repeat(64)}@example.test`;
 
 const DEFAULT_SETTINGS = {
@@ -813,6 +814,15 @@ function buildSavedWords(state) {
 }
 
 function buildDueWords(state, fixture) {
+  if (fixture === "long-content") {
+    const items = MULTIPLE_CHOICE_DUE_WORDS.map((word, index) => ({
+      ...word,
+      wordText: `word-${LONG_REVIEW_CONTENT}`,
+      partOfSpeech: `part-${LONG_REVIEW_CONTENT}`,
+      shortDefinition: `${index === 0 ? "correct" : `option-${index}`}-${LONG_REVIEW_CONTENT}`,
+    }));
+    return { items, nextCursor: undefined, totalCount: items.length };
+  }
   if (fixture === "completion-summary") {
     const page = state.completionSummaryDueFetches;
     state.completionSummaryDueFetches += 1;
