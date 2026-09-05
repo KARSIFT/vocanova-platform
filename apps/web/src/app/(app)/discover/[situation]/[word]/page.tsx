@@ -15,6 +15,22 @@ interface WordDetailPageProps {
 export default async function WordDetailPage({ params }: WordDetailPageProps) {
   const { situation, word } = await params;
   const client = await createServerApiClient();
+  let situationResponse: Awaited<ReturnType<typeof client.getJourneySituation>>;
+  try {
+    situationResponse = await client.getJourneySituation(situation);
+  } catch (error) {
+    if (error instanceof ApiResponseError && error.status === 404) {
+      notFound();
+    }
+    requireAuthRedirect(error, `/discover/${situation}/${word}`);
+  }
+  if (
+    !situationResponse.data.meanings.some(
+      (meaning) => meaning.wordSlug === word,
+    )
+  ) {
+    notFound();
+  }
   let response: Awaited<ReturnType<typeof client.getCanonicalWord>>;
   try {
     response = await client.getCanonicalWord(word);
