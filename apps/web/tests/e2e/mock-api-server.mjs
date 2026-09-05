@@ -534,6 +534,7 @@ function createInitialState() {
     progress: cloneProgress(DEFAULT_PROGRESS),
     dailyMission: { ...DEFAULT_DAILY_MISSION },
     reviewAttempts: [],
+    reviewAttemptsByClientAttemptId: new Map(),
     sentenceAttempts: [],
     lastReviewAttemptId: null,
     sentenceCount: 0,
@@ -1097,6 +1098,17 @@ const server = createServer(async (req, res) => {
       return;
     }
     const state = getSessionState(cookies);
+    const priorAttempt = state.reviewAttemptsByClientAttemptId.get(
+      body.clientAttemptId,
+    );
+    if (priorAttempt) {
+      logLine(req, 200, {
+        action: "replay-review",
+        meaningId: priorAttempt.meaningId,
+      });
+      jsonResponse(res, 200, priorAttempt.response);
+      return;
+    }
     const attemptId = generateId("att");
     const reviewedMeaningId = body.meaningId;
     if (reviewedMeaningId) {
@@ -1121,7 +1133,7 @@ const server = createServer(async (req, res) => {
       meaningId: reviewedMeaningId,
       reviewedCount: state.reviewedCount,
     });
-    jsonResponse(res, 200, {
+    const response = {
       attemptId,
       userWordId: body.userWordId,
       meaningId: body.meaningId,
@@ -1138,7 +1150,12 @@ const server = createServer(async (req, res) => {
       source: body.source ?? "review_session",
       clientAttemptId: body.clientAttemptId,
       nextReviewAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    };
+    state.reviewAttemptsByClientAttemptId.set(body.clientAttemptId, {
+      meaningId: reviewedMeaningId,
+      response,
     });
+    jsonResponse(res, 200, response);
     return;
   }
 
