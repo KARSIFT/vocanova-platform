@@ -25,6 +25,7 @@ test("keeps long Word Detail content within the viewport", async ({
 
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   await expect(page.getByText(/^definition-/)).toBeVisible();
+  await expect(page.getByText(/^learner-/)).toBeVisible();
   await expect(page.getByText(/^example-/)).toBeVisible();
   await expect(page.getByText(/^note-/)).toBeVisible();
   await expect(page.getByRole("heading", { name: /^Practice with word-/ })).toBeVisible();

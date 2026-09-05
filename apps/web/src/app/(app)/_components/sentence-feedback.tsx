@@ -149,12 +149,12 @@ export function SentenceFeedback({
     >
       <h3
         id={`sentence-feedback-heading-${attemptId}`}
-        className="break-all text-base font-semibold text-neutral-900"
+        className="wrap-break-word text-base font-semibold text-neutral-900"
       >
         Practice with {targetWord}
         {shortDefinition ? ` — ${shortDefinition}` : null}
       </h3>
-      <p className="mt-[var(--spacing-xs)] break-all text-base text-neutral-700">
+      <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-700">
         Write a sentence using the word{" "}
         <span className="font-medium text-neutral-900">{targetWord}</span>.
       </p>
@@ -166,7 +166,7 @@ export function SentenceFeedback({
         <div>
           <label
             htmlFor={`sentence-input-${attemptId}`}
-            className="sr-only break-all whitespace-normal"
+            className="sr-only"
           >{`Write a sentence using ${targetWord}`}</label>
           <textarea
             id={`sentence-input-${attemptId}`}
