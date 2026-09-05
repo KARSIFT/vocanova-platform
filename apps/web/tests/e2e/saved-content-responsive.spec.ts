@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test";
 
+const LONG_SAVED_CONTENT = "a".repeat(300);
+const LONG_WORD = `word-${LONG_SAVED_CONTENT}`;
+const LONG_PART_OF_SPEECH = `part-${LONG_SAVED_CONTENT}`;
+const LONG_DEFINITION = `definition-${LONG_SAVED_CONTENT}`;
+
 for (const pathname of ["/home", "/progress"]) {
   test(`keeps long saved content within the viewport on ${pathname}`, async ({
     page,
@@ -15,8 +20,15 @@ for (const pathname of ["/home", "/progress"]) {
     ]);
     await page.goto(pathname);
 
-    await expect(page.getByText(/^word-/).first()).toBeVisible();
-    await expect(page.getByText(/^definition-/).first()).toBeVisible();
+    await expect(page.getByText(LONG_WORD, { exact: true })).toBeVisible();
+    await expect(
+      page.getByText(LONG_DEFINITION, { exact: true }),
+    ).toBeVisible();
+    if (pathname === "/home") {
+      await expect(
+        page.getByText(LONG_PART_OF_SPEECH, { exact: true }),
+      ).toBeVisible();
+    }
     await expect
       .poll(() => page.evaluate(() => document.documentElement.scrollWidth))
       .toBeLessThanOrEqual(page.viewportSize()?.width ?? 0);
