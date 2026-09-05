@@ -295,6 +295,50 @@ describe("Worker AI feedback parity", () => {
     );
   });
 
+  it("returns a pending result to a fresh key while matching feedback is generating", async () => {
+    let markStarted: () => void = () => undefined;
+    const started = new Promise<void>((resolve) => {
+      markStarted = resolve;
+    });
+    let release: () => void = () => undefined;
+    const provider = new ScriptedProvider(
+      () =>
+        new Promise((resolve) => {
+          markStarted();
+          release = () => resolve(validFeedback());
+        }),
+    );
+    const service = createService(provider);
+    const generating = service.submit(
+      USER_A,
+      submission("I work every day."),
+      "pending-first-key",
+    );
+    await started;
+
+    const pending = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "pending-fresh-key",
+    );
+    expect(pending.result).toMatchObject({
+      errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE",
+      canRetry: true,
+    });
+    expect(provider.generateCalls).toBe(1);
+    expect(await counts()).toMatchObject({ attempts: 1, pointRows: 0 });
+
+    release();
+    const completed = await generating;
+    const replay = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "pending-fresh-key",
+    );
+    expect(replay.result).toEqual(completed.result);
+    expect(provider.generateCalls).toBe(1);
+  });
+
   it("bounds timeouts and enforces persistent rate, cost, concurrency, and kill switches", async () => {
     const timeoutProvider = new ScriptedProvider(
       (_call, _task, signal) =>

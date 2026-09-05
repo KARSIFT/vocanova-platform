@@ -124,7 +124,7 @@ export class D1AIFeedbackRepository {
                 a.feedback_text, a.error_code, a.error_message,
                 EXISTS(SELECT 1 FROM ai_feedback_reports r WHERE r.attempt_id = a.id) AS reported
          FROM ai_feedback_attempts a
-         WHERE a.request_hash = ?1 AND a.status = 'succeeded'`,
+         WHERE a.request_hash = ?1 AND a.status IN ('pending', 'succeeded')`,
       )
       .bind(requestHash)
       .first<Row>();
