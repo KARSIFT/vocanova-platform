@@ -737,9 +737,13 @@ describe("Worker content, learning, and review parity", () => {
     await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
 
     let reads = 0;
-    let releaseReads!: () => void;
-    const bothReads = new Promise<void>((resolve) => {
-      releaseReads = resolve;
+    let releaseFirstRead!: () => void;
+    const firstReadIsHeld = new Promise<void>((resolve) => {
+      releaseFirstRead = resolve;
+    });
+    let firstReadReached!: () => void;
+    const firstRead = new Promise<void>((resolve) => {
+      firstReadReached = resolve;
     });
     const concurrentDatabase = new Proxy(env.DB, {
       get(target, property, receiver) {
@@ -774,8 +778,10 @@ describe("Worker content, learning, and review parity", () => {
                     return async <T>(): Promise<T | null> => {
                       const row = await boundStatement.first<T>();
                       reads += 1;
-                      if (reads === 2) releaseReads();
-                      await bothReads;
+                      if (reads === 1) {
+                        firstReadReached();
+                        await firstReadIsHeld;
+                      }
                       return row;
                     };
                   },
@@ -791,20 +797,23 @@ describe("Worker content, learning, and review parity", () => {
       () => new Date(NOW),
     );
 
+    const first = concurrentRepository.submitReview(
+      USER_A,
+      review({ clientAttemptId: "concurrent-review-one" }),
+      "concurrent-review-one",
+    );
+    await firstRead;
     await expect(
-      Promise.all([
-        concurrentRepository.submitReview(
-          USER_A,
-          review({ clientAttemptId: "concurrent-review-one" }),
-          "concurrent-review-one",
-        ),
-        concurrentRepository.submitReview(
-          USER_A,
-          review({ clientAttemptId: "concurrent-review-two" }),
-          "concurrent-review-two",
-        ),
-      ]),
-    ).resolves.toHaveLength(2);
+      concurrentRepository.submitReview(
+        USER_A,
+        review({ clientAttemptId: "concurrent-review-two" }),
+        "concurrent-review-two",
+      ),
+    ).resolves.toMatchObject({ clientAttemptId: "concurrent-review-two" });
+    releaseFirstRead();
+    await expect(first).resolves.toMatchObject({
+      clientAttemptId: "concurrent-review-one",
+    });
 
     const attempts = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM review_attempts WHERE user_word_id = ?1",

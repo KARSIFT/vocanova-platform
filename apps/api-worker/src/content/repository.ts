@@ -410,7 +410,12 @@ export class D1ContentLearningRepository {
       const word = await this.database
         .prepare(
           `SELECT review_step, meaning_id, total_review_count, correct_review_count,
-                  consecutive_correct_count, consecutive_incorrect_count
+                  consecutive_correct_count, consecutive_incorrect_count,
+                  coalesce((
+                    SELECT max(state_version) + 1
+                    FROM review_state_reservations
+                    WHERE user_word_id = user_words.id
+                  ), 0) AS review_state_version
            FROM user_words WHERE id = ?1 AND user_id = ?2 AND deleted_at IS NULL`,
         )
         .bind(normalized.userWordId, userId)
@@ -438,14 +443,7 @@ export class D1ContentLearningRepository {
         normalized.rating,
         timestamp,
       );
-      const version = await this.database
-        .prepare(
-          `SELECT coalesce(max(state_version), -1) + 1 AS state_version
-           FROM review_state_reservations WHERE user_word_id = ?1`,
-        )
-        .bind(normalized.userWordId)
-        .first<{ state_version: number }>();
-      const reviewStateVersion = Number(version?.state_version);
+      const reviewStateVersion = Number(word.review_state_version);
       try {
         await this.database.batch([
           this.database
