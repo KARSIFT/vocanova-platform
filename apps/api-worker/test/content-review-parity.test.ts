@@ -284,6 +284,41 @@ describe("Worker content, learning, and review parity", () => {
     });
   });
 
+  it("publishes the shared idempotency key boundary for every retry-sensitive operation", () => {
+    const document = createOpenApiDocument() as {
+      paths: Record<
+        string,
+        {
+          post?: {
+            parameters?: Array<{
+              name: string;
+              in?: string;
+              required?: boolean;
+              schema: unknown;
+            }>;
+          };
+        }
+      >;
+    };
+    for (const path of [
+      "/api/v1/user-words",
+      "/api/v1/reviews/submissions",
+      "/api/v1/sentence-feedback",
+      "/api/v1/account-deletion-requests",
+    ]) {
+      const parameter = document.paths[path]?.post?.parameters?.find(
+        (candidate) => candidate.name === "Idempotency-Key",
+      );
+      expect(parameter?.in, path).toBe("header");
+      expect(parameter?.required, path).toBe(true);
+      expect(parameter?.schema, path).toEqual({
+        type: "string",
+        minLength: 1,
+        maxLength: 200,
+      });
+    }
+  });
+
   it("preserves journey ordering, opaque cursors, detail shape, and requester overlays", async () => {
     await insertUserWord(
       USER_WORD_A,
@@ -514,6 +549,40 @@ describe("Worker content, learning, and review parity", () => {
         ).first<{ count: number }>()
       )?.count,
     ).toBe(2);
+  });
+
+  it("accepts 200-character content idempotency keys and rejects 201", async () => {
+    const accepted = "a".repeat(200);
+    const rejected = "b".repeat(201);
+    const saved = await repository.saveUserWord(
+      USER_A,
+      MEANING_A,
+      "manual",
+      accepted,
+    );
+    await expect(
+      repository.saveUserWord(USER_A, MEANING_B, "manual", rejected),
+    ).rejects.toMatchObject({ code: "invalid_idempotency" });
+    await expect(
+      repository.submitReview(
+        USER_A,
+        review({
+          userWordId: saved.userWordId,
+          clientAttemptId: "boundary-review",
+        }),
+        accepted,
+      ),
+    ).resolves.toMatchObject({ userWordId: saved.userWordId });
+    await expect(
+      repository.submitReview(
+        USER_A,
+        review({
+          userWordId: saved.userWordId,
+          clientAttemptId: "boundary-review-rejected",
+        }),
+        rejected,
+      ),
+    ).rejects.toMatchObject({ code: "invalid_idempotency" });
   });
 
   it("rolls back the entire save batch when its idempotency record fails", async () => {

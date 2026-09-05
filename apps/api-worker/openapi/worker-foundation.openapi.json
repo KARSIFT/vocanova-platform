@@ -120,6 +120,8 @@
             "name": "Idempotency-Key",
             "required": true,
             "schema": {
+              "maxLength": 200,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -1314,6 +1316,8 @@
             "name": "Idempotency-Key",
             "required": true,
             "schema": {
+              "maxLength": 200,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -1528,6 +1532,8 @@
             "name": "Idempotency-Key",
             "required": true,
             "schema": {
+              "maxLength": 200,
+              "minLength": 1,
               "type": "string"
             }
           }
@@ -2047,6 +2053,8 @@
             "name": "Idempotency-Key",
             "required": true,
             "schema": {
+              "maxLength": 200,
+              "minLength": 1,
               "type": "string"
             }
           }
