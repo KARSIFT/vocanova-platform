@@ -273,7 +273,11 @@ export function SentenceFeedback({
                   </button>
                 )}
                 {reportStatus === "error" ? (
-                  <span className="text-sm text-red-700">
+                  <span
+                    role="alert"
+                    aria-live="polite"
+                    className="text-sm text-red-700"
+                  >
                     Unable to report. Try again.
                   </span>
                 ) : null}
