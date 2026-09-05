@@ -129,20 +129,23 @@ export class D1MissionsRepository {
       )
       .bind(userId)
       .first<{ timezone: string; daily_review_target: number }>();
+    const reviewTarget = stored
+      ? Number(stored.daily_review_target)
+      : DEFAULT_REVIEW_TARGET;
     if (stored && stored.timezone && stored.timezone !== DEFAULT_TIMEZONE) {
       if (!isValidTimezone(stored.timezone))
         throw new MissionsError("invalid_timezone");
       return {
         timezone: stored.timezone,
-        reviewTarget: Number(stored.daily_review_target),
+        reviewTarget,
       };
     }
     if (clientTimezone) {
       if (!isValidTimezone(clientTimezone))
         throw new MissionsError("invalid_timezone");
-      return { timezone: clientTimezone, reviewTarget: DEFAULT_REVIEW_TARGET };
+      return { timezone: clientTimezone, reviewTarget };
     }
-    return { timezone: DEFAULT_TIMEZONE, reviewTarget: DEFAULT_REVIEW_TARGET };
+    return { timezone: DEFAULT_TIMEZONE, reviewTarget };
   }
 
   async reconcile(

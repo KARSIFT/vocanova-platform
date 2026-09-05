@@ -304,6 +304,53 @@ const TRUNCATED_SAVED_WORDS_RESPONSE = {
   nextCursor: "e2e-saved-words-after-10",
 };
 
+const MULTIPLE_CHOICE_DUE_WORDS = [
+  {
+    userWordId: "e2e-review-user-word-arrival",
+    meaningId: "e2e-review-meaning-arrival",
+    wordId: "e2e-review-word-arrival",
+    wordSlug: "arrival",
+    wordText: "arrival",
+    partOfSpeech: "noun",
+    shortDefinition: "the act of reaching a place",
+    status: "due",
+    reviewStep: 0,
+  },
+  {
+    userWordId: "e2e-review-user-word-baggage",
+    meaningId: "e2e-review-meaning-baggage",
+    wordId: "e2e-review-word-baggage",
+    wordSlug: "baggage",
+    wordText: "baggage",
+    partOfSpeech: "noun",
+    shortDefinition: "bags carried while travelling",
+    status: "due",
+    reviewStep: 0,
+  },
+  {
+    userWordId: "e2e-review-user-word-counter",
+    meaningId: "e2e-review-meaning-counter",
+    wordId: "e2e-review-word-counter",
+    wordSlug: "counter",
+    wordText: "counter",
+    partOfSpeech: "noun",
+    shortDefinition: "a long flat surface for service",
+    status: "due",
+    reviewStep: 0,
+  },
+  {
+    userWordId: "e2e-review-user-word-departure",
+    meaningId: "e2e-review-meaning-departure",
+    wordId: "e2e-review-word-departure",
+    wordSlug: "departure",
+    wordText: "departure",
+    partOfSpeech: "noun",
+    shortDefinition: "the act of leaving a place",
+    status: "due",
+    reviewStep: 0,
+  },
+];
+
 const CANONICAL_WORDS = {
   pour: {
     id: "word-pour",
@@ -503,6 +550,7 @@ function createInitialState() {
     reviewedCount: 0,
     consumedReadFailureFixtures: new Set(),
     readHolds: new Map(),
+    completionSummaryDueFetches: 0,
   };
 }
 
@@ -606,7 +654,28 @@ function buildSavedWords(state) {
   return { items, nextCursor: undefined };
 }
 
-function buildDueWords(state) {
+function buildDueWords(state, fixture) {
+  if (fixture === "completion-summary") {
+    const page = state.completionSummaryDueFetches;
+    state.completionSummaryDueFetches += 1;
+    const start = page * 2;
+    const items = MULTIPLE_CHOICE_DUE_WORDS.slice(start, start + 2);
+    return {
+      items,
+      nextCursor:
+        start + items.length < MULTIPLE_CHOICE_DUE_WORDS.length
+          ? `completion-summary-${page + 1}`
+          : undefined,
+      totalCount: Math.max(0, MULTIPLE_CHOICE_DUE_WORDS.length - start),
+    };
+  }
+  if (fixture === "multiple-choice") {
+    return {
+      items: MULTIPLE_CHOICE_DUE_WORDS,
+      nextCursor: undefined,
+      totalCount: MULTIPLE_CHOICE_DUE_WORDS.length,
+    };
+  }
   const items = [];
   for (const meaningId of state.savedMeaningIds) {
     if (state.reviewedMeaningIds.has(meaningId)) {
@@ -1097,7 +1166,7 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 500, { error: "fixture_read_failure" });
       return;
     }
-    const data = buildDueWords(state);
+    const data = buildDueWords(state, cookies.e2e_review_fixture);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
