@@ -92,7 +92,7 @@ export default async function HomePage() {
                 <SentenceFeedback
                   targetWord={savedWord.wordText}
                   attemptId={savedWord.userWordId}
-                  source="word_detail"
+                  source="daily_mission"
                   shortDefinition={savedWord.shortDefinition}
                 />
               </li>
