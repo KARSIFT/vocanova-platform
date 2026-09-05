@@ -491,6 +491,105 @@ describe("Worker content, learning, and review parity", () => {
     expect(restored.source).toBe("search");
   });
 
+  it("converges a save that races with removing the same saved word", async () => {
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    const delayed = delaySavedWordLookup(env.DB);
+    const racingRepository = new D1ContentLearningRepository(
+      delayed.database,
+      () => new Date(NOW),
+    );
+
+    const save = racingRepository.saveUserWord(
+      USER_A,
+      MEANING_A,
+      "search",
+      "save-after-remove",
+    );
+    await delayed.read;
+    await repository.unsaveUserWord(USER_A, MEANING_A);
+    delayed.release();
+
+    await expect(save).resolves.toMatchObject({
+      userWordId: USER_WORD_A,
+      meaningId: MEANING_A,
+      saved: true,
+    });
+    await expect(
+      env.DB.prepare(
+        `SELECT deleted_at, status, review_step, total_review_count
+         FROM user_words WHERE id = ?1`,
+      )
+        .bind(USER_WORD_A)
+        .first(),
+    ).resolves.toEqual({
+      deleted_at: null,
+      status: "new",
+      review_step: 0,
+      total_review_count: 0,
+    });
+    await expect(
+      env.DB.prepare(
+        `SELECT count(*) AS count FROM confidence_point_ledger
+         WHERE reason = 'word_added'`,
+      ).first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        `SELECT count(*) AS count FROM idempotency_keys
+         WHERE user_id = ?1 AND operation = 'user_words:save' AND key = ?2`,
+      )
+        .bind(USER_A, "save-after-remove")
+        .first(),
+    ).resolves.toEqual({ count: 1 });
+  });
+
+  it("preserves an already active saved word when recording a new save key", async () => {
+    await insertUserWord(
+      USER_WORD_A,
+      USER_A,
+      MEANING_A,
+      NOW,
+      3,
+      "2026-08-25T12:00:00.000Z",
+    );
+    await env.DB.prepare(
+      `UPDATE user_words
+       SET source = 'journey', total_review_count = 4, correct_review_count = 3,
+           consecutive_correct_count = 2, consecutive_incorrect_count = 0
+       WHERE id = ?1`,
+    )
+      .bind(USER_WORD_A)
+      .run();
+    const before = await env.DB.prepare(
+      `SELECT status, source, review_step, next_review_at, total_review_count,
+              correct_review_count, consecutive_correct_count,
+              consecutive_incorrect_count, deleted_at
+       FROM user_words WHERE id = ?1`,
+    )
+      .bind(USER_WORD_A)
+      .first();
+
+    await expect(
+      repository.saveUserWord(USER_A, MEANING_A, "search", "active-save"),
+    ).resolves.toMatchObject({ userWordId: USER_WORD_A, source: "journey" });
+    await expect(
+      env.DB.prepare(
+        `SELECT status, source, review_step, next_review_at, total_review_count,
+                correct_review_count, consecutive_correct_count,
+                consecutive_incorrect_count, deleted_at
+         FROM user_words WHERE id = ?1`,
+      )
+        .bind(USER_WORD_A)
+        .first(),
+    ).resolves.toEqual(before);
+    await expect(
+      env.DB.prepare(
+        `SELECT count(*) AS count FROM confidence_point_ledger
+         WHERE reason = 'word_added'`,
+      ).first(),
+    ).resolves.toEqual({ count: 0 });
+  });
+
   it("resets a restored word into the due queue without erasing review evidence", async () => {
     const saved = await repository.saveUserWord(
       USER_A,
@@ -1319,6 +1418,69 @@ function review(overrides: Partial<ReviewSubmission>): ReviewSubmission {
     clientAttemptId: "attempt-default",
     ...overrides,
   };
+}
+
+function delaySavedWordLookup(database: D1Database): {
+  database: D1Database;
+  read: Promise<void>;
+  release: () => void;
+} {
+  let lookupRead!: () => void;
+  let resume!: () => void;
+  const read = new Promise<void>((resolve) => {
+    lookupRead = resolve;
+  });
+  const resumed = new Promise<void>((resolve) => {
+    resume = resolve;
+  });
+  let delayed = false;
+  const delayedDatabase = new Proxy(database, {
+    get(target, property, receiver) {
+      if (property !== "prepare")
+        return Reflect.get(target, property, receiver);
+      return (sql: string) => {
+        const statement = target.prepare(sql);
+        if (
+          delayed ||
+          !sql.includes(
+            "SELECT id, deleted_at FROM user_words WHERE user_id = ?1 AND meaning_id = ?2",
+          )
+        )
+          return statement;
+        return new Proxy(statement, {
+          get(prepared, statementProperty, statementReceiver) {
+            if (statementProperty !== "bind")
+              return Reflect.get(
+                prepared,
+                statementProperty,
+                statementReceiver,
+              );
+            return (...values: unknown[]) => {
+              const bound = prepared.bind(...values);
+              return new Proxy(bound, {
+                get(boundStatement, boundProperty, boundReceiver) {
+                  if (boundProperty !== "first")
+                    return Reflect.get(
+                      boundStatement,
+                      boundProperty,
+                      boundReceiver,
+                    );
+                  return async <T>(): Promise<T | null> => {
+                    const row = await boundStatement.first<T>();
+                    delayed = true;
+                    lookupRead();
+                    await resumed;
+                    return row;
+                  };
+                },
+              });
+            };
+          },
+        });
+      };
+    },
+  }) as D1Database;
+  return { database: delayedDatabase, read, release: resume };
 }
 
 async function clearTables(): Promise<void> {
