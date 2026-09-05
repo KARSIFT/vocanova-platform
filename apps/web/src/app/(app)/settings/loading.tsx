@@ -1,6 +1,7 @@
 export default function SettingsLoading() {
   return (
     <div
+      role="status"
       aria-busy="true"
       aria-label="Loading settings"
       className="animate-pulse p-[var(--spacing-lg)]"
