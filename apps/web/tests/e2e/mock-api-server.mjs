@@ -705,6 +705,10 @@ function generateId(prefix) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
 }
 
+function reviewRewardForRating(rating) {
+  return { again: 1, hard: 2, good: 5, easy: 6 }[rating] ?? 0;
+}
+
 // --- deterministic AI feedback --------------------------------
 
 function evaluateSentenceFeedback({ sentence, targetWord }) {
@@ -1115,6 +1119,7 @@ const server = createServer(async (req, res) => {
       state.reviewedMeaningIds.add(reviewedMeaningId);
     }
     state.reviewedCount += 1;
+    state.progress.confidencePointsBalance += reviewRewardForRating(body.rating);
     state.lastReviewAttemptId = attemptId;
     state.reviewAttempts.push({
       attemptId,

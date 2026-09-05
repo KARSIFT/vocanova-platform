@@ -32,14 +32,31 @@ test("replays a committed review and retries the due list without duplicate prog
   expect(saveResponse.ok()).toBeTruthy();
 
   let submissionRequests = 0;
+  const submissionFingerprints: Array<{
+    body: unknown;
+    idempotencyKey: string | undefined;
+  }> = [];
+  let committedResponse: unknown;
+  let replayedResponse: unknown;
   await page.route("**/api/v1/reviews/submissions", async (route) => {
     submissionRequests += 1;
+    submissionFingerprints.push({
+      body: route.request().postDataJSON(),
+      idempotencyKey: route.request().headers()["idempotency-key"],
+    });
     if (submissionRequests > 1) {
-      await route.continue();
+      const response = await route.fetch();
+      replayedResponse = await response.json();
+      await route.fulfill({
+        status: response.status(),
+        contentType: "application/json",
+        body: JSON.stringify(replayedResponse),
+      });
       return;
     }
 
-    await route.fetch();
+    const response = await route.fetch();
+    committedResponse = await response.json();
     await route.fulfill({
       status: 500,
       contentType: "application/json",
@@ -82,4 +99,19 @@ test("replays a committed review and retries the due list without duplicate prog
   ).toBeVisible();
   expect(submissionRequests).toBe(2);
   expect(dueListRequests).toBe(2);
+  expect(submissionFingerprints).toHaveLength(2);
+  expect(submissionFingerprints[1]).toEqual(submissionFingerprints[0]);
+  expect(replayedResponse).toEqual(committedResponse);
+
+  const progressResponse = await page.request.get(
+    `http://127.0.0.1:${mockApiPort}/api/v1/progress`,
+  );
+  expect(progressResponse.ok()).toBeTruthy();
+  expect((await progressResponse.json()).confidencePointsBalance).toBe(125);
+
+  const missionResponse = await page.request.get(
+    `http://127.0.0.1:${mockApiPort}/api/v1/daily-mission`,
+  );
+  expect(missionResponse.ok()).toBeTruthy();
+  expect((await missionResponse.json()).reviewsCompleted).toBe(1);
 });
