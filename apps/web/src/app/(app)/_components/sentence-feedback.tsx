@@ -19,6 +19,9 @@ interface SentenceFeedbackProps {
 const AI_LIMITATION_COPY =
   "AI feedback can make mistakes. Use your own judgment and your teacher's guidance when learning.";
 
+const PRIVACY_REMINDER_COPY =
+  "Please do not include personal information in your sentence.";
+
 const RETRY_MESSAGE =
   "Vocanova could not check this sentence right now. Your sentence is still here, so you can try again.";
 
@@ -160,6 +163,7 @@ export function SentenceFeedback({
           <textarea
             id={`sentence-input-${attemptId}`}
             name="sentence"
+            aria-describedby={`sentence-privacy-${attemptId} sentence-count-${attemptId}`}
             value={sentence}
             onChange={(event) => setSentence(event.target.value)}
             disabled={isLoading}
@@ -168,7 +172,16 @@ export function SentenceFeedback({
             placeholder={`Type a sentence using "${targetWord}"...`}
             className="w-full rounded-md border border-neutral-300 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base text-neutral-900 placeholder:text-neutral-500 focus:border-primary-500 focus:outline focus:outline-2 focus:outline-primary-500/20 disabled:cursor-not-allowed disabled:opacity-60"
           />
-          <p className="mt-[var(--spacing-xs)] text-right text-sm text-neutral-600">
+          <p
+            id={`sentence-privacy-${attemptId}`}
+            className="mt-[var(--spacing-xs)] text-sm text-neutral-600"
+          >
+            {PRIVACY_REMINDER_COPY}
+          </p>
+          <p
+            id={`sentence-count-${attemptId}`}
+            className="mt-[var(--spacing-xs)] text-right text-sm text-neutral-600"
+          >
             {sentence.length}/300
           </p>
         </div>
