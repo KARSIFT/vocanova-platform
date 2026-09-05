@@ -1,6 +1,7 @@
 export default function ReviewsLoading() {
   return (
     <div
+      role="status"
       aria-busy="true"
       aria-label="Loading review"
       className="animate-pulse p-[var(--spacing-lg)]"

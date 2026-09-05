@@ -76,6 +76,9 @@
 //             one 500 per session for discovery or reviews when the
 //             `e2e_read_failure` cookie names that fixture; used to prove
 //             route-boundary retry behavior against a real recovered request
+//             holds one discovery or review read per session when the
+//             `e2e_read_hold` cookie names that fixture; the E2E-only
+//             release endpoint makes loading-state assertions deterministic
 //
 //   GET    /api/v1/settings                          -> 200 Settings
 //   PATCH  /api/v1/settings                          -> 200 Settings
@@ -499,6 +502,7 @@ function createInitialState() {
     sentenceCount: 0,
     reviewedCount: 0,
     consumedReadFailureFixtures: new Set(),
+    readHolds: new Map(),
   };
 }
 
@@ -511,6 +515,35 @@ function consumeReadFailureFixture(state, cookies, fixture) {
   }
 
   state.consumedReadFailureFixtures.add(fixture);
+  return true;
+}
+
+function waitForReadHold(state, cookies, fixture) {
+  if (cookies.e2e_read_hold !== fixture) {
+    return null;
+  }
+
+  let hold = state.readHolds.get(fixture);
+  if (!hold) {
+    let release;
+    const promise = new Promise((resolve) => {
+      release = resolve;
+    });
+    hold = { promise, release, released: false };
+    state.readHolds.set(fixture, hold);
+  }
+
+  return hold.released ? null : hold.promise;
+}
+
+function releaseReadHold(state, fixture) {
+  const hold = state.readHolds.get(fixture);
+  if (!hold || hold.released) {
+    return false;
+  }
+
+  hold.released = true;
+  hold.release();
   return true;
 }
 
@@ -809,6 +842,24 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "POST" && url.pathname === "/__e2e/release-read") {
+    const fixture = url.searchParams.get("fixture");
+    if (fixture !== "discover" && fixture !== "reviews") {
+      logLine(req, 400, { reason: "invalid-read-hold-fixture" });
+      jsonResponse(res, 400, { error: "invalid_fixture" });
+      return;
+    }
+
+    const released = releaseReadHold(getSessionState(cookies), fixture);
+    logLine(req, released ? 204 : 409, { fixture, action: "release-read" });
+    if (released) {
+      emptyResponse(res, 204);
+    } else {
+      jsonResponse(res, 409, { error: "read_not_held" });
+    }
+    return;
+  }
+
   // ----- auth (CSRF-exempt) ----------------------------------
 
   if (req.method === "POST" && url.pathname === "/api/v1/auth/magic-links") {
@@ -1037,6 +1088,10 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/reviews/due") {
     const state = getSessionState(cookies);
+    const readHold = waitForReadHold(state, cookies, "reviews");
+    if (readHold) {
+      await readHold;
+    }
     if (consumeReadFailureFixture(state, cookies, "reviews")) {
       logLine(req, 500, { reason: "fixture-read-failure", fixture: "reviews" });
       jsonResponse(res, 500, { error: "fixture_read_failure" });
@@ -1192,6 +1247,10 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/journey-situations") {
     const state = getSessionState(cookies);
+    const readHold = waitForReadHold(state, cookies, "discover");
+    if (readHold) {
+      await readHold;
+    }
     if (consumeReadFailureFixture(state, cookies, "discover")) {
       logLine(req, 500, {
         reason: "fixture-read-failure",

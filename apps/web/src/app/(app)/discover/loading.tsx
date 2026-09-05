@@ -1,6 +1,7 @@
 export default function DiscoverLoading() {
   return (
     <div
+      role="status"
       aria-busy="true"
       aria-label="Loading journey"
       className="animate-pulse p-[var(--spacing-lg)]"
