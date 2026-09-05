@@ -19,6 +19,43 @@ import {
 } from "./axe-helper.js";
 
 test.describe("Settings account accessibility", () => {
+  test("moves keyboard focus to the deletion confirmation phrase", async ({
+    page,
+  }) => {
+    await page.goto("/settings/account");
+    await page
+      .getByRole("button", { name: "I want to delete my account" })
+      .focus();
+    await page.keyboard.press("Enter");
+
+    await expect(
+      page.getByRole("textbox", { name: "Type the confirmation phrase" }),
+    ).toBeFocused();
+  });
+
+  test("returns keyboard focus to the deletion trigger after cancellation", async ({
+    page,
+  }) => {
+    await page.goto("/settings/account");
+    const deleteTrigger = page.getByRole("button", {
+      name: "I want to delete my account",
+    });
+    await deleteTrigger.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("textbox", { name: "Type the confirmation phrase" }),
+    ).toBeFocused();
+
+    await page.getByRole("button", { name: "Cancel" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(deleteTrigger).toBeFocused();
+
+    await page.keyboard.press("Enter");
+    await expect(
+      page.getByRole("textbox", { name: "Type the confirmation phrase" }),
+    ).toBeFocused();
+  });
+
   test("/settings/account renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
   }, testInfo) => {
@@ -57,6 +94,8 @@ test.describe("Settings account accessibility", () => {
       ],
     });
 
-    expect(testInfo.project.name).toMatch(/^(home-desktop-1280|mobile-360|mobile-430)$/);
+    expect(testInfo.project.name).toMatch(
+      /^(home-desktop-1280|mobile-360|mobile-430)$/,
+    );
   });
 });
