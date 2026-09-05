@@ -33,10 +33,14 @@ async function setRetryFixture(context: BrowserContext, baseURL: string) {
 
 async function releaseFirstRequest(page: Page) {
   const mockApiPort = process.env.MOCK_API_PORT ?? "8080";
-  const response = await page.request.post(
-    `http://127.0.0.1:${mockApiPort}/__e2e/release-email-change-request`,
-  );
-  await expect(response).toBeOK();
+  await expect
+    .poll(async () => {
+      const response = await page.request.post(
+        `http://127.0.0.1:${mockApiPort}/__e2e/release-email-change-request`,
+      );
+      return response.status();
+    })
+    .toBe(204);
 }
 
 test.describe("Email-change retry recovery", () => {
