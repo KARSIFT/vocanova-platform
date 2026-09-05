@@ -12,6 +12,11 @@ export function MagicLinkPageContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const email = searchParams.get("email") ?? "";
+  const signInSearchParams = new URLSearchParams();
+  if (email) signInSearchParams.set("email", email);
+  const signInHref = signInSearchParams.size
+    ? `/signin?${signInSearchParams.toString()}`
+    : "/signin";
   const [status, setStatus] = useState<{
     type: "loading" | "error";
     message: string;
@@ -62,7 +67,7 @@ export function MagicLinkPageContent() {
         </p>
         {status.type === "error" ? (
           <Link
-            href="/signin"
+            href={signInHref}
             className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
           >
             Back to sign in
