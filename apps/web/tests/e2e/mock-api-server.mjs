@@ -94,7 +94,11 @@ import { createServer } from "node:http";
 const PORT = Number(process.env.MOCK_API_PORT ?? 8080);
 const HOST = process.env.MOCK_API_HOST ?? "127.0.0.1";
 
-const ONBOARDING_STATUSES = new Set(["not_started", "in_progress", "completed"]);
+const ONBOARDING_STATUSES = new Set([
+  "not_started",
+  "in_progress",
+  "completed",
+]);
 const WORD_DETAIL_REVIEW_STATES = new Map([
   ["unsaved", null],
   ["due", "due"],
@@ -538,7 +542,22 @@ function createInitialState() {
     lastReviewAttemptId: null,
     sentenceCount: 0,
     reviewedCount: 0,
+    consumedReadFailureFixtures: new Set(),
+    readFailureFixtureAttempts: new Map(),
   };
+}
+
+function consumeReadFailureFixture(state, cookies, fixture, after = 0) {
+  if (
+    cookies.e2e_read_failure !== fixture ||
+    state.consumedReadFailureFixtures.has(fixture)
+  )
+    return false;
+  const attempts = (state.readFailureFixtureAttempts.get(fixture) ?? 0) + 1;
+  state.readFailureFixtureAttempts.set(fixture, attempts);
+  if (attempts <= after) return false;
+  state.consumedReadFailureFixtures.add(fixture);
+  return true;
 }
 
 function cloneProgress(progress) {
@@ -813,7 +832,10 @@ const server = createServer(async (req, res) => {
     res.setHeader("Vary", "Origin");
   }
   if (req.method === "OPTIONS") {
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET, POST, PATCH, DELETE, OPTIONS",
+    );
     // Every custom header @vocanova/api-client ever sets
     // (packages/api-client/src/index.ts) - Idempotency-Key was
     // missing here initially and only surfaced once a mutation that
@@ -828,7 +850,10 @@ const server = createServer(async (req, res) => {
     return;
   }
 
-  const url = new URL(req.url, `http://${req.headers.host ?? `${HOST}:${PORT}`}`);
+  const url = new URL(
+    req.url,
+    `http://${req.headers.host ?? `${HOST}:${PORT}`}`,
+  );
   const cookies = parseCookies(req.headers.cookie);
 
   if (req.method === "GET" && url.pathname === "/healthz") {
@@ -921,6 +946,11 @@ const server = createServer(async (req, res) => {
       return;
     }
     const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "account", 1)) {
+      logLine(req, 500, { reason: "fixture-read-failure", fixture: "account" });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const user = buildCurrentUser(state);
     logLine(req, 200, { onboardingStatus: user.onboardingStatus });
     jsonResponse(res, 200, user);
@@ -963,7 +993,9 @@ const server = createServer(async (req, res) => {
       // customized value exists yet. The mock starts with the
       // schema default (20) for every fresh session, so the seed
       // fires for the very first onboarding write.
-      if (state.settings.dailyReviewTarget === DEFAULT_SETTINGS.dailyReviewTarget) {
+      if (
+        state.settings.dailyReviewTarget === DEFAULT_SETTINGS.dailyReviewTarget
+      ) {
         state.settings.dailyReviewTarget = body.dailyReviewTarget;
       }
     }
@@ -981,10 +1013,16 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
+    const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "home")) {
+      logLine(req, 500, { reason: "fixture-read-failure", fixture: "home" });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     const data =
       cookies.e2e_saved_words_fixture === "truncated-page"
         ? TRUNCATED_SAVED_WORDS_RESPONSE
-        : buildSavedWords(getSessionState(cookies));
+        : buildSavedWords(state);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
@@ -1167,11 +1205,13 @@ const server = createServer(async (req, res) => {
       attemptId: body.attemptId,
       status: evaluation.status,
       originalSentence: body.sentenceText,
-      correctedSentence: evaluation.status === "correct" ? body.sentenceText : undefined,
+      correctedSentence:
+        evaluation.status === "correct" ? body.sentenceText : undefined,
       explanation: evaluation.explanation,
-      improvementTip: evaluation.status === "needs_improvement"
-        ? "Try using the target word naturally in your sentence."
-        : undefined,
+      improvementTip:
+        evaluation.status === "needs_improvement"
+          ? "Try using the target word naturally in your sentence."
+          : undefined,
       missionCompleted: !evaluation.errorCode,
       canRetry: Boolean(evaluation.errorCode),
       reported: false,
@@ -1204,6 +1244,14 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/progress") {
     const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "progress")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "progress",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     logLine(req, 200, { reviewedCount: state.reviewedCount });
     jsonResponse(res, 200, buildProgress(state));
     return;
@@ -1258,6 +1306,14 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/settings") {
     const state = getSessionState(cookies);
+    if (consumeReadFailureFixture(state, cookies, "settings")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "settings",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     logLine(req, 200);
     jsonResponse(res, 200, buildSettings(state));
     return;
@@ -1330,7 +1386,9 @@ const server = createServer(async (req, res) => {
     }
     logLine(req, 200, { action: "account-deletion" });
     const requestedAt = new Date();
-    const purgeAfter = new Date(requestedAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const purgeAfter = new Date(
+      requestedAt.getTime() + 30 * 24 * 60 * 60 * 1000,
+    );
     jsonResponse(
       res,
       200,
