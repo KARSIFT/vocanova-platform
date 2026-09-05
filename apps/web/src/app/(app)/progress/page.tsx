@@ -97,10 +97,10 @@ export default async function ProgressPage() {
                   key={savedWord.userWordId}
                   className="rounded-md p-[var(--spacing-sm)]"
                 >
-                  <p className="font-medium text-neutral-900">
+                  <p className="wrap-break-word font-medium text-neutral-900">
                     {savedWord.wordText}
                   </p>
-                  <p className="text-base text-neutral-700">
+                  <p className="wrap-break-word text-base text-neutral-700">
                     {savedWord.shortDefinition}
                   </p>
                 </li>

@@ -80,13 +80,13 @@ export default async function HomePage() {
                 key={savedWord.userWordId}
                 className="rounded-md p-[var(--spacing-sm)]"
               >
-                <p className="font-medium text-neutral-900">
+                <p className="wrap-break-word font-medium text-neutral-900">
                   {savedWord.wordText}
-                  <span className="ml-[var(--spacing-xs)] text-sm font-normal text-neutral-600">
+                  <span className="ml-[var(--spacing-xs)] wrap-break-word text-sm font-normal text-neutral-600">
                     {savedWord.partOfSpeech}
                   </span>
                 </p>
-                <p className="text-base text-neutral-700">
+                <p className="wrap-break-word text-base text-neutral-700">
                   {savedWord.shortDefinition}
                 </p>
                 <SentenceFeedback
