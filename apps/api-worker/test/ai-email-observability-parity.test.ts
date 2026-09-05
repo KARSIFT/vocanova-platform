@@ -70,8 +70,21 @@ describe("Worker AI feedback parity", () => {
       submission("I work every day."),
       "feedback-one",
     );
+    const crossKeyReplay = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "feedback-one-cross-key",
+    );
     expect(rowsAtCall).toBe(1);
     expect(replay.result).toEqual(first.result);
+    expect(crossKeyReplay.result).toEqual(first.result);
+    await expect(
+      service.submit(
+        USER_A,
+        submission("We work every evening."),
+        "feedback-one-cross-key",
+      ),
+    ).rejects.toMatchObject({ code: "idempotency_conflict" });
     expect(provider.generateCalls).toBe(1);
     expect(await counts()).toMatchObject({
       sentences: 1,
@@ -221,6 +234,65 @@ describe("Worker AI feedback parity", () => {
     });
     expect(malformedProvider.generateCalls).toBe(2);
     expect(await attemptStatus()).toBe("failed");
+  });
+
+  it("retries a persisted temporary provider failure with a fresh idempotency key", async () => {
+    const provider = new ScriptedProvider((call) => {
+      if (call === 1) return Promise.reject(new Error("temporary failure"));
+      return validFeedback();
+    });
+    const service = createService(provider);
+
+    const failed = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "provider-failure-first",
+    );
+    expect(failed.result).toMatchObject({
+      errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE",
+      canRetry: true,
+    });
+
+    const sameKeyReplay = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "provider-failure-first",
+    );
+    expect(sameKeyReplay.result).toMatchObject({
+      errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE",
+      canRetry: true,
+    });
+    expect(provider.generateCalls).toBe(1);
+
+    const retried = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "provider-failure-retry",
+    );
+    expect(retried.result).toMatchObject({
+      status: "correct",
+      canRetry: false,
+    });
+    expect(provider.generateCalls).toBe(2);
+    expect(await counts()).toMatchObject({
+      attempts: 2,
+      pointRows: 2,
+      balance: 5,
+      activitySentences: 1,
+      activityFeedback: 1,
+    });
+    const attempts = await env.DB.prepare(
+      `SELECT status, request_hash
+       FROM ai_feedback_attempts
+       ORDER BY status`,
+    ).all<{ status: string; request_hash: string }>();
+    expect(attempts.results).toMatchObject([
+      { status: "failed" },
+      { status: "succeeded" },
+    ]);
+    expect(attempts.results[0]?.request_hash).not.toBe(
+      attempts.results[1]?.request_hash,
+    );
   });
 
   it("bounds timeouts and enforces persistent rate, cost, concurrency, and kill switches", async () => {
