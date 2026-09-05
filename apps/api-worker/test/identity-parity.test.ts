@@ -426,6 +426,38 @@ describe("identity and account parity", () => {
       .bind("oauth@example.test")
       .first<{ id: string }>();
     expect(originalUser?.id).toBeDefined();
+    const updatedSettings = await app.request(
+      "http://worker.test/api/v1/settings",
+      withAuth(
+        json(
+          {
+            dailyReviewTarget: 12,
+            reviewIntervalPreset: "custom",
+            notificationsEnabled: false,
+            marketingEmailsEnabled: true,
+          },
+          "PATCH",
+        ),
+        cookiePairs(cookieHeader(magic)),
+        namedCookie(cookieHeader(magic), "vocanova_csrf"),
+      ),
+      env,
+    );
+    expect(updatedSettings.status).toBe(200);
+    const settingsBefore = await env.DB.prepare(
+      `SELECT user_id, timezone, daily_review_target, review_interval_preset,
+              notifications_enabled, marketing_emails_enabled, app_language
+       FROM user_settings WHERE user_id = ?1`,
+    )
+      .bind(originalUser?.id)
+      .first<Record<string, string | number>>();
+    expect(settingsBefore).toMatchObject({
+      user_id: originalUser?.id,
+      daily_review_target: 12,
+      review_interval_preset: "custom",
+      notifications_enabled: 0,
+      marketing_emails_enabled: 1,
+    });
 
     const started = await app.request(
       "http://worker.test/api/v1/auth/oauth/google/start",
@@ -461,23 +493,28 @@ describe("identity and account parity", () => {
     )
       .bind("oauth@example.test")
       .first<{ count: number }>();
-    const identity = await env.DB.prepare(
-      `SELECT user_id, provider, provider_subject
-       FROM external_identities
-       WHERE provider = 'google'`,
-    ).first<{ user_id: string; provider: string; provider_subject: string }>();
+    const googleIdentityCount = await env.DB.prepare(
+      `SELECT COUNT(*) AS count FROM external_identities
+       WHERE user_id = ?1 AND provider = 'google'`,
+    )
+      .bind(originalUser?.id)
+      .first<{ count: number }>();
     const sessions = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM sessions WHERE user_id = ?1",
     )
       .bind(originalUser?.id)
       .first<{ count: number }>();
+    const settingsAfter = await env.DB.prepare(
+      `SELECT user_id, timezone, daily_review_target, review_interval_preset,
+              notifications_enabled, marketing_emails_enabled, app_language
+       FROM user_settings WHERE user_id = ?1`,
+    )
+      .bind(originalUser?.id)
+      .first<Record<string, string | number>>();
     expect(users?.count).toBe(1);
     expect(sessions?.count).toBe(2);
-    expect(identity).toMatchObject({
-      user_id: originalUser?.id,
-      provider: "google",
-    });
-    expect(identity?.provider_subject).toMatch(/^google-subject-/);
+    expect(settingsAfter).toEqual(settingsBefore);
+    expect(googleIdentityCount?.count).toBe(1);
   });
 
   it("rejects expired OAuth state without consuming it and scopes its production cookie", async () => {
