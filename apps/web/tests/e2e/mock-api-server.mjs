@@ -534,6 +534,7 @@ function createInitialState() {
     progress: cloneProgress(DEFAULT_PROGRESS),
     dailyMission: { ...DEFAULT_DAILY_MISSION },
     reviewAttempts: [],
+    reviewAttemptsByClientAttemptId: new Map(),
     sentenceAttempts: [],
     lastReviewAttemptId: null,
     sentenceCount: 0,
@@ -702,6 +703,10 @@ function buildJourneySituations() {
 
 function generateId(prefix) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
+}
+
+function reviewRewardForRating(rating) {
+  return { again: 1, hard: 2, good: 5, easy: 6 }[rating] ?? 0;
 }
 
 // --- deterministic AI feedback --------------------------------
@@ -1097,12 +1102,24 @@ const server = createServer(async (req, res) => {
       return;
     }
     const state = getSessionState(cookies);
+    const priorAttempt = state.reviewAttemptsByClientAttemptId.get(
+      body.clientAttemptId,
+    );
+    if (priorAttempt) {
+      logLine(req, 200, {
+        action: "replay-review",
+        meaningId: priorAttempt.meaningId,
+      });
+      jsonResponse(res, 200, priorAttempt.response);
+      return;
+    }
     const attemptId = generateId("att");
     const reviewedMeaningId = body.meaningId;
     if (reviewedMeaningId) {
       state.reviewedMeaningIds.add(reviewedMeaningId);
     }
     state.reviewedCount += 1;
+    state.progress.confidencePointsBalance += reviewRewardForRating(body.rating);
     state.lastReviewAttemptId = attemptId;
     state.reviewAttempts.push({
       attemptId,
@@ -1121,7 +1138,7 @@ const server = createServer(async (req, res) => {
       meaningId: reviewedMeaningId,
       reviewedCount: state.reviewedCount,
     });
-    jsonResponse(res, 200, {
+    const response = {
       attemptId,
       userWordId: body.userWordId,
       meaningId: body.meaningId,
@@ -1138,7 +1155,12 @@ const server = createServer(async (req, res) => {
       source: body.source ?? "review_session",
       clientAttemptId: body.clientAttemptId,
       nextReviewAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+    };
+    state.reviewAttemptsByClientAttemptId.set(body.clientAttemptId, {
+      meaningId: reviewedMeaningId,
+      response,
     });
+    jsonResponse(res, 200, response);
     return;
   }
 

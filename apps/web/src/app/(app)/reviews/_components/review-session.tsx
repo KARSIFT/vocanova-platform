@@ -28,6 +28,12 @@ interface ReviewOption {
   label: string;
 }
 
+interface PendingReviewSubmission {
+  body: SubmitReviewBody;
+  clientAttemptId: string;
+  card: DueWord;
+}
+
 interface ReviewSessionProps {
   initialDueWords: DueWord[];
   initialTotalCount: number;
@@ -44,6 +50,7 @@ export function ReviewSession({
   const [isRefetching, setIsRefetching] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [completed, setCompleted] = useState(false);
+  const [awaitingNextPage, setAwaitingNextPage] = useState(false);
   const [completedReviewCount, setCompletedReviewCount] = useState(0);
   const [phase, setPhase] = useState<PromptPhase>("prompt");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
@@ -55,6 +62,7 @@ export function ReviewSession({
     null,
   );
   const submissionInFlight = useRef(false);
+  const pendingSubmission = useRef<PendingReviewSubmission | null>(null);
 
   const currentCard = dueWords[currentIndex];
 
@@ -76,12 +84,9 @@ export function ReviewSession({
     setStartTime(Date.now());
   }, [currentIndex, dueWords]);
 
-  const advance = () => {
-    if (currentIndex + 1 < dueWords.length) {
-      setCurrentIndex((index) => index + 1);
-      return;
-    }
-
+  const loadNextPage = () => {
+    setAwaitingNextPage(false);
+    setErrorMessage(null);
     setIsRefetching(true);
     const client = createApiClient();
     void client
@@ -96,9 +101,7 @@ export function ReviewSession({
         }
       })
       .catch((error) => {
-        // A 401 here means the session expired mid-review-session;
-        // route the learner to re-auth instead of leaving them looking at
-        // an error on a frozen card.
+        setAwaitingNextPage(true);
         setErrorMessage(
           handleApiError(error, "Unable to load more words. Please try again."),
         );
@@ -108,17 +111,57 @@ export function ReviewSession({
       });
   };
 
-  const submitAttempt = async ({
-    result,
-    rating,
-    selectedOptionMeaningId,
-  }: {
+  const advance = () => {
+    if (currentIndex + 1 < dueWords.length) {
+      setCurrentIndex((index) => index + 1);
+      return;
+    }
+
+    loadNextPage();
+  };
+
+  const submitAttempt = async (attempt?: {
     result: "correct" | "incorrect";
     rating: Rating;
     selectedOptionMeaningId?: string;
   }) => {
-    if (!currentCard || submissionInFlight.current) {
+    if (submissionInFlight.current) {
       return;
+    }
+
+    let submission = pendingSubmission.current;
+    if (!submission) {
+      if (!attempt || !currentCard) {
+        return;
+      }
+
+      const csrfToken = getCookieValue(CSRF_COOKIE_NAME);
+      if (!csrfToken) {
+        setErrorMessage("Session is not ready. Please refresh the page.");
+        return;
+      }
+
+      const clientAttemptId = generateClientAttemptId();
+      submission = {
+        card: currentCard,
+        clientAttemptId,
+        body: {
+          userWordId: currentCard.userWordId,
+          meaningId: currentCard.meaningId,
+          attemptType: "review",
+          promptType:
+            promptType === "multiple_choice" ? "multiple_choice" : "self_check",
+          result: attempt.result,
+          rating: attempt.rating,
+          answeredAt: new Date().toISOString(),
+          responseTimeMs: Math.max(0, Date.now() - startTime),
+          selectedOptionMeaningId: attempt.selectedOptionMeaningId,
+          wasHintUsed: false,
+          source: "review_session",
+          clientAttemptId,
+        },
+      };
+      pendingSubmission.current = submission;
     }
 
     const csrfToken = getCookieValue(CSRF_COOKIE_NAME);
@@ -127,42 +170,24 @@ export function ReviewSession({
       return;
     }
 
-    setIsSubmitting(true);
     submissionInFlight.current = true;
+    setIsSubmitting(true);
     setErrorMessage(null);
 
-    const client = createApiClient();
-    const clientAttemptId = generateClientAttemptId();
-    const body: SubmitReviewBody = {
-      userWordId: currentCard.userWordId,
-      meaningId: currentCard.meaningId,
-      attemptType: "review",
-      promptType:
-        promptType === "multiple_choice" ? "multiple_choice" : "self_check",
-      result,
-      rating,
-      answeredAt: new Date().toISOString(),
-      responseTimeMs: Math.max(0, Date.now() - startTime),
-      selectedOptionMeaningId,
-      wasHintUsed: false,
-      source: "review_session",
-      clientAttemptId,
-    };
-
     try {
-      const { data } = await client.submitReview(body, clientAttemptId, {
-        headers: { "X-CSRF-Token": csrfToken },
-      });
-      setLastReviewedCard(currentCard);
+      const client = createApiClient();
+      const { data } = await client.submitReview(
+        submission.body,
+        submission.clientAttemptId,
+        { headers: { "X-CSRF-Token": csrfToken } },
+      );
+      pendingSubmission.current = null;
+      setLastReviewedCard(submission.card);
       setLastReviewAttemptId(data.attemptId);
       setCompletedReviewCount((count) => count + 1);
       setRemainingCount((count) => Math.max(0, count - 1));
       advance();
     } catch (error) {
-      // A 401 mid-review-session is the documented
-      // session-expiry mid-flow case — never claim a card was
-      // reviewed when the server rejected it. handleApiError routes
-      // the learner to re-auth instead.
       setErrorMessage(
         handleApiError(
           error,
@@ -219,6 +244,24 @@ export function ReviewSession({
 
   if (!currentCard) {
     return null;
+  }
+
+  if (awaitingNextPage) {
+    return (
+      <div className="rounded-md border border-neutral-200 bg-white p-[var(--spacing-md)]">
+        <p role="alert" className="text-sm text-red-700">
+          {errorMessage}
+        </p>
+        <button
+          type="button"
+          onClick={loadNextPage}
+          disabled={isRefetching}
+          className="mt-[var(--spacing-md)] rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Retry loading reviews
+        </button>
+      </div>
+    );
   }
 
   const isMultipleChoiceCorrect =
@@ -402,6 +445,16 @@ export function ReviewSession({
           >
             {errorMessage}
           </p>
+        ) : null}
+        {errorMessage && pendingSubmission.current ? (
+          <button
+            type="button"
+            onClick={() => void submitAttempt()}
+            disabled={isLoading}
+            className="mt-[var(--spacing-md)] rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Retry submission
+          </button>
         ) : null}
       </div>
     </div>
