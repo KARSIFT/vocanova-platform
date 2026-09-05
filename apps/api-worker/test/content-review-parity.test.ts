@@ -590,6 +590,108 @@ describe("Worker content, learning, and review parity", () => {
     ).resolves.toEqual({ count: 0 });
   });
 
+  it("serializes concurrent saves for one learner meaning without exposing a uniqueness failure", async () => {
+    let reads = 0;
+    let releaseReads!: () => void;
+    const bothReads = new Promise<void>((resolve) => {
+      releaseReads = resolve;
+    });
+    const concurrentDatabase = new Proxy(env.DB, {
+      get(target, property, receiver) {
+        if (property !== "prepare")
+          return Reflect.get(target, property, receiver);
+        return (query: string) => {
+          const statement = target.prepare(query);
+          if (
+            !query.includes(
+              "FROM user_words WHERE user_id = ?1 AND meaning_id = ?2",
+            )
+          )
+            return statement;
+          return new Proxy(statement, {
+            get(prepared, preparedProperty, preparedReceiver) {
+              if (preparedProperty !== "bind")
+                return Reflect.get(
+                  prepared,
+                  preparedProperty,
+                  preparedReceiver,
+                );
+              return (...values: unknown[]) => {
+                const bound = prepared.bind(...values);
+                return new Proxy(bound, {
+                  get(boundStatement, boundProperty, boundReceiver) {
+                    if (boundProperty !== "first")
+                      return Reflect.get(
+                        boundStatement,
+                        boundProperty,
+                        boundReceiver,
+                      );
+                    return async <T>(): Promise<T | null> => {
+                      const row = await boundStatement.first<T>();
+                      reads += 1;
+                      if (reads === 2) releaseReads();
+                      await bothReads;
+                      return row;
+                    };
+                  },
+                });
+              };
+            },
+          });
+        };
+      },
+    });
+    const concurrentRepository = new D1ContentLearningRepository(
+      concurrentDatabase,
+      () => new Date(NOW),
+    );
+
+    const saves = await Promise.all([
+      concurrentRepository.saveUserWord(
+        USER_A,
+        MEANING_A,
+        "journey",
+        "concurrent-save-one",
+      ),
+      concurrentRepository.saveUserWord(
+        USER_A,
+        MEANING_A,
+        "journey",
+        "concurrent-save-two",
+      ),
+    ]);
+    expect(saves).toEqual([
+      expect.objectContaining({ meaningId: MEANING_A }),
+      expect.objectContaining({ meaningId: MEANING_A }),
+    ]);
+    const activeWords = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM user_words WHERE user_id = ?1 AND meaning_id = ?2 AND deleted_at IS NULL",
+    )
+      .bind(USER_A, MEANING_A)
+      .first<{ count: number }>();
+    const activeWord = await env.DB.prepare(
+      "SELECT id FROM user_words WHERE user_id = ?1 AND meaning_id = ?2 AND deleted_at IS NULL",
+    )
+      .bind(USER_A, MEANING_A)
+      .first<{ id: string }>();
+    const addRewards = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM confidence_point_ledger WHERE user_id = ?1 AND reason = 'word_added'",
+    )
+      .bind(USER_A)
+      .first<{ count: number }>();
+    const keys = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM idempotency_keys WHERE user_id = ?1 AND operation = 'user_words:save'",
+    )
+      .bind(USER_A)
+      .first<{ count: number }>();
+    expect(activeWords?.count).toBe(1);
+    expect(saves[0].userWordId).toBe(activeWord?.id);
+    expect(saves[1].userWordId).toBe(activeWord?.id);
+    expect(saves[0].userWordId).toBe(saves[1].userWordId);
+    expect(addRewards?.count).toBe(1);
+    expect(keys?.count).toBe(2);
+  });
+
   it("resets a restored word into the due queue without erasing review evidence", async () => {
     const saved = await repository.saveUserWord(
       USER_A,
