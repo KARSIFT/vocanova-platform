@@ -83,7 +83,11 @@ test("replays a committed review and retries the due list without duplicate prog
   await page.getByRole("button", { name: "Show answer" }).click();
   await page.getByRole("button", { name: "Good", exact: true }).click();
 
-  await expect(page.getByText("HTTP 500", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Unable to submit your answer. Please try again.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Retry submission" }).click();
 
   await expect(
