@@ -557,6 +557,11 @@ describe("identity and account parity", () => {
         "test-ip",
       ),
     ).rejects.toMatchObject({ code: "invalid_idempotency" });
+    await expect(
+      env.DB.prepare("SELECT status FROM users WHERE id = ?1")
+        .bind(rejected.userId)
+        .first<{ status: string }>(),
+    ).resolves.toEqual({ status: "active" });
   });
 
   it("rolls back the deletion record when a later deactivation mutation fails", async () => {

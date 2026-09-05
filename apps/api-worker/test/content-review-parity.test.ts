@@ -246,7 +246,16 @@ describe("Worker content, learning, and review parity", () => {
     const document = createOpenApiDocument() as {
       paths: Record<
         string,
-        { post?: { parameters?: Array<{ name: string; schema: unknown }> } }
+        {
+          post?: {
+            parameters?: Array<{
+              name: string;
+              in?: string;
+              required?: boolean;
+              schema: unknown;
+            }>;
+          };
+        }
       >;
     };
     for (const path of [
@@ -258,6 +267,8 @@ describe("Worker content, learning, and review parity", () => {
       const parameter = document.paths[path]?.post?.parameters?.find(
         (candidate) => candidate.name === "Idempotency-Key",
       );
+      expect(parameter?.in, path).toBe("header");
+      expect(parameter?.required, path).toBe(true);
       expect(parameter?.schema, path).toEqual({
         type: "string",
         minLength: 1,
