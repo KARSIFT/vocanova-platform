@@ -146,6 +146,8 @@ const LONG_WORD_DETAIL_TARGET = `word-${"a".repeat(289)}`;
 const LONG_REVIEW_CONTENT = "a".repeat(300);
 const LONG_ACCOUNT_EMAIL = `${"a".repeat(64)}@example.test`;
 
+const LONG_SAVED_CONTENT = "a".repeat(300);
+
 const DEFAULT_SETTINGS = {
   dailyReviewTarget: 20,
   reviewIntervalPreset: "vocanova_default",
@@ -334,6 +336,17 @@ const TRUNCATED_SAVED_WORDS_RESPONSE = {
     },
   ],
   nextCursor: "e2e-saved-words-after-10",
+};
+
+const LONG_SAVED_WORDS_RESPONSE = {
+  items: [
+    {
+      ...TRUNCATED_SAVED_WORDS_RESPONSE.items[0],
+      wordText: `word-${LONG_SAVED_CONTENT}`,
+      partOfSpeech: `part-${LONG_SAVED_CONTENT}`,
+      shortDefinition: `definition-${LONG_SAVED_CONTENT}`,
+    },
+  ],
 };
 
 const MULTIPLE_CHOICE_DUE_WORDS = [
@@ -1373,7 +1386,9 @@ const server = createServer(async (req, res) => {
     const data =
       cookies.e2e_saved_words_fixture === "truncated-page"
         ? TRUNCATED_SAVED_WORDS_RESPONSE
-        : buildSavedWords(state);
+        : cookies.e2e_saved_words_fixture === "long-content"
+          ? LONG_SAVED_WORDS_RESPONSE
+          : buildSavedWords(state);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
