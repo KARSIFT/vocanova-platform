@@ -175,14 +175,14 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
   };
   requireSuccess(runLocalD1Migrations(options), "empty initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 7,
+    migrationCount: 8,
     health: "ok",
     rollbackTable: undefined,
   });
 
   requireSuccess(runLocalD1Migrations(options), "repeated initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 7,
+    migrationCount: 8,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -197,7 +197,7 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
     "isolated initialization",
   );
   assert.deepEqual(databaseEvidence(isolatedState), {
-    migrationCount: 7,
+    migrationCount: 8,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -252,7 +252,7 @@ test("a failed forward migration rolls back while prior migrations survive", (t)
     /0008_intentional_failure|syntax error/i,
   );
   assert.deepEqual(databaseEvidence(stateDirectory), {
-    migrationCount: 7,
+    migrationCount: 8,
     health: "ok",
     rollbackTable: undefined,
   });
