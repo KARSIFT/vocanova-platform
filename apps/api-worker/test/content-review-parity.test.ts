@@ -1018,6 +1018,76 @@ describe("Worker content, learning, and review parity", () => {
     await env.DB.prepare("DROP TRIGGER fail_review_idempotency").run();
   });
 
+  it("scopes saved-word deletion to the authenticated account over HTTP", async () => {
+    const sessions = [
+      [USER_A, "90000000-0000-4000-8000-000000000007", "unsave-owner"],
+      [USER_B, "90000000-0000-4000-8000-000000000008", "unsave-other"],
+    ] as const;
+    for (const [userId, sessionId, token] of sessions) {
+      await env.DB.prepare(
+        `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at)
+         VALUES (?1, ?2, ?3, ?4, '9999-12-31T23:59:59.999Z')`,
+      )
+        .bind(sessionId, userId, await hashToken(token), NOW)
+        .run();
+    }
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    const ownerBefore = await env.DB.prepare(
+      "SELECT * FROM user_words WHERE id = ?1",
+    )
+      .bind(USER_WORD_A)
+      .first();
+    expect(ownerBefore).toMatchObject({ user_id: USER_A, deleted_at: null });
+    const app = createApp();
+    const unsave = (token: string) =>
+      app.request(
+        `http://worker.test/api/v1/user-words/${MEANING_A}`,
+        {
+          method: "DELETE",
+          headers: {
+            cookie: `vocanova_session=${token}; vocanova_csrf=unsave-csrf`,
+            "x-csrf-token": "unsave-csrf",
+          },
+        },
+        env,
+      );
+    expect((await unsave("unsave-other")).status).toBe(404);
+    await expect(
+      env.DB.prepare("SELECT * FROM user_words WHERE id = ?1")
+        .bind(USER_WORD_A)
+        .first(),
+    ).resolves.toEqual(ownerBefore);
+
+    await insertUserWord(USER_WORD_B, USER_B, MEANING_A, NOW);
+    expect((await unsave("unsave-other")).status).toBe(204);
+    await expect(
+      env.DB.prepare("SELECT * FROM user_words WHERE id = ?1")
+        .bind(USER_WORD_A)
+        .first(),
+    ).resolves.toEqual(ownerBefore);
+    const otherAfter = await env.DB.prepare(
+      "SELECT * FROM user_words WHERE id = ?1",
+    )
+      .bind(USER_WORD_B)
+      .first();
+    expect(otherAfter).toMatchObject({
+      user_id: USER_B,
+      deleted_at: expect.any(String),
+    });
+
+    expect((await unsave("unsave-owner")).status).toBe(204);
+    await expect(
+      env.DB.prepare("SELECT deleted_at FROM user_words WHERE id = ?1")
+        .bind(USER_WORD_A)
+        .first(),
+    ).resolves.toEqual({ deleted_at: expect.any(String) });
+    await expect(
+      env.DB.prepare("SELECT * FROM user_words WHERE id = ?1")
+        .bind(USER_WORD_B)
+        .first(),
+    ).resolves.toEqual(otherAfter);
+  });
+
   it("keeps all migrated content routes behind authentication", async () => {
     const app = createApp();
     for (const [method, path] of [
