@@ -317,16 +317,18 @@ describe("identity and account parity", () => {
 
   it("does not return settings after deletion wins during a stale update", async () => {
     const { userId } = await signedIn("settings-race@example.test");
-    await new D1IdentityRepository(env.DB).getSettings(userId, now.toISOString());
+    await new D1IdentityRepository(env.DB).getSettings(
+      userId,
+      now.toISOString(),
+    );
     await env.DB.batch([
-      env.DB
-        .prepare(
-          "UPDATE user_settings SET daily_review_target = ?1 WHERE user_id = ?2",
-        )
-        .bind(17, userId),
-      env.DB
-        .prepare("UPDATE users SET display_name = ?1 WHERE id = ?2")
-        .bind("Established", userId),
+      env.DB.prepare(
+        "UPDATE user_settings SET daily_review_target = ?1 WHERE user_id = ?2",
+      ).bind(17, userId),
+      env.DB.prepare("UPDATE users SET display_name = ?1 WHERE id = ?2").bind(
+        "Established",
+        userId,
+      ),
     ]);
     let reached!: () => void;
     let release!: () => void;
