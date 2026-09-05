@@ -10,12 +10,16 @@ export const metadata: Metadata = {
 };
 
 interface SignInPageProps {
-  searchParams: Promise<{ returnTo?: string }>;
+  searchParams: Promise<{
+    returnTo?: string | string[];
+    email?: string | string[];
+  }>;
 }
 
 export default async function SignInPage({ searchParams }: SignInPageProps) {
-  const { returnTo } = await searchParams;
+  const { returnTo, email } = await searchParams;
   const safeReturnTo = normalizeReturnTo(returnTo);
+  const recoveryEmail = normalizeRecoveryEmail(email);
 
   return (
     <main className="grid min-h-screen place-items-center p-6">
@@ -42,8 +46,17 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
           <div className="h-px flex-1 bg-neutral-200" />
         </div>
 
-        <MagicLinkForm returnTo={safeReturnTo} />
+        <MagicLinkForm returnTo={safeReturnTo} initialEmail={recoveryEmail} />
       </div>
     </main>
   );
+}
+function normalizeRecoveryEmail(value: unknown): string {
+  if (typeof value !== "string") {
+    return "";
+  }
+  const email = value.trim().toLowerCase();
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 254
+    ? email
+    : "";
 }

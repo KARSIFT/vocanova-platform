@@ -9,10 +9,14 @@ import { getAppOrigin } from "@/lib/env";
 
 interface MagicLinkFormProps {
   returnTo: string;
+  initialEmail?: string;
 }
 
-export function MagicLinkForm({ returnTo }: MagicLinkFormProps) {
-  const [email, setEmail] = useState("");
+export function MagicLinkForm({
+  returnTo,
+  initialEmail = "",
+}: MagicLinkFormProps) {
+  const [email, setEmail] = useState(initialEmail);
   const [status, setStatus] = useState<{
     type: "idle" | "loading" | "success" | "error";
     message: string;
