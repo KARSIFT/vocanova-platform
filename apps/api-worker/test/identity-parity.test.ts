@@ -1117,6 +1117,46 @@ describe("identity and account parity", () => {
     ).rejects.toMatchObject({ code: "conflict" });
   });
 
+  it("isolates the same account-deletion idempotency key between users", async () => {
+    const first = await signedIn("first-delete@example.test");
+    const second = await signedIn("second-delete@example.test");
+    const deletion = (account: Awaited<ReturnType<typeof signedIn>>) =>
+      account.app.request(
+        "http://worker.test/api/v1/account-deletion-requests",
+        withAuth(
+          { method: "POST", headers: { "Idempotency-Key": "shared-delete" } },
+          account.cookie,
+          account.csrf,
+        ),
+        env,
+      );
+
+    const firstDeleted = await deletion(first);
+    const secondDeleted = await deletion(second);
+    expect(firstDeleted.status).toBe(200);
+    expect(secondDeleted.status).toBe(200);
+    expect(await firstDeleted.json()).toMatchObject({
+      userId: first.userId,
+      replayed: false,
+    });
+    expect(await secondDeleted.json()).toMatchObject({
+      userId: second.userId,
+      replayed: false,
+    });
+
+    const requests = await env.DB.prepare(
+      `SELECT user_id, idempotency_key FROM account_deletion_requests
+       WHERE idempotency_key = ?1 ORDER BY user_id`,
+    )
+      .bind("shared-delete")
+      .all<{ user_id: string; idempotency_key: string }>();
+    expect(requests.results).toEqual(
+      [first.userId, second.userId]
+        .sort()
+        .map((user_id) => ({ user_id, idempotency_key: "shared-delete" })),
+    );
+  });
+
   it("revokes every session and pending email change when an account is deactivated", async () => {
     const first = await signedIn("all-credentials@example.test");
     const second = await signedIn("all-credentials@example.test");
