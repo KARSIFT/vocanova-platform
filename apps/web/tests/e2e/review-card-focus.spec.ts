@@ -111,7 +111,11 @@ test("does not advance focus until a failed review submission succeeds on retry"
     .click();
   await page.getByRole("button", { name: "Good", exact: true }).click();
 
-  await expect(page.getByText("HTTP 500", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Unable to submit your answer. Please try again.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "arrival", level: 2 }),
   ).toBeVisible();

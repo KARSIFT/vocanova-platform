@@ -81,7 +81,11 @@ test("keeps multiple-choice options in place through selection, feedback, loadin
   await expect.poll(optionLabels).toEqual(orderBeforeSelection);
 
   releaseFirstSubmission?.();
-  await expect(page.getByText("HTTP 500", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Unable to submit your answer. Please try again.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await expect(goodRating).toBeEnabled();
   await expect.poll(optionLabels).toEqual(orderBeforeSelection);
 });
