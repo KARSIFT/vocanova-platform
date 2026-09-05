@@ -912,6 +912,80 @@ describe("Worker content, learning, and review parity", () => {
     expect(await response.json()).toMatchObject({ detail: "invalid request" });
   });
 
+  it("replays a client attempt over HTTP without repeating its schedule", async () => {
+    const token = "review-replay-session";
+    const csrf = "review-replay-csrf";
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    await env.DB.prepare(
+      `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at)
+       VALUES (?1, ?2, ?3, ?4, '9999-12-31T23:59:59.999Z')`,
+    )
+      .bind(
+        "90000000-0000-4000-8000-000000000004",
+        USER_A,
+        await hashToken(token),
+        NOW,
+      )
+      .run();
+    const submit = (
+      key: string,
+      body = review({ clientAttemptId: "http-replay" }),
+    ) =>
+      createApp().request(
+        "http://worker.test/api/v1/reviews/submissions",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+            cookie: `vocanova_session=${token}; vocanova_csrf=${csrf}`,
+            "x-csrf-token": csrf,
+            "idempotency-key": key,
+          },
+          body: JSON.stringify(body),
+        },
+        env,
+      );
+    const first = await submit("http-replay-one");
+    expect(first.status).toBe(200);
+    const firstBody = await first.json();
+    const readState = async () => ({
+      attempts: (
+        await env.DB.prepare(
+          "SELECT * FROM review_attempts WHERE user_id = ?1 ORDER BY id",
+        )
+          .bind(USER_A)
+          .all()
+      ).results,
+      word: await env.DB.prepare("SELECT * FROM user_words WHERE id = ?1")
+        .bind(USER_WORD_A)
+        .first(),
+      ledger: (
+        await env.DB.prepare(
+          "SELECT * FROM confidence_point_ledger WHERE user_id = ?1 ORDER BY id",
+        )
+          .bind(USER_A)
+          .all()
+      ).results,
+    });
+    const snapshot = await readState();
+    expect(snapshot.attempts).toHaveLength(1);
+    expect(snapshot.word).toMatchObject({
+      total_review_count: 1,
+      review_step: 1,
+    });
+    expect(snapshot.ledger.length).toBeGreaterThan(0);
+    const replay = await submit("http-replay-two");
+    expect(replay.status).toBe(200);
+    expect(await replay.json()).toEqual(firstBody);
+    expect(await readState()).toEqual(snapshot);
+    const conflict = await submit(
+      "http-replay-three",
+      review({ clientAttemptId: "http-replay", rating: "easy" }),
+    );
+    expect(conflict.status).toBe(409);
+    expect(await readState()).toEqual(snapshot);
+  });
+
   it("rolls back attempt and schedule together when the review batch fails", async () => {
     await insertUserWord(
       USER_WORD_A,
