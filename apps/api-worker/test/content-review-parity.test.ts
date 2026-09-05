@@ -20,6 +20,7 @@ const MEANING_C = "30000000-0000-4000-8000-000000000003";
 const SITUATION_A = "40000000-0000-4000-8000-000000000001";
 const SITUATION_B = "40000000-0000-4000-8000-000000000002";
 const USER_WORD_A = "50000000-0000-4000-8000-000000000001";
+const USER_WORD_B = "50000000-0000-4000-8000-000000000002";
 
 let repository: D1ContentLearningRepository;
 
@@ -437,6 +438,50 @@ describe("Worker content, learning, and review parity", () => {
       total_review_count: 1,
       correct_review_count: 1,
     });
+  });
+
+  it("isolates the same review idempotency key between users", async () => {
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    await insertUserWord(USER_WORD_B, USER_B, MEANING_B, NOW);
+
+    await expect(
+      repository.submitReview(
+        USER_A,
+        review({ clientAttemptId: "shared-key-a" }),
+        "shared-review-key",
+      ),
+    ).resolves.toMatchObject({ userWordId: USER_WORD_A });
+    await expect(
+      repository.submitReview(
+        USER_B,
+        review({
+          userWordId: USER_WORD_B,
+          meaningId: MEANING_B,
+          clientAttemptId: "shared-key-b",
+        }),
+        "shared-review-key",
+      ),
+    ).resolves.toMatchObject({ userWordId: USER_WORD_B });
+
+    const rows = await env.DB.prepare(
+      `SELECT user_id, count(*) AS count FROM idempotency_keys
+       WHERE operation = 'reviews:submit' AND key = 'shared-review-key'
+       GROUP BY user_id ORDER BY user_id`,
+    ).all<{ user_id: string; count: number }>();
+    expect(rows.results).toEqual([
+      { user_id: USER_A, count: 1 },
+      { user_id: USER_B, count: 1 },
+    ]);
+    const schedules = await env.DB.prepare(
+      `SELECT user_id, total_review_count FROM user_words
+       WHERE id IN (?1, ?2) ORDER BY user_id`,
+    )
+      .bind(USER_WORD_A, USER_WORD_B)
+      .all<{ user_id: string; total_review_count: number }>();
+    expect(schedules.results).toEqual([
+      { user_id: USER_A, total_review_count: 1 },
+      { user_id: USER_B, total_review_count: 1 },
+    ]);
   });
 
   it("applies again, consecutive reset, hard, easy, and skipped transitions", async () => {
