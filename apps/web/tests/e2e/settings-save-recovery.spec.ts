@@ -29,10 +29,14 @@ async function setRetryFixture(context: BrowserContext, baseURL: string) {
 
 async function releaseSettingsPatch(page: Page) {
   const mockApiPort = process.env.MOCK_API_PORT ?? "8080";
-  const response = await page.request.post(
-    `http://127.0.0.1:${mockApiPort}/__e2e/release-settings-patch`,
-  );
-  await expect(response).toBeOK();
+  await expect
+    .poll(async () => {
+      const response = await page.request.post(
+        `http://127.0.0.1:${mockApiPort}/__e2e/release-settings-patch`,
+      );
+      return response.status();
+    })
+    .toBe(204);
 }
 
 test.describe("Settings save recovery", () => {
