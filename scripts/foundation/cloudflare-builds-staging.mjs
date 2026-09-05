@@ -52,6 +52,11 @@ export function createDeployPlan(release, baseEnvironment = process.env) {
   return [
     {
       command: "pnpm",
+      args: ["--filter", "@vocanova/api-worker", "dry-run:staging"],
+      env,
+    },
+    {
+      command: "pnpm",
       args: [
         "--filter",
         "@vocanova/api-worker",

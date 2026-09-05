@@ -73,6 +73,7 @@ test("deploys migrations, API, web, and smoke checks in order", () => {
   assert.deepEqual(
     plan.map(({ command, args }) => [command, ...args]),
     [
+      ["pnpm", "--filter", "@vocanova/api-worker", "dry-run:staging"],
       [
         "pnpm",
         "--filter",
