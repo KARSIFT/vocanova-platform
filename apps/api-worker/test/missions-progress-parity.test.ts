@@ -554,6 +554,69 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     expect(await pointBalance()).toBe(20);
   });
 
+  it("earns grace on the seventh completed day without exceeding the balance cap", async () => {
+    const today = "2026-08-22";
+    const yesterday = addDays(today, -1);
+    const timestamp = "2026-08-22T12:00:00.000Z";
+    await env.DB.batch([
+      mission(yesterday, "completed", timestamp),
+      mission(today, "completed", timestamp),
+      env.DB.prepare(
+        `INSERT INTO streak_states
+           (id, user_id, current_streak_count, longest_streak_count,
+            last_completed_local_date, last_activity_local_date, timezone, status,
+            created_at, updated_at)
+         VALUES (?1, ?2, 6, 6, ?3, ?3, 'UTC', 'active', ?4, ?4)`,
+      ).bind(crypto.randomUUID(), USER, yesterday, timestamp),
+      env.DB.prepare(
+        `INSERT INTO grace_day_ledger
+           (id, user_id, amount, balance_after, reason, source_type,
+            applied_to_local_date, timezone, idempotency_key, created_at, updated_at)
+         VALUES (?1, ?2, 1, 1, 'manual_grant', 'admin', ?3, 'UTC',
+                 'seed-grace-earning', ?4, ?4)`,
+      ).bind(crypto.randomUUID(), USER, yesterday, timestamp),
+    ]);
+    const repository = new D1MissionsRepository(
+      env.DB,
+      () => new Date(timestamp),
+    );
+
+    await repository.reconcile(USER, "UTC", today, true);
+
+    await expect(repository.getProgress(USER, "UTC")).resolves.toMatchObject({
+      streak: {
+        currentStreakCount: 7,
+        graceDayBalance: 2,
+      },
+    });
+    expect(await graceAwards()).toEqual([
+      {
+        amount: 1,
+        balance_after: 2,
+        applied_to_local_date: today,
+      },
+    ]);
+
+    await env.DB.prepare(
+      `UPDATE streak_states
+       SET current_streak_count = 13, longest_streak_count = 13,
+           last_completed_local_date = ?1, last_activity_local_date = ?1
+       WHERE user_id = ?2`,
+    )
+      .bind(yesterday, USER)
+      .run();
+    await repository.reconcile(USER, "UTC", today, true);
+
+    expect(await graceAwards()).toHaveLength(1);
+    await expect(
+      env.DB.prepare(
+        "SELECT current_streak_count FROM streak_states WHERE user_id = ?1",
+      )
+        .bind(USER)
+        .first<{ current_streak_count: number }>(),
+    ).resolves.toEqual({ current_streak_count: 14 });
+  });
+
   it("protects one missed day with grace and exposes reconciled progress", async () => {
     const today = "2026-08-22";
     const timestamp = "2026-08-22T12:00:00.000Z";
@@ -652,6 +715,28 @@ async function pointBalance(): Promise<number> {
     .bind(USER)
     .first<{ balance_after: number }>();
   return Number(row?.balance_after ?? 0);
+}
+
+async function graceAwards(): Promise<
+  Array<{
+    amount: number;
+    balance_after: number;
+    applied_to_local_date: string;
+  }>
+> {
+  const result = await env.DB.prepare(
+    `SELECT amount, balance_after, applied_to_local_date
+     FROM grace_day_ledger
+     WHERE user_id = ?1 AND reason = 'earned_by_streak'
+     ORDER BY rowid`,
+  )
+    .bind(USER)
+    .all<{
+      amount: number;
+      balance_after: number;
+      applied_to_local_date: string;
+    }>();
+  return result.results;
 }
 
 async function seed(): Promise<void> {
