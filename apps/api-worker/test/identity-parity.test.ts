@@ -452,6 +452,14 @@ describe("identity and account parity", () => {
       user_id: user?.id,
       count: 1,
     });
+    const identityRowBeforeRejectedCallback = await env.DB.prepare(
+      `SELECT id, user_id, provider, provider_subject, provider_email,
+              provider_email_verified, created_at, updated_at
+       FROM external_identities
+       WHERE provider = 'google' AND provider_subject = ?1`,
+    )
+      .bind("google-subject-1")
+      .first<Record<string, string | number>>();
 
     const secondStart = await app.request(
       "http://worker.test/api/v1/auth/oauth/google/start",
@@ -492,11 +500,22 @@ describe("identity and account parity", () => {
     )
       .bind("google-subject-1")
       .first<{ user_id: string; count: number }>();
+    const identityRowAfterRejectedCallback = await env.DB.prepare(
+      `SELECT id, user_id, provider, provider_subject, provider_email,
+              provider_email_verified, created_at, updated_at
+       FROM external_identities
+       WHERE provider = 'google' AND provider_subject = ?1`,
+    )
+      .bind("google-subject-1")
+      .first<Record<string, string | number>>();
     expect(account).toEqual({ status: "deleted", email: null });
     expect(sessionRows?.count).toBe(1);
     expect(usersAfterRejectedCallback).toEqual(usersBeforeRejectedCallback);
     expect(identitiesAfterRejectedCallback).toEqual(
       identitiesBeforeRejectedCallback,
+    );
+    expect(identityRowAfterRejectedCallback).toEqual(
+      identityRowBeforeRejectedCallback,
     );
   });
 
