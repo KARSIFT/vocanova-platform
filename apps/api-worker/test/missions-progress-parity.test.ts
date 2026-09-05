@@ -58,6 +58,40 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     });
   });
 
+  it("preserves a UTC custom target when client timezone selects the local day", async () => {
+    let current = new Date("2026-08-22T12:00:00.000Z");
+    const repository = new D1MissionsRepository(env.DB, () => current);
+    const first = await repository.getDailyMission(USER, "America/New_York");
+    expect(first).toMatchObject({
+      localDate: "2026-08-22",
+      timezone: "America/New_York",
+      reviewTarget: 20,
+    });
+    await env.DB.prepare(
+      `INSERT INTO user_settings
+       (id, user_id, timezone, daily_review_target, created_at, updated_at)
+       VALUES (?1, ?2, 'UTC', 35, ?3, ?3)`,
+    )
+      .bind(crypto.randomUUID(), USER, NOW)
+      .run();
+    const stable = await repository.getDailyMission(USER, "Europe/London");
+    expect(stable).toMatchObject({
+      timezone: "America/New_York",
+      reviewTarget: 20,
+    });
+    current = new Date("2026-08-23T12:00:00.000Z");
+    const next = await repository.getDailyMission(USER, "Europe/London");
+    expect(next).toMatchObject({
+      localDate: "2026-08-23",
+      timezone: "Europe/London",
+      reviewTarget: 35,
+    });
+    expect(await repository.resolveSettings(USER, "")).toEqual({
+      timezone: "UTC",
+      reviewTarget: 35,
+    });
+  });
+
   it("awards word and rating points once and completes a five-review mission atomically", async () => {
     await setSettings("Asia/Tehran", 5);
     const content = new D1ContentLearningRepository(
