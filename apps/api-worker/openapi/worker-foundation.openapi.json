@@ -1498,7 +1498,6 @@
                     "attemptType",
                     "promptType",
                     "result",
-                    "rating",
                     "reviewStepBefore",
                     "reviewStepAfter",
                     "answeredAt",

@@ -122,7 +122,7 @@ const ReviewAttempt = z.object({
   attemptType: z.string(),
   promptType: z.enum(["multiple_choice", "self_check"]),
   result: z.enum(["correct", "incorrect", "skipped"]),
-  rating: z.enum(["again", "hard", "good", "easy"]),
+  rating: z.enum(["again", "hard", "good", "easy"]).optional(),
   reviewStepBefore: z.number().int(),
   reviewStepAfter: z.number().int(),
   answeredAt: z.iso.datetime(),

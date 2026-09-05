@@ -484,8 +484,27 @@ describe("Worker content, learning, and review parity", () => {
       review({ clientAttemptId: "skip", result: "skipped", rating: undefined }),
       "skip",
     );
+    const skippedReplay = await repository.submitReview(
+      USER_A,
+      review({ clientAttemptId: "skip", result: "skipped", rating: undefined }),
+      "skip",
+    );
     expect(skipped.reviewStepAfter).toBe(1);
-    expect(skipped.rating).toBe("");
+    expect(skipped).not.toHaveProperty("rating");
+    expect(skippedReplay).toEqual(skipped);
+  });
+
+  it("publishes review rating as an optional four-value OpenAPI enum", () => {
+    const document = createOpenApiDocument() as ReviewSubmissionOpenApi;
+    const attemptSchema =
+      document.paths["/api/v1/reviews/submissions"].post.responses["200"]
+        .content["application/json"].schema;
+
+    expect(attemptSchema.required).not.toContain("rating");
+    expect(attemptSchema.properties.rating).toEqual({
+      enum: ["again", "hard", "good", "easy"],
+      type: "string",
+    });
   });
 
   it("rejects invalid, conflicting, and cross-user review submissions", async () => {
@@ -752,6 +771,27 @@ interface CanonicalWordOpenApi {
                       };
                     };
                   };
+                };
+              };
+            };
+          };
+        };
+      };
+    };
+  };
+}
+
+interface ReviewSubmissionOpenApi {
+  paths: {
+    "/api/v1/reviews/submissions": {
+      post: {
+        responses: {
+          "200": {
+            content: {
+              "application/json": {
+                schema: {
+                  required: string[];
+                  properties: { rating: unknown };
                 };
               };
             };
