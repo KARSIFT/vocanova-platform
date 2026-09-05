@@ -134,6 +134,33 @@ describe("identity and account parity", () => {
     expect(cookieHeader(consumed)).toContain("Secure");
   });
 
+  it("uses production cookie lifetimes, visibility, and clearing semantics", async () => {
+    const production = {
+      ...config,
+      environment: "production" as const,
+      secureCookies: true,
+    };
+    const app = identityApp(production);
+    await app.request(
+      "http://worker.test/api/v1/auth/magic-links",
+      json({ email: "cookie-contract@example.test" }),
+      env,
+    );
+    const token = messageToken(messages.at(-1)!);
+    const consumed = await app.request(
+      "http://worker.test/api/v1/auth/magic-links/consume",
+      json({ token, email: "cookie-contract@example.test" }),
+      env,
+    );
+    const cookies = cookieHeader(consumed);
+    expect(cookies).toContain("vocanova_session=");
+    expect(cookies).toContain("vocanova_csrf=");
+    expect(cookies).toContain("Path=/; Max-Age=2592000");
+    expect(cookies).toContain("HttpOnly; SameSite=Lax; Secure");
+    expect(cookies).toContain("SameSite=Lax; Secure");
+    expect(cookies).not.toMatch(/vocanova_csrf=[^;]*;[^\n]*HttpOnly/);
+  });
+
   it("authenticates requester scope and enforces double-submit CSRF on settings and onboarding", async () => {
     const { app, cookie, csrf } = await signedIn("settings@example.test");
     const me = await app.request(
