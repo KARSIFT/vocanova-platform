@@ -639,6 +639,60 @@ describe("identity and account parity", () => {
     expect(link?.consumed_at).toBeNull();
   });
 
+  it("rejects an expired email-change token without changing the account or notifying it", async () => {
+    const { app, cookie, csrf, userId } = await signedIn(
+      "expiry-owner@example.test",
+    );
+    const requested = await app.request(
+      "http://worker.test/api/v1/settings/email-change-links",
+      withAuth(json({ newEmail: "expiry-target@example.test" }), cookie, csrf),
+      env,
+    );
+    expect(requested.status).toBe(204);
+    const token = messageToken(messages.at(-1)!);
+    await env.DB.prepare(
+      "UPDATE email_change_links SET created_at = '2026-08-22T11:45:00.000Z', expires_at = ?1 WHERE user_id = ?2",
+    )
+      .bind(now.toISOString(), userId)
+      .run();
+    const userBefore = await env.DB.prepare(
+      "SELECT email, updated_at FROM users WHERE id = ?1",
+    )
+      .bind(userId)
+      .first();
+    const linkBefore = await env.DB.prepare(
+      "SELECT * FROM email_change_links WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .first();
+    expect(linkBefore).not.toBeNull();
+    const messagesBefore = [...messages];
+
+    const expired = await app.request(
+      "http://worker.test/api/v1/settings/email-change-links/consume",
+      withAuth(json({ token }), cookie, csrf),
+      env,
+    );
+    expect(expired.status).toBe(401);
+    await expect(
+      env.DB.prepare("SELECT email, updated_at FROM users WHERE id = ?1")
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual(userBefore);
+    await expect(
+      env.DB.prepare("SELECT * FROM email_change_links WHERE user_id = ?1")
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual(linkBefore);
+    expect(messages).toEqual(messagesBefore);
+    const stillAuthenticated = await app.request(
+      "http://worker.test/api/v1/me",
+      { headers: { Cookie: cookie } },
+      env,
+    );
+    expect(stillAuthenticated.status).toBe(200);
+  });
+
   it("keeps settings isolated between requester sessions", async () => {
     const first = await signedIn("first@example.test");
     const second = await signedIn("second@example.test");
