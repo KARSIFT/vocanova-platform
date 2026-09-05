@@ -788,6 +788,14 @@ function evaluateSentenceFeedback({ sentence, targetWord }) {
       errorMessage: "Your sentence is too long. Keep it under 300 characters.",
     };
   }
+  if (/unsafe feedback fixture/i.test(trimmed)) {
+    return {
+      status: "incorrect",
+      errorCode: "SAFETY_BLOCKED",
+      errorMessage:
+        "This sentence cannot be checked. Please try a different sentence.",
+    };
+  }
   const containsTarget = targetWord
     ? new RegExp(`\\b${targetWord}\\b`, "i").test(trimmed)
     : true;
@@ -1299,7 +1307,10 @@ const server = createServer(async (req, res) => {
         evaluation.status === "needs_improvement"
           ? "Try using the target word naturally in your sentence."
           : undefined,
-      missionCompleted: !evaluation.errorCode,
+      // Sentence feedback can award sentence activity, but it never completes a
+      // daily mission. Keep this deterministic browser fixture aligned with the
+      // public API contract in docs/engineering/09-ai-features.md §2.
+      missionCompleted: false,
       canRetry: Boolean(evaluation.errorCode),
       reported: false,
       errorCode: evaluation.errorCode,
