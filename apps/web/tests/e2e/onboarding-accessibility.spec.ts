@@ -37,6 +37,42 @@ import {
 } from "./axe-helper.js";
 
 test.describe("Onboarding accessibility", () => {
+  test("moves keyboard focus into each newly displayed onboarding step", async ({
+    page,
+  }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) {
+      throw new Error("Expected Playwright to configure a base URL.");
+    }
+    await page.context().addCookies([
+      {
+        name: "e2e_onboarding_status",
+        value: "not_started",
+        url: baseURL,
+      },
+    ]);
+
+    await page.goto("/onboarding");
+    await page.getByLabel("A1 — Beginner").check();
+    await page.getByRole("button", { name: "Continue" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("Native language")).toBeFocused();
+
+    await page.getByLabel("Native language").fill("Spanish");
+    await page.getByRole("button", { name: "Continue" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("General growth")).toBeFocused();
+
+    await page.getByLabel("General growth").check();
+    await page.getByRole("button", { name: "Continue" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("Daily life")).toBeFocused();
+
+    await page.getByRole("button", { name: "Back" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("General growth")).toBeFocused();
+  });
+
   test("/onboarding renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state on step 1", async ({
     page,
   }, testInfo) => {
@@ -96,6 +132,8 @@ test.describe("Onboarding accessibility", () => {
 
     // Sanity: the test ran on a supported project, otherwise
     // the project name is asserted in the report.
-    expect(testInfo.project.name).toMatch(/^(home-desktop-1280|mobile-360|mobile-430)$/);
+    expect(testInfo.project.name).toMatch(
+      /^(home-desktop-1280|mobile-360|mobile-430)$/,
+    );
   });
 });
