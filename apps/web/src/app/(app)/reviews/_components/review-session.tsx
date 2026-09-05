@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { DueWord, SubmitReviewBody } from "@vocanova/api-client";
 
@@ -59,10 +59,13 @@ export function ReviewSession({
   const promptType = currentCard
     ? determinePromptType(dueWords, currentIndex)
     : null;
-  const options =
-    currentCard && promptType === "multiple_choice"
-      ? buildMultipleChoiceOptions(dueWords, currentIndex)
-      : null;
+  const options = useMemo(
+    () =>
+      currentCard && promptType === "multiple_choice"
+        ? buildMultipleChoiceOptions(dueWords, currentIndex)
+        : null,
+    [currentCard, currentIndex, dueWords, promptType],
+  );
 
   useEffect(() => {
     setPhase("prompt");
@@ -400,13 +403,22 @@ function determinePromptType(
   dueWords: DueWord[],
   currentIndex: number,
 ): "multiple_choice" | "self_check" {
-  const options = buildMultipleChoiceOptions(dueWords, currentIndex);
   // Build a mix of both prompt types when possible: even-indexed cards use
   // multiple-choice if enough distractors exist, otherwise fall back to self-check.
-  if (options.length >= 4 && currentIndex % 2 === 0) {
+  if (
+    availableChoiceCount(dueWords, currentIndex) >= 4 &&
+    currentIndex % 2 === 0
+  ) {
     return "multiple_choice";
   }
   return "self_check";
+}
+
+function availableChoiceCount(
+  dueWords: DueWord[],
+  currentIndex: number,
+): number {
+  return dueWords[currentIndex] ? Math.min(dueWords.length, 4) : 0;
 }
 
 function buildMultipleChoiceOptions(
