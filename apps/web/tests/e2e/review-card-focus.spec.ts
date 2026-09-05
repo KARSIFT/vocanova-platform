@@ -131,3 +131,38 @@ test("does not advance focus until a failed review submission succeeds on retry"
   ).toBeFocused();
   expect(submissionCount).toBe(2);
 });
+
+test("moves focus to the completion heading after the final review", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) {
+    throw new Error("Expected a Playwright base URL.");
+  }
+
+  await context.addCookies([
+    {
+      name: "vocanova_session",
+      value: `review-completion-focus-${randomUUID()}`,
+      url: baseURL,
+    },
+    {
+      name: "vocanova_csrf",
+      value: `review-completion-focus-csrf-${randomUUID()}`,
+      url: baseURL,
+    },
+    { name: "e2e_review_fixture", value: "completion-summary", url: baseURL },
+  ]);
+
+  await page.goto("/reviews");
+  for (const word of ["arrival", "baggage", "counter", "departure"]) {
+    await expect(page.getByRole("heading", { name: word, level: 2 })).toBeVisible();
+    await page.getByRole("button", { name: "Show answer" }).click();
+    await page.getByRole("button", { name: "Good", exact: true }).click();
+  }
+
+  await expect(
+    page.getByRole("heading", { name: "You're all caught up", level: 2 }),
+  ).toBeFocused();
+});

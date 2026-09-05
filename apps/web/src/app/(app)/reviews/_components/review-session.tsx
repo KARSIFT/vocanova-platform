@@ -65,6 +65,7 @@ export function ReviewSession({
   const pendingSubmission = useRef<PendingReviewSubmission | null>(null);
   const shouldFocusNextCard = useRef(false);
   const currentCardHeadingRef = useRef<HTMLHeadingElement>(null);
+  const completionHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const currentCard = dueWords[currentIndex];
 
@@ -90,6 +91,13 @@ export function ReviewSession({
       shouldFocusNextCard.current = false;
     }
   }, [currentIndex, dueWords]);
+
+  useEffect(() => {
+    if (completed && shouldFocusNextCard.current) {
+      completionHeadingRef.current?.focus();
+      shouldFocusNextCard.current = false;
+    }
+  }, [completed]);
 
   const loadNextPage = () => {
     setAwaitingNextPage(false);
@@ -213,7 +221,11 @@ export function ReviewSession({
   if (dueWords.length === 0 || completed) {
     return (
       <div className="flex flex-col items-center justify-center py-[var(--spacing-2xl)] text-center">
-        <h2 className="text-xl font-semibold text-neutral-900">
+        <h2
+          ref={completionHeadingRef}
+          tabIndex={-1}
+          className="text-xl font-semibold text-neutral-900"
+        >
           You&apos;re all caught up
         </h2>
         <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">
