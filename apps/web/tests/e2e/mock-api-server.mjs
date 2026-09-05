@@ -71,6 +71,7 @@
 //   GET    /api/v1/progress                          -> 200 Progress
 //
 //   GET    /api/v1/journey-situations                -> 200 { items: [...] }
+//             `e2e_journey_fixture=empty` returns an empty catalog
 //   GET    /api/v1/journey-situations/:slug          -> 200 SituationResponse
 //   GET    /api/v1/canonical-words/:slug             -> 200 WordDetailResponse
 //             one 500 per session for discovery or reviews when the
@@ -752,7 +753,10 @@ function buildSituationResponse(slug) {
   };
 }
 
-function buildJourneySituations() {
+function buildJourneySituations(fixture) {
+  if (fixture === "empty") {
+    return { items: [] };
+  }
   return { items: JOURNEY_SITUATIONS.map((s) => ({ ...s })) };
 }
 
@@ -1383,7 +1387,7 @@ const server = createServer(async (req, res) => {
       return;
     }
     logLine(req, 200);
-    jsonResponse(res, 200, buildJourneySituations());
+    jsonResponse(res, 200, buildJourneySituations(cookies.e2e_journey_fixture));
     return;
   }
 
