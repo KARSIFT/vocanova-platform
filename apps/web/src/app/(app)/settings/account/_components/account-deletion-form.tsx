@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { ApiResponseError } from "@vocanova/api-client";
+
 import { createApiClient } from "@/lib/api";
 import {
   CSRF_COOKIE_NAME,
@@ -12,12 +14,16 @@ import {
 } from "@/lib/cookies";
 import { handleApiError } from "@/lib/session";
 
-type DeletionPhase =
-  | { type: "idle" }
-  | { type: "confirming" }
-  | { type: "error"; message: string };
+type DeletionPhase = { type: "idle" } | { type: "confirming"; error?: string };
 
 const CONFIRMATION_PHRASE = "delete my account";
+
+function getDeletionError(error: unknown, fallbackMessage: string): string {
+  if (error instanceof ApiResponseError && error.status >= 500) {
+    return fallbackMessage;
+  }
+  return handleApiError(error, fallbackMessage);
+}
 
 function generateIdempotencyKey(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -39,8 +45,8 @@ export function AccountDeletionForm() {
   async function handleDelete() {
     if (typedPhrase.trim() !== CONFIRMATION_PHRASE) {
       setPhase({
-        type: "error",
-        message: `Please type "${CONFIRMATION_PHRASE}" exactly to confirm.`,
+        type: "confirming",
+        error: `Please type "${CONFIRMATION_PHRASE}" exactly to confirm.`,
       });
       return;
     }
@@ -48,8 +54,8 @@ export function AccountDeletionForm() {
     const csrfToken = getCookieValue(CSRF_COOKIE_NAME);
     if (!csrfToken) {
       setPhase({
-        type: "error",
-        message:
+        type: "confirming",
+        error:
           "Your session is missing a security token. Please refresh the page and try again.",
       });
       return;
@@ -87,11 +93,15 @@ export function AccountDeletionForm() {
       // request; handleApiError routes the learner to re-auth and
       // the typed confirmation is preserved in component state so
       // the learner can re-confirm after re-authentication.
-      const message = handleApiError(
+      const message = getDeletionError(
         error,
         "We couldn't deactivate your account. Please try again.",
       );
-      setPhase({ type: "error", message });
+      setPhase((current) =>
+        current.type === "confirming"
+          ? { ...current, error: message }
+          : { type: "confirming", error: message },
+      );
     } finally {
       setIsDeleting(false);
     }
@@ -181,6 +191,15 @@ export function AccountDeletionForm() {
           >
             Type the phrase exactly, with the same lowercase letters and spaces.
           </p>
+          {phase.error ? (
+            <p
+              role="alert"
+              aria-live="assertive"
+              className="mt-[var(--spacing-sm)] rounded-md border border-red-300 bg-red-50 p-[var(--spacing-sm)] text-base text-red-800"
+            >
+              {phase.error}
+            </p>
+          ) : null}
           <div className="mt-[var(--spacing-md)] flex flex-wrap gap-[var(--spacing-sm)]">
             <button
               type="button"
@@ -208,16 +227,6 @@ export function AccountDeletionForm() {
             </button>
           </div>
         </div>
-      ) : null}
-
-      {phase.type === "error" ? (
-        <p
-          role="alert"
-          aria-live="assertive"
-          className="rounded-md border border-red-300 bg-red-50 p-[var(--spacing-sm)] text-base text-red-800"
-        >
-          {phase.message}
-        </p>
       ) : null}
     </div>
   );

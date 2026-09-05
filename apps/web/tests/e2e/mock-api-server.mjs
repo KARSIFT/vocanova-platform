@@ -87,6 +87,9 @@
 //   POST   /api/v1/settings/email-change-links/consume -> 200 ConsumeEmailChangeLinkResult
 //
 //   POST   /api/v1/account-deletion-requests         -> 200 CreateAccountDeletionRequestResult
+//             `e2e_account_deletion_failure=retry` fails the first deletion
+//             write per session; `e2e_account_deletion_hold=1` holds it until
+//             the E2E-only release endpoint is called
 //
 // Anything else returns 404. Mutations without a matching
 // X-CSRF-Token return 403 (matches the Worker API contract).
@@ -551,6 +554,8 @@ function createInitialState() {
     reviewedCount: 0,
     consumedReadFailureFixtures: new Set(),
     readHolds: new Map(),
+    consumedAccountDeletionFailure: false,
+    accountDeletionHold: null,
     completionSummaryDueFetches: 0,
   };
 }
@@ -587,6 +592,35 @@ function waitForReadHold(state, cookies, fixture) {
 
 function releaseReadHold(state, fixture) {
   const hold = state.readHolds.get(fixture);
+  if (!hold || hold.released) {
+    return false;
+  }
+
+  hold.released = true;
+  hold.release();
+  return true;
+}
+
+function waitForAccountDeletionHold(state, cookies) {
+  if (cookies.e2e_account_deletion_hold !== "1") {
+    return null;
+  }
+
+  if (!state.accountDeletionHold) {
+    let release;
+    const promise = new Promise((resolve) => {
+      release = resolve;
+    });
+    state.accountDeletionHold = { promise, release, released: false };
+  }
+
+  return state.accountDeletionHold.released
+    ? null
+    : state.accountDeletionHold.promise;
+}
+
+function releaseAccountDeletionHold(state) {
+  const hold = state.accountDeletionHold;
   if (!hold || hold.released) {
     return false;
   }
@@ -930,6 +964,20 @@ const server = createServer(async (req, res) => {
       emptyResponse(res, 204);
     } else {
       jsonResponse(res, 409, { error: "read_not_held" });
+    }
+    return;
+  }
+
+  if (
+    req.method === "POST" &&
+    url.pathname === "/__e2e/release-account-deletion"
+  ) {
+    const released = releaseAccountDeletionHold(getSessionState(cookies));
+    logLine(req, released ? 204 : 409, { action: "release-account-deletion" });
+    if (released) {
+      emptyResponse(res, 204);
+    } else {
+      jsonResponse(res, 409, { error: "account_deletion_not_held" });
     }
     return;
   }
@@ -1479,6 +1527,20 @@ const server = createServer(async (req, res) => {
     url.pathname === "/api/v1/account-deletion-requests"
   ) {
     if (!checkCsrf(req, cookies, res, logLine)) {
+      return;
+    }
+    const state = getSessionState(cookies);
+    const hold = waitForAccountDeletionHold(state, cookies);
+    if (hold) {
+      await hold;
+    }
+    if (
+      cookies.e2e_account_deletion_failure === "retry" &&
+      !state.consumedAccountDeletionFailure
+    ) {
+      state.consumedAccountDeletionFailure = true;
+      logLine(req, 500, { reason: "fixture-account-deletion-failure" });
+      jsonResponse(res, 500, { error: "fixture_account_deletion_failure" });
       return;
     }
     const sessionId = cookies[SESSION_COOKIE_NAME];
