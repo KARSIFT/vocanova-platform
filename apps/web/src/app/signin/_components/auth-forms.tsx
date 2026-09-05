@@ -60,8 +60,8 @@ export function MagicLinkForm({ returnTo }: MagicLinkFormProps) {
       </div>
       {status.message ? (
         <p
-          role="alert"
-          aria-live="polite"
+          role={status.type === "error" ? "alert" : "status"}
+          aria-live={status.type === "error" ? "assertive" : "polite"}
           className={`text-base ${status.type === "success" ? "text-green-700" : status.type === "error" ? "text-red-700" : "text-neutral-700"}`}
         >
           {status.message}
