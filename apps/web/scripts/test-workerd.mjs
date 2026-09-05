@@ -51,10 +51,7 @@ export async function runWorkerdSmoke() {
 async function exerciseWorkerd(origin) {
   const staticResponse = await fetch(origin);
   assert.equal(staticResponse.status, 200);
-  assert.match(
-    await staticResponse.text(),
-    /Vocanova web foundation is running/,
-  );
+  assert.match(await staticResponse.text(), /Practical English, every day/);
 
   const signInResponse = await fetch(`${origin}/signin`);
   assert.equal(signInResponse.status, 200);
