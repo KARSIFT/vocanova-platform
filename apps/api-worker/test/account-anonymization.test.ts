@@ -45,6 +45,22 @@ describe("account anonymization", () => {
     expect(await env.DB.prepare("SELECT count(*) AS count FROM account_deletion_requests").first<{ count: number }>()).toEqual({ count: 1 });
     await env.DB.prepare("DROP TRIGGER fail_anonymization").run();
   });
+
+  it("preserves active accounts and shared operational data", async () => {
+    await seed("2026-09-04T00:00:00.000Z");
+    const other = "10000000-0000-4000-8000-000000000097";
+    await env.DB.batch([
+      env.DB.prepare("INSERT INTO users (id, email, status, created_at, updated_at) VALUES (?1, 'other@example.test', 'active', ?2, ?2)").bind(other, NOW),
+      env.DB.prepare("INSERT INTO account_deletion_requests (id, user_id, requested_at, purge_after, idempotency_key, created_at, updated_at) VALUES ('20000000-0000-4000-8000-000000000097', ?1, '2026-08-01T00:00:00.000Z', '2026-08-02T00:00:00.000Z', 'other', ?2, ?2)").bind(other, NOW),
+      env.DB.prepare("INSERT INTO magic_links (id, user_id, email, token_hash, environment, created_at, expires_at) VALUES ('40000000-0000-4000-8000-000000000097', ?1, 'person@example.test', ?2, 'local', ?3, '2026-10-01T00:00:00.000Z')").bind(other, "e".repeat(64), NOW),
+      env.DB.prepare("INSERT INTO auth_rate_limits (bucket_key, window_started_at, attempts) VALUES ('account.delete:ip:shared', 0, 1)"),
+      env.DB.prepare("INSERT INTO ai_usage_counters (scope, subject, period, request_count, estimated_cost_cents, updated_at) VALUES ('global_day', 'global', '2026-09-01', 1, 1, ?1)").bind(NOW),
+    ]);
+    await new AccountAnonymizationProcessor(env.DB, () => new Date(NOW)).run({ dryRun: false });
+    for (const table of ["users", "account_deletion_requests", "magic_links", "auth_rate_limits", "ai_usage_counters", "canonical_words"]) {
+      expect(await env.DB.prepare(`SELECT count(*) AS count FROM ${table}`).first<{ count: number }>(), table).toEqual({ count: 1 });
+    }
+  });
 });
 
 async function seed(purgeAfter: string) {
@@ -63,5 +79,13 @@ async function seed(purgeAfter: string) {
     env.DB.prepare("INSERT INTO learner_sentences (id, user_id, user_word_id, sentence_text, normalized_sentence_text, source, submitted_at, created_at, updated_at) VALUES ('83000000-0000-4000-8000-000000000099', ?1, '80000000-0000-4000-8000-000000000099', 'private text', 'private text', 'free_practice', ?2, ?2, ?2)").bind(USER, NOW),
     env.DB.prepare("INSERT INTO ai_feedback_attempts (id, learner_sentence_id, status, provider, model, prompt_version, request_hash, feedback_text, created_at, updated_at) VALUES ('84000000-0000-4000-8000-000000000099', '83000000-0000-4000-8000-000000000099', 'pending', 'test', 'test', 'v1', ?1, 'private feedback', ?2, ?2)").bind("d".repeat(64), NOW),
     env.DB.prepare("INSERT INTO ai_feedback_reports (id, attempt_id, user_id, reason, created_at) VALUES ('85000000-0000-4000-8000-000000000099', '84000000-0000-4000-8000-000000000099', ?1, 'private', ?2)").bind(USER, NOW),
+    env.DB.prepare("INSERT INTO daily_mission_snapshots (id, user_id, local_date, timezone, review_target, reviews_completed, policy_version, status, grace_applied, created_at, updated_at) VALUES ('86000000-0000-4000-8000-000000000099', ?1, '2026-09-01', 'UTC', 5, 0, 'test', 'open', 0, ?2, ?2)").bind(USER, NOW),
+    env.DB.prepare("INSERT INTO daily_activity_summaries (id, user_id, local_date, timezone, created_at, updated_at) VALUES ('87000000-0000-4000-8000-000000000099', ?1, '2026-09-01', 'UTC', ?2, ?2)").bind(USER, NOW),
+    env.DB.prepare("INSERT INTO confidence_point_ledger (id, user_id, amount, balance_after, reason, source_type, metadata_json, occurred_at, created_at, updated_at) VALUES ('88000000-0000-4000-8000-000000000099', ?1, 1, 1, 'admin_adjustment', 'admin', '{\"private\":true}', ?2, ?2, ?2)").bind(USER, NOW),
+    env.DB.prepare("INSERT INTO streak_states (id, user_id, timezone, created_at, updated_at) VALUES ('89000000-0000-4000-8000-000000000099', ?1, 'UTC', ?2, ?2)").bind(USER, NOW),
+    env.DB.prepare("INSERT INTO grace_day_ledger (id, user_id, amount, balance_after, reason, source_type, applied_to_local_date, timezone, created_at, updated_at) VALUES ('90000000-0000-4000-8000-000000000099', ?1, 1, 1, 'manual_grant', 'admin', '2026-09-01', 'UTC', ?2, ?2)").bind(USER, NOW),
+    env.DB.prepare("INSERT INTO ai_usage_counters (scope, subject, period, request_count, estimated_cost_cents, updated_at) VALUES ('user_day', ?1, '2026-09-01', 1, 1, ?2)").bind(USER, NOW),
+    env.DB.prepare("INSERT INTO ai_generation_events (id, user_id, occurred_at, estimated_cost_cents) VALUES ('91000000-0000-4000-8000-000000000099', ?1, ?2, 1)").bind(USER, NOW),
+    env.DB.prepare("INSERT INTO ai_generation_leases (user_id, lease_id, expires_at, created_at) VALUES (?1, '92000000-0000-4000-8000-000000000099', '2026-10-01T00:00:00.000Z', ?2)").bind(USER, NOW),
   ]);
 }

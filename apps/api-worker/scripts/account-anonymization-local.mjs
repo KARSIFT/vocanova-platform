@@ -1,6 +1,7 @@
 import { getPlatformProxy } from "wrangler";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 
 import { AccountAnonymizationProcessor } from "../dist/identity/anonymization.js";
 import { LOCAL_D1_PATHS, localOnlyEnvironment } from "./local-d1-init.mjs";
@@ -14,7 +15,7 @@ export async function runLocalAnonymization({ stateDirectory = LOCAL_D1_PATHS.ca
       environment: "",
       envFiles: [],
       remoteBindings: false,
-      persist: { path: stateDirectory },
+      persist: { path: join(stateDirectory, "v3") },
     });
     try { return await new AccountAnonymizationProcessor(platform.env.DB).run({ dryRun }); }
     finally { await platform.dispose(); }
