@@ -641,6 +641,90 @@ describe("identity and account parity", () => {
     ).rejects.toMatchObject({ code: "conflict" });
   });
 
+  it("revokes every session and pending email change when an account is deactivated", async () => {
+    const first = await signedIn("all-credentials@example.test");
+    const second = await signedIn("all-credentials@example.test");
+    const other = await signedIn("unaffected@example.test");
+    expect(second.userId).toBe(first.userId);
+    expect(second.token).not.toBe(first.token);
+    const requested = await first.app.request(
+      "http://worker.test/api/v1/settings/email-change-links",
+      withAuth(
+        json({ newEmail: "replacement@example.test" }),
+        first.cookie,
+        first.csrf,
+      ),
+      env,
+    );
+    expect(requested.status).toBe(204);
+    const pendingToken = messageToken(messages.at(-1)!);
+    const pending = await env.DB.prepare(
+      "SELECT consumed_at, revoked_at FROM email_change_links WHERE user_id = ?1",
+    )
+      .bind(first.userId)
+      .first<{ consumed_at: string | null; revoked_at: string | null }>();
+    expect(pending).toEqual({ consumed_at: null, revoked_at: null });
+    const notificationCount = messages.length;
+
+    const deleted = await first.app.request(
+      "http://worker.test/api/v1/account-deletion-requests",
+      withAuth(
+        {
+          method: "POST",
+          headers: { "Idempotency-Key": "revoke-all-credentials" },
+        },
+        first.cookie,
+        first.csrf,
+      ),
+      env,
+    );
+    expect(deleted.status).toBe(200);
+    const sessions = await env.DB.prepare(
+      "SELECT revoked_at FROM sessions WHERE user_id = ?1",
+    )
+      .bind(first.userId)
+      .all<{ revoked_at: string | null }>();
+    expect(sessions.results).toHaveLength(2);
+    expect(
+      sessions.results.every(
+        (session) => session.revoked_at === now.toISOString(),
+      ),
+    ).toBe(true);
+    for (const session of [first, second]) {
+      const me = await session.app.request(
+        "http://worker.test/api/v1/me",
+        { headers: { Cookie: session.cookie } },
+        env,
+      );
+      expect(me.status).toBe(401);
+    }
+    await expect(
+      env.DB.prepare(
+        "SELECT consumed_at, revoked_at FROM email_change_links WHERE user_id = ?1",
+      )
+        .bind(first.userId)
+        .first(),
+    ).resolves.toEqual({ consumed_at: null, revoked_at: now.toISOString() });
+    const confirmation = await second.app.request(
+      "http://worker.test/api/v1/settings/email-change-links/consume",
+      withAuth(json({ token: pendingToken }), second.cookie, second.csrf),
+      env,
+    );
+    expect(confirmation.status).toBe(401);
+    expect(messages).toHaveLength(notificationCount);
+    await expect(
+      env.DB.prepare("SELECT status, email FROM users WHERE id = ?1")
+        .bind(first.userId)
+        .first(),
+    ).resolves.toEqual({ status: "deleted", email: null });
+    const unaffected = await other.app.request(
+      "http://worker.test/api/v1/me",
+      { headers: { Cookie: other.cookie } },
+      env,
+    );
+    expect(unaffected.status).toBe(200);
+  });
+
   it("matches the reference validation status for a missing deletion key", async () => {
     const { app, cookie, csrf } = await signedIn(
       "missing-idempotency@example.test",
