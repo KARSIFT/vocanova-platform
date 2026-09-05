@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import type { OpenAPIHono } from "@hono/zod-openapi";
 
+import { SESSION_COOKIE_SECURITY } from "../http/openapi.js";
 import type { IdentityUser } from "../domain/identity.js";
 import { IdentityError } from "../domain/identity.js";
 import type { VocaNovaWorkerEnvironment } from "../http/middleware.js";
@@ -430,10 +431,30 @@ function registerIdentityOpenApi(
     {
       name: "X-CSRF-Token",
       in: "header" as const,
-      required: false,
+      required: true,
       schema: { type: "string" as const },
     },
   ];
+  const csrfParameter = logoutParameters[0]!;
+  const authenticatedOperations = new Set([
+    "GetCurrentUser",
+    "Logout",
+    "GetOnboarding",
+    "CompleteOnboarding",
+    "GetSettings",
+    "UpdateSettings",
+    "RequestEmailChangeLink",
+    "ConsumeEmailChangeLink",
+    "CreateAccountDeletionRequest",
+  ]);
+  const csrfOperations = new Set([
+    "Logout",
+    "CompleteOnboarding",
+    "UpdateSettings",
+    "RequestEmailChangeLink",
+    "ConsumeEmailChangeLink",
+    "CreateAccountDeletionRequest",
+  ]);
   const deletionParameters = [
     {
       name: "Idempotency-Key",
@@ -586,7 +607,19 @@ function registerIdentityOpenApi(
       path,
       operationId,
       tags: ["Identity and account"],
-      ...(parameters && { parameters: [...parameters] }),
+      ...(authenticatedOperations.has(operationId) && {
+        security: [{ [SESSION_COOKIE_SECURITY]: [] }],
+      }),
+      ...(parameters || csrfOperations.has(operationId)
+        ? {
+            parameters: [
+              ...(parameters ?? []),
+              ...(csrfOperations.has(operationId) && operationId !== "Logout"
+                ? [csrfParameter]
+                : []),
+            ],
+          }
+        : {}),
       ...(request && { request: { body: { content: json(request) } } }),
       responses: {
         [status]: {

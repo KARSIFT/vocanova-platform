@@ -27,6 +27,7 @@ import {
   requestContext,
   type VocaNovaWorkerEnvironment,
 } from "./http/middleware.js";
+import { SESSION_COOKIE_SECURITY } from "./http/openapi.js";
 
 const HealthSchema = z
   .object({
@@ -104,6 +105,16 @@ export function createApp(
   dependencies: AppDependencies = defaultDependencies,
 ): OpenAPIHono<VocaNovaWorkerEnvironment> {
   const app = new OpenAPIHono<VocaNovaWorkerEnvironment>();
+  app.openAPIRegistry.registerComponent(
+    "securitySchemes",
+    SESSION_COOKIE_SECURITY,
+    {
+      type: "apiKey",
+      in: "cookie",
+      name: "vocanova_session",
+      description: "Server-managed authenticated session cookie.",
+    },
+  );
   app.use("*", requestContext);
   app.use("*", corsPolicy);
 

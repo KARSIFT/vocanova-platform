@@ -1,6 +1,7 @@
 import { z } from "@hono/zod-openapi";
 import type { OpenAPIHono } from "@hono/zod-openapi";
 
+import { SESSION_COOKIE_SECURITY } from "../http/openapi.js";
 import { AIFeedbackError } from "../domain/ai-feedback.js";
 import type { VocaNovaWorkerEnvironment } from "../http/middleware.js";
 import { ProblemSchema, problemResponse } from "../http/problem.js";
@@ -22,6 +23,12 @@ const ReportInput = z.object({
   reason: z.string().max(200),
   classification: z.string().max(100).optional(),
 });
+const csrfParameter = {
+  name: "X-CSRF-Token",
+  in: "header" as const,
+  required: true,
+  schema: { type: "string" as const },
+};
 const FeedbackResult = z.object({
   sentenceId: Uuid.optional(),
   attemptId: Uuid.optional(),
@@ -98,6 +105,7 @@ export function registerAIFeedbackRoutes(
     path: "/api/v1/sentence-feedback",
     operationId: "SubmitSentenceFeedback",
     tags: ["AI Feedback"],
+    security: [{ [SESSION_COOKIE_SECURITY]: [] }],
     parameters: [
       {
         name: "Idempotency-Key",
@@ -105,6 +113,7 @@ export function registerAIFeedbackRoutes(
         required: true,
         schema: { type: "string", minLength: 1, maxLength: 200 },
       },
+      csrfParameter,
     ],
     request: { body: { content: json(SubmitInput) } },
     responses: {
@@ -127,6 +136,7 @@ export function registerAIFeedbackRoutes(
     path: "/api/v1/sentence-feedback/{attemptId}/reports",
     operationId: "ReportSentenceFeedback",
     tags: ["AI Feedback"],
+    security: [{ [SESSION_COOKIE_SECURITY]: [] }],
     parameters: [
       {
         name: "attemptId",
@@ -134,6 +144,7 @@ export function registerAIFeedbackRoutes(
         required: true,
         schema: { type: "string", format: "uuid" },
       },
+      csrfParameter,
     ],
     request: { body: { content: json(ReportInput) } },
     responses: {
