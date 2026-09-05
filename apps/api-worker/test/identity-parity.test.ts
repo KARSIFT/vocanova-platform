@@ -327,6 +327,73 @@ describe("identity and account parity", () => {
     expect(replay.status).toBe(401);
   });
 
+  it("round-trips supported local OAuth returns and rejects unsafe destinations", async () => {
+    const service = identityService();
+    const returnUrl = "http://127.0.0.1:3000/discover/coffee?level=b1";
+    const credentialedReturnUrl = new URL(returnUrl);
+    credentialedReturnUrl.username = "test-user";
+    credentialedReturnUrl.password = "test-password";
+    const started = await service.startOAuth(returnUrl, "oauth-local-route");
+    const finished = await service.finishOAuth(
+      "valid-code",
+      started.state,
+      started.state,
+      "oauth-local-route",
+    );
+    expect(finished.returnUrl).toBe(returnUrl);
+    for (const invalid of [
+      "https://evil.example.test/home",
+      credentialedReturnUrl.toString(),
+      "http://127.0.0.1:3000/unknown",
+      "http://127.0.0.1:3000/discover\\escape",
+      "http://127.0.0.1:3000/reviews%0Aevil",
+    ]) {
+      await expect(
+        service.startOAuth(invalid, `oauth-${invalid}`),
+      ).rejects.toMatchObject({
+        code: "oauth_invalid",
+      });
+    }
+  });
+
+  it("carries a supported magic-link return query and falls back for invalid input", async () => {
+    const service = identityService();
+    await service.requestMagicLink(
+      "return@example.test",
+      "magic-return",
+      "/reviews?mode=due",
+    );
+    expect(messages.at(-1)?.text).toContain("returnTo=%2Freviews%3Fmode%3Ddue");
+    await service.requestMagicLink(
+      "fallback@example.test",
+      "magic-fallback",
+      "https://evil.example.test/home",
+    );
+    expect(messages.at(-1)?.text).toContain("returnTo=%2Fhome");
+  });
+
+  it("wires safe magic-link return targets through the HTTP request DTO", async () => {
+    const app = identityApp();
+    for (const [returnTo, expected] of [
+      [undefined, "/home"],
+      ["/settings/account?tab=security", "/settings/account?tab=security"],
+      ["//evil.example.test/home", "/home"],
+      ["https://evil.example.test/home", "/home"],
+      ["/discover\\escape", "/home"],
+      ["/unknown", "/home"],
+    ] as const) {
+      const response = await app.request(
+        "http://worker.test/api/v1/auth/magic-links",
+        json({ email: `route-${messages.length}@example.test`, returnTo }),
+        env,
+      );
+      expect(response.status).toBe(204);
+      expect(messages.at(-1)?.text).toContain(
+        `returnTo=${encodeURIComponent(expected)}`,
+      );
+    }
+  });
+
   it("creates no partial identity or session for provider failure or unverified email", async () => {
     const providers: OAuthProvider[] = [
       {

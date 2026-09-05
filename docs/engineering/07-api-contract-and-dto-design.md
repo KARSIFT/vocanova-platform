@@ -20,6 +20,15 @@ retry-sensitive records also require `Idempotency-Key`: adding user words, revie
 sentence-feedback submissions, and account-deletion requests. Keys are scoped by authenticated user
 and operation.
 
+Magic-link requests optionally carry a `returnTo` path (at most 2048 characters).
+The server includes a validated local app route in the emailed link; the frontend
+validates it again before navigating. Missing or unsupported paths fall back to
+`/home`. OAuth retains configured exact return URLs and also accepts documented
+protected app routes under the configured app base origin. External origins,
+credentials, backslashes, control characters and unsupported routes are not
+accepted through this local-route extension. No return path changes session or
+token semantics.
+
 ## DTO and response conventions
 
 Routes expose explicit DTOs rather than persistence rows. Validation is defined by each route's Zod

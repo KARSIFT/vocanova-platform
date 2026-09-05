@@ -19,7 +19,10 @@ import { constantTimeEqual } from "./crypto.js";
 import type { IdentityService } from "./service.js";
 
 const EmailSchema = z.email().max(254);
-const MagicRequestSchema = z.object({ email: EmailSchema });
+const MagicRequestSchema = z.object({
+  email: EmailSchema,
+  returnTo: z.string().max(2048).optional(),
+});
 const MagicConsumeSchema = z.object({
   token: z.string().min(1),
   email: EmailSchema,
@@ -78,6 +81,7 @@ export function registerIdentityRoutes(
       await serviceFactory(context.env).requestMagicLink(
         input.email,
         clientKey(context.req.raw),
+        input.returnTo,
       );
       return context.body(null, 204);
     } catch (error) {

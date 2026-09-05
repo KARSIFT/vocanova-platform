@@ -210,6 +210,10 @@
                     "format": "email",
                     "maxLength": 254,
                     "type": "string"
+                  },
+                  "returnTo": {
+                    "maxLength": 2048,
+                    "type": "string"
                   }
                 },
                 "required": [

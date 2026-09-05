@@ -6,6 +6,10 @@ import type {
 import { IdentityError } from "../domain/identity.js";
 import { constantTimeEqual, hashToken, issueOpaqueToken } from "./crypto.js";
 import type { IdentityRepository } from "./repository.js";
+import {
+  supportedAppReturnPath,
+  supportedOAuthReturnUrl,
+} from "./return-path.js";
 
 export interface IdentityConfig {
   environment: "local" | "staging" | "production";
@@ -39,7 +43,11 @@ export class IdentityService {
     private readonly clock: () => Date = () => new Date(),
   ) {}
 
-  async requestMagicLink(emailInput: string, clientKey: string): Promise<void> {
+  async requestMagicLink(
+    emailInput: string,
+    clientKey: string,
+    returnTo?: string,
+  ): Promise<void> {
     if (!this.config.magicLinkEnabled)
       throw new IdentityError("magic_disabled");
     await this.requireRate(`magic.request:${clientKey}`, 60_000, 10);
@@ -58,6 +66,10 @@ export class IdentityService {
     const link = new URL("/auth/magic", this.config.baseUrl);
     link.searchParams.set("token", token);
     link.searchParams.set("email", email);
+    link.searchParams.set(
+      "returnTo",
+      supportedAppReturnPath(returnTo) ?? "/home",
+    );
     await this.email.send({
       to: email,
       subject: "Sign in to Vocanova",
@@ -118,15 +130,19 @@ export class IdentityService {
   ): Promise<{ url: string; state: string }> {
     if (!this.config.oauthEnabled) throw new IdentityError("oauth_disabled");
     if (!this.oauth) throw new IdentityError("oauth_not_configured");
-    if (!this.config.oauthReturnAllowlist.includes(returnUrl))
-      throw new IdentityError("oauth_invalid");
+    const safeReturnUrl = supportedOAuthReturnUrl(
+      returnUrl,
+      this.config.baseUrl,
+      this.config.oauthReturnAllowlist,
+    );
+    if (!safeReturnUrl) throw new IdentityError("oauth_invalid");
     await this.requireRate(`oauth.start:${clientKey}`, 60_000, 10);
     const now = this.clock();
     const { token, hash } = await issueOpaqueToken();
     await this.repository.createOAuthState(
       hash,
       this.config.environment,
-      returnUrl,
+      safeReturnUrl,
       now.toISOString(),
       plusSeconds(now, this.config.oauthStateSeconds),
     );
