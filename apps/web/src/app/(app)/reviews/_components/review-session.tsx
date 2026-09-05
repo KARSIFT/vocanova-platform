@@ -63,6 +63,9 @@ export function ReviewSession({
   );
   const submissionInFlight = useRef(false);
   const pendingSubmission = useRef<PendingReviewSubmission | null>(null);
+  const shouldFocusNextCard = useRef(false);
+  const currentCardHeadingRef = useRef<HTMLHeadingElement>(null);
+  const completionHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const currentCard = dueWords[currentIndex];
 
@@ -82,7 +85,19 @@ export function ReviewSession({
     setSelectedOption(null);
     setErrorMessage(null);
     setStartTime(Date.now());
+
+    if (shouldFocusNextCard.current) {
+      currentCardHeadingRef.current?.focus();
+      shouldFocusNextCard.current = false;
+    }
   }, [currentIndex, dueWords]);
+
+  useEffect(() => {
+    if (completed && shouldFocusNextCard.current) {
+      completionHeadingRef.current?.focus();
+      shouldFocusNextCard.current = false;
+    }
+  }, [completed]);
 
   const loadNextPage = () => {
     setAwaitingNextPage(false);
@@ -186,6 +201,7 @@ export function ReviewSession({
       setLastReviewAttemptId(data.attemptId);
       setCompletedReviewCount((count) => count + 1);
       setRemainingCount((count) => Math.max(0, count - 1));
+      shouldFocusNextCard.current = true;
       advance();
     } catch (error) {
       setErrorMessage(
@@ -205,7 +221,11 @@ export function ReviewSession({
   if (dueWords.length === 0 || completed) {
     return (
       <div className="flex flex-col items-center justify-center py-[var(--spacing-2xl)] text-center">
-        <h2 className="text-xl font-semibold text-neutral-900">
+        <h2
+          ref={completionHeadingRef}
+          tabIndex={-1}
+          className="text-xl font-semibold text-neutral-900"
+        >
           You&apos;re all caught up
         </h2>
         <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">
@@ -288,7 +308,11 @@ export function ReviewSession({
           <span className="inline-block rounded-full bg-neutral-100 px-[var(--spacing-sm)] py-[var(--spacing-xs)] text-sm text-neutral-700">
             {currentCard.partOfSpeech}
           </span>
-          <h2 className="mt-[var(--spacing-sm)] text-3xl font-semibold text-neutral-900">
+          <h2
+            ref={currentCardHeadingRef}
+            tabIndex={-1}
+            className="mt-[var(--spacing-sm)] text-3xl font-semibold text-neutral-900"
+          >
             {currentCard.wordText}
           </h2>
           {promptType === "self_check" && phase !== "rate" ? (
