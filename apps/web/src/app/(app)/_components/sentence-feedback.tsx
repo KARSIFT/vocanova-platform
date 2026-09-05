@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { SentenceFeedbackResult } from "@vocanova/api-client";
 
@@ -40,6 +40,7 @@ export function SentenceFeedback({
   const [reportStatus, setReportStatus] = useState<
     "idle" | "loading" | "error"
   >("idle");
+  const feedbackVersion = useRef(0);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -99,6 +100,7 @@ export function SentenceFeedback({
       return;
     }
 
+    const reportVersion = feedbackVersion.current;
     setReportStatus("loading");
 
     const client = createApiClient();
@@ -111,9 +113,15 @@ export function SentenceFeedback({
         },
         { headers: { "X-CSRF-Token": csrfToken } },
       );
+      if (feedbackVersion.current !== reportVersion) {
+        return;
+      }
       setReported(true);
       setReportStatus("idle");
     } catch (error) {
+      if (feedbackVersion.current !== reportVersion) {
+        return;
+      }
       // A 401 on a report submission routes the learner to
       // re-auth. The text is in component state and the feedback
       // result is still visible — nothing is lost.
@@ -165,7 +173,16 @@ export function SentenceFeedback({
             name="sentence"
             aria-describedby={`sentence-privacy-${attemptId} sentence-count-${attemptId}`}
             value={sentence}
-            onChange={(event) => setSentence(event.target.value)}
+            onChange={(event) => {
+              setSentence(event.target.value);
+              if (result) {
+                feedbackVersion.current += 1;
+                setResult(null);
+                setErrorMessage(null);
+                setReported(false);
+                setReportStatus("idle");
+              }
+            }}
             disabled={isLoading}
             maxLength={300}
             rows={3}
