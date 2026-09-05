@@ -49,9 +49,9 @@ export function handleSessionExpired(currentPath?: string): void {
 /**
  * handleApiError is the cross-cutting catch-path helper for every
  * authenticated client request. It detects a 401 and routes the learner to
- * re-authentication; for every other error it returns the error to the
- * caller so the existing per-screen error display can render a stable
- * message.
+ * re-authentication. Client errors retain their API detail, while server
+ * errors use the caller's safe, actionable retry message rather than
+ * surfacing raw status text or backend detail.
  *
  * Usage:
  *
@@ -72,6 +72,9 @@ export function handleApiError(
     return "Your session expired. Redirecting you to sign in...";
   }
   if (error instanceof ApiResponseError) {
+    if (error.status >= 500 && error.status < 600) {
+      return fallbackMessage;
+    }
     return error.message;
   }
   return fallbackMessage;

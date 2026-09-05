@@ -69,7 +69,11 @@ test("counts only successful reviews across fetched due-word pages", async ({
   await expect(firstGoodRating).toBeDisabled();
 
   releaseFailedSubmission?.();
-  await expect(page.getByText("HTTP 500", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Unable to submit your answer. Please try again.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await expect(firstGoodRating).toBeEnabled();
   expect(submissionCount).toBe(1);
 

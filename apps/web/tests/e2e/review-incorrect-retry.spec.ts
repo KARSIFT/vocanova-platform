@@ -82,7 +82,11 @@ test("records an incorrect multiple-choice answer as Again and retries it withou
   );
 
   await page.getByRole("button", { name: "Continue" }).click();
-  await expect(page.getByText("HTTP 500", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("Unable to submit your answer. Please try again.", {
+      exact: true,
+    }),
+  ).toBeVisible();
   await expect(
     page.getByRole("heading", { name: "arrival", level: 2 }),
   ).toBeVisible();
