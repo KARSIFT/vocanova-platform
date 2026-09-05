@@ -106,11 +106,18 @@ export class AIFeedbackService {
       requestHash,
       input.sentenceText,
     );
-    if (stored)
+    if (stored) {
+      if (idempotency === "new")
+        await this.repository.recordIdempotency(
+          userId,
+          idempotencyKey,
+          requestHash,
+        );
       return {
         result: stored,
         telemetry: this.record("replay", startedAt, stored.status),
       };
+    }
     if (idempotency === "replay") return failure(ERROR.temporaryFailure, true);
 
     const reservation = await this.repository.reserve(
@@ -196,6 +203,7 @@ export class AIFeedbackService {
         null,
         ERROR.temporaryFailure,
         "AI feedback is temporarily unavailable",
+        await sha256(`${requestHash}:${pending.attemptId}:failed`),
       );
       return {
         result: {

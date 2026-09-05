@@ -25,6 +25,7 @@ export interface PendingAttempt {
   sentenceId: string;
   attemptId: string;
   leaseId: string;
+  requestHash: string;
 }
 
 export class D1AIFeedbackRepository {
@@ -122,11 +123,33 @@ export class D1AIFeedbackRepository {
         `SELECT a.id, a.learner_sentence_id, a.status, a.feedback_json,
                 a.feedback_text, a.error_code, a.error_message,
                 EXISTS(SELECT 1 FROM ai_feedback_reports r WHERE r.attempt_id = a.id) AS reported
-         FROM ai_feedback_attempts a WHERE a.request_hash = ?1`,
+         FROM ai_feedback_attempts a
+         WHERE a.request_hash = ?1 AND a.status IN ('pending', 'succeeded')`,
       )
       .bind(requestHash)
       .first<Row>();
     return row ? resultFromRow(row, originalSentence) : null;
+  }
+
+  async recordIdempotency(
+    userId: string,
+    key: string,
+    requestHash: string,
+  ): Promise<void> {
+    await this.database
+      .prepare(
+        `INSERT INTO idempotency_keys
+         (id, user_id, operation, key, fingerprint, created_at)
+         VALUES (?1, ?2, 'ai_feedback_request', ?3, ?4, ?5)`,
+      )
+      .bind(
+        crypto.randomUUID(),
+        userId,
+        key,
+        requestHash,
+        this.now().toISOString(),
+      )
+      .run();
   }
 
   async reserve(
@@ -285,7 +308,7 @@ export class D1AIFeedbackRepository {
           timestamp,
         ),
     ]);
-    return { sentenceId, attemptId: feedbackAttemptId, leaseId };
+    return { sentenceId, attemptId: feedbackAttemptId, leaseId, requestHash };
   }
 
   async finalize(
@@ -294,6 +317,7 @@ export class D1AIFeedbackRepository {
     feedback: ProviderFeedback | null,
     errorCode = "",
     errorMessage = "",
+    failedRequestHash?: string,
   ): Promise<void> {
     const timestamp = this.now().toISOString();
     const statements: D1PreparedStatement[] = [
@@ -301,7 +325,8 @@ export class D1AIFeedbackRepository {
         .prepare(
           `UPDATE ai_feedback_attempts SET status = ?1, feedback_json = ?2,
              feedback_text = ?3, error_code = ?4, error_message = ?5,
-             completed_at = ?6, updated_at = ?6 WHERE id = ?7 AND status = 'pending'`,
+             request_hash = COALESCE(?6, request_hash),
+             completed_at = ?7, updated_at = ?7 WHERE id = ?8 AND status = 'pending'`,
         )
         .bind(
           feedback ? "succeeded" : "failed",
@@ -309,6 +334,7 @@ export class D1AIFeedbackRepository {
           feedback?.explanation ?? null,
           errorCode || null,
           errorMessage || null,
+          failedRequestHash ?? null,
           timestamp,
           pending.attemptId,
         ),
