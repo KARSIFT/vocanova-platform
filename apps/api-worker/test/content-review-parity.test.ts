@@ -367,12 +367,39 @@ describe("Worker content, learning, and review parity", () => {
       }),
       "restore-schedule-review",
     );
+    await env.DB.prepare(
+      `UPDATE user_words
+       SET status = 'mastered', review_step = 7, mastered_at = ?1, ignored_at = NULL
+       WHERE id = ?2`,
+    )
+      .bind(NOW, saved.userWordId)
+      .run();
     await repository.unsaveUserWord(USER_A, MEANING_A);
     await repository.saveUserWord(
       USER_A,
       MEANING_A,
       "search",
       "restore-schedule-resave",
+    );
+    const ignored = await repository.saveUserWord(
+      USER_A,
+      MEANING_B,
+      "manual",
+      "restore-ignored-save",
+    );
+    await env.DB.prepare(
+      `UPDATE user_words
+       SET status = 'ignored', ignored_at = ?1, mastered_at = NULL
+       WHERE id = ?2`,
+    )
+      .bind(NOW, ignored.userWordId)
+      .run();
+    await repository.unsaveUserWord(USER_A, MEANING_B);
+    await repository.saveUserWord(
+      USER_A,
+      MEANING_B,
+      "search",
+      "restore-ignored-resave",
     );
 
     expect(
@@ -385,27 +412,48 @@ describe("Worker content, learning, and review parity", () => {
     ).toContain(saved.userWordId);
     expect(
       await env.DB.prepare(
-        `SELECT next_review_at, last_reviewed_at, total_review_count,
+        `SELECT status, review_step, next_review_at, last_reviewed_at, total_review_count,
                 correct_review_count, consecutive_correct_count,
-                consecutive_incorrect_count
+                consecutive_incorrect_count, mastered_at, ignored_at
          FROM user_words WHERE id = ?1`,
       )
         .bind(saved.userWordId)
         .first<{
+          status: string;
+          review_step: number;
           next_review_at: string | null;
           last_reviewed_at: string | null;
           total_review_count: number;
           correct_review_count: number;
           consecutive_correct_count: number;
           consecutive_incorrect_count: number;
+          mastered_at: string | null;
+          ignored_at: string | null;
         }>(),
     ).toEqual({
+      status: "new",
+      review_step: 0,
       next_review_at: null,
       last_reviewed_at: NOW,
       total_review_count: 1,
       correct_review_count: 1,
       consecutive_correct_count: 0,
       consecutive_incorrect_count: 0,
+      mastered_at: null,
+      ignored_at: null,
+    });
+    await expect(
+      env.DB.prepare(
+        "SELECT status, review_step, next_review_at, mastered_at, ignored_at FROM user_words WHERE id = ?1",
+      )
+        .bind(ignored.userWordId)
+        .first(),
+    ).resolves.toEqual({
+      status: "new",
+      review_step: 0,
+      next_review_at: null,
+      mastered_at: null,
+      ignored_at: null,
     });
     expect(
       (
@@ -422,7 +470,7 @@ describe("Worker content, learning, and review parity", () => {
           "SELECT count(*) AS count FROM confidence_point_ledger WHERE reason = 'word_added'",
         ).first<{ count: number }>()
       )?.count,
-    ).toBe(1);
+    ).toBe(2);
   });
 
   it("rolls back the entire save batch when its idempotency record fails", async () => {
