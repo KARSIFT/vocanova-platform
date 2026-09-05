@@ -113,12 +113,22 @@ export function createDeployPlan(
   const apiEnvironment = childEnvironment(baseEnvironment, {
     WRANGLER_CI_MATCH_TAG: workerTags.api,
   });
+  // The canonicalized artifact is ready for Wrangler; OpenNext's temporary
+  // compiled config has intentionally been removed by the build cleanup.
+  const webEnvironment = childEnvironment(baseEnvironment, {
+    OPEN_NEXT_DEPLOY: "true",
+  });
   const message = `Cloudflare Builds ${release}`;
   return [
     {
       command: "pnpm",
       args: ["--filter", "@vocanova/api-worker", "dry-run:staging"],
       env: apiEnvironment,
+    },
+    {
+      command: "pnpm",
+      args: ["--filter", "@vocanova/web", "cloudflare:dry-run:staging"],
+      env: webEnvironment,
     },
     {
       command: "pnpm",
@@ -177,7 +187,7 @@ export function createDeployPlan(
         "--message",
         message,
       ],
-      env,
+      env: webEnvironment,
     },
     {
       command: "node",

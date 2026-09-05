@@ -167,6 +167,26 @@ test("deploys each Worker with its own CI identity instead of inheriting the web
   );
 });
 
+test("deploys the prepared web artifact directly and preflights it before migrations", () => {
+  const plan = createDeployPlan(release, buildEnvironment, workerTags);
+  const webSteps = plan.filter(({ args }) => args.includes("@vocanova/web"));
+  assert.equal(webSteps.length, 2);
+  for (const step of webSteps) {
+    assert.equal(step.env.OPEN_NEXT_DEPLOY, "true");
+    assert.equal(step.env.WRANGLER_CI_MATCH_TAG, workerTags.web);
+  }
+  const preflight = plan.findIndex(({ args }) =>
+    args.includes("cloudflare:dry-run:staging"),
+  );
+  const migration = plan.findIndex(({ args }) => args.includes("migrations"));
+  assert(preflight >= 0 && preflight < migration);
+  assert(
+    plan
+      .filter(({ args }) => args.includes("@vocanova/api-worker"))
+      .every(({ env }) => env.OPEN_NEXT_DEPLOY === undefined),
+  );
+});
+
 test("package scripts expose only the reviewed Cloudflare Builds entry points", async () => {
   const packageJson = JSON.parse(
     await readFile(new URL("../../package.json", import.meta.url), "utf8"),
@@ -231,6 +251,7 @@ test("deploys migrations, API, web, and smoke checks in order", () => {
     plan.map(({ command, args }) => [command, ...args]),
     [
       ["pnpm", "--filter", "@vocanova/api-worker", "dry-run:staging"],
+      ["pnpm", "--filter", "@vocanova/web", "cloudflare:dry-run:staging"],
       [
         "pnpm",
         "--filter",
