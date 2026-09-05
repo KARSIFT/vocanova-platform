@@ -401,9 +401,9 @@ describe("Worker content, learning, and review parity", () => {
         }>(),
     ).toEqual({
       next_review_at: null,
-      last_reviewed_at: null,
-      total_review_count: 0,
-      correct_review_count: 0,
+      last_reviewed_at: NOW,
+      total_review_count: 1,
+      correct_review_count: 1,
       consecutive_correct_count: 0,
       consecutive_incorrect_count: 0,
     });
