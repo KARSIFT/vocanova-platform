@@ -396,6 +396,7 @@ describe("Worker content, learning, and review parity", () => {
     let cursor = "";
     let pages = 0;
     do {
+      expect(pages).toBeLessThan(4);
       const page = await repository.listSituations(cursor, 1);
       ids.push(...page.items.map((item) => item.id));
       cursor = page.nextCursor ?? "";
@@ -404,7 +405,19 @@ describe("Worker content, learning, and review parity", () => {
 
     expect(ids).toEqual([SITUATION_A, SITUATION_B, situationC]);
     expect(new Set(ids).size).toBe(3);
-    expect(pages).toBe(4);
+
+    await env.DB.prepare(
+      `INSERT INTO journey_words
+       (id, journey_situation_id, meaning_id, display_order, created_at, updated_at)
+       VALUES (?1, ?2, ?3, 1, ?4, ?4)`,
+    )
+      .bind("60000000-0000-4000-8000-000000000003", SITUATION_A, MEANING_B, NOW)
+      .run();
+    const situation = await repository.getSituation(USER_A, "at-the-cafe");
+    expect(situation.meanings.map((meaning) => meaning.meaningId)).toEqual([
+      MEANING_A,
+      MEANING_B,
+    ]);
   });
 
   it("saves, replays, paginates, unsaves, restores, and isolates learner state", async () => {
