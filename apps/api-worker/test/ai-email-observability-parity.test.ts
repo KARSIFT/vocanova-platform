@@ -460,6 +460,40 @@ describe("Worker AI feedback parity", () => {
     });
   });
 
+  it("shares the global daily generation budget across learners", async () => {
+    const userWordB = crypto.randomUUID();
+    await env.DB.prepare(
+      `INSERT INTO user_words
+       (id, user_id, meaning_id, status, source, review_step, added_at, created_at, updated_at)
+       VALUES (?1, ?2, ?3, 'learning', 'manual', 0, ?4, ?4, ?4)`,
+    )
+      .bind(userWordB, USER_B, MEANING, NOW)
+      .run();
+    const provider = new ScriptedProvider(() => validFeedback());
+    const service = createService(provider, {
+      limits: { perMinute: 10, perDay: 10, globalPerDay: 1 },
+    });
+    await expect(
+      service.submit(USER_A, submission("I work every day."), "global-one"),
+    ).resolves.toMatchObject({ result: { status: "correct" } });
+
+    await expect(
+      service.submit(
+        USER_B,
+        { ...submission("We work every evening."), attemptId: userWordB },
+        "global-two",
+      ),
+    ).resolves.toMatchObject({
+      result: { errorCode: "AI_FEEDBACK_RATE_LIMITED" },
+    });
+    expect(provider.generateCalls).toBe(1);
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM ai_feedback_attempts WHERE status = 'succeeded'",
+      ).first<{ count: number }>(),
+    ).resolves.toEqual({ count: 1 });
+  });
+
   it("records reports for owners only and never exposes cross-user attempt existence", async () => {
     const service = createService(new ScriptedProvider(() => validFeedback()));
     const submitted = await service.submit(
