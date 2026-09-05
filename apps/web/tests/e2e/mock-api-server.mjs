@@ -1073,7 +1073,12 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/__e2e/release-read") {
     const fixture = url.searchParams.get("fixture");
-    if (fixture !== "discover" && fixture !== "reviews") {
+    if (
+      fixture !== "discover" &&
+      fixture !== "reviews" &&
+      fixture !== "home" &&
+      fixture !== "progress"
+    ) {
       logLine(req, 400, { reason: "invalid-read-hold-fixture" });
       jsonResponse(res, 400, { error: "invalid_fixture" });
       return;
@@ -1549,6 +1554,8 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/daily-mission") {
     const state = getSessionState(cookies);
+    const hold = waitForReadHold(state, cookies, "home");
+    if (hold) await hold;
     const mission = buildDailyMission(state);
     logLine(req, 200, { reviewsCompleted: mission.reviewsCompleted });
     jsonResponse(res, 200, mission);
@@ -1557,6 +1564,8 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/progress") {
     const state = getSessionState(cookies);
+    const hold = waitForReadHold(state, cookies, "progress");
+    if (hold) await hold;
     if (consumeReadFailureFixture(state, cookies, "progress")) {
       logLine(req, 500, {
         reason: "fixture-read-failure",

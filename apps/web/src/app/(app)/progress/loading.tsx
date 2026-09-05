@@ -1,6 +1,7 @@
 export default function ProgressLoading() {
   return (
     <div
+      role="status"
       aria-busy="true"
       aria-label="Loading progress"
       className="animate-pulse p-[var(--spacing-lg)]"
