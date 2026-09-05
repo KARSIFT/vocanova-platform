@@ -5,10 +5,12 @@ processor in `apps/api-worker/src/identity/anonymization.ts` is the only
 purge path; it is not an HTTP endpoint and is not scheduled or deployed.
 
 Run only against a synthetic local D1 database. `pnpm --filter @vocanova/api-worker
-anonymize:local` is the executable dry-run rehearsal; it applies local migrations
-and uses Wrangler `d1 execute DB --local` against the fixed local persistence
-directory. `pnpm --filter @vocanova/api-worker anonymize:local -- --apply` is
-explicit and processes at most one due account atomically. Neither form accepts
+anonymize:local` is the executable dry-run rehearsal. Initialize the synthetic
+local database separately using `pnpm --filter @vocanova/api-worker migrate:local`.
+The command uses Wrangler's local platform proxy against the fixed local
+persistence directory; dry-run only reads and does not apply migrations.
+`pnpm --filter @vocanova/api-worker anonymize:local --apply` explicitly processes
+at most 25 due accounts, with each account deleted atomically. Neither form accepts
 remote configuration, and this repository provides no production command or
 authorization.
 

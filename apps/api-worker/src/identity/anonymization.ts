@@ -32,14 +32,24 @@ export class AccountAnonymizationProcessor {
       .bind(now, limit)
       .all<DueAccount>();
     if (dryRun)
-      return { dryRun: true, due: due.results.length, processed: 0, deleted: 0 };
+      return {
+        dryRun: true,
+        due: due.results.length,
+        processed: 0,
+        deleted: 0,
+      };
 
     let deleted = 0;
     for (const account of due.results) {
       await this.deleteAccount(account.user_id);
       deleted += 1;
     }
-    return { dryRun: false, due: due.results.length, processed: due.results.length, deleted };
+    return {
+      dryRun: false,
+      due: due.results.length,
+      processed: due.results.length,
+      deleted,
+    };
   }
 
   private async deleteAccount(userId: string): Promise<void> {
