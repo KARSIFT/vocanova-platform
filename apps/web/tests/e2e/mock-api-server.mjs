@@ -82,6 +82,9 @@
 //
 //   GET    /api/v1/settings                          -> 200 Settings
 //   PATCH  /api/v1/settings                          -> 200 Settings
+//             `e2e_settings_patch_failure=retry` fails the first settings
+//             write per session; `e2e_settings_patch_hold=1` holds it until
+//             the E2E-only release endpoint is called
 //
 //   POST   /api/v1/settings/email-change-links       -> 204
 //   POST   /api/v1/settings/email-change-links/consume -> 200 ConsumeEmailChangeLinkResult
@@ -552,6 +555,8 @@ function createInitialState() {
     consumedReadFailureFixtures: new Set(),
     readFailureFixtureAttempts: new Map(),
     readHolds: new Map(),
+    consumedSettingsPatchFailure: false,
+    settingsPatchHold: null,
     completionSummaryDueFetches: 0,
   };
 }
@@ -589,6 +594,33 @@ function waitForReadHold(state, cookies, fixture) {
 
 function releaseReadHold(state, fixture) {
   const hold = state.readHolds.get(fixture);
+  if (!hold || hold.released) {
+    return false;
+  }
+
+  hold.released = true;
+  hold.release();
+  return true;
+}
+
+function waitForSettingsPatchHold(state, cookies) {
+  if (cookies.e2e_settings_patch_hold !== "1") {
+    return null;
+  }
+
+  if (!state.settingsPatchHold) {
+    let release;
+    const promise = new Promise((resolve) => {
+      release = resolve;
+    });
+    state.settingsPatchHold = { promise, release, released: false };
+  }
+
+  return state.settingsPatchHold.released ? null : state.settingsPatchHold.promise;
+}
+
+function releaseSettingsPatchHold(state) {
+  const hold = state.settingsPatchHold;
   if (!hold || hold.released) {
     return false;
   }
@@ -932,6 +964,17 @@ const server = createServer(async (req, res) => {
       emptyResponse(res, 204);
     } else {
       jsonResponse(res, 409, { error: "read_not_held" });
+    }
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/__e2e/release-settings-patch") {
+    const released = releaseSettingsPatchHold(getSessionState(cookies));
+    logLine(req, released ? 204 : 409, { action: "release-settings-patch" });
+    if (released) {
+      emptyResponse(res, 204);
+    } else {
+      jsonResponse(res, 409, { error: "settings_patch_not_held" });
     }
     return;
   }
@@ -1453,6 +1496,23 @@ const server = createServer(async (req, res) => {
     if (!checkCsrf(req, cookies, res, logLine)) {
       return;
     }
+    const state = getSessionState(cookies);
+    const hold = waitForSettingsPatchHold(state, cookies);
+    if (hold) {
+      await hold;
+    }
+    if (
+      cookies.e2e_settings_patch_failure === "retry" &&
+      !state.consumedSettingsPatchFailure
+    ) {
+      state.consumedSettingsPatchFailure = true;
+      logLine(req, 500, { reason: "fixture-settings-patch-failure" });
+      jsonResponse(res, 500, {
+        title: "Test settings save failure",
+        detail: "Unable to save settings. Please try again.",
+      });
+      return;
+    }
     let body = {};
     try {
       body = await readJsonBody(req);
@@ -1461,7 +1521,6 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 400, { error: "invalid_json" });
       return;
     }
-    const state = getSessionState(cookies);
     try {
       state.settings = applySettingsPatch(state.settings, body);
     } catch (error) {
