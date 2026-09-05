@@ -221,6 +221,48 @@ describe("Worker content, learning, and review parity", () => {
     expect(JSON.stringify(bodyB)).not.toContain(USER_WORD_A);
   });
 
+  it("rejects malformed pagination limits on every documented list route", async () => {
+    const token = "invalid-page-limit-session";
+    await env.DB.prepare(
+      `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at)
+       VALUES (?1, ?2, ?3, ?4, '9999-12-31T23:59:59.999Z')`,
+    )
+      .bind(
+        "90000000-0000-4000-8000-000000000006",
+        USER_A,
+        await hashToken(token),
+        NOW,
+      )
+      .run();
+    const app = createApp();
+
+    for (const malformedLimit of [
+      "not-a-number",
+      "",
+      "  ",
+      "1.5",
+      "Infinity",
+    ]) {
+      for (const route of [
+        "/api/v1/journey-situations",
+        "/api/v1/user-words",
+        "/api/v1/reviews/due",
+      ]) {
+        const path = `${route}?limit=${encodeURIComponent(malformedLimit)}`;
+        const response = await app.request(
+          `http://worker.test${path}`,
+          { headers: { cookie: `vocanova_session=${token}` } },
+          env,
+        );
+
+        expect(response.status, path).toBe(400);
+        await expect(response.json()).resolves.toMatchObject({
+          detail: "invalid request",
+        });
+      }
+    }
+  });
+
   it("publishes reviewState as one required nullable OpenAPI enum", () => {
     const document = createOpenApiDocument() as CanonicalWordOpenApi;
     const meaningSchema =
