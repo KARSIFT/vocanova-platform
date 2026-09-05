@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
+import { PageBackLink } from "../_components/page-back-link";
 
 import { SettingsForm } from "./_components/settings-form";
 
@@ -22,12 +23,7 @@ export default async function SettingsPage() {
     <div className="p-[var(--spacing-lg)]">
       <div className="mb-[var(--spacing-md)] flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-neutral-900">Settings</h1>
-        <Link
-          href="/home"
-          className="text-base font-semibold text-primary-700 hover:text-primary-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
-        >
-          Back to Home
-        </Link>
+        <PageBackLink href="/home">Back to Home</PageBackLink>
       </div>
 
       <p className="text-base text-neutral-700">
