@@ -404,6 +404,119 @@ describe("identity and account parity", () => {
     expect(replay.status).toBe(401);
   });
 
+  it("links verified OAuth to the user created by a magic link", async () => {
+    const app = identityApp();
+    const email = "OAuth@Example.Test";
+    const requested = await app.request(
+      "http://worker.test/api/v1/auth/magic-links",
+      json({ email }),
+      env,
+    );
+    expect(requested.status).toBe(204);
+    const magicToken = messageToken(messages.at(-1)!);
+    const magic = await app.request(
+      "http://worker.test/api/v1/auth/magic-links/consume",
+      json({ token: magicToken, email }),
+      env,
+    );
+    expect(magic.status).toBe(200);
+    const originalUser = await env.DB.prepare(
+      "SELECT id FROM users WHERE email = ?1",
+    )
+      .bind("oauth@example.test")
+      .first<{ id: string }>();
+    expect(originalUser?.id).toBeDefined();
+    const updatedSettings = await app.request(
+      "http://worker.test/api/v1/settings",
+      withAuth(
+        json(
+          {
+            dailyReviewTarget: 12,
+            reviewIntervalPreset: "custom",
+            notificationsEnabled: false,
+            marketingEmailsEnabled: true,
+          },
+          "PATCH",
+        ),
+        cookiePairs(cookieHeader(magic)),
+        namedCookie(cookieHeader(magic), "vocanova_csrf"),
+      ),
+      env,
+    );
+    expect(updatedSettings.status).toBe(200);
+    const settingsBefore = await env.DB.prepare(
+      `SELECT user_id, timezone, daily_review_target, review_interval_preset,
+              notifications_enabled, marketing_emails_enabled, app_language
+       FROM user_settings WHERE user_id = ?1`,
+    )
+      .bind(originalUser?.id)
+      .first<Record<string, string | number>>();
+    expect(settingsBefore).toMatchObject({
+      user_id: originalUser?.id,
+      daily_review_target: 12,
+      review_interval_preset: "custom",
+      notifications_enabled: 0,
+      marketing_emails_enabled: 1,
+    });
+
+    const started = await app.request(
+      "http://worker.test/api/v1/auth/oauth/google/start",
+      json({ redirectUri: "http://127.0.0.1:3000/home" }),
+      env,
+    );
+    const state = new URL(
+      (await started.json<{ url: string }>()).url,
+    ).searchParams.get("state")!;
+    const callback = await app.request(
+      `http://worker.test/api/v1/auth/oauth/google/callback?code=valid-code&state=${encodeURIComponent(state)}`,
+      {
+        headers: {
+          Cookie: `vocanova_oauth_state=${namedCookie(cookieHeader(started), "vocanova_oauth_state")}`,
+        },
+        redirect: "manual",
+      },
+      env,
+    );
+    expect(callback.status).toBe(302);
+    const oauthSession = await app.request(
+      "http://worker.test/api/v1/me",
+      { headers: { Cookie: cookiePairs(cookieHeader(callback)) } },
+      env,
+    );
+    expect(oauthSession.status).toBe(200);
+    expect(await oauthSession.json()).toMatchObject({
+      email: "oauth@example.test",
+    });
+
+    const users = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM users WHERE email = ?1",
+    )
+      .bind("oauth@example.test")
+      .first<{ count: number }>();
+    const googleIdentityCount = await env.DB.prepare(
+      `SELECT COUNT(*) AS count FROM external_identities
+       WHERE user_id = ?1 AND provider = 'google'`,
+    )
+      .bind(originalUser?.id)
+      .first<{ count: number }>();
+    const sessions = await env.DB.prepare(
+      "SELECT COUNT(*) AS count FROM sessions WHERE user_id = ?1",
+    )
+      .bind(originalUser?.id)
+      .first<{ count: number }>();
+    const settingsAfter = await env.DB.prepare(
+      `SELECT user_id, timezone, daily_review_target, review_interval_preset,
+              notifications_enabled, marketing_emails_enabled, app_language
+       FROM user_settings WHERE user_id = ?1`,
+    )
+      .bind(originalUser?.id)
+      .first<Record<string, string | number>>();
+    expect(users?.count).toBe(1);
+    expect(sessions?.count).toBe(2);
+    expect(settingsAfter).toEqual(settingsBefore);
+    expect(googleIdentityCount?.count).toBe(1);
+  });
+
   it("rejects expired OAuth state without consuming it and scopes its production cookie", async () => {
     const app = identityApp({
       ...config,
