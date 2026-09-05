@@ -19,6 +19,45 @@ import {
 } from "./axe-helper.js";
 
 test.describe("Settings account accessibility", () => {
+  test("moves keyboard focus to the confirmation token after requesting an email change", async ({
+    page,
+  }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) {
+      throw new Error("Expected Playwright to configure a base URL.");
+    }
+    await page
+      .context()
+      .addCookies([
+        { name: "vocanova_csrf", value: "test-csrf", url: baseURL },
+      ]);
+    await page.route("**/api/v1/settings/email-change-links", async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      await route.fulfill({
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": new URL(baseURL).origin,
+          "Access-Control-Allow-Credentials": "true",
+        },
+      });
+    });
+
+    await page.goto("/settings/account");
+    await page
+      .getByRole("textbox", { name: "New sign-in email" })
+      .fill("new@example.test");
+    await page.getByRole("button", { name: "Send confirmation link" }).focus();
+    await page.keyboard.press("Enter");
+
+    await expect(page.getByLabel("Confirmation token")).toBeFocused();
+    await expect(
+      page.getByRole("status").filter({ hasText: "new@example.test" }),
+    ).toBeVisible();
+  });
+
   test("/settings/account renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
   }, testInfo) => {
@@ -57,6 +96,8 @@ test.describe("Settings account accessibility", () => {
       ],
     });
 
-    expect(testInfo.project.name).toMatch(/^(home-desktop-1280|mobile-360|mobile-430)$/);
+    expect(testInfo.project.name).toMatch(
+      /^(home-desktop-1280|mobile-360|mobile-430)$/,
+    );
   });
 });
