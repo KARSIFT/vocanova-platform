@@ -38,17 +38,15 @@ test("keeps page-level back navigation reachable on touch screens", async ({
     { name: "vocanova_csrf", value: `test-csrf-${randomUUID()}`, url: baseURL },
   ]);
 
-  const linkHeights: number[] = [];
   for (const navigation of navigationCases) {
     await page.goto(navigation.path);
     const link = page.getByRole("link", { name: navigation.name }).first();
     await expect(link).toBeVisible();
     const linkBox = await link.boundingBox();
     expect(linkBox).not.toBeNull();
-    linkHeights.push(linkBox?.height ?? 0);
+    expect(linkBox?.height, navigation.path).toBeGreaterThanOrEqual(44);
+    expect(linkBox?.width, navigation.path).toBeGreaterThanOrEqual(44);
     await link.click();
     await expect(page).toHaveURL(new RegExp(`${navigation.destination}$`));
   }
-
-  expect(linkHeights.every((height) => height >= 44)).toBe(true);
 });
