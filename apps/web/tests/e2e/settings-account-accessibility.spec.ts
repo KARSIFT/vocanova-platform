@@ -95,6 +95,41 @@ test.describe("Settings account accessibility", () => {
     ).toBeVisible();
   });
 
+  test("returns keyboard focus to the email field after canceling confirmation", async ({
+    page,
+  }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) {
+      throw new Error("Expected Playwright to configure a base URL.");
+    }
+    const email = page.getByRole("textbox", { name: "New sign-in email" });
+    await page.context().addCookies([
+      {
+        name: "vocanova_session",
+        value: `email-cancel-${Date.now()}`,
+        url: baseURL,
+      },
+      {
+        name: "vocanova_csrf",
+        value: `email-cancel-csrf-${Date.now()}`,
+        url: baseURL,
+      },
+    ]);
+
+    await page.goto("/settings/account");
+    await email.fill("new@example.test");
+    await page.getByRole("button", { name: "Send confirmation link" }).click();
+    await expect(page.getByLabel("Confirmation token")).toBeFocused();
+
+    await page.getByRole("button", { name: "Cancel" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(email).toBeFocused();
+
+    await email.fill("another@example.test");
+    await page.getByRole("button", { name: "Send confirmation link" }).click();
+    await expect(page.getByLabel("Confirmation token")).toBeFocused();
+  });
+
   test("/settings/account renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
   }, testInfo) => {

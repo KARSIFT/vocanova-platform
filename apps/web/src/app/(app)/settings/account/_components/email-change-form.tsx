@@ -32,10 +32,20 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
   const [isConsuming, setIsConsuming] = useState(false);
   const [phase, setPhase] = useState<EmailPhase>({ type: "idle" });
   const confirmationTokenRef = useRef<HTMLInputElement>(null);
+  const newEmailInputRef = useRef<HTMLInputElement>(null);
+  const previousPhaseRef = useRef(phase.type);
 
   useEffect(() => {
+    const previousPhase = previousPhaseRef.current;
+    previousPhaseRef.current = phase.type;
+
     if (phase.type === "pending") {
       confirmationTokenRef.current?.focus();
+    } else if (
+      phase.type === "idle" &&
+      (previousPhase === "pending" || previousPhase === "completed")
+    ) {
+      newEmailInputRef.current?.focus();
     }
   }, [phase]);
 
@@ -243,6 +253,7 @@ export function EmailChangeForm({ currentEmail }: EmailChangeFormProps) {
             New sign-in email
           </label>
           <input
+            ref={newEmailInputRef}
             id="new-email"
             name="newEmail"
             type="email"
