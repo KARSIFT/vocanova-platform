@@ -24,7 +24,7 @@ const REVIEW_INTERVAL_PRESETS = [
   {
     value: "custom",
     label: "Custom",
-    helper: "Not available. Custom review schedules are not supported yet.",
+    helper: "Not available. Custom review schedules are not supported.",
   },
 ] as const;
 

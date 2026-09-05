@@ -24,6 +24,7 @@ for (const preset of ["vocanova_default", "wordup_like", "custom"] as const) {
     await page.goto("/settings");
     await expect(page.getByRole("radio", { name: /Faster reminders/ })).toBeDisabled();
     await expect(page.getByRole("radio", { name: /Custom/ })).toBeDisabled();
+    await expect(page.getByRole("radio", { name: /Vocanova default/ })).toBeEnabled();
     await expect(page.getByText("All reviews currently use the Vocanova default schedule.")).toBeVisible();
     await expect(page.locator(`input[name="reviewIntervalPreset"][value="${preset}"]`)).toBeChecked();
 
