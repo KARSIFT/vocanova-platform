@@ -19,9 +19,9 @@ test("starts another email change with a 44px completed-state control", async ({
   ]);
 
   await page.goto("/settings/account");
-  await page.getByRole("textbox", { name: "New sign-in email" }).fill(
-    "new@example.test",
-  );
+  await page
+    .getByRole("textbox", { name: "New sign-in email" })
+    .fill("new@example.test");
   await page.getByRole("button", { name: "Send confirmation link" }).click();
   await page.getByRole("textbox", { name: "Confirmation token" }).fill("token");
   await page.getByRole("button", { name: "Confirm change" }).click();
@@ -33,6 +33,7 @@ test("starts another email change with a 44px completed-state control", async ({
   const startOverBox = await startOver.boundingBox();
   expect(startOverBox).not.toBeNull();
   expect(startOverBox?.height).toBeGreaterThanOrEqual(44);
+  expect(startOverBox?.width).toBeGreaterThanOrEqual(44);
   await startOver.click();
   await expect(
     page.getByRole("textbox", { name: "New sign-in email" }),
