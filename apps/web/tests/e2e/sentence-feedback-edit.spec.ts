@@ -43,6 +43,22 @@ test("clears feedback for an edited sentence and accepts a new submission", asyn
   await expect(page.getByRole("status", { name: "Feedback result: Correct" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Report a problem" })).toBeVisible();
 
+  let releaseReport: (() => void) | undefined;
+  const reportReleased = new Promise<void>((resolve) => {
+    releaseReport = resolve;
+  });
+  await page.route("**/api/v1/sentence-feedback/*/reports", async (route) => {
+    await reportReleased;
+    await route.continue();
+  });
+  const reportResponse = page.waitForResponse(
+    (response) =>
+      response.url().includes("/api/v1/sentence-feedback/") &&
+      response.url().endsWith("/reports") &&
+      response.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: "Report a problem" }).click();
+
   const replacement = "I pour water every morning.";
   await sentenceInput.fill(replacement);
   await expect(sentenceInput).toHaveValue(replacement);
@@ -53,4 +69,8 @@ test("clears feedback for an edited sentence and accepts a new submission", asyn
 
   await page.getByRole("button", { name: "Check my sentence" }).click();
   await expect(page.getByRole("status", { name: "Feedback result: Correct" })).toBeVisible();
+  releaseReport?.();
+  expect((await reportResponse).status()).toBe(204);
+  await expect(page.getByRole("button", { name: "Report a problem" })).toBeVisible();
+  await expect(page.getByText("Reported", { exact: true })).toHaveCount(0);
 });
