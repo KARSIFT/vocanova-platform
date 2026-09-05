@@ -63,6 +63,8 @@ export function ReviewSession({
   );
   const submissionInFlight = useRef(false);
   const pendingSubmission = useRef<PendingReviewSubmission | null>(null);
+  const shouldFocusNextCard = useRef(false);
+  const currentCardHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const currentCard = dueWords[currentIndex];
 
@@ -82,6 +84,11 @@ export function ReviewSession({
     setSelectedOption(null);
     setErrorMessage(null);
     setStartTime(Date.now());
+
+    if (shouldFocusNextCard.current) {
+      currentCardHeadingRef.current?.focus();
+      shouldFocusNextCard.current = false;
+    }
   }, [currentIndex, dueWords]);
 
   const loadNextPage = () => {
@@ -186,6 +193,7 @@ export function ReviewSession({
       setLastReviewAttemptId(data.attemptId);
       setCompletedReviewCount((count) => count + 1);
       setRemainingCount((count) => Math.max(0, count - 1));
+      shouldFocusNextCard.current = true;
       advance();
     } catch (error) {
       setErrorMessage(
@@ -288,7 +296,11 @@ export function ReviewSession({
           <span className="inline-block rounded-full bg-neutral-100 px-[var(--spacing-sm)] py-[var(--spacing-xs)] text-sm text-neutral-700">
             {currentCard.partOfSpeech}
           </span>
-          <h2 className="mt-[var(--spacing-sm)] text-3xl font-semibold text-neutral-900">
+          <h2
+            ref={currentCardHeadingRef}
+            tabIndex={-1}
+            className="mt-[var(--spacing-sm)] text-3xl font-semibold text-neutral-900"
+          >
             {currentCard.wordText}
           </h2>
           {promptType === "self_check" && phase !== "rate" ? (
