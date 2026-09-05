@@ -422,7 +422,7 @@ export class D1IdentityRepository implements IdentityRepository {
     if (!user || user.status !== "active") return null;
     await this.database
       .prepare(
-        "INSERT INTO user_settings (id, user_id, created_at, updated_at) VALUES (?1, ?2, ?3, ?3) ON CONFLICT(user_id) DO NOTHING",
+        "INSERT INTO user_settings (id, user_id, created_at, updated_at) SELECT ?1, ?2, ?3, ?3 FROM users WHERE id = ?2 AND status = 'active' ON CONFLICT(user_id) DO NOTHING",
       )
       .bind(crypto.randomUUID(), userId, now)
       .run();
@@ -696,15 +696,18 @@ export class D1IdentityRepository implements IdentityRepository {
     );
   }
 
-  private async readSettings(userId: string): Promise<Record<string, unknown>> {
+  private async readSettings(
+    userId: string,
+  ): Promise<Record<string, unknown> | null> {
     const row = await this.database
       .prepare(
-        "SELECT s.daily_review_target, s.review_interval_preset, s.app_language, s.notifications_enabled, s.marketing_emails_enabled, u.display_name FROM user_settings s JOIN users u ON u.id = s.user_id WHERE s.user_id = ?1",
+        "SELECT s.daily_review_target, s.review_interval_preset, s.app_language, s.notifications_enabled, s.marketing_emails_enabled, u.display_name FROM user_settings s JOIN users u ON u.id = s.user_id WHERE s.user_id = ?1 AND u.status = 'active'",
       )
       .bind(userId)
       .first<Record<string, unknown>>();
+    if (!row) return null;
     return {
-      dailyReviewTarget: row!.daily_review_target,
+      dailyReviewTarget: row.daily_review_target,
       reviewIntervalPreset: row!.review_interval_preset,
       appLanguage: row!.app_language,
       notificationsEnabled: row!.notifications_enabled === 1,
