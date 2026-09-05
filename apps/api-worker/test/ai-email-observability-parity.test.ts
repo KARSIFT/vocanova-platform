@@ -391,6 +391,58 @@ describe("Worker AI feedback parity", () => {
     expect(costProvider.generateCalls).toBe(1);
 
     await clearFeedbackState();
+    const userWordB = crypto.randomUUID();
+    await env.DB.prepare(
+      `INSERT INTO user_words
+       (id, user_id, meaning_id, status, source, review_step, added_at, created_at, updated_at)
+       VALUES (?1, ?2, ?3, 'learning', 'manual', 0, ?4, ?4, ?4)`,
+    )
+      .bind(userWordB, USER_B, MEANING, NOW)
+      .run();
+    const sharedCostProvider = new ScriptedProvider(() => validFeedback());
+    const sharedCostCap = createService(sharedCostProvider, {
+      limits: {
+        perMinute: 10,
+        perDay: 10,
+        monthlyCostHardStopCents: 2,
+        requestCostCents: 1,
+      },
+    });
+    await sharedCostCap.submit(
+      USER_A,
+      submission("I work every day."),
+      "shared-cost-one",
+    );
+    const otherLearnerBlocked = await sharedCostCap.submit(
+      USER_B,
+      { ...submission("We work every evening."), attemptId: userWordB },
+      "shared-cost-two",
+    );
+    expect(otherLearnerBlocked.result.errorCode).toBe(
+      "AI_FEEDBACK_GENERATION_DISABLED",
+    );
+    expect(sharedCostProvider.generateCalls).toBe(1);
+    await expect(
+      env.DB.prepare(
+        `SELECT
+           (SELECT count(*) FROM learner_sentences WHERE user_id = ?1) AS sentences,
+           (SELECT count(*)
+            FROM ai_feedback_attempts
+            JOIN learner_sentences
+              ON learner_sentences.id = ai_feedback_attempts.learner_sentence_id
+            WHERE learner_sentences.user_id = ?1) AS attempts,
+           (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?1) AS rewards`,
+      )
+        .bind(USER_B)
+        .first<{ sentences: number; attempts: number; rewards: number }>(),
+    ).resolves.toEqual({ sentences: 0, attempts: 0, rewards: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT request_count, estimated_cost_cents FROM ai_usage_counters WHERE scope = 'global_month' AND subject = 'global'",
+      ).first<{ request_count: number; estimated_cost_cents: number }>(),
+    ).resolves.toEqual({ request_count: 1, estimated_cost_cents: 1 });
+
+    await clearFeedbackState();
     let finishFirst: () => void = () => undefined;
     const concurrentProvider = new ScriptedProvider(
       () =>
