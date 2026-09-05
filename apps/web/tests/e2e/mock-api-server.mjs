@@ -140,6 +140,8 @@ const DEFAULT_USER = {
   emailVerifiedAt: "2026-01-01T00:00:00Z",
 };
 
+const LONG_CONTENT_TOKEN = "a".repeat(300);
+
 const DEFAULT_SETTINGS = {
   dailyReviewTarget: 20,
   reviewIntervalPreset: "vocanova_default",
@@ -863,10 +865,30 @@ function buildWordDetailResponse(state, slug, selectedFixture, wordFixture) {
   const selectedReviewState = hasSelectedFixture
     ? WORD_DETAIL_REVIEW_STATES.get(selectedFixture)
     : undefined;
+  const contentWord =
+    wordFixture === "long-content"
+      ? {
+          ...word,
+          text: `word-${LONG_CONTENT_TOKEN}`,
+          meanings: word.meanings.map((meaning) => ({
+            ...meaning,
+            shortDefinition: `definition-${LONG_CONTENT_TOKEN}`,
+            learnerDefinition: `learner-${LONG_CONTENT_TOKEN}`,
+            examples: meaning.examples.map((example) => ({
+              ...example,
+              exampleText: `example-${LONG_CONTENT_TOKEN}`,
+            })),
+            usageNotes: meaning.usageNotes.map((note) => ({
+              ...note,
+              noteText: `note-${LONG_CONTENT_TOKEN}`,
+            })),
+          })),
+        }
+      : word;
   const meanings =
     wordFixture === "empty-meanings"
       ? []
-      : word.meanings.map((meaning) => {
+      : contentWord.meanings.map((meaning) => {
           const statefulSaved = state.savedMeaningIds.has(meaning.id);
           const saved = hasSelectedFixture
             ? selectedReviewState !== null
@@ -884,7 +906,7 @@ function buildWordDetailResponse(state, slug, selectedFixture, wordFixture) {
         });
   return {
     word: {
-      ...word,
+      ...contentWord,
       meanings,
     },
   };
