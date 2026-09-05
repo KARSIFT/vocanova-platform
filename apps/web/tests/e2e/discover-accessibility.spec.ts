@@ -8,9 +8,7 @@
 // screen is the screen where most of the saved-words interaction
 // happens (the Save button + the sentence feedback widget), so it
 // is also where colour-only feedback and keyboard reachability
-// regressions are most likely to land. The non-color-only
-// assertion specifically targets the "Saved" badge and the
-// meaning-by-meaning card structure on the situation page.
+// regressions are most likely to land.
 
 import { randomUUID } from "node:crypto";
 
@@ -76,16 +74,14 @@ test.describe("Discover accessibility", () => {
       ).join("\n")}`,
     ).toEqual([]);
 
-    // Each meaning is an anchor; the back link is also focusable.
+    // Each recommended meaning is an anchor; the back link is also focusable.
     // Fixture has two meanings, so at least 3 focusable elements.
     await assertKeyboardReachable(page, { minFocusable: 3 });
 
     await assertNonColorOnlyFeedback(page, {
       contextLabel: "/discover/[situation]",
       requireText: [
-        // The "Saved" indicator on already-saved meanings is the
-        // most likely colour-only regression on this screen.
-        "text=Saved",
+        "text=Explore a new word for this situation.",
         "text=Back to Journey",
       ],
     });
