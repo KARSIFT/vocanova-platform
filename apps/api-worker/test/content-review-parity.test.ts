@@ -1210,6 +1210,61 @@ describe("Worker content, learning, and review parity", () => {
     await env.DB.prepare("DROP TRIGGER fail_review_idempotency").run();
   });
 
+  it("does not submit a review after the saved word is removed during validation", async () => {
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    const delayed = delayUserWordValidation(env.DB);
+    const racingRepository = new D1ContentLearningRepository(
+      delayed.database,
+      () => new Date(NOW),
+    );
+
+    const submission = racingRepository.submitReview(
+      USER_A,
+      review({ clientAttemptId: "removed-during-review" }),
+      "removed-during-review",
+    );
+    await delayed.validating;
+    await repository.unsaveUserWord(USER_A, MEANING_A);
+    delayed.release();
+
+    await expect(submission).rejects.toMatchObject({
+      code: "user_word_not_found",
+    });
+    await expect(
+      env.DB.prepare("SELECT count(*) AS count FROM review_attempts").first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM confidence_point_ledger",
+      ).first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare("SELECT count(*) AS count FROM idempotency_keys").first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM daily_activity_summaries",
+      ).first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM daily_mission_snapshots",
+      ).first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        `SELECT deleted_at, review_step, total_review_count
+         FROM user_words WHERE id = ?1`,
+      )
+        .bind(USER_WORD_A)
+        .first(),
+    ).resolves.toEqual({
+      deleted_at: NOW,
+      review_step: 0,
+      total_review_count: 0,
+    });
+  });
+
   it("scopes saved-word deletion to the authenticated account over HTTP", async () => {
     const sessions = [
       [USER_A, "90000000-0000-4000-8000-000000000007", "unsave-owner"],
@@ -1319,6 +1374,67 @@ function review(overrides: Partial<ReviewSubmission>): ReviewSubmission {
     clientAttemptId: "attempt-default",
     ...overrides,
   };
+}
+
+function delayUserWordValidation(database: D1Database): {
+  database: D1Database;
+  validating: Promise<void>;
+  release: () => void;
+} {
+  let validationStarted!: () => void;
+  let resume!: () => void;
+  const validating = new Promise<void>((resolve) => {
+    validationStarted = resolve;
+  });
+  const resumed = new Promise<void>((resolve) => {
+    resume = resolve;
+  });
+  let delayed = false;
+  const delayedDatabase = new Proxy(database, {
+    get(target, property, receiver) {
+      if (property !== "prepare")
+        return Reflect.get(target, property, receiver);
+      return (sql: string) => {
+        const statement = target.prepare(sql);
+        if (
+          delayed ||
+          !sql.includes("FROM user_words WHERE id = ?1 AND user_id = ?2")
+        )
+          return statement;
+        return new Proxy(statement, {
+          get(prepared, statementProperty, statementReceiver) {
+            if (statementProperty !== "bind")
+              return Reflect.get(
+                prepared,
+                statementProperty,
+                statementReceiver,
+              );
+            return (...values: unknown[]) => {
+              const bound = prepared.bind(...values);
+              return new Proxy(bound, {
+                get(boundStatement, boundProperty, boundReceiver) {
+                  if (boundProperty !== "first")
+                    return Reflect.get(
+                      boundStatement,
+                      boundProperty,
+                      boundReceiver,
+                    );
+                  return async <T>(): Promise<T | null> => {
+                    const row = await boundStatement.first<T>();
+                    delayed = true;
+                    validationStarted();
+                    await resumed;
+                    return row;
+                  };
+                },
+              });
+            };
+          },
+        });
+      };
+    },
+  }) as D1Database;
+  return { database: delayedDatabase, validating, release: resume };
 }
 
 async function clearTables(): Promise<void> {
