@@ -119,12 +119,7 @@ test("does not advance focus until a failed review submission succeeds on retry"
     page.getByRole("heading", { name: "baggage", level: 2 }),
   ).toHaveCount(0);
 
-  const retryButton = page.getByRole("button", { name: "Retry submission" });
-  if (await retryButton.count()) {
-    await retryButton.click();
-  } else {
-    await page.getByRole("button", { name: "Good", exact: true }).click();
-  }
+  await page.getByRole("button", { name: "Retry submission" }).click();
 
   await expect(
     page.getByRole("heading", { name: "baggage", level: 2 }),
