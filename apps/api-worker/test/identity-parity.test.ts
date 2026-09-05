@@ -745,6 +745,32 @@ describe("identity and account parity", () => {
     );
     expect(blocked.status).toBe(429);
   });
+
+  it("isolates exhausted magic-link rate buckets by connecting client", async () => {
+    const app = identityApp();
+    const request = (email: string, ip: string) =>
+      app.request(
+        "http://worker.test/api/v1/auth/magic-links",
+        {
+          ...json({ email }),
+          headers: {
+            "content-type": "application/json",
+            "cf-connecting-ip": ip,
+          },
+        },
+        env,
+      );
+    for (let index = 0; index < 10; index += 1)
+      expect(
+        (await request(`bucket-${index}@example.test`, "203.0.113.10")).status,
+      ).toBe(204);
+    expect((await request("blocked@example.test", "203.0.113.10")).status).toBe(
+      429,
+    );
+    expect((await request("other@example.test", "203.0.113.11")).status).toBe(
+      204,
+    );
+  });
 });
 
 function identityApp(
