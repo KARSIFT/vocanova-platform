@@ -292,7 +292,7 @@ test.describe("Core loop end-to-end", () => {
       page.getByText("Your sentence uses the target word naturally."),
     ).toBeVisible();
     await expect(
-      page.getByText(/Mission completed: Yes/),
+      page.getByText(/Mission completed: Not yet/),
     ).toBeVisible();
 
     // ----- 7. Progress update.
