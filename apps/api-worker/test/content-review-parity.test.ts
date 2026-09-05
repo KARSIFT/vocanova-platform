@@ -516,6 +516,106 @@ describe("Worker content, learning, and review parity", () => {
     ).rejects.toMatchObject({ code: "idempotency_conflict" });
   });
 
+  it("rejects forged multiple-choice results before changing review state", async () => {
+    await insertUserWord(
+      USER_WORD_A,
+      USER_A,
+      MEANING_A,
+      "2026-08-22T10:00:00.000Z",
+      2,
+    );
+    const multipleChoice = {
+      promptType: "multiple_choice" as const,
+      selectedOptionMeaningId: MEANING_B,
+    };
+    await expect(
+      repository.submitReview(
+        USER_A,
+        review({ ...multipleChoice, clientAttemptId: "forged-correct" }),
+        "forged-correct",
+      ),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    await expect(
+      repository.submitReview(
+        USER_A,
+        review({
+          ...multipleChoice,
+          clientAttemptId: "forged-incorrect",
+          result: "incorrect",
+          rating: "again",
+          selectedOptionMeaningId: MEANING_A,
+        }),
+        "forged-incorrect",
+      ),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    await expect(
+      repository.submitReview(
+        USER_A,
+        review({
+          promptType: "multiple_choice",
+          clientAttemptId: "missing-selection",
+        }),
+        "missing-selection",
+      ),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    const word = await env.DB.prepare(
+      "SELECT review_step, total_review_count FROM user_words WHERE id = ?1",
+    )
+      .bind(USER_WORD_A)
+      .first<{ review_step: number; total_review_count: number }>();
+    expect(word).toEqual({ review_step: 2, total_review_count: 0 });
+    await expect(
+      repository.submitReview(
+        USER_A,
+        review({
+          promptType: "multiple_choice",
+          selectedOptionMeaningId: MEANING_A,
+          clientAttemptId: "objective-correct",
+        }),
+        "objective-correct",
+      ),
+    ).resolves.toMatchObject({ result: "correct", reviewStepAfter: 3 });
+  });
+
+  it("returns a client-validation response for a forged multiple-choice API payload", async () => {
+    const token = "multiple-choice-session";
+    const csrf = "multiple-choice-csrf";
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    await env.DB.prepare(
+      `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at)
+       VALUES (?1, ?2, ?3, ?4, '9999-12-31T23:59:59.999Z')`,
+    )
+      .bind(
+        "90000000-0000-4000-8000-000000000003",
+        USER_A,
+        await hashToken(token),
+        NOW,
+      )
+      .run();
+    const response = await createApp().request(
+      "http://worker.test/api/v1/reviews/submissions",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          cookie: `vocanova_session=${token}; vocanova_csrf=${csrf}`,
+          "x-csrf-token": csrf,
+          "idempotency-key": "forged-api-review",
+        },
+        body: JSON.stringify(
+          review({
+            promptType: "multiple_choice",
+            selectedOptionMeaningId: MEANING_B,
+            clientAttemptId: "forged-api-review",
+          }),
+        ),
+      },
+      env,
+    );
+    expect(response.status).toBe(400);
+    expect(await response.json()).toMatchObject({ detail: "invalid request" });
+  });
+
   it("rolls back attempt and schedule together when the review batch fails", async () => {
     await insertUserWord(
       USER_WORD_A,
