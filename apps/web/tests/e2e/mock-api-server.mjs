@@ -578,6 +578,7 @@ function createInitialState() {
     consumedReadFailureFixtures: new Set(),
     readFailureFixtureAttempts: new Map(),
     readHolds: new Map(),
+    readHoldAttempts: new Map(),
     consumedSettingsPatchFailure: false,
     settingsPatchHold: null,
     consumedAccountDeletionFailure: false,
@@ -617,6 +618,12 @@ function waitForReadHold(state, cookies, fixture) {
   }
 
   return hold.released ? null : hold.promise;
+}
+
+function waitForReadHoldAfter(state, cookies, fixture, after) {
+  const attempts = (state.readHoldAttempts.get(fixture) ?? 0) + 1;
+  state.readHoldAttempts.set(fixture, attempts);
+  return attempts > after ? waitForReadHold(state, cookies, fixture) : null;
 }
 
 function releaseReadHold(state, fixture) {
@@ -1073,7 +1080,7 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && url.pathname === "/__e2e/release-read") {
     const fixture = url.searchParams.get("fixture");
-    if (fixture !== "discover" && fixture !== "reviews") {
+    if (!["discover", "reviews", "settings", "account"].includes(fixture)) {
       logLine(req, 400, { reason: "invalid-read-hold-fixture" });
       jsonResponse(res, 400, { error: "invalid_fixture" });
       return;
@@ -1233,6 +1240,8 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 500, { error: "fixture_read_failure" });
       return;
     }
+    const accountHold = waitForReadHoldAfter(state, cookies, "account", 1);
+    if (accountHold) await accountHold;
     const user = buildCurrentUser(state);
     logLine(req, 200, { onboardingStatus: user.onboardingStatus });
     jsonResponse(res, 200, user);
@@ -1664,6 +1673,8 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/settings") {
     const state = getSessionState(cookies);
+    const settingsHold = waitForReadHold(state, cookies, "settings");
+    if (settingsHold) await settingsHold;
     if (consumeReadFailureFixture(state, cookies, "settings")) {
       logLine(req, 500, {
         reason: "fixture-read-failure",
