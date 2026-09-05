@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { env, exports } from "cloudflare:workers";
 
-import { createApp } from "../src/app.js";
+import { createApp, createOpenApiDocument } from "../src/app.js";
 
 describe("Worker API", () => {
   it("reports D1 health without exposing configuration", async () => {
@@ -106,6 +106,39 @@ describe("Worker API", () => {
       "/configz",
       "/healthz",
     ]);
+  });
+
+  it("publishes AI feedback HTTP problem responses with the shared schema", () => {
+    const document = createOpenApiDocument() as {
+      paths: Record<
+        string,
+        {
+          post: {
+            responses: Record<
+              string,
+              { content?: Record<string, { schema: unknown }> }
+            >;
+          };
+        }
+      >;
+    };
+    const problemSchema = { $ref: "#/components/schemas/Problem" };
+    for (const [path, statuses] of [
+      ["/api/v1/sentence-feedback", [400, 401, 403, 404, 409, 422, 500]],
+      [
+        "/api/v1/sentence-feedback/{attemptId}/reports",
+        [400, 401, 403, 404, 422, 500],
+      ],
+    ] as const) {
+      const responses = document.paths[path]!.post.responses;
+      for (const status of statuses) {
+        expect(
+          responses[String(status)]?.content?.["application/problem+json"]
+            ?.schema,
+          `${path} ${status}`,
+        ).toEqual(problemSchema);
+      }
+    }
   });
 
   it("allows only configured credentialed CORS origins", async () => {
