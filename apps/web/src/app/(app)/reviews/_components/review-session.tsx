@@ -276,7 +276,7 @@ export function ReviewSession({
           type="button"
           onClick={loadNextPage}
           disabled={isRefetching}
-          className="mt-[var(--spacing-md)] rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-[var(--spacing-md)] min-h-[var(--spacing-2xl)] rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Retry loading reviews
         </button>
@@ -359,7 +359,7 @@ export function ReviewSession({
                         setPhase("feedback");
                       }
                     }}
-                    className={`w-full rounded-md border px-[var(--spacing-md)] py-[var(--spacing-sm)] text-left text-base transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    className={`min-h-[var(--spacing-2xl)] w-full rounded-md border px-[var(--spacing-md)] py-[var(--spacing-sm)] text-left text-base transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-60 ${
                       showCorrectness && isCorrect
                         ? "border-primary-500 bg-primary-50 text-primary-900"
                         : showCorrectness && isSelected && !isCorrect
@@ -385,7 +385,7 @@ export function ReviewSession({
             type="button"
             onClick={() => setPhase("rate")}
             disabled={isLoading}
-            className="w-full rounded-md border border-neutral-200 bg-neutral-50 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-[var(--spacing-2xl)] w-full rounded-md border border-neutral-200 bg-neutral-50 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Show answer
           </button>
@@ -407,7 +407,7 @@ export function ReviewSession({
                 })
               }
               disabled={isLoading}
-              className="mt-[var(--spacing-md)] w-full rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 transition-colors hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-[var(--spacing-md)] min-h-[var(--spacing-2xl)] w-full rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 transition-colors hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Continue
             </button>
@@ -451,7 +451,7 @@ export function ReviewSession({
                       })
                     }
                     disabled={isLoading}
-                    className="rounded-md border border-neutral-200 bg-neutral-50 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="min-h-[var(--spacing-2xl)] rounded-md border border-neutral-200 bg-neutral-50 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 transition-colors hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {RATING_LABELS[rating]}
                   </button>
@@ -475,7 +475,7 @@ export function ReviewSession({
             type="button"
             onClick={() => void submitAttempt()}
             disabled={isLoading}
-            className="mt-[var(--spacing-md)] rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-[var(--spacing-md)] min-h-[var(--spacing-2xl)] rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Retry submission
           </button>
