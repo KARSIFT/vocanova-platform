@@ -40,8 +40,9 @@ export default async function OnboardingPage() {
             Welcome to Vocanova
           </h1>
           <p className="text-base text-neutral-700">
-            A few quick questions so we can shape your practice. You can change
-            every answer later in Settings.
+            A few quick questions so we can shape your practice. You can update
+            your daily review target and other practice preferences later in
+            Settings.
           </p>
         </header>
         <OnboardingForm />
