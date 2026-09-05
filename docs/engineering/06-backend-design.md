@@ -61,6 +61,10 @@ requester; deleted users can't authenticate. DTO validation (required fields, fo
 enums) is separate from domain validation (learning rules, review rules, mission rules, reward
 rules).
 
+Email-change confirmation requires the authenticated account that requested the link. A valid link
+owned by another account returns 404 without changing either account, consuming the link, or sending
+a notification; the owner may still confirm it afterward.
+
 ## 8. Atomicity and D1 repository usage
 
 Prepared statements are mandatory for dynamic values. Typed repository interfaces isolate D1 from

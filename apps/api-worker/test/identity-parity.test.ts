@@ -693,6 +693,63 @@ describe("identity and account parity", () => {
     expect(stillAuthenticated.status).toBe(200);
   });
 
+  it("does not let another signed-in account consume an owner's email-change link", async () => {
+    const owner = await signedIn("email-owner@example.test");
+    const other = await signedIn("email-other@example.test");
+    const requested = await owner.app.request(
+      "http://worker.test/api/v1/settings/email-change-links",
+      withAuth(
+        json({ newEmail: "owner-new@example.test" }),
+        owner.cookie,
+        owner.csrf,
+      ),
+      env,
+    );
+    expect(requested.status).toBe(204);
+    const token = messageToken(messages.at(-1)!);
+    const usersBefore = await env.DB.prepare(
+      "SELECT id, email, updated_at FROM users ORDER BY id",
+    ).all();
+    const linkBefore = await env.DB.prepare(
+      "SELECT * FROM email_change_links WHERE user_id = ?1",
+    )
+      .bind(owner.userId)
+      .first();
+    expect(linkBefore).not.toBeNull();
+    const messagesBefore = [...messages];
+    const consumed = await other.app.request(
+      "http://worker.test/api/v1/settings/email-change-links/consume",
+      withAuth(json({ token }), other.cookie, other.csrf),
+      env,
+    );
+    expect(consumed.status).toBe(404);
+    expect(await consumed.text()).not.toContain("email-owner@example.test");
+    expect(
+      await env.DB.prepare(
+        "SELECT id, email, updated_at FROM users ORDER BY id",
+      ).all(),
+    ).toMatchObject({ results: usersBefore.results });
+    await expect(
+      env.DB.prepare("SELECT * FROM email_change_links WHERE user_id = ?1")
+        .bind(owner.userId)
+        .first(),
+    ).resolves.toEqual(linkBefore);
+    expect(messages).toEqual(messagesBefore);
+
+    const ownerConsumed = await owner.app.request(
+      "http://worker.test/api/v1/settings/email-change-links/consume",
+      withAuth(json({ token }), owner.cookie, owner.csrf),
+      env,
+    );
+    expect(ownerConsumed.status).toBe(200);
+    expect(await ownerConsumed.json()).toMatchObject({
+      email: "owner-new@example.test",
+      previousEmail: "email-owner@example.test",
+    });
+    expect(messages).toHaveLength(messagesBefore.length + 1);
+    expect(messages.at(-1)?.to).toBe("email-owner@example.test");
+  });
+
   it("keeps settings isolated between requester sessions", async () => {
     const first = await signedIn("first@example.test");
     const second = await signedIn("second@example.test");

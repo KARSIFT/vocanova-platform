@@ -315,6 +315,7 @@ export class IdentityService {
   }
 
   async consumeEmailChange(
+    userId: string,
     token: string,
     sessionToken: string,
     clientKey: string,
@@ -335,6 +336,7 @@ export class IdentityService {
     ) {
       throw new IdentityError("invalid_link");
     }
+    if (link.userId !== userId) throw new IdentityError("not_found");
     const changed = await this.repository.consumeEmailChangeLink(
       link,
       now.toISOString(),

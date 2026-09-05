@@ -249,11 +249,12 @@ export function registerIdentityRoutes(
     context.set("routeName", "consume_email_change");
     try {
       const service = serviceFactory(context.env);
-      const { token } = await authenticated(context.req.raw, service);
+      const { user, token } = await authenticated(context.req.raw, service);
       requireCsrf(context.req.raw);
       const input = EmailChangeConsumeSchema.parse(await context.req.json());
       return context.json(
         await service.consumeEmailChange(
+          user.id,
           input.token,
           token,
           clientKey(context.req.raw),
