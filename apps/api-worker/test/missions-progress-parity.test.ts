@@ -187,6 +187,76 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     });
   });
 
+  it("does not let a stale passive update overwrite an existing streak", async () => {
+    const today = "2026-08-22";
+    const yesterday = addDays(today, -1);
+    const timestamp = "2026-08-22T12:00:00.000Z";
+    await setSettings("UTC", 5);
+    await env.DB.batch([
+      mission(yesterday, "completed", timestamp),
+      env.DB.prepare(
+        `INSERT INTO streak_states
+         (id, user_id, current_streak_count, longest_streak_count,
+          last_completed_local_date, last_activity_local_date, timezone, status,
+          created_at, updated_at)
+         VALUES (?1, ?2, 3, 3, ?3, ?3, 'UTC', 'active', ?4, ?4)`,
+      ).bind(crypto.randomUUID(), USER, yesterday, timestamp),
+    ]);
+    const missions = new D1MissionsRepository(
+      env.DB,
+      () => new Date(timestamp),
+    );
+    const staleStatements = await missions.reconciliationStatements(
+      USER,
+      "UTC",
+      today,
+      false,
+    );
+    const content = new D1ContentLearningRepository(
+      env.DB,
+      () => new Date(timestamp),
+    );
+    const saved = await content.saveUserWord(
+      USER,
+      MEANING,
+      "manual",
+      "passive-existing-race-save",
+    );
+    for (let index = 0; index < 5; index += 1) {
+      const clientAttemptId = `passive-existing-race-${index}`;
+      await content.submitReview(
+        USER,
+        review(saved.userWordId, clientAttemptId),
+        clientAttemptId,
+      );
+    }
+
+    await env.DB.batch(staleStatements);
+
+    expect(
+      await env.DB.prepare(
+        `SELECT current_streak_count, last_completed_local_date, status
+         FROM streak_states WHERE user_id = ?1`,
+      )
+        .bind(USER)
+        .first<{
+          current_streak_count: number;
+          last_completed_local_date: string | null;
+          status: string;
+        }>(),
+    ).toEqual({
+      current_streak_count: 4,
+      last_completed_local_date: today,
+      status: "active",
+    });
+    expect((await missions.getProgress(USER, "UTC")).streak).toEqual({
+      currentStreakCount: 4,
+      longestStreakCount: 4,
+      status: "active",
+      graceDayBalance: 0,
+    });
+  });
+
   it("reconciles a missed local day when progress is read without daily mission", async () => {
     const today = "2026-08-22";
     await env.DB.batch([
