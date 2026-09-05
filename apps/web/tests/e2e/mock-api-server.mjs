@@ -140,8 +140,10 @@ const DEFAULT_USER = {
   emailVerifiedAt: "2026-01-01T00:00:00Z",
 };
 
-const LONG_REVIEW_CONTENT = "a".repeat(300);
+const LONG_CONTENT_TOKEN = "a".repeat(300);
 
+const LONG_WORD_DETAIL_TARGET = `word-${"a".repeat(289)}`;
+const LONG_REVIEW_CONTENT = "a".repeat(300);
 const LONG_ACCOUNT_EMAIL = `${"a".repeat(64)}@example.test`;
 
 const DEFAULT_SETTINGS = {
@@ -585,6 +587,7 @@ function createInitialState() {
     reviewAttempts: [],
     reviewAttemptsByClientAttemptId: new Map(),
     sentenceAttempts: [],
+    feedbackTargets: new Map(),
     lastReviewAttemptId: null,
     sentenceCount: 0,
     reviewedCount: 0,
@@ -879,10 +882,30 @@ function buildWordDetailResponse(state, slug, selectedFixture, wordFixture) {
   const selectedReviewState = hasSelectedFixture
     ? WORD_DETAIL_REVIEW_STATES.get(selectedFixture)
     : undefined;
+  const contentWord =
+    wordFixture === "long-content"
+      ? {
+          ...word,
+          text: LONG_WORD_DETAIL_TARGET,
+          meanings: word.meanings.map((meaning) => ({
+            ...meaning,
+            shortDefinition: `definition-${LONG_CONTENT_TOKEN}`,
+            learnerDefinition: `learner-${LONG_CONTENT_TOKEN}`,
+            examples: meaning.examples.map((example) => ({
+              ...example,
+              exampleText: `example-${LONG_CONTENT_TOKEN}`,
+            })),
+            usageNotes: meaning.usageNotes.map((note) => ({
+              ...note,
+              noteText: `note-${LONG_CONTENT_TOKEN}`,
+            })),
+          })),
+        }
+      : word;
   const meanings =
     wordFixture === "empty-meanings"
       ? []
-      : word.meanings.map((meaning) => {
+      : contentWord.meanings.map((meaning) => {
           const statefulSaved = state.savedMeaningIds.has(meaning.id);
           const saved = hasSelectedFixture
             ? selectedReviewState !== null
@@ -898,9 +921,14 @@ function buildWordDetailResponse(state, slug, selectedFixture, wordFixture) {
                 : null,
           };
         });
+  for (const meaning of meanings) {
+    if (meaning.userWordId) {
+      state.feedbackTargets.set(meaning.userWordId, contentWord.text);
+    }
+  }
   return {
     word: {
-      ...word,
+      ...contentWord,
       meanings,
     },
   };
@@ -1531,7 +1559,7 @@ const server = createServer(async (req, res) => {
     const state = getSessionState(cookies);
     const sentenceId = generateId("sent");
     const targetWord = body.attemptId
-      ? lookupTargetWord(body.attemptId)
+      ? lookupTargetWord(body.attemptId, state)
       : "pour";
     const evaluation = evaluateSentenceFeedback({
       sentence: body.sentenceText,
@@ -1861,17 +1889,11 @@ const server = createServer(async (req, res) => {
   jsonResponse(res, 404, { error: "not_found", path: url.pathname });
 });
 
-function lookupTargetWord(attemptId) {
-  // attemptId == userWordId == "uw-<meaningId>" for this fixture.
+function lookupTargetWord(attemptId, state) {
   if (typeof attemptId !== "string") {
     return "pour";
   }
-  const meaningId = attemptId.startsWith("uw-")
-    ? attemptId.slice("uw-".length)
-    : attemptId;
-  const word = CANONICAL_WORDS.pour;
-  const meaning = word.meanings.find((m) => m.id === meaningId);
-  return meaning ? word.text : "pour";
+  return state.feedbackTargets.get(attemptId) ?? "pour";
 }
 
 function checkCsrf(req, cookies, res, logLineRef) {

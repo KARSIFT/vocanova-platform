@@ -50,10 +50,10 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
       </PageBackLink>
 
       <div className="mt-[var(--spacing-md)]">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1 className="wrap-break-word text-2xl font-semibold text-neutral-900">
           {wordData.text}
         </h1>
-        <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+        <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-700">
           {wordData.wordType}
           {wordData.difficultyLevel ? ` · ${wordData.difficultyLevel}` : null}
         </p>
@@ -71,14 +71,14 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
                 >
                   <div className="flex flex-wrap items-start justify-between gap-[var(--spacing-md)]">
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium text-neutral-900">
+                      <p className="wrap-break-word font-medium text-neutral-900">
                         {meaning.partOfSpeech}
                       </p>
-                      <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+                      <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-700">
                         {meaning.shortDefinition}
                       </p>
                       {meaning.learnerDefinition ? (
-                        <p className="mt-[var(--spacing-xs)] text-base text-neutral-600">
+                        <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-600">
                           {meaning.learnerDefinition}
                         </p>
                       ) : null}
@@ -104,7 +104,9 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
                       </h3>
                       <ul className="mt-[var(--spacing-xs)] list-disc space-y-[var(--spacing-xs)] pl-[var(--spacing-lg)] text-base text-neutral-700">
                         {meaning.examples.map((example) => (
-                          <li key={example.id}>{example.exampleText}</li>
+                          <li key={example.id} className="wrap-break-word">
+                            {example.exampleText}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -118,10 +120,10 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
                       <ul className="mt-[var(--spacing-xs)] space-y-[var(--spacing-sm)]">
                         {meaning.usageNotes.map((note) => (
                           <li key={note.id}>
-                            <h4 className="text-sm font-semibold text-neutral-800">
+                            <h4 className="wrap-break-word text-sm font-semibold text-neutral-800">
                               {formatNoteType(note.noteType)}
                             </h4>
-                            <p className="text-base text-neutral-700">
+                            <p className="wrap-break-word text-base text-neutral-700">
                               {note.noteText}
                             </p>
                           </li>
