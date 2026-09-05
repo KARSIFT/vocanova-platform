@@ -141,6 +141,8 @@ const DEFAULT_USER = {
 };
 
 const LONG_CONTENT_TOKEN = "a".repeat(300);
+
+const LONG_WORD_DETAIL_TARGET = `word-${"a".repeat(289)}`;
 const LONG_ACCOUNT_EMAIL = `${"a".repeat(64)}@example.test`;
 
 const DEFAULT_SETTINGS = {
@@ -584,6 +586,7 @@ function createInitialState() {
     reviewAttempts: [],
     reviewAttemptsByClientAttemptId: new Map(),
     sentenceAttempts: [],
+    feedbackTargets: new Map(),
     lastReviewAttemptId: null,
     sentenceCount: 0,
     reviewedCount: 0,
@@ -873,7 +876,7 @@ function buildWordDetailResponse(state, slug, selectedFixture, wordFixture) {
     wordFixture === "long-content"
       ? {
           ...word,
-          text: `word-${LONG_CONTENT_TOKEN}`,
+          text: LONG_WORD_DETAIL_TARGET,
           meanings: word.meanings.map((meaning) => ({
             ...meaning,
             shortDefinition: `definition-${LONG_CONTENT_TOKEN}`,
@@ -908,6 +911,11 @@ function buildWordDetailResponse(state, slug, selectedFixture, wordFixture) {
                 : null,
           };
         });
+  for (const meaning of meanings) {
+    if (meaning.userWordId) {
+      state.feedbackTargets.set(meaning.userWordId, contentWord.text);
+    }
+  }
   return {
     word: {
       ...contentWord,
@@ -1541,7 +1549,7 @@ const server = createServer(async (req, res) => {
     const state = getSessionState(cookies);
     const sentenceId = generateId("sent");
     const targetWord = body.attemptId
-      ? lookupTargetWord(body.attemptId)
+      ? lookupTargetWord(body.attemptId, state)
       : "pour";
     const evaluation = evaluateSentenceFeedback({
       sentence: body.sentenceText,
@@ -1871,17 +1879,11 @@ const server = createServer(async (req, res) => {
   jsonResponse(res, 404, { error: "not_found", path: url.pathname });
 });
 
-function lookupTargetWord(attemptId) {
-  // attemptId == userWordId == "uw-<meaningId>" for this fixture.
+function lookupTargetWord(attemptId, state) {
   if (typeof attemptId !== "string") {
     return "pour";
   }
-  const meaningId = attemptId.startsWith("uw-")
-    ? attemptId.slice("uw-".length)
-    : attemptId;
-  const word = CANONICAL_WORDS.pour;
-  const meaning = word.meanings.find((m) => m.id === meaningId);
-  return meaning ? word.text : "pour";
+  return state.feedbackTargets.get(attemptId) ?? "pour";
 }
 
 function checkCsrf(req, cookies, res, logLineRef) {

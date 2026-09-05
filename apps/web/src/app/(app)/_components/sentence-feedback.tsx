@@ -233,7 +233,7 @@ export function SentenceFeedback({
             >
               <p className="font-semibold">{statusLabel}</p>
               {result.explanation ? (
-                <p className="mt-[var(--spacing-xs)] text-base">
+                <p className="mt-[var(--spacing-xs)] wrap-break-word text-base">
                   {result.explanation}
                 </p>
               ) : null}
@@ -244,7 +244,7 @@ export function SentenceFeedback({
             <div
               role="alert"
               aria-live="polite"
-              className="rounded-md bg-red-50 p-[var(--spacing-md)] text-base text-red-700"
+              className="wrap-break-word rounded-md bg-red-50 p-[var(--spacing-md)] text-base text-red-700"
             >
               {errorMessage}
             </div>
@@ -257,7 +257,7 @@ export function SentenceFeedback({
               className="rounded-md bg-amber-50 p-[var(--spacing-md)] text-base text-amber-900"
             >
               <p className="font-semibold">We are here to help</p>
-              <p className="mt-[var(--spacing-xs)]">
+              <p className="mt-[var(--spacing-xs)] wrap-break-word">
                 {result.crisisResourceMessage}
               </p>
             </div>
@@ -293,7 +293,7 @@ export function SentenceFeedback({
           {result.improvementTip ? (
             <div className="rounded-md bg-neutral-50 p-[var(--spacing-md)]">
               <p className="text-sm font-medium text-neutral-700">Tip</p>
-              <p className="mt-[var(--spacing-xs)] text-base text-neutral-900">
+              <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-900">
                 {result.improvementTip}
               </p>
             </div>
