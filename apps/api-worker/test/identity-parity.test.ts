@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { createApp } from "../src/app.js";
 import type { EmailMessage, OAuthProvider } from "../src/domain/identity.js";
-import { issueOpaqueToken } from "../src/identity/crypto.js";
+import { hashToken, issueOpaqueToken } from "../src/identity/crypto.js";
 import { D1IdentityRepository } from "../src/identity/repository.js";
 import {
   IdentityService,
@@ -325,6 +325,60 @@ describe("identity and account parity", () => {
       env,
     );
     expect(replay.status).toBe(401);
+  });
+
+  it("rejects expired OAuth state without consuming it and scopes its production cookie", async () => {
+    const app = identityApp({
+      ...config,
+      environment: "production",
+      secureCookies: true,
+    });
+    const started = await app.request(
+      "http://worker.test/api/v1/auth/oauth/google/start",
+      json({ redirectUri: "http://127.0.0.1:3000/home" }),
+      env,
+    );
+    const issued = cookieHeader(started);
+    expect(issued).toContain("vocanova_oauth_state=");
+    expect(issued).toContain(
+      "Path=/; Max-Age=600; HttpOnly; SameSite=Lax; Secure",
+    );
+    const state = new URL(
+      (await started.json<{ url: string }>()).url,
+    ).searchParams.get("state")!;
+    const tokenHash = await hashToken(state);
+    await env.DB.prepare("DELETE FROM oauth_states WHERE token_hash = ?1")
+      .bind(tokenHash)
+      .run();
+    await new D1IdentityRepository(env.DB).createOAuthState(
+      tokenHash,
+      "production",
+      "http://127.0.0.1:3000/home",
+      "2026-08-22T11:00:00.000Z",
+      "2026-08-22T11:30:00.000Z",
+    );
+
+    const expired = await app.request(
+      `http://worker.test/api/v1/auth/oauth/google/callback?code=valid-code&state=${encodeURIComponent(state)}`,
+      {
+        headers: { Cookie: `vocanova_oauth_state=${state}` },
+        redirect: "manual",
+      },
+      env,
+    );
+    expect(expired.status).toBe(401);
+    const stateRow = await env.DB.prepare(
+      "SELECT consumed_at FROM oauth_states WHERE token_hash = ?1",
+    )
+      .bind(tokenHash)
+      .first<{ consumed_at: string | null }>();
+    expect(stateRow?.consumed_at).toBeNull();
+    for (const table of ["users", "sessions"]) {
+      const row = await env.DB.prepare(
+        `SELECT COUNT(*) AS count FROM ${table}`,
+      ).first<{ count: number }>();
+      expect(row?.count).toBe(0);
+    }
   });
 
   it("creates no partial identity or session for provider failure or unverified email", async () => {
