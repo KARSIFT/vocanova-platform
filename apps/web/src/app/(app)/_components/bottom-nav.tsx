@@ -18,7 +18,8 @@ export function BottomNav() {
       className="fixed inset-x-0 bottom-0 flex h-16 w-full border-t border-neutral-200 bg-white"
     >
       {NAV_ITEMS.map((item) => {
-        const isActive = pathname === item.href;
+        const isActive =
+          pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         return (
           <Link
