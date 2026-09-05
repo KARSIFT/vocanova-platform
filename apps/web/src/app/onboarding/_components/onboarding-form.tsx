@@ -439,7 +439,7 @@ function EnglishLevelStep({
   return (
     <RadioStep
       legend="How would you describe your English?"
-      description="This is just a starting point — you can change it any time."
+      description="This helps us suggest a useful starting point for your practice."
       name="englishLevel"
       value={value}
       onChange={onChange}

@@ -27,4 +27,15 @@ test("accurately describes which onboarding preferences can be updated in Settin
       exact: true,
     }),
   ).toHaveCount(0);
+  await expect(
+    page.getByText("This is just a starting point — you can change it any time.", {
+      exact: true,
+    }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText(
+      "This helps us suggest a useful starting point for your practice.",
+      { exact: true },
+    ),
+  ).toBeVisible();
 });
