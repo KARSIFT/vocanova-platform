@@ -25,8 +25,8 @@ export class AccountAnonymizationProcessor {
     const now = this.now().toISOString();
     const due = await this.database
       .prepare(
-        `SELECT user_id FROM account_deletion_requests
-         WHERE status IN ('deactivated', 'anonymizing') AND purge_after <= ?1
+        `SELECT r.user_id FROM account_deletion_requests r JOIN users u ON u.id = r.user_id
+         WHERE r.status IN ('deactivated', 'anonymizing') AND u.status = 'deleted' AND r.purge_after <= ?1
          ORDER BY purge_after, user_id LIMIT ?2`,
       )
       .bind(now, limit)
@@ -65,10 +65,10 @@ export class AccountAnonymizationProcessor {
            (instr(bucket_key, ':session:') > 0 AND substr(bucket_key, -64) = token_hash)
          )
        )`,
-      `DELETE FROM magic_links WHERE user_id = ?1 OR email IN (
+      `DELETE FROM magic_links WHERE user_id = ?1 OR (user_id IS NULL AND email IN (
          SELECT provider_email FROM external_identities WHERE user_id = ?1
          AND provider_email <> ''
-       )`,
+       ))`,
       "DELETE FROM external_identities WHERE user_id = ?1",
       "DELETE FROM sessions WHERE user_id = ?1",
       "DELETE FROM email_change_links WHERE user_id = ?1",
