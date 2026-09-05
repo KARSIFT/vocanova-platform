@@ -3,7 +3,7 @@ import type { OpenAPIHono } from "@hono/zod-openapi";
 
 import { AIFeedbackError } from "../domain/ai-feedback.js";
 import type { VocaNovaWorkerEnvironment } from "../http/middleware.js";
-import { problemResponse } from "../http/problem.js";
+import { ProblemSchema, problemResponse } from "../http/problem.js";
 import {
   authenticated,
   identityProblem,
@@ -89,6 +89,10 @@ export function registerAIFeedbackRoutes(
   });
 
   const json = (schema: z.ZodType) => ({ "application/json": { schema } });
+  const problem = (description: string) => ({
+    description,
+    content: { "application/problem+json": { schema: ProblemSchema } },
+  });
   app.openAPIRegistry.registerPath({
     method: "post",
     path: "/api/v1/sentence-feedback",
@@ -109,7 +113,13 @@ export function registerAIFeedbackRoutes(
           "Feedback result, which may include a business-level error code",
         content: json(FeedbackResult),
       },
-      404: { description: "Owner or target resource not found" },
+      400: problem("Malformed request"),
+      401: problem("Authentication required"),
+      403: problem("Invalid CSRF token"),
+      404: problem("Owner or target resource not found"),
+      409: problem("Idempotency conflict"),
+      422: problem("Invalid request or Idempotency-Key"),
+      500: problem("Unexpected server error"),
     },
   });
   app.openAPIRegistry.registerPath({
@@ -126,7 +136,15 @@ export function registerAIFeedbackRoutes(
       },
     ],
     request: { body: { content: json(ReportInput) } },
-    responses: { 204: { description: "Report recorded" } },
+    responses: {
+      204: { description: "Report recorded" },
+      400: problem("Malformed report request"),
+      401: problem("Authentication required"),
+      403: problem("Invalid CSRF token"),
+      404: problem("Feedback attempt not found"),
+      422: problem("Invalid request body"),
+      500: problem("Unexpected server error"),
+    },
   });
 }
 
