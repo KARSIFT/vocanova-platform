@@ -26,7 +26,7 @@ actions and are not automated by pull-request workflows.
 
 ## 3. Table inventory
 
-The eight current migrations create 32 tables:
+The nine current migrations create 32 tables:
 
 - Foundation: `platform_metadata`.
 - Identity and accounts: `users`, `external_identities`, `sessions`, `magic_links`, `oauth_states`,
@@ -100,6 +100,9 @@ same logical write as the attempt. `review_state_reservations` is a D1-only runt
 reserves each learner-word transition before that write. Its `(user_word_id, state_version)` key
 causes a concurrent stale submission to abort atomically and retry from fresh state, preserving
 append-only attempts and preventing lost scheduler transitions.
+The `review_attempts` insertion guard also aborts the entire review batch if a
+saved word was soft-deleted after validation, so deleted words cannot gain
+attempt, scheduler, mission, activity, reward, or idempotency side effects.
 
 ## 10. Missions and daily activity
 
