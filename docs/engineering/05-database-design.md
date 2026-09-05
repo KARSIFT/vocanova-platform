@@ -26,7 +26,7 @@ actions and are not automated by pull-request workflows.
 
 ## 3. Table inventory
 
-The nine current migrations create 32 tables:
+The ten current migrations create 32 tables:
 
 - Foundation: `platform_metadata`.
 - Identity and accounts: `users`, `external_identities`, `sessions`, `magic_links`, `oauth_states`,
@@ -113,7 +113,9 @@ day. `daily_activity_summaries` stores daily activity aggregates.
 ## 11. Learner sentences and AI feedback
 
 `learner_sentences` stores the original and normalized sentence, source surface, status, and links to
-the learner and optional vocabulary rows. `ai_feedback_attempts` stores provider/model/prompt
+the learner and optional vocabulary rows. Word-detail sentence practice is guarded at insertion so
+its saved-word target must still be active; review-origin feedback keeps historical review evidence
+after a word is removed. `ai_feedback_attempts` stores provider/model/prompt
 versions, request hash, structured feedback JSON, lifecycle status, and redacted failure metadata.
 Successful attempts require a completion time; failed attempts require an error code.
 

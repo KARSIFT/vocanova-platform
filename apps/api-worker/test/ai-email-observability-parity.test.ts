@@ -162,6 +162,53 @@ describe("Worker AI feedback parity", () => {
     expect(provider.generateCalls).toBe(1);
   });
 
+  it("does not generate feedback after its target is removed during validation", async () => {
+    const delayed = delayFeedbackTargetLookup(env.DB);
+    const provider = new ScriptedProvider(() => validFeedback());
+    const service = createService(provider, {}, undefined, delayed.database);
+    const feedback = service.submit(
+      USER_A,
+      submission("I work every day."),
+      "removed-target",
+    );
+    await delayed.read;
+    await env.DB.prepare("UPDATE user_words SET deleted_at = ?1 WHERE id = ?2")
+      .bind(NOW, USER_WORD)
+      .run();
+    delayed.release();
+
+    await expect(feedback).rejects.toMatchObject({ code: "target_not_found" });
+    expect(provider.generateCalls).toBe(0);
+    await expect(
+      env.DB.prepare("SELECT count(*) AS count FROM learner_sentences").first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM ai_feedback_attempts",
+      ).first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM confidence_point_ledger",
+      ).first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM daily_activity_summaries",
+      ).first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM ai_generation_leases",
+      ).first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM ai_generation_events",
+      ).first(),
+    ).resolves.toEqual({ count: 1 });
+  });
+
   it("enforces the idempotency key length before provider work", async () => {
     const provider = new ScriptedProvider(() => validFeedback());
     const service = createService(provider);
@@ -899,6 +946,7 @@ function createService(
     providerTimeoutMs?: number;
   } = {},
   telemetry?: AIFeedbackTelemetry,
+  database: D1Database = env.DB,
 ): AIFeedbackService {
   const config: AIFeedbackServiceConfig = {
     limits: {
@@ -915,13 +963,70 @@ function createService(
     release: "test",
   };
   return new AIFeedbackService(
-    new D1AIFeedbackRepository(env.DB, () => new Date(NOW)),
+    new D1AIFeedbackRepository(database, () => new Date(NOW)),
     provider,
     provider,
     telemetry,
     config,
     () => new Date(NOW),
   );
+}
+
+function delayFeedbackTargetLookup(database: D1Database): {
+  database: D1Database;
+  read: Promise<void>;
+  release: () => void;
+} {
+  let lookupRead!: () => void;
+  let resume!: () => void;
+  const read = new Promise<void>((resolve) => {
+    lookupRead = resolve;
+  });
+  const resumed = new Promise<void>((resolve) => {
+    resume = resolve;
+  });
+  let delayed = false;
+  const delayedDatabase = new Proxy(database, {
+    get(target, property, receiver) {
+      if (property !== "prepare")
+        return Reflect.get(target, property, receiver);
+      return (sql: string) => {
+        const statement = target.prepare(sql);
+        if (delayed || !sql.includes("FROM user_words uw")) return statement;
+        return new Proxy(statement, {
+          get(prepared, statementProperty, statementReceiver) {
+            if (statementProperty !== "bind")
+              return Reflect.get(
+                prepared,
+                statementProperty,
+                statementReceiver,
+              );
+            return (...values: unknown[]) => {
+              const bound = prepared.bind(...values);
+              return new Proxy(bound, {
+                get(boundStatement, boundProperty, boundReceiver) {
+                  if (boundProperty !== "first")
+                    return Reflect.get(
+                      boundStatement,
+                      boundProperty,
+                      boundReceiver,
+                    );
+                  return async <T>(): Promise<T | null> => {
+                    const row = await boundStatement.first<T>();
+                    delayed = true;
+                    lookupRead();
+                    await resumed;
+                    return row;
+                  };
+                },
+              });
+            };
+          },
+        });
+      };
+    },
+  }) as D1Database;
+  return { database: delayedDatabase, read, release: resume };
 }
 
 function submission(sentenceText: string) {
