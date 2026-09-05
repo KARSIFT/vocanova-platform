@@ -888,9 +888,15 @@ function buildSituationResponse(slug, selectedFixture) {
   };
 }
 
-function buildJourneySituations(fixture) {
+function buildJourneySituations(fixture, after) {
   if (fixture === "empty") {
     return { items: [] };
+  }
+  if (fixture === "paginated") {
+    if (after === "e2e-journey-page-2") {
+      return { items: [JOURNEY_SITUATIONS[1]] };
+    }
+    return { items: [JOURNEY_SITUATIONS[0]], nextCursor: "e2e-journey-page-2" };
   }
   return { items: JOURNEY_SITUATIONS.map((s) => ({ ...s })) };
 }
@@ -1575,7 +1581,14 @@ const server = createServer(async (req, res) => {
       return;
     }
     logLine(req, 200);
-    jsonResponse(res, 200, buildJourneySituations(cookies.e2e_journey_fixture));
+    jsonResponse(
+      res,
+      200,
+      buildJourneySituations(
+        cookies.e2e_journey_fixture,
+        url.searchParams.get("after"),
+      ),
+    );
     return;
   }
 
