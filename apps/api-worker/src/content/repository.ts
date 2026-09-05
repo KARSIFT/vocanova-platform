@@ -399,107 +399,132 @@ export class D1ContentLearningRepository {
       await this.recordIdempotency(userId, "reviews:submit", key, fingerprint);
       return existingAttempt;
     }
-    const word = await this.database
-      .prepare(
-        `SELECT review_step, meaning_id, total_review_count, correct_review_count,
-                consecutive_correct_count, consecutive_incorrect_count
-         FROM user_words WHERE id = ?1 AND user_id = ?2 AND deleted_at IS NULL`,
-      )
-      .bind(normalized.userWordId, userId)
-      .first<Row>();
-    if (!word || word.meaning_id !== normalized.meaningId)
-      throw new ContentLearningError("user_word_not_found");
     if (
       normalized.promptType === "multiple_choice" &&
       normalized.result !== "skipped" &&
       (normalized.result === "correct") !==
-        (normalized.selectedOptionMeaningId === word.meaning_id)
+        (normalized.selectedOptionMeaningId === normalized.meaningId)
     )
       throw new ContentLearningError("invalid_input");
-    const schedule = applyReview(
-      {
-        step: Number(word.review_step),
-        total: Number(word.total_review_count),
-        correct: Number(word.correct_review_count),
-        consecutiveCorrect: Number(word.consecutive_correct_count),
-        consecutiveIncorrect: Number(word.consecutive_incorrect_count),
-      },
-      normalized.result,
-      normalized.rating,
-      normalized.answeredAt,
-    );
-    const attemptId = crypto.randomUUID();
-    const timestamp = this.now().toISOString();
-    const missionWiring = await this.reviewMissionStatements(
-      userId,
-      attemptId,
-      normalized.result,
-      normalized.rating,
-      timestamp,
-    );
-    await this.database.batch([
-      this.database
+    for (let retry = 0; retry < 3; retry += 1) {
+      const word = await this.database
         .prepare(
-          `INSERT INTO review_attempts
+          `SELECT review_step, meaning_id, total_review_count, correct_review_count,
+                  consecutive_correct_count, consecutive_incorrect_count
+           FROM user_words WHERE id = ?1 AND user_id = ?2 AND deleted_at IS NULL`,
+        )
+        .bind(normalized.userWordId, userId)
+        .first<Row>();
+      if (!word || word.meaning_id !== normalized.meaningId)
+        throw new ContentLearningError("user_word_not_found");
+      const schedule = applyReview(
+        {
+          step: Number(word.review_step),
+          total: Number(word.total_review_count),
+          correct: Number(word.correct_review_count),
+          consecutiveCorrect: Number(word.consecutive_correct_count),
+          consecutiveIncorrect: Number(word.consecutive_incorrect_count),
+        },
+        normalized.result,
+        normalized.rating,
+        normalized.answeredAt,
+      );
+      const attemptId = crypto.randomUUID();
+      const timestamp = this.now().toISOString();
+      const missionWiring = await this.reviewMissionStatements(
+        userId,
+        attemptId,
+        normalized.result,
+        normalized.rating,
+        timestamp,
+      );
+      const version = await this.database
+        .prepare(
+          `SELECT coalesce(max(state_version), -1) + 1 AS state_version
+           FROM review_state_reservations WHERE user_word_id = ?1`,
+        )
+        .bind(normalized.userWordId)
+        .first<{ state_version: number }>();
+      const reviewStateVersion = Number(version?.state_version);
+      try {
+        await this.database.batch([
+          this.database
+            .prepare(
+              `INSERT INTO review_state_reservations
+               (user_word_id, state_version, created_at) VALUES (?1, ?2, ?3)`,
+            )
+            .bind(normalized.userWordId, reviewStateVersion, timestamp),
+          this.database
+            .prepare(
+              `INSERT INTO review_attempts
            (id, user_id, user_word_id, meaning_id, attempt_type, prompt_type, result,
             rating, review_step_before, review_step_after, answered_at, response_time_ms,
             selected_option_meaning_id, typed_answer, was_hint_used, source,
             client_attempt_id, metadata_json, created_at, updated_at)
            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12,
                    ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?19)`,
-        )
-        .bind(
-          attemptId,
-          userId,
-          normalized.userWordId,
-          normalized.meaningId,
-          normalized.attemptType,
-          normalized.promptType,
-          normalized.result,
-          normalized.rating || null,
-          schedule.before,
-          schedule.after,
-          normalized.answeredAt,
-          normalized.responseTimeMs,
-          normalized.selectedOptionMeaningId || null,
-          normalized.typedAnswer || null,
-          normalized.wasHintUsed ? 1 : 0,
-          normalized.source,
-          normalized.clientAttemptId,
-          normalized.metadata ? JSON.stringify(normalized.metadata) : null,
-          timestamp,
-        ),
-      this.database
-        .prepare(
-          `UPDATE user_words SET review_step = ?1, next_review_at = ?2,
+            )
+            .bind(
+              attemptId,
+              userId,
+              normalized.userWordId,
+              normalized.meaningId,
+              normalized.attemptType,
+              normalized.promptType,
+              normalized.result,
+              normalized.rating || null,
+              schedule.before,
+              schedule.after,
+              normalized.answeredAt,
+              normalized.responseTimeMs,
+              normalized.selectedOptionMeaningId || null,
+              normalized.typedAnswer || null,
+              normalized.wasHintUsed ? 1 : 0,
+              normalized.source,
+              normalized.clientAttemptId,
+              normalized.metadata ? JSON.stringify(normalized.metadata) : null,
+              timestamp,
+            ),
+          this.database
+            .prepare(
+              `UPDATE user_words SET review_step = ?1, next_review_at = ?2,
              last_reviewed_at = ?3, last_result = ?4, last_rating = ?5,
              total_review_count = ?6, correct_review_count = ?7,
              consecutive_correct_count = ?8, consecutive_incorrect_count = ?9,
              updated_at = ?10 WHERE id = ?11 AND user_id = ?12`,
-        )
-        .bind(
-          schedule.after,
-          schedule.nextReviewAt,
-          normalized.answeredAt,
-          normalized.result,
-          schedule.lastRating || null,
-          schedule.total,
-          schedule.correct,
-          schedule.consecutiveCorrect,
-          schedule.consecutiveIncorrect,
-          timestamp,
-          normalized.userWordId,
-          userId,
-        ),
-      this.database
-        .prepare(
-          `INSERT INTO idempotency_keys (id, user_id, operation, key, fingerprint, created_at)
+            )
+            .bind(
+              schedule.after,
+              schedule.nextReviewAt,
+              normalized.answeredAt,
+              normalized.result,
+              schedule.lastRating || null,
+              schedule.total,
+              schedule.correct,
+              schedule.consecutiveCorrect,
+              schedule.consecutiveIncorrect,
+              timestamp,
+              normalized.userWordId,
+              userId,
+            ),
+          this.database
+            .prepare(
+              `INSERT INTO idempotency_keys (id, user_id, operation, key, fingerprint, created_at)
            VALUES (?1, ?2, 'reviews:submit', ?3, ?4, ?5)`,
-        )
-        .bind(crypto.randomUUID(), userId, key, fingerprint, timestamp),
-      ...missionWiring.statements,
-    ]);
-    return (await this.attemptByClientId(userId, normalized.clientAttemptId))!;
+            )
+            .bind(crypto.randomUUID(), userId, key, fingerprint, timestamp),
+          ...missionWiring.statements,
+        ]);
+      } catch (error) {
+        if (isReviewStateVersionConflict(error) && retry < 2) continue;
+        throw error;
+      }
+      return (await this.attemptByClientId(
+        userId,
+        normalized.clientAttemptId,
+      ))!;
+    }
+    throw new Error("review scheduler retries exhausted");
   }
 
   private async examples(
@@ -942,6 +967,15 @@ function zUuid(value: string): boolean {
 function requireKey(key: string): void {
   if (!key || key.length > 200)
     throw new ContentLearningError("invalid_idempotency");
+}
+
+function isReviewStateVersionConflict(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes(
+      "review_state_reservations.user_word_id, review_state_reservations.state_version",
+    )
+  );
 }
 async function sha256(value: string): Promise<string> {
   const bytes = await crypto.subtle.digest(
