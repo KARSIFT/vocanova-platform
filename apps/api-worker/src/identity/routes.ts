@@ -160,6 +160,11 @@ export function registerIdentityRoutes(
         clearCookie(SESSION_COOKIE, true, service.config.secureCookies),
         { append: true },
       );
+      context.header(
+        "set-cookie",
+        clearCookie(CSRF_COOKIE, false, service.config.secureCookies),
+        { append: true },
+      );
       return context.body(null, 204);
     } catch (error) {
       return identityProblem(context, error);
