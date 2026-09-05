@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ApiResponseError } from "@vocanova/api-client";
 
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
+import { PageBackLink } from "../../_components/page-back-link";
 
 interface SituationDiscoverPageProps {
   params: Promise<{ situation: string }>;
@@ -28,12 +29,7 @@ export default async function SituationDiscoverPage({
 
   return (
     <div className="p-[var(--spacing-lg)]">
-      <Link
-        href="/discover"
-        className="text-base font-semibold text-primary-700 hover:text-primary-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
-      >
-        Back to Journey
-      </Link>
+      <PageBackLink href="/discover">Back to Journey</PageBackLink>
       <h1 className="mt-[var(--spacing-md)] text-2xl font-semibold text-neutral-900">
         {situationData.title}
       </h1>

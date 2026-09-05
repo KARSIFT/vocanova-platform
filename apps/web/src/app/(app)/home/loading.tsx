@@ -1,6 +1,7 @@
 export default function HomeLoading() {
   return (
     <div
+      role="status"
       aria-busy="true"
       aria-label="Loading home"
       className="animate-pulse p-[var(--spacing-lg)]"

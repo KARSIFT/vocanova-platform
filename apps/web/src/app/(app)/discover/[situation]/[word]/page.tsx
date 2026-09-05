@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { ApiResponseError, type WordReviewState } from "@vocanova/api-client";
 
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
+import { PageBackLink } from "../../../_components/page-back-link";
 import { SentenceFeedback } from "../../../_components/sentence-feedback";
 
 import { MeaningSaveButton } from "./_components/meaning-save-button";
@@ -29,12 +29,9 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
 
   return (
     <div className="p-[var(--spacing-lg)]">
-      <Link
-        href={`/discover/${situation}`}
-        className="text-base font-semibold text-primary-700 hover:text-primary-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
-      >
+      <PageBackLink href={`/discover/${situation}`}>
         Back to Journey
-      </Link>
+      </PageBackLink>
 
       <div className="mt-[var(--spacing-md)]">
         <h1 className="text-2xl font-semibold text-neutral-900">

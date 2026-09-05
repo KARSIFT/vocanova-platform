@@ -16,6 +16,7 @@ import {
   type IdentityConfig,
 } from "../src/identity/service.js";
 import { D1PlatformRepository } from "../src/repositories/d1-platform-repository.js";
+import { D1MissionsRepository } from "../src/missions/repository.js";
 
 const now = new Date("2026-08-22T12:00:00.000Z");
 const config: IdentityConfig = {
@@ -61,6 +62,14 @@ beforeEach(async () => {
     "ai_generation_leases",
     "ai_generation_events",
     "ai_usage_counters",
+    "grace_day_ledger",
+    "streak_states",
+    "confidence_point_ledger",
+    "daily_activity_summaries",
+    "daily_mission_snapshots",
+    "review_attempts",
+    "idempotency_keys",
+    "user_words",
     "account_deletion_requests",
     "email_change_links",
     "user_onboarding_profiles",
@@ -304,6 +313,51 @@ describe("identity and account parity", () => {
       env,
     );
     expect(await preserved.json()).toMatchObject({ dailyReviewTarget: 35 });
+  });
+
+  it("keeps today's mission snapshot when Settings and client timezone change", async () => {
+    const app = identityApp(config, oauth, () => now);
+    const { cookie, csrf } = await signedIn(
+      "mission-snapshot@example.test",
+      app,
+    );
+    const initialSettings = await app.request(
+      "http://worker.test/api/v1/settings",
+      withAuth(json({ dailyReviewTarget: 5 }, "PATCH"), cookie, csrf),
+      env,
+    );
+    expect(initialSettings.status).toBe(200);
+
+    const initialMission = await app.request(
+      "http://worker.test/api/v1/daily-mission?timezone=Asia%2FTehran",
+      { headers: { Cookie: cookie } },
+      env,
+    );
+    expect(initialMission.status).toBe(200);
+    expect(await initialMission.json()).toMatchObject({
+      localDate: "2026-08-22",
+      timezone: "Asia/Tehran",
+      reviewTarget: 5,
+    });
+
+    const changedSettings = await app.request(
+      "http://worker.test/api/v1/settings",
+      withAuth(json({ dailyReviewTarget: 20 }, "PATCH"), cookie, csrf),
+      env,
+    );
+    expect(changedSettings.status).toBe(200);
+
+    const sameDayMission = await app.request(
+      "http://worker.test/api/v1/daily-mission?timezone=America%2FLos_Angeles",
+      { headers: { Cookie: cookie } },
+      env,
+    );
+    expect(sameDayMission.status).toBe(200);
+    expect(await sameDayMission.json()).toMatchObject({
+      localDate: "2026-08-22",
+      timezone: "Asia/Tehran",
+      reviewTarget: 5,
+    });
   });
 
   it("requires CSRF to logout and revokes only the supplied session", async () => {
@@ -1117,6 +1171,46 @@ describe("identity and account parity", () => {
     ).rejects.toMatchObject({ code: "conflict" });
   });
 
+  it("isolates the same account-deletion idempotency key between users", async () => {
+    const first = await signedIn("first-delete@example.test");
+    const second = await signedIn("second-delete@example.test");
+    const deletion = (account: Awaited<ReturnType<typeof signedIn>>) =>
+      account.app.request(
+        "http://worker.test/api/v1/account-deletion-requests",
+        withAuth(
+          { method: "POST", headers: { "Idempotency-Key": "shared-delete" } },
+          account.cookie,
+          account.csrf,
+        ),
+        env,
+      );
+
+    const firstDeleted = await deletion(first);
+    const secondDeleted = await deletion(second);
+    expect(firstDeleted.status).toBe(200);
+    expect(secondDeleted.status).toBe(200);
+    expect(await firstDeleted.json()).toMatchObject({
+      userId: first.userId,
+      replayed: false,
+    });
+    expect(await secondDeleted.json()).toMatchObject({
+      userId: second.userId,
+      replayed: false,
+    });
+
+    const requests = await env.DB.prepare(
+      `SELECT user_id, idempotency_key FROM account_deletion_requests
+       WHERE idempotency_key = ?1 ORDER BY user_id`,
+    )
+      .bind("shared-delete")
+      .all<{ user_id: string; idempotency_key: string }>();
+    expect(requests.results).toEqual(
+      [first.userId, second.userId]
+        .sort()
+        .map((user_id) => ({ user_id, idempotency_key: "shared-delete" })),
+    );
+  });
+
   it("revokes every session and pending email change when an account is deactivated", async () => {
     const first = await signedIn("all-credentials@example.test");
     const second = await signedIn("all-credentials@example.test");
@@ -1556,11 +1650,14 @@ describe("identity and account parity", () => {
 function identityApp(
   identityConfiguration: IdentityConfig = config,
   provider: OAuthProvider | null = oauth,
+  missionsClock: () => Date = () => new Date(),
 ) {
   return createApp({
     createPlatformRepository: (database) => new D1PlatformRepository(database),
     createIdentityService: () =>
       identityService(identityConfiguration, provider),
+    createMissionsRepository: () =>
+      new D1MissionsRepository(env.DB, missionsClock),
   });
 }
 
@@ -1582,8 +1679,7 @@ function identityService(
   );
 }
 
-async function signedIn(email: string) {
-  const app = identityApp();
+async function signedIn(email: string, app = identityApp()) {
   await app.request(
     "http://worker.test/api/v1/auth/magic-links",
     json({ email }),
