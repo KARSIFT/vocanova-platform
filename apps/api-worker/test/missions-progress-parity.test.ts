@@ -27,18 +27,29 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     );
   });
 
+  it("handles a valid timezone change that moves the local date backward", async () => {
+    await setSettings("Pacific/Honolulu", 5);
+    await env.DB.prepare(`INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 1, 1, '2026-08-23', '2026-08-23', 'Pacific/Kiritimati', 'active', ?3, ?3)`).bind(crypto.randomUUID(), USER, NOW).run();
+    await expect(new D1MissionsRepository(env.DB, () => new Date("2026-08-22T12:00:00.000Z")).getProgress(USER, "")).rejects.toThrow("last completion is after current local date");
+  });
+
   it("reconciles a missed local day when progress is read without daily mission", async () => {
     const today = "2026-08-22";
     await env.DB.batch([
       mission(addDays(today, -1), "open", NOW),
-      env.DB.prepare(`INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 3, 3, ?3, ?3, 'UTC', 'active', ?4, ?4)`).bind(crypto.randomUUID(), USER, addDays(today, -2), NOW),
+      env.DB.prepare(
+        `INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 3, 3, ?3, ?3, 'UTC', 'active', ?4, ?4)`,
+      ).bind(crypto.randomUUID(), USER, addDays(today, -2), NOW),
     ]);
     const repository = new D1MissionsRepository(
       env.DB,
       () => new Date("2026-08-22T12:00:00.000Z"),
     );
     const progress = await repository.getProgress(USER, "UTC");
-    expect(progress.streak).toMatchObject({ currentStreakCount: 0, status: "broken" });
+    expect(progress.streak).toMatchObject({
+      currentStreakCount: 0,
+      status: "broken",
+    });
     expect((await repository.getProgress(USER, "UTC")).streak).toEqual(
       progress.streak,
     );
@@ -48,9 +59,18 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     const today = "2026-08-22";
     await env.DB.batch([
       mission(today, "completed", NOW),
-      env.DB.prepare(`INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 3, 3, ?3, ?3, 'UTC', 'active', ?4, ?4)`).bind(crypto.randomUUID(), USER, today, NOW),
+      env.DB.prepare(
+        `INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 3, 3, ?3, ?3, 'UTC', 'active', ?4, ?4)`,
+      ).bind(crypto.randomUUID(), USER, today, NOW),
     ]);
-    expect((await new D1MissionsRepository(env.DB, () => new Date("2026-08-22T12:00:00.000Z")).getProgress(USER, "UTC")).streak).toMatchObject({ currentStreakCount: 3, status: "active" });
+    expect(
+      (
+        await new D1MissionsRepository(
+          env.DB,
+          () => new Date("2026-08-22T12:00:00.000Z"),
+        ).getProgress(USER, "UTC")
+      ).streak,
+    ).toMatchObject({ currentStreakCount: 3, status: "active" });
   });
 
   it("preserves available grace when progress reads an at-risk streak", async () => {
@@ -58,10 +78,17 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     await env.DB.batch([
       mission(addDays(today, -2), "completed", NOW),
       mission(addDays(today, -1), "missed", NOW),
-      env.DB.prepare(`INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 2, 2, ?3, ?3, 'UTC', 'active', ?4, ?4)`).bind(crypto.randomUUID(), USER, addDays(today, -2), NOW),
-      env.DB.prepare(`INSERT INTO grace_day_ledger (id, user_id, amount, balance_after, reason, source_type, applied_to_local_date, timezone, idempotency_key, created_at, updated_at) VALUES (?1, ?2, 1, 1, 'manual_grant', 'admin', ?3, 'UTC', 'progress-grace', ?4, ?4)`).bind(crypto.randomUUID(), USER, addDays(today, -2), NOW),
+      env.DB.prepare(
+        `INSERT INTO streak_states (id, user_id, current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status, created_at, updated_at) VALUES (?1, ?2, 2, 2, ?3, ?3, 'UTC', 'active', ?4, ?4)`,
+      ).bind(crypto.randomUUID(), USER, addDays(today, -2), NOW),
+      env.DB.prepare(
+        `INSERT INTO grace_day_ledger (id, user_id, amount, balance_after, reason, source_type, applied_to_local_date, timezone, idempotency_key, created_at, updated_at) VALUES (?1, ?2, 1, 1, 'manual_grant', 'admin', ?3, 'UTC', 'progress-grace', ?4, ?4)`,
+      ).bind(crypto.randomUUID(), USER, addDays(today, -2), NOW),
     ]);
-    const repository = new D1MissionsRepository(env.DB, () => new Date("2026-08-22T12:00:00.000Z"));
+    const repository = new D1MissionsRepository(
+      env.DB,
+      () => new Date("2026-08-22T12:00:00.000Z"),
+    );
     await repository.getProgress(USER, "UTC");
     const first = await repository.getProgress(USER, "UTC");
     expect(first.streak).toMatchObject({
@@ -69,7 +96,15 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
       status: "at_risk",
       graceDayBalance: 1,
     });
-    expect((await env.DB.prepare("SELECT count(*) AS count FROM grace_day_ledger WHERE user_id = ?1").bind(USER).first<{ count: number }>())?.count).toBe(1);
+    expect(
+      (
+        await env.DB.prepare(
+          "SELECT count(*) AS count FROM grace_day_ledger WHERE user_id = ?1",
+        )
+          .bind(USER)
+          .first<{ count: number }>()
+      )?.count,
+    ).toBe(1);
   });
 
   it("freezes today's snapshot while settings apply on the next local day", async () => {
