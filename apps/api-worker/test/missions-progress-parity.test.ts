@@ -610,6 +610,12 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     await repository.reconcile(USER, "UTC", nextThreshold, true);
 
     expect(await graceAwards()).toHaveLength(1);
+    await expect(repository.getProgress(USER, "UTC")).resolves.toMatchObject({
+      streak: {
+        currentStreakCount: 14,
+        graceDayBalance: 2,
+      },
+    });
     await expect(
       env.DB.prepare(
         "SELECT current_streak_count FROM streak_states WHERE user_id = ?1",
