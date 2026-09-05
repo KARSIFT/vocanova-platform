@@ -124,7 +124,11 @@ export function OAuthButton({ returnTo }: OAuthButtonProps) {
         {status.type === "loading" ? "Redirecting..." : "Continue with Google"}
       </button>
       {status.message ? (
-        <p role="alert" aria-live="polite" className="text-base text-red-700">
+        <p
+          role={status.type === "error" ? "alert" : "status"}
+          aria-live={status.type === "error" ? "assertive" : "polite"}
+          className={`text-base ${status.type === "error" ? "text-red-700" : "text-neutral-700"}`}
+        >
           {status.message}
         </p>
       ) : null}
