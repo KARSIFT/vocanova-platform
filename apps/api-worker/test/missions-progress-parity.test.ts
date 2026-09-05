@@ -597,15 +597,17 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
       },
     ]);
 
-    await env.DB.prepare(
-      `UPDATE streak_states
-       SET current_streak_count = 13, longest_streak_count = 13,
-           last_completed_local_date = ?1, last_activity_local_date = ?1
-       WHERE user_id = ?2`,
-    )
-      .bind(yesterday, USER)
-      .run();
-    await repository.reconcile(USER, "UTC", today, true);
+    const nextThreshold = addDays(today, 1);
+    await env.DB.batch([
+      mission(nextThreshold, "completed", timestamp),
+      env.DB.prepare(
+        `UPDATE streak_states
+         SET current_streak_count = 13, longest_streak_count = 13,
+             last_completed_local_date = ?1, last_activity_local_date = ?1
+         WHERE user_id = ?2`,
+      ).bind(today, USER),
+    ]);
+    await repository.reconcile(USER, "UTC", nextThreshold, true);
 
     expect(await graceAwards()).toHaveLength(1);
     await expect(
