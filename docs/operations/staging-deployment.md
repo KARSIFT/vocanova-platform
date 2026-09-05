@@ -68,9 +68,33 @@ curl --fail --silent --show-error https://api-stag.vocanova.site/configz
 curl --fail --silent --show-error --output /dev/null https://stag.vocanova.site/
 ```
 
-`configz.release` must equal the `main` commit shown by the build. A healthy
-deployment does not imply that sign-in is usable: inspect `configz` feature flags
-before beginning a learner-journey walkthrough.
+`configz.release` must equal the `main` commit shown by the build. This endpoint
+reports the API release, not the web release or authentication feature flags.
+A healthy deployment does not imply that sign-in is usable: check the staging
+authentication configuration and test sign-in before beginning a learner-journey
+walkthrough.
+
+### Test the merge-to-staging path
+
+Use a small, reviewed pull request to exercise the existing connection:
+
+1. Record staging's current API release, then merge the pull request after its
+   required checks pass. Record the resulting commit on `main`, not the feature
+   branch commit.
+2. In the web Worker's Builds page, confirm that a build starts automatically for
+   that exact `main` commit and uses the commands above. A successful GitHub CI
+   run alone is not deployment evidence.
+3. Confirm that the build completes its API and web deployments and final smoke
+   checks. Check both Workers' deployment records for the same `sha-<commit>` tag.
+4. Repeat the health and release checks above. The API release must match the
+   merge commit. Load the website in a fresh browser context and inspect its
+   client API requests: they must target `https://api-stag.vocanova.site`, never
+   `http://127.0.0.1:8080`.
+
+If no build starts, inspect the repository connection, branch, and build watch
+paths. If a build fails, inspect its first failing step. Do not substitute a
+manual Wrangler deployment as proof that automatic deployment works. Report
+authentication or AI-provider failures separately from release delivery.
 
 ## Recover or roll back
 
