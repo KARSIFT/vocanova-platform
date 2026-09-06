@@ -56,6 +56,28 @@ describe("starter vocabulary catalog", () => {
     ).resolves.toEqual({ count: 32 });
   });
 
+  it("keeps every seeded Journey word link navigable and canonical", async () => {
+    const repository = new D1ContentLearningRepository(
+      env.DB,
+      () => new Date(NOW),
+    );
+    const situations = await repository.listSituations("", 10);
+    let meaningsChecked = 0;
+    for (const situation of situations.items) {
+      const detail = await repository.getSituation(USER, situation.slug);
+      expect(detail.meanings).toHaveLength(8);
+      for (const meaning of detail.meanings) {
+        expect(meaning.wordSlug).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+        const canonical = await repository.getWord(USER, meaning.wordSlug);
+        expect(
+          canonical.word.meanings.some((item) => item.id === meaning.meaningId),
+        ).toBe(true);
+        meaningsChecked += 1;
+      }
+    }
+    expect(meaningsChecked).toBe(32);
+  });
+
   it("supports a synthetic learner saving and reviewing a catalog meaning", async () => {
     await env.DB.prepare(
       `INSERT INTO users (id, email, status, onboarding_status, created_at, updated_at)

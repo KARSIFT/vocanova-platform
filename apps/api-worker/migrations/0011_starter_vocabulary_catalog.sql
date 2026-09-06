@@ -41,7 +41,7 @@ VALUES
   ('a2000000-0000-4000-8000-000000000015', 'take notes', 'take notes', 'phrase', 'en', 'active', 'a2', '2026-08-22T00:00:00.000Z', '2026-08-22T00:00:00.000Z'),
   ('a2000000-0000-4000-8000-000000000016', 'follow up', 'follow up', 'phrasal_verb', 'en', 'active', 'b1', '2026-08-22T00:00:00.000Z', '2026-08-22T00:00:00.000Z'),
   ('a2000000-0000-4000-8000-000000000017', 'available', 'available', 'word', 'en', 'active', 'a2', '2026-08-22T00:00:00.000Z', '2026-08-22T00:00:00.000Z'),
-  ('a2000000-0000-4000-8000-000000000018', 'Could you repeat that?', 'could you repeat that?', 'phrase', 'en', 'active', 'a2', '2026-08-22T00:00:00.000Z', '2026-08-22T00:00:00.000Z');
+  ('a2000000-0000-4000-8000-000000000018', 'Could you repeat that', 'could you repeat that', 'phrase', 'en', 'active', 'a2', '2026-08-22T00:00:00.000Z', '2026-08-22T00:00:00.000Z');
 
 INSERT INTO canonical_words
   (id, text, normalized_text, word_type, language_code, status, difficulty_level, created_at, updated_at)
