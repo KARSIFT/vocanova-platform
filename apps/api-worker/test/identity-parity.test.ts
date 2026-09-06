@@ -459,6 +459,69 @@ describe("identity and account parity", () => {
     });
   });
 
+  it("persists an onboarding timezone without replacing an existing custom target", async () => {
+    const { app, cookie, csrf, userId } = await signedIn(
+      "timezone-onboarding@example.test",
+    );
+    await app.request("http://worker.test/api/v1/settings", {
+      headers: { Cookie: cookie },
+    }, env);
+    await env.DB.prepare(
+      "UPDATE user_settings SET daily_review_target = 35 WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
+    const response = await app.request(
+      "http://worker.test/api/v1/onboarding",
+      withAuth(
+        json({
+          englishLevel: "a2",
+          nativeLanguage: "en",
+          learningGoal: "work",
+          mainUseCase: "work",
+          dailyReviewTarget: 10,
+          timezone: "Asia/Tehran",
+        }),
+        cookie,
+        csrf,
+      ),
+      env,
+    );
+    expect(response.status).toBe(200);
+    await expect(
+      env.DB.prepare(
+        "SELECT timezone, daily_review_target FROM user_settings WHERE user_id = ?1",
+      )
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual({ timezone: "Asia/Tehran", daily_review_target: 35 });
+  });
+
+  it("rejects an invalid timezone without changing other settings", async () => {
+    const { app, cookie, csrf } = await signedIn(
+      "timezone-invalid@example.test",
+    );
+    const response = await app.request(
+      "http://worker.test/api/v1/settings",
+      withAuth(
+        json({ timezone: "Mars/Olympus", dailyReviewTarget: 50 }, "PATCH"),
+        cookie,
+        csrf,
+      ),
+      env,
+    );
+    expect(response.status).toBe(422);
+    const settings = await app.request(
+      "http://worker.test/api/v1/settings",
+      { headers: { Cookie: cookie } },
+      env,
+    );
+    await expect(settings.json()).resolves.toMatchObject({
+      timezone: "UTC",
+      dailyReviewTarget: 20,
+    });
+  });
+
   it("rejects invalid IANA timezones across mission reads", async () => {
     const { app, cookie } = await signedIn("invalid-timezone@example.test");
     for (const route of ["daily-mission", "progress"]) {
