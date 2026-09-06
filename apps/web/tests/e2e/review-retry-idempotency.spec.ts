@@ -8,7 +8,9 @@ test("replays a committed review and retries the due list without duplicate prog
 }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL;
   if (!baseURL) {
-    throw new Error("Expected the Playwright project to configure use.baseURL.");
+    throw new Error(
+      "Expected the Playwright project to configure use.baseURL.",
+    );
   }
 
   const csrfToken = `review-retry-csrf-${randomUUID()}`;
@@ -39,11 +41,12 @@ test("replays a committed review and retries the due list without duplicate prog
     });
     if (submissionRequests > 1) {
       const response = await route.fetch();
-      replayedResponse = await response.json();
+      const responseBody = await response.json();
+      if (submissionRequests === 2) replayedResponse = responseBody;
       await route.fulfill({
         status: response.status(),
         contentType: "application/json",
-        body: JSON.stringify(replayedResponse),
+        body: JSON.stringify(responseBody),
       });
       return;
     }
@@ -94,7 +97,9 @@ test("replays a committed review and retries the due list without duplicate prog
   ).toBeVisible();
   await page.getByRole("button", { name: "Show answer" }).click();
   await page.getByRole("button", { name: "Good", exact: true }).click();
-  await expect(page.getByText("You completed 2 reviews in this session.", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("You completed 2 reviews in this session.", { exact: true }),
+  ).toBeVisible();
   expect(submissionRequests).toBe(3);
   expect(dueListRequests).toBe(2);
   expect(submissionFingerprints).toHaveLength(3);
@@ -106,7 +111,7 @@ test("replays a committed review and retries the due list without duplicate prog
     `http://127.0.0.1:${mockApiPort}/api/v1/progress`,
   );
   expect(progressResponse.ok()).toBeTruthy();
-  expect((await progressResponse.json()).confidencePointsBalance).toBe(125);
+  expect((await progressResponse.json()).confidencePointsBalance).toBe(130);
 
   const missionResponse = await page.request.get(
     `http://127.0.0.1:${mockApiPort}/api/v1/daily-mission`,

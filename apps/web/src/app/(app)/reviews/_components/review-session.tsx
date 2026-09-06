@@ -96,12 +96,21 @@ export function ReviewSession({
     setSelectedOption(null);
     setErrorMessage(null);
     setStartTime(Date.now());
+  }, [completed, currentIndex, dueWords]);
 
-    if (!completed && !isRefetching && shouldFocusNextCard.current) {
-      currentCardHeadingRef.current?.focus();
+  useEffect(() => {
+    const heading = currentCardHeadingRef.current;
+    if (
+      !completed &&
+      !isRefetching &&
+      !awaitingNextPage &&
+      shouldFocusNextCard.current &&
+      heading
+    ) {
+      heading.focus();
       shouldFocusNextCard.current = false;
     }
-  }, [completed, currentIndex, dueWords, isRefetching]);
+  }, [completed, currentIndex, dueWords, isRefetching, awaitingNextPage]);
 
   useEffect(() => {
     if (completed && shouldFocusNextCard.current) {
