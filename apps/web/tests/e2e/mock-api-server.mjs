@@ -368,6 +368,24 @@ const SAVED_LIBRARY_PAGE_TWO = [
     wordText: "later word",
     shortDefinition: "a saved word from a later page",
   },
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[0],
+    userWordId: "e2e-library-bank-river",
+    meaningId: "mean-bank-river",
+    wordId: "word-bank",
+    wordSlug: "bank",
+    wordText: "bank",
+    shortDefinition: "land beside a river",
+  },
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[1],
+    userWordId: "e2e-library-bank-money",
+    meaningId: "mean-bank-money",
+    wordId: "word-bank",
+    wordSlug: "bank",
+    wordText: "bank",
+    shortDefinition: "a financial institution",
+  },
 ];
 
 const MULTIPLE_CHOICE_DUE_WORDS = [
@@ -418,6 +436,16 @@ const MULTIPLE_CHOICE_DUE_WORDS = [
 ];
 
 const CANONICAL_WORDS = {
+  bank: {
+    id: "word-bank",
+    text: "bank",
+    slug: "bank",
+    wordType: "noun",
+    meanings: [
+      { id: "mean-bank-river", partOfSpeech: "noun", shortDefinition: "land beside a river", saved: false, examples: [], usageNotes: [] },
+      { id: "mean-bank-money", partOfSpeech: "noun", shortDefinition: "a financial institution", saved: false, examples: [], usageNotes: [] },
+    ],
+  },
   pour: {
     id: "word-pour",
     text: "pour",
@@ -1790,6 +1818,17 @@ const server = createServer(async (req, res) => {
             }
           : meaning,
       );
+    }
+    if (cookies.e2e_saved_words_fixture === "library" && slug === "bank") {
+      response.word.meanings = response.word.meanings.map((meaning) => ({
+        ...meaning,
+        saved: true,
+        userWordId:
+          meaning.id === "mean-bank-river"
+            ? "e2e-library-bank-river"
+            : "e2e-library-bank-money",
+        reviewState: "due",
+      }));
     }
     logLine(req, 200, { slug });
     jsonResponse(res, 200, response);

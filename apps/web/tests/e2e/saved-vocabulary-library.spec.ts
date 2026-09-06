@@ -61,3 +61,14 @@ test("rejects a canonical meaning that is not saved", async ({ page }) => {
     page.getByRole("heading", { name: "Journey item not found", level: 1 }),
   ).toBeVisible();
 });
+
+test("keeps saved meanings for the same word distinct", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([{ name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
+  await page.goto("/discover/saved/bank?meaning=mean-bank-river");
+  await expect(page.getByText("land beside a river", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Remove bank from saved words" })).toBeVisible();
+  await page.goto("/discover/saved/bank?meaning=mean-bank-money");
+  await expect(page.getByText("a financial institution", { exact: true })).toBeVisible();
+});
