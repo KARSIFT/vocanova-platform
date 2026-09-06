@@ -1,49 +1,25 @@
 "use client";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useState } from "react";
 
 import { createApiClient } from "@/lib/api";
 
-const IdentityContext = createContext<string | undefined>(undefined);
-export function IdentityProvider({
-  userId,
-  children,
-}: {
-  userId?: string;
-  children: ReactNode;
-}) {
-  const [resolvedUserId, setResolvedUserId] = useState(userId);
+export function useAuthenticatedUserId() {
+  const [userId, setUserId] = useState<string>();
 
   useEffect(() => {
-    if (userId) {
-      setResolvedUserId(userId);
-      return;
-    }
     let active = true;
     void createApiClient()
       .getCurrentUser({ cache: "no-store" })
       .then(({ data }) => {
-        if (active) setResolvedUserId(data.userId);
+        if (active) setUserId(data.userId);
       })
       .catch(() => {
-        if (active) setResolvedUserId(undefined);
+        if (active) setUserId(undefined);
       });
     return () => {
       active = false;
     };
-  }, [userId]);
+  }, []);
 
-  return (
-    <IdentityContext.Provider value={resolvedUserId}>
-      {children}
-    </IdentityContext.Provider>
-  );
-}
-export function useAuthenticatedUserId() {
-  return useContext(IdentityContext);
+  return userId;
 }
