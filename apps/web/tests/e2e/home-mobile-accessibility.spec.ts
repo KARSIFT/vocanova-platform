@@ -37,13 +37,12 @@ test.describe("Home accessibility (mobile)", () => {
       ).join("\n")}`,
     ).toEqual([]);
 
-    // The Home page renders at least two links ("Go to Journey",
-    // "Start review") and the sentence-feedback form's submit
-    // button. Use a conservative floor.
+    // The mission action, navigation, and the sentence-feedback
+    // submit button provide several keyboard-reachable controls.
     await assertKeyboardReachable(page, { minFocusable: 2 });
 
     // Non-color-only feedback: the mission progress text, the
-    // streak text, and the "words due today" line all carry
+    // streak text, and the due-review line all carry
     // their state in text, not just color. The empty-saved-words
     // message is also text.
     await assertNonColorOnlyFeedback(page, {
@@ -52,7 +51,7 @@ test.describe("Home accessibility (mobile)", () => {
         "text=Review target",
         "text=words reviewed today",
         "text=-day streak",
-        "text=words due today",
+        "text=words due for review",
       ],
     });
   });

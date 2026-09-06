@@ -55,7 +55,7 @@ test.describe("Sentence practice privacy reminder", () => {
     await page.getByRole("button", { name: "Show answer" }).click();
     await page.getByRole("button", { name: "Good" }).click();
     await expect(
-      page.getByRole("heading", { name: "You're all caught up", level: 2 }),
+      page.getByRole("heading", { name: "Review session complete", level: 2 }),
     ).toBeVisible();
     await expectPrivacyReminder(page);
   });
