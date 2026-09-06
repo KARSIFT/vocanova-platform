@@ -888,13 +888,27 @@ function buildProgress(state) {
 function buildDailyMission(state, cookies = {}) {
   const homeFixture = cookies.e2e_home_fixture;
   const streak = { ...state.progress.streak };
-  if (homeFixture === "mission-complete") {
+  if (
+    homeFixture === "mission-complete" ||
+    homeFixture === "mission-complete-milestone" ||
+    homeFixture === "mission-complete-zero-streak"
+  ) {
+    const completedStreak =
+      homeFixture === "mission-complete-milestone"
+        ? {
+            ...streak,
+            currentStreakCount: 7,
+            longestStreakCount: Math.max(streak.longestStreakCount, 7),
+          }
+        : homeFixture === "mission-complete-zero-streak"
+          ? { ...streak, currentStreakCount: 0 }
+          : streak;
     return {
       ...state.dailyMission,
       reviewsCompleted: state.dailyMission.reviewTarget,
       status: "completed",
       completedAt: "2026-01-01T12:00:00.000Z",
-      streak,
+      streak: completedStreak,
     };
   }
   if (homeFixture === "sentence-practice-needed") {

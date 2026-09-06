@@ -28,6 +28,11 @@ export default async function HomePage() {
     status: missionStatus,
     streak,
   } = dailyMissionResponse.data;
+  const isReviewTargetComplete = reviewedWordsToday >= missionTargetWords;
+  const isStreakMilestone =
+    isReviewTargetComplete &&
+    streak.currentStreakCount > 0 &&
+    streak.currentStreakCount % 7 === 0;
   const missionProgressPercent = Math.min(
     100,
     Math.round((reviewedWordsToday / missionTargetWords) * 100),
@@ -97,6 +102,23 @@ export default async function HomePage() {
           <p className="mt-[var(--spacing-md)] text-base font-medium text-green-800">
             Today&apos;s mission is complete.
           </p>
+        ) : null}
+        {isReviewTargetComplete ? (
+          <div
+            aria-label="Mission celebration"
+            className="mt-[var(--spacing-md)] rounded-md border border-green-200 bg-green-50 p-[var(--spacing-sm)] text-base text-green-900"
+            role="status"
+          >
+            <p className="font-medium">
+              Great work — today&apos;s review target is complete.
+            </p>
+            {isStreakMilestone ? (
+              <p className="mt-[var(--spacing-xs)]">
+                {streak.currentStreakCount}-day streak milestone. Keep building
+                your habit.
+              </p>
+            ) : null}
+          </div>
         ) : null}
       </section>
 

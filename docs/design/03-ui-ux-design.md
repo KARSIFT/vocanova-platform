@@ -103,6 +103,10 @@ Progress screen is intentionally simple: Confidence Point total, current/longest
 completion history view. Celebration moments (small positive feedback on mission completion,
 streak milestones) should be lightweight — a brief animation or message, not a full-screen
 interruption — consistent with "encouraging, not gamified for its own sake" from §1.
+Home delivers this as an inline, readable status message when the authoritative daily-mission
+projection reports `reviewsCompleted >= reviewTarget`. A positive current streak divisible by seven
+adds a short milestone message; other streak counts, including zero, do not. The message never
+blocks the learner's remaining mission actions.
 
 ## 9. Empty, loading, and error states
 
