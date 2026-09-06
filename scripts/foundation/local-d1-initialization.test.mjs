@@ -175,14 +175,14 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
   };
   requireSuccess(runLocalD1Migrations(options), "empty initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 12,
+    migrationCount: 13,
     health: "ok",
     rollbackTable: undefined,
   });
 
   requireSuccess(runLocalD1Migrations(options), "repeated initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 12,
+    migrationCount: 13,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -197,7 +197,7 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
     "isolated initialization",
   );
   assert.deepEqual(databaseEvidence(isolatedState), {
-    migrationCount: 12,
+    migrationCount: 13,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -252,7 +252,7 @@ test("a failed forward migration rolls back while prior migrations survive", (t)
     /0011_intentional_failure|syntax error/i,
   );
   assert.deepEqual(databaseEvidence(stateDirectory), {
-    migrationCount: 12,
+    migrationCount: 13,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -357,7 +357,7 @@ for (const collision of ["none", "natural-key", "stable-id"]) {
     }
     assert.equal(
       check.prepare("SELECT COUNT(*) AS count FROM d1_migrations").get().count,
-      collision === "none" ? 12 : 11,
+      collision === "none" ? 13 : 12,
     );
     for (const [table, expected] of [
       ["journey_situations", 4],

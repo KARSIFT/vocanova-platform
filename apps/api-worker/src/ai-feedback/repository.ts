@@ -28,6 +28,8 @@ export interface PendingAttempt {
   requestHash: string;
 }
 
+const LEGACY_PENDING_ATTEMPT_SECONDS = 60;
+
 export class D1AIFeedbackRepository {
   constructor(
     private readonly database: D1Database,
@@ -98,23 +100,27 @@ export class D1AIFeedbackRepository {
     userId: string,
     key: string,
     requestHash: string,
-  ): Promise<"new" | "replay"> {
+  ): Promise<{ state: "new" } | { state: "replay"; attemptId: string | null }> {
     if (!key || key.length > 200)
       throw new AIFeedbackError("invalid_idempotency");
     const row = await this.database
       .prepare(
-        `SELECT fingerprint FROM idempotency_keys
-         WHERE user_id = ?1 AND operation = 'ai_feedback_request' AND key = ?2`,
+        `SELECT k.fingerprint, m.attempt_id
+         FROM idempotency_keys k
+         LEFT JOIN ai_feedback_idempotency_attempts m
+           ON m.user_id = k.user_id AND m.key = k.key
+         WHERE k.user_id = ?1 AND k.operation = 'ai_feedback_request' AND k.key = ?2`,
       )
       .bind(userId, key)
-      .first<{ fingerprint: string }>();
-    if (!row) return "new";
+      .first<{ fingerprint: string; attempt_id: string | null }>();
+    if (!row) return { state: "new" };
     if (row.fingerprint !== requestHash)
       throw new AIFeedbackError("idempotency_conflict");
-    return "replay";
+    return { state: "replay", attemptId: row.attempt_id };
   }
 
   async findAttempt(
+    userId: string,
     requestHash: string,
     originalSentence: string,
   ): Promise<SentenceFeedbackResult | null> {
@@ -124,39 +130,107 @@ export class D1AIFeedbackRepository {
                 a.feedback_text, a.error_code, a.error_message,
                 EXISTS(SELECT 1 FROM ai_feedback_reports r WHERE r.attempt_id = a.id) AS reported
          FROM ai_feedback_attempts a
-         WHERE a.request_hash = ?1 AND a.status IN ('pending', 'succeeded')`,
+         JOIN learner_sentences s ON s.id = a.learner_sentence_id
+         WHERE a.request_hash = ?1 AND s.user_id = ?2
+           AND a.status IN ('pending', 'succeeded')`,
       )
-      .bind(requestHash)
+      .bind(requestHash, userId)
       .first<Row>();
     return row ? resultFromRow(row, originalSentence) : null;
+  }
+
+  async findAttemptById(
+    userId: string,
+    attemptId: string,
+  ): Promise<SentenceFeedbackResult | null> {
+    const row = await this.database
+      .prepare(
+        `SELECT a.id, a.learner_sentence_id, a.status, a.feedback_json,
+                a.feedback_text, a.error_code, a.error_message,
+                s.sentence_text,
+                EXISTS(SELECT 1 FROM ai_feedback_reports r WHERE r.attempt_id = a.id) AS reported
+         FROM ai_feedback_attempts a
+         JOIN learner_sentences s ON s.id = a.learner_sentence_id
+         WHERE a.id = ?1 AND s.user_id = ?2`,
+      )
+      .bind(attemptId, userId)
+      .first<Row>();
+    return row ? resultFromRow(row, String(row.sentence_text)) : null;
+  }
+
+  async recoverAbandoned(
+    userId: string,
+    pending: PendingAttempt,
+    failedRequestHash: string,
+  ): Promise<boolean> {
+    const timestamp = this.now().toISOString();
+    const legacyDeadline = new Date(
+      this.now().getTime() - LEGACY_PENDING_ATTEMPT_SECONDS * 1_000,
+    ).toISOString();
+    const results = await this.database.batch([
+      this.database
+        .prepare(
+          `UPDATE ai_feedback_attempts
+           SET status = 'failed', error_code = 'AI_FEEDBACK_TEMPORARY_FAILURE',
+               error_message = 'AI feedback is temporarily unavailable. Please try again.',
+               request_hash = ?1, completed_at = ?2, updated_at = ?2
+           WHERE id = ?3 AND request_hash = ?4 AND status = 'pending'
+             AND EXISTS (
+               SELECT 1 FROM learner_sentences s
+               WHERE s.id = learner_sentence_id AND s.user_id = ?5
+             )
+             AND (
+               generation_expires_at <= ?2
+               OR (generation_expires_at IS NULL AND started_at <= ?6)
+             )`,
+        )
+        .bind(
+          failedRequestHash,
+          timestamp,
+          pending.attemptId,
+          pending.requestHash,
+          userId,
+          legacyDeadline,
+        ),
+      this.database
+        .prepare(
+          `UPDATE learner_sentences SET status = 'feedback_failed', updated_at = ?1
+           WHERE id = ?2 AND changes() = 1`,
+        )
+        .bind(timestamp, pending.sentenceId),
+    ]);
+    return (results[0]!.meta.changes ?? 0) === 1;
   }
 
   async recordIdempotency(
     userId: string,
     key: string,
     requestHash: string,
+    attemptId: string,
   ): Promise<void> {
-    await this.database
-      .prepare(
-        `INSERT INTO idempotency_keys
-         (id, user_id, operation, key, fingerprint, created_at)
-         VALUES (?1, ?2, 'ai_feedback_request', ?3, ?4, ?5)`,
-      )
-      .bind(
-        crypto.randomUUID(),
-        userId,
-        key,
-        requestHash,
-        this.now().toISOString(),
-      )
-      .run();
+    const timestamp = this.now().toISOString();
+    await this.database.batch([
+      this.database
+        .prepare(
+          `INSERT INTO idempotency_keys
+           (id, user_id, operation, key, fingerprint, created_at)
+           VALUES (?1, ?2, 'ai_feedback_request', ?3, ?4, ?5)`,
+        )
+        .bind(crypto.randomUUID(), userId, key, requestHash, timestamp),
+      this.database
+        .prepare(
+          `INSERT INTO ai_feedback_idempotency_attempts
+           (user_id, key, attempt_id, created_at) VALUES (?1, ?2, ?3, ?4)`,
+        )
+        .bind(userId, key, attemptId, timestamp),
+    ]);
   }
 
   async reserve(
     userId: string,
     limits: GenerationLimits,
   ): Promise<
-    | { ok: true; leaseId: string }
+    | { ok: true; leaseId: string; expiresAt: string }
     | { ok: false; reason: "disabled" | "limited" }
   > {
     if (!limits.enabled) return { ok: false, reason: "disabled" };
@@ -241,7 +315,7 @@ export class D1AIFeedbackRepository {
           )
           .bind(month, limits.requestCostCents, timestamp),
       ]);
-      return { ok: true, leaseId };
+      return { ok: true, leaseId, expiresAt };
     } catch {
       return { ok: false, reason: "limited" };
     }
@@ -257,6 +331,7 @@ export class D1AIFeedbackRepository {
     provider: string,
     model: string,
     leaseId: string,
+    generationExpiresAt: string,
   ): Promise<PendingAttempt> {
     const sentenceId = crypto.randomUUID();
     const feedbackAttemptId = crypto.randomUUID();
@@ -283,8 +358,8 @@ export class D1AIFeedbackRepository {
         .prepare(
           `INSERT INTO ai_feedback_attempts
            (id, learner_sentence_id, status, provider, model, prompt_version,
-            request_hash, started_at, created_at, updated_at)
-           VALUES (?1, ?2, 'pending', ?3, ?4, 'sentence-feedback-v1', ?5, ?6, ?6, ?6)`,
+            request_hash, generation_expires_at, started_at, created_at, updated_at)
+           VALUES (?1, ?2, 'pending', ?3, ?4, 'sentence-feedback-v1', ?5, ?6, ?7, ?7, ?7)`,
         )
         .bind(
           feedbackAttemptId,
@@ -292,6 +367,7 @@ export class D1AIFeedbackRepository {
           provider,
           model,
           requestHash,
+          generationExpiresAt,
           timestamp,
         ),
       this.database
@@ -307,6 +383,12 @@ export class D1AIFeedbackRepository {
           requestHash,
           timestamp,
         ),
+      this.database
+        .prepare(
+          `INSERT INTO ai_feedback_idempotency_attempts
+           (user_id, key, attempt_id, created_at) VALUES (?1, ?2, ?3, ?4)`,
+        )
+        .bind(userId, idempotencyKey, feedbackAttemptId, timestamp),
     ]);
     return { sentenceId, attemptId: feedbackAttemptId, leaseId, requestHash };
   }
@@ -318,7 +400,7 @@ export class D1AIFeedbackRepository {
     errorCode = "",
     errorMessage = "",
     failedRequestHash?: string,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const timestamp = this.now().toISOString();
     const statements: D1PreparedStatement[] = [
       this.database
@@ -340,24 +422,29 @@ export class D1AIFeedbackRepository {
         ),
       this.database
         .prepare(
-          "UPDATE learner_sentences SET status = ?1, updated_at = ?2 WHERE id = ?3",
+          `UPDATE learner_sentences SET status = ?1, updated_at = ?2
+           WHERE id = ?3 AND changes() = 1`,
         )
         .bind(
           feedback ? "feedback_ready" : "feedback_failed",
           timestamp,
           pending.sentenceId,
         ),
-      this.database
-        .prepare(
-          "DELETE FROM ai_generation_leases WHERE user_id = ?1 AND lease_id = ?2",
-        )
-        .bind(userId, pending.leaseId),
     ];
     if (feedback)
       statements.push(
         ...(await this.rewardStatements(userId, pending, timestamp)),
       );
-    await this.database.batch(statements);
+    statements.push(
+      this.database
+        .prepare(
+          `DELETE FROM ai_generation_leases
+           WHERE user_id = ?1 AND lease_id = ?2 AND changes() = 1`,
+        )
+        .bind(userId, pending.leaseId),
+    );
+    const results = await this.database.batch(statements);
+    return (results[0]!.meta.changes ?? 0) === 1;
   }
 
   async release(userId: string, leaseId: string): Promise<void> {
@@ -450,7 +537,8 @@ export class D1AIFeedbackRepository {
            (id, user_id, local_date, timezone, sentences_submitted,
             ai_feedback_received, confidence_points_earned, created_at, updated_at)
            SELECT ?1, ?2, ?3, ?4, 1, 1, 5, ?5, ?5
-           WHERE EXISTS (SELECT 1 FROM confidence_point_ledger WHERE user_id = ?2 AND idempotency_key = ?6)
+       WHERE changes() = 1
+         AND EXISTS (SELECT 1 FROM confidence_point_ledger WHERE user_id = ?2 AND idempotency_key = ?6)
              AND EXISTS (SELECT 1 FROM confidence_point_ledger WHERE user_id = ?2 AND idempotency_key = ?7)
            ON CONFLICT(user_id, local_date) DO UPDATE SET
              sentences_submitted = sentences_submitted + 1,
@@ -520,7 +608,8 @@ function pointStatement(
          COALESCE((SELECT balance_after FROM confidence_point_ledger
            WHERE user_id = ?2 ORDER BY occurred_at DESC, rowid DESC LIMIT 1), 0) + ?3,
          ?4, ?5, ?6, ?7, ?8, ?8, ?8
-       WHERE NOT EXISTS (SELECT 1 FROM confidence_point_ledger
+       WHERE changes() = 1
+         AND NOT EXISTS (SELECT 1 FROM confidence_point_ledger
          WHERE user_id = ?2 AND idempotency_key = ?7)`,
     )
     .bind(
