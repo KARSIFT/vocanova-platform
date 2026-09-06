@@ -456,6 +456,33 @@ const MULTIPLE_CHOICE_DUE_WORDS = [
   },
 ];
 
+const ANNOUNCEMENT_MULTIPLE_CHOICE_DUE_WORDS = [
+  ...MULTIPLE_CHOICE_DUE_WORDS,
+  {
+    userWordId: "e2e-review-user-word-gate",
+    meaningId: "e2e-review-meaning-gate",
+    wordId: "e2e-review-word-gate",
+    wordSlug: "gate",
+    wordText: "gate",
+    partOfSpeech: "noun",
+    shortDefinition: "the area where passengers board a flight",
+    status: "due",
+    reviewStep: 0,
+  },
+];
+
+const ANNOUNCEMENT_PAGE_TWO_DUE_WORD = {
+  userWordId: "e2e-review-user-word-terminal",
+  meaningId: "e2e-review-meaning-terminal",
+  wordId: "e2e-review-word-terminal",
+  wordSlug: "terminal",
+  wordText: "terminal",
+  partOfSpeech: "noun",
+  shortDefinition: "an airport building for passengers",
+  status: "due",
+  reviewStep: 0,
+};
+
 const CANONICAL_WORDS = {
   bank: {
     id: "word-bank",
@@ -705,6 +732,7 @@ function createInitialState() {
     emailChangeHolds: new Map(),
     completionSummaryDueFetches: 0,
     paginationRetryDueFetches: 0,
+    announcementMultipleChoiceDueFetches: 0,
   };
 }
 
@@ -984,6 +1012,18 @@ function buildDueWords(state, fixture) {
     state.paginationRetryDueFetches += 1;
     const items = MULTIPLE_CHOICE_DUE_WORDS.slice(page, Math.min(page + 1, 2));
     return { items, nextCursor: undefined, totalCount: Math.max(0, 2 - page) };
+  }
+  if (fixture === "announcement-multiple-choice-pagination") {
+    const page = state.announcementMultipleChoiceDueFetches;
+    state.announcementMultipleChoiceDueFetches += 1;
+    return {
+      items:
+        page === 0
+          ? ANNOUNCEMENT_MULTIPLE_CHOICE_DUE_WORDS
+          : [ANNOUNCEMENT_PAGE_TWO_DUE_WORD],
+      nextCursor: page === 0 ? "announcement-multiple-choice-2" : undefined,
+      totalCount: page === 0 ? 6 : 1,
+    };
   }
   if (fixture === "multiple-choice") {
     return {
