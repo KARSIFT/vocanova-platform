@@ -72,6 +72,9 @@
 //   GET    /api/v1/progress                          -> 200 Progress
 //             `e2e_progress_fixture=first-mission` returns authoritative
 //             zero totals and no completion history for first-time progress
+//             `e2e_progress_preview_fixture` provides one-shot saved and
+//             sentence-preview failures, plus per-read 401 fixtures, for
+//             Progress recovery coverage
 //
 //   GET    /api/v1/journey-situations                -> 200 { items: [...] }
 //             `e2e_journey_fixture=empty` returns an empty catalog
@@ -747,6 +750,19 @@ function consumeReadFailureFixture(state, cookies, fixture, after = 0) {
   state.readFailureFixtureAttempts.set(fixture, attempts);
   if (attempts <= after) return false;
   state.consumedReadFailureFixtures.add(fixture);
+  return true;
+}
+
+function consumeProgressPreviewFailureFixture(state, cookies, preview) {
+  const fixture = `${preview}-unavailable`;
+  const stateKey = `progress-preview-${preview}`;
+  if (
+    cookies.e2e_progress_preview_fixture !== fixture ||
+    state.consumedReadFailureFixtures.has(stateKey)
+  ) {
+    return false;
+  }
+  state.consumedReadFailureFixtures.add(stateKey);
   return true;
 }
 
@@ -1551,6 +1567,14 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
     const state = getSessionState(cookies);
+    if (cookies.e2e_progress_preview_fixture === "saved-reauth") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
+    if (consumeProgressPreviewFailureFixture(state, cookies, "saved")) {
+      jsonResponse(res, 503, { error: "saved_preview_unavailable" });
+      return;
+    }
     // The canonical saved-detail route must authorize from its canonical
     // response, rather than depending on a (possibly truncated) saved list.
     if (cookies.e2e_saved_words_fixture === "canonical-without-list") {
@@ -1877,6 +1901,15 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && url.pathname === "/api/v1/sentence-feedback/history") {
+    const state = getSessionState(cookies);
+    if (cookies.e2e_progress_preview_fixture === "sentence-reauth") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
+    if (consumeProgressPreviewFailureFixture(state, cookies, "sentence")) {
+      jsonResponse(res, 503, { error: "sentence_preview_unavailable" });
+      return;
+    }
     const data = buildSentenceHistory(
       cookies.e2e_sentence_history_fixture,
       url.searchParams.get("after"),
@@ -1898,6 +1931,10 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/progress") {
     const state = getSessionState(cookies);
+    if (cookies.e2e_progress_preview_fixture === "progress-reauth") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
     const hold = waitForReadHold(state, cookies, "progress");
     if (hold) await hold;
     if (consumeReadFailureFixture(state, cookies, "progress")) {

@@ -110,7 +110,9 @@ Required for every screen with dynamic content:
   learner's typed input and disable duplicate submission (see [09](../engineering/09-ai-features.md) §2).
 - **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
   input or falsely imply something completed. AI feedback failures specifically must never claim
-  mission completion (see [09](../engineering/09-ai-features.md) §2 and §9).
+  mission completion (see [09](../engineering/09-ai-features.md) §2 and §9). Progress keeps its
+  backend-authoritative confidence, streak, and mission summary visible when a supporting preview
+  is unavailable; each failed preview states that it is unavailable and offers an in-place retry.
 
 ## 10. Accessibility
 

@@ -1,7 +1,10 @@
 import Link from "next/link";
 
+import { ApiResponseError } from "@vocanova/api-client";
+
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
 
+import { ProgressPreviewUnavailable } from "./_components/progress-preview-unavailable";
 import { SentencePracticeHistory } from "./_components/sentence-practice-history";
 
 function formatMissionDate(localDate: string): string {
@@ -31,29 +34,36 @@ function getMissionStatusLabel(
 
 export default async function ProgressPage() {
   const client = await createServerApiClient();
-  let savedWordsResponse: Awaited<ReturnType<typeof client.listSavedWords>>;
-  let progressResponse: Awaited<ReturnType<typeof client.getProgress>>;
-  let sentenceHistoryResponse: Awaited<
-    ReturnType<typeof client.listSentenceFeedbackHistory>
-  >;
-  try {
-    [savedWordsResponse, progressResponse, sentenceHistoryResponse] =
-      await Promise.all([
-        client.listSavedWords({ limit: 10 }),
-        client.getProgress(),
-        client.listSentenceFeedbackHistory({ limit: 10 }),
-      ]);
-  } catch (error) {
-    requireAuthRedirect(error, "/progress");
+  const [savedWordsResult, progressResult, sentenceHistoryResult] =
+    await Promise.allSettled([
+      client.listSavedWords({ limit: 10 }),
+      client.getProgress(),
+      client.listSentenceFeedbackHistory({ limit: 10 }),
+    ]);
+
+  for (const result of [
+    savedWordsResult,
+    progressResult,
+    sentenceHistoryResult,
+  ]) {
+    if (
+      result.status === "rejected" &&
+      result.reason instanceof ApiResponseError &&
+      result.reason.status === 401
+    ) {
+      requireAuthRedirect(result.reason, "/progress");
+    }
   }
 
-  const { items: savedWords } = savedWordsResponse.data;
+  if (progressResult.status === "rejected") {
+    requireAuthRedirect(progressResult.reason, "/progress");
+  }
 
   const {
     confidencePointsBalance: confidencePointsTotal,
     streak,
     completionHistory,
-  } = progressResponse.data;
+  } = progressResult.value.data;
   const {
     currentStreakCount: currentStreakDays,
     longestStreakCount: longestStreakDays,
@@ -129,13 +139,15 @@ export default async function ProgressPage() {
         >
           View all saved vocabulary
         </Link>
-        {savedWords.length > 0 ? (
+        {savedWordsResult.status === "rejected" ? (
+          <ProgressPreviewUnavailable preview="saved vocabulary" />
+        ) : savedWordsResult.value.data.items.length > 0 ? (
           <>
             <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
               A preview of up to 10 recently saved words.
             </p>
             <ul className="mt-[var(--spacing-md)] space-y-[var(--spacing-xs)]">
-              {savedWords.map((savedWord) => (
+              {savedWordsResult.value.data.items.map((savedWord) => (
                 <li
                   key={savedWord.userWordId}
                   className="rounded-md p-[var(--spacing-sm)]"
@@ -171,10 +183,14 @@ export default async function ProgressPage() {
         <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
           Your completed sentence feedback, newest first.
         </p>
-        <SentencePracticeHistory
-          initialItems={sentenceHistoryResponse.data.items}
-          initialNextCursor={sentenceHistoryResponse.data.nextCursor}
-        />
+        {sentenceHistoryResult.status === "rejected" ? (
+          <ProgressPreviewUnavailable preview="recent sentence practice" />
+        ) : (
+          <SentencePracticeHistory
+            initialItems={sentenceHistoryResult.value.data.items}
+            initialNextCursor={sentenceHistoryResult.value.data.nextCursor}
+          />
+        )}
       </section>
 
       <section
