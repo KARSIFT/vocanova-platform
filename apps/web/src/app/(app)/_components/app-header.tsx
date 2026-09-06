@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, deleteCookie, getCookieValue } from "@/lib/cookies";
@@ -8,6 +9,7 @@ import { handleApiError } from "@/lib/session";
 import { clearSentenceRecovery } from "@/lib/sentence-recovery";
 
 export function AppHeader() {
+  const logoutButton = useRef<HTMLButtonElement>(null);
   const [status, setStatus] = useState<{
     type: "idle" | "loading" | "error";
     message: string;
@@ -15,6 +17,12 @@ export function AppHeader() {
     type: "idle",
     message: "",
   });
+
+  useEffect(() => {
+    if (status.type === "error") {
+      logoutButton.current?.focus();
+    }
+  }, [status.type]);
 
   async function handleLogout() {
     setStatus({ type: "loading", message: "" });
@@ -48,15 +56,19 @@ export function AppHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b border-neutral-200 bg-white px-[var(--spacing-md)]">
-      <span className="text-lg font-semibold text-neutral-900">Vocanova</span>
-      <div className="flex items-center gap-[var(--spacing-sm)]">
-        {status.message ? (
-          <p role="alert" aria-live="polite" className="text-sm text-red-700">
-            {status.message}
-          </p>
-        ) : null}
+    <header className="sticky top-0 z-10 flex min-h-14 items-center gap-[var(--spacing-sm)] border-b border-neutral-200 bg-white px-[var(--spacing-md)] py-[var(--spacing-xs)]">
+      <span className="shrink-0 text-lg font-semibold text-neutral-900">
+        Vocanova
+      </span>
+      <div className="ml-auto flex max-w-full flex-wrap items-center justify-end gap-[var(--spacing-sm)]">
+        <Link
+          href="/settings"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border border-neutral-300 px-[var(--spacing-md)] py-[var(--spacing-xs)] text-sm font-medium text-neutral-900 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+        >
+          Settings
+        </Link>
         <button
+          ref={logoutButton}
           type="button"
           onClick={handleLogout}
           disabled={status.type === "loading"}
@@ -65,6 +77,15 @@ export function AppHeader() {
         >
           {status.type === "loading" ? "Signing out..." : "Log out"}
         </button>
+        {status.message ? (
+          <p
+            role="alert"
+            aria-live="polite"
+            className="basis-full text-right text-sm text-red-700"
+          >
+            {status.message}
+          </p>
+        ) : null}
       </div>
     </header>
   );
