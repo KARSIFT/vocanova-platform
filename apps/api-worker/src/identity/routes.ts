@@ -354,6 +354,7 @@ function appendSessionCookies(
 
 function currentUser(user: IdentityUser): Record<string, unknown> {
   return {
+    userId: user.id,
     email: user.email,
     ...(user.displayName && { displayName: user.displayName }),
     ...(user.avatarUrl && { avatarUrl: user.avatarUrl }),
@@ -424,6 +425,7 @@ function registerIdentityOpenApi(
   app: OpenAPIHono<VocaNovaWorkerEnvironment>,
 ): void {
   const CurrentUser = z.object({
+    userId: z.string(),
     email: EmailSchema.optional(),
     displayName: z.string().optional(),
     avatarUrl: z.url().optional(),

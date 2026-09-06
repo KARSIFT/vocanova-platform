@@ -318,9 +318,13 @@
                         "completed"
                       ],
                       "type": "string"
+                    },
+                    "userId": {
+                      "type": "string"
                     }
                   },
                   "required": [
+                    "userId",
                     "onboardingStatus"
                   ],
                   "type": "object"
@@ -480,6 +484,13 @@
                               },
                               "learnerDefinition": {
                                 "type": "string"
+                              },
+                              "nextReviewAt": {
+                                "format": "date-time",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
                               },
                               "partOfSpeech": {
                                 "type": "string"
@@ -943,9 +954,13 @@
                         "completed"
                       ],
                       "type": "string"
+                    },
+                    "userId": {
+                      "type": "string"
                     }
                   },
                   "required": [
+                    "userId",
                     "onboardingStatus"
                   ],
                   "type": "object"
@@ -1241,11 +1256,21 @@
                           "localDate": {
                             "format": "date",
                             "type": "string"
+                          },
+                          "status": {
+                            "enum": [
+                              "open",
+                              "completed",
+                              "missed",
+                              "protected"
+                            ],
+                            "type": "string"
                           }
                         },
                         "required": [
                           "localDate",
-                          "completed"
+                          "completed",
+                          "status"
                         ],
                         "type": "object"
                       },
@@ -1384,6 +1409,13 @@
                     },
                     "nextCursor": {
                       "type": "string"
+                    },
+                    "nextReviewAt": {
+                      "format": "date-time",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "totalCount": {
                       "type": "integer"
@@ -2319,6 +2351,13 @@
                             "format": "uuid",
                             "type": "string"
                           },
+                          "nextReviewAt": {
+                            "format": "date-time",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "partOfSpeech": {
                             "type": "string"
                           },
@@ -2451,6 +2490,13 @@
                     "meaningId": {
                       "format": "uuid",
                       "type": "string"
+                    },
+                    "nextReviewAt": {
+                      "format": "date-time",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "partOfSpeech": {
                       "type": "string"

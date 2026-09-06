@@ -15,7 +15,18 @@ describe("D1 platform repository", () => {
     const migrationCount = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM d1_migrations",
     ).first<{ count: number }>();
-    expect(migrationCount?.count).toBe(10);
+    expect(migrationCount?.count).toBe(11);
+    const starterCatalog = await env.DB.prepare(
+      `SELECT slug FROM journey_situations
+       WHERE slug IN ('travel-airport', 'daily-life-shopping', 'work-meetings', 'study-classroom')
+       ORDER BY display_order`,
+    ).all<{ slug: string }>();
+    expect(starterCatalog.results.map((situation) => situation.slug)).toEqual([
+      "travel-airport",
+      "daily-life-shopping",
+      "work-meetings",
+      "study-classroom",
+    ]);
     const reservationTable = await env.DB.prepare(
       "SELECT name, sql FROM sqlite_master WHERE type = 'table' AND name = ?1",
     )

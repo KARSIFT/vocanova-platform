@@ -100,6 +100,17 @@ describe("Worker AI feedback parity", () => {
     });
   });
 
+  it("resolves a daily mission target for its owner without exposing another learner's word", async () => {
+    const repository = new D1AIFeedbackRepository(env.DB, () => new Date(NOW));
+
+    await expect(
+      repository.loadTarget(USER_A, "daily_mission", USER_WORD),
+    ).resolves.toMatchObject({ userWordId: USER_WORD, wordText: "work" });
+    await expect(
+      repository.loadTarget(USER_B, "daily_mission", USER_WORD),
+    ).rejects.toMatchObject({ code: "target_not_found" });
+  });
+
   it("persists the sentence before the provider call and replays the exact result once", async () => {
     let rowsAtCall = 0;
     const provider = new ScriptedProvider(async () => {

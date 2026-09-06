@@ -88,9 +88,10 @@
           "displayName",
           "email",
           "emailVerifiedAt",
-          "onboardingStatus"
+          "onboardingStatus",
+          "userId"
         ],
-        "required": ["onboardingStatus"]
+        "required": ["onboardingStatus", "userId"]
       }
     },
     {
@@ -161,9 +162,10 @@
           "displayName",
           "email",
           "emailVerifiedAt",
-          "onboardingStatus"
+          "onboardingStatus",
+          "userId"
         ],
-        "required": ["onboardingStatus"]
+        "required": ["onboardingStatus", "userId"]
       }
     },
     {
@@ -287,7 +289,7 @@
       ],
       "request": null,
       "response": {
-        "properties": ["items", "nextCursor", "totalCount"],
+        "properties": ["items", "nextCursor", "nextReviewAt", "totalCount"],
         "required": ["items", "totalCount"]
       }
     },
@@ -498,6 +500,7 @@
         "properties": [
           "addedAt",
           "meaningId",
+          "nextReviewAt",
           "partOfSpeech",
           "saved",
           "shortDefinition",

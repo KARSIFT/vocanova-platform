@@ -27,7 +27,9 @@ validates it again before navigating. Missing or unsupported paths fall back to
 protected app routes under the configured app base origin. External origins,
 credentials, backslashes, control characters and unsupported routes are not
 accepted through this local-route extension. No return path changes session or
-token semantics.
+token semantics. Saved-word detail return paths preserve an encoded word segment and
+its meaning query through sign-in. Encoded question marks and hashes stay inside that
+segment; encoded separators, control characters, and nested encodings are rejected.
 
 ## DTO and response conventions
 
@@ -77,6 +79,14 @@ deletion request identifier, timestamps, and replay state; it does not expose in
 progress.
 
 ## Contract maintenance
+
+`GET /api/v1/progress` returns the latest seven persisted mission snapshots, newest first. It is
+not a calendar-week feed and does not fill in missing dates. Each `completionHistory` entry retains
+its compatible `completed` boolean (`true` for `completed` and `protected`) and may include the
+persisted `status` (`open`, `completed`, `missed`, or `protected`). Status is optional for rollout
+compatibility: clients receiving an older entry must use a neutral completed/not-completed label
+rather than infer a richer state. Streak grace-day balances are server-authoritative and must be
+displayed as returned.
 
 Route definitions provide stable operation IDs and schemas to the OpenAPI generator. Any observable
 change must update the route/schema, committed OpenAPI artifact, API client, and relevant tests

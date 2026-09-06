@@ -1,7 +1,7 @@
 // Accessibility scan for /progress.
 //
 // The progress page is the most state-heavy screen in the core
-// loop - the "Done" / "Rest" day pills and the streak text both
+// loop - the explicit mission-status labels and the streak text both
 // use colour AND text. The non-color-only assertion specifically
 // targets those text labels, which is the accessibility
 // criterion's "non-color-only feedback is asserted explicitly,
@@ -183,14 +183,14 @@ test.describe("Progress accessibility", () => {
       requireText: [
         "text=Confidence Points",
         "text=Your streaks",
-        "text=This week",
-        // The "Done" / "Rest" labels on the day pills are the
+        "text=Recent missions",
+        // The explicit status labels are the
         // most likely place for a colour-only regression
         // (the pills use bg-primary-100 vs bg-neutral-200
         // plus the text label - the text label is the part
         // this assertion checks).
-        "text=Done",
-        "text=Rest",
+        "text=Completed",
+        "text=Missed",
       ],
     });
 

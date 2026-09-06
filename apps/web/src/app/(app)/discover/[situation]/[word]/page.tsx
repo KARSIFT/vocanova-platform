@@ -42,6 +42,9 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
   }
 
   const { word: wordData } = response.data;
+  const feedbackAttemptIds = wordData.meanings
+    .filter((meaning) => meaning.saved && meaning.userWordId)
+    .map((meaning) => meaning.userWordId!);
 
   return (
     <div className="p-[var(--spacing-lg)]">
@@ -138,6 +141,8 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
                       attemptId={meaning.userWordId}
                       source="word_detail"
                       shortDefinition={meaning.shortDefinition}
+                      clearMismatchedRecovery
+                      recoveryAttemptIds={feedbackAttemptIds}
                     />
                   ) : null}
                 </li>

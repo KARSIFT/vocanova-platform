@@ -28,7 +28,11 @@ export interface DailyMission {
 export interface Progress {
   confidencePointsBalance: number;
   streak: StreakView;
-  completionHistory: Array<{ localDate: string; completed: boolean }>;
+  completionHistory: Array<{
+    localDate: string;
+    completed: boolean;
+    status: DailyMission["status"];
+  }>;
 }
 
 export class MissionsError extends Error {
