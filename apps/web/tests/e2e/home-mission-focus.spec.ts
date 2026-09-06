@@ -10,7 +10,8 @@ async function useHomeFixture(
     | "reviews-due"
     | "caught-up"
     | "mission-complete"
-    | "sentence-practice-needed",
+    | "sentence-practice-needed"
+    | "sentence-practice-needed-without-saved-words",
 ) {
   await context.addCookies([
     {
@@ -162,6 +163,58 @@ test("does not infer completion from review progress when sentence practice rema
   await expect(
     page.getByText("Today's mission is complete.", { exact: true }),
   ).toHaveCount(0);
+});
+
+test("moves focus from the sentence-practice mission action to the saved-word selector", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+
+  await useHomeFixture(context, baseURL, "sentence-practice-needed");
+
+  for (const activate of [
+    async () => {
+      await page.getByRole("link", { name: "Practice a saved word" }).click();
+    },
+    async () => {
+      const action = page.getByRole("link", {
+        name: "Practice a saved word",
+      });
+      await action.focus();
+      await page.keyboard.press("Enter");
+    },
+  ]) {
+    await page.goto("/home");
+    await activate();
+
+    const selector = page.getByLabel("Choose a saved word to practice");
+    await expect(page).toHaveURL(/\/home#saved-word-practice-heading$/);
+    await expect(selector).toBeFocused();
+    await expect(selector).toBeInViewport();
+    await selector.selectOption("e2e-preview-user-word-02");
+    await expect(selector).toHaveValue("e2e-preview-user-word-02");
+  }
+});
+
+test("keeps Journey as the sentence-practice action when no saved words are available", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+
+  await useHomeFixture(
+    context,
+    baseURL,
+    "sentence-practice-needed-without-saved-words",
+  );
+  await page.goto("/home");
+
+  await page.getByRole("link", { name: "Explore a journey" }).click();
+  await expect(page).toHaveURL(/\/discover$/);
+  await expect(page.getByRole("heading", { name: "Journey", level: 1 })).toBeVisible();
 });
 
 test("does not change the practice target while feedback is in flight", async ({

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
+import { MissionActionLink } from "./_components/mission-action-link";
 import { SavedWordPracticeSelector } from "./_components/saved-word-practice-selector";
 
 export default async function HomePage() {
@@ -113,12 +114,10 @@ export default async function HomePage() {
         <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">
           {primaryAction.description}
         </p>
-        <Link
+        <MissionActionLink
           href={primaryAction.href}
-          className="mt-[var(--spacing-md)] inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
-        >
-          {primaryAction.label}
-        </Link>
+          label={primaryAction.label}
+        />
         {primaryAction.href !== "/reviews" && dueReviewWords > 0 ? (
           <Link
             href="/reviews"

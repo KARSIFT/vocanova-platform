@@ -42,6 +42,18 @@ export function SavedWordPracticeSelector({
       setSelectedUserWordId(record.attemptId);
   }, [savedWords, userId]);
 
+  useEffect(() => {
+    function focusSelectorFromMissionAction() {
+      if (window.location.hash !== "#saved-word-practice-heading") return;
+      selectorRef.current?.focus({ preventScroll: true });
+    }
+
+    focusSelectorFromMissionAction();
+    window.addEventListener("hashchange", focusSelectorFromMissionAction);
+    return () =>
+      window.removeEventListener("hashchange", focusSelectorFromMissionAction);
+  }, []);
+
   const selectedWord = savedWords.find(
     (savedWord) => savedWord.userWordId === selectedUserWordId,
   );

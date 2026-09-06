@@ -897,7 +897,10 @@ function buildDailyMission(state, cookies = {}) {
       streak,
     };
   }
-  if (homeFixture === "sentence-practice-needed") {
+  if (
+    homeFixture === "sentence-practice-needed" ||
+    homeFixture === "sentence-practice-needed-without-saved-words"
+  ) {
     return {
       ...state.dailyMission,
       reviewsCompleted: state.dailyMission.reviewTarget,
@@ -1576,6 +1579,8 @@ const server = createServer(async (req, res) => {
               ? { items: SAVED_LIBRARY_PAGE_TWO.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: undefined }
               : { items: TRUNCATED_SAVED_WORDS_RESPONSE.items.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: "e2e-library-page-2" }
           : cookies.e2e_home_fixture !== "new-learner" &&
+              cookies.e2e_home_fixture !==
+                "sentence-practice-needed-without-saved-words" &&
               cookies.e2e_home_fixture
             ? HOME_PRACTICE_SAVED_WORDS_RESPONSE
           : buildSavedWords(state);
@@ -1689,7 +1694,8 @@ const server = createServer(async (req, res) => {
         :
       cookies.e2e_home_fixture === "reviews-due" ||
       cookies.e2e_home_fixture === "mission-complete" ||
-      cookies.e2e_home_fixture === "sentence-practice-needed"
+      cookies.e2e_home_fixture === "sentence-practice-needed" ||
+      cookies.e2e_home_fixture === "sentence-practice-needed-without-saved-words"
         ? { items: [], nextCursor: undefined, totalCount: 3 }
         : buildDueWords(state, cookies.e2e_review_fixture);
     logLine(req, 200, { count: data.items.length });
