@@ -1428,6 +1428,13 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
     const state = getSessionState(cookies);
+    // The canonical saved-detail route must authorize from its canonical
+    // response, rather than depending on a (possibly truncated) saved list.
+    if (cookies.e2e_saved_words_fixture === "canonical-without-list") {
+      logLine(req, 500, { reason: "saved-list-unavailable" });
+      jsonResponse(res, 500, { error: "saved_list_unavailable" });
+      return;
+    }
     if (consumeReadFailureFixture(state, cookies, "home")) {
       logLine(req, 500, { reason: "fixture-read-failure", fixture: "home" });
       jsonResponse(res, 500, { error: "fixture_read_failure" });
@@ -1809,7 +1816,12 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 404, { error: "not_found", slug });
       return;
     }
-    if (cookies.e2e_saved_words_fixture === "library" && slug === "pour") {
+    if (
+      ["library", "canonical-without-list"].includes(
+        cookies.e2e_saved_words_fixture,
+      ) &&
+      slug === "pour"
+    ) {
       response.word.meanings = response.word.meanings.map((meaning) =>
         meaning.id === "mean-pour"
           ? {

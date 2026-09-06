@@ -21,17 +21,31 @@ export function SavedVocabularyList({
   const [nextCursor, setNextCursor] = useState(initialNextCursor);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const firstAppendedLink = useRef<HTMLAnchorElement>(null);
+  const loadMoreButton = useRef<HTMLButtonElement>(null);
+  const [shouldRefocusLoadMore, setShouldRefocusLoadMore] = useState(false);
   const [appendedStartIndex, setAppendedStartIndex] = useState<number | null>(
     null,
   );
 
   useEffect(() => {
-    if (appendedStartIndex !== null) {
-      firstAppendedLink.current?.focus();
+    const firstAppendedLink = document.getElementById(
+      "saved-vocabulary-first-appended",
+    );
+    if (
+      appendedStartIndex !== null &&
+      firstAppendedLink instanceof HTMLAnchorElement
+    ) {
+      firstAppendedLink.focus();
       setAppendedStartIndex(null);
     }
   }, [appendedStartIndex, items]);
+
+  useEffect(() => {
+    if (shouldRefocusLoadMore && !isLoading) {
+      loadMoreButton.current?.focus();
+      setShouldRefocusLoadMore(false);
+    }
+  }, [isLoading, shouldRefocusLoadMore]);
 
   async function loadMore() {
     if (!nextCursor || isLoading) return;
@@ -52,6 +66,7 @@ export function SavedVocabularyList({
           "We couldn't load more saved words. Please try again.",
         ),
       );
+      setShouldRefocusLoadMore(true);
     } finally {
       setIsLoading(false);
     }
@@ -63,7 +78,11 @@ export function SavedVocabularyList({
         {items.map((item, index) => (
           <li key={item.userWordId}>
             <Link
-              ref={index === appendedStartIndex ? firstAppendedLink : undefined}
+              id={
+                index === appendedStartIndex
+                  ? "saved-vocabulary-first-appended"
+                  : undefined
+              }
               href={`/discover/saved/${item.wordSlug}?meaning=${encodeURIComponent(item.meaningId)}`}
               className="block rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)] shadow-sm hover:border-primary-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary-600"
             >
@@ -82,6 +101,7 @@ export function SavedVocabularyList({
       </ul>
       {nextCursor ? (
         <button
+          ref={loadMoreButton}
           type="button"
           onClick={loadMore}
           disabled={isLoading}
