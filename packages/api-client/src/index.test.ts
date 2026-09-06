@@ -297,6 +297,7 @@ describe("VocanovaClient", () => {
                 source: "journey",
                 saved: true,
                 addedAt: "2026-07-25T12:00:00Z",
+                nextReviewAt: "2026-07-26T12:00:00Z",
               },
             ],
           }),
@@ -311,6 +312,7 @@ describe("VocanovaClient", () => {
     });
     const { data } = await client.listSavedWords();
     assert.equal(data.items[0]!.wordSlug, "boarding-pass");
+    assert.equal(data.items[0]!.nextReviewAt, "2026-07-26T12:00:00Z");
   });
 
   it("sends GET /api/v1/reviews/due", async () => {

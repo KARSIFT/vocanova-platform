@@ -1512,6 +1512,14 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 500, { error: "saved_list_unavailable" });
       return;
     }
+    if (cookies.e2e_saved_words_fixture === "saved-list-failure") {
+      jsonResponse(res, 503, { error: "saved_list_unavailable" });
+      return;
+    }
+    if (cookies.e2e_saved_words_fixture === "saved-list-reauth") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
     if (consumeReadFailureFixture(state, cookies, "home")) {
       logLine(req, 500, { reason: "fixture-read-failure", fixture: "home" });
       jsonResponse(res, 500, { error: "fixture_read_failure" });
@@ -1520,6 +1528,21 @@ const server = createServer(async (req, res) => {
     const data =
       cookies.e2e_saved_words_fixture === "punctuation-reauth"
         ? { items: [{ ...SAVED_LIBRARY_PAGE_TWO[0], wordSlug: "pour?#" }], nextCursor: undefined }
+        : cookies.e2e_saved_words_fixture === "next-review"
+          ? {
+              items: [
+                {
+                  ...SAVED_LIBRARY_PAGE_TWO[1],
+                  nextReviewAt: "2099-08-22T12:30:00.000Z",
+                },
+              ],
+              nextCursor: undefined,
+            }
+          : cookies.e2e_saved_words_fixture === "no-active-reviews"
+            ? {
+                items: [SAVED_LIBRARY_PAGE_TWO[0]],
+                nextCursor: undefined,
+              }
       : cookies.e2e_saved_words_fixture === "truncated-page"
         ? TRUNCATED_SAVED_WORDS_RESPONSE
         : cookies.e2e_saved_words_fixture === "long-content"
@@ -1633,6 +1656,21 @@ const server = createServer(async (req, res) => {
       return;
     }
     const data =
+      cookies.e2e_review_fixture === "next-review"
+        ? {
+            items: [],
+            nextCursor: undefined,
+            totalCount: 0,
+            nextReviewAt: "2099-08-22T12:30:00.000Z",
+          }
+        : cookies.e2e_review_fixture === "no-active-reviews"
+          ? {
+              items: [],
+              nextCursor: undefined,
+              totalCount: 0,
+              nextReviewAt: null,
+            }
+        :
       cookies.e2e_home_fixture === "reviews-due" ||
       cookies.e2e_home_fixture === "mission-complete" ||
       cookies.e2e_home_fixture === "sentence-practice-needed"
@@ -1941,6 +1979,15 @@ const server = createServer(async (req, res) => {
             ? "e2e-library-bank-river"
             : "e2e-library-bank-money",
         reviewState: "due",
+      }));
+    }
+    if (cookies.e2e_saved_words_fixture === "next-review" && slug === "later-word") {
+      response.word.meanings = response.word.meanings.map((meaning) => ({
+        ...meaning,
+        saved: true,
+        userWordId: "e2e-library-user-word-12",
+        reviewState: "learning",
+        nextReviewAt: "2099-08-22T12:30:00.000Z",
       }));
     }
     if (cookies.e2e_saved_words_fixture === "library" && slug === "later-word") {

@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { SavedMeaning } from "@vocanova/api-client";
 
 import { createApiClient } from "@/lib/api";
+import { formatReviewDateTime, isDueReview } from "@/lib/review-schedule";
 import { handleApiError } from "@/lib/session";
 
 interface SavedVocabularyListProps {
@@ -97,6 +98,13 @@ export function SavedVocabularyList({
               <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-700">
                 {item.shortDefinition}
               </p>
+              {item.nextReviewAt !== undefined ? (
+                <p className="mt-[var(--spacing-xs)] text-sm text-neutral-700">
+                  {item.nextReviewAt === null || isDueReview(item.nextReviewAt)
+                    ? "Due now"
+                    : `Next review: ${formatReviewDateTime(item.nextReviewAt)}`}
+                </p>
+              ) : null}
             </Link>
           </li>
         ))}
