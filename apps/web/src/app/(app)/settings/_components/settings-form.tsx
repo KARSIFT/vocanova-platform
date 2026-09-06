@@ -70,6 +70,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (!state.timezone.trim()) {
+      setStatus({
+        type: "error",
+        message: "Enter an IANA timezone before saving your settings.",
+      });
+      return;
+    }
+
     const csrfToken = getCookieValue(CSRF_COOKIE_NAME);
     if (!csrfToken) {
       setStatus({
@@ -138,6 +146,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
           value={state.timezone}
           onChange={(event) => patch("timezone", event.target.value)}
           list="timezone-suggestions"
+          aria-invalid={state.timezone.trim().length === 0 || undefined}
           className="min-h-[var(--spacing-2xl)] w-full rounded-md border border-neutral-300 px-[var(--spacing-sm)] text-base text-neutral-900"
         />
         <datalist id="timezone-suggestions">
@@ -375,7 +384,7 @@ function buildUpdateBody(
   baseline: Settings,
 ): UpdateSettingsBody {
   const body: UpdateSettingsBody = {};
-  if (next.timezone !== baseline.timezone && next.timezone.trim()) {
+  if (next.timezone !== baseline.timezone) {
     body.timezone = next.timezone;
   }
   if (next.dailyReviewTarget !== baseline.dailyReviewTarget) {

@@ -3,6 +3,53 @@ import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
 
 test.describe("Timezone preference", () => {
+  test("blocks blank timezone saves before they can report success or partially save", async ({
+    page,
+    context,
+  }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) throw new Error("Expected a Playwright base URL.");
+    const domain = new URL(baseURL).hostname;
+    await context.addCookies([
+      {
+        name: "vocanova_session",
+        value: `timezone-blank-${randomUUID()}`,
+        domain,
+        path: "/",
+      },
+      { name: "vocanova_csrf", value: "timezone-csrf", domain, path: "/" },
+    ]);
+
+    const patchRequests: string[] = [];
+    page.on("request", (request) => {
+      if (
+        request.method() === "PATCH" &&
+        request.url().endsWith("/api/v1/settings")
+      ) {
+        patchRequests.push(request.postData() ?? "");
+      }
+    });
+
+    await page.goto("/settings");
+    const timezone = page.getByRole("combobox", { name: "IANA timezone" });
+    await timezone.fill("");
+    await page.getByRole("button", { name: "Save settings" }).click();
+    await expect(page.getByRole("alert")).toHaveText(
+      "Enter an IANA timezone before saving your settings.",
+    );
+    await expect(page.getByRole("status")).toHaveCount(0);
+    expect(patchRequests).toHaveLength(0);
+
+    await page.getByLabel("50").check();
+    await page.getByRole("button", { name: "Save settings" }).click();
+    await expect(page.getByRole("alert")).toHaveText(
+      "Enter an IANA timezone before saving your settings.",
+    );
+    await expect(page.getByRole("status")).toHaveCount(0);
+    expect(patchRequests).toHaveLength(0);
+    await expect(page.getByLabel("50")).toBeChecked();
+  });
+
   test("saves manual and device timezones and restores the persisted value after reload", async ({
     page,
     context,
