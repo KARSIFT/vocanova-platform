@@ -258,6 +258,11 @@ export interface DailyMission {
 export interface CompletionDay {
   localDate: string;
   completed: boolean;
+  /**
+   * Older API deployments may omit this additive field. Callers should use a
+   * neutral completed/not-completed label when it is unavailable.
+   */
+  status?: "open" | "completed" | "missed" | "protected";
 }
 
 export interface Progress {

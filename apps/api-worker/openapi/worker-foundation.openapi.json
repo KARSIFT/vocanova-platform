@@ -1231,11 +1231,21 @@
                           "localDate": {
                             "format": "date",
                             "type": "string"
+                          },
+                          "status": {
+                            "enum": [
+                              "open",
+                              "completed",
+                              "missed",
+                              "protected"
+                            ],
+                            "type": "string"
                           }
                         },
                         "required": [
                           "localDate",
-                          "completed"
+                          "completed",
+                          "status"
                         ],
                         "type": "object"
                       },

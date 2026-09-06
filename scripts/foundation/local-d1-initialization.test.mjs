@@ -175,14 +175,14 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
   };
   requireSuccess(runLocalD1Migrations(options), "empty initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 10,
+    migrationCount: 11,
     health: "ok",
     rollbackTable: undefined,
   });
 
   requireSuccess(runLocalD1Migrations(options), "repeated initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 10,
+    migrationCount: 11,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -197,7 +197,7 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
     "isolated initialization",
   );
   assert.deepEqual(databaseEvidence(isolatedState), {
-    migrationCount: 10,
+    migrationCount: 11,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -252,8 +252,124 @@ test("a failed forward migration rolls back while prior migrations survive", (t)
     /0011_intentional_failure|syntax error/i,
   );
   assert.deepEqual(databaseEvidence(stateDirectory), {
-    migrationCount: 10,
+    migrationCount: 11,
     health: "ok",
     rollbackTable: undefined,
   });
 });
+
+for (const collision of ["none", "natural-key", "stable-id"]) {
+  test(`catalog upgrade preserves learner records with ${collision} collision`, (t) => {
+    const fixture = temporaryDirectory(t, "vocanova-catalog-upgrade-");
+    const stateDirectory = join(fixture, "state");
+    const migrationsDirectory = join(fixture, "migrations");
+    const catalogMigration = "0011_starter_vocabulary_catalog.sql";
+    cpSync(resolve(LOCAL_D1_PATHS.apiRoot, "migrations"), migrationsDirectory, {
+      recursive: true,
+    });
+    rmSync(join(migrationsDirectory, catalogMigration));
+    const configPath = join(fixture, "wrangler.jsonc");
+    writeFileSync(
+      configPath,
+      JSON.stringify({
+        name: "catalog-upgrade",
+        d1_databases: [
+          {
+            binding: "DB",
+            database_name: "catalog-upgrade",
+            database_id: "local",
+            migrations_dir: "migrations",
+            migrations_table: "d1_migrations",
+          },
+        ],
+      }),
+    );
+    const options = {
+      purpose: "test",
+      configPath,
+      stateDirectory,
+      stdio: "pipe",
+    };
+    requireSuccess(runLocalD1Migrations(options), "pre-catalog initialization");
+    const database = new DatabaseSync(sqliteFiles(stateDirectory)[0]);
+    database.exec(`
+      PRAGMA foreign_keys = ON;
+      INSERT INTO users (id,email,status,onboarding_status,created_at,updated_at)
+      VALUES ('a9000000-0000-4000-8000-000000000099','existing@example.test','active','completed','2026-08-22T00:00:00.000Z','2026-08-22T00:00:00.000Z');
+      INSERT INTO canonical_words (id,text,normalized_text,word_type,language_code,status,difficulty_level,created_at,updated_at)
+      VALUES ('a9000000-0000-4000-8000-000000000098','existing word','existing word','word','en','active','b1','2026-08-22T00:00:00.000Z','2026-08-22T00:00:00.000Z');
+      INSERT INTO word_meanings (id,word_id,part_of_speech,short_definition,meaning_order,status,created_at,updated_at)
+      VALUES ('a9000000-0000-4000-8000-000000000097','a9000000-0000-4000-8000-000000000098','noun','Preserved editorial definition',1,'active','2026-08-22T00:00:00.000Z','2026-08-22T00:00:00.000Z');
+      INSERT INTO user_words (id,user_id,meaning_id,status,source,review_step,next_review_at,added_at,created_at,updated_at)
+      VALUES ('a9000000-0000-4000-8000-000000000096','a9000000-0000-4000-8000-000000000099','a9000000-0000-4000-8000-000000000097','reviewing','manual',3,'2026-08-25T09:00:00.000Z','2026-08-22T00:00:00.000Z','2026-08-22T00:00:00.000Z','2026-08-22T00:00:00.000Z');
+    `);
+    if (collision === "natural-key") {
+      database.exec(`INSERT INTO canonical_words (id,text,normalized_text,word_type,language_code,status,difficulty_level,created_at,updated_at)
+        VALUES ('a9000000-0000-4000-8000-000000000095','make a mistake','make a mistake','phrase','en','active','a2','2026-08-22T00:00:00.000Z','2026-08-22T00:00:00.000Z');`);
+    }
+    if (collision === "stable-id") {
+      // A collision in the final notes insert must roll back preceding catalog tables too.
+      database.exec(`INSERT INTO usage_notes (id,meaning_id,note_type,note_text,note_order,status,created_at,updated_at)
+        VALUES ('a5000000-0000-4000-8000-000000000032','a9000000-0000-4000-8000-000000000097','other','Preserved editorial note',1,'active','2026-08-22T00:00:00.000Z','2026-08-22T00:00:00.000Z');`);
+    }
+    const tables = [
+      "users",
+      "canonical_words",
+      "word_meanings",
+      "user_words",
+      "usage_notes",
+    ];
+    const before = new Map(
+      tables.map((table) => [
+        table,
+        database.prepare(`SELECT * FROM ${table} ORDER BY id`).all(),
+      ]),
+    );
+    database.close();
+    cpSync(
+      resolve(LOCAL_D1_PATHS.apiRoot, "migrations", catalogMigration),
+      join(migrationsDirectory, catalogMigration),
+    );
+    const result = runLocalD1Migrations(options);
+    if (collision === "none") requireSuccess(result, "catalog upgrade");
+    else {
+      assert.notEqual(result.status, 0);
+      assert.match(
+        `${result.stdout}\n${result.stderr}`,
+        /UNIQUE constraint failed/,
+      );
+    }
+    const check = new DatabaseSync(sqliteFiles(stateDirectory)[0], {
+      readOnly: true,
+    });
+    for (const table of tables) {
+      const rows = check.prepare(`SELECT * FROM ${table} ORDER BY id`).all();
+      const priorRows = before.get(table);
+      const preserved =
+        collision === "none"
+          ? rows.filter((row) => priorRows.some((prior) => prior.id === row.id))
+          : rows;
+      assert.deepEqual(
+        preserved,
+        priorRows,
+        `${table} records must remain unchanged`,
+      );
+    }
+    assert.equal(
+      check.prepare("SELECT COUNT(*) AS count FROM d1_migrations").get().count,
+      collision === "none" ? 11 : 10,
+    );
+    for (const [table, expected] of [
+      ["journey_situations", 4],
+      ["journey_words", 32],
+      ["word_examples", 32],
+    ]) {
+      assert.equal(
+        check.prepare(`SELECT COUNT(*) AS count FROM ${table}`).get().count,
+        collision === "none" ? expected : 0,
+      );
+    }
+    assert.deepEqual(check.prepare("PRAGMA foreign_key_check").all(), []);
+    check.close();
+  });
+}

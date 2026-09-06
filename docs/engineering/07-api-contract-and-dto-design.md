@@ -80,6 +80,14 @@ progress.
 
 ## Contract maintenance
 
+`GET /api/v1/progress` returns the latest seven persisted mission snapshots, newest first. It is
+not a calendar-week feed and does not fill in missing dates. Each `completionHistory` entry retains
+its compatible `completed` boolean (`true` for `completed` and `protected`) and may include the
+persisted `status` (`open`, `completed`, `missed`, or `protected`). Status is optional for rollout
+compatibility: clients receiving an older entry must use a neutral completed/not-completed label
+rather than infer a richer state. Streak grace-day balances are server-authoritative and must be
+displayed as returned.
+
 Route definitions provide stable operation IDs and schemas to the OpenAPI generator. Any observable
 change must update the route/schema, committed OpenAPI artifact, API client, and relevant tests
 together. Validation covers contract drift, authentication, CSRF, cross-user isolation,
