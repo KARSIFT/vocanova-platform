@@ -14,6 +14,7 @@ interface SentenceFeedbackProps {
   source: "word_detail" | "review" | "daily_mission" | "free_practice";
   shortDefinition?: string;
   onFeedbackSubmitted?: (result: SentenceFeedbackResult) => void;
+  onPendingChange?: (isPending: boolean) => void;
 }
 
 const AI_LIMITATION_COPY =
@@ -31,6 +32,7 @@ export function SentenceFeedback({
   source,
   shortDefinition,
   onFeedbackSubmitted,
+  onPendingChange,
 }: SentenceFeedbackProps) {
   const [sentence, setSentence] = useState("");
   const [result, setResult] = useState<SentenceFeedbackResult | null>(null);
@@ -52,6 +54,7 @@ export function SentenceFeedback({
     }
 
     setIsLoading(true);
+    onPendingChange?.(true);
     setErrorMessage(null);
     setReported(false);
     setReportStatus("idle");
@@ -86,6 +89,7 @@ export function SentenceFeedback({
       );
     } finally {
       setIsLoading(false);
+      onPendingChange?.(false);
     }
   }
 
