@@ -112,6 +112,8 @@ Required for every screen with dynamic content:
   blank area.
 - **Loading** — calm, non-jarring; sentence-feedback pending state specifically must preserve the
   learner's typed input and disable duplicate submission (see [09](../engineering/09-ai-features.md) §2).
+  Journey drill-down loaders identify whether the selected situation or Word Detail is loading rather
+  than showing the Journey catalog structure.
 - **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
   input or falsely imply something completed. AI feedback failures specifically must never claim
   mission completion (see [09](../engineering/09-ai-features.md) §2 and §9).

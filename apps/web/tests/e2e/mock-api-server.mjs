@@ -76,8 +76,10 @@
 //             `e2e_journey_fixture=empty` returns an empty catalog
 //   GET    /api/v1/journey-situations/:slug          -> 200 SituationResponse
 //             `e2e_situation_fixture=empty` returns an empty word list
+//             `e2e_read_hold=journey-situation` holds one selected situation read
 //   GET    /api/v1/canonical-words/:slug             -> 200 WordDetailResponse
 //             `e2e_word_detail_fixture=empty-meanings` returns a valid word
+//             `e2e_read_hold=word-detail` holds one canonical-word read
 //             with no meanings
 //             one 500 per session for discovery or reviews when the
 //             `e2e_read_failure` cookie names that fixture; used to prove
@@ -1301,7 +1303,16 @@ const server = createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/__e2e/release-read") {
     const fixture = url.searchParams.get("fixture");
     if (
-      !["discover", "reviews", "home", "progress", "settings", "account"].includes(
+      ![
+        "discover",
+        "journey-situation",
+        "word-detail",
+        "reviews",
+        "home",
+        "progress",
+        "settings",
+        "account",
+      ].includes(
         fixture,
       )
     ) {
@@ -1946,6 +1957,12 @@ const server = createServer(async (req, res) => {
     url.pathname.startsWith("/api/v1/journey-situations/")
   ) {
     const state = getSessionState(cookies);
+    const situationHold = waitForReadHold(
+      state,
+      cookies,
+      "journey-situation",
+    );
+    if (situationHold) await situationHold;
     if (consumeReadFailureFixture(state, cookies, "discover")) {
       logLine(req, 500, {
         reason: "fixture-read-failure",
@@ -1998,6 +2015,8 @@ const server = createServer(async (req, res) => {
       return;
     }
     const state = getSessionState(cookies);
+    const wordDetailHold = waitForReadHold(state, cookies, "word-detail");
+    if (wordDetailHold) await wordDetailHold;
     if (consumeReadFailureFixture(state, cookies, "discover")) {
       logLine(req, 500, {
         reason: "fixture-read-failure",
