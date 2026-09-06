@@ -596,8 +596,8 @@ function DailyReviewTargetStep({
           Timezone
         </label>
         <p className="text-base text-neutral-700">
-          Your timezone sets the daily mission reset boundary. You can change
-          it later in Settings.
+          Your timezone sets the daily mission reset boundary. You can change it
+          later in Settings.
         </p>
         <input
           id="onboarding-timezone"

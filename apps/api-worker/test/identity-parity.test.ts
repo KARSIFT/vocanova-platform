@@ -463,9 +463,13 @@ describe("identity and account parity", () => {
     const { app, cookie, csrf, userId } = await signedIn(
       "timezone-onboarding@example.test",
     );
-    await app.request("http://worker.test/api/v1/settings", {
-      headers: { Cookie: cookie },
-    }, env);
+    await app.request(
+      "http://worker.test/api/v1/settings",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
     await env.DB.prepare(
       "UPDATE user_settings SET daily_review_target = 35 WHERE user_id = ?1",
     )
@@ -501,9 +505,13 @@ describe("identity and account parity", () => {
     const { app, cookie, csrf, userId } = await signedIn(
       "timezone-legacy-onboarding@example.test",
     );
-    await app.request("http://worker.test/api/v1/settings", {
-      headers: { Cookie: cookie },
-    }, env);
+    await app.request(
+      "http://worker.test/api/v1/settings",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
     await env.DB.prepare(
       "UPDATE user_settings SET timezone = 'America/New_York', daily_review_target = 35 WHERE user_id = ?1",
     )
@@ -568,9 +576,13 @@ describe("identity and account parity", () => {
     const { app, cookie, csrf, userId } = await signedIn(
       "timezone-invalid-onboarding@example.test",
     );
-    await app.request("http://worker.test/api/v1/settings", {
-      headers: { Cookie: cookie },
-    }, env);
+    await app.request(
+      "http://worker.test/api/v1/settings",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
     await env.DB.prepare(
       "UPDATE user_settings SET daily_review_target = 35, timezone = 'Asia/Tehran' WHERE user_id = ?1",
     )
@@ -596,9 +608,7 @@ describe("identity and account parity", () => {
 
     expect(response.status).toBe(422);
     await expect(
-      env.DB.prepare(
-        "SELECT onboarding_status FROM users WHERE id = ?1",
-      )
+      env.DB.prepare("SELECT onboarding_status FROM users WHERE id = ?1")
         .bind(userId)
         .first(),
     ).resolves.toEqual({ onboarding_status: "not_started" });
@@ -623,53 +633,47 @@ describe("identity and account parity", () => {
       "timezone-evidence@example.test",
     );
     const timestamp = now.toISOString();
-    await app.request("http://worker.test/api/v1/settings", {
-      headers: { Cookie: cookie },
-    }, env);
+    await app.request(
+      "http://worker.test/api/v1/settings",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
     await env.DB.batch([
-      env.DB
-        .prepare(
-          `UPDATE user_settings
+      env.DB.prepare(
+        `UPDATE user_settings
            SET daily_review_target = 35, notifications_enabled = 0,
                marketing_emails_enabled = 1, timezone = 'UTC'
            WHERE user_id = ?1`,
-        )
-        .bind(userId),
-      env.DB
-        .prepare(
-          `INSERT INTO daily_mission_snapshots
+      ).bind(userId),
+      env.DB.prepare(
+        `INSERT INTO daily_mission_snapshots
            (id, user_id, local_date, timezone, review_target, reviews_completed,
             policy_version, status, completed_at, grace_applied, created_at, updated_at)
            VALUES (?1, ?2, '2026-08-22', 'UTC', 5, 5,
                    'p4-mission-policy-v1', 'completed', ?3, 0, ?3, ?3)`,
-        )
-        .bind(crypto.randomUUID(), userId, timestamp),
-      env.DB
-        .prepare(
-          `INSERT INTO daily_activity_summaries
+      ).bind(crypto.randomUUID(), userId, timestamp),
+      env.DB.prepare(
+        `INSERT INTO daily_activity_summaries
            (id, user_id, local_date, timezone, reviews_attempted, reviews_correct,
             confidence_points_earned, created_at, updated_at)
            VALUES (?1, ?2, '2026-08-22', 'UTC', 5, 5, 37, ?3, ?3)`,
-        )
-        .bind(crypto.randomUUID(), userId, timestamp),
-      env.DB
-        .prepare(
-          `INSERT INTO confidence_point_ledger
+      ).bind(crypto.randomUUID(), userId, timestamp),
+      env.DB.prepare(
+        `INSERT INTO confidence_point_ledger
            (id, user_id, amount, balance_after, reason, source_type, source_id,
             idempotency_key, metadata_json, occurred_at, created_at, updated_at)
            VALUES (?1, ?2, 30, 37, 'daily_mission_completed', 'daily_mission',
                    'mission', 'timezone-evidence', '{"localDate":"2026-08-22"}', ?3, ?3, ?3)`,
-        )
-        .bind(crypto.randomUUID(), userId, timestamp),
-      env.DB
-        .prepare(
-          `INSERT INTO streak_states
+      ).bind(crypto.randomUUID(), userId, timestamp),
+      env.DB.prepare(
+        `INSERT INTO streak_states
            (id, user_id, current_streak_count, longest_streak_count,
             last_completed_local_date, last_activity_local_date, timezone, status,
             created_at, updated_at)
            VALUES (?1, ?2, 4, 7, '2026-08-22', '2026-08-22', 'UTC', 'active', ?3, ?3)`,
-        )
-        .bind(crypto.randomUUID(), userId, timestamp),
+      ).bind(crypto.randomUUID(), userId, timestamp),
     ]);
     const evidenceBefore = await timezoneEvidence(userId);
 

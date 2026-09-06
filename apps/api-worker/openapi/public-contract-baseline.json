@@ -48,9 +48,7 @@
           "status",
           "timezone"
         ],
-        "required": [
-          "status"
-        ]
+        "required": ["status"]
       }
     },
     {
@@ -66,24 +64,12 @@
         }
       ],
       "request": {
-        "properties": [
-          "token"
-        ],
-        "required": [
-          "token"
-        ]
+        "properties": ["token"],
+        "required": ["token"]
       },
       "response": {
-        "properties": [
-          "changedAt",
-          "email",
-          "previousEmail"
-        ],
-        "required": [
-          "changedAt",
-          "email",
-          "previousEmail"
-        ]
+        "properties": ["changedAt", "email", "previousEmail"],
+        "required": ["changedAt", "email", "previousEmail"]
       }
     },
     {
@@ -93,14 +79,8 @@
       "successStatus": 200,
       "parameters": [],
       "request": {
-        "properties": [
-          "email",
-          "token"
-        ],
-        "required": [
-          "email",
-          "token"
-        ]
+        "properties": ["email", "token"],
+        "required": ["email", "token"]
       },
       "response": {
         "properties": [
@@ -110,9 +90,7 @@
           "emailVerifiedAt",
           "onboardingStatus"
         ],
-        "required": [
-          "onboardingStatus"
-        ]
+        "required": ["onboardingStatus"]
       }
     },
     {
@@ -166,12 +144,8 @@
       ],
       "request": null,
       "response": {
-        "properties": [
-          "word"
-        ],
-        "required": [
-          "word"
-        ]
+        "properties": ["word"],
+        "required": ["word"]
       }
     },
     {
@@ -189,9 +163,7 @@
           "emailVerifiedAt",
           "onboardingStatus"
         ],
-        "required": [
-          "onboardingStatus"
-        ]
+        "required": ["onboardingStatus"]
       }
     },
     {
@@ -249,14 +221,8 @@
       ],
       "request": null,
       "response": {
-        "properties": [
-          "meanings",
-          "situation"
-        ],
-        "required": [
-          "meanings",
-          "situation"
-        ]
+        "properties": ["meanings", "situation"],
+        "required": ["meanings", "situation"]
       }
     },
     {
@@ -277,9 +243,7 @@
           "status",
           "timezone"
         ],
-        "required": [
-          "status"
-        ]
+        "required": ["status"]
       }
     },
     {
@@ -301,11 +265,7 @@
           "confidencePointsBalance",
           "streak"
         ],
-        "required": [
-          "completionHistory",
-          "confidencePointsBalance",
-          "streak"
-        ]
+        "required": ["completionHistory", "confidencePointsBalance", "streak"]
       }
     },
     {
@@ -327,15 +287,8 @@
       ],
       "request": null,
       "response": {
-        "properties": [
-          "items",
-          "nextCursor",
-          "totalCount"
-        ],
-        "required": [
-          "items",
-          "totalCount"
-        ]
+        "properties": ["items", "nextCursor", "totalCount"],
+        "required": ["items", "totalCount"]
       }
     },
     {
@@ -385,13 +338,8 @@
       ],
       "request": null,
       "response": {
-        "properties": [
-          "items",
-          "nextCursor"
-        ],
-        "required": [
-          "items"
-        ]
+        "properties": ["items", "nextCursor"],
+        "required": ["items"]
       }
     },
     {
@@ -413,13 +361,8 @@
       ],
       "request": null,
       "response": {
-        "properties": [
-          "items",
-          "nextCursor"
-        ],
-        "required": [
-          "items"
-        ]
+        "properties": ["items", "nextCursor"],
+        "required": ["items"]
       }
     },
     {
@@ -469,20 +412,12 @@
       "successStatus": 200,
       "parameters": [],
       "request": {
-        "properties": [
-          "redirectUri"
-        ],
-        "required": [
-          "redirectUri"
-        ]
+        "properties": ["redirectUri"],
+        "required": ["redirectUri"]
       },
       "response": {
-        "properties": [
-          "url"
-        ],
-        "required": [
-          "url"
-        ]
+        "properties": ["url"],
+        "required": ["url"]
       }
     },
     {
@@ -503,13 +438,8 @@
         }
       ],
       "request": {
-        "properties": [
-          "classification",
-          "reason"
-        ],
-        "required": [
-          "reason"
-        ]
+        "properties": ["classification", "reason"],
+        "required": ["reason"]
       },
       "response": null
     },
@@ -526,12 +456,8 @@
         }
       ],
       "request": {
-        "properties": [
-          "newEmail"
-        ],
-        "required": [
-          "newEmail"
-        ]
+        "properties": ["newEmail"],
+        "required": ["newEmail"]
       },
       "response": null
     },
@@ -542,13 +468,8 @@
       "successStatus": 204,
       "parameters": [],
       "request": {
-        "properties": [
-          "email",
-          "returnTo"
-        ],
-        "required": [
-          "email"
-        ]
+        "properties": ["email", "returnTo"],
+        "required": ["email"]
       },
       "response": null
     },
@@ -570,14 +491,8 @@
         }
       ],
       "request": {
-        "properties": [
-          "meaningId",
-          "source"
-        ],
-        "required": [
-          "meaningId",
-          "source"
-        ]
+        "properties": ["meaningId", "source"],
+        "required": ["meaningId", "source"]
       },
       "response": {
         "properties": [
@@ -707,16 +622,8 @@
         }
       ],
       "request": {
-        "properties": [
-          "attemptId",
-          "sentenceText",
-          "source"
-        ],
-        "required": [
-          "attemptId",
-          "sentenceText",
-          "source"
-        ]
+        "properties": ["attemptId", "sentenceText", "source"],
+        "required": ["attemptId", "sentenceText", "source"]
       },
       "response": {
         "properties": [
