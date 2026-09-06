@@ -66,6 +66,7 @@ export function SentenceFeedback({
   const feedbackVersion = useRef(0);
   const ownerId = useRef(userId);
   const practiceHeadingRef = useRef<HTMLHeadingElement>(null);
+  const feedbackResultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (
@@ -76,6 +77,12 @@ export function SentenceFeedback({
       practiceHeadingRef.current?.focus();
     }
   }, [meaningId, pathname, source]);
+
+  useEffect(() => {
+    if (result && !result.errorCode) {
+      feedbackResultRef.current?.focus();
+    }
+  }, [result]);
 
   useEffect(() => {
     if (!userId) return;
@@ -351,6 +358,12 @@ export function SentenceFeedback({
         </button>
       </form>
 
+      {isLoading ? (
+        <p role="status" aria-live="polite" className="sr-only">
+          Checking sentence…
+        </p>
+      ) : null}
+
       {errorMessage && !hasResult ? (
         <p
           role="alert"
@@ -365,7 +378,10 @@ export function SentenceFeedback({
         <div className="mt-[var(--spacing-md)] space-y-[var(--spacing-md)]">
           {statusLabel ? (
             <div
+              ref={hasSuccessResult ? feedbackResultRef : undefined}
+              id={`sentence-feedback-result-${attemptId}`}
               role="status"
+              tabIndex={hasSuccessResult ? -1 : undefined}
               aria-label={`Feedback result: ${statusLabel}`}
               className={`rounded-md p-[var(--spacing-md)] ${getStatusClasses(result.status)}`}
             >
