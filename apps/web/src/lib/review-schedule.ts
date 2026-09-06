@@ -7,7 +7,7 @@ export function formatReviewDateTime(
     hour: "numeric",
     minute: "2-digit",
     month: "short",
-    timeZoneName: "short",
+    timeZoneName: "longOffset",
     year: "numeric",
   };
   const date = new Date(isoDateTime);
