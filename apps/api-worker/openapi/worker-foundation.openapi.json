@@ -485,6 +485,13 @@
                               "learnerDefinition": {
                                 "type": "string"
                               },
+                              "nextReviewAt": {
+                                "format": "date-time",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
                               "partOfSpeech": {
                                 "type": "string"
                               },
@@ -1384,6 +1391,13 @@
                     },
                     "nextCursor": {
                       "type": "string"
+                    },
+                    "nextReviewAt": {
+                      "format": "date-time",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "totalCount": {
                       "type": "integer"
@@ -2299,6 +2313,13 @@
                             "format": "uuid",
                             "type": "string"
                           },
+                          "nextReviewAt": {
+                            "format": "date-time",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "partOfSpeech": {
                             "type": "string"
                           },
@@ -2431,6 +2452,13 @@
                     "meaningId": {
                       "format": "uuid",
                       "type": "string"
+                    },
+                    "nextReviewAt": {
+                      "format": "date-time",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "partOfSpeech": {
                       "type": "string"

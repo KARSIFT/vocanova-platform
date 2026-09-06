@@ -99,6 +99,7 @@ export interface WordMeaning {
   saved: boolean;
   userWordId?: string;
   reviewState: WordReviewState | null;
+  nextReviewAt?: string | null;
   examples: WordExample[];
   usageNotes: WordUsageNote[];
 }
@@ -138,6 +139,7 @@ export interface SavedMeaning {
   source: string;
   saved: boolean;
   addedAt: string;
+  nextReviewAt?: string | null;
 }
 
 export interface ListSavedWordsResponse {
@@ -166,6 +168,7 @@ export interface ListDueWordsResponse {
   items: DueWord[];
   nextCursor?: string;
   totalCount: number;
+  nextReviewAt?: string | null;
 }
 
 export interface ReviewAttempt {

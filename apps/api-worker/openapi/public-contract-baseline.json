@@ -232,7 +232,7 @@
       ],
       "request": null,
       "response": {
-        "properties": ["items", "nextCursor", "totalCount"],
+        "properties": ["items", "nextCursor", "nextReviewAt", "totalCount"],
         "required": ["items", "totalCount"]
       }
     },
@@ -377,6 +377,7 @@
         "properties": [
           "addedAt",
           "meaningId",
+          "nextReviewAt",
           "partOfSpeech",
           "saved",
           "shortDefinition",

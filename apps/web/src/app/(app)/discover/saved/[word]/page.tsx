@@ -5,6 +5,7 @@ import { ApiResponseError } from "@vocanova/api-client";
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
 import { PageBackLink } from "../../../_components/page-back-link";
 import { SentenceFeedback } from "../../../_components/sentence-feedback";
+import { formatReviewDateTime, isDueReview } from "@/lib/review-schedule";
 
 import { RemoveSavedMeaning } from "./_components/remove-saved-meaning";
 
@@ -66,6 +67,15 @@ export default async function SavedWordPage({
         {meaning.reviewState ? (
           <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
             Review state: {reviewStateLabel(meaning.reviewState)}
+          </p>
+        ) : null}
+        {meaning.nextReviewAt !== undefined ? (
+          <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+            {meaning.reviewState === "due" ||
+            meaning.nextReviewAt === null ||
+            isDueReview(meaning.nextReviewAt)
+              ? "Due now"
+              : `Next review: ${formatReviewDateTime(meaning.nextReviewAt)}`}
           </p>
         ) : null}
         {meaning.examples.length ? (
