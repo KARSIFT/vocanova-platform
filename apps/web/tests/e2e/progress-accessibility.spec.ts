@@ -153,6 +153,37 @@ const truncatedSavedWordsResponse = {
   nextCursor: "e2e-saved-words-after-10",
 };
 
+const sharedSlugSavedWordsResponse = {
+  items: [
+    {
+      userWordId: "e2e-library-bank-river",
+      meaningId: "mean-bank-river",
+      wordId: "word-bank",
+      wordSlug: "bank",
+      wordText: "bank",
+      partOfSpeech: "noun",
+      shortDefinition: "land beside a river",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-10T00:00:00.000Z",
+    },
+    {
+      userWordId: "e2e-library-bank-money",
+      meaningId: "mean-bank-money",
+      wordId: "word-bank",
+      wordSlug: "bank",
+      wordText: "bank",
+      partOfSpeech: "noun",
+      shortDefinition: "a financial institution",
+      status: "saved",
+      source: "journey",
+      saved: true,
+      addedAt: "2026-01-09T00:00:00.000Z",
+    },
+  ],
+};
+
 test.describe("Progress accessibility", () => {
   test("/progress renders with zero critical/serious axe violations, is keyboard reachable, and uses text-based state", async ({
     page,
@@ -286,5 +317,93 @@ test.describe("Progress accessibility", () => {
         criticalOrSerious,
       ).join("\n")}`,
     ).toEqual([]);
+  });
+
+  test("saved vocabulary preview opens the exact meaning when one word has multiple saved meanings", async ({
+    page,
+    baseURL,
+  }) => {
+    if (!baseURL) {
+      throw new Error(
+        "Expected the Playwright project to configure use.baseURL so the e2e_saved_words_fixture cookie can be scoped to it.",
+      );
+    }
+
+    await page.context().addCookies([
+      {
+        name: "e2e_saved_words_fixture",
+        value: "progress-shared-slug",
+        url: baseURL,
+      },
+    ]);
+
+    const mockApiPort = Number(process.env.MOCK_API_PORT ?? 8080);
+    const fixtureResponse = await page.request.get(
+      `http://127.0.0.1:${mockApiPort}/api/v1/user-words?limit=10`,
+    );
+    await expect(fixtureResponse).toBeOK();
+    await expect(await fixtureResponse.json()).toEqual(
+      sharedSlugSavedWordsResponse,
+    );
+
+    await page.goto("/progress");
+
+    const savedVocabularySection = page
+      .getByRole("heading", {
+        name: "Recently saved vocabulary",
+        level: 2,
+      })
+      .locator("..");
+    const savedVocabularyItems = savedVocabularySection
+      .getByRole("list")
+      .getByRole("listitem");
+    await expect(savedVocabularyItems).toHaveCount(
+      sharedSlugSavedWordsResponse.items.length,
+    );
+
+    const riverLink = savedVocabularyItems
+      .nth(0)
+      .getByRole("link", { name: "bank land beside a river" });
+    const moneyLink = savedVocabularyItems
+      .nth(1)
+      .getByRole("link", { name: "bank a financial institution" });
+    await expect(riverLink).toHaveAttribute(
+      "href",
+      "/discover/saved/bank?meaning=mean-bank-river",
+    );
+    await expect(moneyLink).toHaveAttribute(
+      "href",
+      "/discover/saved/bank?meaning=mean-bank-money",
+    );
+
+    const { criticalOrSerious } = await scanForAxeViolations(page);
+    expect(
+      criticalOrSerious,
+      `Expected zero critical or serious axe-core violations on /progress shared-slug saved-vocabulary preview; found:\n${formatViolations(
+        criticalOrSerious,
+      ).join("\n")}`,
+    ).toEqual([]);
+
+    await riverLink.click();
+    await expect(page).toHaveURL(
+      /\/discover\/saved\/bank\?meaning=mean-bank-river$/,
+    );
+    await expect(
+      page.getByText("land beside a river", { exact: true }),
+    ).toBeVisible();
+
+    await page.goto("/progress");
+    const keyboardMoneyLink = page.getByRole("link", {
+      name: "bank a financial institution",
+    });
+    await keyboardMoneyLink.focus();
+    await expect(keyboardMoneyLink).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(
+      /\/discover\/saved\/bank\?meaning=mean-bank-money$/,
+    );
+    await expect(
+      page.getByText("a financial institution", { exact: true }),
+    ).toBeVisible();
   });
 });

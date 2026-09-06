@@ -127,16 +127,18 @@ export default async function ProgressPage() {
             </p>
             <ul className="mt-[var(--spacing-md)] space-y-[var(--spacing-xs)]">
               {savedWords.map((savedWord) => (
-                <li
-                  key={savedWord.userWordId}
-                  className="rounded-md p-[var(--spacing-sm)]"
-                >
-                  <p className="wrap-break-word font-medium text-neutral-900">
-                    {savedWord.wordText}
-                  </p>
-                  <p className="wrap-break-word text-base text-neutral-700">
-                    {savedWord.shortDefinition}
-                  </p>
+                <li key={savedWord.userWordId} className="rounded-md">
+                  <Link
+                    href={`/discover/saved/${encodeURIComponent(savedWord.wordSlug)}?meaning=${encodeURIComponent(savedWord.meaningId)}`}
+                    className="block rounded-md p-[var(--spacing-sm)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+                  >
+                    <p className="wrap-break-word font-medium text-neutral-900">
+                      {savedWord.wordText}
+                    </p>
+                    <p className="wrap-break-word text-base text-neutral-700">
+                      {savedWord.shortDefinition}
+                    </p>
+                  </Link>
                 </li>
               ))}
             </ul>
