@@ -277,9 +277,12 @@ describe("VocanovaClient", () => {
     assert.equal(data.word.meanings[0]!.reviewState, "mastered");
   });
 
-  it("sends GET /api/v1/user-words", async () => {
+  it("sends GET /api/v1/user-words with a search query", async () => {
     const fetch = (url: string, init: RequestInit): Promise<Response> => {
-      assert.equal(url, "https://api.example.com/api/v1/user-words");
+      assert.equal(
+        url,
+        "https://api.example.com/api/v1/user-words?limit=10&query=flat+white",
+      );
       assert.equal(init.method, "GET");
       return Promise.resolve(
         new Response(
@@ -310,7 +313,10 @@ describe("VocanovaClient", () => {
       baseURL: "https://api.example.com",
       fetch: fetch as typeof globalThis.fetch,
     });
-    const { data } = await client.listSavedWords();
+    const { data } = await client.listSavedWords({
+      limit: 10,
+      query: "flat white",
+    });
     assert.equal(data.items[0]!.wordSlug, "boarding-pass");
     assert.equal(data.items[0]!.nextReviewAt, "2026-07-26T12:00:00Z");
   });

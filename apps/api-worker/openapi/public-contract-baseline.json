@@ -357,6 +357,11 @@
           "in": "query",
           "name": "limit",
           "required": false
+        },
+        {
+          "in": "query",
+          "name": "query",
+          "required": false
         }
       ],
       "request": null,

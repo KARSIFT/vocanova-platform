@@ -544,7 +544,7 @@ export class VocanovaClient {
   }
 
   async listSavedWords(
-    params?: { after?: string; limit?: number },
+    params?: { after?: string; limit?: number; query?: string },
     init?: RequestInit,
   ): Promise<{ data: ListSavedWordsResponse; response: Response }> {
     const query = new URLSearchParams();
@@ -553,6 +553,9 @@ export class VocanovaClient {
     }
     if (params?.limit !== undefined) {
       query.set("limit", String(params.limit));
+    }
+    if (params?.query !== undefined) {
+      query.set("query", params.query);
     }
     const path =
       "/api/v1/user-words" + (query.toString() ? `?${query.toString()}` : "");

@@ -124,6 +124,87 @@ test("offers Journey discovery when the saved library is empty", async ({
   ).toHaveAttribute("href", "/discover");
 });
 
+test("searches saved meanings by normalized definition, focuses results, and clears a no-match filter", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "library", url: baseURL },
+  ]);
+
+  await page.goto("/discover/saved");
+  const search = page.getByRole("searchbox", {
+    name: "Search saved vocabulary",
+  });
+  await search.fill("  RIVER  ");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(
+    page.locator('a[href="/discover/saved/bank?meaning=mean-bank-river"]'),
+  ).toBeVisible();
+  await expect(page.getByText("arrival", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Search results", level: 2 }),
+  ).toBeFocused();
+
+  await search.fill("does not exist");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "No saved words match your search",
+      level: 3,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(
+      "This filter found no saved words. Clear the search to see your full vocabulary library.",
+    ),
+  ).toBeVisible();
+  await expect(search).toHaveValue("does not exist");
+
+  await page.getByRole("button", { name: "Clear search" }).last().click();
+  await expect(page.getByText("arrival", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Saved words", level: 2 }),
+  ).toBeFocused();
+});
+
+test("retains the entered saved-vocabulary search after a safe retry", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "library", url: baseURL },
+  ]);
+  let failOnce = true;
+  await page.route("**/api/v1/user-words?limit=10&query=river", async (route) => {
+    if (failOnce) {
+      failOnce = false;
+      await route.fulfill({ status: 500, body: "{}" });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto("/discover/saved");
+  const search = page.getByRole("searchbox", {
+    name: "Search saved vocabulary",
+  });
+  await search.fill("river");
+  await page.getByRole("button", { name: "Search", exact: true }).click();
+  await expect(
+    page.getByText("We couldn't search saved words. Please try again."),
+  ).toBeVisible();
+  await expect(search).toHaveValue("river");
+  await page.getByRole("button", { name: "Try search again" }).click();
+  await expect(
+    page.locator('a[href="/discover/saved/bank?meaning=mean-bank-river"]'),
+  ).toBeVisible();
+});
+
 test("opens a saved canonical word without Journey context and retains removal after a failure", async ({
   page,
   context,

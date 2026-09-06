@@ -60,6 +60,11 @@ responses with business-level `errorCode`, `errorMessage`, `canRetry`, or
 - Daily mission, progress, points, and streaks
 - Sentence feedback and feedback reports
 
+`GET /api/v1/user-words` accepts an optional `query` of at most 100 characters.
+The Worker trims it, collapses internal whitespace, and compares case-insensitively
+against the saved meaning's word text and short definition. Its opaque cursor is
+bound to that normalized query, so pagination cannot cross search result sets.
+
 Review prompts currently use `multiple_choice` and `self_check`. `result` and `rating` are distinct;
 the backend owns review-step and scheduling rules.
 

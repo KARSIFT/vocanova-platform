@@ -2324,6 +2324,16 @@
               "default": 20,
               "type": "integer"
             }
+          },
+          {
+            "description": "Case-insensitive word or short-definition search, trimmed and normalized to single spaces.",
+            "in": "query",
+            "name": "query",
+            "required": false,
+            "schema": {
+              "maxLength": 100,
+              "type": "string"
+            }
           }
         ],
         "responses": {

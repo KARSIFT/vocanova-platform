@@ -92,6 +92,64 @@ describe("Worker content, learning, and review parity", () => {
     ).toEqual(["due", "learning"]);
   });
 
+  it("searches only the owner's saved meanings with a normalized, query-bound cursor", async () => {
+    await env.DB.prepare(
+      `INSERT INTO word_meanings
+       (id, word_id, part_of_speech, short_definition, meaning_order, status, created_at, updated_at)
+       VALUES (?1, ?2, 'noun', 'a second coffee drink', 2, 'active', ?3, ?3)`,
+    )
+      .bind(MEANING_C, WORD_A, NOW)
+      .run();
+    await insertUserWord(
+      USER_WORD_A,
+      USER_A,
+      MEANING_A,
+      "2026-08-22T11:00:00.000Z",
+    );
+    await insertUserWord(
+      "50000000-0000-4000-8000-000000000003",
+      USER_A,
+      MEANING_C,
+      "2026-08-22T12:00:00.000Z",
+    );
+    await insertUserWord(
+      "50000000-0000-4000-8000-000000000004",
+      USER_B,
+      MEANING_C,
+      "2026-08-22T13:00:00.000Z",
+    );
+    await insertUserWord(
+      USER_WORD_B,
+      USER_A,
+      MEANING_B,
+      "2026-08-22T14:00:00.000Z",
+    );
+
+    const first = await repository.listSavedWords(USER_A, "", 1, "  COFFEE  ");
+    expect(first.items.map((item) => item.meaningId)).toEqual([MEANING_C]);
+    expect(first.nextCursor).toBeTruthy();
+
+    const second = await repository.listSavedWords(
+      USER_A,
+      first.nextCursor!,
+      1,
+      "coffee",
+    );
+    expect(second.items.map((item) => item.meaningId)).toEqual([MEANING_A]);
+
+    await expect(
+      repository.listSavedWords(USER_A, first.nextCursor!, 1, "flat white"),
+    ).rejects.toMatchObject({ code: "invalid_cursor" });
+    expect(
+      (await repository.listSavedWords(USER_B, "", 10, "coffee")).items,
+    ).toEqual([
+      expect.objectContaining({
+        meaningId: MEANING_C,
+        userWordId: "50000000-0000-4000-8000-000000000004",
+      }),
+    ]);
+  });
+
   it("keeps Word Detail state minimized for absent, active, and soft-deleted rows", async () => {
     const absent = (await repository.getWord(USER_A, "flat-white")).word
       .meanings[0]!;
@@ -261,6 +319,16 @@ describe("Worker content, learning, and review parity", () => {
         });
       }
     }
+
+    const overlongSearch = await app.request(
+      `http://worker.test/api/v1/user-words?query=${"x".repeat(101)}`,
+      { headers: { cookie: `vocanova_session=${token}` } },
+      env,
+    );
+    expect(overlongSearch.status).toBe(400);
+    await expect(overlongSearch.json()).resolves.toMatchObject({
+      detail: "invalid request",
+    });
   });
 
   it("publishes reviewState as one required nullable OpenAPI enum", () => {

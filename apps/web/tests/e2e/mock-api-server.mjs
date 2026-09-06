@@ -412,6 +412,42 @@ const PROGRESS_SHARED_SLUG_SAVED_WORDS_RESPONSE = {
   items: [SAVED_LIBRARY_PAGE_TWO[2], SAVED_LIBRARY_PAGE_TWO[3]],
 };
 
+function buildSavedVocabularyLibrary(state, { after, limit, query }) {
+  const items = [
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items,
+    ...SAVED_LIBRARY_PAGE_TWO,
+  ].filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId));
+  if (query !== null) {
+    const normalizedQuery = query
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+    return {
+      items: items.filter((item) =>
+        `${item.wordText} ${item.shortDefinition}`
+          .toLowerCase()
+          .includes(normalizedQuery),
+      ),
+      nextCursor: undefined,
+    };
+  }
+  if (limit === "100") return { items, nextCursor: undefined };
+  if (after) {
+    return {
+      items: SAVED_LIBRARY_PAGE_TWO.filter(
+        (item) => !state.libraryRemovedMeaningIds.has(item.meaningId),
+      ),
+      nextCursor: undefined,
+    };
+  }
+  return {
+    items: TRUNCATED_SAVED_WORDS_RESPONSE.items.filter(
+      (item) => !state.libraryRemovedMeaningIds.has(item.meaningId),
+    ),
+    nextCursor: "e2e-library-page-2",
+  };
+}
+
 const MULTIPLE_CHOICE_DUE_WORDS = [
   {
     userWordId: "e2e-review-user-word-arrival",
@@ -1576,20 +1612,14 @@ const server = createServer(async (req, res) => {
         ? TRUNCATED_SAVED_WORDS_RESPONSE
         : cookies.e2e_saved_words_fixture === "progress-shared-slug"
           ? PROGRESS_SHARED_SLUG_SAVED_WORDS_RESPONSE
-        : cookies.e2e_saved_words_fixture === "long-content"
+          : cookies.e2e_saved_words_fixture === "long-content"
           ? LONG_SAVED_WORDS_RESPONSE
           : cookies.e2e_saved_words_fixture === "library"
-            ? url.searchParams.get("limit") === "100"
-              ? {
-                  items: [
-                    ...TRUNCATED_SAVED_WORDS_RESPONSE.items,
-                    ...SAVED_LIBRARY_PAGE_TWO,
-                  ].filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)),
-                  nextCursor: undefined,
-                }
-              : url.searchParams.get("after")
-              ? { items: SAVED_LIBRARY_PAGE_TWO.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: undefined }
-              : { items: TRUNCATED_SAVED_WORDS_RESPONSE.items.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: "e2e-library-page-2" }
+            ? buildSavedVocabularyLibrary(state, {
+                after: url.searchParams.get("after"),
+                limit: url.searchParams.get("limit"),
+                query: url.searchParams.get("query"),
+              })
           : cookies.e2e_home_fixture !== "new-learner" &&
               cookies.e2e_home_fixture
             ? HOME_PRACTICE_SAVED_WORDS_RESPONSE

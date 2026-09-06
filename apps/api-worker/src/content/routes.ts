@@ -209,6 +209,7 @@ export function registerContentLearningRoutes(
           user.id,
           context.req.query("after") ?? "",
           numberQuery(context.req.query("limit")),
+          context.req.query("query") ?? "",
         ),
         200,
       );
@@ -352,6 +353,17 @@ function registerOpenApi(app: OpenAPIHono<VocaNovaWorkerEnvironment>): void {
       schema: { type: "integer" as const, default: 20 },
     },
   ];
+  const savedWordsPageParameters = [
+    ...pageParameters,
+    {
+      name: "query",
+      in: "query" as const,
+      required: false,
+      schema: { type: "string" as const, maxLength: 100 },
+      description:
+        "Case-insensitive word or short-definition search, trimmed and normalized to single spaces.",
+    },
+  ];
   const idempotency = [
     {
       name: "Idempotency-Key",
@@ -421,7 +433,7 @@ function registerOpenApi(app: OpenAPIHono<VocaNovaWorkerEnvironment>): void {
         nextCursor: z.string().optional(),
       }),
       200,
-      pageParameters,
+      savedWordsPageParameters,
     ],
     [
       "post",
