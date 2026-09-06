@@ -72,3 +72,26 @@ test("keeps saved meanings for the same word distinct", async ({ page, context }
   await page.goto("/discover/saved/bank?meaning=mean-bank-money");
   await expect(page.getByText("a financial institution", { exact: true })).toBeVisible();
 });
+
+test("keeps a saved meaning until a retry succeeds, then refreshes the library", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "library", url: baseURL },
+    { name: "vocanova_csrf", value: "saved-library-retry-csrf", url: baseURL },
+  ]);
+  let failOnce = true;
+  await page.route("**/api/v1/user-words/mean-bank-river", async (route) => {
+    if (failOnce) { failOnce = false; await route.fulfill({ status: 503, body: "{}" }); return; }
+    await route.continue();
+  });
+  await page.goto("/discover/saved/bank?meaning=mean-bank-river");
+  const remove = page.getByRole("button", { name: "Remove bank from saved words" });
+  await remove.click();
+  await expect(page.getByText("Unable to remove this saved word. Please try again.")).toBeVisible();
+  await remove.click();
+  await expect(page).toHaveURL(/\/discover\/saved$/);
+  await page.getByRole("button", { name: "Load more saved words" }).click();
+  await expect(page.getByText("land beside a river", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("a financial institution", { exact: true })).toBeVisible();
+});

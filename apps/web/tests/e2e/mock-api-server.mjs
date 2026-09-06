@@ -635,6 +635,7 @@ function createInitialState() {
   return {
     onboardingCompleted: true,
     savedMeaningIds: new Set(),
+    libraryRemovedMeaningIds: new Set(),
     // A meaning enters reviewedMeaningIds after a successful
     // review submission. The /api/v1/reviews/due response is
     // `savedMeaningIds - reviewedMeaningIds` so the review
@@ -1443,11 +1444,11 @@ const server = createServer(async (req, res) => {
                   items: [
                     ...TRUNCATED_SAVED_WORDS_RESPONSE.items,
                     ...SAVED_LIBRARY_PAGE_TWO,
-                  ],
+                  ].filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)),
                   nextCursor: undefined,
                 }
               : url.searchParams.get("after")
-              ? { items: SAVED_LIBRARY_PAGE_TWO, nextCursor: undefined }
+              ? { items: SAVED_LIBRARY_PAGE_TWO.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: undefined }
               : { items: TRUNCATED_SAVED_WORDS_RESPONSE.items, nextCursor: "e2e-library-page-2" }
           : buildSavedWords(state);
     logLine(req, 200, { count: data.items.length });
@@ -1521,6 +1522,7 @@ const server = createServer(async (req, res) => {
     );
     const state = getSessionState(cookies);
     state.savedMeaningIds.delete(meaningId);
+    state.libraryRemovedMeaningIds.add(meaningId);
     logLine(req, 204, { action: "unsave", meaningId });
     emptyResponse(res, 204);
     return;
