@@ -45,6 +45,8 @@ live directly under `app/`.
 /onboarding
 /home
 /discover
+/discover/saved
+/discover/saved/[word]
 /discover/[situation]
 /discover/[situation]/[word]
 /reviews

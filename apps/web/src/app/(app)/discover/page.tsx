@@ -21,6 +21,12 @@ export default async function DiscoverPage() {
       <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
         Choose a situation to explore practical vocabulary.
       </p>
+      <Link
+        href="/discover/saved"
+        className="mt-[var(--spacing-md)] inline-flex min-h-[var(--spacing-2xl)] items-center rounded-md border border-neutral-300 bg-white px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900"
+      >
+        View saved vocabulary
+      </Link>
 
       {items.length > 0 ? (
         <JourneySituationList
