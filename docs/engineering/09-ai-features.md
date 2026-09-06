@@ -87,9 +87,16 @@ finalize the attempt, learner sentence, activity count, and rewards → emit pri
 return the result.
 
 D1 records pending/succeeded/failed/cancelled attempt state internally. An idempotency key and
-fingerprint deduplicate requests; a per-user lease prevents concurrent generation. Stored feedback
-is reused for a matching completed request. Failures preserve a retryable public outcome where
-appropriate and do not award successful-feedback activity or rewards.
+fingerprint deduplicate requests; a per-user lease prevents concurrent generation. Each pending
+attempt records the immutable expiry of the lease that created it, because later leases cannot
+identify an older attempt's deadline. At that deadline, one request atomically marks the pending
+attempt failed with a retryable temporary outcome and a fresh idempotency key can create one
+replacement. Legacy pending rows without a deadline use a conservative 60-second fallback from
+their start time. The original idempotency key remains bound to the abandoned attempt, so it
+replays that terminal outcome instead of a replacement result. Stored feedback is reused for a
+matching completed request. A finalizer must win the pending-to-terminal transition before it may
+change the sentence, rewards, activity, or lease; late responses cannot overwrite a replacement
+or create duplicate rewards. Failures do not award successful-feedback activity or rewards.
 
 ## 7. Runtime controls
 

@@ -544,6 +544,172 @@ describe("Worker AI feedback parity", () => {
     expect(unsafeLeaseProvider.generateCalls).toBe(0);
   });
 
+  it("recovers an abandoned pending attempt only at its lease deadline and ignores its late finalizer", async () => {
+    let clock = new Date(NOW);
+    let finishAbandoned: () => void = () => undefined;
+    const provider = new ScriptedProvider((call) => {
+      if (call === 1)
+        return new Promise((resolve) => {
+          finishAbandoned = () => resolve(validFeedback());
+        });
+      return validFeedback();
+    });
+    const service = createService(
+      provider,
+      { limits: { perMinute: 10 } },
+      undefined,
+      env.DB,
+      () => clock,
+    );
+    const abandoned = service.submit(
+      USER_A,
+      submission("I work every day."),
+      "abandoned-original",
+    );
+    await vi.waitFor(() => expect(provider.generateCalls).toBe(1));
+    const pending = await env.DB.prepare(
+      `SELECT id, learner_sentence_id, generation_expires_at
+       FROM ai_feedback_attempts WHERE status = 'pending'`,
+    ).first<{
+      id: string;
+      learner_sentence_id: string;
+      generation_expires_at: string;
+    }>();
+    expect(pending?.generation_expires_at).toBe("2026-08-22T12:00:15.000Z");
+
+    const active = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "abandoned-active",
+    );
+    expect(active.result).toMatchObject({
+      attemptId: pending?.id,
+      errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE",
+      canRetry: true,
+    });
+    expect(provider.generateCalls).toBe(1);
+
+    clock = new Date("2026-08-22T12:00:15.000Z");
+    const replacement = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "abandoned-replacement",
+    );
+    expect(replacement.result).toMatchObject({ status: "correct" });
+    expect(replacement.result.attemptId).not.toBe(pending?.id);
+    expect(provider.generateCalls).toBe(2);
+    await expect(
+      env.DB.prepare(
+        `SELECT a.status, a.error_code, s.status AS sentence_status
+         FROM ai_feedback_attempts a
+         JOIN learner_sentences s ON s.id = a.learner_sentence_id
+         WHERE a.id = ?1`,
+      )
+        .bind(pending?.id)
+        .first<{
+          status: string;
+          error_code: string;
+          sentence_status: string;
+        }>(),
+    ).resolves.toEqual({
+      status: "failed",
+      error_code: "AI_FEEDBACK_TEMPORARY_FAILURE",
+      sentence_status: "feedback_failed",
+    });
+    const originalReplay = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "abandoned-original",
+    );
+    expect(originalReplay.result).toMatchObject({
+      errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE",
+      canRetry: true,
+    });
+
+    finishAbandoned();
+    await expect(abandoned).resolves.toMatchObject({
+      result: {
+        attemptId: pending?.id,
+        errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE",
+        canRetry: true,
+      },
+    });
+    expect(await counts()).toMatchObject({
+      sentences: 2,
+      attempts: 2,
+      pointRows: 2,
+      balance: 5,
+      activitySentences: 1,
+      activityFeedback: 1,
+    });
+  });
+
+  it("allows one replacement for concurrent recovery and uses the legacy 60-second deadline", async () => {
+    let clock = new Date(NOW);
+    let finishAbandoned: () => void = () => undefined;
+    const provider = new ScriptedProvider((call) => {
+      if (call === 1)
+        return new Promise((resolve) => {
+          finishAbandoned = () => resolve(validFeedback());
+        });
+      return validFeedback();
+    });
+    const service = createService(
+      provider,
+      { limits: { perMinute: 10 } },
+      undefined,
+      env.DB,
+      () => clock,
+    );
+    const abandoned = service.submit(
+      USER_A,
+      submission("I work every day."),
+      "legacy-original",
+    );
+    await vi.waitFor(() => expect(provider.generateCalls).toBe(1));
+    await env.DB.prepare(
+      "UPDATE ai_feedback_attempts SET generation_expires_at = NULL WHERE status = 'pending'",
+    ).run();
+
+    clock = new Date("2026-08-22T12:00:59.999Z");
+    const beforeLegacyDeadline = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "legacy-active",
+    );
+    expect(beforeLegacyDeadline.result.errorCode).toBe(
+      "AI_FEEDBACK_TEMPORARY_FAILURE",
+    );
+    expect(provider.generateCalls).toBe(1);
+
+    clock = new Date("2026-08-22T12:01:00.000Z");
+    const recovered = await Promise.all([
+      service.submit(USER_A, submission("I work every day."), "legacy-one"),
+      service.submit(USER_A, submission("I work every day."), "legacy-two"),
+    ]);
+    expect(provider.generateCalls).toBe(2);
+    expect(
+      recovered.filter((item) => item.result.status === "correct"),
+    ).toHaveLength(1);
+    expect(
+      recovered.filter(
+        (item) => item.result.errorCode === "AI_FEEDBACK_RATE_LIMITED",
+      ),
+    ).toHaveLength(1);
+    finishAbandoned();
+    await expect(abandoned).resolves.toMatchObject({
+      result: { errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE" },
+    });
+    expect(await counts()).toMatchObject({
+      sentences: 2,
+      attempts: 2,
+      pointRows: 2,
+      balance: 5,
+      activitySentences: 1,
+      activityFeedback: 1,
+    });
+  });
+
   it("enforces rolling rate windows across UTC bucket boundaries", async () => {
     let clock = new Date("2026-08-22T12:00:59.900Z");
     const repository = new D1AIFeedbackRepository(env.DB, () => clock);
@@ -958,6 +1124,7 @@ function createService(
   } = {},
   telemetry?: AIFeedbackTelemetry,
   database: D1Database = env.DB,
+  now: () => Date = () => new Date(NOW),
 ): AIFeedbackService {
   const config: AIFeedbackServiceConfig = {
     limits: {
@@ -974,12 +1141,12 @@ function createService(
     release: "test",
   };
   return new AIFeedbackService(
-    new D1AIFeedbackRepository(database, () => new Date(NOW)),
+    new D1AIFeedbackRepository(database, now),
     provider,
     provider,
     telemetry,
     config,
-    () => new Date(NOW),
+    now,
   );
 }
 
@@ -1109,6 +1276,7 @@ async function seed(): Promise<void> {
 async function clearFeedbackState(): Promise<void> {
   for (const table of [
     "ai_feedback_reports",
+    "ai_feedback_idempotency_attempts",
     "ai_feedback_attempts",
     "learner_sentences",
     "ai_generation_leases",
@@ -1124,6 +1292,7 @@ async function clearFeedbackState(): Promise<void> {
 async function clearTables(): Promise<void> {
   for (const table of [
     "ai_feedback_reports",
+    "ai_feedback_idempotency_attempts",
     "ai_feedback_attempts",
     "learner_sentences",
     "ai_generation_leases",

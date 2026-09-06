@@ -102,23 +102,87 @@ export class AIFeedbackService {
       idempotencyKey,
       requestHash,
     );
-    const stored = await this.repository.findAttempt(
+    if (idempotency.state === "replay" && idempotency.attemptId) {
+      let replay = await this.repository.findAttemptById(
+        userId,
+        idempotency.attemptId,
+      );
+      if (replay?.errorCode === ERROR.temporaryFailure && replay.sentenceId) {
+        await this.repository.recoverAbandoned(
+          userId,
+          {
+            sentenceId: replay.sentenceId,
+            attemptId: idempotency.attemptId,
+            leaseId: "",
+            requestHash,
+          },
+          await sha256(`${requestHash}:${idempotency.attemptId}:abandoned`),
+        );
+        replay = await this.repository.findAttemptById(
+          userId,
+          idempotency.attemptId,
+        );
+      }
+      if (replay)
+        return {
+          result: replay,
+          telemetry: this.record("replay", startedAt, replay.status),
+        };
+      return failure(ERROR.temporaryFailure, true);
+    }
+    let stored = await this.repository.findAttempt(
+      userId,
       requestHash,
       input.sentenceText,
     );
+    if (stored?.errorCode === ERROR.temporaryFailure && stored.attemptId) {
+      const recovered = await this.repository.recoverAbandoned(
+        userId,
+        {
+          sentenceId: stored.sentenceId!,
+          attemptId: stored.attemptId,
+          leaseId: "",
+          requestHash,
+        },
+        await sha256(`${requestHash}:${stored.attemptId}:abandoned`),
+      );
+      if (recovered) {
+        const abandoned: SentenceFeedbackResult = {
+          ...stored,
+          errorCode: ERROR.temporaryFailure,
+          errorMessage:
+            "AI feedback is temporarily unavailable. Please try again.",
+          canRetry: true,
+        };
+        if (idempotency.state === "replay")
+          return {
+            result: abandoned,
+            telemetry: this.record("replay", startedAt),
+          };
+        stored = null;
+      } else {
+        stored = await this.repository.findAttempt(
+          userId,
+          requestHash,
+          input.sentenceText,
+        );
+      }
+    }
     if (stored) {
-      if (idempotency === "new")
+      if (idempotency.state === "new")
         await this.repository.recordIdempotency(
           userId,
           idempotencyKey,
           requestHash,
+          stored.attemptId!,
         );
       return {
         result: stored,
         telemetry: this.record("replay", startedAt, stored.status),
       };
     }
-    if (idempotency === "replay") return failure(ERROR.temporaryFailure, true);
+    if (idempotency.state === "replay")
+      return failure(ERROR.temporaryFailure, true);
 
     const reservation = await this.repository.reserve(
       userId,
@@ -171,6 +235,7 @@ export class AIFeedbackService {
         this.provider.name,
         this.provider.model,
         reservation.leaseId,
+        reservation.expiresAt,
       );
     } catch (error) {
       await this.repository.release(userId, reservation.leaseId);
@@ -199,7 +264,7 @@ export class AIFeedbackService {
         feedback = parseProviderFeedback(repaired);
       }
     } catch {
-      await this.repository.finalize(
+      const finalized = await this.repository.finalize(
         userId,
         pending,
         null,
@@ -207,6 +272,17 @@ export class AIFeedbackService {
         "AI feedback is temporarily unavailable",
         await sha256(`${requestHash}:${pending.attemptId}:failed`),
       );
+      if (!finalized) {
+        const canonical = await this.repository.findAttemptById(
+          userId,
+          pending.attemptId,
+        );
+        if (canonical)
+          return {
+            result: canonical,
+            telemetry: this.record("stale", startedAt),
+          };
+      }
       return {
         result: {
           sentenceId: pending.sentenceId,
@@ -221,7 +297,18 @@ export class AIFeedbackService {
       };
     }
 
-    await this.repository.finalize(userId, pending, feedback);
+    const finalized = await this.repository.finalize(userId, pending, feedback);
+    if (!finalized) {
+      const canonical = await this.repository.findAttemptById(
+        userId,
+        pending.attemptId,
+      );
+      if (canonical)
+        return {
+          result: canonical,
+          telemetry: this.record("stale", startedAt, canonical.status),
+        };
+    }
     return {
       result: {
         sentenceId: pending.sentenceId,

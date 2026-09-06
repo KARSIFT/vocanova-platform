@@ -25,6 +25,7 @@ export type TableSpec = Readonly<{
   name: string;
   fields: readonly FieldSpec[];
   sourceOnlyFields?: readonly FieldSpec[];
+  targetOnlyFields?: readonly FieldSpec[];
 }>;
 
 const field = (
@@ -381,6 +382,9 @@ export const DATA_TABLES = [
       field("started_at", "timestamp", { nullable: true }),
       field("completed_at", "timestamp", { nullable: true }),
       ...lifecycle,
+    ],
+    targetOnlyFields: [
+      field("generation_expires_at", "timestamp", { nullable: true }),
     ],
   },
   {

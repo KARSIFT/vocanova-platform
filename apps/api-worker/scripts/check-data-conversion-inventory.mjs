@@ -51,6 +51,7 @@ assert.deepEqual(
 
 const allowedD1OnlyTables = [
   "ai_feedback_reports",
+  "ai_feedback_idempotency_attempts",
   "ai_generation_events",
   "ai_generation_leases",
   "ai_usage_counters",
@@ -71,7 +72,9 @@ for (const tableName of DATA_TABLE_NAMES) {
     ...spec.fields.map((field) => field.source),
     ...(spec.sourceOnlyFields ?? []).map((field) => field.source),
   ];
-  const targetFields = spec.fields.map((field) => field.target ?? field.source);
+  const targetFields = [...spec.fields, ...(spec.targetOnlyFields ?? [])].map(
+    (field) => field.target ?? field.source,
+  );
   const postgresTable = requireTable(postgresTables, tableName);
   const d1Table = requireTable(d1Tables, tableName);
   assert.deepEqual(
@@ -97,6 +100,14 @@ for (const tableName of DATA_TABLE_NAMES) {
       d1Table.get(target)?.toUpperCase(),
       d1TypeFor(field.kind),
       `${tableName}.${target}: D1 field kind drifted`,
+    );
+  }
+  for (const field of spec.targetOnlyFields ?? []) {
+    const target = field.target ?? field.source;
+    assert.equal(
+      d1Table.get(target)?.toUpperCase(),
+      d1TypeFor(field.kind),
+      `${tableName}.${target}: D1-only field kind drifted`,
     );
   }
   assert.ok(
