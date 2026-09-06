@@ -867,7 +867,7 @@ function buildDueWords(state, fixture) {
   if (fixture === "pagination-retry") {
     const page = state.paginationRetryDueFetches;
     state.paginationRetryDueFetches += 1;
-    const items = MULTIPLE_CHOICE_DUE_WORDS.slice(page, page + 1);
+    const items = MULTIPLE_CHOICE_DUE_WORDS.slice(page, Math.min(page + 1, 2));
     return { items, nextCursor: undefined, totalCount: Math.max(0, 2 - page) };
   }
   if (fixture === "multiple-choice") {

@@ -107,6 +107,15 @@ test("replays a committed review and retries the due list without duplicate prog
   expect(submissionFingerprints[2]).not.toEqual(submissionFingerprints[0]);
   expect(replayedResponse).toEqual(committedResponse);
 
+  const emptyQueueResponse = await page.request.get(
+    `http://127.0.0.1:${mockApiPort}/api/v1/reviews/due?limit=50`,
+  );
+  expect(emptyQueueResponse.ok()).toBeTruthy();
+  expect(await emptyQueueResponse.json()).toMatchObject({
+    items: [],
+    totalCount: 0,
+  });
+
   const progressResponse = await page.request.get(
     `http://127.0.0.1:${mockApiPort}/api/v1/progress`,
   );
