@@ -26,6 +26,18 @@ export default async function SavedWordPage({
   const { meaning: meaningId } = await searchParams;
   const client = await createServerApiClient();
   let canonical;
+  const timezonePromise = client
+    .getSettings()
+    .then(({ data }) => data.timezone)
+    .catch((error) => {
+      if (error instanceof ApiResponseError && error.status === 401) {
+        requireAuthRedirect(
+          error,
+          `/discover/saved/${encodeURIComponent(word)}?meaning=${encodeURIComponent(meaningId ?? "")}`,
+        );
+      }
+      return undefined;
+    });
   try {
     canonical = await client.getCanonicalWord(word);
   } catch (error) {
@@ -36,6 +48,7 @@ export default async function SavedWordPage({
     );
   }
   if (!meaningId) notFound();
+  const timezone = await timezonePromise;
   const meaning = canonical.data.word.meanings.find(
     (item) => item.id === meaningId && item.saved && item.userWordId,
   );
@@ -75,7 +88,7 @@ export default async function SavedWordPage({
             meaning.nextReviewAt === null ||
             isDueReview(meaning.nextReviewAt)
               ? "Due now"
-              : `Next review: ${formatReviewDateTime(meaning.nextReviewAt)}`}
+              : `Next review: ${formatReviewDateTime(meaning.nextReviewAt, timezone)}`}
           </p>
         ) : null}
         {meaning.examples.length ? (

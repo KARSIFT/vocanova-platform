@@ -12,6 +12,15 @@ export default async function ReviewsPage() {
   const client = await createServerApiClient();
   let dueResponse: Awaited<ReturnType<typeof client.listDueWords>>;
   let dailyMissionResponse: Awaited<ReturnType<typeof client.getDailyMission>>;
+  const timezonePromise = client
+    .getSettings()
+    .then(({ data }) => data.timezone)
+    .catch((error) => {
+      if (error instanceof ApiResponseError && error.status === 401) {
+        requireAuthRedirect(error, "/reviews");
+      }
+      return undefined;
+    });
   try {
     [dueResponse, dailyMissionResponse] = await Promise.all([
       client.listDueWords({ limit: 50 }),
@@ -23,6 +32,7 @@ export default async function ReviewsPage() {
 
   const { items: dueWords, totalCount, nextReviewAt } = dueResponse.data;
   const { reviewTarget, reviewsCompleted } = dailyMissionResponse.data;
+  const timezone = await timezonePromise;
   let savedWordCount: number | undefined;
   if (dueWords.length === 0 && nextReviewAt === null) {
     try {
@@ -49,7 +59,7 @@ export default async function ReviewsPage() {
           </h2>
           <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">
             {nextReviewAt
-              ? `Your next review is ${formatReviewDateTime(nextReviewAt)}.`
+              ? `Your next review is ${formatReviewDateTime(nextReviewAt, timezone)}.`
               : nextReviewAt === undefined
                 ? "No words are due for review right now."
                 : savedWordCount === 0

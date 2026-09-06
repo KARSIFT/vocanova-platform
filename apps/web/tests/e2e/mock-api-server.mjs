@@ -2051,7 +2051,10 @@ const server = createServer(async (req, res) => {
       return;
     }
     logLine(req, 200);
-    jsonResponse(res, 200, buildSettings(state));
+    jsonResponse(res, 200, {
+      ...buildSettings(state),
+      ...(cookies.e2e_timezone ? { timezone: cookies.e2e_timezone } : {}),
+    });
     return;
   }
 
