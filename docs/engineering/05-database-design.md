@@ -80,6 +80,11 @@ non-deleted saved row for the same learner and meaning.
 `journey_situations` stores the discoverable situation, slug, level band, category, status, and
 display order. `journey_words` links meanings into a situation with relevance, core-word, and display
 ordering. The implemented discovery order is explicit display order followed by stable meaning ID.
+Migration `0011_starter_vocabulary_catalog.sql` owns the original A2–B1 starter
+catalog for travel, daily life, work, and study. Editorial changes use a new
+forward migration with stable IDs and must retain definitions, examples, notes,
+and ordered situation links. Catalog migrations never upsert over existing
+canonical content: a stable-ID or natural-key collision aborts safely.
 
 ## 9. Saved-word reviews and scheduling
 
