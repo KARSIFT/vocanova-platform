@@ -125,6 +125,7 @@ export class D1MissionsRepository {
       completionHistory: history.results.map((day) => ({
         localDate: day.local_date,
         completed: day.status === "completed" || day.status === "protected",
+        status: day.status,
       })),
     };
   }

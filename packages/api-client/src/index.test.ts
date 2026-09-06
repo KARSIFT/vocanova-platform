@@ -676,7 +676,11 @@ describe("VocanovaClient", () => {
               graceDayBalance: 1,
             },
             completionHistory: [
-              { localDate: "2026-07-20", completed: true },
+              {
+                localDate: "2026-07-20",
+                completed: true,
+                status: "protected",
+              },
               { localDate: "2026-07-21", completed: true },
               { localDate: "2026-07-22", completed: false },
               { localDate: "2026-07-23", completed: true },
@@ -699,6 +703,7 @@ describe("VocanovaClient", () => {
     assert.equal(data.streak.currentStreakCount, 3);
     assert.equal(data.completionHistory.length, 7);
     assert.equal(data.completionHistory[0]?.completed, true);
+    assert.equal(data.completionHistory[0]?.status, "protected");
   });
 
   it("sends GET /api/v1/onboarding", async () => {
