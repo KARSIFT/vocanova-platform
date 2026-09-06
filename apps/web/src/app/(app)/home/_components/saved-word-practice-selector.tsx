@@ -21,6 +21,7 @@ export function SavedWordPracticeSelector({
   );
   const [selectionNotice, setSelectionNotice] = useState<string | null>(null);
   const hasDraftRef = useRef(false);
+  const selectorRef = useRef<HTMLSelectElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedWord = savedWords.find(
@@ -43,6 +44,7 @@ export function SavedWordPracticeSelector({
       return;
     }
     setSelectionNotice(null);
+    setPendingUserWordId(null);
     setSelectedUserWordId(nextUserWordId);
   }
 
@@ -52,6 +54,7 @@ export function SavedWordPracticeSelector({
     setSelectionNotice(null);
     setSelectedUserWordId(pendingUserWordId);
     setPendingUserWordId(null);
+    selectorRef.current?.focus();
   }
 
   return (
@@ -74,6 +77,7 @@ export function SavedWordPracticeSelector({
           Choose a saved word to practice
         </label>
         <select
+          ref={selectorRef}
           id="home-practice-word"
           value={selectedUserWordId}
           onChange={(event) => selectWord(event.target.value)}
@@ -127,7 +131,10 @@ export function SavedWordPracticeSelector({
           <div className="mt-[var(--spacing-sm)] flex flex-wrap gap-[var(--spacing-sm)]">
             <button
               type="button"
-              onClick={() => setPendingUserWordId(null)}
+              onClick={() => {
+                setPendingUserWordId(null);
+                selectorRef.current?.focus();
+              }}
               className="inline-flex min-h-[var(--spacing-2xl)] items-center justify-center rounded-md border border-neutral-300 bg-white px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
             >
               Keep practicing

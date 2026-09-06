@@ -27,23 +27,29 @@ async function useHomeFixture(
   ]);
 }
 
-test("puts the authoritative next mission action before optional practice", async (
-  { page, context },
-  testInfo,
-) => {
+test("puts the authoritative next mission action before optional practice", async ({
+  page,
+  context,
+}, testInfo) => {
   const baseURL = testInfo.project.use.baseURL;
   if (!baseURL) throw new Error("Expected a Playwright base URL.");
 
   await useHomeFixture(context, baseURL, "reviews-due");
   await page.goto("/home");
 
-  await expect(page.getByText("3 words due for review", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("3 words due for review", { exact: true }),
+  ).toBeVisible();
   const primaryAction = page.getByRole("link", { name: "Start review" });
   await expect(primaryAction).toBeVisible();
   await expect(primaryAction).toHaveAttribute("href", "/reviews");
-  await expect(page.getByRole("heading", { name: "Practice a saved word" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Practice a saved word" }),
+  ).toBeVisible();
 
-  const actionTop = await primaryAction.evaluate((element) => element.getBoundingClientRect().top);
+  const actionTop = await primaryAction.evaluate(
+    (element) => element.getBoundingClientRect().top,
+  );
   const practiceTop = await page
     .getByRole("heading", { name: "Practice a saved word" })
     .evaluate((element) => element.getBoundingClientRect().top);
@@ -90,7 +96,9 @@ test("keeps one keyboard-selectable practice target and protects a draft", async
 
   const selector = page.getByLabel("Choose a saved word to practice");
   await expect(selector).toBeVisible();
-  await expect(page.getByRole("textbox", { name: /Write a sentence using arrival/ })).toHaveCount(1);
+  await expect(
+    page.getByRole("textbox", { name: /Write a sentence using arrival/ }),
+  ).toHaveCount(1);
   await expect(
     page.getByText("the act of reaching a place", { exact: true }),
   ).toBeVisible();
@@ -98,12 +106,16 @@ test("keeps one keyboard-selectable practice target and protects a draft", async
   await selector.focus();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("textbox", { name: /Write a sentence using baggage/ })).toHaveCount(1);
+  await expect(
+    page.getByRole("textbox", { name: /Write a sentence using baggage/ }),
+  ).toHaveCount(1);
   await expect(
     page.getByText("bags carried while travelling", { exact: true }),
   ).toBeVisible();
 
-  const sentence = page.getByRole("textbox", { name: /Write a sentence using baggage/ });
+  const sentence = page.getByRole("textbox", {
+    name: /Write a sentence using baggage/,
+  });
   await sentence.fill("My baggage is ready for the flight.");
   await selector.selectOption("e2e-preview-user-word-01");
   await expect(selector).toHaveValue("e2e-preview-user-word-02");
@@ -112,11 +124,17 @@ test("keeps one keyboard-selectable practice target and protects a draft", async
   ).toBeVisible();
   await expect(sentence).toHaveValue("My baggage is ready for the flight.");
   await page.getByRole("button", { name: "Keep practicing" }).click();
+  await expect(selector).toBeFocused();
   await expect(sentence).toHaveValue("My baggage is ready for the flight.");
 
   await selector.selectOption("e2e-preview-user-word-01");
-  await page.getByRole("button", { name: "Discard draft and change word" }).click();
-  await expect(page.getByRole("textbox", { name: /Write a sentence using arrival/ })).toHaveCount(1);
+  await page
+    .getByRole("button", { name: "Discard draft and change word" })
+    .click();
+  await expect(selector).toBeFocused();
+  await expect(
+    page.getByRole("textbox", { name: /Write a sentence using arrival/ }),
+  ).toHaveCount(1);
 });
 
 test("does not infer completion from review progress when sentence practice remains", async ({
@@ -129,7 +147,9 @@ test("does not infer completion from review progress when sentence practice rema
   await useHomeFixture(context, baseURL, "sentence-practice-needed");
   await page.goto("/home");
 
-  await expect(page.getByText("0 reviews remaining", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("0 reviews remaining", { exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByText("1 sentence practice remaining", { exact: true }),
   ).toBeVisible();
@@ -144,10 +164,10 @@ test("does not infer completion from review progress when sentence practice rema
   ).toHaveCount(0);
 });
 
-test("does not change the practice target while feedback is in flight", async (
-  { page, context },
-  testInfo,
-) => {
+test("does not change the practice target while feedback is in flight", async ({
+  page,
+  context,
+}, testInfo) => {
   const baseURL = testInfo.project.use.baseURL;
   if (!baseURL) throw new Error("Expected a Playwright base URL.");
 
@@ -195,10 +215,10 @@ test("does not change the practice target while feedback is in flight", async (
   ).toBeVisible();
 });
 
-test("allows an explicit target change after local feedback validation fails", async (
-  { page, context },
-  testInfo,
-) => {
+test("allows an explicit target change after local feedback validation fails", async ({
+  page,
+  context,
+}, testInfo) => {
   const baseURL = testInfo.project.use.baseURL;
   if (!baseURL) throw new Error("Expected a Playwright base URL.");
 
@@ -219,8 +239,38 @@ test("allows an explicit target change after local feedback validation fails", a
 
   const selector = page.getByLabel("Choose a saved word to practice");
   await selector.selectOption("e2e-preview-user-word-02");
-  await page.getByRole("button", { name: "Discard draft and change word" }).click();
+  await page
+    .getByRole("button", { name: "Discard draft and change word" })
+    .click();
   await expect(
     page.getByRole("textbox", { name: /Write a sentence using baggage/ }),
   ).toHaveCount(1);
+});
+
+test("clears an older pending word choice after the learner clears the draft", async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await useHomeFixture(context, baseURL!, "caught-up");
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "truncated-page", url: baseURL! },
+  ]);
+  await page.goto("/home");
+  const selector = page.getByLabel("Choose a saved word to practice");
+  const sentence = page.getByRole("textbox", {
+    name: /Write a sentence using arrival/,
+  });
+  await sentence.fill("My arrival is at noon.");
+  await selector.selectOption("e2e-preview-user-word-02");
+  await expect(
+    page.getByRole("button", { name: "Discard draft and change word" }),
+  ).toBeVisible();
+  await sentence.fill("");
+  await selector.selectOption("e2e-preview-user-word-03");
+  await expect(selector).toHaveValue("e2e-preview-user-word-03");
+  await expect(
+    page.getByRole("button", { name: "Discard draft and change word" }),
+  ).toHaveCount(0);
+  await expect(page.getByRole("textbox")).toHaveValue("");
 });
