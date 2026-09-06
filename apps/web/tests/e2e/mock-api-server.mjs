@@ -451,6 +451,22 @@ const CANONICAL_WORDS = {
       { id: "mean-bank-money", partOfSpeech: "noun", shortDefinition: "a financial institution", saved: false, examples: [], usageNotes: [] },
     ],
   },
+  "later-word": {
+    id: "e2e-preview-word-02",
+    text: "later word",
+    slug: "later-word",
+    wordType: "noun",
+    meanings: [
+      {
+        id: "e2e-library-meaning-12",
+        partOfSpeech: "noun",
+        shortDefinition: "a saved word from a later page",
+        saved: false,
+        examples: [],
+        usageNotes: [],
+      },
+    ],
+  },
   pour: {
     id: "word-pour",
     text: "pour",
@@ -1909,11 +1925,24 @@ const server = createServer(async (req, res) => {
         reviewState: "due",
       }));
     }
+    if (cookies.e2e_saved_words_fixture === "library" && slug === "later-word") {
+      response.word.meanings = response.word.meanings.map((meaning) => ({
+        ...meaning,
+        saved: true,
+        userWordId: "e2e-library-user-word-12",
+        reviewState: "due",
+      }));
+    }
     response.word.meanings = response.word.meanings.map((meaning) =>
       state.libraryRemovedMeaningIds.has(meaning.id)
         ? { ...meaning, saved: false, userWordId: undefined, reviewState: null }
         : meaning,
     );
+    for (const meaning of response.word.meanings) {
+      if (meaning.userWordId) {
+        state.feedbackTargets.set(meaning.userWordId, response.word.text);
+      }
+    }
     logLine(req, 200, { slug });
     jsonResponse(res, 200, response);
     return;

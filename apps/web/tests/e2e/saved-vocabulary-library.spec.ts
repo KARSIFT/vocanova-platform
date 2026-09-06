@@ -48,6 +48,10 @@ test("loads later saved vocabulary pages and retains earlier items when a page r
   await expect(
     page.locator('a[href="/discover/saved/pour?meaning=mean-pour"]'),
   ).toBeFocused();
+  await page.getByRole("link", { name: /later word/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "later word", level: 1 }),
+  ).toBeVisible();
 });
 
 test("offers Journey discovery when the saved library is empty", async ({
@@ -148,6 +152,9 @@ test("keeps saved meanings for the same word distinct", async ({
     attemptId: "e2e-library-bank-river",
     source: "word_detail",
   });
+  await expect(
+    page.getByText("Your sentence uses the target word naturally."),
+  ).toBeVisible();
   await page.goto("/discover/saved/bank?meaning=mean-bank-money");
   await expect(
     page.getByText("a financial institution", { exact: true }),
