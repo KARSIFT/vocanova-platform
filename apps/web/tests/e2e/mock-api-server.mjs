@@ -349,6 +349,27 @@ const LONG_SAVED_WORDS_RESPONSE = {
   ],
 };
 
+const SAVED_LIBRARY_PAGE_TWO = [
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[0],
+    userWordId: "e2e-library-user-word-11",
+    meaningId: "mean-pour",
+    wordId: "word-pour",
+    wordSlug: "pour",
+    wordText: "pour",
+    partOfSpeech: "verb",
+    shortDefinition: "to make liquid flow into a container",
+  },
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[1],
+    userWordId: "e2e-library-user-word-12",
+    meaningId: "e2e-library-meaning-12",
+    wordSlug: "later-word",
+    wordText: "later word",
+    shortDefinition: "a saved word from a later page",
+  },
+];
+
 const MULTIPLE_CHOICE_DUE_WORDS = [
   {
     userWordId: "e2e-review-user-word-arrival",
@@ -1388,6 +1409,18 @@ const server = createServer(async (req, res) => {
         ? TRUNCATED_SAVED_WORDS_RESPONSE
         : cookies.e2e_saved_words_fixture === "long-content"
           ? LONG_SAVED_WORDS_RESPONSE
+          : cookies.e2e_saved_words_fixture === "library"
+            ? url.searchParams.get("limit") === "100"
+              ? {
+                  items: [
+                    ...TRUNCATED_SAVED_WORDS_RESPONSE.items,
+                    ...SAVED_LIBRARY_PAGE_TWO,
+                  ],
+                  nextCursor: undefined,
+                }
+              : url.searchParams.get("after")
+              ? { items: SAVED_LIBRARY_PAGE_TWO, nextCursor: undefined }
+              : { items: TRUNCATED_SAVED_WORDS_RESPONSE.items, nextCursor: "e2e-library-page-2" }
           : buildSavedWords(state);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
