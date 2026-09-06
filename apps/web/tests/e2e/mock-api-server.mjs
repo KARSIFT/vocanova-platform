@@ -166,13 +166,10 @@ const DEFAULT_PROGRESS = {
     graceDayBalance: 1,
   },
   completionHistory: [
-    { localDate: "2026-01-01", completed: true },
-    { localDate: "2026-01-02", completed: true },
-    { localDate: "2026-01-03", completed: true },
-    { localDate: "2026-01-04", completed: false },
-    { localDate: "2026-01-05", completed: false },
-    { localDate: "2026-01-06", completed: false },
-    { localDate: "2026-01-07", completed: false },
+    { localDate: "2026-01-07", completed: true, status: "completed" },
+    { localDate: "2026-01-04", completed: true, status: "protected" },
+    { localDate: "2025-12-31", completed: false, status: "missed" },
+    { localDate: "2025-12-28", completed: false, status: "open" },
   ],
 };
 
@@ -185,6 +182,13 @@ const FIRST_MISSION_PROGRESS = {
     graceDayBalance: 0,
   },
   completionHistory: [],
+};
+
+const LEGACY_PROGRESS = {
+  ...DEFAULT_PROGRESS,
+  completionHistory: DEFAULT_PROGRESS.completionHistory.map(
+    ({ localDate, completed }) => ({ localDate, completed }),
+  ),
 };
 
 const DEFAULT_DAILY_MISSION = {
@@ -1656,6 +1660,8 @@ const server = createServer(async (req, res) => {
     const progress =
       cookies.e2e_progress_fixture === "first-mission"
         ? FIRST_MISSION_PROGRESS
+        : cookies.e2e_progress_fixture === "legacy-history"
+          ? LEGACY_PROGRESS
         : buildProgress(state);
     logLine(req, 200, { reviewedCount: state.reviewedCount });
     jsonResponse(res, 200, progress);

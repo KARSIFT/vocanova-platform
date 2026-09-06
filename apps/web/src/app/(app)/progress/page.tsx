@@ -1,11 +1,28 @@
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
 
-function formatWeekdayLabel(localDate: string): string {
+function formatMissionDate(localDate: string): string {
   const date = new Date(`${localDate}T00:00:00Z`);
-  return new Intl.DateTimeFormat(undefined, {
-    weekday: "short",
+  return new Intl.DateTimeFormat("en-US", {
+    dateStyle: "medium",
     timeZone: "UTC",
   }).format(date);
+}
+
+function getMissionStatusLabel(
+  status: "open" | "completed" | "missed" | "protected" | undefined,
+): string | undefined {
+  switch (status) {
+    case "open":
+      return "In progress";
+    case "completed":
+      return "Completed";
+    case "missed":
+      return "Missed";
+    case "protected":
+      return "Streak protected";
+    default:
+      return undefined;
+  }
 }
 
 export default async function ProgressPage() {
@@ -33,7 +50,10 @@ export default async function ProgressPage() {
 
   const historyWithLabels = completionHistory.map((day) => ({
     ...day,
-    label: formatWeekdayLabel(day.localDate),
+    formattedDate: formatMissionDate(day.localDate),
+    statusLabel:
+      getMissionStatusLabel(day.status) ??
+      (day.completed ? "Completed or protected" : "Not completed"),
   }));
 
   return (
@@ -73,6 +93,12 @@ export default async function ProgressPage() {
         </p>
         <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
           Longest streak: {longestStreakDays} days
+        </p>
+        <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+          Grace days available: {streak.graceDayBalance}
+        </p>
+        <p className="mt-[var(--spacing-xs)] text-sm text-neutral-600">
+          A grace day protects your streak when you miss a mission.
         </p>
       </section>
 
@@ -123,25 +149,26 @@ export default async function ProgressPage() {
           id="completion-history-heading"
           className="text-lg font-semibold text-neutral-900"
         >
-          This week
+          Recent missions
         </h2>
         <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-          Keep showing up — each day counts.
+          Your latest mission snapshots, newest first.
         </p>
         {historyWithLabels.length > 0 ? (
-          <ul className="mt-[var(--spacing-md)] grid grid-cols-7 gap-[var(--spacing-xs)]">
+          <ul className="mt-[var(--spacing-md)] space-y-[var(--spacing-xs)]">
             {historyWithLabels.map((day) => (
               <li
                 key={day.localDate}
-                className={`rounded-md p-[var(--spacing-xs)] text-center ${
-                  day.completed
-                    ? "bg-primary-100 text-primary-900"
-                    : "bg-neutral-200 text-neutral-800"
-                }`}
+                className="rounded-md bg-white p-[var(--spacing-sm)] text-neutral-900"
               >
-                <p className="text-sm font-semibold">{day.label}</p>
-                <p className="mt-[var(--spacing-xs)] text-xs font-medium">
-                  {day.completed ? "Done" : "Rest"}
+                <time
+                  dateTime={day.localDate}
+                  className="text-sm font-semibold"
+                >
+                  {day.formattedDate}
+                </time>
+                <p className="mt-[var(--spacing-xs)] text-sm text-neutral-700">
+                  {day.statusLabel}
                 </p>
               </li>
             ))}

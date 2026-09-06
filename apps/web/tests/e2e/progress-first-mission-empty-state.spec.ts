@@ -35,14 +35,14 @@ test("explains genuinely empty progress without inventing history and keeps Home
   ).toBeVisible();
 
   const completionHistory = page
-    .getByRole("heading", { name: "This week", level: 2 })
+    .getByRole("heading", { name: "Recent missions", level: 2 })
     .locator("..");
   await expect(completionHistory).toContainText(
     "No mission history yet. Complete your first daily mission to start building your streak.",
   );
   await expect(completionHistory.getByRole("list")).toHaveCount(0);
-  await expect(page.getByText("Done", { exact: true })).toHaveCount(0);
-  await expect(page.getByText("Rest", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Completed", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Missed", { exact: true })).toHaveCount(0);
 
   const homeLink = page.getByRole("link", { name: "Home", exact: true });
   await homeLink.focus();
