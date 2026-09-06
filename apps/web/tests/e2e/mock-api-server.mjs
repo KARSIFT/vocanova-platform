@@ -59,6 +59,10 @@
 //   GET    /api/v1/user-words                        -> 200 { items, nextCursor }
 //   POST   /api/v1/user-words                        -> 200 SavedMeaning
 //   DELETE /api/v1/user-words/:meaningId             -> 204
+//             `e2e_word_detail_mutation_hold=save|remove` holds that
+//             Word Detail mutation until the E2E-only release endpoint is
+//             called; `e2e_word_detail_mutation_failure=save|remove` then
+//             returns a deterministic failure after the hold releases
 //
 //   GET    /api/v1/reviews/due                       -> 200 { items, nextCursor, totalCount }
 //   POST   /api/v1/reviews/submissions               -> 200 ReviewAttempt
@@ -702,6 +706,7 @@ function createInitialState() {
     accountDeletionHold: null,
     consumedEmailChangeFailures: new Set(),
     emailChangeHolds: new Map(),
+    wordDetailMutationHolds: new Map(),
     completionSummaryDueFetches: 0,
     paginationRetryDueFetches: 0,
   };
@@ -848,6 +853,34 @@ function releaseEmailChangeHold(state, phase) {
     return false;
   }
 
+  hold.released = true;
+  hold.release();
+  return true;
+}
+
+function waitForWordDetailMutationHold(state, cookies, action) {
+  if (cookies.e2e_word_detail_mutation_hold !== action) {
+    return null;
+  }
+
+  let hold = state.wordDetailMutationHolds.get(action);
+  if (!hold) {
+    let release;
+    const promise = new Promise((resolve) => {
+      release = resolve;
+    });
+    hold = { promise, release, released: false };
+    state.wordDetailMutationHolds.set(action, hold);
+  }
+
+  return hold.released ? null : hold.promise;
+}
+
+function releaseWordDetailMutationHold(state, action) {
+  const hold = state.wordDetailMutationHolds.get(action);
+  if (!hold || hold.released) {
+    return false;
+  }
   hold.released = true;
   hold.release();
   return true;
@@ -1370,6 +1403,32 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (
+    req.method === "POST" &&
+    url.pathname === "/__e2e/release-word-detail-mutation"
+  ) {
+    const action = url.searchParams.get("action");
+    if (action !== "save" && action !== "remove") {
+      logLine(req, 400, { reason: "invalid-word-detail-mutation-action" });
+      jsonResponse(res, 400, { error: "invalid_action" });
+      return;
+    }
+    const released = releaseWordDetailMutationHold(
+      getSessionState(cookies),
+      action,
+    );
+    logLine(req, released ? 204 : 409, {
+      action: "release-word-detail-mutation",
+      mutation: action,
+    });
+    if (released) {
+      emptyResponse(res, 204);
+    } else {
+      jsonResponse(res, 409, { error: "word_detail_mutation_not_held" });
+    }
+    return;
+  }
+
   // ----- auth (CSRF-exempt) ----------------------------------
 
   if (req.method === "POST" && url.pathname === "/api/v1/auth/magic-links") {
@@ -1611,7 +1670,15 @@ const server = createServer(async (req, res) => {
     if (!checkCsrf(req, cookies, res, logLine)) {
       return;
     }
-    if (cookies.e2e_word_detail_save_failure === "1") {
+    const state = getSessionState(cookies);
+    const hold = waitForWordDetailMutationHold(state, cookies, "save");
+    if (hold) {
+      await hold;
+    }
+    if (
+      cookies.e2e_word_detail_save_failure === "1" ||
+      cookies.e2e_word_detail_mutation_failure === "save"
+    ) {
       logLine(req, 500, { reason: "fixture-forced-save-failure" });
       jsonResponse(
         res,
@@ -1634,7 +1701,6 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 400, { error: "invalid_json" });
       return;
     }
-    const state = getSessionState(cookies);
     const meaningId = body.meaningId;
     if (!meaningId) {
       logLine(req, 400, { reason: "missing-meaning-id" });
@@ -1674,10 +1740,29 @@ const server = createServer(async (req, res) => {
     if (!checkCsrf(req, cookies, res, logLine)) {
       return;
     }
+    const state = getSessionState(cookies);
+    const hold = waitForWordDetailMutationHold(state, cookies, "remove");
+    if (hold) {
+      await hold;
+    }
+    if (cookies.e2e_word_detail_mutation_failure === "remove") {
+      logLine(req, 500, { reason: "fixture-forced-removal-failure" });
+      jsonResponse(
+        res,
+        500,
+        {
+          type: "about:blank",
+          title: "Test removal failure",
+          status: 500,
+          detail: "Unable to update saved state. Please try again.",
+        },
+        { "Content-Type": "application/problem+json; charset=utf-8" },
+      );
+      return;
+    }
     const meaningId = decodeURIComponent(
       url.pathname.slice("/api/v1/user-words/".length),
     );
-    const state = getSessionState(cookies);
     state.savedMeaningIds.delete(meaningId);
     state.libraryRemovedMeaningIds.add(meaningId);
     logLine(req, 204, { action: "unsave", meaningId });

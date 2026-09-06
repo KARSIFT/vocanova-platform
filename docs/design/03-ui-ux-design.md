@@ -76,6 +76,10 @@ words are shown one at a time or as a short scannable list; the backend controls
 already in the learner's saved list is visually marked and excluded from "new" recommendations.
 Saving must succeed against the backend before the UI reflects it as saved — no optimistic-only
 save state that could desync from the backend.
+While that request is pending, the Word Detail control remains disabled and gives matching visible
+and screen-reader feedback: **Saving...** when adding a word and **Removing...** when removing it.
+On failure, the prior saved state remains visible with a retryable error; the UI must not imply that
+the vocabulary change completed.
 
 ## 6. Word Detail UX
 

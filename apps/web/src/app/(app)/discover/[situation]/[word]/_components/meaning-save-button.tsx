@@ -26,7 +26,9 @@ export function MeaningSaveButton({
   const router = useRouter();
   const pathname = usePathname();
   const [saved, setSaved] = useState(initialSaved);
-  const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "saving" | "removing" | "error"
+  >("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -42,7 +44,7 @@ export function MeaningSaveButton({
       return;
     }
 
-    setStatus("loading");
+    setStatus(saved ? "removing" : "saving");
     setErrorMessage("");
 
     const client = createApiClient();
@@ -81,9 +83,21 @@ export function MeaningSaveButton({
   }
 
   const label = saved ? "Saved" : "Save";
-  const ariaLabel = saved
-    ? `Remove ${wordText} from saved words`
-    : `Save ${wordText}: ${shortDefinition}`;
+  const isSaving = status === "saving";
+  const isRemoving = status === "removing";
+  const isLoading = isSaving || isRemoving;
+  const ariaLabel = isSaving
+    ? `Saving ${wordText}: ${shortDefinition}`
+    : isRemoving
+      ? `Removing ${wordText} from saved words`
+      : saved
+        ? `Remove ${wordText} from saved words`
+        : `Save ${wordText}: ${shortDefinition}`;
+  const pendingMessage = isSaving
+    ? `Saving ${wordText}.`
+    : isRemoving
+      ? `Removing ${wordText} from saved words.`
+      : null;
 
   return (
     <div className="flex flex-col items-end gap-[var(--spacing-xs)]">
@@ -91,14 +105,19 @@ export function MeaningSaveButton({
         ref={buttonRef}
         type="button"
         onClick={toggleSave}
-        disabled={status === "loading"}
+        disabled={isLoading}
         aria-pressed={saved}
         aria-label={ariaLabel}
-        aria-busy={status === "loading"}
+        aria-busy={isLoading}
         className="min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] rounded-md border border-neutral-200 bg-neutral-50 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-700 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-neutral-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {status === "loading" ? "Saving..." : label}
+        {isSaving ? "Saving..." : isRemoving ? "Removing..." : label}
       </button>
+      {pendingMessage ? (
+        <p role="status" className="sr-only">
+          {pendingMessage}
+        </p>
+      ) : null}
       {errorMessage ? (
         <p role="alert" aria-live="polite" className="text-sm text-red-700">
           {errorMessage}
