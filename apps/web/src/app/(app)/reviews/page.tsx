@@ -10,8 +10,6 @@ import { ReviewSession } from "./_components/review-session";
 
 export default async function ReviewsPage() {
   const client = await createServerApiClient();
-  let dueResponse: Awaited<ReturnType<typeof client.listDueWords>>;
-  let dailyMissionResponse: Awaited<ReturnType<typeof client.getDailyMission>>;
   const timezonePromise = client
     .getSettings()
     .then(({ data }) => data.timezone)
@@ -21,17 +19,34 @@ export default async function ReviewsPage() {
       }
       return undefined;
     });
-  try {
-    [dueResponse, dailyMissionResponse] = await Promise.all([
-      client.listDueWords({ limit: 50 }),
-      client.getDailyMission(),
-    ]);
-  } catch (error) {
-    requireAuthRedirect(error, "/reviews");
+  const [dueResult, dailyMissionResult] = await Promise.allSettled([
+    client.listDueWords({ limit: 50 }),
+    client.getDailyMission(),
+  ]);
+
+  if (
+    dueResult.status === "rejected" &&
+    dueResult.reason instanceof ApiResponseError &&
+    dueResult.reason.status === 401
+  ) {
+    requireAuthRedirect(dueResult.reason, "/reviews");
+  }
+  if (
+    dailyMissionResult.status === "rejected" &&
+    dailyMissionResult.reason instanceof ApiResponseError &&
+    dailyMissionResult.reason.status === 401
+  ) {
+    requireAuthRedirect(dailyMissionResult.reason, "/reviews");
+  }
+  if (dueResult.status === "rejected") {
+    requireAuthRedirect(dueResult.reason, "/reviews");
   }
 
-  const { items: dueWords, totalCount, nextReviewAt } = dueResponse.data;
-  const { reviewTarget, reviewsCompleted } = dailyMissionResponse.data;
+  const { items: dueWords, totalCount, nextReviewAt } = dueResult.value.data;
+  const dailyMission =
+    dailyMissionResult.status === "fulfilled"
+      ? dailyMissionResult.value.data
+      : undefined;
   const timezone = await timezonePromise;
   let savedWordCount: number | undefined;
   if (dueWords.length === 0 && nextReviewAt === null) {
@@ -53,6 +68,15 @@ export default async function ReviewsPage() {
         <h1 className="text-2xl font-semibold text-neutral-900">Review</h1>
         <PageBackLink href="/home">Back to Home</PageBackLink>
       </div>
+
+      {!dailyMission && dueWords.length > 0 ? (
+        <p
+          role="status"
+          className="mb-[var(--spacing-md)] text-sm text-neutral-700"
+        >
+          Mission progress is temporarily unavailable.
+        </p>
+      ) : null}
 
       {dueWords.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-[var(--spacing-2xl)] text-center">
@@ -83,8 +107,7 @@ export default async function ReviewsPage() {
         <ReviewSession
           initialDueWords={dueWords}
           initialTotalCount={totalCount}
-          reviewTarget={reviewTarget}
-          reviewsCompleted={reviewsCompleted}
+          mission={dailyMission}
           timezone={timezone}
         />
       )}

@@ -113,6 +113,10 @@ Required for every screen with dynamic content:
 - **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
   input or falsely imply something completed. AI feedback failures specifically must never claim
   mission completion (see [09](../engineering/09-ai-features.md) §2 and §9).
+- **Review mission read recovery** — if due cards load but the auxiliary daily-mission read is
+  temporarily unavailable, Reviews keeps those cards usable while stating that mission progress is
+  unavailable. The session uses only the loaded due-card batch and must not claim a target,
+  progress, completion, reward, or remaining mission value.
 
 ## 10. Accessibility
 

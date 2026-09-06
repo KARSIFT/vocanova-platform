@@ -38,22 +38,25 @@ interface PendingReviewSubmission {
 interface ReviewSessionProps {
   initialDueWords: DueWord[];
   initialTotalCount: number;
-  reviewTarget: number;
-  reviewsCompleted: number;
+  mission?: {
+    reviewTarget: number;
+    reviewsCompleted: number;
+  };
   timezone?: string;
 }
 
 export function ReviewSession({
   initialDueWords,
   initialTotalCount,
-  reviewTarget,
-  reviewsCompleted,
+  mission,
   timezone,
 }: ReviewSessionProps) {
-  const initialSessionLimit = Math.min(
-    Math.max(0, reviewTarget - reviewsCompleted),
-    initialTotalCount,
-  );
+  const initialSessionLimit = mission
+    ? Math.min(
+        Math.max(0, mission.reviewTarget - mission.reviewsCompleted),
+        initialTotalCount,
+      )
+    : initialDueWords.length;
   const [dueWords, setDueWords] = useState<DueWord[]>(initialDueWords);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [remainingCount, setRemainingCount] = useState(initialTotalCount);
@@ -201,7 +204,10 @@ export function ReviewSession({
   };
 
   const startOptionalSession = () => {
-    const nextSessionLimit = Math.min(reviewTarget, remainingCount);
+    const nextSessionLimit = Math.min(
+      mission?.reviewTarget ?? initialDueWords.length,
+      remainingCount,
+    );
     if (nextSessionLimit === 0) {
       return;
     }
@@ -310,8 +316,10 @@ export function ReviewSession({
     const sessionWasStarted = sessionLimit > 0;
     const canContinue = hasRemainingDueWords && sessionWasStarted;
     const canStartOptionalPractice = hasRemainingDueWords && !sessionWasStarted;
-    const reviewTargetReached =
-      reviewsCompleted + totalSuccessfulReviewCount >= reviewTarget;
+    const reviewTargetReached = mission
+      ? mission.reviewsCompleted + totalSuccessfulReviewCount >=
+        mission.reviewTarget
+      : false;
     return (
       <div className="flex flex-col items-center justify-center py-[var(--spacing-2xl)] text-center">
         <h2
@@ -326,11 +334,13 @@ export function ReviewSession({
         <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">
           {nextReviewAt
             ? `Your next review is ${formatReviewDateTime(nextReviewAt, timezone)}.`
-            : sessionWasStarted
-              ? reviewTargetReached
-                ? "You reached today’s review target."
-                : "No more due words are available for this session."
-              : "You’ve already reached today’s review target."}
+            : !mission
+              ? "Mission progress is temporarily unavailable."
+              : sessionWasStarted
+                ? reviewTargetReached
+                  ? "You reached today’s review target."
+                  : "No more due words are available for this session."
+                : "You’ve already reached today’s review target."}
         </p>
         {sessionWasStarted ? (
           <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
@@ -350,9 +360,11 @@ export function ReviewSession({
             onClick={startOptionalSession}
             className="mt-[var(--spacing-md)] min-h-[var(--spacing-2xl)] rounded-md border border-neutral-300 bg-white px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 transition-colors hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
           >
-            {canStartOptionalPractice
-              ? `Start optional practice (up to ${Math.min(reviewTarget, remainingCount)} reviews)`
-              : `Continue with up to ${Math.min(reviewTarget, remainingCount)} more reviews`}
+            {!mission
+              ? "Continue reviewing"
+              : canStartOptionalPractice
+                ? `Start optional practice (up to ${Math.min(mission.reviewTarget, remainingCount)} reviews)`
+                : `Continue with up to ${Math.min(mission.reviewTarget, remainingCount)} more reviews`}
           </button>
         ) : null}
         {lastReviewedCard && lastReviewAttemptId ? (

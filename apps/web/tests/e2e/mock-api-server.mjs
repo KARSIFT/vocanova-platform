@@ -68,6 +68,8 @@
 //   POST   /api/v1/sentence-feedback/:attemptId/reports -> 204
 //
 //   GET    /api/v1/daily-mission                     -> 200 DailyMission
+//             `e2e_daily_mission_fixture=unavailable` returns 503 while
+//             leaving due-review reads available; `reauth` returns 401
 //   GET    /api/v1/progress                          -> 200 Progress
 //             `e2e_progress_fixture=first-mission` returns authoritative
 //             zero totals and no completion history for first-time progress
@@ -1884,6 +1886,16 @@ const server = createServer(async (req, res) => {
     const state = getSessionState(cookies);
     const hold = waitForReadHold(state, cookies, "home");
     if (hold) await hold;
+    if (cookies.e2e_daily_mission_fixture === "unavailable") {
+      logLine(req, 503, { reason: "fixture-daily-mission-unavailable" });
+      jsonResponse(res, 503, { error: "fixture_daily_mission_unavailable" });
+      return;
+    }
+    if (cookies.e2e_daily_mission_fixture === "reauth") {
+      logLine(req, 401, { reason: "fixture-daily-mission-reauth" });
+      jsonResponse(res, 401, { error: "fixture_daily_mission_reauth" });
+      return;
+    }
     const mission = buildDailyMission(state, cookies);
     logLine(req, 200, { reviewsCompleted: mission.reviewsCompleted });
     jsonResponse(res, 200, mission);
