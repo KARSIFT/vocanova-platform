@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
 
+import { SentencePracticeHistory } from "./_components/sentence-practice-history";
+
 function formatMissionDate(localDate: string): string {
   const date = new Date(`${localDate}T00:00:00Z`);
   return new Intl.DateTimeFormat("en-US", {
@@ -31,9 +33,16 @@ export default async function ProgressPage() {
   const client = await createServerApiClient();
   let savedWordsResponse: Awaited<ReturnType<typeof client.listSavedWords>>;
   let progressResponse: Awaited<ReturnType<typeof client.getProgress>>;
+  let sentenceHistoryResponse: Awaited<
+    ReturnType<typeof client.listSentenceFeedbackHistory>
+  >;
   try {
-    savedWordsResponse = await client.listSavedWords({ limit: 10 });
-    progressResponse = await client.getProgress();
+    [savedWordsResponse, progressResponse, sentenceHistoryResponse] =
+      await Promise.all([
+        client.listSavedWords({ limit: 10 }),
+        client.getProgress(),
+        client.listSentenceFeedbackHistory({ limit: 10 }),
+      ]);
   } catch (error) {
     requireAuthRedirect(error, "/progress");
   }
@@ -147,6 +156,25 @@ export default async function ProgressPage() {
             vocabulary here.
           </p>
         )}
+      </section>
+
+      <section
+        aria-labelledby="sentence-practice-history-heading"
+        className="mt-[var(--spacing-md)] rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)] shadow-sm"
+      >
+        <h2
+          id="sentence-practice-history-heading"
+          className="text-lg font-semibold text-neutral-900"
+        >
+          Recent sentence practice
+        </h2>
+        <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+          Your completed sentence feedback, newest first.
+        </p>
+        <SentencePracticeHistory
+          initialItems={sentenceHistoryResponse.data.items}
+          initialNextCursor={sentenceHistoryResponse.data.nextCursor}
+        />
       </section>
 
       <section

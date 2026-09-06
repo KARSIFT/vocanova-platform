@@ -1974,6 +1974,137 @@
         ]
       }
     },
+    "/api/v1/sentence-feedback/history": {
+      "get": {
+        "operationId": "ListSentenceFeedbackHistory",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 10,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "items": {
+                      "items": {
+                        "properties": {
+                          "attemptId": {
+                            "format": "uuid",
+                            "type": "string"
+                          },
+                          "completedAt": {
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "correctedSentence": {
+                            "type": "string"
+                          },
+                          "explanation": {
+                            "type": "string"
+                          },
+                          "improvementTip": {
+                            "type": "string"
+                          },
+                          "originalSentence": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "enum": [
+                              "correct",
+                              "needs_improvement",
+                              "incorrect"
+                            ],
+                            "type": "string"
+                          },
+                          "targetMeaning": {
+                            "type": "string"
+                          },
+                          "targetWord": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "attemptId",
+                          "completedAt",
+                          "originalSentence",
+                          "status",
+                          "explanation"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "nextCursor": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "items"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Recent completed sentence feedback"
+          },
+          "400": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Invalid cursor"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Authentication required"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unexpected server error"
+          }
+        },
+        "security": [
+          {
+            "SessionCookie": []
+          }
+        ],
+        "tags": [
+          "AI Feedback"
+        ]
+      }
+    },
     "/api/v1/settings": {
       "get": {
         "operationId": "GetSettings",

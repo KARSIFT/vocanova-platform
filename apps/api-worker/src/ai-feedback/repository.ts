@@ -4,6 +4,7 @@ import {
   type FeedbackSource,
   type FeedbackTarget,
   type ProviderFeedback,
+  type SentenceFeedbackHistoryItem,
   type SentenceFeedbackResult,
   type SubmitFeedbackInput,
 } from "../domain/ai-feedback.js";
@@ -93,6 +94,44 @@ export class D1AIFeedbackRepository {
       shortDefinition: String(row.short_definition),
       learnerLevel: String(row.learner_level),
       acceptedForms: acceptedForms(wordText, wordType, partOfSpeech),
+    };
+  }
+
+  async listHistory(
+    userId: string,
+    after: string,
+    requestedLimit: number,
+  ): Promise<{ items: SentenceFeedbackHistoryItem[]; nextCursor?: string }> {
+    const limit = normalizeHistoryLimit(requestedLimit);
+    const cursor = decodeHistoryCursor(after);
+    const result = await this.database
+      .prepare(
+        `SELECT a.id AS attempt_id, a.completed_at, a.feedback_json,
+              s.sentence_text, s.submitted_at, cw.text AS word_text,
+              wm.short_definition
+       FROM learner_sentences s
+       JOIN ai_feedback_attempts a
+         ON a.learner_sentence_id = s.id AND a.status = 'succeeded'
+       LEFT JOIN word_meanings wm ON wm.id = s.meaning_id
+       LEFT JOIN canonical_words cw ON cw.id = wm.word_id
+       WHERE s.user_id = ?1
+         AND (?2 IS NULL OR s.submitted_at < ?2
+           OR (s.submitted_at = ?2 AND a.id < ?3))
+       ORDER BY s.submitted_at DESC, a.id DESC LIMIT ?4`,
+      )
+      .bind(userId, cursor?.submittedAt ?? null, cursor?.attemptId ?? "", limit)
+      .all<Row>();
+    const items = result.results.map(historyItemFromRow);
+    const last = result.results.at(-1);
+    return {
+      items,
+      ...(items.length === limit &&
+        last && {
+          nextCursor: encodeHistoryCursor(
+            String(last.submitted_at),
+            String(last.attempt_id),
+          ),
+        }),
     };
   }
 
@@ -674,4 +713,68 @@ function resultFromRow(
       improvementTip: String(feedback.improvement_tip),
     }),
   };
+}
+
+function historyItemFromRow(row: Row): SentenceFeedbackHistoryItem {
+  const feedback = JSON.parse(String(row.feedback_json)) as Record<
+    string,
+    unknown
+  >;
+  return {
+    attemptId: String(row.attempt_id),
+    completedAt: String(row.completed_at),
+    originalSentence: String(row.sentence_text),
+    status: String(feedback.status) as SentenceFeedbackHistoryItem["status"],
+    explanation: String(feedback.explanation),
+    ...(typeof feedback.corrected_sentence === "string" && {
+      correctedSentence: feedback.corrected_sentence,
+    }),
+    ...(typeof feedback.improvement_tip === "string" && {
+      improvementTip: feedback.improvement_tip,
+    }),
+    ...(row.word_text !== null && { targetWord: String(row.word_text) }),
+    ...(row.short_definition !== null && {
+      targetMeaning: String(row.short_definition),
+    }),
+  };
+}
+
+function normalizeHistoryLimit(value: number): number {
+  if (!Number.isInteger(value) || value < 1 || value > 50)
+    throw new AIFeedbackError("invalid_cursor");
+  return value;
+}
+
+function encodeHistoryCursor(submittedAt: string, attemptId: string): string {
+  return btoa(JSON.stringify({ h: submittedAt, i: attemptId }))
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "");
+}
+
+function decodeHistoryCursor(
+  value: string,
+): { submittedAt: string; attemptId: string } | null {
+  if (!value) return null;
+  try {
+    const parsed = JSON.parse(
+      atob(value.replaceAll("-", "+").replaceAll("_", "/")),
+    ) as Record<string, unknown>;
+    if (
+      typeof parsed.h !== "string" ||
+      !Number.isFinite(Date.parse(parsed.h)) ||
+      typeof parsed.i !== "string" ||
+      !isUuid(parsed.i)
+    )
+      throw new Error();
+    return { submittedAt: parsed.h, attemptId: parsed.i };
+  } catch {
+    throw new AIFeedbackError("invalid_cursor");
+  }
+}
+
+function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u.test(
+    value,
+  );
 }

@@ -26,6 +26,12 @@ export default function ProgressLoading() {
       </section>
 
       <section className="mt-[var(--spacing-md)] rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)] shadow-sm">
+        <div className="h-5 w-1/2 rounded bg-neutral-200" />
+        <div className="mt-[var(--spacing-sm)] h-4 w-full rounded bg-neutral-200" />
+        <div className="mt-[var(--spacing-xs)] h-4 w-4/5 rounded bg-neutral-200" />
+      </section>
+
+      <section className="mt-[var(--spacing-md)] rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)] shadow-sm">
         <div className="h-5 w-1/3 rounded bg-neutral-200" />
         <div className="mt-[var(--spacing-xs)] h-4 w-1/2 rounded bg-neutral-200" />
         <div className="mt-[var(--spacing-md)] grid grid-cols-7 gap-[var(--spacing-xs)]">

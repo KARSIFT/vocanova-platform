@@ -586,6 +586,28 @@ describe("VocanovaClient", () => {
     assert.equal(response.status, 204);
   });
 
+  it("sends GET /api/v1/sentence-feedback/history with a cursor", async () => {
+    const fetch = (url: string, init: RequestInit): Promise<Response> => {
+      assert.equal(
+        url,
+        "https://api.example.com/api/v1/sentence-feedback/history?after=cursor&limit=10",
+      );
+      assert.equal(init.method, "GET");
+      return Promise.resolve(
+        new Response(JSON.stringify({ items: [] }), { status: 200 }),
+      );
+    };
+    const client = new VocanovaClient({
+      baseURL: "https://api.example.com",
+      fetch: fetch as typeof globalThis.fetch,
+    });
+    const { data } = await client.listSentenceFeedbackHistory({
+      after: "cursor",
+      limit: 10,
+    });
+    assert.deepEqual(data, { items: [] });
+  });
+
   it("sends GET /api/v1/daily-mission", async () => {
     const fetch = (url: string, init: RequestInit): Promise<Response> => {
       assert.equal(url, "https://api.example.com/api/v1/daily-mission");

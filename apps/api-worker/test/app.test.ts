@@ -97,6 +97,7 @@ describe("Worker API", () => {
       "/api/v1/reviews/due",
       "/api/v1/reviews/submissions",
       "/api/v1/sentence-feedback",
+      "/api/v1/sentence-feedback/history",
       "/api/v1/sentence-feedback/{attemptId}/reports",
       "/api/v1/settings",
       "/api/v1/settings/email-change-links",

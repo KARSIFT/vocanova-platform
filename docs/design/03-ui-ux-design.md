@@ -31,10 +31,10 @@ from Home, Word Detail, and Review Completion. This is a deliberate MVP scoping 
 the tab bar simple and treats "write a sentence" as something the learner does _in the middle of_
 another activity, not as its own destination.
 
-There is **no dedicated Sentence History screen.** History is retained in the backend
-(`learner_sentences` / `ai_feedback_attempts` — see [05](../engineering/05-database-design.md) §11) for future use, but
-is not surfaced as its own MVP UI. Treat "sentence-history insights" as a named post-MVP
-opportunity, not a cut corner.
+There is **no dedicated Sentence History screen.** The existing Progress screen includes a bounded,
+newest-first recent sentence-practice section backed by `learner_sentences` and successful
+`ai_feedback_attempts` (see [05](../engineering/05-database-design.md) §11). It shows the learner's
+own original sentence and stored feedback without exposing provider or operational data.
 
 ## 3. Onboarding flow
 

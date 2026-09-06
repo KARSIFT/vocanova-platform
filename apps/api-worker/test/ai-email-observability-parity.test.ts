@@ -47,6 +47,84 @@ beforeEach(async () => {
 });
 
 describe("Worker AI feedback parity", () => {
+  it("lists only the owner's completed feedback in stable cursor order without operational fields", async () => {
+    const service = createService(new ScriptedProvider(() => validFeedback()));
+    await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "history-one",
+    );
+    await service.submit(
+      USER_A,
+      submission("We work every evening."),
+      "history-two",
+    );
+    const hidden = await service.submit(
+      USER_A,
+      submission("They work every weekend."),
+      "history-hidden",
+    );
+    await env.DB.prepare(
+      "UPDATE ai_feedback_attempts SET status = 'pending' WHERE id = ?1",
+    )
+      .bind(hidden.result.attemptId)
+      .run();
+    await env.DB.prepare(
+      "UPDATE canonical_words SET status = 'archived' WHERE id = ?1",
+    )
+      .bind(WORD)
+      .run();
+
+    const repository = new D1AIFeedbackRepository(env.DB, () => new Date(NOW));
+    const first = await repository.listHistory(USER_A, "", 1);
+    const second = await repository.listHistory(USER_A, first.nextCursor!, 1);
+    expect(first.items).toHaveLength(1);
+    expect(second.items).toHaveLength(1);
+    expect(first.items[0]?.attemptId).not.toBe(second.items[0]?.attemptId);
+    expect([...first.items, ...second.items]).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          targetWord: "work",
+          targetMeaning: "perform a job",
+          status: "correct",
+        }),
+      ]),
+    );
+    expect(JSON.stringify(first)).not.toMatch(
+      /feedback_json|provider|model|prompt|request_hash|idempotency|telemetry/i,
+    );
+    await expect(repository.listHistory(USER_B, "", 10)).resolves.toEqual({
+      items: [],
+    });
+    await expect(
+      repository.listHistory(USER_A, "not-a-cursor", 10),
+    ).rejects.toMatchObject({
+      code: "invalid_cursor",
+    });
+
+    const app = createApp({
+      createPlatformRepository: () => ({
+        checkHealth: () => Promise.resolve({ database: "ok" as const }),
+        getMetadata: () => Promise.resolve(null),
+        putMetadata: () => Promise.resolve(),
+      }),
+      createIdentityService: () => fakeIdentity(USER_B),
+    });
+    const outsider = await app.request(
+      "https://worker.test/api/v1/sentence-feedback/history",
+      undefined,
+      env,
+    );
+    expect(outsider.status).toBe(200);
+    await expect(outsider.json()).resolves.toEqual({ items: [] });
+    const malformed = await app.request(
+      "https://worker.test/api/v1/sentence-feedback/history?after=not-a-cursor",
+      undefined,
+      env,
+    );
+    expect(malformed.status).toBe(400);
+  });
+
   it("resolves a daily mission target for its owner without exposing another learner's word", async () => {
     const repository = new D1AIFeedbackRepository(env.DB, () => new Date(NOW));
 

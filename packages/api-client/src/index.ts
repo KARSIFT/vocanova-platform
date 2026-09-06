@@ -224,6 +224,23 @@ export interface SentenceFeedbackResult {
   crisisResourceMessage?: string;
 }
 
+export interface SentenceFeedbackHistoryItem {
+  attemptId: string;
+  completedAt: string;
+  originalSentence: string;
+  status: "correct" | "needs_improvement" | "incorrect";
+  correctedSentence?: string;
+  explanation: string;
+  improvementTip?: string;
+  targetWord?: string;
+  targetMeaning?: string;
+}
+
+export interface SentenceFeedbackHistory {
+  items: SentenceFeedbackHistoryItem[];
+  nextCursor?: string;
+}
+
 export interface SubmitSentenceFeedbackBody {
   sentenceText: string;
   source: "word_detail" | "review" | "daily_mission" | "free_practice";
@@ -658,6 +675,24 @@ export class VocanovaClient {
       init,
     );
     return { response };
+  }
+
+  async listSentenceFeedbackHistory(
+    params?: { after?: string; limit?: number },
+    init?: RequestInit,
+  ): Promise<{ data: SentenceFeedbackHistory; response: Response }> {
+    const query = new URLSearchParams();
+    if (params?.after) query.set("after", params.after);
+    if (params?.limit) query.set("limit", String(params.limit));
+    const response = await this.request(
+      "GET",
+      "/api/v1/sentence-feedback/history" +
+        (query.toString() ? `?${query.toString()}` : ""),
+      undefined,
+      init,
+    );
+    const data = (await response.json()) as SentenceFeedbackHistory;
+    return { data, response };
   }
 
   async getDailyMission(

@@ -65,6 +65,7 @@
 //
 //   POST   /api/v1/sentence-feedback                 -> 200 SentenceFeedbackResult
 //                                                       (deterministic rule table)
+//   GET    /api/v1/sentence-feedback/history         -> 200 completed feedback history
 //   POST   /api/v1/sentence-feedback/:attemptId/reports -> 204
 //
 //   GET    /api/v1/daily-mission                     -> 200 DailyMission
@@ -201,6 +202,35 @@ const LEGACY_PROGRESS = {
     ({ localDate, completed }) => ({ localDate, completed }),
   ),
 };
+
+const SENTENCE_HISTORY_PAGE_ONE = [
+  {
+    attemptId: "11111111-1111-4111-8111-111111111111",
+    completedAt: "2026-01-07T12:00:00.000Z",
+    originalSentence: "I use arrival in my travel plan.",
+    status: "correct",
+    explanation: "Your sentence uses the target word naturally.",
+    targetWord: "arrival",
+    targetMeaning: "the act of reaching a place",
+  },
+];
+const SENTENCE_HISTORY_PAGE_TWO = [{
+  attemptId: "22222222-2222-4222-8222-222222222222",
+  completedAt: "2026-01-06T12:00:00.000Z",
+  originalSentence: "I wait at the gate.",
+  status: "needs_improvement",
+  correctedSentence: "I wait at the gate for my flight.",
+  explanation: "Add the purpose of waiting to make the sentence clearer.",
+  improvementTip: "Try adding a short detail after the target word.",
+  targetWord: "gate",
+  targetMeaning: "the place where passengers board",
+}];
+
+function buildSentenceHistory(fixture, after) {
+  if (fixture === "empty") return { items: [] };
+  if (after) return { items: SENTENCE_HISTORY_PAGE_TWO };
+  return { items: SENTENCE_HISTORY_PAGE_ONE, nextCursor: "e2e-sentence-history-page-2" };
+}
 
 const DEFAULT_DAILY_MISSION = {
   localDate: "2026-01-01",
@@ -1843,6 +1873,16 @@ const server = createServer(async (req, res) => {
     }
     logLine(req, 204, { action: "report-sentence" });
     emptyResponse(res, 204);
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/v1/sentence-feedback/history") {
+    const data = buildSentenceHistory(
+      cookies.e2e_sentence_history_fixture,
+      url.searchParams.get("after"),
+    );
+    logLine(req, 200, { count: data.items.length });
+    jsonResponse(res, 200, data);
     return;
   }
 

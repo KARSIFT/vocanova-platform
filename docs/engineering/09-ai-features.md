@@ -17,6 +17,7 @@ The client submits an authenticated, CSRF-protected request with an idempotency 
 ```text
 POST /api/v1/sentence-feedback
 POST /api/v1/sentence-feedback/{attemptId}/reports
+GET /api/v1/sentence-feedback/history
 ```
 
 Submission includes `sentenceText`, its product `source`, and an eligible `attemptId`. The backend
@@ -33,6 +34,11 @@ Feedback uses one of three learning statuses:
 A successful result increments `daily_activity_summaries.sentences_submitted` and awards the
 sentence and feedback rewards. It does not currently complete a daily mission; the response always has
 `missionCompleted: false`.
+
+The authenticated history read returns successful attempts in stable newest-first cursor order for
+the requesting learner only. Its DTO contains stored learner-facing feedback and optional vocabulary
+display context; provider prompts and raw output, safety classifications, fingerprints, idempotency
+keys, and telemetry are never returned.
 
 ## 3. Validation and safety
 
