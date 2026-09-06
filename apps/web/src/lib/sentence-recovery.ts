@@ -25,14 +25,36 @@ function valid(record: unknown): record is SentenceRecoveryRecord {
   const value = record as Record<string, unknown>;
   return (
     value.version === 1 &&
-    typeof value.ownerId === "string" &&
-    typeof value.source === "string" &&
-    typeof value.attemptId === "string" &&
-    typeof value.path === "string" &&
-    typeof value.targetWord === "string" &&
+    validString(value.ownerId, 200) &&
+    (value.source === "word_detail" ||
+      value.source === "review" ||
+      value.source === "daily_mission" ||
+      value.source === "free_practice") &&
+    validString(value.attemptId, 200) &&
+    validPath(value.path) &&
+    validString(value.targetWord, 200) &&
     typeof value.sentence === "string" &&
+    value.sentence.trim().length > 0 &&
     value.sentence.length <= 300 &&
-    typeof value.createdAt === "number"
+    (value.shortDefinition === undefined ||
+      validString(value.shortDefinition, 300)) &&
+    typeof value.createdAt === "number" &&
+    Number.isFinite(value.createdAt) &&
+    value.createdAt <= Date.now()
+  );
+}
+function validString(value: unknown, max: number): value is string {
+  return (
+    typeof value === "string" && value.trim().length > 0 && value.length <= max
+  );
+}
+function validPath(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length <= 2048 &&
+    (value === "/home" ||
+      value === "/reviews" ||
+      /^\/discover\/[a-z0-9-]+\/[a-z0-9-]+$/.test(value))
   );
 }
 export function saveSentenceRecovery(
@@ -57,7 +79,13 @@ export function readSentenceRecovery(
   ownerId?: string,
 ): SentenceRecoveryRecord | null {
   const target = storage();
-  if (!target || !ownerId) return null;
+  if (!target) return null;
+  if (!ownerId) {
+    try {
+      target.removeItem(SENTENCE_RECOVERY_KEY);
+    } catch {}
+    return null;
+  }
   try {
     const raw = target.getItem(SENTENCE_RECOVERY_KEY);
     if (!raw) return null;
@@ -72,6 +100,9 @@ export function readSentenceRecovery(
     }
     return record;
   } catch {
+    try {
+      target.removeItem(SENTENCE_RECOVERY_KEY);
+    } catch {}
     return null;
   }
 }

@@ -5,14 +5,17 @@ import { BottomNav } from "./_components/bottom-nav";
 import { IdentityProvider } from "./_components/identity-context";
 import { createServerApiClient } from "@/lib/api-server";
 
-export default function AppShellLayout({
+export default async function AppShellLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   let userId: string | undefined;
   try {
-    userId = await(await createServerApiClient()).getCurrentUser({
-      cache: "no-store",
-    }).data.userId;
+    const client = await createServerApiClient();
+    userId = (
+      await client.getCurrentUser({
+        cache: "no-store",
+      })
+    ).data.userId;
   } catch {
     /* recovery fails closed; route auth stays unchanged */
   }
