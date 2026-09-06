@@ -23,6 +23,8 @@ export function JourneySituationList({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [focusIndex, setFocusIndex] = useState<number | null>(null);
   const appendedJourneyRef = useRef<HTMLAnchorElement>(null);
+  const loadMoreButton = useRef<HTMLButtonElement>(null);
+  const [shouldRefocusLoadMore, setShouldRefocusLoadMore] = useState(false);
 
   useEffect(() => {
     if (focusIndex !== null) {
@@ -30,6 +32,13 @@ export function JourneySituationList({
       setFocusIndex(null);
     }
   }, [focusIndex, items]);
+
+  useEffect(() => {
+    if (shouldRefocusLoadMore && !isLoading) {
+      loadMoreButton.current?.focus();
+      setShouldRefocusLoadMore(false);
+    }
+  }, [isLoading, shouldRefocusLoadMore]);
 
   async function loadMore() {
     if (!nextCursor || isLoading) return;
@@ -50,6 +59,7 @@ export function JourneySituationList({
           "We couldn't load more journeys. Please try again.",
         ),
       );
+      setShouldRefocusLoadMore(true);
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +88,7 @@ export function JourneySituationList({
       {nextCursor ? (
         <div className="mt-[var(--spacing-lg)]">
           <button
+            ref={loadMoreButton}
             type="button"
             onClick={loadMore}
             disabled={isLoading}

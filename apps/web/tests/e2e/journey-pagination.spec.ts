@@ -52,7 +52,7 @@ test("does not offer a false Journey continuation for an exact terminal page", a
   ).toHaveCount(0);
 });
 
-test("retains the first Journey page when a later page fails and retries it", async ({
+test("restores the keyboard retry target after a Journey page fails", async ({
   page,
   context,
 }, testInfo) => {
@@ -62,10 +62,15 @@ test("retains the first Journey page when a later page fails and retries it", as
     { name: "e2e_journey_fixture", value: "paginated", url: baseURL },
   ]);
 
-  let shouldFail = true;
+  let requestCount = 0;
+  let settleFirstRequest: (() => void) | undefined;
+  const firstRequest = new Promise<void>((resolve) => {
+    settleFirstRequest = resolve;
+  });
   await page.route("**/api/v1/journey-situations?after=*", async (route) => {
-    if (shouldFail) {
-      shouldFail = false;
+    requestCount += 1;
+    if (requestCount === 1) {
+      await firstRequest;
       await route.fulfill({ status: 500, body: "{}" });
       return;
     }
@@ -73,20 +78,36 @@ test("retains the first Journey page when a later page fails and retries it", as
   });
 
   await page.goto("/discover");
-  const loadMore = page.getByRole("button", { name: "Load more journeys" });
-  await loadMore.click();
+  const loadMore = page.getByRole("button", { name: /journeys/ });
+  await loadMore.focus();
+  await loadMore.press("Enter");
+  await expect(loadMore).toHaveText("Loading journeys...");
+  await expect(loadMore).toHaveAttribute("aria-busy", "true");
+  await expect(loadMore).toBeDisabled();
+  await expect.poll(() => requestCount).toBe(1);
+  await loadMore.click({ force: true });
+  await expect.poll(() => requestCount).toBe(1);
+
+  if (!settleFirstRequest) throw new Error("Expected the pagination request.");
+  settleFirstRequest();
   await expect(
     page.getByText("We couldn't load more journeys. Please try again."),
   ).toBeVisible();
+  await expect(loadMore).toHaveText("Load more journeys");
   await expect(
     page.getByRole("heading", { name: "Ordering at a cafe", level: 2 }),
   ).toBeVisible();
+  await expect(loadMore).toHaveAttribute("aria-busy", "false");
   await expect(loadMore).toBeEnabled();
+  await expect(loadMore).toBeFocused();
 
-  await loadMore.click();
+  await loadMore.press("Enter");
   await expect(
     page.getByRole("heading", { name: "Navigating an airport", level: 2 }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /Navigating an airport/ }),
+  ).toBeFocused();
 });
 
 test("keeps focus on the retained Journey when an empty terminal page removes the control", async ({
