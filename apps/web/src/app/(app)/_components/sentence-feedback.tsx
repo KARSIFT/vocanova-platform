@@ -13,9 +13,11 @@ import {
   readSentenceRecovery,
   saveSentenceRecovery,
 } from "@/lib/sentence-recovery";
+import { consumeWordDetailPracticeFocus } from "@/lib/word-detail-practice-focus";
 import { useAuthenticatedUserId } from "./identity-context";
 
 interface SentenceFeedbackProps {
+  meaningId?: string;
   targetWord: string;
   attemptId: string;
   source: "word_detail" | "review" | "daily_mission" | "free_practice";
@@ -36,6 +38,7 @@ const RETRY_MESSAGE =
   "Vocanova could not check this sentence right now. Your sentence is still here, so you can try again.";
 
 export function SentenceFeedback({
+  meaningId,
   targetWord,
   attemptId,
   source,
@@ -62,6 +65,17 @@ export function SentenceFeedback({
   >("idle");
   const feedbackVersion = useRef(0);
   const ownerId = useRef(userId);
+  const practiceHeadingRef = useRef<HTMLHeadingElement>(null);
+
+  useEffect(() => {
+    if (
+      source === "word_detail" &&
+      meaningId &&
+      consumeWordDetailPracticeFocus(meaningId, pathname)
+    ) {
+      practiceHeadingRef.current?.focus();
+    }
+  }, [meaningId, pathname, source]);
 
   useEffect(() => {
     if (!userId) return;
@@ -243,7 +257,9 @@ export function SentenceFeedback({
       className="mt-[var(--spacing-md)] rounded-md border border-neutral-200 bg-white p-[var(--spacing-md)] shadow-sm"
     >
       <h3
+        ref={practiceHeadingRef}
         id={`sentence-feedback-heading-${attemptId}`}
+        tabIndex={-1}
         className="wrap-break-word text-base font-semibold text-neutral-900"
       >
         Practice with {targetWord}
