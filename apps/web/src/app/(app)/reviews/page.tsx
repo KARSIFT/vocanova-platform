@@ -7,6 +7,7 @@ import { PageBackLink } from "../_components/page-back-link";
 import { formatReviewDateTime } from "@/lib/review-schedule";
 
 import { ReviewSession } from "./_components/review-session";
+import { ReviewRecoveryPanel } from "./_components/review-recovery-panel";
 
 export default async function ReviewsPage() {
   const client = await createServerApiClient();
@@ -41,6 +42,7 @@ export default async function ReviewsPage() {
         <h1 className="text-2xl font-semibold text-neutral-900">Review</h1>
         <PageBackLink href="/home">Back to Home</PageBackLink>
       </div>
+      <ReviewRecoveryPanel />
 
       {dueWords.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-[var(--spacing-2xl)] text-center">

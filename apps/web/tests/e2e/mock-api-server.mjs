@@ -135,6 +135,7 @@ const CSRF_COOKIE_NAME = "vocanova_csrf";
 const SESSION_DEFAULT_VALUE = "test-session-default";
 
 const DEFAULT_USER = {
+  userId: "user-fixture",
   email: "core-loop-fixture@example.test",
   displayName: "Core Loop Fixture",
   emailVerifiedAt: "2026-01-01T00:00:00Z",
@@ -510,6 +511,7 @@ const CANONICAL_WORDS = {
     ],
   },
 };
+CANONICAL_WORDS["pour?#"] = CANONICAL_WORDS.pour;
 
 const JOURNEY_SITUATIONS = [
   {
@@ -655,6 +657,7 @@ function buildClearSessionCookie() {
 // --- per-session mutable state ---------------------------------
 
 const sessions = new Map();
+const magicLinkStates = new Map();
 
 function getSessionState(cookies) {
   const sessionId = cookies[SESSION_COOKIE_NAME] ?? SESSION_DEFAULT_VALUE;
@@ -860,6 +863,10 @@ function cloneProgress(progress) {
 
 function buildCurrentUser(state, cookies = {}) {
   return {
+    userId:
+      cookies.e2e_identity_fixture === "alternate"
+        ? "alternate-user-fixture"
+        : "user-fixture",
     email:
       cookies.e2e_account_email_fixture === "long"
         ? LONG_ACCOUNT_EMAIL
@@ -1346,6 +1353,10 @@ const server = createServer(async (req, res) => {
   // ----- auth (CSRF-exempt) ----------------------------------
 
   if (req.method === "POST" && url.pathname === "/api/v1/auth/magic-links") {
+    const body = await readJsonBody(req);
+    if (typeof body.email === "string") {
+      magicLinkStates.set(body.email.toLowerCase(), getSessionState(cookies));
+    }
     logLine(req, 200);
     jsonResponse(res, 200, {});
     return;
@@ -1355,9 +1366,14 @@ const server = createServer(async (req, res) => {
     req.method === "POST" &&
     url.pathname === "/api/v1/auth/magic-links/consume"
   ) {
+    const body = await readJsonBody(req);
     const sessionValue = generateId("session");
     const csrfValue = generateId("csrf");
-    sessions.set(sessionValue, createInitialState());
+    const state =
+      typeof body.email === "string"
+        ? magicLinkStates.get(body.email.toLowerCase())
+        : undefined;
+    sessions.set(sessionValue, state ?? createInitialState());
     logLine(req, 200, { session: "issued" });
     jsonResponse(
       res,
@@ -1917,6 +1933,20 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 404, { error: "not_found", slug });
       return;
     }
+    if (
+      cookies.e2e_saved_words_fixture === "library" &&
+      slug === "ordering-at-a-cafe"
+    ) {
+      response.meanings.push({
+        meaningId: "mean-bank-river",
+        wordId: "word-bank",
+        wordSlug: "bank",
+        wordText: "bank",
+        partOfSpeech: "noun",
+        shortDefinition: "land beside a river",
+        saved: true,
+      });
+    }
     logLine(req, 200, { slug });
     jsonResponse(res, 200, response);
     return;
@@ -1957,7 +1987,7 @@ const server = createServer(async (req, res) => {
       ["library", "canonical-without-list"].includes(
         cookies.e2e_saved_words_fixture,
       ) &&
-      slug === "pour"
+      ["pour", "pour?#"].includes(slug)
     ) {
       response.word.meanings = response.word.meanings.map((meaning) =>
         meaning.id === "mean-pour"

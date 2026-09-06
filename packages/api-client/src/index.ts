@@ -1,4 +1,6 @@
 export interface CurrentUser {
+  /** Stable server-authenticated identity. Older API deployments may omit it. */
+  userId?: string;
   email?: string;
   displayName?: string;
   avatarUrl?: string;

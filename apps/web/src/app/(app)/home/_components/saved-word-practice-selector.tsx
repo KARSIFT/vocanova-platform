@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { SavedMeaning } from "@vocanova/api-client";
 
 import { SentenceFeedback } from "../../_components/sentence-feedback";
+import { readSentenceRecovery } from "@/lib/sentence-recovery";
+import { useAuthenticatedUserId } from "../../_components/identity-context";
 
 interface SavedWordPracticeSelectorProps {
   savedWords: SavedMeaning[];
@@ -13,6 +15,7 @@ interface SavedWordPracticeSelectorProps {
 export function SavedWordPracticeSelector({
   savedWords,
 }: SavedWordPracticeSelectorProps) {
+  const userId = useAuthenticatedUserId();
   const [selectedUserWordId, setSelectedUserWordId] = useState(
     savedWords[0]?.userWordId ?? "",
   );
@@ -23,6 +26,21 @@ export function SavedWordPracticeSelector({
   const hasDraftRef = useRef(false);
   const selectorRef = useRef<HTMLSelectElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (!userId) return;
+    const record = readSentenceRecovery(userId);
+    if (
+      record?.path === "/home" &&
+      record.source === "daily_mission" &&
+      savedWords.some(
+        (word) =>
+          word.userWordId === record.attemptId &&
+          word.wordText === record.targetWord,
+      )
+    )
+      setSelectedUserWordId(record.attemptId);
+  }, [savedWords, userId]);
 
   const selectedWord = savedWords.find(
     (savedWord) => savedWord.userWordId === selectedUserWordId,
@@ -119,6 +137,8 @@ export function SavedWordPracticeSelector({
           source="daily_mission"
           shortDefinition={selectedWord.shortDefinition}
           onPendingChange={setIsSubmitting}
+          clearMismatchedRecovery
+          recoveryAttemptIds={savedWords.map((word) => word.userWordId)}
         />
       </div>
 

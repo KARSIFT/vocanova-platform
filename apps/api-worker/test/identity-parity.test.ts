@@ -130,7 +130,11 @@ describe("identity and account parity", () => {
       env,
     );
     expect(consumed.status).toBe(200);
+    const user = await env.DB.prepare("SELECT id FROM users WHERE email = ?")
+      .bind("learner@example.test")
+      .first<{ id: string }>();
     expect(await consumed.json()).toMatchObject({
+      userId: user?.id,
       email: "learner@example.test",
       onboardingStatus: "not_started",
     });
@@ -221,13 +225,17 @@ describe("identity and account parity", () => {
   });
 
   it("authenticates requester scope and enforces double-submit CSRF on settings and onboarding", async () => {
-    const { app, cookie, csrf } = await signedIn("settings@example.test");
+    const session = await signedIn("settings@example.test");
+    const { app, cookie, csrf } = session;
     const me = await app.request(
       "http://worker.test/api/v1/me",
       { headers: { Cookie: cookie } },
       env,
     );
     expect(me.status).toBe(200);
+    await expect(me.json()).resolves.toMatchObject({
+      userId: session.userId,
+    });
 
     const denied = await app.request(
       "http://worker.test/api/v1/settings",
