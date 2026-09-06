@@ -306,6 +306,7 @@ export class D1ContentLearningRepository {
     items: DueWord[];
     nextCursor?: string;
     totalCount: number;
+    nextReviewAt?: string | null;
   }> {
     const limit = normalizeLimit(requestedLimit);
     const cursor = decodeCursor<string>(after, "n");
