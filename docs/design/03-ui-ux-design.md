@@ -26,6 +26,10 @@ Three-tab bottom navigation:
 2. **Journey** — situation-based discovery and saved-word management.
 3. **Progress** — Confidence Points, streak history, completion summary.
 
+The shared app header provides a clearly labeled **Settings** link for learning preferences and
+account management, alongside Log out. Settings is intentionally outside the three-tab primary
+navigation.
+
 Sentence practice is a **reusable component**, not a fourth tab or standalone route — it is invoked
 from Home, Word Detail, and Review Completion. This is a deliberate MVP scoping decision: it keeps
 the tab bar simple and treats "write a sentence" as something the learner does _in the middle of_
