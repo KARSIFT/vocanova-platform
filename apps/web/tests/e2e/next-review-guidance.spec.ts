@@ -18,6 +18,9 @@ test("shows the learner-local scheduled review time on every scheduled-review su
   await expect(
     page.getByText("Your next review is Aug 22, 2099, 8:30 AM EDT."),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Explore Journey and save a word" }),
+  ).not.toBeVisible();
 
   await page.goto("/discover/saved");
   await expect(
@@ -81,6 +84,17 @@ test("distinguishes no saved vocabulary from saved words without active reviews"
   ]);
   await page.goto("/reviews");
   await expect(page.getByText("Save a word to start reviewing.")).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Explore Journey and save a word" }),
+  ).toHaveAttribute("href", "/discover");
+  await expect(page.getByRole("link", { name: "Back to Home" })).toHaveAttribute(
+    "href",
+    "/home",
+  );
+  await page.getByRole("link", { name: "Explore Journey and save a word" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Journey", level: 1 }),
+  ).toBeVisible();
 
   await context.addCookies([
     {
@@ -93,6 +107,9 @@ test("distinguishes no saved vocabulary from saved words without active reviews"
   await expect(
     page.getByText("No active reviews are scheduled right now."),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Explore Journey and save a word" }),
+  ).not.toBeVisible();
 });
 
 test("keeps neutral guidance when the auxiliary saved-word read is unavailable", async ({

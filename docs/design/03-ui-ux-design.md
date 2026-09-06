@@ -53,7 +53,9 @@ not to gate access behind a long survey.
    [05](../engineering/05-database-design.md) §9), reveal correctness, then record a rating. Objective
    incorrect answers record `Again`; objective correct answers allow Hard/Good/Easy. Self-check
    prompts derive correctness from the learner's selected rating. Then advance. No competing UI
-   during an active review item.
+   during an active review item. When the learner has no saved vocabulary, the caught-up state
+   provides a direct Journey action to discover and save a word while retaining navigation back to
+   Home.
 3. **Review completion** surfaces a summary and offers sentence practice as an optional next step
    using one of the words just reviewed.
 4. **Sentence practice** (reusable component): shows the target word/meaning, an input box, a short
