@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-test("explains genuinely empty progress without inventing history and keeps Home reachable", async ({
+test("guides genuinely empty progress to today's mission without inventing history", async ({
   page,
   context,
 }, testInfo) => {
@@ -44,10 +44,13 @@ test("explains genuinely empty progress without inventing history and keeps Home
   await expect(page.getByText("Completed", { exact: true })).toHaveCount(0);
   await expect(page.getByText("Missed", { exact: true })).toHaveCount(0);
 
-  const homeLink = page.getByRole("link", { name: "Home", exact: true });
-  await homeLink.focus();
-  await expect(homeLink).toBeFocused();
-  await homeLink.press("Enter");
+  const startMission = completionHistory.getByRole("link", {
+    name: "Start today's mission",
+  });
+  await expect(startMission).toBeVisible();
+  await startMission.focus();
+  await expect(startMission).toBeFocused();
+  await startMission.press("Enter");
   await expect(page).toHaveURL(/\/home$/);
   await expect(
     page.getByRole("heading", { name: "Today's Mission", level: 1 }),

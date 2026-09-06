@@ -104,8 +104,7 @@ interruption — consistent with "encouraging, not gamified for its own sake" fr
 Required for every screen with dynamic content:
 
 - **Empty** — first-time/no-history states must explain what will appear here and how to get there
-  (e.g. empty Progress screen invites the learner to complete their first mission), not just show a
-  blank area.
+  (e.g. empty Progress links directly to Today&apos;s Mission), not just show a blank area.
 - **Loading** — calm, non-jarring; sentence-feedback pending state specifically must preserve the
   learner's typed input and disable duplicate submission (see [09](../engineering/09-ai-features.md) §2).
 - **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
