@@ -140,6 +140,34 @@ test("home restores selection and review restores the historical attempt without
   expect(reviewPosts).toBe(0);
 });
 
+test("home preserves recovery for the second saved word while selections change", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  await context.addCookies([{ name: "vocanova_session", value: `home-second-${randomUUID()}`, url: baseURL }, { name: "vocanova_csrf", value: "home-second-csrf", url: baseURL }, { name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
+  await page.goto("/home");
+  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ source: "daily_mission", attemptId: "e2e-library-bank-river", path: "/home", targetWord: "bank" })]);
+  await page.reload();
+
+  const selector = page.getByRole("combobox", { name: "Choose a saved word to practice" });
+  await expect(selector).toHaveValue("e2e-library-bank-river");
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+  await selector.selectOption("uw-mean-pour");
+  await selector.selectOption("e2e-library-bank-river");
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+});
+
+test("mounted review recovery clears when the authenticated user changes", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  await authenticate(page, context, baseURL);
+  await page.goto("/reviews");
+  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ source: "review", attemptId: "historical-review-attempt", path: "/reviews" })]);
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Resume sentence practice" })).toBeVisible();
+
+  await context.addCookies([{ name: "e2e_identity_fixture", value: "alternate", url: baseURL }]);
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await expect(page.getByRole("heading", { name: "Resume sentence practice" })).toHaveCount(0);
+});
+
 test("Home recovers a daily-mission sentence through 401 reauthentication", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   const port = process.env.MOCK_API_PORT ?? "8080";

@@ -9,22 +9,29 @@ import { useAuthenticatedUserId } from "../../_components/identity-context";
 export function ReviewRecoveryPanel() {
   const userId = useAuthenticatedUserId();
   const [attempt, setAttempt] = useState<{
+    ownerId: string;
     attemptId: string;
     targetWord: string;
     shortDefinition?: string;
   } | null>(null);
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      setAttempt(null);
+      return;
+    }
     const record = readSentenceRecovery(userId);
     if (record?.path === "/reviews" && record.source === "review") {
       setAttempt({
+        ownerId: record.ownerId,
         attemptId: record.attemptId,
         targetWord: record.targetWord,
         shortDefinition: record.shortDefinition,
       });
+      return;
     }
+    setAttempt(null);
   }, [userId]);
-  if (!attempt) return null;
+  if (!attempt || attempt.ownerId !== userId) return null;
   return (
     <section
       className="mb-[var(--spacing-lg)]"

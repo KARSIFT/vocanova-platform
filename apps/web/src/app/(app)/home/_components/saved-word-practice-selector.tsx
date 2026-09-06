@@ -138,6 +138,7 @@ export function SavedWordPracticeSelector({
           shortDefinition={selectedWord.shortDefinition}
           onPendingChange={setIsSubmitting}
           clearMismatchedRecovery
+          recoveryAttemptIds={savedWords.map((word) => word.userWordId)}
         />
       </div>
 

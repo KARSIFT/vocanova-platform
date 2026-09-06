@@ -8,16 +8,21 @@ export function useAuthenticatedUserId() {
 
   useEffect(() => {
     let active = true;
-    void createApiClient()
-      .getCurrentUser({ cache: "no-store" })
-      .then(({ data }) => {
-        if (active) setUserId(data.userId);
-      })
-      .catch(() => {
-        if (active) setUserId(undefined);
-      });
+    function refreshIdentity() {
+      void createApiClient()
+        .getCurrentUser({ cache: "no-store" })
+        .then(({ data }) => {
+          if (active) setUserId(data.userId);
+        })
+        .catch(() => {
+          if (active) setUserId(undefined);
+        });
+    }
+    refreshIdentity();
+    window.addEventListener("focus", refreshIdentity);
     return () => {
       active = false;
+      window.removeEventListener("focus", refreshIdentity);
     };
   }, []);
 
