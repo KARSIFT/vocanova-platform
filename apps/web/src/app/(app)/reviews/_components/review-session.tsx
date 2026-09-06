@@ -138,6 +138,8 @@ export function ReviewSession({
       .listDueWords({ limit: 50 })
       .then(({ data }) => {
         if (data.items.length > 0) {
+          setPhase("prompt");
+          setSelectedOption(null);
           setDueWords(data.items);
           setRemainingCount(data.totalCount);
           setCurrentIndex(0);
