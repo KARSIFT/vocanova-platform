@@ -130,9 +130,7 @@ describe("identity and account parity", () => {
       env,
     );
     expect(consumed.status).toBe(200);
-    const user = await env.DB.prepare(
-      "SELECT id FROM users WHERE email = ?",
-    )
+    const user = await env.DB.prepare("SELECT id FROM users WHERE email = ?")
       .bind("learner@example.test")
       .first<{ id: string }>();
     expect(await consumed.json()).toMatchObject({

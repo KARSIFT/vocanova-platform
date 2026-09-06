@@ -8,21 +8,25 @@ export function useAuthenticatedUserId() {
 
   useEffect(() => {
     let active = true;
+    let requestVersion = 0;
     function refreshIdentity() {
+      const currentRequest = ++requestVersion;
+      setUserId(undefined);
       void createApiClient()
         .getCurrentUser({ cache: "no-store" })
         .then(({ data }) => {
-          if (active) setUserId(data.userId);
+          if (active && currentRequest === requestVersion)
+            setUserId(data.userId);
         })
         .catch(() => {
-          if (active) setUserId(undefined);
+          if (active && currentRequest === requestVersion) setUserId(undefined);
         });
     }
     refreshIdentity();
-    window.addEventListener("focus", refreshIdentity);
+    window.addEventListener("pageshow", refreshIdentity);
     return () => {
       active = false;
-      window.removeEventListener("focus", refreshIdentity);
+      window.removeEventListener("pageshow", refreshIdentity);
     };
   }, []);
 

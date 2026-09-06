@@ -143,28 +143,30 @@ test("home restores selection and review restores the historical attempt without
 test("home preserves recovery for the second saved word while selections change", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await context.addCookies([{ name: "vocanova_session", value: `home-second-${randomUUID()}`, url: baseURL }, { name: "vocanova_csrf", value: "home-second-csrf", url: baseURL }, { name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
+  await page.goto("/settings");
+  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ source: "daily_mission", attemptId: "e2e-preview-user-word-02", path: "/home", targetWord: "baggage" })]);
   await page.goto("/home");
-  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ source: "daily_mission", attemptId: "e2e-library-bank-river", path: "/home", targetWord: "bank" })]);
-  await page.reload();
+  await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
 
   const selector = page.getByRole("combobox", { name: "Choose a saved word to practice" });
-  await expect(selector).toHaveValue("e2e-library-bank-river");
+  await expect(selector).toHaveValue("e2e-preview-user-word-02");
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
-  await selector.selectOption("uw-mean-pour");
-  await selector.selectOption("e2e-library-bank-river");
+  await selector.selectOption("e2e-preview-user-word-01");
+  await selector.selectOption("e2e-preview-user-word-02");
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
 });
 
 test("mounted review recovery clears when the authenticated user changes", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await authenticate(page, context, baseURL);
-  await page.goto("/reviews");
+  await page.goto("/settings");
   await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ source: "review", attemptId: "historical-review-attempt", path: "/reviews" })]);
-  await page.reload();
+  await page.goto("/reviews");
+  await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
   await expect(page.getByRole("heading", { name: "Resume sentence practice" })).toBeVisible();
 
   await context.addCookies([{ name: "e2e_identity_fixture", value: "alternate", url: baseURL }]);
-  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow")));
   await expect(page.getByRole("heading", { name: "Resume sentence practice" })).toHaveCount(0);
 });
 
@@ -184,6 +186,15 @@ test("Home recovers a daily-mission sentence through 401 reauthentication", asyn
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
   await page.getByRole("button", { name: "Resume sentence" }).click();
   await expect(input).toHaveValue("I pour coffee at home.");
+  await context.addCookies([{ name: "vocanova_csrf", value: "home-resume-csrf", url: baseURL }]);
+  const feedbackRequest = page.waitForRequest((request) => request.url().endsWith("/api/v1/sentence-feedback") && request.method() === "POST");
+  await page.getByRole("button", { name: "Check my sentence" }).click();
+  expect((await feedbackRequest).postDataJSON()).toMatchObject({
+    attemptId: "uw-mean-pour",
+    source: "daily_mission",
+    sentenceText: "I pour coffee at home.",
+  });
+  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
 });
 
 test("Review recovers the historical attempt after 401 when the queue is empty", async ({ page, context }, testInfo) => {
@@ -195,7 +206,9 @@ test("Review recovers the historical attempt after 401 when the queue is empty",
   await page.route("**/api/v1/reviews/submissions", async (route) => { reviewPosts += 1; await route.continue(); });
   await page.goto("/reviews");
   await page.getByRole("button", { name: "Show answer" }).click();
+  const reviewSubmission = page.waitForResponse((response) => response.url().endsWith("/api/v1/reviews/submissions") && response.request().method() === "POST");
   await page.getByRole("button", { name: "Good", exact: true }).click();
+  const historicalAttemptId = ((await reviewSubmission).json() as Promise<{ attemptId: string }>).then((body) => body.attemptId);
   const input = page.getByRole("textbox", { name: /Write a sentence using pour/ });
   await input.fill("I pour coffee after review.");
   await page.route("**/api/v1/sentence-feedback", (route) => route.fulfill({ status: 401, contentType: "application/problem+json", body: JSON.stringify({ detail: "authentication required" }) }));
@@ -206,6 +219,15 @@ test("Review recovers the historical attempt after 401 when the queue is empty",
   await expect(page.getByRole("heading", { name: "Resume sentence practice" })).toBeVisible();
   await page.getByRole("button", { name: "Resume sentence" }).click();
   await expect(input).toHaveValue("I pour coffee after review.");
+  await context.addCookies([{ name: "vocanova_csrf", value: "review-resume-csrf", url: baseURL }]);
+  const feedbackRequest = page.waitForRequest((request) => request.url().endsWith("/api/v1/sentence-feedback") && request.method() === "POST");
+  await page.getByRole("button", { name: "Check my sentence" }).click();
+  expect((await feedbackRequest).postDataJSON()).toMatchObject({
+    attemptId: await historicalAttemptId,
+    source: "review",
+    sentenceText: "I pour coffee after review.",
+  });
+  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
   expect(reviewPosts).toBe(1);
 });
 
