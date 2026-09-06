@@ -81,6 +81,7 @@ export default async function ReviewsPage() {
           initialTotalCount={totalCount}
           reviewTarget={reviewTarget}
           reviewsCompleted={reviewsCompleted}
+          timezone={timezone}
         />
       )}
     </div>
