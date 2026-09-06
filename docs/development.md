@@ -40,6 +40,13 @@ Run the disposable end-to-end stack smoke test with:
 pnpm test:local-stack
 ```
 
+Run the real browser learner acceptance loop, using one synthetic learner in a
+fresh disposable local D1 database, with:
+
+```bash
+pnpm test:local-learner-loop
+```
+
 The local commands use workerd and local D1. They do not deploy, access a Cloudflare account, send email, call a paid AI provider, or require production credentials.
 
 ## Validation
