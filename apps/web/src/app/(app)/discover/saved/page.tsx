@@ -3,9 +3,15 @@ import { ApiResponseError } from "@vocanova/api-client";
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
 import { PageBackLink } from "../../_components/page-back-link";
 
+import { SavedVocabularyRemovalStatus } from "./_components/saved-vocabulary-removal-status";
 import { SavedVocabularyList } from "./_components/saved-vocabulary-list";
 
-export default async function SavedVocabularyPage() {
+export default async function SavedVocabularyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ removed?: string }>;
+}) {
+  const { removed } = await searchParams;
   const client = await createServerApiClient();
   let response: Awaited<ReturnType<typeof client.listSavedWords>>;
   const timezonePromise = client
@@ -33,6 +39,7 @@ export default async function SavedVocabularyPage() {
       <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
         Review and manage every word you have saved.
       </p>
+      {removed === "1" ? <SavedVocabularyRemovalStatus /> : null}
       <SavedVocabularyList
         initialItems={items}
         initialNextCursor={nextCursor}

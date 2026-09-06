@@ -110,7 +110,9 @@ Required for every screen with dynamic content:
   learner's typed input and disable duplicate submission (see [09](../engineering/09-ai-features.md) §2).
 - **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
   input or falsely imply something completed. AI feedback failures specifically must never claim
-  mission completion (see [09](../engineering/09-ai-features.md) §2 and §9).
+  mission completion (see [09](../engineering/09-ai-features.md) §2 and §9). Saved-vocabulary
+  removal keeps the word visible after a failure and returns focus to its retry control; after a
+  successful removal, Saved Vocabulary announces and focuses its completion context.
   Saved Vocabulary identifies its own library or saved-word read failures, keeps retry in place,
   and offers a route back to the relevant Journey or library screen; it does not present those
   failures as a Journey read failure.

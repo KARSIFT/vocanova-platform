@@ -345,7 +345,7 @@ test("keeps a saved meaning until a retry succeeds, then refreshes the library",
     page.getByText("Unable to remove this saved word. Please try again."),
   ).toBeVisible();
   await remove.click();
-  await expect(page).toHaveURL(/\/discover\/saved$/);
+  await expect(page).toHaveURL(/\/discover\/saved\?removed=1$/);
   await page.getByRole("button", { name: "Load more saved words" }).click();
   await expect(
     page.getByText("land beside a river", { exact: true }),
@@ -357,6 +357,107 @@ test("keeps a saved meaning until a retry succeeds, then refreshes the library",
   await expect(
     page.getByRole("heading", { name: "Saved item unavailable", level: 1 }),
   ).toBeVisible();
+});
+
+test("keeps saved-word removal accessible while pending, after a retry, and on return to the library", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "library", url: baseURL },
+    { name: "vocanova_csrf", value: "saved-removal-csrf", url: baseURL },
+  ]);
+
+  let removeCalls = 0;
+  let releaseFirstRemoval!: () => void;
+  const firstRemovalHeld = new Promise<void>((resolve) => {
+    releaseFirstRemoval = resolve;
+  });
+  let firstRemovalObserved!: () => void;
+  const firstRemovalRequested = new Promise<void>((resolve) => {
+    firstRemovalObserved = resolve;
+  });
+  await page.route("**/api/v1/user-words/mean-bank-river", async (route) => {
+    removeCalls += 1;
+    if (removeCalls === 1) {
+      firstRemovalObserved();
+      await firstRemovalHeld;
+      await route.fulfill({ status: 503, body: "{}" });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto("/discover/saved/bank?meaning=mean-bank-river");
+  const remove = page.getByRole("button", {
+    name: "Remove bank from saved words",
+  });
+  await remove.focus();
+  const focusStyle = await remove.evaluate((button) => {
+    const style = window.getComputedStyle(button);
+    return {
+      outlineStyle: style.outlineStyle,
+      outlineWidth: style.outlineWidth,
+    };
+  });
+  expect(focusStyle.outlineStyle).toBe("solid");
+  expect(Number.parseFloat(focusStyle.outlineWidth)).toBeGreaterThanOrEqual(2);
+
+  await remove.click();
+  await firstRemovalRequested;
+  const pendingRemoval = page.getByRole("button", {
+    name: "Removing saved word",
+  });
+  await expect(pendingRemoval).toBeDisabled();
+  await expect(pendingRemoval).toHaveAttribute("aria-busy", "true");
+
+  releaseFirstRemoval();
+  await expect(
+    page.getByText("Unable to remove this saved word. Please try again."),
+  ).toBeVisible();
+  await expect(remove).toHaveAttribute("aria-busy", "false");
+  await expect(remove).toBeFocused();
+  expect(removeCalls).toBe(1);
+
+  await remove.click();
+  await expect.poll(() => removeCalls).toBe(2);
+  await expect(page).toHaveURL(/\/discover\/saved\?removed=1$/);
+  const completion = page.getByText(
+    "Saved word removed. You can continue managing your vocabulary.",
+    { exact: true },
+  );
+  await expect(completion).toHaveAttribute(
+    "role",
+    "status",
+  );
+  await expect(completion).toBeVisible();
+  await expect(completion).toBeFocused();
+});
+
+test("routes to sign in when saved-word removal returns 401 without claiming success", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "library", url: baseURL },
+    { name: "vocanova_csrf", value: "saved-removal-401-csrf", url: baseURL },
+  ]);
+  await page.route("**/api/v1/user-words/mean-bank-river", (route) =>
+    route.fulfill({ status: 401, body: "{}" }),
+  );
+
+  await page.goto("/discover/saved/bank?meaning=mean-bank-river");
+  await page
+    .getByRole("button", { name: "Remove bank from saved words" })
+    .click();
+  await expect(page).toHaveURL(/\/signin\?returnTo=/);
+  await expect(
+    page.getByText("Saved word removed. You can continue managing your vocabulary."),
+  ).toHaveCount(0);
 });
 
 test("keeps keyboard focus and announces the end after an empty final page", async ({
