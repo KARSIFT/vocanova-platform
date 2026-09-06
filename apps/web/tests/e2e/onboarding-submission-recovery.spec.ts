@@ -83,20 +83,16 @@ test("keeps complete onboarding answers through a failed final save and retries 
   await page.getByRole("button", { name: "Finish setup" }).click();
   await expect(page).toHaveURL(/\/home$/);
 
-  expect(requestBodies).toEqual([
+  expect(requestBodies).toHaveLength(2);
+  expect(requestBodies[0]).toMatchObject(
     {
       englishLevel: "b1",
       nativeLanguage: "Spanish",
       learningGoal: "travel",
       mainUseCase: "daily_life",
       dailyReviewTarget: 15,
+      timezone: expect.any(String),
     },
-    {
-      englishLevel: "b1",
-      nativeLanguage: "Spanish",
-      learningGoal: "travel",
-      mainUseCase: "daily_life",
-      dailyReviewTarget: 15,
-    },
-  ]);
+  );
+  expect(requestBodies[1]).toEqual(requestBodies[0]);
 });
