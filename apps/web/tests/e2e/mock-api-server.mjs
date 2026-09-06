@@ -620,6 +620,7 @@ function createInitialState() {
     consumedEmailChangeFailures: new Set(),
     emailChangeHolds: new Map(),
     completionSummaryDueFetches: 0,
+    paginationRetryDueFetches: 0,
   };
 }
 
@@ -797,7 +798,8 @@ function buildProgress(state) {
   return cloneProgress(state.progress);
 }
 
-function buildDailyMission(state, homeFixture) {
+function buildDailyMission(state, cookies = {}) {
+  const homeFixture = cookies.e2e_home_fixture;
   const streak = { ...state.progress.streak };
   if (homeFixture === "mission-complete") {
     return {
@@ -819,9 +821,23 @@ function buildDailyMission(state, homeFixture) {
       streak,
     };
   }
+  const fixture = cookies.e2e_review_mission_fixture;
+  const fixtureMission =
+    fixture === "target-three"
+      ? { reviewTarget: 3, reviewsCompleted: 0 }
+      : fixture === "partially-completed"
+        ? { reviewTarget: 4, reviewsCompleted: 2 }
+        : fixture === "already-met"
+          ? { reviewTarget: 4, reviewsCompleted: 4 }
+          : fixture === "fewer-due-words"
+            ? { reviewTarget: 5, reviewsCompleted: 0 }
+            : undefined;
+
   return {
     ...state.dailyMission,
-    reviewsCompleted: state.reviewedCount,
+    ...fixtureMission,
+    reviewsCompleted:
+      (fixtureMission?.reviewsCompleted ?? 0) + state.reviewedCount,
     streak,
   };
 }
@@ -874,6 +890,12 @@ function buildDueWords(state, fixture) {
           : undefined,
       totalCount: Math.max(0, MULTIPLE_CHOICE_DUE_WORDS.length - start),
     };
+  }
+  if (fixture === "pagination-retry") {
+    const page = state.paginationRetryDueFetches;
+    state.paginationRetryDueFetches += 1;
+    const items = MULTIPLE_CHOICE_DUE_WORDS.slice(page, Math.min(page + 1, 2));
+    return { items, nextCursor: undefined, totalCount: Math.max(0, 2 - page) };
   }
   if (fixture === "multiple-choice") {
     return {
@@ -1668,7 +1690,7 @@ const server = createServer(async (req, res) => {
     const state = getSessionState(cookies);
     const hold = waitForReadHold(state, cookies, "home");
     if (hold) await hold;
-    const mission = buildDailyMission(state, cookies.e2e_home_fixture);
+    const mission = buildDailyMission(state, cookies);
     logLine(req, 200, { reviewsCompleted: mission.reviewsCompleted });
     jsonResponse(res, 200, mission);
     return;

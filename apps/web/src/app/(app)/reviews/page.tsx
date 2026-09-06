@@ -8,13 +8,18 @@ import { ReviewSession } from "./_components/review-session";
 export default async function ReviewsPage() {
   const client = await createServerApiClient();
   let dueResponse: Awaited<ReturnType<typeof client.listDueWords>>;
+  let dailyMissionResponse: Awaited<ReturnType<typeof client.getDailyMission>>;
   try {
-    dueResponse = await client.listDueWords({ limit: 50 });
+    [dueResponse, dailyMissionResponse] = await Promise.all([
+      client.listDueWords({ limit: 50 }),
+      client.getDailyMission(),
+    ]);
   } catch (error) {
     requireAuthRedirect(error, "/reviews");
   }
 
   const { items: dueWords, totalCount } = dueResponse.data;
+  const { reviewTarget, reviewsCompleted } = dailyMissionResponse.data;
 
   return (
     <div className="p-[var(--spacing-lg)]">
@@ -42,6 +47,8 @@ export default async function ReviewsPage() {
         <ReviewSession
           initialDueWords={dueWords}
           initialTotalCount={totalCount}
+          reviewTarget={reviewTarget}
+          reviewsCompleted={reviewsCompleted}
         />
       )}
     </div>
