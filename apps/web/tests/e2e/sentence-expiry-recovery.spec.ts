@@ -37,6 +37,12 @@ test("word detail saves on 401, signs in, and explicitly resumes only its matchi
   await page.goto("/auth/magic?token=recovery-token&email=learner%40example.test&returnTo=%2Fdiscover%2Fordering-at-a-cafe%2Fpour");
   await expect(page).toHaveURL("/discover/ordering-at-a-cafe/pour");
   await expect(page.getByText("Your sentence was saved when your session expired.")).toBeVisible();
+  for (const name of ["Resume sentence", "Discard saved sentence"]) {
+    const control = page.getByRole("button", { name });
+    expect((await control.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+    await control.focus();
+    await expect(control).toBeFocused();
+  }
   await page.getByRole("button", { name: "Resume sentence" }).click();
   await expect(input).toHaveValue("I pour coffee every morning.");
 });

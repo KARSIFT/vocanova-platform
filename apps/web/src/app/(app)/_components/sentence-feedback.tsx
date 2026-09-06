@@ -231,21 +231,21 @@ export function SentenceFeedback({
             className="rounded-md bg-amber-50 p-[var(--spacing-sm)] text-base text-amber-900"
           >
             <p>Your sentence was saved when your session expired.</p>
-            <div className="mt-[var(--spacing-sm)] flex gap-[var(--spacing-sm)]">
+            <div className="mt-[var(--spacing-sm)] flex flex-wrap gap-[var(--spacing-sm)]">
               <button
                 type="button"
                 onClick={() => {
                   setSentence(recovered);
                   setRecovered(null);
                 }}
-                className="underline"
+                className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center px-[var(--spacing-sm)] text-base font-medium underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
               >
                 Resume sentence
               </button>
               <button
                 type="button"
                 onClick={discardRecovery}
-                className="underline"
+                className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center px-[var(--spacing-sm)] text-base font-medium underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
               >
                 Discard saved sentence
               </button>

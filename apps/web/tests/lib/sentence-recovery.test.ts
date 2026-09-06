@@ -50,7 +50,7 @@ it("clears records with invalid source, owner, target, definition, path, or futu
   for (const invalid of [
     record({ source: "unknown" }), record({ ownerId: "" }), record({ targetWord: "" }),
     record({ shortDefinition: 4 }), record({ path: "/settings" }),
-    record({ createdAt: Date.now() + 1 }),
+    record({ createdAt: Date.now() + 60_000 }),
   ]) {
     storage.setItem(SENTENCE_RECOVERY_KEY, JSON.stringify({ ...invalid, version: 1 }));
     assert.equal(readSentenceRecovery("user-a"), null);
