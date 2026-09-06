@@ -22,14 +22,16 @@ export function SavedVocabularyList({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const firstAppendedLink = useRef<HTMLAnchorElement>(null);
-  const [focusAppended, setFocusAppended] = useState(false);
+  const [appendedStartIndex, setAppendedStartIndex] = useState<number | null>(
+    null,
+  );
 
   useEffect(() => {
-    if (focusAppended) {
+    if (appendedStartIndex !== null) {
       firstAppendedLink.current?.focus();
-      setFocusAppended(false);
+      setAppendedStartIndex(null);
     }
-  }, [focusAppended, items]);
+  }, [appendedStartIndex, items]);
 
   async function loadMore() {
     if (!nextCursor || isLoading) return;
@@ -40,7 +42,7 @@ export function SavedVocabularyList({
         after: nextCursor,
         limit: 10,
       });
-      setFocusAppended(data.items.length > 0);
+      setAppendedStartIndex(data.items.length > 0 ? items.length : null);
       setItems((current) => [...current, ...data.items]);
       setNextCursor(data.nextCursor);
     } catch (error) {
@@ -61,11 +63,7 @@ export function SavedVocabularyList({
         {items.map((item, index) => (
           <li key={item.userWordId}>
             <Link
-              ref={
-                index === items.length - 1 && focusAppended
-                  ? firstAppendedLink
-                  : undefined
-              }
+              ref={index === appendedStartIndex ? firstAppendedLink : undefined}
               href={`/discover/saved/${item.wordSlug}?meaning=${encodeURIComponent(item.meaningId)}`}
               className="block rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)] shadow-sm hover:border-primary-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary-600"
             >

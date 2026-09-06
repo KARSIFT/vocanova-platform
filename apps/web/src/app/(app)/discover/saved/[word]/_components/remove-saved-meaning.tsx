@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { createApiClient } from "@/lib/api";
@@ -18,6 +18,9 @@ export function RemoveSavedMeaning({
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
   const buttonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (status === "error") buttonRef.current?.focus();
+  }, [status]);
   async function remove() {
     if (status === "loading") return;
     const csrf = getCookieValue(CSRF_COOKIE_NAME);
@@ -42,7 +45,6 @@ export function RemoveSavedMeaning({
           "Unable to remove this saved word. Please try again.",
         ),
       );
-      buttonRef.current?.focus();
     }
   }
   return (
