@@ -78,6 +78,8 @@ export function ReviewSession({
   const currentCardHeadingRef = useRef<HTMLHeadingElement>(null);
   const completionHeadingRef = useRef<HTMLHeadingElement>(null);
   const nextActionRef = useRef<HTMLButtonElement>(null);
+  const retrySubmissionRef = useRef<HTMLButtonElement>(null);
+  const retryLoadingReviewsRef = useRef<HTMLButtonElement>(null);
 
   const currentCard = dueWords[currentIndex];
 
@@ -128,6 +130,18 @@ export function ReviewSession({
       nextActionRef.current?.focus();
     }
   }, [phase, promptType]);
+
+  useEffect(() => {
+    if (errorMessage && pendingSubmission.current && !isSubmitting) {
+      retrySubmissionRef.current?.focus();
+    }
+  }, [errorMessage, isSubmitting]);
+
+  useEffect(() => {
+    if (awaitingNextPage && !isRefetching) {
+      retryLoadingReviewsRef.current?.focus();
+    }
+  }, [awaitingNextPage, isRefetching]);
 
   const loadNextPage = () => {
     setAwaitingNextPage(false);
@@ -363,6 +377,7 @@ export function ReviewSession({
           {errorMessage}
         </p>
         <button
+          ref={retryLoadingReviewsRef}
           type="button"
           onClick={loadNextPage}
           disabled={isRefetching}
@@ -394,6 +409,16 @@ export function ReviewSession({
           Card {completedReviewCount + 1} of {sessionLimit}
         </p>
       </div>
+
+      {isSubmitting ? (
+        <p
+          role="status"
+          aria-live="polite"
+          className="mt-[var(--spacing-md)] text-sm text-neutral-700"
+        >
+          Submitting review…
+        </p>
+      ) : null}
 
       <div className="mt-[var(--spacing-md)] rounded-md border border-neutral-200 bg-white p-[var(--spacing-md)] shadow-sm">
         <div className="mb-[var(--spacing-lg)] text-center">
@@ -579,6 +604,7 @@ export function ReviewSession({
         ) : null}
         {errorMessage && pendingSubmission.current ? (
           <button
+            ref={retrySubmissionRef}
             type="button"
             onClick={() => void submitAttempt()}
             disabled={isLoading}
