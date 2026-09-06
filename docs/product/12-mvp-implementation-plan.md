@@ -57,7 +57,7 @@ The complete journey works across supported layouts with no critical product, se
 
 ### Staging readiness
 
-A release candidate can be deployed to an isolated environment, migrated, smoke-tested, observed, and rolled back using a documented process. Remote delivery is not currently automated in this repository.
+Cloudflare Workers Builds automatically deploys validated protected `main` merges to staging and applies compatible staging migrations. Confirm the resulting build and exact release using the merge-to-staging runbook, including smoke checks and documented rollback procedures.
 
 ### Production readiness
 
