@@ -1334,7 +1334,16 @@ const server = createServer(async (req, res) => {
   if (req.method === "POST" && url.pathname === "/__e2e/release-read") {
     const fixture = url.searchParams.get("fixture");
     if (
-      !["discover", "reviews", "home", "progress", "settings", "account"].includes(
+      ![
+        "discover",
+        "reviews",
+        "home",
+        "progress",
+        "settings",
+        "account",
+        "saved-library",
+        "saved-detail",
+      ].includes(
         fixture,
       )
     ) {
@@ -1570,6 +1579,12 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
     const state = getSessionState(cookies);
+    const savedLibraryHold = waitForReadHold(
+      state,
+      cookies,
+      "saved-library",
+    );
+    if (savedLibraryHold) await savedLibraryHold;
     // The canonical saved-detail route must authorize from its canonical
     // response, rather than depending on a (possibly truncated) saved list.
     if (cookies.e2e_saved_words_fixture === "canonical-without-list") {
@@ -1583,6 +1598,14 @@ const server = createServer(async (req, res) => {
     }
     if (cookies.e2e_saved_words_fixture === "saved-list-reauth") {
       jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
+    if (consumeReadFailureFixture(state, cookies, "saved-library")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "saved-library",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
       return;
     }
     if (consumeReadFailureFixture(state, cookies, "home")) {
@@ -1995,6 +2018,16 @@ const server = createServer(async (req, res) => {
       return;
     }
     const state = getSessionState(cookies);
+    const savedDetailHold = waitForReadHold(state, cookies, "saved-detail");
+    if (savedDetailHold) await savedDetailHold;
+    if (consumeReadFailureFixture(state, cookies, "saved-detail")) {
+      logLine(req, 500, {
+        reason: "fixture-read-failure",
+        fixture: "saved-detail",
+      });
+      jsonResponse(res, 500, { error: "fixture_read_failure" });
+      return;
+    }
     if (consumeReadFailureFixture(state, cookies, "discover")) {
       logLine(req, 500, {
         reason: "fixture-read-failure",
