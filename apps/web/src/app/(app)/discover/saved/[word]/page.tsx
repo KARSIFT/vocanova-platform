@@ -23,7 +23,10 @@ export default async function SavedWordPage({
     canonical = await client.getCanonicalWord(word);
   } catch (error) {
     if (error instanceof ApiResponseError && error.status === 404) notFound();
-    requireAuthRedirect(error, `/discover/saved/${word}`);
+    requireAuthRedirect(
+      error,
+      `/discover/saved/${word}?meaning=${encodeURIComponent(meaningId ?? "")}`,
+    );
   }
   if (!meaningId) notFound();
   const meaning = canonical.data.word.meanings.find(
@@ -38,6 +41,12 @@ export default async function SavedWordPage({
       <h1 className="mt-[var(--spacing-md)] wrap-break-word text-2xl font-semibold text-neutral-900">
         {canonical.data.word.text}
       </h1>
+      <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-700">
+        {canonical.data.word.wordType}
+        {canonical.data.word.difficultyLevel
+          ? ` · ${canonical.data.word.difficultyLevel}`
+          : null}
+      </p>
       <section className="mt-[var(--spacing-lg)] rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)]">
         <p className="font-medium text-neutral-900">{meaning.partOfSpeech}</p>
         <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-700">
@@ -74,8 +83,11 @@ export default async function SavedWordPage({
             </h2>
             <ul className="mt-[var(--spacing-xs)] space-y-[var(--spacing-xs)] text-base text-neutral-700">
               {meaning.usageNotes.map((note) => (
-                <li key={note.id} className="wrap-break-word">
-                  {note.noteText}
+                <li key={note.id}>
+                  <h3 className="wrap-break-word text-sm font-semibold text-neutral-800">
+                    {formatNoteType(note.noteType)}
+                  </h3>
+                  <p className="wrap-break-word">{note.noteText}</p>
                 </li>
               ))}
             </ul>
@@ -83,7 +95,7 @@ export default async function SavedWordPage({
         ) : null}
         <SentenceFeedback
           targetWord={canonical.data.word.text}
-              attemptId={meaning.userWordId!}
+          attemptId={meaning.userWordId!}
           source="word_detail"
           shortDefinition={meaning.shortDefinition}
         />
@@ -107,4 +119,11 @@ function reviewStateLabel(
     mastered: "Mastered",
     not_reviewing: "Not in review",
   }[state];
+}
+
+function formatNoteType(noteType: string) {
+  return noteType
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
