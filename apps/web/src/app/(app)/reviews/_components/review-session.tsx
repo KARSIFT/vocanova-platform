@@ -520,13 +520,14 @@ export function ReviewSession({
         (promptType === "self_check" && phase === "rate") ? (
           <div className="mb-[var(--spacing-lg)]">
             {isMultipleChoiceCorrect ? (
-              <p
-                role="status"
-                aria-live="polite"
-                className="mb-[var(--spacing-md)] text-center text-lg font-medium text-primary-900"
-              >
-                Correct. Choose how well you knew this word.
-              </p>
+              <>
+                <p role="status" aria-live="polite" className="sr-only">
+                  Correct. Choose how well you knew this word.
+                </p>
+                <p className="mb-[var(--spacing-md)] text-center text-lg font-medium text-primary-900">
+                  Correct
+                </p>
+              </>
             ) : null}
             <fieldset>
               <legend className="sr-only">
