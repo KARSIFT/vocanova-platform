@@ -354,6 +354,45 @@ const LONG_SAVED_WORDS_RESPONSE = {
   ],
 };
 
+const SAVED_LIBRARY_PAGE_TWO = [
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[0],
+    userWordId: "e2e-library-user-word-11",
+    meaningId: "mean-pour",
+    wordId: "word-pour",
+    wordSlug: "pour",
+    wordText: "pour",
+    partOfSpeech: "verb",
+    shortDefinition: "to make liquid flow into a container",
+  },
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[1],
+    userWordId: "e2e-library-user-word-12",
+    meaningId: "e2e-library-meaning-12",
+    wordSlug: "later-word",
+    wordText: "later word",
+    shortDefinition: "a saved word from a later page",
+  },
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[0],
+    userWordId: "e2e-library-bank-river",
+    meaningId: "mean-bank-river",
+    wordId: "word-bank",
+    wordSlug: "bank",
+    wordText: "bank",
+    shortDefinition: "land beside a river",
+  },
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[1],
+    userWordId: "e2e-library-bank-money",
+    meaningId: "mean-bank-money",
+    wordId: "word-bank",
+    wordSlug: "bank",
+    wordText: "bank",
+    shortDefinition: "a financial institution",
+  },
+];
+
 const MULTIPLE_CHOICE_DUE_WORDS = [
   {
     userWordId: "e2e-review-user-word-arrival",
@@ -402,6 +441,32 @@ const MULTIPLE_CHOICE_DUE_WORDS = [
 ];
 
 const CANONICAL_WORDS = {
+  bank: {
+    id: "word-bank",
+    text: "bank",
+    slug: "bank",
+    wordType: "noun",
+    meanings: [
+      { id: "mean-bank-river", partOfSpeech: "noun", shortDefinition: "land beside a river", saved: false, examples: [], usageNotes: [] },
+      { id: "mean-bank-money", partOfSpeech: "noun", shortDefinition: "a financial institution", saved: false, examples: [], usageNotes: [] },
+    ],
+  },
+  "later-word": {
+    id: "e2e-preview-word-02",
+    text: "later word",
+    slug: "later-word",
+    wordType: "noun",
+    meanings: [
+      {
+        id: "e2e-library-meaning-12",
+        partOfSpeech: "noun",
+        shortDefinition: "a saved word from a later page",
+        saved: false,
+        examples: [],
+        usageNotes: [],
+      },
+    ],
+  },
   pour: {
     id: "word-pour",
     text: "pour",
@@ -591,6 +656,7 @@ function createInitialState() {
   return {
     onboardingCompleted: true,
     savedMeaningIds: new Set(),
+    libraryRemovedMeaningIds: new Set(),
     // A meaning enters reviewedMeaningIds after a successful
     // review submission. The /api/v1/reviews/due response is
     // `savedMeaningIds - reviewedMeaningIds` so the review
@@ -1425,16 +1491,37 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
     const state = getSessionState(cookies);
+    // The canonical saved-detail route must authorize from its canonical
+    // response, rather than depending on a (possibly truncated) saved list.
+    if (cookies.e2e_saved_words_fixture === "canonical-without-list") {
+      logLine(req, 500, { reason: "saved-list-unavailable" });
+      jsonResponse(res, 500, { error: "saved_list_unavailable" });
+      return;
+    }
     if (consumeReadFailureFixture(state, cookies, "home")) {
       logLine(req, 500, { reason: "fixture-read-failure", fixture: "home" });
       jsonResponse(res, 500, { error: "fixture_read_failure" });
       return;
     }
     const data =
-      cookies.e2e_saved_words_fixture === "truncated-page"
+      cookies.e2e_saved_words_fixture === "punctuation-reauth"
+        ? { items: [{ ...SAVED_LIBRARY_PAGE_TWO[0], wordSlug: "pour?#" }], nextCursor: undefined }
+      : cookies.e2e_saved_words_fixture === "truncated-page"
         ? TRUNCATED_SAVED_WORDS_RESPONSE
         : cookies.e2e_saved_words_fixture === "long-content"
           ? LONG_SAVED_WORDS_RESPONSE
+          : cookies.e2e_saved_words_fixture === "library"
+            ? url.searchParams.get("limit") === "100"
+              ? {
+                  items: [
+                    ...TRUNCATED_SAVED_WORDS_RESPONSE.items,
+                    ...SAVED_LIBRARY_PAGE_TWO,
+                  ].filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)),
+                  nextCursor: undefined,
+                }
+              : url.searchParams.get("after")
+              ? { items: SAVED_LIBRARY_PAGE_TWO.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: undefined }
+              : { items: TRUNCATED_SAVED_WORDS_RESPONSE.items.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: "e2e-library-page-2" }
           : cookies.e2e_home_fixture !== "new-learner" &&
               cookies.e2e_home_fixture
             ? HOME_PRACTICE_SAVED_WORDS_RESPONSE
@@ -1482,6 +1569,7 @@ const server = createServer(async (req, res) => {
       return;
     }
     state.savedMeaningIds.add(meaningId);
+    state.libraryRemovedMeaningIds.delete(meaningId);
     logLine(req, 200, { action: "save", meaningId });
     const word = CANONICAL_WORDS.pour;
     const meaning = word.meanings.find((m) => m.id === meaningId);
@@ -1513,6 +1601,7 @@ const server = createServer(async (req, res) => {
     );
     const state = getSessionState(cookies);
     state.savedMeaningIds.delete(meaningId);
+    state.libraryRemovedMeaningIds.add(meaningId);
     logLine(req, 204, { action: "unsave", meaningId });
     emptyResponse(res, 204);
     return;
@@ -1784,6 +1873,10 @@ const server = createServer(async (req, res) => {
     const slug = decodeURIComponent(
       url.pathname.slice("/api/v1/canonical-words/".length),
     );
+    if (cookies.e2e_saved_words_fixture === "punctuation-reauth" && slug === "pour?#") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
     const state = getSessionState(cookies);
     if (consumeReadFailureFixture(state, cookies, "discover")) {
       logLine(req, 500, {
@@ -1803,6 +1896,52 @@ const server = createServer(async (req, res) => {
       logLine(req, 404, { slug });
       jsonResponse(res, 404, { error: "not_found", slug });
       return;
+    }
+    if (
+      ["library", "canonical-without-list"].includes(
+        cookies.e2e_saved_words_fixture,
+      ) &&
+      slug === "pour"
+    ) {
+      response.word.meanings = response.word.meanings.map((meaning) =>
+        meaning.id === "mean-pour"
+          ? {
+              ...meaning,
+              saved: true,
+              userWordId: "e2e-library-user-word-11",
+              reviewState: "due",
+            }
+          : meaning,
+      );
+    }
+    if (cookies.e2e_saved_words_fixture === "library" && slug === "bank") {
+      response.word.meanings = response.word.meanings.map((meaning) => ({
+        ...meaning,
+        saved: true,
+        userWordId:
+          meaning.id === "mean-bank-river"
+            ? "e2e-library-bank-river"
+            : "e2e-library-bank-money",
+        reviewState: "due",
+      }));
+    }
+    if (cookies.e2e_saved_words_fixture === "library" && slug === "later-word") {
+      response.word.meanings = response.word.meanings.map((meaning) => ({
+        ...meaning,
+        saved: true,
+        userWordId: "e2e-library-user-word-12",
+        reviewState: "due",
+      }));
+    }
+    response.word.meanings = response.word.meanings.map((meaning) =>
+      state.libraryRemovedMeaningIds.has(meaning.id)
+        ? { ...meaning, saved: false, userWordId: undefined, reviewState: null }
+        : meaning,
+    );
+    for (const meaning of response.word.meanings) {
+      if (meaning.userWordId) {
+        state.feedbackTargets.set(meaning.userWordId, response.word.text);
+      }
     }
     logLine(req, 200, { slug });
     jsonResponse(res, 200, response);
