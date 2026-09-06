@@ -85,7 +85,7 @@ export function SavedVocabularyList({
                   ? "saved-vocabulary-first-appended"
                   : undefined
               }
-              href={`/discover/saved/${item.wordSlug}?meaning=${encodeURIComponent(item.meaningId)}`}
+              href={`/discover/saved/${encodeURIComponent(item.wordSlug)}?meaning=${encodeURIComponent(item.meaningId)}`}
               className="block rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)] shadow-sm hover:border-primary-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary-600"
             >
               <p className="wrap-break-word text-lg font-semibold text-neutral-900">

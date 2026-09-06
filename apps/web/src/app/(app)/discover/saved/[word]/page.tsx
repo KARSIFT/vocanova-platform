@@ -15,7 +15,13 @@ export default async function SavedWordPage({
   params: Promise<{ word: string }>;
   searchParams: Promise<{ meaning?: string }>;
 }) {
-  const { word } = await params;
+  const { word: wordSegment } = await params;
+  let word: string;
+  try {
+    word = decodeURIComponent(wordSegment);
+  } catch {
+    notFound();
+  }
   const { meaning: meaningId } = await searchParams;
   const client = await createServerApiClient();
   let canonical;
@@ -25,7 +31,7 @@ export default async function SavedWordPage({
     if (error instanceof ApiResponseError && error.status === 404) notFound();
     requireAuthRedirect(
       error,
-      `/discover/saved/${word}?meaning=${encodeURIComponent(meaningId ?? "")}`,
+      `/discover/saved/${encodeURIComponent(word)}?meaning=${encodeURIComponent(meaningId ?? "")}`,
     );
   }
   if (!meaningId) notFound();

@@ -1488,7 +1488,9 @@ const server = createServer(async (req, res) => {
       return;
     }
     const data =
-      cookies.e2e_saved_words_fixture === "truncated-page"
+      cookies.e2e_saved_words_fixture === "punctuation-reauth"
+        ? { items: [{ ...SAVED_LIBRARY_PAGE_TWO[0], wordSlug: "pour?#" }], nextCursor: undefined }
+      : cookies.e2e_saved_words_fixture === "truncated-page"
         ? TRUNCATED_SAVED_WORDS_RESPONSE
         : cookies.e2e_saved_words_fixture === "long-content"
           ? LONG_SAVED_WORDS_RESPONSE
@@ -1503,7 +1505,7 @@ const server = createServer(async (req, res) => {
                 }
               : url.searchParams.get("after")
               ? { items: SAVED_LIBRARY_PAGE_TWO.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: undefined }
-              : { items: TRUNCATED_SAVED_WORDS_RESPONSE.items, nextCursor: "e2e-library-page-2" }
+              : { items: TRUNCATED_SAVED_WORDS_RESPONSE.items.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: "e2e-library-page-2" }
           : cookies.e2e_home_fixture !== "new-learner" &&
               cookies.e2e_home_fixture
             ? HOME_PRACTICE_SAVED_WORDS_RESPONSE
@@ -1854,6 +1856,10 @@ const server = createServer(async (req, res) => {
     const slug = decodeURIComponent(
       url.pathname.slice("/api/v1/canonical-words/".length),
     );
+    if (cookies.e2e_saved_words_fixture === "punctuation-reauth" && slug === "pour?#") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
     const state = getSessionState(cookies);
     if (consumeReadFailureFixture(state, cookies, "discover")) {
       logLine(req, 500, {
@@ -1902,6 +1908,11 @@ const server = createServer(async (req, res) => {
         reviewState: "due",
       }));
     }
+    response.word.meanings = response.word.meanings.map((meaning) =>
+      state.libraryRemovedMeaningIds.has(meaning.id)
+        ? { ...meaning, saved: false, userWordId: undefined, reviewState: "not_reviewing" }
+        : meaning,
+    );
     logLine(req, 200, { slug });
     jsonResponse(res, 200, response);
     return;

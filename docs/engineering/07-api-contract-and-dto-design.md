@@ -27,7 +27,9 @@ validates it again before navigating. Missing or unsupported paths fall back to
 protected app routes under the configured app base origin. External origins,
 credentials, backslashes, control characters and unsupported routes are not
 accepted through this local-route extension. No return path changes session or
-token semantics.
+token semantics. Saved-word detail return paths preserve an encoded word segment and
+its meaning query through sign-in. Encoded question marks and hashes stay inside that
+segment; encoded separators, control characters, and nested encodings are rejected.
 
 ## DTO and response conventions
 

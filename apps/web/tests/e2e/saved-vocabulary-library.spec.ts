@@ -1,4 +1,17 @@
+import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
+
+test.beforeEach(async ({ context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    {
+      name: "vocanova_session",
+      value: `saved-library-${randomUUID()}`,
+      url: baseURL,
+    },
+  ]);
+});
 
 test("loads later saved vocabulary pages and retains earlier items when a page retry fails", async ({
   page,
@@ -190,6 +203,10 @@ test("keeps a saved meaning until a retry succeeds, then refreshes the library",
   await expect(
     page.getByText("a financial institution", { exact: true }),
   ).toBeVisible();
+  await page.goto("/discover/saved/bank?meaning=mean-bank-river");
+  await expect(
+    page.getByRole("heading", { name: "Journey item not found", level: 1 }),
+  ).toBeVisible();
 });
 
 test("keeps keyboard focus and announces the end after an empty final page", async ({
@@ -219,4 +236,52 @@ test("keeps keyboard focus and announces the end after an empty final page", asy
   await expect(page.getByRole("status")).toHaveText(
     "All saved words are shown.",
   );
+});
+
+test("removes a first-page item from the library after reloading", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "library", url: baseURL },
+    { name: "vocanova_csrf", value: "library-reload-csrf", url: baseURL },
+  ]);
+  await page.goto("/discover/saved");
+  await expect(page.getByText("arrival", { exact: true })).toBeVisible();
+  const response = await page.request.delete(
+    `http://127.0.0.1:${process.env.MOCK_API_PORT ?? "8103"}/api/v1/user-words/e2e-preview-meaning-01`,
+    { headers: { "X-CSRF-Token": "library-reload-csrf" } },
+  );
+  expect(response.status()).toBe(204);
+  await page.reload();
+  await expect(page.getByText("arrival", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("baggage", { exact: true })).toBeVisible();
+});
+
+test("preserves encoded word punctuation and meaning through server reauthentication", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    {
+      name: "e2e_saved_words_fixture",
+      value: "punctuation-reauth",
+      url: baseURL,
+    },
+  ]);
+  await page.goto("/discover/saved");
+  const link = page.getByRole("link", { name: /pour/ });
+  await expect(link).toHaveAttribute(
+    "href",
+    "/discover/saved/pour%3F%23?meaning=mean-pour",
+  );
+  await link.click();
+  await expect(page).toHaveURL(/\/signin\?/);
+  const returnTo = new URL(page.url()).searchParams.get("returnTo");
+  expect(returnTo).toBe("/discover/saved/pour%3F%23?meaning=mean-pour");
+  await expect(page.getByRole("heading", { name: /sign in/i })).toBeVisible();
 });
