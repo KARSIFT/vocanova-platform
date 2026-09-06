@@ -1148,6 +1148,35 @@ describe("identity and account parity", () => {
     }
   });
 
+  it("preserves encoded saved-word segments through magic links and OAuth", async () => {
+    const service = identityService();
+    for (const [index, path] of [
+      "/discover/saved/repeat%3F?meaning=meaning-1",
+      "/discover/saved/topic%23tag?meaning=meaning-2",
+    ].entries()) {
+      await service.requestMagicLink(
+        `encoded-${index}@example.test`,
+        `encoded-magic-${index}`,
+        path,
+      );
+      expect(messages.at(-1)?.text).toContain(
+        new URLSearchParams({ returnTo: path }).toString(),
+      );
+      const returnUrl = `http://127.0.0.1:3000${path}`;
+      const started = await service.startOAuth(
+        returnUrl,
+        `encoded-oauth-${index}`,
+      );
+      const finished = await service.finishOAuth(
+        "valid-code",
+        started.state,
+        started.state,
+        `encoded-oauth-${index}`,
+      );
+      expect(finished.returnUrl).toBe(returnUrl);
+    }
+  });
+
   it("carries a supported magic-link return query and falls back for invalid input", async () => {
     const service = identityService();
     await service.requestMagicLink(
@@ -1172,6 +1201,9 @@ describe("identity and account parity", () => {
       ["//evil.example.test/home", "/home"],
       ["https://evil.example.test/home", "/home"],
       ["/discover\\escape", "/home"],
+      ["/discover/saved/word%2Fother", "/home"],
+      ["/discover/saved/word%5Cother", "/home"],
+      ["/discover/saved/word%252Fother", "/home"],
       ["/unknown", "/home"],
     ] as const) {
       const response = await app.request(

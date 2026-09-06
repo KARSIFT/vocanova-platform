@@ -717,9 +717,13 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
       graceDayBalance: 1,
     });
     expect(progress.completionHistory).toEqual([
-      { localDate: today, completed: true },
-      { localDate: addDays(today, -1), completed: true },
-      { localDate: addDays(today, -2), completed: true },
+      { localDate: today, completed: true, status: "completed" },
+      {
+        localDate: addDays(today, -1),
+        completed: true,
+        status: "protected",
+      },
+      { localDate: addDays(today, -2), completed: true, status: "completed" },
     ]);
     const protectedDay = await env.DB.prepare(
       "SELECT status, grace_applied FROM daily_mission_snapshots WHERE user_id = ?1 AND local_date = ?2",
@@ -727,6 +731,37 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
       .bind(USER, addDays(today, -1))
       .first<{ status: string; grace_applied: number }>();
     expect(protectedDay).toEqual({ status: "protected", grace_applied: 1 });
+  });
+
+  it("returns each persisted mission status while retaining completion compatibility", async () => {
+    const today = "2026-08-22";
+    const repository = new D1MissionsRepository(
+      env.DB,
+      () => new Date("2026-08-22T12:00:00.000Z"),
+    );
+    await env.DB.batch([
+      mission(today, "open", NOW),
+      mission(addDays(today, -1), "missed", NOW),
+      mission(addDays(today, -2), "protected", NOW),
+      mission(addDays(today, -3), "completed", NOW),
+    ]);
+
+    await expect(repository.getProgress(USER, "UTC")).resolves.toMatchObject({
+      completionHistory: [
+        { localDate: today, status: "open", completed: false },
+        { localDate: addDays(today, -1), status: "missed", completed: false },
+        {
+          localDate: addDays(today, -2),
+          status: "protected",
+          completed: true,
+        },
+        {
+          localDate: addDays(today, -3),
+          status: "completed",
+          completed: true,
+        },
+      ],
+    });
   });
 });
 
