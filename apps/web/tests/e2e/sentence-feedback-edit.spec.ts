@@ -58,6 +58,10 @@ test("clears feedback for an edited sentence and accepts a new submission", asyn
       response.request().method() === "POST",
   );
   await page.getByRole("button", { name: "Report a problem" }).click();
+  await page
+    .getByRole("radio", { name: "The feedback is irrelevant" })
+    .check();
+  await page.getByRole("button", { name: "Send report" }).click();
 
   const replacement = "I pour water every morning.";
   await sentenceInput.fill(replacement);

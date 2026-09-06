@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import { SentenceFeedbackResult } from "@vocanova/api-client";
+import type { FeedbackReportClassification } from "@vocanova/api-client";
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
@@ -37,6 +38,26 @@ const PRIVACY_REMINDER_COPY =
 const RETRY_MESSAGE =
   "Vocanova could not check this sentence right now. Your sentence is still here, so you can try again.";
 
+const REPORT_REASONS: ReadonlyArray<{
+  classification: FeedbackReportClassification;
+  label: string;
+}> = [
+  { classification: "incorrect_correction", label: "The correction is wrong" },
+  {
+    classification: "unclear_explanation",
+    label: "The explanation is unclear",
+  },
+  {
+    classification: "irrelevant_feedback",
+    label: "The feedback is irrelevant",
+  },
+  {
+    classification: "inappropriate_feedback",
+    label: "The feedback is inappropriate",
+  },
+  { classification: "other_quality_problem", label: "Another quality problem" },
+];
+
 export function SentenceFeedback({
   meaningId,
   targetWord,
@@ -60,6 +81,9 @@ export function SentenceFeedback({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [reported, setReported] = useState(false);
+  const [reportFormOpen, setReportFormOpen] = useState(false);
+  const [reportClassification, setReportClassification] =
+    useState<FeedbackReportClassification | null>(null);
   const [reportStatus, setReportStatus] = useState<
     "idle" | "loading" | "error"
   >("idle");
@@ -67,6 +91,9 @@ export function SentenceFeedback({
   const ownerId = useRef(userId);
   const practiceHeadingRef = useRef<HTMLHeadingElement>(null);
   const feedbackResultRef = useRef<HTMLDivElement>(null);
+  const reportTriggerRef = useRef<HTMLButtonElement>(null);
+  const reportFirstReasonRef = useRef<HTMLInputElement>(null);
+  const reportRetryRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (
@@ -85,6 +112,14 @@ export function SentenceFeedback({
   }, [result]);
 
   useEffect(() => {
+    if (reportFormOpen) reportFirstReasonRef.current?.focus();
+  }, [reportFormOpen]);
+
+  useEffect(() => {
+    if (reportStatus === "error") reportRetryRef.current?.focus();
+  }, [reportStatus]);
+
+  useEffect(() => {
     if (!userId) return;
     const previousOwnerId = ownerId.current;
     ownerId.current = userId;
@@ -99,6 +134,8 @@ export function SentenceFeedback({
       setResult(null);
       setErrorMessage(null);
       setReported(false);
+      setReportFormOpen(false);
+      setReportClassification(null);
       setReportStatus("idle");
     }
     const record = readSentenceRecovery(userId);
@@ -148,6 +185,8 @@ export function SentenceFeedback({
     onPendingChange?.(true);
     setErrorMessage(null);
     setReported(false);
+    setReportFormOpen(false);
+    setReportClassification(null);
     setReportStatus("idle");
 
     const client = createApiClient();
@@ -158,6 +197,7 @@ export function SentenceFeedback({
         { headers: { "X-CSRF-Token": csrfToken } },
       );
       setResult(data);
+      setReported(data.reported);
       if (data.errorCode) {
         setErrorMessage(
           data.errorMessage || getDefaultErrorMessage(data, targetWord),
@@ -205,8 +245,21 @@ export function SentenceFeedback({
     }
   }
 
-  async function handleReport() {
-    if (!result?.attemptId) {
+  function openReportForm() {
+    setReportStatus("idle");
+    setReportFormOpen(true);
+  }
+
+  function cancelReport() {
+    setReportFormOpen(false);
+    setReportClassification(null);
+    setReportStatus("idle");
+    requestAnimationFrame(() => reportTriggerRef.current?.focus());
+  }
+
+  async function handleReport(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!result?.attemptId || !reportClassification) {
       return;
     }
 
@@ -223,16 +276,14 @@ export function SentenceFeedback({
     try {
       await client.reportSentenceFeedback(
         result.attemptId,
-        {
-          reason: "Learner reported this feedback via UI",
-          classification: "report",
-        },
+        { classification: reportClassification },
         { headers: { "X-CSRF-Token": csrfToken } },
       );
       if (feedbackVersion.current !== reportVersion) {
         return;
       }
       setReported(true);
+      setReportFormOpen(false);
       setReportStatus("idle");
     } catch (error) {
       if (feedbackVersion.current !== reportVersion) {
@@ -325,6 +376,8 @@ export function SentenceFeedback({
                 setResult(null);
                 setErrorMessage(null);
                 setReported(false);
+                setReportFormOpen(false);
+                setReportClassification(null);
                 setReportStatus("idle");
               }
             }}
@@ -466,28 +519,104 @@ export function SentenceFeedback({
                   >
                     Reported
                   </span>
+                ) : reportFormOpen ? (
+                  <form
+                    onSubmit={handleReport}
+                    className="w-full space-y-[var(--spacing-sm)]"
+                  >
+                    <p role="status" aria-live="polite" className="sr-only">
+                      Choose a reason to report this feedback.
+                    </p>
+                    <fieldset
+                      disabled={reportStatus === "loading"}
+                      aria-describedby={`feedback-report-privacy-${attemptId}`}
+                      className="space-y-[var(--spacing-xs)]"
+                    >
+                      <legend className="text-sm font-medium text-neutral-900">
+                        What was wrong with this feedback?
+                      </legend>
+                      {REPORT_REASONS.map(({ classification, label }) => (
+                        <label
+                          key={classification}
+                          className="flex min-h-[var(--spacing-2xl)] items-center gap-[var(--spacing-sm)] text-sm text-neutral-700"
+                        >
+                          <input
+                            ref={
+                              classification === "incorrect_correction"
+                                ? reportFirstReasonRef
+                                : undefined
+                            }
+                            type="radio"
+                            name={`feedback-report-reason-${attemptId}`}
+                            value={classification}
+                            checked={reportClassification === classification}
+                            onChange={() =>
+                              setReportClassification(classification)
+                            }
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </fieldset>
+                    <p
+                      id={`feedback-report-privacy-${attemptId}`}
+                      className="text-sm text-neutral-600"
+                    >
+                      Your choice is private. Please do not add personal
+                      information.
+                    </p>
+                    {reportStatus === "loading" ? (
+                      <p
+                        role="status"
+                        aria-live="polite"
+                        className="text-sm text-neutral-600"
+                      >
+                        Reporting…
+                      </p>
+                    ) : null}
+                    {reportStatus === "error" ? (
+                      <p
+                        role="alert"
+                        aria-live="polite"
+                        className="text-sm text-red-700"
+                      >
+                        Unable to report. Try again.
+                      </p>
+                    ) : null}
+                    <div className="flex flex-wrap gap-[var(--spacing-sm)]">
+                      <button
+                        ref={
+                          reportStatus === "error" ? reportRetryRef : undefined
+                        }
+                        type="submit"
+                        disabled={
+                          reportStatus === "loading" || !reportClassification
+                        }
+                        aria-busy={reportStatus === "loading"}
+                        className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center px-[var(--spacing-sm)] text-sm font-medium text-neutral-600 underline transition-colors hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {reportStatus === "error" ? "Try again" : "Send report"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={cancelReport}
+                        disabled={reportStatus === "loading"}
+                        className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center px-[var(--spacing-sm)] text-sm font-medium text-neutral-600 underline transition-colors hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
                 ) : (
                   <button
+                    ref={reportTriggerRef}
                     type="button"
-                    onClick={handleReport}
-                    disabled={reportStatus === "loading"}
-                    aria-busy={reportStatus === "loading"}
+                    onClick={openReportForm}
                     className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center px-[var(--spacing-sm)] text-sm font-medium text-neutral-600 underline transition-colors hover:text-neutral-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {reportStatus === "loading"
-                      ? "Reporting..."
-                      : "Report a problem"}
+                    Report a problem
                   </button>
                 )}
-                {reportStatus === "error" ? (
-                  <span
-                    role="alert"
-                    aria-live="polite"
-                    className="text-sm text-red-700"
-                  >
-                    Unable to report. Try again.
-                  </span>
-                ) : null}
               </div>
             </div>
           ) : null}

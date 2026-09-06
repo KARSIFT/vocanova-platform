@@ -6,6 +6,35 @@ export const CRISIS_RESOURCE_TEXT =
   "If you or someone you know is in crisis, please contact your local emergency services or a crisis helpline. In the US, call or text 988 for the Suicide & Crisis Lifeline. You are not alone.";
 
 export type FeedbackStatus = "correct" | "needs_improvement" | "incorrect";
+export const feedbackReportClassifications = [
+  "incorrect_correction",
+  "unclear_explanation",
+  "irrelevant_feedback",
+  "inappropriate_feedback",
+  "other_quality_problem",
+] as const;
+export type FeedbackReportClassification =
+  (typeof feedbackReportClassifications)[number];
+
+// These concise reason strings belong to the Worker. Learner input is limited
+// to the stable classification and never becomes stored report text.
+export const feedbackReportReasons: Readonly<
+  Record<FeedbackReportClassification, string>
+> = {
+  incorrect_correction: "The correction is wrong.",
+  unclear_explanation: "The explanation is unclear.",
+  irrelevant_feedback: "The feedback is irrelevant.",
+  inappropriate_feedback: "The feedback is inappropriate.",
+  other_quality_problem: "Another quality problem.",
+};
+
+export function isFeedbackReportClassification(
+  value: string,
+): value is FeedbackReportClassification {
+  return feedbackReportClassifications.includes(
+    value as FeedbackReportClassification,
+  );
+}
 export type FeedbackSource =
   "word_detail" | "review" | "daily_mission" | "free_practice";
 

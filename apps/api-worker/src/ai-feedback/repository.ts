@@ -1,7 +1,9 @@
 import {
   AIFeedbackError,
   acceptedForms,
+  feedbackReportReasons,
   type FeedbackSource,
+  type FeedbackReportClassification,
   type FeedbackTarget,
   type ProviderFeedback,
   type SentenceFeedbackResult,
@@ -372,20 +374,13 @@ export class D1AIFeedbackRepository {
   async report(
     userId: string,
     attemptId: string,
-    reason: string,
-    classification?: string,
+    classification: FeedbackReportClassification,
   ): Promise<void> {
-    if (
-      !reason.trim() ||
-      reason.length > 200 ||
-      (classification?.length ?? 0) > 100
-    )
-      throw new AIFeedbackError("invalid_report");
     const owner = await this.database
       .prepare(
         `SELECT s.user_id FROM ai_feedback_attempts a
          JOIN learner_sentences s ON s.id = a.learner_sentence_id
-         WHERE a.id = ?1 AND s.user_id = ?2`,
+         WHERE a.id = ?1 AND s.user_id = ?2 AND a.status = 'succeeded'`,
       )
       .bind(attemptId, userId)
       .first<{ user_id: string }>();
@@ -401,8 +396,8 @@ export class D1AIFeedbackRepository {
         crypto.randomUUID(),
         attemptId,
         userId,
-        reason.trim(),
-        classification?.trim() || null,
+        feedbackReportReasons[classification],
+        classification,
         this.now().toISOString(),
       )
       .run();

@@ -1866,7 +1866,25 @@ const server = createServer(async (req, res) => {
     if (!checkCsrf(req, cookies, res, logLine)) {
       return;
     }
-    logLine(req, 204, { action: "report-sentence" });
+    let body = {};
+    try {
+      body = await readJsonBody(req);
+    } catch {
+      jsonResponse(res, 422, { title: "Invalid report" });
+      return;
+    }
+    const classifications = new Set([
+      "incorrect_correction",
+      "unclear_explanation",
+      "irrelevant_feedback",
+      "inappropriate_feedback",
+      "other_quality_problem",
+    ]);
+    if (!classifications.has(body.classification)) {
+      jsonResponse(res, 422, { title: "Invalid report" });
+      return;
+    }
+    logLine(req, 204, { action: "report-sentence", classification: body.classification });
     emptyResponse(res, 204);
     return;
   }

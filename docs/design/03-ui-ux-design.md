@@ -61,7 +61,9 @@ not to gate access behind a long survey.
    personal information. Submitting shows a calm pending state (input preserved, no duplicate
    submission possible), then the AI result: status, corrected sentence when needed, short
    explanation, one improvement tip, and a visible "AI can make mistakes" disclaimer plus a
-   report-feedback action. See [09](../engineering/09-ai-features.md) for exact field-level behavior — this is the UI
+   report-feedback action. Opening it presents five radio-button reasons and Send report/Cancel
+   controls; cancel returns focus to the trigger, a failed send preserves the choice and focuses its
+   retry action, and success replaces the form with a polite confirmation. See [09](../engineering/09-ai-features.md) for exact field-level behavior — this is the UI
    shell around that contract, not a re-specification of it.
 5. **Progress** shows Confidence Points total, streak, and a simple day-by-day or week-by-week
    completion view — motivational, not analytical.

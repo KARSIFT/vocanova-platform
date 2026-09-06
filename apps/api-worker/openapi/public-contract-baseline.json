@@ -335,8 +335,8 @@
         { "in": "path", "name": "attemptId", "required": true }
       ],
       "request": {
-        "properties": ["classification", "reason"],
-        "required": ["reason"]
+        "properties": ["classification"],
+        "required": ["classification"]
       },
       "response": null
     },

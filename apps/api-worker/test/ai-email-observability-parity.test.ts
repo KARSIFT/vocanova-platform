@@ -593,32 +593,124 @@ describe("Worker AI feedback parity", () => {
     ).resolves.toEqual({ count: 1 });
   });
 
-  it("records reports for owners only and never exposes cross-user attempt existence", async () => {
+  it("stores one fixed report classification for its owner and preserves the learning result", async () => {
     const service = createService(new ScriptedProvider(() => validFeedback()));
     const submitted = await service.submit(
       USER_A,
       submission("I work every day."),
       "reportable",
     );
+    const before = await Promise.all([
+      env.DB.prepare("SELECT * FROM learner_sentences WHERE id = ?1")
+        .bind(submitted.result.sentenceId)
+        .first<Record<string, string | number | null>>(),
+      env.DB.prepare("SELECT * FROM ai_feedback_attempts WHERE id = ?1")
+        .bind(submitted.result.attemptId)
+        .first<Record<string, string | number | null>>(),
+    ]);
     await service.report(
       USER_A,
       submitted.result.attemptId!,
-      "The explanation was unclear.",
-      "unclear",
+      "unclear_explanation",
     );
     await service.report(
       USER_A,
       submitted.result.attemptId!,
-      "Duplicate report is idempotent.",
-      "unclear",
+      "incorrect_correction",
     );
     await expect(
-      service.report(USER_B, submitted.result.attemptId!, "Cross user"),
+      service.report(
+        USER_B,
+        submitted.result.attemptId!,
+        "unclear_explanation",
+      ),
     ).rejects.toMatchObject({ code: "attempt_not_found" });
-    const reportCount = await env.DB.prepare(
-      "SELECT count(*) AS count FROM ai_feedback_reports",
-    ).first<{ count: number }>();
-    expect(reportCount?.count).toBe(1);
+    await expect(
+      service.report(
+        USER_A,
+        submitted.result.attemptId!,
+        "not_a_classification",
+      ),
+    ).rejects.toMatchObject({ code: "invalid_report" });
+    await expect(
+      env.DB.prepare(
+        "SELECT classification, reason FROM ai_feedback_reports WHERE attempt_id = ?1",
+      )
+        .bind(submitted.result.attemptId)
+        .first<{ classification: string; reason: string }>(),
+    ).resolves.toEqual({
+      classification: "unclear_explanation",
+      reason: "The explanation is unclear.",
+    });
+    await expect(
+      env.DB.prepare(
+        `INSERT INTO ai_feedback_reports
+           (id, attempt_id, user_id, reason, classification, created_at)
+           VALUES (?1, ?2, ?3, ?4, ?5, ?6)`,
+      )
+        .bind(
+          crypto.randomUUID(),
+          submitted.result.attemptId,
+          USER_B,
+          "Arbitrary client text.",
+          "unknown",
+          NOW,
+        )
+        .run(),
+    ).rejects.toThrow("invalid AI feedback report classification");
+    await expect(
+      Promise.all([
+        env.DB.prepare("SELECT * FROM learner_sentences WHERE id = ?1")
+          .bind(submitted.result.sentenceId)
+          .first<Record<string, string | number | null>>(),
+        env.DB.prepare("SELECT * FROM ai_feedback_attempts WHERE id = ?1")
+          .bind(submitted.result.attemptId)
+          .first<Record<string, string | number | null>>(),
+      ]),
+    ).resolves.toEqual(before);
+  });
+
+  it("rejects missing, unknown, and non-succeeded report attempts through the Worker", async () => {
+    const service = createService(new ScriptedProvider(() => validFeedback()));
+    const submitted = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "report-validation",
+    );
+    const app = createApp({
+      createPlatformRepository: () => ({
+        checkHealth: () => Promise.resolve({ database: "ok" }),
+        getMetadata: () => Promise.resolve(null),
+        putMetadata: () => Promise.resolve(),
+      }),
+      createIdentityService: () => fakeIdentity(USER_A),
+      createAIFeedbackService: () => service,
+    });
+    const headers = {
+      "content-type": "application/json",
+      cookie: "vocanova_session=session; vocanova_csrf=csrf-test",
+      "x-csrf-token": "csrf-test",
+    };
+    for (const body of [{}, { classification: "report" }]) {
+      const response = await app.request(
+        `https://worker.test/api/v1/sentence-feedback/${submitted.result.attemptId}/reports`,
+        { method: "POST", headers, body: JSON.stringify(body) },
+        env,
+      );
+      expect(response.status).toBe(422);
+    }
+    await env.DB.prepare(
+      "UPDATE ai_feedback_attempts SET status = 'failed', error_code = 'test_failure' WHERE id = ?1",
+    )
+      .bind(submitted.result.attemptId)
+      .run();
+    await expect(
+      service.report(
+        USER_A,
+        submitted.result.attemptId!,
+        "unclear_explanation",
+      ),
+    ).rejects.toMatchObject({ code: "attempt_not_found" });
   });
 
   it("does not disclose cross-user feedback targets or attempts through HTTP routes", async () => {
@@ -667,7 +759,7 @@ describe("Worker AI feedback parity", () => {
         {
           method: "POST",
           headers,
-          body: JSON.stringify({ reason: "Cross user" }),
+          body: JSON.stringify({ classification: "unclear_explanation" }),
         },
       ),
       env,

@@ -71,7 +71,8 @@ practice is a component, not a route.
   the backend controls scheduling and progress.
 - **Sentence practice**: part of the MVP core loop, reusable component, accessible from Home, Word
   Detail, and Review Completion; AI feedback includes result, correction, explanation, improvement
-  tip (see [09](../engineering/09-ai-features.md) for the full contract).
+  tip, and an optional fixed-reason feedback report (see [09](../engineering/09-ai-features.md) for
+  the full contract).
 - **Progress**: simple, motivation-focused, backend-authoritative.
 - **Settings**: learning preferences, account basics, account deletion with confirmation.
 

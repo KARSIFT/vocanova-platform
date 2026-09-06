@@ -15,7 +15,7 @@ describe("D1 platform repository", () => {
     const migrationCount = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM d1_migrations",
     ).first<{ count: number }>();
-    expect(migrationCount?.count).toBe(11);
+    expect(migrationCount?.count).toBe(12);
     const starterCatalog = await env.DB.prepare(
       `SELECT slug FROM journey_situations
        WHERE slug IN ('travel-airport', 'daily-life-shopping', 'work-meetings', 'study-classroom')

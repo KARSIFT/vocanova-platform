@@ -104,9 +104,22 @@ are not performed by repository CI.
 
 ## 8. Reporting
 
-The current web UI exposes a generic report action. The API stores a bounded `reason` and optional
-bounded `classification` for the owned attempt, then returns `204`. Reports do not replace or alter
-the learning result, and the current schema has no report lifecycle enum.
+Successful feedback offers an optional report form. The learner selects exactly one fixed reason;
+the request body contains only its stable `classification`, never free-form learner text. The Worker
+accepts only these mappings and stores the matching concise, server-owned reason:
+
+| Learner-facing reason         | Classification           | Stored reason                  |
+| ----------------------------- | ------------------------ | ------------------------------ |
+| The correction is wrong       | `incorrect_correction`   | The correction is wrong.       |
+| The explanation is unclear    | `unclear_explanation`    | The explanation is unclear.    |
+| The feedback is irrelevant    | `irrelevant_feedback`    | The feedback is irrelevant.    |
+| The feedback is inappropriate | `inappropriate_feedback` | The feedback is inappropriate. |
+| Another quality problem       | `other_quality_problem`  | Another quality problem.       |
+
+The Worker stores one report for the authenticated owner of a succeeded attempt. A repeated report
+replays safely without adding rows or changing the original learning result, rewards, mission state,
+or feedback status. The report response is `204`; it includes no provider payload, prompt, safety
+label, or learner-supplied text. The schema has no report lifecycle enum.
 
 ## 9. Public feedback result contract
 

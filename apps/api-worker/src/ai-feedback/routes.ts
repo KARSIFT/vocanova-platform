@@ -2,7 +2,10 @@ import { z } from "@hono/zod-openapi";
 import type { OpenAPIHono } from "@hono/zod-openapi";
 
 import { SESSION_COOKIE_SECURITY } from "../http/openapi.js";
-import { AIFeedbackError } from "../domain/ai-feedback.js";
+import {
+  AIFeedbackError,
+  feedbackReportClassifications,
+} from "../domain/ai-feedback.js";
 import type { VocaNovaWorkerEnvironment } from "../http/middleware.js";
 import { ProblemSchema, problemResponse } from "../http/problem.js";
 import {
@@ -20,8 +23,7 @@ const SubmitInput = z.object({
   attemptId: Uuid,
 });
 const ReportInput = z.object({
-  reason: z.string().max(200),
-  classification: z.string().max(100).optional(),
+  classification: z.enum(feedbackReportClassifications),
 });
 const csrfParameter = {
   name: "X-CSRF-Token",
@@ -84,7 +86,6 @@ export function registerAIFeedbackRoutes(
       const telemetry = serviceFactory(context.env).report(
         user.id,
         attemptId,
-        input.reason,
         input.classification,
       );
       context.executionCtx.waitUntil(telemetry);

@@ -230,9 +230,15 @@ export interface SubmitSentenceFeedbackBody {
   attemptId: string;
 }
 
+export type FeedbackReportClassification =
+  | "incorrect_correction"
+  | "unclear_explanation"
+  | "irrelevant_feedback"
+  | "inappropriate_feedback"
+  | "other_quality_problem";
+
 export interface ReportSentenceFeedbackBody {
-  reason: string;
-  classification?: string;
+  classification: FeedbackReportClassification;
 }
 
 export interface Streak {

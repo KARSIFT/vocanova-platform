@@ -8,6 +8,7 @@ import {
   buildProviderTask,
   localSafety,
   parseProviderFeedback,
+  isFeedbackReportClassification,
   validateSentence,
   type FeedbackProvider,
   type ModerationProvider,
@@ -246,10 +247,11 @@ export class AIFeedbackService {
   async report(
     userId: string,
     attemptId: string,
-    reason: string,
-    classification?: string,
+    classification: string,
   ): Promise<void> {
-    await this.repository.report(userId, attemptId, reason, classification);
+    if (!isFeedbackReportClassification(classification))
+      throw new AIFeedbackError("invalid_report");
+    await this.repository.report(userId, attemptId, classification);
     await this.record("report", this.now().getTime());
   }
 
