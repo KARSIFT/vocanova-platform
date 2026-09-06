@@ -12,11 +12,13 @@ import { handleApiError } from "@/lib/session";
 interface SavedVocabularyListProps {
   initialItems: SavedMeaning[];
   initialNextCursor?: string;
+  timezone?: string;
 }
 
 export function SavedVocabularyList({
   initialItems,
   initialNextCursor,
+  timezone,
 }: SavedVocabularyListProps) {
   const [items, setItems] = useState(initialItems);
   const [nextCursor, setNextCursor] = useState(initialNextCursor);
@@ -102,7 +104,7 @@ export function SavedVocabularyList({
                 <p className="mt-[var(--spacing-xs)] text-sm text-neutral-700">
                   {item.nextReviewAt === null || isDueReview(item.nextReviewAt)
                     ? "Due now"
-                    : `Next review: ${formatReviewDateTime(item.nextReviewAt)}`}
+                    : `Next review: ${formatReviewDateTime(item.nextReviewAt, timezone)}`}
                 </p>
               ) : null}
             </Link>

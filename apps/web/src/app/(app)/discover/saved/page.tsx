@@ -1,5 +1,7 @@
 import Link from "next/link";
 
+import { ApiResponseError } from "@vocanova/api-client";
+
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
 import { PageBackLink } from "../../_components/page-back-link";
 
@@ -8,12 +10,22 @@ import { SavedVocabularyList } from "./_components/saved-vocabulary-list";
 export default async function SavedVocabularyPage() {
   const client = await createServerApiClient();
   let response: Awaited<ReturnType<typeof client.listSavedWords>>;
+  const timezonePromise = client
+    .getSettings()
+    .then(({ data }) => data.timezone)
+    .catch((error) => {
+      if (error instanceof ApiResponseError && error.status === 401) {
+        requireAuthRedirect(error, "/discover/saved");
+      }
+      return undefined;
+    });
   try {
     response = await client.listSavedWords({ limit: 10 });
   } catch (error) {
     requireAuthRedirect(error, "/discover/saved");
   }
   const { items, nextCursor } = response.data;
+  const timezone = await timezonePromise;
   return (
     <div className="p-[var(--spacing-lg)]">
       <PageBackLink href="/discover">Back to Journey</PageBackLink>
@@ -27,6 +39,7 @@ export default async function SavedVocabularyPage() {
         <SavedVocabularyList
           initialItems={items}
           initialNextCursor={nextCursor}
+          timezone={timezone}
         />
       ) : (
         <section className="mt-[var(--spacing-lg)] rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)]">
