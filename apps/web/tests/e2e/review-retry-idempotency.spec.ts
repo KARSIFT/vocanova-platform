@@ -19,17 +19,10 @@ test("replays a committed review and retries the due list without duplicate prog
       url: baseURL,
     },
     { name: "vocanova_csrf", value: csrfToken, url: baseURL },
+    { name: "e2e_review_fixture", value: "pagination-retry", url: baseURL },
   ]);
 
   const mockApiPort = process.env.MOCK_API_PORT ?? "8080";
-  const saveResponse = await page.request.post(
-    `http://127.0.0.1:${mockApiPort}/api/v1/user-words`,
-    {
-      data: { meaningId: "mean-pour", source: "journey" },
-      headers: { "X-CSRF-Token": csrfToken },
-    },
-  );
-  expect(saveResponse.ok()).toBeTruthy();
 
   let submissionRequests = 0;
   const submissionFingerprints: Array<{
@@ -97,14 +90,16 @@ test("replays a committed review and retries the due list without duplicate prog
 
   await page.getByRole("button", { name: "Retry loading reviews" }).click();
   await expect(
-    page.getByText("You completed 1 review in this session.", {
-      exact: true,
-    }),
+    page.getByRole("heading", { name: "baggage", level: 2 }),
   ).toBeVisible();
-  expect(submissionRequests).toBe(2);
+  await page.getByRole("button", { name: "Show answer" }).click();
+  await page.getByRole("button", { name: "Good", exact: true }).click();
+  await expect(page.getByText("You completed 2 reviews in this session.", { exact: true })).toBeVisible();
+  expect(submissionRequests).toBe(3);
   expect(dueListRequests).toBe(2);
-  expect(submissionFingerprints).toHaveLength(2);
+  expect(submissionFingerprints).toHaveLength(3);
   expect(submissionFingerprints[1]).toEqual(submissionFingerprints[0]);
+  expect(submissionFingerprints[2]).not.toEqual(submissionFingerprints[0]);
   expect(replayedResponse).toEqual(committedResponse);
 
   const progressResponse = await page.request.get(
@@ -117,5 +112,5 @@ test("replays a committed review and retries the due list without duplicate prog
     `http://127.0.0.1:${mockApiPort}/api/v1/daily-mission`,
   );
   expect(missionResponse.ok()).toBeTruthy();
-  expect((await missionResponse.json()).reviewsCompleted).toBe(1);
+  expect((await missionResponse.json()).reviewsCompleted).toBe(2);
 });

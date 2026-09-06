@@ -37,21 +37,32 @@ interface PendingReviewSubmission {
 interface ReviewSessionProps {
   initialDueWords: DueWord[];
   initialTotalCount: number;
+  reviewTarget: number;
+  reviewsCompleted: number;
 }
 
 export function ReviewSession({
   initialDueWords,
   initialTotalCount,
+  reviewTarget,
+  reviewsCompleted,
 }: ReviewSessionProps) {
+  const initialSessionLimit = Math.min(
+    Math.max(0, reviewTarget - reviewsCompleted),
+    initialTotalCount,
+  );
   const [dueWords, setDueWords] = useState<DueWord[]>(initialDueWords);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [remainingCount, setRemainingCount] = useState(initialTotalCount);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [completed, setCompleted] = useState(false);
+  const [completed, setCompleted] = useState(initialSessionLimit === 0);
   const [awaitingNextPage, setAwaitingNextPage] = useState(false);
   const [completedReviewCount, setCompletedReviewCount] = useState(0);
+  const [totalSuccessfulReviewCount, setTotalSuccessfulReviewCount] =
+    useState(0);
+  const [sessionLimit, setSessionLimit] = useState(initialSessionLimit);
   const [phase, setPhase] = useState<PromptPhase>("prompt");
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<number>(Date.now());
@@ -86,11 +97,11 @@ export function ReviewSession({
     setErrorMessage(null);
     setStartTime(Date.now());
 
-    if (shouldFocusNextCard.current) {
+    if (!completed && !isRefetching && shouldFocusNextCard.current) {
       currentCardHeadingRef.current?.focus();
       shouldFocusNextCard.current = false;
     }
-  }, [currentIndex, dueWords]);
+  }, [completed, currentIndex, dueWords, isRefetching]);
 
   useEffect(() => {
     if (completed && shouldFocusNextCard.current) {
@@ -112,6 +123,7 @@ export function ReviewSession({
           setRemainingCount(data.totalCount);
           setCurrentIndex(0);
         } else {
+          setRemainingCount(0);
           setCompleted(true);
         }
       })
@@ -126,13 +138,37 @@ export function ReviewSession({
       });
   };
 
-  const advance = () => {
+  const advance = (nextCompletedReviewCount: number) => {
+    if (nextCompletedReviewCount >= sessionLimit) {
+      setCompleted(true);
+      return;
+    }
+
     if (currentIndex + 1 < dueWords.length) {
       setCurrentIndex((index) => index + 1);
       return;
     }
 
     loadNextPage();
+  };
+
+  const startOptionalSession = () => {
+    const nextSessionLimit = Math.min(reviewTarget, remainingCount);
+    if (nextSessionLimit === 0) {
+      return;
+    }
+    setCompletedReviewCount(0);
+    setSessionLimit(nextSessionLimit);
+    setCompleted(false);
+    setAwaitingNextPage(false);
+    setErrorMessage(null);
+    shouldFocusNextCard.current = true;
+    const nextCardIndex = sessionLimit > 0 ? currentIndex + 1 : currentIndex;
+    if (nextCardIndex < dueWords.length) {
+      setCurrentIndex(nextCardIndex);
+    } else {
+      loadNextPage();
+    }
   };
 
   const submitAttempt = async (attempt?: {
@@ -199,10 +235,12 @@ export function ReviewSession({
       pendingSubmission.current = null;
       setLastReviewedCard(submission.card);
       setLastReviewAttemptId(data.attemptId);
-      setCompletedReviewCount((count) => count + 1);
+      const nextCompletedReviewCount = completedReviewCount + 1;
+      setCompletedReviewCount(nextCompletedReviewCount);
+      setTotalSuccessfulReviewCount((count) => count + 1);
       setRemainingCount((count) => Math.max(0, count - 1));
       shouldFocusNextCard.current = true;
-      advance();
+      advance(nextCompletedReviewCount);
     } catch (error) {
       setErrorMessage(
         handleApiError(
@@ -219,6 +257,12 @@ export function ReviewSession({
   const isLoading = isSubmitting || isRefetching;
 
   if (dueWords.length === 0 || completed) {
+    const hasRemainingDueWords = remainingCount > 0;
+    const sessionWasStarted = sessionLimit > 0;
+    const canContinue = hasRemainingDueWords && sessionWasStarted;
+    const canStartOptionalPractice = hasRemainingDueWords && !sessionWasStarted;
+    const reviewTargetReached =
+      reviewsCompleted + totalSuccessfulReviewCount >= reviewTarget;
     return (
       <div className="flex flex-col items-center justify-center py-[var(--spacing-2xl)] text-center">
         <h2
@@ -226,21 +270,40 @@ export function ReviewSession({
           tabIndex={-1}
           className="text-xl font-semibold text-neutral-900"
         >
-          You&apos;re all caught up
+          {sessionWasStarted
+            ? "Review session complete"
+            : "Review target reached"}
         </h2>
         <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">
-          No words are due for review right now.
+          {sessionWasStarted
+            ? reviewTargetReached
+              ? "You reached today’s review target."
+              : "No more due words are available for this session."
+            : "You’ve already reached today’s review target."}
         </p>
-        <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-          You completed {completedReviewCount} review
-          {completedReviewCount === 1 ? "" : "s"} in this session.
-        </p>
+        {sessionWasStarted ? (
+          <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
+            You completed {completedReviewCount} review
+            {completedReviewCount === 1 ? "" : "s"} in this session.
+          </p>
+        ) : null}
         <Link
           href="/home"
           className="mt-[var(--spacing-lg)] inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
         >
           Back to Home
         </Link>
+        {canContinue || canStartOptionalPractice ? (
+          <button
+            type="button"
+            onClick={startOptionalSession}
+            className="mt-[var(--spacing-md)] min-h-[var(--spacing-2xl)] rounded-md border border-neutral-300 bg-white px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 transition-colors hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+          >
+            {canStartOptionalPractice
+              ? `Start optional practice (up to ${Math.min(reviewTarget, remainingCount)} reviews)`
+              : `Continue with up to ${Math.min(reviewTarget, remainingCount)} more reviews`}
+          </button>
+        ) : null}
         {lastReviewedCard && lastReviewAttemptId ? (
           // max-w-[28rem] (not max-w-md): see the token-collision note on
           // /onboarding's page.tsx - tokens.generated.css's --spacing-md
@@ -264,6 +327,14 @@ export function ReviewSession({
 
   if (!currentCard) {
     return null;
+  }
+
+  if (isRefetching) {
+    return (
+      <p role="status" className="text-base text-neutral-700">
+        Loading more reviews…
+      </p>
+    );
   }
 
   if (awaitingNextPage) {
@@ -296,10 +367,12 @@ export function ReviewSession({
     <div className="flex flex-col">
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-neutral-600">
-          {remainingCount} word{remainingCount === 1 ? "" : "s"} remaining
+          {Math.max(0, sessionLimit - completedReviewCount)} review
+          {sessionLimit - completedReviewCount === 1 ? "" : "s"} remaining in
+          this session
         </p>
         <p className="text-sm text-neutral-500">
-          Card {currentIndex + 1} of {dueWords.length}
+          Card {completedReviewCount + 1} of {sessionLimit}
         </p>
       </div>
 
