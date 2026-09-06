@@ -34,6 +34,7 @@ export interface CompleteOnboardingBody {
   learningGoal: LearningGoal;
   mainUseCase: MainUseCase;
   dailyReviewTarget: number;
+  timezone?: string;
 }
 
 export interface RequestMagicLinkBody {
@@ -280,6 +281,7 @@ export type AppLanguage = "en";
  * reads this for every editable Settings field.
  */
 export interface Settings {
+  timezone: string;
   dailyReviewTarget: number;
   reviewIntervalPreset: ReviewIntervalPreset;
   appLanguage: AppLanguage;
@@ -296,6 +298,7 @@ export interface Settings {
  * an empty body returns the current state.
  */
 export interface UpdateSettingsBody {
+  timezone?: string;
   dailyReviewTarget?: number;
   reviewIntervalPreset?: ReviewIntervalPreset;
   appLanguage?: AppLanguage;

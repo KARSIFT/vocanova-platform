@@ -4,6 +4,7 @@ import type { OpenAPIHono } from "@hono/zod-openapi";
 import { SESSION_COOKIE_SECURITY } from "../http/openapi.js";
 import type { IdentityUser } from "../domain/identity.js";
 import { IdentityError } from "../domain/identity.js";
+import { isValidTimezone } from "../domain/missions.js";
 import type { VocaNovaWorkerEnvironment } from "../http/middleware.js";
 import { problemResponse } from "../http/problem.js";
 import {
@@ -42,6 +43,12 @@ const OnboardingSchema = z.object({
   ]),
   mainUseCase: z.enum(["daily_life", "work", "travel", "study", "social"]),
   dailyReviewTarget: z.number().int().min(5).max(100),
+  timezone: z
+    .string()
+    .min(1)
+    .max(100)
+    .refine(isValidTimezone, "invalid IANA timezone")
+    .optional(),
 });
 const SettingsUpdateSchema = z
   .object({
@@ -53,6 +60,12 @@ const SettingsUpdateSchema = z
     notificationsEnabled: z.boolean().optional(),
     marketingEmailsEnabled: z.boolean().optional(),
     displayName: z.string().max(80).optional(),
+    timezone: z
+      .string()
+      .min(1)
+      .max(100)
+      .refine(isValidTimezone, "invalid IANA timezone")
+      .optional(),
   })
   .strict();
 const EmailChangeRequestSchema = z.object({ newEmail: EmailSchema });

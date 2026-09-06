@@ -92,6 +92,7 @@ interface FormState {
   learningGoal: LearningGoal | null;
   mainUseCase: MainUseCase | null;
   dailyReviewTarget: number;
+  timezone: string;
 }
 
 const INITIAL_STATE: FormState = {
@@ -100,6 +101,7 @@ const INITIAL_STATE: FormState = {
   learningGoal: null,
   mainUseCase: null,
   dailyReviewTarget: 20,
+  timezone: "UTC",
 };
 
 function isFormComplete(state: FormState): boolean {
@@ -121,6 +123,14 @@ export function OnboardingForm({
     nativeLanguage: defaultNativeLanguage,
   });
   const [status, setStatus] = useState<Status>({ type: "idle" });
+  useEffect(() => {
+    try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (timezone) setState((current) => ({ ...current, timezone }));
+    } catch {
+      // UTC remains usable when device detection is unavailable.
+    }
+  }, []);
   const stepContentRef = useRef<HTMLDivElement>(null);
   const previousStepRef = useRef(step);
 
@@ -180,6 +190,7 @@ export function OnboardingForm({
       learningGoal: state.learningGoal!,
       mainUseCase: state.mainUseCase!,
       dailyReviewTarget: state.dailyReviewTarget,
+      timezone: state.timezone,
     };
     const client = createApiClient();
     try {

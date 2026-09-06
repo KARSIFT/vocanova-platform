@@ -32,7 +32,8 @@ narrowly focused on correct use of the one target word, not general essay gradin
   daily-mission completion, and sentence submissions. Source of truth is an append-only ledger
   (`confidence_point_ledger`), not a mutable balance field — see [05](../engineering/05-database-design.md) §12.
 - **Streak** — advances only after a full daily mission is completed, uses the learner's local
-  timezone, and has a gentle reset (grace days) rather than a hard break. A grace day is earned
+  timezone, and has a gentle reset (grace days) rather than a hard break. Learners can confirm or
+  change their IANA timezone in onboarding and Settings; it sets future daily reset boundaries.
   every 7 completed days, capped at a balance of 2.
 - **Daily Mission ("Today's Mission")** — a stable, timezone-aware daily snapshot of a review target,
   optional new-word target, and optional sentence-practice bonus. Settings changes (e.g. changing

@@ -149,6 +149,7 @@ const LONG_ACCOUNT_EMAIL = `${"a".repeat(64)}@example.test`;
 const LONG_SAVED_CONTENT = "a".repeat(300);
 
 const DEFAULT_SETTINGS = {
+  timezone: "UTC",
   dailyReviewTarget: 20,
   reviewIntervalPreset: "vocanova_default",
   appLanguage: "en",
