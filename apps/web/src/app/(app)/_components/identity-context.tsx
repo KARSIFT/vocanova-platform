@@ -2,25 +2,22 @@
 import { useEffect, useState } from "react";
 
 import { createApiClient } from "@/lib/api";
+import { createIdentityRefresh } from "@/lib/identity-refresh";
 
 export function useAuthenticatedUserId() {
   const [userId, setUserId] = useState<string>();
 
   useEffect(() => {
     let active = true;
-    let requestVersion = 0;
+    const refreshLatestIdentity = createIdentityRefresh((nextUserId) => {
+      if (active) setUserId(nextUserId);
+    });
     function refreshIdentity() {
-      const currentRequest = ++requestVersion;
-      setUserId(undefined);
-      void createApiClient()
-        .getCurrentUser({ cache: "no-store" })
-        .then(({ data }) => {
-          if (active && currentRequest === requestVersion)
-            setUserId(data.userId);
-        })
-        .catch(() => {
-          if (active && currentRequest === requestVersion) setUserId(undefined);
-        });
+      void refreshLatestIdentity(() =>
+        createApiClient()
+          .getCurrentUser({ cache: "no-store" })
+          .then(({ data }) => data.userId),
+      );
     }
     refreshIdentity();
     window.addEventListener("focus", refreshIdentity);
