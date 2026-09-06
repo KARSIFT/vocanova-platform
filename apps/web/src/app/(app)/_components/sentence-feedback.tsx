@@ -1,12 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { SentenceFeedbackResult } from "@vocanova/api-client";
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
-import { handleApiError } from "@/lib/session";
+import { handleApiError, isSessionExpiredError } from "@/lib/session";
+import {
+  clearSentenceRecovery,
+  readSentenceRecovery,
+  saveSentenceRecovery,
+} from "@/lib/sentence-recovery";
+import { useAuthenticatedUserId } from "./identity-context";
 
 interface SentenceFeedbackProps {
   targetWord: string;
@@ -34,7 +41,10 @@ export function SentenceFeedback({
   onFeedbackSubmitted,
   onPendingChange,
 }: SentenceFeedbackProps) {
+  const userId = useAuthenticatedUserId();
+  const pathname = usePathname();
   const [sentence, setSentence] = useState("");
+  const [recovered, setRecovered] = useState<string | null>(null);
   const [result, setResult] = useState<SentenceFeedbackResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -43,6 +53,28 @@ export function SentenceFeedback({
     "idle" | "loading" | "error"
   >("idle");
   const feedbackVersion = useRef(0);
+
+  useEffect(() => {
+    const record = readSentenceRecovery(userId);
+    if (!record) return;
+    if (
+      record.path !== pathname ||
+      record.source !== source ||
+      record.attemptId !== attemptId ||
+      record.targetWord !== targetWord
+    ) {
+      if (record.path === pathname && record.source === source)
+        clearSentenceRecovery(userId);
+      return;
+    }
+    setRecovered(record.sentence);
+  }, [attemptId, pathname, source, targetWord, userId]);
+
+  function discardRecovery() {
+    clearSentenceRecovery(userId);
+    setRecovered(null);
+    setSentence("");
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,10 +105,23 @@ export function SentenceFeedback({
         );
       } else {
         setErrorMessage(null);
+        clearSentenceRecovery(userId);
+        setRecovered(null);
       }
       onFeedbackSubmitted?.(data);
     } catch (error) {
       setResult(null);
+      if (isSessionExpiredError(error)) {
+        saveSentenceRecovery({
+          ownerId: userId ?? "",
+          source,
+          attemptId,
+          path: pathname,
+          targetWord,
+          shortDefinition,
+          sentence,
+        });
+      }
       // A 401 here means the session expired mid-sentence-submission.
       // Never lose the learner's sentence — the textarea stays populated
       // (controlled by component state) and we route to re-auth. The
@@ -167,6 +212,33 @@ export function SentenceFeedback({
         onSubmit={handleSubmit}
         className="mt-[var(--spacing-md)] space-y-[var(--spacing-md)]"
       >
+        {recovered ? (
+          <div
+            role="status"
+            className="rounded-md bg-amber-50 p-[var(--spacing-sm)] text-base text-amber-900"
+          >
+            <p>Your sentence was saved when your session expired.</p>
+            <div className="mt-[var(--spacing-sm)] flex gap-[var(--spacing-sm)]">
+              <button
+                type="button"
+                onClick={() => {
+                  setSentence(recovered);
+                  setRecovered(null);
+                }}
+                className="underline"
+              >
+                Resume sentence
+              </button>
+              <button
+                type="button"
+                onClick={discardRecovery}
+                className="underline"
+              >
+                Discard saved sentence
+              </button>
+            </div>
+          </div>
+        ) : null}
         <div>
           <label
             htmlFor={`sentence-input-${attemptId}`}

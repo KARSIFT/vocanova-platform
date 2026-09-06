@@ -318,9 +318,13 @@
                         "completed"
                       ],
                       "type": "string"
+                    },
+                    "userId": {
+                      "type": "string"
                     }
                   },
                   "required": [
+                    "userId",
                     "onboardingStatus"
                   ],
                   "type": "object"
@@ -943,9 +947,13 @@
                         "completed"
                       ],
                       "type": "string"
+                    },
+                    "userId": {
+                      "type": "string"
                     }
                   },
                   "required": [
+                    "userId",
                     "onboardingStatus"
                   ],
                   "type": "object"

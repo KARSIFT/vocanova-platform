@@ -13,6 +13,7 @@ import {
   SESSION_COOKIE_NAME,
 } from "@/lib/cookies";
 import { handleApiError } from "@/lib/session";
+import { clearSentenceRecovery } from "@/lib/sentence-recovery";
 
 type DeletionPhase = { type: "idle" } | { type: "confirming"; error?: string };
 
@@ -100,6 +101,7 @@ export function AccountDeletionForm() {
       // logout call to flush the requester-side session.
       deleteCookie(CSRF_COOKIE_NAME);
       deleteCookie(SESSION_COOKIE_NAME);
+      clearSentenceRecovery();
       try {
         await client.logout({ headers: { "X-CSRF-Token": csrfToken } });
       } catch {

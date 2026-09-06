@@ -135,6 +135,7 @@ const CSRF_COOKIE_NAME = "vocanova_csrf";
 const SESSION_DEFAULT_VALUE = "test-session-default";
 
 const DEFAULT_USER = {
+  userId: "user-fixture",
   email: "core-loop-fixture@example.test",
   displayName: "Core Loop Fixture",
   emailVerifiedAt: "2026-01-01T00:00:00Z",
@@ -780,6 +781,7 @@ function cloneProgress(progress) {
 
 function buildCurrentUser(state, cookies = {}) {
   return {
+    userId: "user-fixture",
     email:
       cookies.e2e_account_email_fixture === "long"
         ? LONG_ACCOUNT_EMAIL
