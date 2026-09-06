@@ -71,6 +71,18 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     expect(() => localDate(instant, "Mars/Olympus")).toThrow(
       "invalid_timezone",
     );
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Los_Angeles",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: false,
+    });
+    expect(formatter.format(new Date("2026-03-08T09:59:00.000Z"))).toBe(
+      "01:59",
+    );
+    expect(formatter.format(new Date("2026-03-08T10:01:00.000Z"))).toBe(
+      "03:01",
+    );
   });
 
   it("handles a valid timezone change that moves the local date backward", async () => {
