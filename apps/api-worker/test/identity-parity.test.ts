@@ -130,7 +130,11 @@ describe("identity and account parity", () => {
       env,
     );
     expect(consumed.status).toBe(200);
+    const user = await env.DB.prepare("SELECT id FROM users WHERE email = ?")
+      .bind("learner@example.test")
+      .first<{ id: string }>();
     expect(await consumed.json()).toMatchObject({
+      userId: user?.id,
       email: "learner@example.test",
       onboardingStatus: "not_started",
     });
@@ -221,13 +225,17 @@ describe("identity and account parity", () => {
   });
 
   it("authenticates requester scope and enforces double-submit CSRF on settings and onboarding", async () => {
-    const { app, cookie, csrf } = await signedIn("settings@example.test");
+    const session = await signedIn("settings@example.test");
+    const { app, cookie, csrf } = session;
     const me = await app.request(
       "http://worker.test/api/v1/me",
       { headers: { Cookie: cookie } },
       env,
     );
     expect(me.status).toBe(200);
+    await expect(me.json()).resolves.toMatchObject({
+      userId: session.userId,
+    });
 
     const denied = await app.request(
       "http://worker.test/api/v1/settings",
@@ -457,6 +465,240 @@ describe("identity and account parity", () => {
       timezone: "Asia/Tehran",
       reviewTarget: 5,
     });
+  });
+
+  it("persists an onboarding timezone without replacing an existing custom target", async () => {
+    const { app, cookie, csrf, userId } = await signedIn(
+      "timezone-onboarding@example.test",
+    );
+    await app.request(
+      "http://worker.test/api/v1/settings",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
+    await env.DB.prepare(
+      "UPDATE user_settings SET daily_review_target = 35 WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
+    const response = await app.request(
+      "http://worker.test/api/v1/onboarding",
+      withAuth(
+        json({
+          englishLevel: "a2",
+          nativeLanguage: "en",
+          learningGoal: "work",
+          mainUseCase: "work",
+          dailyReviewTarget: 10,
+          timezone: "Asia/Tehran",
+        }),
+        cookie,
+        csrf,
+      ),
+      env,
+    );
+    expect(response.status).toBe(200);
+    await expect(
+      env.DB.prepare(
+        "SELECT timezone, daily_review_target FROM user_settings WHERE user_id = ?1",
+      )
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual({ timezone: "Asia/Tehran", daily_review_target: 35 });
+  });
+
+  it("keeps an existing timezone when a legacy onboarding request omits it", async () => {
+    const { app, cookie, csrf, userId } = await signedIn(
+      "timezone-legacy-onboarding@example.test",
+    );
+    await app.request(
+      "http://worker.test/api/v1/settings",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
+    await env.DB.prepare(
+      "UPDATE user_settings SET timezone = 'America/New_York', daily_review_target = 35 WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
+
+    const response = await app.request(
+      "http://worker.test/api/v1/onboarding",
+      withAuth(
+        json({
+          englishLevel: "a2",
+          nativeLanguage: "en",
+          learningGoal: "work",
+          mainUseCase: "work",
+          dailyReviewTarget: 10,
+        }),
+        cookie,
+        csrf,
+      ),
+      env,
+    );
+
+    expect(response.status).toBe(200);
+    await expect(
+      env.DB.prepare(
+        "SELECT timezone, daily_review_target FROM user_settings WHERE user_id = ?1",
+      )
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual({
+      timezone: "America/New_York",
+      daily_review_target: 35,
+    });
+  });
+
+  it("rejects an invalid timezone without changing other settings", async () => {
+    const { app, cookie, csrf } = await signedIn(
+      "timezone-invalid@example.test",
+    );
+    const response = await app.request(
+      "http://worker.test/api/v1/settings",
+      withAuth(
+        json({ timezone: "Mars/Olympus", dailyReviewTarget: 50 }, "PATCH"),
+        cookie,
+        csrf,
+      ),
+      env,
+    );
+    expect(response.status).toBe(422);
+    const settings = await app.request(
+      "http://worker.test/api/v1/settings",
+      { headers: { Cookie: cookie } },
+      env,
+    );
+    await expect(settings.json()).resolves.toMatchObject({
+      timezone: "UTC",
+      dailyReviewTarget: 20,
+    });
+  });
+
+  it("rejects an invalid onboarding timezone without partially completing onboarding", async () => {
+    const { app, cookie, csrf, userId } = await signedIn(
+      "timezone-invalid-onboarding@example.test",
+    );
+    await app.request(
+      "http://worker.test/api/v1/settings",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
+    await env.DB.prepare(
+      "UPDATE user_settings SET daily_review_target = 35, timezone = 'Asia/Tehran' WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
+
+    const response = await app.request(
+      "http://worker.test/api/v1/onboarding",
+      withAuth(
+        json({
+          englishLevel: "a2",
+          nativeLanguage: "en",
+          learningGoal: "work",
+          mainUseCase: "work",
+          dailyReviewTarget: 10,
+          timezone: "Mars/Olympus",
+        }),
+        cookie,
+        csrf,
+      ),
+      env,
+    );
+
+    expect(response.status).toBe(422);
+    await expect(
+      env.DB.prepare("SELECT onboarding_status FROM users WHERE id = ?1")
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual({ onboarding_status: "not_started" });
+    await expect(
+      env.DB.prepare(
+        "SELECT count(*) AS count FROM user_onboarding_profiles WHERE user_id = ?1",
+      )
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual({ count: 0 });
+    await expect(
+      env.DB.prepare(
+        "SELECT timezone, daily_review_target FROM user_settings WHERE user_id = ?1",
+      )
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual({ timezone: "Asia/Tehran", daily_review_target: 35 });
+  });
+
+  it("changes only the timezone preference without rewriting learning evidence", async () => {
+    const { app, cookie, csrf, userId } = await signedIn(
+      "timezone-evidence@example.test",
+    );
+    const timestamp = now.toISOString();
+    await app.request(
+      "http://worker.test/api/v1/settings",
+      {
+        headers: { Cookie: cookie },
+      },
+      env,
+    );
+    await env.DB.batch([
+      env.DB.prepare(
+        `UPDATE user_settings
+           SET daily_review_target = 35, notifications_enabled = 0,
+               marketing_emails_enabled = 1, timezone = 'UTC'
+           WHERE user_id = ?1`,
+      ).bind(userId),
+      env.DB.prepare(
+        `INSERT INTO daily_mission_snapshots
+           (id, user_id, local_date, timezone, review_target, reviews_completed,
+            policy_version, status, completed_at, grace_applied, created_at, updated_at)
+           VALUES (?1, ?2, '2026-08-22', 'UTC', 5, 5,
+                   'p4-mission-policy-v1', 'completed', ?3, 0, ?3, ?3)`,
+      ).bind(crypto.randomUUID(), userId, timestamp),
+      env.DB.prepare(
+        `INSERT INTO daily_activity_summaries
+           (id, user_id, local_date, timezone, reviews_attempted, reviews_correct,
+            confidence_points_earned, created_at, updated_at)
+           VALUES (?1, ?2, '2026-08-22', 'UTC', 5, 5, 37, ?3, ?3)`,
+      ).bind(crypto.randomUUID(), userId, timestamp),
+      env.DB.prepare(
+        `INSERT INTO confidence_point_ledger
+           (id, user_id, amount, balance_after, reason, source_type, source_id,
+            idempotency_key, metadata_json, occurred_at, created_at, updated_at)
+           VALUES (?1, ?2, 30, 37, 'daily_mission_completed', 'daily_mission',
+                   'mission', 'timezone-evidence', '{"localDate":"2026-08-22"}', ?3, ?3, ?3)`,
+      ).bind(crypto.randomUUID(), userId, timestamp),
+      env.DB.prepare(
+        `INSERT INTO streak_states
+           (id, user_id, current_streak_count, longest_streak_count,
+            last_completed_local_date, last_activity_local_date, timezone, status,
+            created_at, updated_at)
+           VALUES (?1, ?2, 4, 7, '2026-08-22', '2026-08-22', 'UTC', 'active', ?3, ?3)`,
+      ).bind(crypto.randomUUID(), userId, timestamp),
+    ]);
+    const evidenceBefore = await timezoneEvidence(userId);
+
+    const response = await app.request(
+      "http://worker.test/api/v1/settings",
+      withAuth(json({ timezone: "America/New_York" }, "PATCH"), cookie, csrf),
+      env,
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({
+      timezone: "America/New_York",
+      dailyReviewTarget: 35,
+      notificationsEnabled: false,
+      marketingEmailsEnabled: true,
+    });
+    await expect(timezoneEvidence(userId)).resolves.toEqual(evidenceBefore);
   });
 
   it("rejects invalid IANA timezones across mission reads", async () => {
@@ -914,6 +1156,35 @@ describe("identity and account parity", () => {
     }
   });
 
+  it("preserves encoded saved-word segments through magic links and OAuth", async () => {
+    const service = identityService();
+    for (const [index, path] of [
+      "/discover/saved/repeat%3F?meaning=meaning-1",
+      "/discover/saved/topic%23tag?meaning=meaning-2",
+    ].entries()) {
+      await service.requestMagicLink(
+        `encoded-${index}@example.test`,
+        `encoded-magic-${index}`,
+        path,
+      );
+      expect(messages.at(-1)?.text).toContain(
+        new URLSearchParams({ returnTo: path }).toString(),
+      );
+      const returnUrl = `http://127.0.0.1:3000${path}`;
+      const started = await service.startOAuth(
+        returnUrl,
+        `encoded-oauth-${index}`,
+      );
+      const finished = await service.finishOAuth(
+        "valid-code",
+        started.state,
+        started.state,
+        `encoded-oauth-${index}`,
+      );
+      expect(finished.returnUrl).toBe(returnUrl);
+    }
+  });
+
   it("carries a supported magic-link return query and falls back for invalid input", async () => {
     const service = identityService();
     await service.requestMagicLink(
@@ -938,6 +1209,9 @@ describe("identity and account parity", () => {
       ["//evil.example.test/home", "/home"],
       ["https://evil.example.test/home", "/home"],
       ["/discover\\escape", "/home"],
+      ["/discover/saved/word%2Fother", "/home"],
+      ["/discover/saved/word%5Cother", "/home"],
+      ["/discover/saved/word%252Fother", "/home"],
       ["/unknown", "/home"],
     ] as const) {
       const response = await app.request(
@@ -1765,6 +2039,32 @@ describe("identity and account parity", () => {
     );
   });
 });
+
+async function timezoneEvidence(userId: string) {
+  const [mission, activity, points, streak] = await Promise.all([
+    env.DB.prepare(
+      "SELECT local_date, timezone, review_target, reviews_completed, status FROM daily_mission_snapshots WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .first(),
+    env.DB.prepare(
+      "SELECT local_date, timezone, reviews_attempted, reviews_correct, confidence_points_earned FROM daily_activity_summaries WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .first(),
+    env.DB.prepare(
+      "SELECT amount, balance_after, reason, source_type, metadata_json FROM confidence_point_ledger WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .first(),
+    env.DB.prepare(
+      "SELECT current_streak_count, longest_streak_count, last_completed_local_date, last_activity_local_date, timezone, status FROM streak_states WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .first(),
+  ]);
+  return { mission, activity, points, streak };
+}
 
 function identityApp(
   identityConfiguration: IdentityConfig = config,

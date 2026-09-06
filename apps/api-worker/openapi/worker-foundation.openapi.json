@@ -318,9 +318,13 @@
                         "completed"
                       ],
                       "type": "string"
+                    },
+                    "userId": {
+                      "type": "string"
                     }
                   },
                   "required": [
+                    "userId",
                     "onboardingStatus"
                   ],
                   "type": "object"
@@ -480,6 +484,13 @@
                               },
                               "learnerDefinition": {
                                 "type": "string"
+                              },
+                              "nextReviewAt": {
+                                "format": "date-time",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
                               },
                               "partOfSpeech": {
                                 "type": "string"
@@ -943,9 +954,13 @@
                         "completed"
                       ],
                       "type": "string"
+                    },
+                    "userId": {
+                      "type": "string"
                     }
                   },
                   "required": [
+                    "userId",
                     "onboardingStatus"
                   ],
                   "type": "object"
@@ -1025,6 +1040,12 @@
                         "completed"
                       ],
                       "type": "string"
+                    },
+                    "timezone": {
+                      "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                      "maxLength": 100,
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -1102,6 +1123,12 @@
                   "nativeLanguage": {
                     "minLength": 1,
                     "type": "string"
+                  },
+                  "timezone": {
+                    "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -1173,6 +1200,12 @@
                         "completed"
                       ],
                       "type": "string"
+                    },
+                    "timezone": {
+                      "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                      "maxLength": 100,
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -1223,11 +1256,21 @@
                           "localDate": {
                             "format": "date",
                             "type": "string"
+                          },
+                          "status": {
+                            "enum": [
+                              "open",
+                              "completed",
+                              "missed",
+                              "protected"
+                            ],
+                            "type": "string"
                           }
                         },
                         "required": [
                           "localDate",
-                          "completed"
+                          "completed",
+                          "status"
                         ],
                         "type": "object"
                       },
@@ -1366,6 +1409,13 @@
                     },
                     "nextCursor": {
                       "type": "string"
+                    },
+                    "nextReviewAt": {
+                      "format": "date-time",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "totalCount": {
                       "type": "integer"
@@ -1980,6 +2030,12 @@
                         "custom"
                       ],
                       "type": "string"
+                    },
+                    "timezone": {
+                      "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                      "maxLength": 100,
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -1988,7 +2044,8 @@
                     "appLanguage",
                     "notificationsEnabled",
                     "marketingEmailsEnabled",
-                    "displayName"
+                    "displayName",
+                    "timezone"
                   ],
                   "type": "object"
                 }
@@ -2052,6 +2109,12 @@
                       "custom"
                     ],
                     "type": "string"
+                  },
+                  "timezone": {
+                    "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "type": "string"
                   }
                 },
                 "type": "object"
@@ -2094,6 +2157,12 @@
                         "custom"
                       ],
                       "type": "string"
+                    },
+                    "timezone": {
+                      "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                      "maxLength": 100,
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -2102,7 +2171,8 @@
                     "appLanguage",
                     "notificationsEnabled",
                     "marketingEmailsEnabled",
-                    "displayName"
+                    "displayName",
+                    "timezone"
                   ],
                   "type": "object"
                 }
@@ -2281,6 +2351,13 @@
                             "format": "uuid",
                             "type": "string"
                           },
+                          "nextReviewAt": {
+                            "format": "date-time",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "partOfSpeech": {
                             "type": "string"
                           },
@@ -2413,6 +2490,13 @@
                     "meaningId": {
                       "format": "uuid",
                       "type": "string"
+                    },
+                    "nextReviewAt": {
+                      "format": "date-time",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "partOfSpeech": {
                       "type": "string"

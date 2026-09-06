@@ -92,6 +92,7 @@ interface FormState {
   learningGoal: LearningGoal | null;
   mainUseCase: MainUseCase | null;
   dailyReviewTarget: number;
+  timezone: string;
 }
 
 const INITIAL_STATE: FormState = {
@@ -100,6 +101,7 @@ const INITIAL_STATE: FormState = {
   learningGoal: null,
   mainUseCase: null,
   dailyReviewTarget: 20,
+  timezone: "UTC",
 };
 
 function isFormComplete(state: FormState): boolean {
@@ -107,7 +109,8 @@ function isFormComplete(state: FormState): boolean {
     state.englishLevel !== null &&
     state.nativeLanguage.trim().length > 0 &&
     state.learningGoal !== null &&
-    state.mainUseCase !== null
+    state.mainUseCase !== null &&
+    state.timezone.trim().length > 0
   );
 }
 
@@ -121,6 +124,14 @@ export function OnboardingForm({
     nativeLanguage: defaultNativeLanguage,
   });
   const [status, setStatus] = useState<Status>({ type: "idle" });
+  useEffect(() => {
+    try {
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (timezone) setState((current) => ({ ...current, timezone }));
+    } catch {
+      // UTC remains usable when device detection is unavailable.
+    }
+  }, []);
   const stepContentRef = useRef<HTMLDivElement>(null);
   const previousStepRef = useRef(step);
 
@@ -180,6 +191,7 @@ export function OnboardingForm({
       learningGoal: state.learningGoal!,
       mainUseCase: state.mainUseCase!,
       dailyReviewTarget: state.dailyReviewTarget,
+      timezone: state.timezone,
     };
     const client = createApiClient();
     try {
@@ -247,6 +259,9 @@ export function OnboardingForm({
             value={state.dailyReviewTarget}
             onChange={(value) =>
               setState((s) => ({ ...s, dailyReviewTarget: value }))
+            }
+            onTimezoneChange={(timezone) =>
+              setState((s) => ({ ...s, timezone }))
             }
             state={state}
           />
@@ -555,10 +570,12 @@ function MainUseCaseStep({
 function DailyReviewTargetStep({
   value,
   onChange,
+  onTimezoneChange,
   state,
 }: {
   value: number;
   onChange: (next: number) => void;
+  onTimezoneChange: (next: string) => void;
   state: FormState;
 }) {
   return (
@@ -571,6 +588,31 @@ function DailyReviewTargetStep({
           We&apos;ll suggest {value} words a day for review. You can change this
           in Settings any time.
         </p>
+      </div>
+      <div className="space-y-[var(--spacing-sm)]">
+        <label
+          className="block text-base font-medium text-neutral-900"
+          htmlFor="onboarding-timezone"
+        >
+          Timezone
+        </label>
+        <p className="text-base text-neutral-700">
+          Your timezone sets the daily mission reset boundary. You can change it
+          later in Settings.
+        </p>
+        <input
+          id="onboarding-timezone"
+          value={state.timezone}
+          onChange={(event) => onTimezoneChange(event.target.value)}
+          list="onboarding-timezone-suggestions"
+          className="min-h-[var(--spacing-2xl)] w-full rounded-md border border-neutral-300 px-[var(--spacing-sm)] text-base text-neutral-900"
+        />
+        <datalist id="onboarding-timezone-suggestions">
+          <option value="UTC" />
+          <option value="America/New_York" />
+          <option value="Europe/London" />
+          <option value="Asia/Tehran" />
+        </datalist>
       </div>
       <div
         role="radiogroup"

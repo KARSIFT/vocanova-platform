@@ -34,7 +34,11 @@ const Progress = z.object({
   confidencePointsBalance: z.number().int(),
   streak: Streak,
   completionHistory: z.array(
-    z.object({ localDate: z.iso.date(), completed: z.boolean() }),
+    z.object({
+      localDate: z.iso.date(),
+      completed: z.boolean(),
+      status: z.enum(["open", "completed", "missed", "protected"]),
+    }),
   ),
 });
 

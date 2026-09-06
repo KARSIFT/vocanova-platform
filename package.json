@@ -15,6 +15,7 @@
     "cloudflare:build:staging": "node scripts/foundation/cloudflare-builds-staging.mjs build",
     "cloudflare:deploy:staging": "node scripts/foundation/cloudflare-builds-staging.mjs deploy",
     "test:local-stack": "node scripts/foundation/local-stack-smoke.mjs",
+    "test:local-learner-loop": "node scripts/foundation/local-learner-loop.mjs",
     "validate": "pnpm run validate:workspace && pnpm run harness:check && pnpm run architecture:check && pnpm run workflows:check && pnpm run format:check && pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build",
     "ci:foundation": "pnpm run validate:workspace && pnpm run harness:check && pnpm run architecture:check && pnpm run workflows:check && pnpm run format:check && pnpm run build:packages && node --test scripts/foundation/*.test.mjs",
     "ci:packages": "pnpm run lint:packages && pnpm run typecheck:packages && pnpm run build:packages && pnpm --filter @vocanova/api-client test",

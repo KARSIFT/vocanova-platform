@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, deleteCookie, getCookieValue } from "@/lib/cookies";
 import { handleApiError } from "@/lib/session";
+import { clearSentenceRecovery } from "@/lib/sentence-recovery";
 
 export function AppHeader() {
   const logoutButton = useRef<HTMLButtonElement>(null);
@@ -39,6 +40,7 @@ export function AppHeader() {
       await client.logout({
         headers: { "X-CSRF-Token": csrfToken },
       });
+      clearSentenceRecovery();
       deleteCookie(CSRF_COOKIE_NAME);
       window.location.href = "/signin";
     } catch (error) {

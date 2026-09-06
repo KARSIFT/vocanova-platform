@@ -1,4 +1,6 @@
 export interface CurrentUser {
+  /** Stable server-authenticated identity. Older API deployments may omit it. */
+  userId?: string;
   email?: string;
   displayName?: string;
   avatarUrl?: string;
@@ -34,6 +36,7 @@ export interface CompleteOnboardingBody {
   learningGoal: LearningGoal;
   mainUseCase: MainUseCase;
   dailyReviewTarget: number;
+  timezone?: string;
 }
 
 export interface RequestMagicLinkBody {
@@ -97,6 +100,7 @@ export interface WordMeaning {
   saved: boolean;
   userWordId?: string;
   reviewState: WordReviewState | null;
+  nextReviewAt?: string | null;
   examples: WordExample[];
   usageNotes: WordUsageNote[];
 }
@@ -136,6 +140,7 @@ export interface SavedMeaning {
   source: string;
   saved: boolean;
   addedAt: string;
+  nextReviewAt?: string | null;
 }
 
 export interface ListSavedWordsResponse {
@@ -164,6 +169,7 @@ export interface ListDueWordsResponse {
   items: DueWord[];
   nextCursor?: string;
   totalCount: number;
+  nextReviewAt?: string | null;
 }
 
 export interface ReviewAttempt {
@@ -256,6 +262,11 @@ export interface DailyMission {
 export interface CompletionDay {
   localDate: string;
   completed: boolean;
+  /**
+   * Older API deployments may omit this additive field. Callers should use a
+   * neutral completed/not-completed label when it is unavailable.
+   */
+  status?: "open" | "completed" | "missed" | "protected";
 }
 
 export interface Progress {
@@ -280,6 +291,7 @@ export type AppLanguage = "en";
  * reads this for every editable Settings field.
  */
 export interface Settings {
+  timezone: string;
   dailyReviewTarget: number;
   reviewIntervalPreset: ReviewIntervalPreset;
   appLanguage: AppLanguage;
@@ -296,6 +308,7 @@ export interface Settings {
  * an empty body returns the current state.
  */
 export interface UpdateSettingsBody {
+  timezone?: string;
   dailyReviewTarget?: number;
   reviewIntervalPreset?: ReviewIntervalPreset;
   appLanguage?: AppLanguage;

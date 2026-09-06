@@ -135,6 +135,7 @@ const CSRF_COOKIE_NAME = "vocanova_csrf";
 const SESSION_DEFAULT_VALUE = "test-session-default";
 
 const DEFAULT_USER = {
+  userId: "user-fixture",
   email: "core-loop-fixture@example.test",
   displayName: "Core Loop Fixture",
   emailVerifiedAt: "2026-01-01T00:00:00Z",
@@ -149,6 +150,7 @@ const LONG_ACCOUNT_EMAIL = `${"a".repeat(64)}@example.test`;
 const LONG_SAVED_CONTENT = "a".repeat(300);
 
 const DEFAULT_SETTINGS = {
+  timezone: "UTC",
   dailyReviewTarget: 20,
   reviewIntervalPreset: "vocanova_default",
   appLanguage: "en",
@@ -166,13 +168,20 @@ const DEFAULT_PROGRESS = {
     graceDayBalance: 1,
   },
   completionHistory: [
-    { localDate: "2026-01-01", completed: true },
-    { localDate: "2026-01-02", completed: true },
-    { localDate: "2026-01-03", completed: true },
-    { localDate: "2026-01-04", completed: false },
-    { localDate: "2026-01-05", completed: false },
-    { localDate: "2026-01-06", completed: false },
-    { localDate: "2026-01-07", completed: false },
+    { localDate: "2026-01-07", completed: true, status: "completed" },
+    { localDate: "2026-01-04", completed: true, status: "protected" },
+    { localDate: "2025-12-31", completed: false, status: "missed" },
+    { localDate: "2025-12-28", completed: false, status: "open" },
+  ],
+};
+
+const SEVEN_SNAPSHOT_PROGRESS = {
+  ...DEFAULT_PROGRESS,
+  completionHistory: [
+    ...DEFAULT_PROGRESS.completionHistory,
+    { localDate: "2025-12-20", completed: true, status: "completed" },
+    { localDate: "2025-12-03", completed: false, status: "missed" },
+    { localDate: "2025-11-19", completed: true, status: "protected" },
   ],
 };
 
@@ -185,6 +194,13 @@ const FIRST_MISSION_PROGRESS = {
     graceDayBalance: 0,
   },
   completionHistory: [],
+};
+
+const LEGACY_PROGRESS = {
+  ...DEFAULT_PROGRESS,
+  completionHistory: DEFAULT_PROGRESS.completionHistory.map(
+    ({ localDate, completed }) => ({ localDate, completed }),
+  ),
 };
 
 const DEFAULT_DAILY_MISSION = {
@@ -338,6 +354,11 @@ const TRUNCATED_SAVED_WORDS_RESPONSE = {
   nextCursor: "e2e-saved-words-after-10",
 };
 
+const HOME_PRACTICE_SAVED_WORDS_RESPONSE = {
+  items: TRUNCATED_SAVED_WORDS_RESPONSE.items.slice(0, 2),
+  nextCursor: undefined,
+};
+
 const LONG_SAVED_WORDS_RESPONSE = {
   items: [
     {
@@ -348,6 +369,45 @@ const LONG_SAVED_WORDS_RESPONSE = {
     },
   ],
 };
+
+const SAVED_LIBRARY_PAGE_TWO = [
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[0],
+    userWordId: "e2e-library-user-word-11",
+    meaningId: "mean-pour",
+    wordId: "word-pour",
+    wordSlug: "pour",
+    wordText: "pour",
+    partOfSpeech: "verb",
+    shortDefinition: "to make liquid flow into a container",
+  },
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[1],
+    userWordId: "e2e-library-user-word-12",
+    meaningId: "e2e-library-meaning-12",
+    wordSlug: "later-word",
+    wordText: "later word",
+    shortDefinition: "a saved word from a later page",
+  },
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[0],
+    userWordId: "e2e-library-bank-river",
+    meaningId: "mean-bank-river",
+    wordId: "word-bank",
+    wordSlug: "bank",
+    wordText: "bank",
+    shortDefinition: "land beside a river",
+  },
+  {
+    ...TRUNCATED_SAVED_WORDS_RESPONSE.items[1],
+    userWordId: "e2e-library-bank-money",
+    meaningId: "mean-bank-money",
+    wordId: "word-bank",
+    wordSlug: "bank",
+    wordText: "bank",
+    shortDefinition: "a financial institution",
+  },
+];
 
 const MULTIPLE_CHOICE_DUE_WORDS = [
   {
@@ -397,6 +457,32 @@ const MULTIPLE_CHOICE_DUE_WORDS = [
 ];
 
 const CANONICAL_WORDS = {
+  bank: {
+    id: "word-bank",
+    text: "bank",
+    slug: "bank",
+    wordType: "noun",
+    meanings: [
+      { id: "mean-bank-river", partOfSpeech: "noun", shortDefinition: "land beside a river", saved: false, examples: [], usageNotes: [] },
+      { id: "mean-bank-money", partOfSpeech: "noun", shortDefinition: "a financial institution", saved: false, examples: [], usageNotes: [] },
+    ],
+  },
+  "later-word": {
+    id: "e2e-preview-word-02",
+    text: "later word",
+    slug: "later-word",
+    wordType: "noun",
+    meanings: [
+      {
+        id: "e2e-library-meaning-12",
+        partOfSpeech: "noun",
+        shortDefinition: "a saved word from a later page",
+        saved: false,
+        examples: [],
+        usageNotes: [],
+      },
+    ],
+  },
   pour: {
     id: "word-pour",
     text: "pour",
@@ -426,6 +512,7 @@ const CANONICAL_WORDS = {
     ],
   },
 };
+CANONICAL_WORDS["pour?#"] = CANONICAL_WORDS.pour;
 
 const JOURNEY_SITUATIONS = [
   {
@@ -571,6 +658,7 @@ function buildClearSessionCookie() {
 // --- per-session mutable state ---------------------------------
 
 const sessions = new Map();
+const magicLinkStates = new Map();
 
 function getSessionState(cookies) {
   const sessionId = cookies[SESSION_COOKIE_NAME] ?? SESSION_DEFAULT_VALUE;
@@ -586,6 +674,7 @@ function createInitialState() {
   return {
     onboardingCompleted: true,
     savedMeaningIds: new Set(),
+    libraryRemovedMeaningIds: new Set(),
     // A meaning enters reviewedMeaningIds after a successful
     // review submission. The /api/v1/reviews/due response is
     // `savedMeaningIds - reviewedMeaningIds` so the review
@@ -775,6 +864,10 @@ function cloneProgress(progress) {
 
 function buildCurrentUser(state, cookies = {}) {
   return {
+    userId:
+      cookies.e2e_identity_fixture === "alternate"
+        ? "alternate-user-fixture"
+        : "user-fixture",
     email:
       cookies.e2e_account_email_fixture === "long"
         ? LONG_ACCOUNT_EMAIL
@@ -794,7 +887,28 @@ function buildProgress(state) {
 }
 
 function buildDailyMission(state, cookies = {}) {
+  const homeFixture = cookies.e2e_home_fixture;
   const streak = { ...state.progress.streak };
+  if (homeFixture === "mission-complete") {
+    return {
+      ...state.dailyMission,
+      reviewsCompleted: state.dailyMission.reviewTarget,
+      status: "completed",
+      completedAt: "2026-01-01T12:00:00.000Z",
+      streak,
+    };
+  }
+  if (homeFixture === "sentence-practice-needed") {
+    return {
+      ...state.dailyMission,
+      reviewsCompleted: state.dailyMission.reviewTarget,
+      newWordsCompleted: state.dailyMission.newWordTarget,
+      sentencePracticeTarget: 1,
+      sentencePracticesCompleted: 0,
+      status: "open",
+      streak,
+    };
+  }
   const fixture = cookies.e2e_review_mission_fixture;
   const fixtureMission =
     fixture === "target-three"
@@ -806,6 +920,7 @@ function buildDailyMission(state, cookies = {}) {
           : fixture === "fewer-due-words"
             ? { reviewTarget: 5, reviewsCompleted: 0 }
             : undefined;
+
   return {
     ...state.dailyMission,
     ...fixtureMission,
@@ -1063,6 +1178,7 @@ function applySettingsPatch(settings, patch) {
     "notificationsEnabled",
     "marketingEmailsEnabled",
     "displayName",
+    "timezone",
   ]);
   const result = { ...settings };
   for (const [key, value] of Object.entries(patch ?? {})) {
@@ -1096,7 +1212,22 @@ function applySettingsPatch(settings, patch) {
     error.code = 400;
     throw error;
   }
+  if (result.timezone !== undefined && !isValidTimezone(result.timezone)) {
+    const error = new Error("invalid timezone");
+    error.code = 422;
+    throw error;
+  }
   return result;
+}
+
+function isValidTimezone(timezone) {
+  if (typeof timezone !== "string" || timezone.length === 0) return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: timezone }).format(0);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function logLine(req, status, extra) {
@@ -1239,6 +1370,10 @@ const server = createServer(async (req, res) => {
   // ----- auth (CSRF-exempt) ----------------------------------
 
   if (req.method === "POST" && url.pathname === "/api/v1/auth/magic-links") {
+    const body = await readJsonBody(req);
+    if (typeof body.email === "string") {
+      magicLinkStates.set(body.email.toLowerCase(), getSessionState(cookies));
+    }
     logLine(req, 200);
     jsonResponse(res, 200, {});
     return;
@@ -1248,9 +1383,14 @@ const server = createServer(async (req, res) => {
     req.method === "POST" &&
     url.pathname === "/api/v1/auth/magic-links/consume"
   ) {
+    const body = await readJsonBody(req);
     const sessionValue = generateId("session");
     const csrfValue = generateId("csrf");
-    sessions.set(sessionValue, createInitialState());
+    const state =
+      typeof body.email === "string"
+        ? magicLinkStates.get(body.email.toLowerCase())
+        : undefined;
+    sessions.set(sessionValue, state ?? createInitialState());
     logLine(req, 200, { session: "issued" });
     jsonResponse(
       res,
@@ -1371,6 +1511,11 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 400, { error: "invalid_json" });
       return;
     }
+    if (body.timezone !== undefined && !isValidTimezone(body.timezone)) {
+      logLine(req, 422, { reason: "invalid-timezone" });
+      jsonResponse(res, 422, { error: "invalid timezone" });
+      return;
+    }
     state.onboardingCompleted = true;
     if (typeof body.dailyReviewTarget === "number") {
       // seed rule: only seed dailyReviewTarget when no
@@ -1382,6 +1527,9 @@ const server = createServer(async (req, res) => {
       ) {
         state.settings.dailyReviewTarget = body.dailyReviewTarget;
       }
+    }
+    if (typeof body.timezone === "string") {
+      state.settings.timezone = body.timezone;
     }
     logLine(req, 200, { action: "complete-onboarding" });
     jsonResponse(res, 200, {
@@ -1398,17 +1546,67 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
     const state = getSessionState(cookies);
+    // The canonical saved-detail route must authorize from its canonical
+    // response, rather than depending on a (possibly truncated) saved list.
+    if (cookies.e2e_saved_words_fixture === "canonical-without-list") {
+      logLine(req, 500, { reason: "saved-list-unavailable" });
+      jsonResponse(res, 500, { error: "saved_list_unavailable" });
+      return;
+    }
+    if (cookies.e2e_saved_words_fixture === "saved-list-failure") {
+      jsonResponse(res, 503, { error: "saved_list_unavailable" });
+      return;
+    }
+    if (cookies.e2e_saved_words_fixture === "saved-list-reauth") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
     if (consumeReadFailureFixture(state, cookies, "home")) {
       logLine(req, 500, { reason: "fixture-read-failure", fixture: "home" });
       jsonResponse(res, 500, { error: "fixture_read_failure" });
       return;
     }
     const data =
-      cookies.e2e_saved_words_fixture === "truncated-page"
+      cookies.e2e_saved_words_fixture === "punctuation-reauth"
+        ? { items: [{ ...SAVED_LIBRARY_PAGE_TWO[0], wordSlug: "pour?#" }], nextCursor: undefined }
+        : cookies.e2e_saved_words_fixture === "next-review"
+          ? {
+              items: [
+                {
+                  ...SAVED_LIBRARY_PAGE_TWO[1],
+                  nextReviewAt: "2099-08-22T12:30:00.000Z",
+                },
+              ],
+              nextCursor: undefined,
+            }
+          : cookies.e2e_saved_words_fixture === "no-active-reviews"
+            ? {
+                items: [SAVED_LIBRARY_PAGE_TWO[0]],
+                nextCursor: undefined,
+              }
+      : cookies.e2e_saved_words_fixture === "truncated-page"
         ? TRUNCATED_SAVED_WORDS_RESPONSE
         : cookies.e2e_saved_words_fixture === "long-content"
           ? LONG_SAVED_WORDS_RESPONSE
+          : cookies.e2e_saved_words_fixture === "library"
+            ? url.searchParams.get("limit") === "100"
+              ? {
+                  items: [
+                    ...TRUNCATED_SAVED_WORDS_RESPONSE.items,
+                    ...SAVED_LIBRARY_PAGE_TWO,
+                  ].filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)),
+                  nextCursor: undefined,
+                }
+              : url.searchParams.get("after")
+              ? { items: SAVED_LIBRARY_PAGE_TWO.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: undefined }
+              : { items: TRUNCATED_SAVED_WORDS_RESPONSE.items.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: "e2e-library-page-2" }
+          : cookies.e2e_home_fixture !== "new-learner" &&
+              cookies.e2e_home_fixture
+            ? HOME_PRACTICE_SAVED_WORDS_RESPONSE
           : buildSavedWords(state);
+    for (const item of data.items) {
+      state.feedbackTargets.set(item.userWordId, item.wordText);
+    }
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
@@ -1448,10 +1646,20 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 400, { error: "missing_meaning_id" });
       return;
     }
+    const word = Object.values(CANONICAL_WORDS).find((candidate) =>
+      candidate.meanings.some((meaning) => meaning.id === meaningId),
+    );
+    const meaning = word?.meanings.find(
+      (candidate) => candidate.id === meaningId,
+    );
+    if (!word || !meaning) {
+      logLine(req, 400, { reason: "unknown-meaning-id", meaningId });
+      jsonResponse(res, 400, { error: "unknown_meaning_id" });
+      return;
+    }
     state.savedMeaningIds.add(meaningId);
+    state.libraryRemovedMeaningIds.delete(meaningId);
     logLine(req, 200, { action: "save", meaningId });
-    const word = CANONICAL_WORDS.pour;
-    const meaning = word.meanings.find((m) => m.id === meaningId);
     jsonResponse(res, 200, {
       userWordId: `uw-${meaningId}`,
       meaningId: meaning.id,
@@ -1480,6 +1688,7 @@ const server = createServer(async (req, res) => {
     );
     const state = getSessionState(cookies);
     state.savedMeaningIds.delete(meaningId);
+    state.libraryRemovedMeaningIds.add(meaningId);
     logLine(req, 204, { action: "unsave", meaningId });
     emptyResponse(res, 204);
     return;
@@ -1496,7 +1705,27 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 500, { error: "fixture_read_failure" });
       return;
     }
-    const data = buildDueWords(state, cookies.e2e_review_fixture);
+    const data =
+      cookies.e2e_review_fixture === "next-review"
+        ? {
+            items: [],
+            nextCursor: undefined,
+            totalCount: 0,
+            nextReviewAt: "2099-08-22T12:30:00.000Z",
+          }
+        : cookies.e2e_review_fixture === "no-active-reviews"
+          ? {
+              items: [],
+              nextCursor: undefined,
+              totalCount: 0,
+              nextReviewAt: null,
+            }
+        :
+      cookies.e2e_home_fixture === "reviews-due" ||
+      cookies.e2e_home_fixture === "mission-complete" ||
+      cookies.e2e_home_fixture === "sentence-practice-needed"
+        ? { items: [], nextCursor: undefined, totalCount: 3 }
+        : buildDueWords(state, cookies.e2e_review_fixture);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
@@ -1676,6 +1905,10 @@ const server = createServer(async (req, res) => {
     const progress =
       cookies.e2e_progress_fixture === "first-mission"
         ? FIRST_MISSION_PROGRESS
+        : cookies.e2e_progress_fixture === "seven-snapshots"
+          ? SEVEN_SNAPSHOT_PROGRESS
+        : cookies.e2e_progress_fixture === "legacy-history"
+          ? LEGACY_PROGRESS
         : buildProgress(state);
     logLine(req, 200, { reviewedCount: state.reviewedCount });
     jsonResponse(res, 200, progress);
@@ -1734,6 +1967,20 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 404, { error: "not_found", slug });
       return;
     }
+    if (
+      cookies.e2e_saved_words_fixture === "library" &&
+      slug === "ordering-at-a-cafe"
+    ) {
+      response.meanings.push({
+        meaningId: "mean-bank-river",
+        wordId: "word-bank",
+        wordSlug: "bank",
+        wordText: "bank",
+        partOfSpeech: "noun",
+        shortDefinition: "land beside a river",
+        saved: true,
+      });
+    }
     logLine(req, 200, { slug });
     jsonResponse(res, 200, response);
     return;
@@ -1746,6 +1993,10 @@ const server = createServer(async (req, res) => {
     const slug = decodeURIComponent(
       url.pathname.slice("/api/v1/canonical-words/".length),
     );
+    if (cookies.e2e_saved_words_fixture === "punctuation-reauth" && slug === "pour?#") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
     const state = getSessionState(cookies);
     if (consumeReadFailureFixture(state, cookies, "discover")) {
       logLine(req, 500, {
@@ -1765,6 +2016,61 @@ const server = createServer(async (req, res) => {
       logLine(req, 404, { slug });
       jsonResponse(res, 404, { error: "not_found", slug });
       return;
+    }
+    if (
+      ["library", "canonical-without-list"].includes(
+        cookies.e2e_saved_words_fixture,
+      ) &&
+      ["pour", "pour?#"].includes(slug)
+    ) {
+      response.word.meanings = response.word.meanings.map((meaning) =>
+        meaning.id === "mean-pour"
+          ? {
+              ...meaning,
+              saved: true,
+              userWordId: "e2e-library-user-word-11",
+              reviewState: "due",
+            }
+          : meaning,
+      );
+    }
+    if (cookies.e2e_saved_words_fixture === "library" && slug === "bank") {
+      response.word.meanings = response.word.meanings.map((meaning) => ({
+        ...meaning,
+        saved: true,
+        userWordId:
+          meaning.id === "mean-bank-river"
+            ? "e2e-library-bank-river"
+            : "e2e-library-bank-money",
+        reviewState: "due",
+      }));
+    }
+    if (cookies.e2e_saved_words_fixture === "next-review" && slug === "later-word") {
+      response.word.meanings = response.word.meanings.map((meaning) => ({
+        ...meaning,
+        saved: true,
+        userWordId: "e2e-library-user-word-12",
+        reviewState: "learning",
+        nextReviewAt: "2099-08-22T12:30:00.000Z",
+      }));
+    }
+    if (cookies.e2e_saved_words_fixture === "library" && slug === "later-word") {
+      response.word.meanings = response.word.meanings.map((meaning) => ({
+        ...meaning,
+        saved: true,
+        userWordId: "e2e-library-user-word-12",
+        reviewState: "due",
+      }));
+    }
+    response.word.meanings = response.word.meanings.map((meaning) =>
+      state.libraryRemovedMeaningIds.has(meaning.id)
+        ? { ...meaning, saved: false, userWordId: undefined, reviewState: null }
+        : meaning,
+    );
+    for (const meaning of response.word.meanings) {
+      if (meaning.userWordId) {
+        state.feedbackTargets.set(meaning.userWordId, response.word.text);
+      }
     }
     logLine(req, 200, { slug });
     jsonResponse(res, 200, response);
@@ -1820,7 +2126,7 @@ const server = createServer(async (req, res) => {
     try {
       state.settings = applySettingsPatch(state.settings, body);
     } catch (error) {
-      const status = error.code === 400 ? 400 : 500;
+      const status = error.code === 422 ? 422 : error.code === 400 ? 400 : 500;
       logLine(req, status, { reason: "invalid-settings-patch" });
       jsonResponse(res, status, { error: error.message });
       return;

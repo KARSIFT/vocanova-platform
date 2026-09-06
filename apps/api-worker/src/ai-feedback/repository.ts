@@ -40,7 +40,7 @@ export class D1AIFeedbackRepository {
     attemptId: string,
   ): Promise<FeedbackTarget> {
     let row: Row | null = null;
-    if (source === "word_detail") {
+    if (source === "word_detail" || source === "daily_mission") {
       row = await this.database
         .prepare(
           `SELECT w.id AS word_id, m.id AS meaning_id, uw.id AS user_word_id,

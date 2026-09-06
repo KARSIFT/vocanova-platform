@@ -1,12 +1,19 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { SentenceFeedbackResult } from "@vocanova/api-client";
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
-import { handleApiError } from "@/lib/session";
+import { handleApiError, isSessionExpiredError } from "@/lib/session";
+import {
+  clearSentenceRecovery,
+  readSentenceRecovery,
+  saveSentenceRecovery,
+} from "@/lib/sentence-recovery";
+import { useAuthenticatedUserId } from "./identity-context";
 
 interface SentenceFeedbackProps {
   targetWord: string;
@@ -14,6 +21,9 @@ interface SentenceFeedbackProps {
   source: "word_detail" | "review" | "daily_mission" | "free_practice";
   shortDefinition?: string;
   onFeedbackSubmitted?: (result: SentenceFeedbackResult) => void;
+  onPendingChange?: (isPending: boolean) => void;
+  clearMismatchedRecovery?: boolean;
+  recoveryAttemptIds?: string[];
 }
 
 const AI_LIMITATION_COPY =
@@ -31,8 +41,18 @@ export function SentenceFeedback({
   source,
   shortDefinition,
   onFeedbackSubmitted,
+  onPendingChange,
+  clearMismatchedRecovery = false,
+  recoveryAttemptIds,
 }: SentenceFeedbackProps) {
+  const userId = useAuthenticatedUserId();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnPath = searchParams.size
+    ? `${pathname}?${searchParams.toString()}`
+    : pathname;
   const [sentence, setSentence] = useState("");
+  const [recovered, setRecovered] = useState<string | null>(null);
   const [result, setResult] = useState<SentenceFeedbackResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -41,6 +61,58 @@ export function SentenceFeedback({
     "idle" | "loading" | "error"
   >("idle");
   const feedbackVersion = useRef(0);
+  const ownerId = useRef(userId);
+
+  useEffect(() => {
+    if (!userId) return;
+    const previousOwnerId = ownerId.current;
+    ownerId.current = userId;
+    if (
+      previousOwnerId !== userId &&
+      previousOwnerId !== undefined &&
+      userId !== undefined
+    ) {
+      feedbackVersion.current += 1;
+      setSentence("");
+      setRecovered(null);
+      setResult(null);
+      setErrorMessage(null);
+      setReported(false);
+      setReportStatus("idle");
+    }
+    const record = readSentenceRecovery(userId);
+    if (!record) return;
+    if (
+      record.path !== returnPath ||
+      record.source !== source ||
+      record.attemptId !== attemptId ||
+      record.targetWord !== targetWord
+    ) {
+      if (
+        clearMismatchedRecovery &&
+        record.path === returnPath &&
+        record.source === source &&
+        (!recoveryAttemptIds || !recoveryAttemptIds.includes(record.attemptId))
+      )
+        clearSentenceRecovery(userId);
+      return;
+    }
+    setRecovered(record.sentence);
+  }, [
+    attemptId,
+    clearMismatchedRecovery,
+    returnPath,
+    source,
+    targetWord,
+    userId,
+    recoveryAttemptIds,
+  ]);
+
+  function discardRecovery() {
+    clearSentenceRecovery(userId);
+    setRecovered(null);
+    setSentence("");
+  }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,6 +124,7 @@ export function SentenceFeedback({
     }
 
     setIsLoading(true);
+    onPendingChange?.(true);
     setErrorMessage(null);
     setReported(false);
     setReportStatus("idle");
@@ -70,10 +143,31 @@ export function SentenceFeedback({
         );
       } else {
         setErrorMessage(null);
+        const recovery = readSentenceRecovery(userId);
+        if (
+          recovery?.path === returnPath &&
+          recovery.source === source &&
+          recovery.attemptId === attemptId &&
+          recovery.targetWord === targetWord
+        ) {
+          clearSentenceRecovery(userId);
+        }
+        setRecovered(null);
       }
       onFeedbackSubmitted?.(data);
     } catch (error) {
       setResult(null);
+      if (isSessionExpiredError(error)) {
+        saveSentenceRecovery({
+          ownerId: userId ?? "",
+          source,
+          attemptId,
+          path: returnPath,
+          targetWord,
+          shortDefinition,
+          sentence,
+        });
+      }
       // A 401 here means the session expired mid-sentence-submission.
       // Never lose the learner's sentence — the textarea stays populated
       // (controlled by component state) and we route to re-auth. The
@@ -86,6 +180,7 @@ export function SentenceFeedback({
       );
     } finally {
       setIsLoading(false);
+      onPendingChange?.(false);
     }
   }
 
@@ -163,6 +258,33 @@ export function SentenceFeedback({
         onSubmit={handleSubmit}
         className="mt-[var(--spacing-md)] space-y-[var(--spacing-md)]"
       >
+        {recovered ? (
+          <div
+            role="status"
+            className="rounded-md bg-amber-50 p-[var(--spacing-sm)] text-base text-amber-900"
+          >
+            <p>Your sentence was saved when your session expired.</p>
+            <div className="mt-[var(--spacing-sm)] flex flex-wrap gap-[var(--spacing-sm)]">
+              <button
+                type="button"
+                onClick={() => {
+                  setSentence(recovered);
+                  setRecovered(null);
+                }}
+                className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center px-[var(--spacing-sm)] text-base font-medium underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+              >
+                Resume sentence
+              </button>
+              <button
+                type="button"
+                onClick={discardRecovery}
+                className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center px-[var(--spacing-sm)] text-base font-medium underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+              >
+                Discard saved sentence
+              </button>
+            </div>
+          </div>
+        ) : null}
         <div>
           <label
             htmlFor={`sentence-input-${attemptId}`}

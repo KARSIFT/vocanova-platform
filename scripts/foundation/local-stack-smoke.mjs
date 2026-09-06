@@ -93,7 +93,7 @@ function boundedOutput(value) {
   return String(value ?? "").slice(-16_384);
 }
 
-function runPreparation(plan, spawnSyncImpl = spawnSync) {
+export function prepareDisposableLocalStack(plan, spawnSyncImpl = spawnSync) {
   for (const step of plan.preparation) {
     const result = spawnSyncImpl(step.command, [...step.args], {
       cwd: step.cwd,
@@ -114,7 +114,10 @@ function runPreparation(plan, spawnSyncImpl = spawnSync) {
   }
 }
 
-function runMigrations(stateDirectory, runMigration = runLocalD1Migrations) {
+export function migrateDisposableLocalD1(
+  stateDirectory,
+  runMigration = runLocalD1Migrations,
+) {
   const result = runMigration({
     purpose: "test",
     stateDirectory,
@@ -127,6 +130,10 @@ function runMigrations(stateDirectory, runMigration = runLocalD1Migrations) {
       `Disposable D1 migration failed with exit code ${String(result.status)}\n${boundedOutput(result.stdout)}\n${boundedOutput(result.stderr)}`,
     );
   }
+}
+
+function runMigrations(stateDirectory, runMigration = runLocalD1Migrations) {
+  return migrateDisposableLocalD1(stateDirectory, runMigration);
 }
 
 function filesUnder(directory) {
@@ -535,7 +542,7 @@ export async function runLocalStackSmoke({
   const startedAt = Date.now();
   try {
     await portCheck(plan.ports);
-    runPreparation(plan, spawnSyncImpl);
+    prepareDisposableLocalStack(plan, spawnSyncImpl);
     throwIfInterrupted(controller);
 
     runMigrations(stateDirectory, runMigration);
