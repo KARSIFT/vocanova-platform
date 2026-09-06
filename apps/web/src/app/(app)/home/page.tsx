@@ -73,6 +73,12 @@ export default async function HomePage() {
         >
           Saved words
         </h2>
+        <Link
+          href="/discover/saved"
+          className="mt-[var(--spacing-xs)] inline-flex min-h-[var(--spacing-2xl)] items-center text-base font-medium text-primary-700 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+        >
+          View all saved vocabulary
+        </Link>
         {savedWords.length > 0 ? (
           <ul className="mt-[var(--spacing-sm)] space-y-[var(--spacing-md)]">
             {savedWords.map((savedWord) => (

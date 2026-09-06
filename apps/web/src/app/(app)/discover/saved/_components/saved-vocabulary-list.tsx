@@ -1,0 +1,105 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+
+import type { SavedMeaning } from "@vocanova/api-client";
+
+import { createApiClient } from "@/lib/api";
+import { handleApiError } from "@/lib/session";
+
+interface SavedVocabularyListProps {
+  initialItems: SavedMeaning[];
+  initialNextCursor?: string;
+}
+
+export function SavedVocabularyList({
+  initialItems,
+  initialNextCursor,
+}: SavedVocabularyListProps) {
+  const [items, setItems] = useState(initialItems);
+  const [nextCursor, setNextCursor] = useState(initialNextCursor);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const firstAppendedLink = useRef<HTMLAnchorElement>(null);
+  const [focusAppended, setFocusAppended] = useState(false);
+
+  useEffect(() => {
+    if (focusAppended) {
+      firstAppendedLink.current?.focus();
+      setFocusAppended(false);
+    }
+  }, [focusAppended, items]);
+
+  async function loadMore() {
+    if (!nextCursor || isLoading) return;
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const { data } = await createApiClient().listSavedWords({
+        after: nextCursor,
+        limit: 10,
+      });
+      setFocusAppended(data.items.length > 0);
+      setItems((current) => [...current, ...data.items]);
+      setNextCursor(data.nextCursor);
+    } catch (error) {
+      setErrorMessage(
+        handleApiError(
+          error,
+          "We couldn't load more saved words. Please try again.",
+        ),
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <ul className="mt-[var(--spacing-lg)] space-y-[var(--spacing-md)]">
+        {items.map((item, index) => (
+          <li key={item.userWordId}>
+            <Link
+              ref={
+                index === items.length - 1 && focusAppended
+                  ? firstAppendedLink
+                  : undefined
+              }
+              href={`/discover/saved/${item.wordSlug}?meaning=${encodeURIComponent(item.meaningId)}`}
+              className="block rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)] shadow-sm hover:border-primary-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-primary-600"
+            >
+              <p className="wrap-break-word text-lg font-semibold text-neutral-900">
+                {item.wordText}
+              </p>
+              <p className="mt-[var(--spacing-xs)] wrap-break-word text-sm text-neutral-600">
+                {item.partOfSpeech}
+              </p>
+              <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-700">
+                {item.shortDefinition}
+              </p>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {nextCursor ? (
+        <button
+          type="button"
+          onClick={loadMore}
+          disabled={isLoading}
+          className="mt-[var(--spacing-lg)] min-h-[var(--spacing-2xl)] rounded-md border border-neutral-300 bg-white px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 disabled:opacity-50"
+        >
+          {isLoading ? "Loading saved words..." : "Load more saved words"}
+        </button>
+      ) : null}
+      {errorMessage ? (
+        <p
+          role="alert"
+          className="mt-[var(--spacing-sm)] text-base text-red-700"
+        >
+          {errorMessage}
+        </p>
+      ) : null}
+    </>
+  );
+}
