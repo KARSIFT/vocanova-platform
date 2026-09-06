@@ -175,14 +175,14 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
   };
   requireSuccess(runLocalD1Migrations(options), "empty initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 10,
+    migrationCount: 11,
     health: "ok",
     rollbackTable: undefined,
   });
 
   requireSuccess(runLocalD1Migrations(options), "repeated initialization");
   assert.deepEqual(databaseEvidence(firstState), {
-    migrationCount: 10,
+    migrationCount: 11,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -197,7 +197,7 @@ test("empty and repeated local D1 initialization is migrated, healthy, and isola
     "isolated initialization",
   );
   assert.deepEqual(databaseEvidence(isolatedState), {
-    migrationCount: 10,
+    migrationCount: 11,
     health: "ok",
     rollbackTable: undefined,
   });
@@ -252,8 +252,80 @@ test("a failed forward migration rolls back while prior migrations survive", (t)
     /0011_intentional_failure|syntax error/i,
   );
   assert.deepEqual(databaseEvidence(stateDirectory), {
-    migrationCount: 10,
+    migrationCount: 11,
     health: "ok",
     rollbackTable: undefined,
   });
+});
+
+test("a late starter-catalog natural-key collision rolls back without changing learner data", (t) => {
+  const fixture = temporaryDirectory(t, "vocanova-catalog-collision-");
+  const stateDirectory = join(fixture, "state");
+  const migrationsDirectory = join(fixture, "migrations");
+  cpSync(resolve(LOCAL_D1_PATHS.apiRoot, "migrations"), migrationsDirectory, {
+    recursive: true,
+  });
+  rmSync(join(migrationsDirectory, "0011_starter_vocabulary_catalog.sql"));
+  const configPath = join(fixture, "wrangler.jsonc");
+  writeFileSync(
+    configPath,
+    JSON.stringify({
+      name: "catalog-collision",
+      d1_databases: [
+        {
+          binding: "DB",
+          database_name: "catalog-collision",
+          database_id: "local",
+          migrations_dir: "migrations",
+          migrations_table: "d1_migrations",
+        },
+      ],
+    }),
+  );
+  const options = {
+    purpose: "test",
+    configPath,
+    stateDirectory,
+    stdio: "pipe",
+  };
+  requireSuccess(runLocalD1Migrations(options), "pre-catalog initialization");
+  const database = new DatabaseSync(sqliteFiles(stateDirectory)[0]);
+  database.exec(
+    `INSERT INTO users (id,email,status,onboarding_status,created_at,updated_at) VALUES ('a9000000-0000-4000-8000-000000000099','existing@example.test','active','completed','2026-08-22T00:00:00.000Z','2026-08-22T00:00:00.000Z'); INSERT INTO canonical_words (id,text,normalized_text,word_type,language_code,status,difficulty_level,created_at,updated_at) VALUES ('a2000000-0000-4000-8000-000000000032','make a mistake','make a mistake','phrase','en','active','a2','2026-08-22T00:00:00.000Z','2026-08-22T00:00:00.000Z');`,
+  );
+  database.close();
+  cpSync(
+    resolve(
+      LOCAL_D1_PATHS.apiRoot,
+      "migrations/0011_starter_vocabulary_catalog.sql",
+    ),
+    join(migrationsDirectory, "0011_starter_vocabulary_catalog.sql"),
+  );
+  const failed = runLocalD1Migrations(options);
+  assert.notEqual(failed.status, 0);
+  const check = new DatabaseSync(sqliteFiles(stateDirectory)[0], {
+    readOnly: true,
+  });
+  assert.equal(
+    check.prepare("SELECT COUNT(*) AS count FROM journey_situations").get()
+      .count,
+    0,
+  );
+  assert.equal(
+    check.prepare("SELECT COUNT(*) AS count FROM d1_migrations").get().count,
+    10,
+  );
+  assert.equal(
+    check.prepare("SELECT COUNT(*) AS count FROM canonical_words").get().count,
+    1,
+  );
+  assert.equal(
+    check
+      .prepare(
+        "SELECT COUNT(*) AS count FROM users WHERE email = 'existing@example.test'",
+      )
+      .get().count,
+    1,
+  );
+  check.close();
 });

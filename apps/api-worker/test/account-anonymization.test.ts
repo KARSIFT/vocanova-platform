@@ -172,7 +172,6 @@ describe("account anonymization", () => {
       "magic_links",
       "auth_rate_limits",
       "ai_usage_counters",
-      "canonical_words",
     ]) {
       expect(
         await env.DB.prepare(`SELECT count(*) AS count FROM ${table}`).first<{
@@ -181,6 +180,11 @@ describe("account anonymization", () => {
         table,
       ).toEqual({ count: 1 });
     }
+    await expect(
+      env.DB.prepare("SELECT count(*) AS count FROM canonical_words").first<{
+        count: number;
+      }>(),
+    ).resolves.toEqual({ count: 33 });
   });
 });
 

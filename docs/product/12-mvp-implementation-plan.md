@@ -88,7 +88,9 @@ Routine small fixes may put this information directly in the pull request.
 - Documentation is current.
 - No secrets or private data are committed or logged.
 - Required CI passes and review findings are resolved.
-- Remote delivery is verified when the issue includes deployment.
+- Cloudflare staging delivery verifies compatible migrations and the exact release
+  automatically after protected `main` merges; production operation remains an
+  explicitly authorized action.
 
 ## Testing strategy
 
