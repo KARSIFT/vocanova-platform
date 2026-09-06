@@ -1064,6 +1064,7 @@ function applySettingsPatch(settings, patch) {
     "notificationsEnabled",
     "marketingEmailsEnabled",
     "displayName",
+    "timezone",
   ]);
   const result = { ...settings };
   for (const [key, value] of Object.entries(patch ?? {})) {
@@ -1094,6 +1095,14 @@ function applySettingsPatch(settings, patch) {
   }
   if (result.appLanguage !== undefined && result.appLanguage !== "en") {
     const error = new Error("appLanguage not supported");
+    error.code = 400;
+    throw error;
+  }
+  if (
+    result.timezone !== undefined &&
+    (typeof result.timezone !== "string" || result.timezone.length === 0)
+  ) {
+    const error = new Error("invalid timezone");
     error.code = 400;
     throw error;
   }
@@ -1383,6 +1392,9 @@ const server = createServer(async (req, res) => {
       ) {
         state.settings.dailyReviewTarget = body.dailyReviewTarget;
       }
+    }
+    if (typeof body.timezone === "string") {
+      state.settings.timezone = body.timezone;
     }
     logLine(req, 200, { action: "complete-onboarding" });
     jsonResponse(res, 200, {

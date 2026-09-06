@@ -510,14 +510,15 @@ export class D1IdentityRepository implements IdentityRepository {
           .bind(now, userId),
         this.database
           .prepare(
-            "INSERT INTO user_settings (id, user_id, daily_review_target, timezone, created_at, updated_at) SELECT ?1, ?2, ?3, ?4, ?5, ?5 FROM users WHERE id = ?2 AND status = 'active' ON CONFLICT(user_id) DO UPDATE SET daily_review_target = CASE WHEN user_settings.daily_review_target = 20 THEN excluded.daily_review_target ELSE user_settings.daily_review_target END, timezone = excluded.timezone, updated_at = excluded.updated_at",
+            "INSERT INTO user_settings (id, user_id, daily_review_target, timezone, created_at, updated_at) SELECT ?1, ?2, ?3, coalesce(?4, 'UTC'), ?5, ?5 FROM users WHERE id = ?2 AND status = 'active' ON CONFLICT(user_id) DO UPDATE SET daily_review_target = CASE WHEN user_settings.daily_review_target = 20 THEN excluded.daily_review_target ELSE user_settings.daily_review_target END, timezone = CASE WHEN ?6 IS NULL THEN user_settings.timezone ELSE excluded.timezone END, updated_at = excluded.updated_at",
           )
           .bind(
             crypto.randomUUID(),
             userId,
             values.dailyReviewTarget,
-            values.timezone ?? "UTC",
+            values.timezone ?? null,
             now,
+            values.timezone ?? null,
           ),
       ]);
       if (

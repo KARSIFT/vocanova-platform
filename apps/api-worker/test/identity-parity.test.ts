@@ -497,6 +497,48 @@ describe("identity and account parity", () => {
     ).resolves.toEqual({ timezone: "Asia/Tehran", daily_review_target: 35 });
   });
 
+  it("keeps an existing timezone when a legacy onboarding request omits it", async () => {
+    const { app, cookie, csrf, userId } = await signedIn(
+      "timezone-legacy-onboarding@example.test",
+    );
+    await app.request("http://worker.test/api/v1/settings", {
+      headers: { Cookie: cookie },
+    }, env);
+    await env.DB.prepare(
+      "UPDATE user_settings SET timezone = 'America/New_York', daily_review_target = 35 WHERE user_id = ?1",
+    )
+      .bind(userId)
+      .run();
+
+    const response = await app.request(
+      "http://worker.test/api/v1/onboarding",
+      withAuth(
+        json({
+          englishLevel: "a2",
+          nativeLanguage: "en",
+          learningGoal: "work",
+          mainUseCase: "work",
+          dailyReviewTarget: 10,
+        }),
+        cookie,
+        csrf,
+      ),
+      env,
+    );
+
+    expect(response.status).toBe(200);
+    await expect(
+      env.DB.prepare(
+        "SELECT timezone, daily_review_target FROM user_settings WHERE user_id = ?1",
+      )
+        .bind(userId)
+        .first(),
+    ).resolves.toEqual({
+      timezone: "America/New_York",
+      daily_review_target: 35,
+    });
+  });
+
   it("rejects an invalid timezone without changing other settings", async () => {
     const { app, cookie, csrf } = await signedIn(
       "timezone-invalid@example.test",

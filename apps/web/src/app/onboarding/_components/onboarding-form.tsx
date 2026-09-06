@@ -259,6 +259,9 @@ export function OnboardingForm({
             onChange={(value) =>
               setState((s) => ({ ...s, dailyReviewTarget: value }))
             }
+            onTimezoneChange={(timezone) =>
+              setState((s) => ({ ...s, timezone }))
+            }
             state={state}
           />
         ) : null}
@@ -566,10 +569,12 @@ function MainUseCaseStep({
 function DailyReviewTargetStep({
   value,
   onChange,
+  onTimezoneChange,
   state,
 }: {
   value: number;
   onChange: (next: number) => void;
+  onTimezoneChange: (next: string) => void;
   state: FormState;
 }) {
   return (
@@ -582,6 +587,31 @@ function DailyReviewTargetStep({
           We&apos;ll suggest {value} words a day for review. You can change this
           in Settings any time.
         </p>
+      </div>
+      <div className="space-y-[var(--spacing-sm)]">
+        <label
+          className="block text-base font-medium text-neutral-900"
+          htmlFor="onboarding-timezone"
+        >
+          Timezone
+        </label>
+        <p className="text-base text-neutral-700">
+          Your timezone sets the daily mission reset boundary. You can change
+          it later in Settings.
+        </p>
+        <input
+          id="onboarding-timezone"
+          value={state.timezone}
+          onChange={(event) => onTimezoneChange(event.target.value)}
+          list="onboarding-timezone-suggestions"
+          className="min-h-[var(--spacing-2xl)] w-full rounded-md border border-neutral-300 px-[var(--spacing-sm)] text-base text-neutral-900"
+        />
+        <datalist id="onboarding-timezone-suggestions">
+          <option value="UTC" />
+          <option value="America/New_York" />
+          <option value="Europe/London" />
+          <option value="Asia/Tehran" />
+        </datalist>
       </div>
       <div
         role="radiogroup"
