@@ -64,6 +64,7 @@ export function SentenceFeedback({
   const ownerId = useRef(userId);
 
   useEffect(() => {
+    if (!userId) return;
     const previousOwnerId = ownerId.current;
     ownerId.current = userId;
     if (

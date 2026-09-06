@@ -28,6 +28,7 @@ export function SavedWordPracticeSelector({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (!userId) return;
     const record = readSentenceRecovery(userId);
     if (
       record?.path === "/home" &&

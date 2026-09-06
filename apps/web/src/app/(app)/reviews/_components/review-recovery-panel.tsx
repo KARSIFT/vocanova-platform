@@ -14,6 +14,7 @@ export function ReviewRecoveryPanel() {
     shortDefinition?: string;
   } | null>(null);
   useEffect(() => {
+    if (!userId) return;
     const record = readSentenceRecovery(userId);
     if (record?.path === "/reviews" && record.source === "review") {
       setAttempt({
