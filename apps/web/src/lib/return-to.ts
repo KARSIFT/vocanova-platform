@@ -11,10 +11,12 @@ const EXACT_PROTECTED_PATHS = new Set([
 ]);
 
 const DISCOVER_PATH = /^\/discover\/[A-Za-z0-9_-]+(?:\/[A-Za-z0-9_-]+)?$/;
+const SAVED_WORD_PATH =
+  /^\/discover\/saved\/(?:[A-Za-z0-9_.!~*'()-]|%[0-9a-f]{2})+$/i;
 const UNSAFE_CHARACTER = new RegExp(
   `[\\\\${String.fromCharCode(0)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
 );
-const ENCODED_UNSAFE_PATH_CHARACTER = /%(?:2f|5c|0[0-9a-f]|1[0-9a-f]|7f)/i;
+const ENCODED_UNSAFE_PATH_CHARACTER = /%(?:25|2f|5c|0[0-9a-f]|1[0-9a-f]|7f)/i;
 
 export function normalizeReturnTo(value: unknown): string {
   if (
@@ -54,7 +56,9 @@ export function normalizeReturnTo(value: unknown): string {
   if (
     url.origin !== "https://vocanova.local" ||
     ENCODED_UNSAFE_PATH_CHARACTER.test(path) ||
-    (!EXACT_PROTECTED_PATHS.has(path) && !DISCOVER_PATH.test(path))
+    (!EXACT_PROTECTED_PATHS.has(path) &&
+      !DISCOVER_PATH.test(path) &&
+      !SAVED_WORD_PATH.test(path))
   ) {
     return DEFAULT_RETURN_TO;
   }
