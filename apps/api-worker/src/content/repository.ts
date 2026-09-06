@@ -149,6 +149,10 @@ export class D1ContentLearningRepository {
           row.next_review_at === null ? null : String(row.next_review_at),
           nowIso,
         ),
+        ...(isEligibleReviewStatus(row.user_word_status) && {
+          nextReviewAt:
+            row.next_review_at === null ? null : String(row.next_review_at),
+        }),
         examples: examples.get(id) ?? [],
         usageNotes: notes.get(id) ?? [],
       };
@@ -181,7 +185,8 @@ export class D1ContentLearningRepository {
       .prepare(
         `SELECT uw.id AS user_word_id, uw.meaning_id,
                 cw.id AS word_id, cw.text AS word_text, cw.normalized_text,
-                wm.part_of_speech, wm.short_definition, uw.status, uw.source, uw.added_at
+                wm.part_of_speech, wm.short_definition, uw.status, uw.source, uw.added_at,
+                uw.next_review_at
          FROM user_words uw JOIN word_meanings wm ON wm.id = uw.meaning_id
          JOIN canonical_words cw ON cw.id = wm.word_id
          WHERE uw.user_id = ?1 AND uw.deleted_at IS NULL
@@ -307,7 +312,7 @@ export class D1ContentLearningRepository {
     const cursorTime =
       cursor?.value === "0001-01-01T00:00:00Z" ? "" : cursor?.value;
     const timestamp = this.now().toISOString();
-    const [count, result] = await Promise.all([
+    const [count, result, nextScheduled] = await Promise.all([
       this.database
         .prepare(
           `SELECT COUNT(*) AS count FROM user_words uw
@@ -333,6 +338,15 @@ export class D1ContentLearningRepository {
         )
         .bind(userId, timestamp, cursorTime ?? null, cursor?.id ?? "", limit)
         .all<Row>(),
+      this.database
+        .prepare(
+          `SELECT min(uw.next_review_at) AS next_review_at FROM user_words uw
+           WHERE uw.user_id = ?1 AND uw.deleted_at IS NULL
+             AND uw.status IN ('new', 'learning', 'reviewing')
+             AND uw.next_review_at > ?2`,
+        )
+        .bind(userId, timestamp)
+        .first<{ next_review_at: string | null }>(),
     ]);
     const items = result.results.map((row) => ({
       userWordId: String(row.user_word_id),
@@ -346,9 +360,13 @@ export class D1ContentLearningRepository {
       reviewStep: Number(row.review_step),
     }));
     const last = result.results.at(-1);
+    const totalCount = Number(count?.count ?? 0);
     return {
       items,
-      totalCount: Number(count?.count ?? 0),
+      totalCount,
+      ...(totalCount === 0 && {
+        nextReviewAt: nextScheduled?.next_review_at ?? null,
+      }),
       ...(items.length === limit &&
         last && {
           nextCursor: encodeCursor(
@@ -595,7 +613,8 @@ export class D1ContentLearningRepository {
       .prepare(
         `SELECT uw.id AS user_word_id, uw.meaning_id,
                 cw.id AS word_id, cw.text AS word_text, cw.normalized_text,
-                wm.part_of_speech, wm.short_definition, uw.status, uw.source, uw.added_at
+                wm.part_of_speech, wm.short_definition, uw.status, uw.source, uw.added_at,
+                uw.next_review_at
          FROM user_words uw JOIN word_meanings wm ON wm.id = uw.meaning_id
          JOIN canonical_words cw ON cw.id = wm.word_id
          WHERE uw.user_id = ?1 AND uw.meaning_id = ?2 AND uw.deleted_at IS NULL`,
@@ -896,7 +915,17 @@ function savedMeaningFromRow(row: Row): SavedMeaning {
     source: String(row.source),
     saved: true,
     addedAt: String(row.added_at),
+    ...(isEligibleReviewStatus(row.status) && {
+      nextReviewAt:
+        row.next_review_at === null ? null : String(row.next_review_at),
+    }),
   };
+}
+
+function isEligibleReviewStatus(
+  status: string | number | null | undefined,
+): boolean {
+  return ["new", "learning", "reviewing"].includes(String(status));
 }
 
 function attemptFromRow(row: Row): ReviewAttempt {

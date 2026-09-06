@@ -124,16 +124,16 @@ describe("Worker content, learning, and review parity", () => {
       saved: true,
       userWordId: USER_WORD_A,
       reviewState: "learning",
+      nextReviewAt: "2026-08-24T12:00:00.001Z",
     });
     expect(Object.keys(active).sort()).toEqual(
-      [...Object.keys(absent), "userWordId"].sort(),
+      [...Object.keys(absent), "nextReviewAt", "userWordId"].sort(),
     );
     expect(active.examples).toEqual(absent.examples);
     expect(active.usageNotes).toEqual(absent.usageNotes);
     for (const rawField of [
       "status",
       "reviewStep",
-      "nextReviewAt",
       "lastResult",
       "lastRating",
     ]) {
@@ -890,6 +890,8 @@ describe("Worker content, learning, and review parity", () => {
     expect(due.items.map((item) => item.userWordId)).toEqual([USER_WORD_A]);
     const dueSecond = await repository.listDueWords(USER_A, due.nextCursor!, 1);
     expect(dueSecond.items.map((item) => item.userWordId)).toEqual([futureId]);
+    expect(due).not.toHaveProperty("nextReviewAt");
+    expect(dueSecond).not.toHaveProperty("nextReviewAt");
 
     const input = review({
       clientAttemptId: "attempt-good",
@@ -932,6 +934,162 @@ describe("Worker content, learning, and review parity", () => {
       total_review_count: 1,
       correct_review_count: 1,
     });
+  });
+
+  it("reports the earliest eligible future review only after every due word is cleared", async () => {
+    const meaningIds = await seedAdditionalMeanings(7);
+    const [
+      dueMeaningId,
+      futureMeaningId,
+      laterMeaningId,
+      boundaryMeaningId,
+      otherLearnerMeaningId,
+      masteredMeaningId,
+      ignoredMeaningId,
+    ] = meaningIds;
+    const dueId = "50000000-0000-4000-8000-000000000010";
+    const futureId = "50000000-0000-4000-8000-000000000011";
+    const laterId = "50000000-0000-4000-8000-000000000012";
+    const boundaryId = "50000000-0000-4000-8000-000000000013";
+    const otherLearnerId = "50000000-0000-4000-8000-000000000014";
+    const masteredId = "50000000-0000-4000-8000-000000000015";
+    const ignoredId = "50000000-0000-4000-8000-000000000016";
+    const deletedId = "50000000-0000-4000-8000-000000000017";
+
+    await insertUserWord(dueId, USER_A, dueMeaningId!, NOW, 0, NOW);
+    await insertUserWord(
+      futureId,
+      USER_A,
+      futureMeaningId!,
+      NOW,
+      0,
+      "2026-08-22T12:30:00.000Z",
+    );
+    await insertUserWord(
+      laterId,
+      USER_A,
+      laterMeaningId!,
+      NOW,
+      0,
+      "2026-08-22T13:00:00.000Z",
+    );
+    await insertUserWord(boundaryId, USER_A, boundaryMeaningId!, NOW, 0, NOW);
+    await insertUserWord(
+      otherLearnerId,
+      USER_B,
+      otherLearnerMeaningId!,
+      NOW,
+      0,
+      "2026-08-22T12:15:00.000Z",
+    );
+    await insertUserWord(
+      masteredId,
+      USER_A,
+      masteredMeaningId!,
+      NOW,
+      0,
+      "2026-08-22T12:10:00.000Z",
+      "mastered",
+    );
+    await insertUserWord(
+      ignoredId,
+      USER_A,
+      ignoredMeaningId!,
+      NOW,
+      0,
+      "2026-08-22T12:05:00.000Z",
+      "ignored",
+    );
+    await insertUserWord(
+      deletedId,
+      USER_A,
+      (await seedAdditionalMeanings(1))[0]!,
+      NOW,
+      0,
+      "2026-08-22T12:01:00.000Z",
+    );
+    await env.DB.prepare("UPDATE user_words SET deleted_at = ?1 WHERE id = ?2")
+      .bind(NOW, deletedId)
+      .run();
+
+    const duePage = await repository.listDueWords(USER_A, "", 1);
+    const dueSecondPage = await repository.listDueWords(
+      USER_A,
+      duePage.nextCursor!,
+      1,
+    );
+    expect(duePage.totalCount).toBe(2);
+    expect(duePage.items.map((item) => item.userWordId)).toEqual([dueId]);
+    expect(dueSecondPage.items.map((item) => item.userWordId)).toEqual([
+      boundaryId,
+    ]);
+    expect(duePage).not.toHaveProperty("nextReviewAt");
+
+    await env.DB.prepare(
+      "UPDATE user_words SET next_review_at = ?1 WHERE id IN (?2, ?3)",
+    )
+      .bind("2026-08-22T14:00:00.000Z", dueId, boundaryId)
+      .run();
+
+    await expect(repository.listDueWords(USER_A, "", 1)).resolves.toMatchObject(
+      {
+        items: [],
+        totalCount: 0,
+        nextReviewAt: "2026-08-22T12:30:00.000Z",
+      },
+    );
+
+    await env.DB.prepare(
+      "UPDATE user_words SET status = 'mastered' WHERE id IN (?1, ?2, ?3, ?4)",
+    )
+      .bind(dueId, futureId, laterId, boundaryId)
+      .run();
+    await expect(repository.listDueWords(USER_A, "", 1)).resolves.toMatchObject(
+      {
+        items: [],
+        totalCount: 0,
+        nextReviewAt: null,
+      },
+    );
+  });
+
+  it("exposes saved-word scheduling only for active learner states", async () => {
+    const saved = await repository.saveUserWord(
+      USER_A,
+      MEANING_A,
+      "manual",
+      "saved-schedule",
+    );
+    await expect(
+      repository.listSavedWords(USER_A, "", 20),
+    ).resolves.toMatchObject({
+      items: [{ userWordId: saved.userWordId, nextReviewAt: null }],
+    });
+
+    await env.DB.prepare(
+      "UPDATE user_words SET next_review_at = ?1 WHERE id = ?2",
+    )
+      .bind("2026-08-22T12:30:00.000Z", saved.userWordId)
+      .run();
+    await expect(
+      repository.listSavedWords(USER_A, "", 20),
+    ).resolves.toMatchObject({
+      items: [
+        {
+          userWordId: saved.userWordId,
+          nextReviewAt: "2026-08-22T12:30:00.000Z",
+        },
+      ],
+    });
+
+    await env.DB.prepare(
+      "UPDATE user_words SET status = 'mastered' WHERE id = ?1",
+    )
+      .bind(saved.userWordId)
+      .run();
+    const mastered = (await repository.listSavedWords(USER_A, "", 20))
+      .items[0]!;
+    expect(mastered).not.toHaveProperty("nextReviewAt");
   });
 
   it("keeps two concurrent distinct reviews from losing a scheduler transition", async () => {
@@ -1821,6 +1979,29 @@ async function insertUserWord(
   )
     .bind(id, userId, meaningId, reviewStep, nextReviewAt, addedAt, status)
     .run();
+}
+
+async function seedAdditionalMeanings(count: number): Promise<string[]> {
+  const meanings = Array.from({ length: count }, () => crypto.randomUUID());
+  await env.DB.batch(
+    meanings.flatMap((meaningId) => {
+      const wordId = crypto.randomUUID();
+      const text = `test-word-${wordId}`;
+      return [
+        env.DB.prepare(
+          `INSERT INTO canonical_words
+             (id, text, normalized_text, word_type, status, created_at, updated_at)
+             VALUES (?1, ?2, ?2, 'word', 'active', ?3, ?3)`,
+        ).bind(wordId, text, NOW),
+        env.DB.prepare(
+          `INSERT INTO word_meanings
+             (id, word_id, part_of_speech, short_definition, meaning_order, status, created_at, updated_at)
+             VALUES (?1, ?2, 'noun', 'test definition', 1, 'active', ?3, ?3)`,
+        ).bind(meaningId, wordId, NOW),
+      ];
+    }),
+  );
+  return meanings;
 }
 
 async function hashToken(token: string): Promise<string> {

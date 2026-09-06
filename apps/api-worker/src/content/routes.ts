@@ -61,6 +61,7 @@ const WordMeaning = z.object({
   saved: z.boolean(),
   userWordId: Uuid.optional(),
   reviewState: WordReviewState.nullable(),
+  nextReviewAt: z.iso.datetime().nullable().optional(),
   examples: z.array(WordExample),
   usageNotes: z.array(UsageNote),
 });
@@ -84,6 +85,7 @@ const SavedMeaning = z.object({
   source: z.string(),
   saved: z.boolean(),
   addedAt: z.iso.datetime(),
+  nextReviewAt: z.iso.datetime().nullable().optional(),
 });
 const DueWord = z.object({
   userWordId: Uuid,
@@ -455,6 +457,7 @@ function registerOpenApi(app: OpenAPIHono<VocaNovaWorkerEnvironment>): void {
         items: z.array(DueWord),
         nextCursor: z.string().optional(),
         totalCount: z.number().int(),
+        nextReviewAt: z.iso.datetime().nullable().optional(),
       }),
       200,
       pageParameters,
