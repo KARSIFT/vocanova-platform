@@ -1,13 +1,27 @@
-export function formatReviewDateTime(isoDateTime: string): string {
-  return new Intl.DateTimeFormat("en-US", {
+export function formatReviewDateTime(
+  isoDateTime: string,
+  timezone?: string,
+): string {
+  const options: Intl.DateTimeFormatOptions = {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
     month: "short",
-    timeZone: "UTC",
-    timeZoneName: "short",
+    timeZoneName: "longOffset",
     year: "numeric",
-  }).format(new Date(isoDateTime));
+  };
+  const date = new Date(isoDateTime);
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      ...options,
+      timeZone: timezone ?? "UTC",
+    }).format(date);
+  } catch {
+    return new Intl.DateTimeFormat("en-US", {
+      ...options,
+      timeZone: "UTC",
+    }).format(date);
+  }
 }
 
 export function isDueReview(isoDateTime: string, now = Date.now()): boolean {
