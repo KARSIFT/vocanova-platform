@@ -128,6 +128,10 @@ When an existing route error boundary replaces dynamic learner content, focus mo
 route-specific error heading. The heading is programmatically focusable but stays out of the normal
 tab order, so keyboard and screen-reader learners can immediately read the safe retry choices.
 
+The authenticated app shell begins with a focus-revealed “Skip to main content” control. It moves
+focus to the shared main landmark without adding that landmark to normal tab order, so learners can
+bypass repeated header controls and continue through the active page.
+
 ## 11. Visual design direction
 
 Clean, calm, encouraging visual tone — not exam-like, not childish. Tailwind CSS with shadcn/ui-style
