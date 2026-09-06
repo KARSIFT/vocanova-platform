@@ -21,7 +21,7 @@ test("shows dated, newest-first mission statuses and the authoritative grace bal
     .getByRole("heading", { name: "Recent missions", level: 2 })
     .locator("..");
   await expect(history).toContainText(
-    "Your latest mission snapshots, newest first.",
+    "Your recent missions, newest first.",
   );
   await expect(history.locator("time")).toHaveCount(4);
   await expect(

@@ -152,7 +152,7 @@ export default async function ProgressPage() {
           Recent missions
         </h2>
         <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-          Your latest mission snapshots, newest first.
+          Your recent missions, newest first.
         </p>
         {historyWithLabels.length > 0 ? (
           <ul className="mt-[var(--spacing-md)] space-y-[var(--spacing-xs)]">
