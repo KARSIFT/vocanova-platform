@@ -165,9 +165,13 @@ test("mounted review recovery clears when the authenticated user changes", async
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
   await expect(page.getByRole("heading", { name: "Resume sentence practice" })).toBeVisible();
 
+  const otherPage = await context.newPage();
+  await otherPage.bringToFront();
   await context.addCookies([{ name: "e2e_identity_fixture", value: "alternate", url: baseURL }]);
-  await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow")));
+  await page.bringToFront();
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(page.getByRole("heading", { name: "Resume sentence practice" })).toHaveCount(0);
+  await otherPage.close();
 });
 
 test("Home recovers a daily-mission sentence through 401 reauthentication", async ({ page, context }, testInfo) => {

@@ -23,9 +23,11 @@ export function useAuthenticatedUserId() {
         });
     }
     refreshIdentity();
+    window.addEventListener("focus", refreshIdentity);
     window.addEventListener("pageshow", refreshIdentity);
     return () => {
       active = false;
+      window.removeEventListener("focus", refreshIdentity);
       window.removeEventListener("pageshow", refreshIdentity);
     };
   }, []);
