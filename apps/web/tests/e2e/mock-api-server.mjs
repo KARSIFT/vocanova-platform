@@ -497,6 +497,7 @@ const CANONICAL_WORDS = {
     ],
   },
 };
+CANONICAL_WORDS["pour?#"] = CANONICAL_WORDS.pour;
 
 const JOURNEY_SITUATIONS = [
   {
@@ -1913,7 +1914,7 @@ const server = createServer(async (req, res) => {
       ["library", "canonical-without-list"].includes(
         cookies.e2e_saved_words_fixture,
       ) &&
-      slug === "pour"
+      ["pour", "pour?#"].includes(slug)
     ) {
       response.word.meanings = response.word.meanings.map((meaning) =>
         meaning.id === "mean-pour"

@@ -80,8 +80,14 @@ test("encoded saved-word return paths survive 401 reauthentication", async ({ pa
   await page.getByRole("textbox", { name: /Write a sentence using pour/ }).fill("I pour coffee.");
   await page.route("**/api/v1/sentence-feedback", (route) => route.fulfill({ status: 401, contentType: "application/problem+json", body: JSON.stringify({ detail: "authentication required" }) }));
   await page.getByRole("button", { name: "Check my sentence" }).click();
+  await expect(page).toHaveURL(
+    `/signin?returnTo=${encodeURIComponent(path)}`,
+  );
   await page.unroute("**/api/v1/sentence-feedback");
-  await page.goto(`/auth/magic?token=encoded&email=encoded%40example.test&returnTo=${encodeURIComponent(path)}`);
+  await page.goto(
+    `/auth/magic?token=encoded&email=encoded%40example.test&returnTo=${encodeURIComponent(path)}`,
+    { waitUntil: "commit" },
+  );
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
 });
 

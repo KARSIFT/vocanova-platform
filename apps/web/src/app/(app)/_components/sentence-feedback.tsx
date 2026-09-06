@@ -75,7 +75,7 @@ export function SentenceFeedback({
         clearMismatchedRecovery &&
         record.path === returnPath &&
         record.source === source &&
-        (!recoveryAttemptIds || recoveryAttemptIds.includes(record.attemptId))
+        (!recoveryAttemptIds || !recoveryAttemptIds.includes(record.attemptId))
       )
         clearSentenceRecovery(userId);
       return;
