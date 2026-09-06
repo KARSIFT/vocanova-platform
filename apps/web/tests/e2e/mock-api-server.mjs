@@ -173,6 +173,16 @@ const DEFAULT_PROGRESS = {
   ],
 };
 
+const SEVEN_SNAPSHOT_PROGRESS = {
+  ...DEFAULT_PROGRESS,
+  completionHistory: [
+    ...DEFAULT_PROGRESS.completionHistory,
+    { localDate: "2025-12-20", completed: true, status: "completed" },
+    { localDate: "2025-12-03", completed: false, status: "missed" },
+    { localDate: "2025-11-19", completed: true, status: "protected" },
+  ],
+};
+
 const FIRST_MISSION_PROGRESS = {
   confidencePointsBalance: 0,
   streak: {
@@ -1660,6 +1670,8 @@ const server = createServer(async (req, res) => {
     const progress =
       cookies.e2e_progress_fixture === "first-mission"
         ? FIRST_MISSION_PROGRESS
+        : cookies.e2e_progress_fixture === "seven-snapshots"
+          ? SEVEN_SNAPSHOT_PROGRESS
         : cookies.e2e_progress_fixture === "legacy-history"
           ? LEGACY_PROGRESS
         : buildProgress(state);
