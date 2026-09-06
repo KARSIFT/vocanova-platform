@@ -421,7 +421,13 @@ export class D1ContentLearningRepository {
     if (existingAttempt) {
       if (!attemptMatches(existingAttempt, normalized))
         throw new ContentLearningError("idempotency_conflict");
-      await this.recordIdempotency(userId, "reviews:submit", key, fingerprint);
+      await this.recordIdempotency(
+        userId,
+        "reviews:submit",
+        key,
+        fingerprint,
+        reviewReceiptAt(existingAttempt),
+      );
       return existingAttempt;
     }
     if (
@@ -431,6 +437,7 @@ export class D1ContentLearningRepository {
         (normalized.selectedOptionMeaningId === normalized.meaningId)
     )
       throw new ContentLearningError("invalid_input");
+    const receivedAt = this.now().toISOString();
     for (let retry = 0; retry < 3; retry += 1) {
       const word = await this.database
         .prepare(
@@ -457,16 +464,15 @@ export class D1ContentLearningRepository {
         },
         normalized.result,
         normalized.rating,
-        normalized.answeredAt,
+        receivedAt,
       );
       const attemptId = crypto.randomUUID();
-      const timestamp = this.now().toISOString();
       const missionWiring = await this.reviewMissionStatements(
         userId,
         attemptId,
         normalized.result,
         normalized.rating,
-        timestamp,
+        receivedAt,
       );
       const reviewStateVersion = Number(word.review_state_version);
       try {
@@ -476,7 +482,7 @@ export class D1ContentLearningRepository {
               `INSERT INTO review_state_reservations
                (user_word_id, state_version, created_at) VALUES (?1, ?2, ?3)`,
             )
-            .bind(normalized.userWordId, reviewStateVersion, timestamp),
+            .bind(normalized.userWordId, reviewStateVersion, receivedAt),
           this.database
             .prepare(
               `INSERT INTO review_attempts
@@ -506,7 +512,7 @@ export class D1ContentLearningRepository {
               normalized.source,
               normalized.clientAttemptId,
               normalized.metadata ? JSON.stringify(normalized.metadata) : null,
-              timestamp,
+              receivedAt,
             ),
           this.database
             .prepare(
@@ -519,14 +525,14 @@ export class D1ContentLearningRepository {
             .bind(
               schedule.after,
               schedule.nextReviewAt,
-              normalized.answeredAt,
+              receivedAt,
               normalized.result,
               schedule.lastRating || null,
               schedule.total,
               schedule.correct,
               schedule.consecutiveCorrect,
               schedule.consecutiveIncorrect,
-              timestamp,
+              receivedAt,
               normalized.userWordId,
               userId,
             ),
@@ -535,7 +541,7 @@ export class D1ContentLearningRepository {
               `INSERT INTO idempotency_keys (id, user_id, operation, key, fingerprint, created_at)
            VALUES (?1, ?2, 'reviews:submit', ?3, ?4, ?5)`,
             )
-            .bind(crypto.randomUUID(), userId, key, fingerprint, timestamp),
+            .bind(crypto.randomUUID(), userId, key, fingerprint, receivedAt),
           ...missionWiring.statements,
         ]);
       } catch (error) {
@@ -645,6 +651,7 @@ export class D1ContentLearningRepository {
     operation: string,
     key: string,
     fingerprint: string,
+    createdAt = this.now().toISOString(),
   ): Promise<void> {
     await this.database
       .prepare(
@@ -658,7 +665,7 @@ export class D1ContentLearningRepository {
         operation,
         key,
         fingerprint,
-        this.now().toISOString(),
+        createdAt,
       )
       .run();
   }
@@ -669,8 +676,7 @@ export class D1ContentLearningRepository {
   ): Promise<ReviewAttempt | null> {
     const row = await this.database
       .prepare(
-        `SELECT ra.*, uw.next_review_at FROM review_attempts ra
-       JOIN user_words uw ON uw.id = ra.user_word_id
+        `SELECT ra.* FROM review_attempts ra
        WHERE ra.user_id = ?1 AND ra.client_attempt_id = ?2`,
       )
       .bind(userId, clientAttemptId)
@@ -721,9 +727,10 @@ export class D1ContentLearningRepository {
   ): Promise<{
     statements: D1PreparedStatement[];
   }> {
-    const missions = new D1MissionsRepository(this.database, this.now);
+    const receiptClock = () => new Date(timestamp);
+    const missions = new D1MissionsRepository(this.database, receiptClock);
     const settings = await missions.resolveSettings(userId, "");
-    const today = localDate(this.now(), settings.timezone);
+    const today = localDate(receiptClock(), settings.timezone);
     const correct = result === "correct" ? 1 : 0;
     const skipped = result === "skipped" ? 1 : 0;
     const reward = skipped
@@ -949,7 +956,10 @@ function attemptFromRow(row: Row): ReviewAttempt {
     wasHintUsed: row.was_hint_used === 1,
     source: String(row.source),
     clientAttemptId: String(row.client_attempt_id),
-    nextReviewAt: String(row.next_review_at),
+    nextReviewAt: nextReviewAtFromReceipt(
+      String(row.created_at),
+      Number(row.review_step_after),
+    ),
   };
 }
 
@@ -1123,6 +1133,23 @@ function attemptMatches(
   );
 }
 
+const REVIEW_INTERVALS = [
+  600_000, 3_600_000, 86_400_000, 259_200_000, 604_800_000, 1_209_600_000,
+  2_592_000_000, 5_184_000_000,
+];
+
+function nextReviewAtFromReceipt(receivedAt: string, step: number): string {
+  return new Date(
+    Date.parse(receivedAt) + REVIEW_INTERVALS[step]!,
+  ).toISOString();
+}
+
+function reviewReceiptAt(attempt: ReviewAttempt): string {
+  return new Date(
+    Date.parse(attempt.nextReviewAt) - REVIEW_INTERVALS[attempt.reviewStepAfter]!,
+  ).toISOString();
+}
+
 function applyReview(
   prior: {
     step: number;
@@ -1133,7 +1160,7 @@ function applyReview(
   },
   result: string,
   rating: string,
-  answeredAt: string,
+  receivedAt: string,
 ) {
   let after = prior.step;
   let correct = prior.correct;
@@ -1155,10 +1182,6 @@ function applyReview(
     if (lastRating === "good" || lastRating === "easy")
       after = Math.min(7, prior.step + 1);
   }
-  const intervals = [
-    600_000, 3_600_000, 86_400_000, 259_200_000, 604_800_000, 1_209_600_000,
-    2_592_000_000, 5_184_000_000,
-  ];
   return {
     before: prior.step,
     after,
@@ -1167,8 +1190,6 @@ function applyReview(
     consecutiveCorrect,
     consecutiveIncorrect,
     lastRating,
-    nextReviewAt: new Date(
-      Date.parse(answeredAt) + intervals[after]!,
-    ).toISOString(),
+    nextReviewAt: nextReviewAtFromReceipt(receivedAt, after),
   };
 }
