@@ -338,6 +338,11 @@ const TRUNCATED_SAVED_WORDS_RESPONSE = {
   nextCursor: "e2e-saved-words-after-10",
 };
 
+const HOME_PRACTICE_SAVED_WORDS_RESPONSE = {
+  items: TRUNCATED_SAVED_WORDS_RESPONSE.items.slice(0, 2),
+  nextCursor: undefined,
+};
+
 const LONG_SAVED_WORDS_RESPONSE = {
   items: [
     {
@@ -792,8 +797,28 @@ function buildProgress(state) {
   return cloneProgress(state.progress);
 }
 
-function buildDailyMission(state) {
+function buildDailyMission(state, homeFixture) {
   const streak = { ...state.progress.streak };
+  if (homeFixture === "mission-complete") {
+    return {
+      ...state.dailyMission,
+      reviewsCompleted: state.dailyMission.reviewTarget,
+      status: "completed",
+      completedAt: "2026-01-01T12:00:00.000Z",
+      streak,
+    };
+  }
+  if (homeFixture === "sentence-practice-needed") {
+    return {
+      ...state.dailyMission,
+      reviewsCompleted: state.dailyMission.reviewTarget,
+      newWordsCompleted: state.dailyMission.newWordTarget,
+      sentencePracticeTarget: 1,
+      sentencePracticesCompleted: 0,
+      status: "open",
+      streak,
+    };
+  }
   return {
     ...state.dailyMission,
     reviewsCompleted: state.reviewedCount,
@@ -1388,6 +1413,9 @@ const server = createServer(async (req, res) => {
         ? TRUNCATED_SAVED_WORDS_RESPONSE
         : cookies.e2e_saved_words_fixture === "long-content"
           ? LONG_SAVED_WORDS_RESPONSE
+          : cookies.e2e_home_fixture !== "new-learner" &&
+              cookies.e2e_home_fixture
+            ? HOME_PRACTICE_SAVED_WORDS_RESPONSE
           : buildSavedWords(state);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
@@ -1476,7 +1504,12 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 500, { error: "fixture_read_failure" });
       return;
     }
-    const data = buildDueWords(state, cookies.e2e_review_fixture);
+    const data =
+      cookies.e2e_home_fixture === "reviews-due" ||
+      cookies.e2e_home_fixture === "mission-complete" ||
+      cookies.e2e_home_fixture === "sentence-practice-needed"
+        ? { items: [], nextCursor: undefined, totalCount: 3 }
+        : buildDueWords(state, cookies.e2e_review_fixture);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
@@ -1635,7 +1668,7 @@ const server = createServer(async (req, res) => {
     const state = getSessionState(cookies);
     const hold = waitForReadHold(state, cookies, "home");
     if (hold) await hold;
-    const mission = buildDailyMission(state);
+    const mission = buildDailyMission(state, cookies.e2e_home_fixture);
     logLine(req, 200, { reviewsCompleted: mission.reviewsCompleted });
     jsonResponse(res, 200, mission);
     return;

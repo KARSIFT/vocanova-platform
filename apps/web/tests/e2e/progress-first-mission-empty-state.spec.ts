@@ -52,5 +52,7 @@ test("explains genuinely empty progress without inventing history and keeps Home
   await expect(
     page.getByRole("heading", { name: "Today's Mission", level: 1 }),
   ).toBeVisible();
-  await expect(page.getByRole("link", { name: "Go to Journey" })).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Explore a journey" }),
+  ).toBeVisible();
 });
