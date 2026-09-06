@@ -59,6 +59,32 @@ test("rejects different owners, target mismatch, malformed and expired recovery"
   }
 });
 
+test("a sibling saved meaning does not clear another meaning's recovery", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  await context.addCookies([{ name: "vocanova_session", value: `bank-${randomUUID()}`, url: baseURL }, { name: "vocanova_csrf", value: "bank-csrf", url: baseURL }, { name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
+  await page.goto("/discover/saved/bank?meaning=mean-bank-river");
+  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ path: "/discover/saved/bank?meaning=mean-bank-river", attemptId: "e2e-library-bank-river", targetWord: "bank" })]);
+  await page.goto("/discover/saved/bank?meaning=mean-bank-money");
+  await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
+  await page.goto("/discover/saved/bank?meaning=mean-bank-river");
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+});
+
+test("encoded saved-word return paths survive 401 reauthentication", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  const port = process.env.MOCK_API_PORT ?? "8080";
+  await context.addCookies([{ name: "vocanova_session", value: `encoded-${randomUUID()}`, url: baseURL }, { name: "vocanova_csrf", value: "encoded-csrf", url: baseURL }, { name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
+  const path = "/discover/saved/pour%3F%23?meaning=mean-pour";
+  await page.request.post(`http://127.0.0.1:${port}/api/v1/auth/magic-links`, { data: { email: "encoded@example.test", returnTo: path } });
+  await page.goto(path);
+  await page.getByRole("textbox", { name: /Write a sentence using pour/ }).fill("I pour coffee.");
+  await page.route("**/api/v1/sentence-feedback", (route) => route.fulfill({ status: 401, contentType: "application/problem+json", body: JSON.stringify({ detail: "authentication required" }) }));
+  await page.getByRole("button", { name: "Check my sentence" }).click();
+  await page.unroute("**/api/v1/sentence-feedback");
+  await page.goto(`/auth/magic?token=encoded&email=encoded%40example.test&returnTo=${encodeURIComponent(path)}`);
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+});
+
 test("home restores selection and review restores the historical attempt without a new review", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await authenticate(page, context, baseURL);
