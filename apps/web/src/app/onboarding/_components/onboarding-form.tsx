@@ -109,7 +109,8 @@ function isFormComplete(state: FormState): boolean {
     state.englishLevel !== null &&
     state.nativeLanguage.trim().length > 0 &&
     state.learningGoal !== null &&
-    state.mainUseCase !== null
+    state.mainUseCase !== null &&
+    state.timezone.trim().length > 0
   );
 }
 

@@ -1098,15 +1098,22 @@ function applySettingsPatch(settings, patch) {
     error.code = 400;
     throw error;
   }
-  if (
-    result.timezone !== undefined &&
-    (typeof result.timezone !== "string" || result.timezone.length === 0)
-  ) {
+  if (result.timezone !== undefined && !isValidTimezone(result.timezone)) {
     const error = new Error("invalid timezone");
-    error.code = 400;
+    error.code = 422;
     throw error;
   }
   return result;
+}
+
+function isValidTimezone(timezone) {
+  if (typeof timezone !== "string" || timezone.length === 0) return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: timezone }).format(0);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function logLine(req, status, extra) {
@@ -1379,6 +1386,11 @@ const server = createServer(async (req, res) => {
     } catch {
       logLine(req, 400, { reason: "malformed-json" });
       jsonResponse(res, 400, { error: "invalid_json" });
+      return;
+    }
+    if (body.timezone !== undefined && !isValidTimezone(body.timezone)) {
+      logLine(req, 422, { reason: "invalid-timezone" });
+      jsonResponse(res, 422, { error: "invalid timezone" });
       return;
     }
     state.onboardingCompleted = true;
@@ -1833,7 +1845,7 @@ const server = createServer(async (req, res) => {
     try {
       state.settings = applySettingsPatch(state.settings, body);
     } catch (error) {
-      const status = error.code === 400 ? 400 : 500;
+      const status = error.code === 422 ? 422 : error.code === 400 ? 400 : 500;
       logLine(req, status, { reason: "invalid-settings-patch" });
       jsonResponse(res, status, { error: error.message });
       return;

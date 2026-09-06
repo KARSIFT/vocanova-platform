@@ -89,6 +89,8 @@ test.describe("Timezone preference", () => {
 
     const timezone = page.getByRole("combobox", { name: "Timezone" });
     await expect(timezone).toHaveValue("UTC");
+    await timezone.fill("");
+    await expect(page.getByRole("button", { name: "Finish setup" })).toBeDisabled();
     await timezone.fill("Europe/London");
     const onboarding = page.waitForRequest((request) =>
       request.method() === "POST" && request.url().endsWith("/api/v1/onboarding"),
@@ -97,5 +99,55 @@ test.describe("Timezone preference", () => {
     await expect.poll(async () => JSON.parse((await onboarding).postData() ?? "{}")).toMatchObject({
       timezone: "Europe/London",
     });
+  });
+
+  test("rejects invalid IANA timezones in onboarding and settings", async ({
+    page,
+    context,
+  }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) throw new Error("Expected a Playwright base URL.");
+    const domain = new URL(baseURL).hostname;
+    await context.addCookies([
+      {
+        name: "vocanova_session",
+        value: `timezone-invalid-${randomUUID()}`,
+        domain,
+        path: "/",
+      },
+      { name: "vocanova_csrf", value: "timezone-csrf", domain, path: "/" },
+      { name: "e2e_onboarding_status", value: "not_started", domain, path: "/" },
+    ]);
+
+    await page.goto("/onboarding");
+    await page.getByLabel("A1 — Beginner").check();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("textbox", { name: "Native language" }).fill("en");
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByLabel("Work").first().check();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByLabel("Work").last().check();
+    await page.getByRole("button", { name: "Continue" }).click();
+    await page.getByRole("combobox", { name: "Timezone" }).fill("Mars/Olympus");
+    const onboardingResponse = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/onboarding") &&
+        response.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "Finish setup" }).click();
+    expect((await onboardingResponse).status()).toBe(422);
+
+    await context.clearCookies({ name: "e2e_onboarding_status" });
+    await page.goto("/settings");
+    await page
+      .getByRole("combobox", { name: "IANA timezone" })
+      .fill("Mars/Olympus");
+    const settingsResponse = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/settings") &&
+        response.request().method() === "PATCH",
+    );
+    await page.getByRole("button", { name: "Save settings" }).click();
+    expect((await settingsResponse).status()).toBe(422);
   });
 });

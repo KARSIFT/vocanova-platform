@@ -48,7 +48,8 @@ beforeEach(async () => {
 
 describe("Worker AI feedback parity", () => {
   it("records AI activity on the stored local day across the DST boundary", async () => {
-    const clock = () => new Date("2026-03-08T07:30:00.000Z");
+    let timestamp = "2026-03-08T09:59:00.000Z";
+    const clock = () => new Date(timestamp);
     await env.DB.prepare(
       `INSERT INTO user_settings (id, user_id, timezone, created_at, updated_at)
        VALUES (?1, ?2, 'America/Los_Angeles', ?3, ?3)`,
@@ -73,9 +74,29 @@ describe("Worker AI feedback parity", () => {
         .bind(USER_A)
         .first(),
     ).resolves.toEqual({
-      local_date: "2026-03-07",
+      local_date: "2026-03-08",
       timezone: "America/Los_Angeles",
       sentences_submitted: 1,
+    });
+
+    timestamp = "2026-03-08T10:01:00.000Z";
+    await expect(
+      service.submit(
+        USER_A,
+        submission("I work every evening."),
+        "dst-day-after",
+      ),
+    ).resolves.toMatchObject({ result: { status: "correct" } });
+    await expect(
+      env.DB.prepare(
+        "SELECT local_date, timezone, sentences_submitted FROM daily_activity_summaries WHERE user_id = ?1",
+      )
+        .bind(USER_A)
+        .first(),
+    ).resolves.toEqual({
+      local_date: "2026-03-08",
+      timezone: "America/Los_Angeles",
+      sentences_submitted: 2,
     });
   });
 

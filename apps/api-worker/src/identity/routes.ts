@@ -48,6 +48,7 @@ const OnboardingSchema = z.object({
     .min(1)
     .max(100)
     .refine(isValidTimezone, "invalid IANA timezone")
+    .describe("IANA time zone identifier, such as America/Los_Angeles.")
     .optional(),
 });
 const SettingsUpdateSchema = z
@@ -65,6 +66,7 @@ const SettingsUpdateSchema = z
       .min(1)
       .max(100)
       .refine(isValidTimezone, "invalid IANA timezone")
+      .describe("IANA time zone identifier, such as America/Los_Angeles.")
       .optional(),
   })
   .strict();

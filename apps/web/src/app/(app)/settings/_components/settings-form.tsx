@@ -375,7 +375,9 @@ function buildUpdateBody(
   baseline: Settings,
 ): UpdateSettingsBody {
   const body: UpdateSettingsBody = {};
-  if (next.timezone !== baseline.timezone) body.timezone = next.timezone;
+  if (next.timezone !== baseline.timezone && next.timezone.trim()) {
+    body.timezone = next.timezone;
+  }
   if (next.dailyReviewTarget !== baseline.dailyReviewTarget) {
     body.dailyReviewTarget = next.dailyReviewTarget;
   }
