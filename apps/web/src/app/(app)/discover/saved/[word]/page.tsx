@@ -18,24 +18,16 @@ export default async function SavedWordPage({
   const { word } = await params;
   const { meaning: meaningId } = await searchParams;
   const client = await createServerApiClient();
-  let saved;
   let canonical;
   try {
-    [saved, canonical] = await Promise.all([
-      client.listSavedWords({ limit: 100 }),
-      client.getCanonicalWord(word),
-    ]);
+    canonical = await client.getCanonicalWord(word);
   } catch (error) {
     if (error instanceof ApiResponseError && error.status === 404) notFound();
     requireAuthRedirect(error, `/discover/saved/${word}`);
   }
-  const savedMeaning = saved.data.items.find(
-    (item) =>
-      item.wordSlug === word && (!meaningId || item.meaningId === meaningId),
-  );
-  if (!savedMeaning) notFound();
+  if (!meaningId) notFound();
   const meaning = canonical.data.word.meanings.find(
-    (item) => item.id === savedMeaning.meaningId,
+    (item) => item.id === meaningId && item.saved && item.userWordId,
   );
   if (!meaning) notFound();
   return (
@@ -51,9 +43,14 @@ export default async function SavedWordPage({
         <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-700">
           {meaning.shortDefinition}
         </p>
+        {meaning.learnerDefinition ? (
+          <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-neutral-600">
+            {meaning.learnerDefinition}
+          </p>
+        ) : null}
         {meaning.reviewState ? (
           <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-            Review state: {meaning.reviewState}
+            Review state: {reviewStateLabel(meaning.reviewState)}
           </p>
         ) : null}
         {meaning.examples.length ? (
@@ -86,15 +83,28 @@ export default async function SavedWordPage({
         ) : null}
         <SentenceFeedback
           targetWord={canonical.data.word.text}
-          attemptId={savedMeaning.userWordId}
+              attemptId={meaning.userWordId!}
           source="word_detail"
           shortDefinition={meaning.shortDefinition}
         />
         <RemoveSavedMeaning
-          meaningId={savedMeaning.meaningId}
+          meaningId={meaning.id}
           wordText={canonical.data.word.text}
         />
       </section>
     </div>
   );
+}
+
+function reviewStateLabel(
+  state: NonNullable<import("@vocanova/api-client").WordMeaning["reviewState"]>,
+) {
+  return {
+    due: "Due now",
+    new: "New",
+    learning: "Learning",
+    reviewing: "Reviewing",
+    mastered: "Mastered",
+    not_reviewing: "Not in review",
+  }[state];
 }

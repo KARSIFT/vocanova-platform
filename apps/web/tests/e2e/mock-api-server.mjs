@@ -1747,6 +1747,18 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 404, { error: "not_found", slug });
       return;
     }
+    if (cookies.e2e_saved_words_fixture === "library" && slug === "pour") {
+      response.word.meanings = response.word.meanings.map((meaning) =>
+        meaning.id === "mean-pour"
+          ? {
+              ...meaning,
+              saved: true,
+              userWordId: "e2e-library-user-word-11",
+              reviewState: "due",
+            }
+          : meaning,
+      );
+    }
     logLine(req, 200, { slug });
     jsonResponse(res, 200, response);
     return;
