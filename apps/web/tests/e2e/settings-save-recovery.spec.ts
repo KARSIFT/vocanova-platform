@@ -52,7 +52,9 @@ test.describe("Settings save recovery", () => {
     await page.goto("/settings");
 
     const displayName = page.getByRole("textbox", { name: "Display name" });
+    const timezone = page.getByRole("combobox", { name: "IANA timezone" });
     await displayName.fill("Retry-safe learner");
+    await timezone.fill("Asia/Tehran");
     const patchRequests: string[] = [];
     page.on("request", (request) => {
       if (
@@ -79,6 +81,7 @@ test.describe("Settings save recovery", () => {
         .filter({ hasText: "We couldn't save your settings. Please try again." }),
     ).toBeVisible();
     await expect(displayName).toHaveValue("Retry-safe learner");
+    await expect(timezone).toHaveValue("Asia/Tehran");
     await expect(page.getByRole("button", { name: "Save settings" })).toBeEnabled();
 
     await page.getByRole("button", { name: "Save settings" }).click();
@@ -86,11 +89,13 @@ test.describe("Settings save recovery", () => {
       page.getByText("Your settings have been saved.", { exact: true }),
     ).toBeVisible();
     await expect.poll(() => patchRequests).toHaveLength(2);
-    expect(JSON.parse(patchRequests[1])).toEqual({
+    expect(JSON.parse(patchRequests[1]!)).toEqual({
       displayName: "Retry-safe learner",
+      timezone: "Asia/Tehran",
     });
 
     await page.reload();
     await expect(displayName).toHaveValue("Retry-safe learner");
+    await expect(timezone).toHaveValue("Asia/Tehran");
   });
 });

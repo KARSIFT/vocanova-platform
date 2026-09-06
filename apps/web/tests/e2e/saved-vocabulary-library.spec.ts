@@ -174,6 +174,67 @@ test("keeps saved meanings for the same word distinct", async ({
   });
 });
 
+test("restores removed bank meanings and rejects unknown meaning ids", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  const csrfToken = "saved-library-restore-csrf";
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "library", url: baseURL },
+    { name: "vocanova_csrf", value: csrfToken, url: baseURL },
+  ]);
+  const apiOrigin = `http://127.0.0.1:${process.env.MOCK_API_PORT ?? "8080"}`;
+  const bankMeanings = [
+    { meaningId: "mean-bank-river", shortDefinition: "land beside a river" },
+    {
+      meaningId: "mean-bank-money",
+      shortDefinition: "a financial institution",
+    },
+  ];
+
+  for (const expected of bankMeanings) {
+    const removed = await page.request.delete(
+      `${apiOrigin}/api/v1/user-words/${expected.meaningId}`,
+      { headers: { "X-CSRF-Token": csrfToken } },
+    );
+    expect(removed.status()).toBe(204);
+
+    const restored = await page.request.post(`${apiOrigin}/api/v1/user-words`, {
+      headers: { "X-CSRF-Token": csrfToken },
+      data: { meaningId: expected.meaningId, source: "word_detail" },
+    });
+    expect(restored.status()).toBe(200);
+    expect(await restored.json()).toMatchObject({
+      meaningId: expected.meaningId,
+      wordId: "word-bank",
+      wordSlug: "bank",
+      wordText: "bank",
+      shortDefinition: expected.shortDefinition,
+      saved: true,
+      source: "word_detail",
+    });
+  }
+
+  const saved = await page.request.get(
+    `${apiOrigin}/api/v1/user-words?limit=100`,
+  );
+  expect(saved.status()).toBe(200);
+  expect(
+    (await saved.json()).items.map(
+      (item: { meaningId: string }) => item.meaningId,
+    ),
+  ).toEqual(expect.arrayContaining(bankMeanings.map(({ meaningId }) => meaningId)));
+
+  const unknown = await page.request.post(`${apiOrigin}/api/v1/user-words`, {
+    headers: { "X-CSRF-Token": csrfToken },
+    data: { meaningId: "unknown-meaning" },
+  });
+  expect(unknown.status()).toBe(400);
+  expect(await unknown.json()).toEqual({ error: "unknown_meaning_id" });
+});
+
 test("keeps a saved meaning until a retry succeeds, then refreshes the library", async ({
   page,
   context,

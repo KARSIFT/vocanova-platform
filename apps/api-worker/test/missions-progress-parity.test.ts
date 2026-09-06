@@ -17,6 +17,52 @@ beforeEach(async () => {
 });
 
 describe("Worker missions, gamification, streak, and progress parity", () => {
+  it.each([
+    ["Asia/Tehran", "2026-03-08"],
+    ["Pacific/Honolulu", "2026-03-07"],
+    ["America/Los_Angeles", "2026-03-07"],
+  ])(
+    "uses the stored %s timezone for mission, progress, and review activity at the UTC boundary",
+    async (timezone, localDay) => {
+      await setSettings(timezone, 5);
+      const instant = new Date("2026-03-08T07:30:00.000Z");
+      const missions = new D1MissionsRepository(env.DB, () => instant);
+      const content = new D1ContentLearningRepository(env.DB, () => instant);
+      const saved = await content.saveUserWord(
+        USER,
+        MEANING,
+        "manual",
+        `timezone-${timezone}`,
+      );
+
+      await content.submitReview(
+        USER,
+        review(saved.userWordId, `timezone-review-${timezone}`),
+        `timezone-review-${timezone}`,
+      );
+
+      await expect(missions.getDailyMission(USER, "")).resolves.toMatchObject({
+        localDate: localDay,
+        timezone,
+        reviewsCompleted: 1,
+      });
+      await expect(missions.getProgress(USER, "")).resolves.toMatchObject({
+        completionHistory: [{ localDate: localDay, completed: false }],
+      });
+      await expect(
+        env.DB.prepare(
+          "SELECT local_date, timezone, reviews_attempted FROM daily_activity_summaries WHERE user_id = ?1",
+        )
+          .bind(USER)
+          .first(),
+      ).resolves.toEqual({
+        local_date: localDay,
+        timezone,
+        reviews_attempted: 1,
+      });
+    },
+  );
+
   it("uses deterministic IANA local days and rejects unknown zones", () => {
     const instant = new Date("2026-03-08T07:30:00.000Z");
     expect(localDate(instant, "UTC")).toBe("2026-03-08");
@@ -24,6 +70,18 @@ describe("Worker missions, gamification, streak, and progress parity", () => {
     expect(localDate(instant, "Asia/Tehran")).toBe("2026-03-08");
     expect(() => localDate(instant, "Mars/Olympus")).toThrow(
       "invalid_timezone",
+    );
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Los_Angeles",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: false,
+    });
+    expect(formatter.format(new Date("2026-03-08T09:59:00.000Z"))).toBe(
+      "01:59",
+    );
+    expect(formatter.format(new Date("2026-03-08T10:01:00.000Z"))).toBe(
+      "03:01",
     );
   });
 

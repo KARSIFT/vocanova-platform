@@ -14,7 +14,11 @@
       "path": "/api/v1/onboarding",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "X-CSRF-Token", "required": true }
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        }
       ],
       "request": {
         "properties": [
@@ -22,7 +26,8 @@
           "englishLevel",
           "learningGoal",
           "mainUseCase",
-          "nativeLanguage"
+          "nativeLanguage",
+          "timezone"
         ],
         "required": [
           "dailyReviewTarget",
@@ -40,7 +45,8 @@
           "learningGoal",
           "mainUseCase",
           "nativeLanguage",
-          "status"
+          "status",
+          "timezone"
         ],
         "required": ["status"]
       }
@@ -51,9 +57,16 @@
       "path": "/api/v1/settings/email-change-links/consume",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "X-CSRF-Token", "required": true }
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        }
       ],
-      "request": { "properties": ["token"], "required": ["token"] },
+      "request": {
+        "properties": ["token"],
+        "required": ["token"]
+      },
       "response": {
         "properties": ["changedAt", "email", "previousEmail"],
         "required": ["changedAt", "email", "previousEmail"]
@@ -87,8 +100,16 @@
       "path": "/api/v1/account-deletion-requests",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "Idempotency-Key", "required": true },
-        { "in": "header", "name": "X-CSRF-Token", "required": true }
+        {
+          "in": "header",
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        }
       ],
       "request": null,
       "response": {
@@ -115,9 +136,18 @@
       "operationId": "GetCanonicalWord",
       "path": "/api/v1/canonical-words/{wordSlug}",
       "successStatus": 200,
-      "parameters": [{ "in": "path", "name": "wordSlug", "required": true }],
+      "parameters": [
+        {
+          "in": "path",
+          "name": "wordSlug",
+          "required": true
+        }
+      ],
       "request": null,
-      "response": { "properties": ["word"], "required": ["word"] }
+      "response": {
+        "properties": ["word"],
+        "required": ["word"]
+      }
     },
     {
       "method": "GET",
@@ -143,7 +173,13 @@
       "operationId": "GetDailyMission",
       "path": "/api/v1/daily-mission",
       "successStatus": 200,
-      "parameters": [{ "in": "query", "name": "timezone", "required": false }],
+      "parameters": [
+        {
+          "in": "query",
+          "name": "timezone",
+          "required": false
+        }
+      ],
       "request": null,
       "response": {
         "properties": [
@@ -178,7 +214,13 @@
       "operationId": "GetJourneySituation",
       "path": "/api/v1/journey-situations/{slug}",
       "successStatus": 200,
-      "parameters": [{ "in": "path", "name": "slug", "required": true }],
+      "parameters": [
+        {
+          "in": "path",
+          "name": "slug",
+          "required": true
+        }
+      ],
       "request": null,
       "response": {
         "properties": ["meanings", "situation"],
@@ -200,7 +242,8 @@
           "learningGoal",
           "mainUseCase",
           "nativeLanguage",
-          "status"
+          "status",
+          "timezone"
         ],
         "required": ["status"]
       }
@@ -210,7 +253,13 @@
       "operationId": "GetProgress",
       "path": "/api/v1/progress",
       "successStatus": 200,
-      "parameters": [{ "in": "query", "name": "timezone", "required": false }],
+      "parameters": [
+        {
+          "in": "query",
+          "name": "timezone",
+          "required": false
+        }
+      ],
       "request": null,
       "response": {
         "properties": [
@@ -227,8 +276,16 @@
       "path": "/api/v1/reviews/due",
       "successStatus": 200,
       "parameters": [
-        { "in": "query", "name": "after", "required": false },
-        { "in": "query", "name": "limit", "required": false }
+        {
+          "in": "query",
+          "name": "after",
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false
+        }
       ],
       "request": null,
       "response": {
@@ -250,7 +307,8 @@
           "displayName",
           "marketingEmailsEnabled",
           "notificationsEnabled",
-          "reviewIntervalPreset"
+          "reviewIntervalPreset",
+          "timezone"
         ],
         "required": [
           "appLanguage",
@@ -258,7 +316,8 @@
           "displayName",
           "marketingEmailsEnabled",
           "notificationsEnabled",
-          "reviewIntervalPreset"
+          "reviewIntervalPreset",
+          "timezone"
         ]
       }
     },
@@ -268,8 +327,16 @@
       "path": "/api/v1/journey-situations",
       "successStatus": 200,
       "parameters": [
-        { "in": "query", "name": "after", "required": false },
-        { "in": "query", "name": "limit", "required": false }
+        {
+          "in": "query",
+          "name": "after",
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false
+        }
       ],
       "request": null,
       "response": {
@@ -283,8 +350,16 @@
       "path": "/api/v1/user-words",
       "successStatus": 200,
       "parameters": [
-        { "in": "query", "name": "after", "required": false },
-        { "in": "query", "name": "limit", "required": false }
+        {
+          "in": "query",
+          "name": "after",
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "limit",
+          "required": false
+        }
       ],
       "request": null,
       "response": {
@@ -298,7 +373,11 @@
       "path": "/api/v1/auth/logout",
       "successStatus": 204,
       "parameters": [
-        { "in": "header", "name": "X-CSRF-Token", "required": true }
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        }
       ],
       "request": null,
       "response": null
@@ -309,9 +388,21 @@
       "path": "/api/v1/auth/oauth/google/callback",
       "successStatus": 302,
       "parameters": [
-        { "in": "query", "name": "code", "required": false },
-        { "in": "query", "name": "error", "required": false },
-        { "in": "query", "name": "state", "required": false }
+        {
+          "in": "query",
+          "name": "code",
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "error",
+          "required": false
+        },
+        {
+          "in": "query",
+          "name": "state",
+          "required": false
+        }
       ],
       "request": null,
       "response": null
@@ -322,8 +413,14 @@
       "path": "/api/v1/auth/oauth/google/start",
       "successStatus": 200,
       "parameters": [],
-      "request": { "properties": ["redirectUri"], "required": ["redirectUri"] },
-      "response": { "properties": ["url"], "required": ["url"] }
+      "request": {
+        "properties": ["redirectUri"],
+        "required": ["redirectUri"]
+      },
+      "response": {
+        "properties": ["url"],
+        "required": ["url"]
+      }
     },
     {
       "method": "POST",
@@ -331,8 +428,16 @@
       "path": "/api/v1/sentence-feedback/{attemptId}/reports",
       "successStatus": 204,
       "parameters": [
-        { "in": "header", "name": "X-CSRF-Token", "required": true },
-        { "in": "path", "name": "attemptId", "required": true }
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        },
+        {
+          "in": "path",
+          "name": "attemptId",
+          "required": true
+        }
       ],
       "request": {
         "properties": ["classification", "reason"],
@@ -346,9 +451,16 @@
       "path": "/api/v1/settings/email-change-links",
       "successStatus": 204,
       "parameters": [
-        { "in": "header", "name": "X-CSRF-Token", "required": true }
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        }
       ],
-      "request": { "properties": ["newEmail"], "required": ["newEmail"] },
+      "request": {
+        "properties": ["newEmail"],
+        "required": ["newEmail"]
+      },
       "response": null
     },
     {
@@ -357,7 +469,10 @@
       "path": "/api/v1/auth/magic-links",
       "successStatus": 204,
       "parameters": [],
-      "request": { "properties": ["email", "returnTo"], "required": ["email"] },
+      "request": {
+        "properties": ["email", "returnTo"],
+        "required": ["email"]
+      },
       "response": null
     },
     {
@@ -366,8 +481,16 @@
       "path": "/api/v1/user-words",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "Idempotency-Key", "required": true },
-        { "in": "header", "name": "X-CSRF-Token", "required": true }
+        {
+          "in": "header",
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        }
       ],
       "request": {
         "properties": ["meaningId", "source"],
@@ -409,8 +532,16 @@
       "path": "/api/v1/reviews/submissions",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "Idempotency-Key", "required": true },
-        { "in": "header", "name": "X-CSRF-Token", "required": true }
+        {
+          "in": "header",
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        }
       ],
       "request": {
         "properties": [
@@ -482,8 +613,16 @@
       "path": "/api/v1/sentence-feedback",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "Idempotency-Key", "required": true },
-        { "in": "header", "name": "X-CSRF-Token", "required": true }
+        {
+          "in": "header",
+          "name": "Idempotency-Key",
+          "required": true
+        },
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        }
       ],
       "request": {
         "properties": ["attemptId", "sentenceText", "source"],
@@ -519,8 +658,16 @@
       "path": "/api/v1/user-words/{meaningId}",
       "successStatus": 204,
       "parameters": [
-        { "in": "header", "name": "X-CSRF-Token", "required": true },
-        { "in": "path", "name": "meaningId", "required": true }
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        },
+        {
+          "in": "path",
+          "name": "meaningId",
+          "required": true
+        }
       ],
       "request": null,
       "response": null
@@ -531,7 +678,11 @@
       "path": "/api/v1/settings",
       "successStatus": 200,
       "parameters": [
-        { "in": "header", "name": "X-CSRF-Token", "required": true }
+        {
+          "in": "header",
+          "name": "X-CSRF-Token",
+          "required": true
+        }
       ],
       "request": {
         "properties": [
@@ -540,7 +691,8 @@
           "displayName",
           "marketingEmailsEnabled",
           "notificationsEnabled",
-          "reviewIntervalPreset"
+          "reviewIntervalPreset",
+          "timezone"
         ],
         "required": []
       },
@@ -551,7 +703,8 @@
           "displayName",
           "marketingEmailsEnabled",
           "notificationsEnabled",
-          "reviewIntervalPreset"
+          "reviewIntervalPreset",
+          "timezone"
         ],
         "required": [
           "appLanguage",
@@ -559,7 +712,8 @@
           "displayName",
           "marketingEmailsEnabled",
           "notificationsEnabled",
-          "reviewIntervalPreset"
+          "reviewIntervalPreset",
+          "timezone"
         ]
       }
     }
@@ -615,7 +769,11 @@
       "operationId": "GetJourneySituation",
       "path": "/api/v1/journey-situations/{slug}"
     },
-    { "method": "GET", "operationId": "GetCurrentUser", "path": "/api/v1/me" },
+    {
+      "method": "GET",
+      "operationId": "GetCurrentUser",
+      "path": "/api/v1/me"
+    },
     {
       "method": "GET",
       "operationId": "GetOnboarding",

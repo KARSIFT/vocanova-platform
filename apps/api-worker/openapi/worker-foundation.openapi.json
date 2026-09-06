@@ -1040,6 +1040,12 @@
                         "completed"
                       ],
                       "type": "string"
+                    },
+                    "timezone": {
+                      "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                      "maxLength": 100,
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -1117,6 +1123,12 @@
                   "nativeLanguage": {
                     "minLength": 1,
                     "type": "string"
+                  },
+                  "timezone": {
+                    "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "type": "string"
                   }
                 },
                 "required": [
@@ -1187,6 +1199,12 @@
                         "in_progress",
                         "completed"
                       ],
+                      "type": "string"
+                    },
+                    "timezone": {
+                      "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                      "maxLength": 100,
+                      "minLength": 1,
                       "type": "string"
                     }
                   },
@@ -2012,6 +2030,12 @@
                         "custom"
                       ],
                       "type": "string"
+                    },
+                    "timezone": {
+                      "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                      "maxLength": 100,
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -2020,7 +2044,8 @@
                     "appLanguage",
                     "notificationsEnabled",
                     "marketingEmailsEnabled",
-                    "displayName"
+                    "displayName",
+                    "timezone"
                   ],
                   "type": "object"
                 }
@@ -2084,6 +2109,12 @@
                       "custom"
                     ],
                     "type": "string"
+                  },
+                  "timezone": {
+                    "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                    "maxLength": 100,
+                    "minLength": 1,
+                    "type": "string"
                   }
                 },
                 "type": "object"
@@ -2126,6 +2157,12 @@
                         "custom"
                       ],
                       "type": "string"
+                    },
+                    "timezone": {
+                      "description": "IANA time zone identifier, such as America/Los_Angeles.",
+                      "maxLength": 100,
+                      "minLength": 1,
+                      "type": "string"
                     }
                   },
                   "required": [
@@ -2134,7 +2171,8 @@
                     "appLanguage",
                     "notificationsEnabled",
                     "marketingEmailsEnabled",
-                    "displayName"
+                    "displayName",
+                    "timezone"
                   ],
                   "type": "object"
                 }

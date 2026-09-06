@@ -55,6 +55,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
     appLanguage: initialSettings.appLanguage,
     notificationsEnabled: initialSettings.notificationsEnabled,
     marketingEmailsEnabled: initialSettings.marketingEmailsEnabled,
+    timezone: initialSettings.timezone,
     displayName: initialSettings.displayName,
   });
   const [status, setStatus] = useState<SaveStatus>({ type: "idle" });
@@ -68,6 +69,14 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!state.timezone.trim()) {
+      setStatus({
+        type: "error",
+        message: "Enter an IANA timezone before saving your settings.",
+      });
+      return;
+    }
 
     const csrfToken = getCookieValue(CSRF_COOKIE_NAME);
     if (!csrfToken) {
@@ -98,6 +107,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         appLanguage: data.appLanguage,
         notificationsEnabled: data.notificationsEnabled,
         marketingEmailsEnabled: data.marketingEmailsEnabled,
+        timezone: data.timezone,
         displayName: data.displayName,
       });
       setStatus({ type: "saved" });
@@ -118,6 +128,49 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       aria-label="Practice settings"
       className="mt-[var(--spacing-lg)] space-y-[var(--spacing-lg)]"
     >
+      <fieldset className="space-y-[var(--spacing-md)]">
+        <legend className="text-lg font-semibold text-neutral-900">
+          Timezone
+        </legend>
+        <p className="text-base text-neutral-700">
+          Your timezone sets the daily mission reset boundary.
+        </p>
+        <label
+          className="block text-base font-medium text-neutral-900"
+          htmlFor="timezone"
+        >
+          IANA timezone
+        </label>
+        <input
+          id="timezone"
+          value={state.timezone}
+          onChange={(event) => patch("timezone", event.target.value)}
+          list="timezone-suggestions"
+          aria-invalid={state.timezone.trim().length === 0 || undefined}
+          className="min-h-[var(--spacing-2xl)] w-full rounded-md border border-neutral-300 px-[var(--spacing-sm)] text-base text-neutral-900"
+        />
+        <datalist id="timezone-suggestions">
+          <option value="UTC" />
+          <option value="America/New_York" />
+          <option value="Europe/London" />
+          <option value="Asia/Tehran" />
+        </datalist>
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+              if (timezone) patch("timezone", timezone);
+            } catch {
+              patch("timezone", "UTC");
+            }
+          }}
+          className="min-h-[var(--spacing-2xl)] rounded-md border border-neutral-300 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900"
+        >
+          Use device timezone
+        </button>
+      </fieldset>
+
       <fieldset className="space-y-[var(--spacing-md)]">
         <legend className="text-lg font-semibold text-neutral-900">
           Daily review target
@@ -331,6 +384,9 @@ function buildUpdateBody(
   baseline: Settings,
 ): UpdateSettingsBody {
   const body: UpdateSettingsBody = {};
+  if (next.timezone !== baseline.timezone) {
+    body.timezone = next.timezone;
+  }
   if (next.dailyReviewTarget !== baseline.dailyReviewTarget) {
     body.dailyReviewTarget = next.dailyReviewTarget;
   }

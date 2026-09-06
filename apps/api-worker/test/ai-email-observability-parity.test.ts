@@ -47,6 +47,59 @@ beforeEach(async () => {
 });
 
 describe("Worker AI feedback parity", () => {
+  it("records AI activity on the stored local day across the DST boundary", async () => {
+    let timestamp = "2026-03-08T09:59:00.000Z";
+    const clock = () => new Date(timestamp);
+    await env.DB.prepare(
+      `INSERT INTO user_settings (id, user_id, timezone, created_at, updated_at)
+       VALUES (?1, ?2, 'America/Los_Angeles', ?3, ?3)`,
+    )
+      .bind(crypto.randomUUID(), USER_A, clock().toISOString())
+      .run();
+    const service = createService(
+      new ScriptedProvider(() => validFeedback()),
+      {},
+      undefined,
+      env.DB,
+      clock,
+    );
+
+    await expect(
+      service.submit(USER_A, submission("I work every morning."), "dst-day"),
+    ).resolves.toMatchObject({ result: { status: "correct" } });
+    await expect(
+      env.DB.prepare(
+        "SELECT local_date, timezone, sentences_submitted FROM daily_activity_summaries WHERE user_id = ?1",
+      )
+        .bind(USER_A)
+        .first(),
+    ).resolves.toEqual({
+      local_date: "2026-03-08",
+      timezone: "America/Los_Angeles",
+      sentences_submitted: 1,
+    });
+
+    timestamp = "2026-03-08T10:01:00.000Z";
+    await expect(
+      service.submit(
+        USER_A,
+        submission("I work every evening."),
+        "dst-day-after",
+      ),
+    ).resolves.toMatchObject({ result: { status: "correct" } });
+    await expect(
+      env.DB.prepare(
+        "SELECT local_date, timezone, sentences_submitted FROM daily_activity_summaries WHERE user_id = ?1",
+      )
+        .bind(USER_A)
+        .first(),
+    ).resolves.toEqual({
+      local_date: "2026-03-08",
+      timezone: "America/Los_Angeles",
+      sentences_submitted: 2,
+    });
+  });
+
   it("resolves a daily mission target for its owner without exposing another learner's word", async () => {
     const repository = new D1AIFeedbackRepository(env.DB, () => new Date(NOW));
 
@@ -958,6 +1011,7 @@ function createService(
   } = {},
   telemetry?: AIFeedbackTelemetry,
   database: D1Database = env.DB,
+  clock: () => Date = () => new Date(NOW),
 ): AIFeedbackService {
   const config: AIFeedbackServiceConfig = {
     limits: {
@@ -974,12 +1028,12 @@ function createService(
     release: "test",
   };
   return new AIFeedbackService(
-    new D1AIFeedbackRepository(database, () => new Date(NOW)),
+    new D1AIFeedbackRepository(database, clock),
     provider,
     provider,
     telemetry,
     config,
-    () => new Date(NOW),
+    clock,
   );
 }
 

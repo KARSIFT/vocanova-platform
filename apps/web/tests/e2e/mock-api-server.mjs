@@ -150,6 +150,7 @@ const LONG_ACCOUNT_EMAIL = `${"a".repeat(64)}@example.test`;
 const LONG_SAVED_CONTENT = "a".repeat(300);
 
 const DEFAULT_SETTINGS = {
+  timezone: "UTC",
   dailyReviewTarget: 20,
   reviewIntervalPreset: "vocanova_default",
   appLanguage: "en",
@@ -1177,6 +1178,7 @@ function applySettingsPatch(settings, patch) {
     "notificationsEnabled",
     "marketingEmailsEnabled",
     "displayName",
+    "timezone",
   ]);
   const result = { ...settings };
   for (const [key, value] of Object.entries(patch ?? {})) {
@@ -1210,7 +1212,22 @@ function applySettingsPatch(settings, patch) {
     error.code = 400;
     throw error;
   }
+  if (result.timezone !== undefined && !isValidTimezone(result.timezone)) {
+    const error = new Error("invalid timezone");
+    error.code = 422;
+    throw error;
+  }
   return result;
+}
+
+function isValidTimezone(timezone) {
+  if (typeof timezone !== "string" || timezone.length === 0) return false;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: timezone }).format(0);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function logLine(req, status, extra) {
@@ -1494,6 +1511,11 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 400, { error: "invalid_json" });
       return;
     }
+    if (body.timezone !== undefined && !isValidTimezone(body.timezone)) {
+      logLine(req, 422, { reason: "invalid-timezone" });
+      jsonResponse(res, 422, { error: "invalid timezone" });
+      return;
+    }
     state.onboardingCompleted = true;
     if (typeof body.dailyReviewTarget === "number") {
       // seed rule: only seed dailyReviewTarget when no
@@ -1505,6 +1527,9 @@ const server = createServer(async (req, res) => {
       ) {
         state.settings.dailyReviewTarget = body.dailyReviewTarget;
       }
+    }
+    if (typeof body.timezone === "string") {
+      state.settings.timezone = body.timezone;
     }
     logLine(req, 200, { action: "complete-onboarding" });
     jsonResponse(res, 200, {
@@ -1621,11 +1646,20 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 400, { error: "missing_meaning_id" });
       return;
     }
+    const word = Object.values(CANONICAL_WORDS).find((candidate) =>
+      candidate.meanings.some((meaning) => meaning.id === meaningId),
+    );
+    const meaning = word?.meanings.find(
+      (candidate) => candidate.id === meaningId,
+    );
+    if (!word || !meaning) {
+      logLine(req, 400, { reason: "unknown-meaning-id", meaningId });
+      jsonResponse(res, 400, { error: "unknown_meaning_id" });
+      return;
+    }
     state.savedMeaningIds.add(meaningId);
     state.libraryRemovedMeaningIds.delete(meaningId);
     logLine(req, 200, { action: "save", meaningId });
-    const word = CANONICAL_WORDS.pour;
-    const meaning = word.meanings.find((m) => m.id === meaningId);
     jsonResponse(res, 200, {
       userWordId: `uw-${meaningId}`,
       meaningId: meaning.id,
@@ -2092,7 +2126,7 @@ const server = createServer(async (req, res) => {
     try {
       state.settings = applySettingsPatch(state.settings, body);
     } catch (error) {
-      const status = error.code === 400 ? 400 : 500;
+      const status = error.code === 422 ? 422 : error.code === 400 ? 400 : 500;
       logLine(req, status, { reason: "invalid-settings-patch" });
       jsonResponse(res, status, { error: error.message });
       return;
