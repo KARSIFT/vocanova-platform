@@ -1,23 +1,41 @@
 import Link from "next/link";
 
+import { ApiResponseError } from "@vocanova/api-client";
+
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
+import { HomeAuxiliaryReadRecovery } from "./_components/home-auxiliary-read-recovery";
 import { SavedWordPracticeSelector } from "./_components/saved-word-practice-selector";
 
 export default async function HomePage() {
   const client = await createServerApiClient();
-  let savedWordsResponse: Awaited<ReturnType<typeof client.listSavedWords>>;
-  let dueResponse: Awaited<ReturnType<typeof client.listDueWords>>;
-  let dailyMissionResponse: Awaited<ReturnType<typeof client.getDailyMission>>;
-  try {
-    savedWordsResponse = await client.listSavedWords({ limit: 10 });
-    dueResponse = await client.listDueWords({ limit: 1 });
-    dailyMissionResponse = await client.getDailyMission();
-  } catch (error) {
-    requireAuthRedirect(error, "/home");
+  const [savedWordsResult, dueWordsResult, dailyMissionResult] =
+    await Promise.allSettled([
+      client.listSavedWords({ limit: 10 }),
+      client.listDueWords({ limit: 1 }),
+      client.getDailyMission(),
+    ]);
+  const failedResults = [savedWordsResult, dueWordsResult, dailyMissionResult];
+  const unauthorizedResult = failedResults.find(
+    (result) =>
+      result.status === "rejected" &&
+      result.reason instanceof ApiResponseError &&
+      result.reason.status === 401,
+  );
+  if (unauthorizedResult?.status === "rejected") {
+    requireAuthRedirect(unauthorizedResult.reason, "/home");
+  }
+  if (dailyMissionResult.status === "rejected") {
+    requireAuthRedirect(dailyMissionResult.reason, "/home");
   }
 
-  const { items: savedWords } = savedWordsResponse.data;
-  const dueReviewWords = dueResponse.data.totalCount;
+  const savedWords =
+    savedWordsResult.status === "fulfilled"
+      ? savedWordsResult.value.data.items
+      : null;
+  const dueReviewWords =
+    dueWordsResult.status === "fulfilled"
+      ? dueWordsResult.value.data.totalCount
+      : null;
   const {
     reviewTarget: missionTargetWords,
     reviewsCompleted: reviewedWordsToday,
@@ -27,7 +45,7 @@ export default async function HomePage() {
     sentencePracticesCompleted,
     status: missionStatus,
     streak,
-  } = dailyMissionResponse.data;
+  } = dailyMissionResult.value.data;
   const isReviewTargetComplete = reviewedWordsToday >= missionTargetWords;
   const isStreakMilestone =
     isReviewTargetComplete &&
@@ -52,7 +70,7 @@ export default async function HomePage() {
     remainingReviews,
     remainingNewWords,
     remainingSentencePractices,
-    hasSavedWords: savedWords.length > 0,
+    hasSavedWords: savedWords === null ? null : savedWords.length > 0,
   });
 
   return (
@@ -141,7 +159,9 @@ export default async function HomePage() {
         >
           {primaryAction.label}
         </Link>
-        {primaryAction.href !== "/reviews" && dueReviewWords > 0 ? (
+        {primaryAction.href !== "/reviews" &&
+        dueReviewWords !== null &&
+        dueReviewWords > 0 ? (
           <Link
             href="/reviews"
             className="mt-[var(--spacing-md)] inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center rounded-md border border-neutral-300 bg-white px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
@@ -156,7 +176,15 @@ export default async function HomePage() {
         className="mt-[var(--spacing-lg)] space-y-[var(--spacing-xs)] text-base text-neutral-800"
       >
         <p>{streak.currentStreakCount}-day streak</p>
-        <p>{dueReviewWords} words due for review</p>
+        {dueReviewWords === null ? (
+          <HomeAuxiliaryReadRecovery
+            heading="Review availability unavailable"
+            description="We couldn’t check which words are due. Your mission progress is still up to date."
+            retryLabel="Try review availability again"
+          />
+        ) : (
+          <p>{dueReviewWords} words due for review</p>
+        )}
       </section>
 
       <Link
@@ -166,7 +194,13 @@ export default async function HomePage() {
         View all saved vocabulary
       </Link>
 
-      {savedWords.length > 0 ? (
+      {savedWords === null ? (
+        <HomeAuxiliaryReadRecovery
+          heading="Saved vocabulary unavailable"
+          description="We couldn’t load your saved words for practice. Your mission progress is still up to date."
+          retryLabel="Try saved vocabulary again"
+        />
+      ) : savedWords.length > 0 ? (
         <SavedWordPracticeSelector savedWords={savedWords} />
       ) : (
         <section
@@ -201,11 +235,11 @@ function getPrimaryAction({
   hasSavedWords,
 }: {
   missionStatus: "open" | "completed" | "missed" | "protected";
-  dueReviewWords: number;
+  dueReviewWords: number | null;
   remainingReviews: number;
   remainingNewWords: number | null;
   remainingSentencePractices: number | null;
-  hasSavedWords: boolean;
+  hasSavedWords: boolean | null;
 }) {
   if (missionStatus === "completed") {
     return {
@@ -214,7 +248,19 @@ function getPrimaryAction({
       description: "See the progress you completed today.",
     };
   }
-  if (remainingReviews > 0 && dueReviewWords > 0) {
+  if (remainingReviews > 0 && dueReviewWords === null) {
+    return {
+      href: "/reviews",
+      label: "Check reviews",
+      description:
+        "We couldn’t check the review queue. Open Reviews to see what is ready.",
+    };
+  }
+  if (
+    remainingReviews > 0 &&
+    dueReviewWords !== null &&
+    dueReviewWords > 0
+  ) {
     return {
       href: "/reviews",
       label: "Start review",
@@ -229,17 +275,24 @@ function getPrimaryAction({
     };
   }
   if (remainingSentencePractices !== null && remainingSentencePractices > 0) {
-    return hasSavedWords
+    return hasSavedWords === true
       ? {
           href: "#saved-word-practice-heading",
           label: "Practice a saved word",
           description: `${remainingSentencePractices} ${remainingSentencePractices === 1 ? "sentence practice is" : "sentence practices are"} still part of today’s mission.`,
         }
-      : {
-          href: "/discover",
-          label: "Explore a journey",
-          description: "Save a word to complete today’s sentence practice.",
-        };
+      : hasSavedWords === false
+        ? {
+            href: "/discover",
+            label: "Explore a journey",
+            description: "Save a word to complete today’s sentence practice.",
+          }
+        : {
+            href: "/discover/saved",
+            label: "Check saved vocabulary",
+            description:
+              "We couldn’t load your saved words. Open saved vocabulary to choose one for practice.",
+          };
   }
   return {
     href: "/discover",

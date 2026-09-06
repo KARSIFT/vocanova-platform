@@ -120,6 +120,10 @@ Required for every screen with dynamic content:
 - **Error/retry** — every network-dependent screen needs a safe retry path that doesn't lose learner
   input or falsely imply something completed. AI feedback failures specifically must never claim
   mission completion (see [09](../engineering/09-ai-features.md) §2 and §9).
+  Home keeps its authoritative daily-mission projection visible when its saved-vocabulary preview or
+  due-review count is unavailable. Each auxiliary region identifies what could not load and offers
+  an in-place retry; an unavailable due count is never rendered as zero or used to claim that the
+  learner is caught up. An expired session on any Home read still redirects to sign in.
 
 ## 10. Accessibility
 

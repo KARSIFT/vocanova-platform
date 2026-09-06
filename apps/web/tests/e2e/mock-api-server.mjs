@@ -68,6 +68,8 @@
 //   POST   /api/v1/sentence-feedback/:attemptId/reports -> 204
 //
 //   GET    /api/v1/daily-mission                     -> 200 DailyMission
+//             `e2e_home_read_unauthorized` returns one 401 from the named
+//             Home read (`saved`, `due`, or `mission`)
 //   GET    /api/v1/progress                          -> 200 Progress
 //             `e2e_progress_fixture=first-mission` returns authoritative
 //             zero totals and no completion history for first-time progress
@@ -1555,6 +1557,10 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/user-words") {
     const state = getSessionState(cookies);
+    if (cookies.e2e_home_read_unauthorized === "saved") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
     // The canonical saved-detail route must authorize from its canonical
     // response, rather than depending on a (possibly truncated) saved list.
     if (cookies.e2e_saved_words_fixture === "canonical-without-list") {
@@ -1701,6 +1707,10 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/reviews/due") {
     const state = getSessionState(cookies);
+    if (cookies.e2e_home_read_unauthorized === "due") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
     const readHold = waitForReadHold(state, cookies, "reviews");
     if (readHold) {
       await readHold;
@@ -1905,6 +1915,10 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && url.pathname === "/api/v1/daily-mission") {
     const state = getSessionState(cookies);
+    if (cookies.e2e_home_read_unauthorized === "mission") {
+      jsonResponse(res, 401, { error: "unauthorized" });
+      return;
+    }
     const hold = waitForReadHold(state, cookies, "home");
     if (hold) await hold;
     const mission = buildDailyMission(state, cookies);
