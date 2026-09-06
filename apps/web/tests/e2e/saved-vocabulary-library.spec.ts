@@ -36,10 +36,16 @@ test("opens a saved canonical word without Journey context and retains removal a
     { name: "e2e_saved_words_fixture", value: "library", url: baseURL },
     { name: "vocanova_csrf", value: "saved-library-csrf", url: baseURL },
   ]);
+  let savedListReads = 0;
+  await page.route("**/api/v1/user-words?*", async (route) => {
+    savedListReads += 1;
+    await route.abort();
+  });
   await page.route("**/api/v1/user-words/mean-pour", (route) =>
     route.fulfill({ status: 500, body: "{}" }),
   );
   await page.goto("/discover/saved/pour?meaning=mean-pour");
+  expect(savedListReads).toBe(0);
   await expect(page.getByRole("heading", { name: "pour", level: 1 })).toBeVisible();
   await expect(page.getByText("Could you pour me a cup of coffee?")).toBeVisible();
   await expect(page.getByRole("textbox", { name: /Write a sentence using pour/ })).toBeVisible();
@@ -47,4 +53,11 @@ test("opens a saved canonical word without Journey context and retains removal a
   await remove.click();
   await expect(page.getByText("Unable to remove this saved word. Please try again.")).toBeVisible();
   await expect(remove).toBeFocused();
+});
+
+test("rejects a canonical meaning that is not saved", async ({ page }) => {
+  await page.goto("/discover/saved/pour?meaning=unknown-meaning");
+  await expect(
+    page.getByRole("heading", { name: "Journey item not found", level: 1 }),
+  ).toBeVisible();
 });
