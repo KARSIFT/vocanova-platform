@@ -409,6 +409,10 @@ const SAVED_LIBRARY_PAGE_TWO = [
   },
 ];
 
+const PROGRESS_SHARED_SLUG_SAVED_WORDS_RESPONSE = {
+  items: [SAVED_LIBRARY_PAGE_TWO[2], SAVED_LIBRARY_PAGE_TWO[3]],
+};
+
 const MULTIPLE_CHOICE_DUE_WORDS = [
   {
     userWordId: "e2e-review-user-word-arrival",
@@ -1691,6 +1695,8 @@ const server = createServer(async (req, res) => {
               }
       : cookies.e2e_saved_words_fixture === "truncated-page"
         ? TRUNCATED_SAVED_WORDS_RESPONSE
+        : cookies.e2e_saved_words_fixture === "progress-shared-slug"
+          ? PROGRESS_SHARED_SLUG_SAVED_WORDS_RESPONSE
         : cookies.e2e_saved_words_fixture === "long-content"
           ? LONG_SAVED_WORDS_RESPONSE
           : cookies.e2e_saved_words_fixture === "library"
@@ -2138,7 +2144,12 @@ const server = createServer(async (req, res) => {
           : meaning,
       );
     }
-    if (cookies.e2e_saved_words_fixture === "library" && slug === "bank") {
+    if (
+      ["library", "progress-shared-slug"].includes(
+        cookies.e2e_saved_words_fixture,
+      ) &&
+      slug === "bank"
+    ) {
       response.word.meanings = response.word.meanings.map((meaning) => ({
         ...meaning,
         saved: true,
