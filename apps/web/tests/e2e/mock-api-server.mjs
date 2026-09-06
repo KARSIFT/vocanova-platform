@@ -1646,11 +1646,20 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 400, { error: "missing_meaning_id" });
       return;
     }
+    const word = Object.values(CANONICAL_WORDS).find((candidate) =>
+      candidate.meanings.some((meaning) => meaning.id === meaningId),
+    );
+    const meaning = word?.meanings.find(
+      (candidate) => candidate.id === meaningId,
+    );
+    if (!word || !meaning) {
+      logLine(req, 400, { reason: "unknown-meaning-id", meaningId });
+      jsonResponse(res, 400, { error: "unknown_meaning_id" });
+      return;
+    }
     state.savedMeaningIds.add(meaningId);
     state.libraryRemovedMeaningIds.delete(meaningId);
     logLine(req, 200, { action: "save", meaningId });
-    const word = CANONICAL_WORDS.pour;
-    const meaning = word.meanings.find((m) => m.id === meaningId);
     jsonResponse(res, 200, {
       userWordId: `uw-${meaningId}`,
       meaningId: meaning.id,
