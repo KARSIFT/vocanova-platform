@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useErrorHeadingFocus } from "@/lib/use-error-heading-focus";
+
 interface WordDetailErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
@@ -10,6 +12,7 @@ interface WordDetailErrorProps {
 
 export default function WordDetailError({ reset }: WordDetailErrorProps) {
   const router = useRouter();
+  const headingRef = useErrorHeadingFocus();
 
   function retry() {
     reset();
@@ -18,7 +21,11 @@ export default function WordDetailError({ reset }: WordDetailErrorProps) {
 
   return (
     <div className="p-[var(--spacing-lg)]">
-      <h1 className="text-xl font-semibold text-neutral-900">
+      <h1
+        ref={headingRef}
+        tabIndex={-1}
+        className="text-xl font-semibold text-neutral-900"
+      >
         We couldn&apos;t load this word
       </h1>
       <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">

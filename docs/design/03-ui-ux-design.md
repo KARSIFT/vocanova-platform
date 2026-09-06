@@ -124,6 +124,10 @@ forms and icon-only controls, sufficient color contrast, and no information conv
 change). Automated coverage is documented in the [browser-test guide](../../apps/web/tests/e2e/README.md)
 and [Lighthouse guide](../../apps/web/tests/lighthouse/README.md).
 
+When an existing route error boundary replaces dynamic learner content, focus moves to its
+route-specific error heading. The heading is programmatically focusable but stays out of the normal
+tab order, so keyboard and screen-reader learners can immediately read the safe retry choices.
+
 ## 11. Visual design direction
 
 Clean, calm, encouraging visual tone — not exam-like, not childish. Tailwind CSS with shadcn/ui-style

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useErrorHeadingFocus } from "@/lib/use-error-heading-focus";
+
 interface HomeErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
@@ -11,9 +13,14 @@ interface HomeErrorProps {
 export default function HomeError(props: HomeErrorProps) {
   const { reset } = props;
   const router = useRouter();
+  const headingRef = useErrorHeadingFocus();
   return (
     <div className="p-[var(--spacing-lg)]">
-      <h1 className="text-xl font-semibold text-neutral-900">
+      <h1
+        ref={headingRef}
+        tabIndex={-1}
+        className="text-xl font-semibold text-neutral-900"
+      >
         Something went wrong
       </h1>
       <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">

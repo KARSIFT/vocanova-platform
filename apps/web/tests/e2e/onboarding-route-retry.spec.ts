@@ -25,6 +25,12 @@ test("retries the failed initial onboarding profile read", async ({
       level: 1,
     }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", {
+      name: "We couldn't load onboarding",
+      level: 1,
+    }),
+  ).toBeFocused();
   await page.getByRole("button", { name: "Try again" }).click();
   await expect(
     page.getByRole("heading", { name: "Welcome to Vocanova", level: 1 }),

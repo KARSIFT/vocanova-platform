@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { useErrorHeadingFocus } from "@/lib/use-error-heading-focus";
+
 interface SettingsAccountErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
@@ -11,9 +13,14 @@ interface SettingsAccountErrorProps {
 export default function SettingsAccountError(props: SettingsAccountErrorProps) {
   const { reset } = props;
   const router = useRouter();
+  const headingRef = useErrorHeadingFocus();
   return (
     <div className="p-[var(--spacing-lg)]">
-      <h1 className="text-xl font-semibold text-neutral-900">
+      <h1
+        ref={headingRef}
+        tabIndex={-1}
+        className="text-xl font-semibold text-neutral-900"
+      >
         We couldn&apos;t load your account
       </h1>
       <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">

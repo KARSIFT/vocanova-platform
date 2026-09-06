@@ -49,6 +49,9 @@ async function expectRecoveredRoute(
   await expect(
     page.getByRole("heading", { name: errorHeading, level: 1 }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: errorHeading, level: 1 }),
+  ).toBeFocused();
   await expect(page.getByText(errorCopy, { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Try again" }).click();

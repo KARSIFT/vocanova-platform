@@ -2,12 +2,15 @@
 
 import { useRouter } from "next/navigation";
 
+import { useErrorHeadingFocus } from "@/lib/use-error-heading-focus";
+
 interface OnboardingErrorProps {
   reset: () => void;
 }
 
 export default function OnboardingError({ reset }: OnboardingErrorProps) {
   const router = useRouter();
+  const headingRef = useErrorHeadingFocus();
 
   function retry() {
     reset();
@@ -17,7 +20,11 @@ export default function OnboardingError({ reset }: OnboardingErrorProps) {
   return (
     <main className="grid min-h-screen place-items-center bg-neutral-50 p-6">
       <div className="w-full max-w-[36rem] space-y-[var(--spacing-lg)] rounded-xl border border-neutral-200 bg-white p-[var(--spacing-lg)] shadow-sm">
-        <h1 className="text-2xl font-semibold text-neutral-900">
+        <h1
+          ref={headingRef}
+          tabIndex={-1}
+          className="text-2xl font-semibold text-neutral-900"
+        >
           We couldn&apos;t load onboarding
         </h1>
         <p className="text-base text-neutral-700">
