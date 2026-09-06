@@ -251,7 +251,7 @@ test("removes a first-page item from the library after reloading", async ({
   await page.goto("/discover/saved");
   await expect(page.getByText("arrival", { exact: true })).toBeVisible();
   const response = await page.request.delete(
-    `http://127.0.0.1:${process.env.MOCK_API_PORT ?? "8103"}/api/v1/user-words/e2e-preview-meaning-01`,
+    `http://127.0.0.1:${process.env.MOCK_API_PORT ?? "8080"}/api/v1/user-words/e2e-preview-meaning-01`,
     { headers: { "X-CSRF-Token": "library-reload-csrf" } },
   );
   expect(response.status()).toBe(204);

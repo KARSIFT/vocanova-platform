@@ -1553,6 +1553,7 @@ const server = createServer(async (req, res) => {
       return;
     }
     state.savedMeaningIds.add(meaningId);
+    state.libraryRemovedMeaningIds.delete(meaningId);
     logLine(req, 200, { action: "save", meaningId });
     const word = CANONICAL_WORDS.pour;
     const meaning = word.meanings.find((m) => m.id === meaningId);
@@ -1910,7 +1911,7 @@ const server = createServer(async (req, res) => {
     }
     response.word.meanings = response.word.meanings.map((meaning) =>
       state.libraryRemovedMeaningIds.has(meaning.id)
-        ? { ...meaning, saved: false, userWordId: undefined, reviewState: "not_reviewing" }
+        ? { ...meaning, saved: false, userWordId: undefined, reviewState: null }
         : meaning,
     );
     logLine(req, 200, { slug });
