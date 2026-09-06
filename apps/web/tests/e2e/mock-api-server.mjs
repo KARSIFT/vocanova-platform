@@ -471,6 +471,18 @@ const ANNOUNCEMENT_MULTIPLE_CHOICE_DUE_WORDS = [
   },
 ];
 
+const ANNOUNCEMENT_PAGE_TWO_DUE_WORD = {
+  userWordId: "e2e-review-user-word-terminal",
+  meaningId: "e2e-review-meaning-terminal",
+  wordId: "e2e-review-word-terminal",
+  wordSlug: "terminal",
+  wordText: "terminal",
+  partOfSpeech: "noun",
+  shortDefinition: "an airport building for passengers",
+  status: "due",
+  reviewStep: 0,
+};
+
 const CANONICAL_WORDS = {
   bank: {
     id: "word-bank",
@@ -1008,7 +1020,7 @@ function buildDueWords(state, fixture) {
       items:
         page === 0
           ? ANNOUNCEMENT_MULTIPLE_CHOICE_DUE_WORDS
-          : MULTIPLE_CHOICE_DUE_WORDS,
+          : [ANNOUNCEMENT_PAGE_TWO_DUE_WORD],
       nextCursor: page === 0 ? "announcement-multiple-choice-2" : undefined,
       totalCount: page === 0 ? 6 : 1,
     };

@@ -212,7 +212,6 @@ test("does not repeat multiple-choice feedback across a page boundary", async ({
     ["baggage", null],
     ["counter", "a long flat surface for service"],
     ["departure", null],
-    ["gate", "the area where passengers board a flight"],
   ];
   for (const [index, [word, answer]] of cards.entries()) {
     const heading = page.getByRole("heading", { name: word, exact: true });
@@ -223,16 +222,28 @@ test("does not repeat multiple-choice feedback across a page boundary", async ({
     } else {
       await page.getByRole("button", { name: "Show answer" }).click();
     }
-    if (index === cards.length - 1) {
-      await clearRecordedAnnouncements(page);
-    }
     await page.getByRole("button", { name: "Good", exact: true }).click();
   }
 
+  await expect(
+    page.getByRole("heading", { name: "gate", exact: true }),
+  ).toBeFocused();
+  await page
+    .getByRole("button", { name: /the act of reaching a place/ })
+    .click();
+  await expectAnnouncement(
+    page,
+    "Incorrect. The correct answer is shown. Continue to record this review.",
+  );
+  await expect(page.getByRole("button", { name: "Continue" })).toBeFocused();
+  await clearRecordedAnnouncements(page);
+  await page.getByRole("button", { name: "Continue" }).click();
+
   await expect(page.getByText("Card 6 of 6", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "arrival", exact: true }),
+    page.getByRole("heading", { name: "terminal", exact: true }),
   ).toBeFocused();
+  await expect(page.getByRole("button", { name: "Show answer" })).toBeVisible();
   expect(await recordedAnnouncements(page)).not.toContain(
     "Incorrect. The correct answer is shown. Continue to record this review.",
   );
