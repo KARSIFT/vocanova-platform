@@ -13,6 +13,64 @@ test.beforeEach(async ({ context }, testInfo) => {
   ]);
 });
 
+test("shows a visible focus outline and busy state while a saved-vocabulary page is pending", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "library", url: baseURL },
+  ]);
+
+  let requestCount = 0;
+  let settleFirstRequest: (() => void) | undefined;
+  const firstRequest = new Promise<void>((resolve) => {
+    settleFirstRequest = resolve;
+  });
+  await page.route("**/api/v1/user-words?after=*&limit=10", async (route) => {
+    requestCount += 1;
+    if (requestCount === 1) {
+      await firstRequest;
+      await route.fulfill({ status: 500, body: "{}" });
+      return;
+    }
+    await route.continue();
+  });
+
+  await page.goto("/discover/saved");
+  const loadMore = page.getByRole("button", { name: /saved words/ });
+  await loadMore.focus();
+  await expect(loadMore).toBeFocused();
+  const focusStyle = await loadMore.evaluate((button) => {
+    const computed = window.getComputedStyle(button);
+    return {
+      outlineOffset: computed.outlineOffset,
+      outlineStyle: computed.outlineStyle,
+      outlineWidth: computed.outlineWidth,
+    };
+  });
+  expect(focusStyle.outlineStyle).toBe("solid");
+  expect(Number.parseFloat(focusStyle.outlineWidth)).toBeGreaterThanOrEqual(2);
+  expect(Number.parseFloat(focusStyle.outlineOffset)).toBeGreaterThanOrEqual(2);
+
+  await loadMore.click();
+  await expect(loadMore).toHaveAttribute("aria-busy", "true");
+  await expect(loadMore).toBeDisabled();
+  await expect.poll(() => requestCount).toBe(1);
+  await loadMore.click({ force: true });
+  await expect.poll(() => requestCount).toBe(1);
+
+  if (!settleFirstRequest) throw new Error("Expected the pagination request.");
+  settleFirstRequest();
+  await expect(
+    page.getByText("We couldn't load more saved words. Please try again."),
+  ).toBeVisible();
+  await expect(loadMore).toHaveAttribute("aria-busy", "false");
+  await expect(loadMore).toBeEnabled();
+  await expect(loadMore).toBeFocused();
+});
+
 test("loads later saved vocabulary pages and retains earlier items when a page retry fails", async ({
   page,
   context,
