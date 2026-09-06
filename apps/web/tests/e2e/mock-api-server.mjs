@@ -1096,7 +1096,9 @@ function buildSituationResponse(state, slug, selectedFixture) {
         ? []
         : situationFixture.meanings.map((meaning) => ({
             ...meaning,
-            saved: state.savedMeaningIds.has(meaning.meaningId),
+            saved:
+              selectedFixture === "all-saved" ||
+              state.savedMeaningIds.has(meaning.meaningId),
           })),
   };
 }

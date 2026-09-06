@@ -77,7 +77,9 @@ Daily Conversation, Work Meeting, University Class, etc. — see [05](../enginee
 full `journey_situations` model), not by grammar topic or difficulty tier alone. Within a situation,
 words are shown one at a time or as a short scannable list; the backend controls ordering
 (display order followed by stable meaning ID — see [05](../engineering/05-database-design.md) §8). A word
-already in the learner's saved list is visually marked and excluded from "new" recommendations.
+already in the learner's saved list is visually marked and excluded from "new" recommendations. When
+every published word in a situation is already saved, the completion state links to Saved Vocabulary
+and keeps a route to another journey; a genuinely empty situation remains a content-unavailable state.
 Saving must succeed against the backend before the UI reflects it as saved — no optimistic-only
 save state that could desync from the backend.
 
