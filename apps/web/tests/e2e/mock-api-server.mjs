@@ -932,11 +932,11 @@ function buildDailyMission(state, cookies = {}) {
 function buildSavedWords(state) {
   const items = [];
   for (const meaningId of state.savedMeaningIds) {
-    const word = CANONICAL_WORDS.pour;
-    const meaning = word.meanings.find((m) => m.id === meaningId);
-    if (!meaning) {
+    const savedMeaning = findCanonicalMeaning(meaningId);
+    if (!savedMeaning) {
       continue;
     }
+    const { word, meaning } = savedMeaning;
     items.push({
       userWordId: `uw-${meaningId}`,
       meaningId: meaning.id,
@@ -996,11 +996,11 @@ function buildDueWords(state, fixture) {
     if (state.reviewedMeaningIds.has(meaningId)) {
       continue;
     }
-    const word = CANONICAL_WORDS.pour;
-    const meaning = word.meanings.find((m) => m.id === meaningId);
-    if (!meaning) {
+    const savedMeaning = findCanonicalMeaning(meaningId);
+    if (!savedMeaning) {
       continue;
     }
+    const { word, meaning } = savedMeaning;
     items.push({
       userWordId: `uw-${meaningId}`,
       meaningId: meaning.id,
@@ -1086,16 +1086,36 @@ function buildSituationResponse(state, slug, selectedFixture) {
   if (!situationFixture) {
     return null;
   }
+  const meanings =
+    selectedFixture === "empty"
+      ? []
+      : situationFixture.meanings.map((meaning) => ({
+          ...meaning,
+          saved: state.savedMeaningIds.has(meaning.meaningId),
+        }));
+  if (selectedFixture === "bank" && slug === "ordering-at-a-cafe") {
+    meanings.push({
+      meaningId: "mean-bank-river",
+      wordId: CANONICAL_WORDS.bank.id,
+      wordSlug: CANONICAL_WORDS.bank.slug,
+      wordText: CANONICAL_WORDS.bank.text,
+      partOfSpeech: "noun",
+      shortDefinition: "land beside a river",
+      saved: state.savedMeaningIds.has("mean-bank-river"),
+    });
+  }
   return {
     situation: situationFixture.situation,
-    meanings:
-      selectedFixture === "empty"
-        ? []
-        : situationFixture.meanings.map((meaning) => ({
-            ...meaning,
-            saved: state.savedMeaningIds.has(meaning.meaningId),
-          })),
+    meanings,
   };
+}
+
+function findCanonicalMeaning(meaningId) {
+  for (const word of Object.values(CANONICAL_WORDS)) {
+    const meaning = word.meanings.find((item) => item.id === meaningId);
+    if (meaning) return { word, meaning };
+  }
+  return null;
 }
 
 function buildJourneySituations(fixture, after) {
@@ -1621,11 +1641,16 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 400, { error: "missing_meaning_id" });
       return;
     }
+    const savedMeaning = findCanonicalMeaning(meaningId);
+    if (!savedMeaning) {
+      logLine(req, 404, { reason: "unknown-meaning-id", meaningId });
+      jsonResponse(res, 404, { error: "not_found", meaningId });
+      return;
+    }
     state.savedMeaningIds.add(meaningId);
     state.libraryRemovedMeaningIds.delete(meaningId);
     logLine(req, 200, { action: "save", meaningId });
-    const word = CANONICAL_WORDS.pour;
-    const meaning = word.meanings.find((m) => m.id === meaningId);
+    const { word, meaning } = savedMeaning;
     jsonResponse(res, 200, {
       userWordId: `uw-${meaningId}`,
       meaningId: meaning.id,

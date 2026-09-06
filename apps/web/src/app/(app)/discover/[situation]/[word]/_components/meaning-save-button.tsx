@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
 import { handleApiError } from "@/lib/session";
+import { requestWordDetailPracticeFocus } from "@/lib/word-detail-practice-focus";
 
 interface MeaningSaveButtonProps {
   meaningId: string;
@@ -23,9 +24,15 @@ export function MeaningSaveButton({
   shortDefinition,
 }: MeaningSaveButtonProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [saved, setSaved] = useState(initialSaved);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (status === "error") buttonRef.current?.focus();
+  }, [status]);
 
   async function toggleSave() {
     const csrfToken = getCookieValue(CSRF_COOKIE_NAME);
@@ -47,9 +54,14 @@ export function MeaningSaveButton({
         setSaved(false);
       } else {
         const idempotencyKey = generateIdempotencyKey();
-        await client.saveUserWord({ meaningId, source }, idempotencyKey, {
-          headers: { "X-CSRF-Token": csrfToken },
-        });
+        const { data } = await client.saveUserWord(
+          { meaningId, source },
+          idempotencyKey,
+          {
+            headers: { "X-CSRF-Token": csrfToken },
+          },
+        );
+        requestWordDetailPracticeFocus(data.meaningId, pathname);
         setSaved(true);
       }
       setStatus("idle");
@@ -76,6 +88,7 @@ export function MeaningSaveButton({
   return (
     <div className="flex flex-col items-end gap-[var(--spacing-xs)]">
       <button
+        ref={buttonRef}
         type="button"
         onClick={toggleSave}
         disabled={status === "loading"}
