@@ -162,6 +162,6 @@ test("moves focus to the completion heading after the final review", async ({
   }
 
   await expect(
-    page.getByRole("heading", { name: "You're all caught up", level: 2 }),
+    page.getByRole("heading", { name: "Review session complete", level: 2 }),
   ).toBeFocused();
 });

@@ -263,7 +263,7 @@ test.describe("Core loop end-to-end", () => {
     // "All caught up" empty state with a sentence-feedback
     // widget for the just-reviewed card.
     await expect(
-      page.getByRole("heading", { name: "You're all caught up", level: 2 }),
+      page.getByRole("heading", { name: "Review session complete", level: 2 }),
     ).toBeVisible();
     await expect(
       page.getByText("You completed 1 review in this session.", {
