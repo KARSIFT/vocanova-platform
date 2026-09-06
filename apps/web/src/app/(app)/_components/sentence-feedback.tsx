@@ -22,6 +22,7 @@ interface SentenceFeedbackProps {
   shortDefinition?: string;
   onFeedbackSubmitted?: (result: SentenceFeedbackResult) => void;
   onPendingChange?: (isPending: boolean) => void;
+  clearMismatchedRecovery?: boolean;
 }
 
 const AI_LIMITATION_COPY =
@@ -40,6 +41,7 @@ export function SentenceFeedback({
   shortDefinition,
   onFeedbackSubmitted,
   onPendingChange,
+  clearMismatchedRecovery = false,
 }: SentenceFeedbackProps) {
   const userId = useAuthenticatedUserId();
   const pathname = usePathname();
@@ -62,10 +64,24 @@ export function SentenceFeedback({
       record.source !== source ||
       record.attemptId !== attemptId ||
       record.targetWord !== targetWord
-    )
+    ) {
+      if (
+        clearMismatchedRecovery &&
+        record.path === pathname &&
+        record.source === source
+      )
+        clearSentenceRecovery(userId);
       return;
+    }
     setRecovered(record.sentence);
-  }, [attemptId, pathname, source, targetWord, userId]);
+  }, [
+    attemptId,
+    clearMismatchedRecovery,
+    pathname,
+    source,
+    targetWord,
+    userId,
+  ]);
 
   function discardRecovery() {
     clearSentenceRecovery(userId);

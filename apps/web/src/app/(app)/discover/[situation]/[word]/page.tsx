@@ -138,6 +138,7 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
                       attemptId={meaning.userWordId}
                       source="word_detail"
                       shortDefinition={meaning.shortDefinition}
+                      clearMismatchedRecovery
                     />
                   ) : null}
                 </li>

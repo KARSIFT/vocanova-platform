@@ -80,7 +80,9 @@ export function saveSentenceRecovery(
       SENTENCE_RECOVERY_KEY,
       JSON.stringify({ ...record, version: 1, createdAt: Date.now() }),
     );
-  } catch {}
+  } catch {
+    // Storage failures never interrupt session recovery.
+  }
 }
 export function readSentenceRecovery(
   ownerId?: string,
@@ -90,7 +92,9 @@ export function readSentenceRecovery(
   if (!ownerId) {
     try {
       target.removeItem(SENTENCE_RECOVERY_KEY);
-    } catch {}
+    } catch {
+      // Storage failures leave recovery disabled.
+    }
     return null;
   }
   try {
@@ -109,7 +113,9 @@ export function readSentenceRecovery(
   } catch {
     try {
       target.removeItem(SENTENCE_RECOVERY_KEY);
-    } catch {}
+    } catch {
+      // A malformed entry cannot be removed when storage is blocked.
+    }
     return null;
   }
 }
@@ -119,5 +125,7 @@ export function clearSentenceRecovery(ownerId?: string): void {
   try {
     const record = readSentenceRecovery(ownerId);
     if (!ownerId || record) target.removeItem(SENTENCE_RECOVERY_KEY);
-  } catch {}
+  } catch {
+    // Storage failures never interrupt logout or account deletion.
+  }
 }

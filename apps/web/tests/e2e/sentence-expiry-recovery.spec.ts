@@ -22,6 +22,9 @@ async function authenticate(page: import("@playwright/test").Page, context: impo
 test("word detail saves on 401, signs in, and explicitly resumes only its matching sentence", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await authenticate(page, context, baseURL);
+  await page.request.post("http://127.0.0.1:8107/api/v1/auth/magic-links", {
+    data: { email: "learner@example.test", returnTo: "/discover/ordering-at-a-cafe/pour" },
+  });
   const input = page.getByRole("textbox", { name: /Write a sentence using pour/ });
   await input.fill("I pour coffee every morning.");
   await page.route("**/api/v1/sentence-feedback", async (route) => route.fulfill({ status: 401, contentType: "application/problem+json", body: JSON.stringify({ detail: "authentication required" }) }));
@@ -31,7 +34,7 @@ test("word detail saves on 401, signs in, and explicitly resumes only its matchi
     .poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY))
     .not.toBeNull();
   await page.unroute("**/api/v1/sentence-feedback");
-  await page.goto("/discover/ordering-at-a-cafe/pour");
+  await page.goto("/auth/magic?token=recovery-token&email=learner%40example.test&returnTo=%2Fdiscover%2Fordering-at-a-cafe%2Fpour");
   await expect(page).toHaveURL("/discover/ordering-at-a-cafe/pour");
   await expect(page.getByText("Your sentence was saved when your session expired.")).toBeVisible();
   await page.getByRole("button", { name: "Resume sentence" }).click();
@@ -74,6 +77,7 @@ test("discard, successful feedback, and logout clear recovery", async ({ page, c
     if (action === "Check my sentence") await page.getByRole("button", { name: "Resume sentence" }).click();
     await page.getByRole("button", { name: action }).click();
     if (action === "Check my sentence") await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+    if (action === "Log out") await expect(page).toHaveURL("/signin");
     await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).toBeNull();
   }
 });

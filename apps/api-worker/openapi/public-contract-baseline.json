@@ -75,9 +75,10 @@
           "displayName",
           "email",
           "emailVerifiedAt",
-          "onboardingStatus"
+          "onboardingStatus",
+          "userId"
         ],
-        "required": ["onboardingStatus"]
+        "required": ["onboardingStatus", "userId"]
       }
     },
     {
@@ -131,9 +132,10 @@
           "displayName",
           "email",
           "emailVerifiedAt",
-          "onboardingStatus"
+          "onboardingStatus",
+          "userId"
         ],
-        "required": ["onboardingStatus"]
+        "required": ["onboardingStatus", "userId"]
       }
     },
     {

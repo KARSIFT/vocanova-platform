@@ -577,6 +577,7 @@ function buildClearSessionCookie() {
 // --- per-session mutable state ---------------------------------
 
 const sessions = new Map();
+const magicLinkStates = new Map();
 
 function getSessionState(cookies) {
   const sessionId = cookies[SESSION_COOKIE_NAME] ?? SESSION_DEFAULT_VALUE;
@@ -1268,6 +1269,10 @@ const server = createServer(async (req, res) => {
   // ----- auth (CSRF-exempt) ----------------------------------
 
   if (req.method === "POST" && url.pathname === "/api/v1/auth/magic-links") {
+    const body = await readJsonBody(req);
+    if (typeof body.email === "string") {
+      magicLinkStates.set(body.email.toLowerCase(), getSessionState(cookies));
+    }
     logLine(req, 200);
     jsonResponse(res, 200, {});
     return;
@@ -1277,9 +1282,14 @@ const server = createServer(async (req, res) => {
     req.method === "POST" &&
     url.pathname === "/api/v1/auth/magic-links/consume"
   ) {
+    const body = await readJsonBody(req);
     const sessionValue = generateId("session");
     const csrfValue = generateId("csrf");
-    sessions.set(sessionValue, createInitialState());
+    const state =
+      typeof body.email === "string"
+        ? magicLinkStates.get(body.email.toLowerCase())
+        : undefined;
+    sessions.set(sessionValue, state ?? createInitialState());
     logLine(req, 200, { session: "issued" });
     jsonResponse(
       res,
