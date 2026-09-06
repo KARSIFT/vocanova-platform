@@ -20,25 +20,24 @@ export function SavedVocabularyList({
   const [items, setItems] = useState(initialItems);
   const [nextCursor, setNextCursor] = useState(initialNextCursor);
   const [isLoading, setIsLoading] = useState(false);
+  const [reachedEnd, setReachedEnd] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const loadMoreButton = useRef<HTMLButtonElement>(null);
   const [shouldRefocusLoadMore, setShouldRefocusLoadMore] = useState(false);
-  const [appendedStartIndex, setAppendedStartIndex] = useState<number | null>(
-    null,
-  );
+  const [focusItemIndex, setFocusItemIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const firstAppendedLink = document.getElementById(
+    const focusedItemLink = document.getElementById(
       "saved-vocabulary-first-appended",
     );
     if (
-      appendedStartIndex !== null &&
-      firstAppendedLink instanceof HTMLAnchorElement
+      focusItemIndex !== null &&
+      focusedItemLink instanceof HTMLAnchorElement
     ) {
-      firstAppendedLink.focus();
-      setAppendedStartIndex(null);
+      focusedItemLink.focus();
+      setFocusItemIndex(null);
     }
-  }, [appendedStartIndex, items]);
+  }, [focusItemIndex, items]);
 
   useEffect(() => {
     if (shouldRefocusLoadMore && !isLoading) {
@@ -56,7 +55,10 @@ export function SavedVocabularyList({
         after: nextCursor,
         limit: 10,
       });
-      setAppendedStartIndex(data.items.length > 0 ? items.length : null);
+      setFocusItemIndex(
+        data.items.length > 0 ? items.length : items.length - 1,
+      );
+      setReachedEnd(!data.nextCursor);
       setItems((current) => [...current, ...data.items]);
       setNextCursor(data.nextCursor);
     } catch (error) {
@@ -79,7 +81,7 @@ export function SavedVocabularyList({
           <li key={item.userWordId}>
             <Link
               id={
-                index === appendedStartIndex
+                index === focusItemIndex
                   ? "saved-vocabulary-first-appended"
                   : undefined
               }
@@ -110,6 +112,12 @@ export function SavedVocabularyList({
           {isLoading ? "Loading saved words..." : "Load more saved words"}
         </button>
       ) : null}
+      <p
+        role="status"
+        className="mt-[var(--spacing-sm)] text-base text-neutral-700"
+      >
+        {reachedEnd ? "All saved words are shown." : ""}
+      </p>
       {errorMessage ? (
         <p
           role="alert"
