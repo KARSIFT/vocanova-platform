@@ -77,6 +77,7 @@ export function ReviewSession({
   const shouldFocusNextCard = useRef(false);
   const currentCardHeadingRef = useRef<HTMLHeadingElement>(null);
   const completionHeadingRef = useRef<HTMLHeadingElement>(null);
+  const nextActionRef = useRef<HTMLButtonElement>(null);
 
   const currentCard = dueWords[currentIndex];
 
@@ -118,6 +119,15 @@ export function ReviewSession({
       shouldFocusNextCard.current = false;
     }
   }, [completed]);
+
+  useEffect(() => {
+    if (
+      phase === "feedback" ||
+      (promptType === "self_check" && phase === "rate")
+    ) {
+      nextActionRef.current?.focus();
+    }
+  }, [phase, promptType]);
 
   const loadNextPage = () => {
     setAwaitingNextPage(false);
@@ -415,6 +425,9 @@ export function ReviewSession({
             <p className="mt-[var(--spacing-xs)] wrap-break-word text-lg text-primary-900">
               {currentCard.shortDefinition}
             </p>
+            <p role="status" aria-live="polite" className="sr-only">
+              Answer revealed. Choose how well you knew this word.
+            </p>
           </div>
         ) : null}
 
@@ -477,11 +490,16 @@ export function ReviewSession({
 
         {phase === "feedback" && isMultipleChoiceIncorrect ? (
           <div className="mb-[var(--spacing-lg)] rounded-md border border-red-200 bg-red-50 p-[var(--spacing-md)]">
+            <p role="status" aria-live="polite" className="sr-only">
+              Incorrect. The correct answer is shown. Continue to record this
+              review.
+            </p>
             <p className="font-medium text-red-900">Not quite</p>
             <p className="mt-[var(--spacing-xs)] wrap-break-word text-base text-red-800">
               The correct answer was: {currentCard.shortDefinition}
             </p>
             <button
+              ref={nextActionRef}
               type="button"
               onClick={() =>
                 submitAttempt({
@@ -502,8 +520,12 @@ export function ReviewSession({
         (promptType === "self_check" && phase === "rate") ? (
           <div className="mb-[var(--spacing-lg)]">
             {isMultipleChoiceCorrect ? (
-              <p className="mb-[var(--spacing-md)] text-center text-lg font-medium text-primary-900">
-                Correct
+              <p
+                role="status"
+                aria-live="polite"
+                className="mb-[var(--spacing-md)] text-center text-lg font-medium text-primary-900"
+              >
+                Correct. Choose how well you knew this word.
               </p>
             ) : null}
             <fieldset>
@@ -520,9 +542,10 @@ export function ReviewSession({
                 {(isMultipleChoiceCorrect
                   ? RATING_ORDER.filter((rating) => rating !== "again")
                   : RATING_ORDER
-                ).map((rating) => (
+                ).map((rating, index) => (
                   <button
                     key={rating}
+                    ref={index === 0 ? nextActionRef : undefined}
                     type="button"
                     onClick={() =>
                       submitAttempt({
