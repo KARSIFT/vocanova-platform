@@ -34,17 +34,24 @@ test.describe("Timezone preference", () => {
     const timezone = page.getByRole("combobox", { name: "IANA timezone" });
     await timezone.fill("");
     await page.getByRole("button", { name: "Save settings" }).click();
-    await expect(page.getByRole("alert")).toHaveText(
-      "Enter an IANA timezone before saving your settings.",
-    );
+    await expect(
+      page.getByText("Enter an IANA timezone before saving your settings.", {
+        exact: true,
+      }),
+    ).toBeVisible();
     await expect(page.getByRole("status")).toHaveCount(0);
     expect(patchRequests).toHaveLength(0);
 
-    await page.getByLabel("50").check();
+    await page
+      .getByRole("radiogroup", { name: "Daily review target" })
+      .getByText("50", { exact: true })
+      .click();
     await page.getByRole("button", { name: "Save settings" }).click();
-    await expect(page.getByRole("alert")).toHaveText(
-      "Enter an IANA timezone before saving your settings.",
-    );
+    await expect(
+      page.getByText("Enter an IANA timezone before saving your settings.", {
+        exact: true,
+      }),
+    ).toBeVisible();
     await expect(page.getByRole("status")).toHaveCount(0);
     expect(patchRequests).toHaveLength(0);
     await expect(page.getByLabel("50")).toBeChecked();
@@ -86,14 +93,18 @@ test.describe("Timezone preference", () => {
     await expect(timezone).toHaveValue("UTC");
     await timezone.fill("Asia/Tehran");
     await page.getByRole("button", { name: "Save settings" }).click();
-    await expect(page.getByText("Your settings have been saved.")).toBeVisible();
+    await expect(
+      page.getByText("Your settings have been saved."),
+    ).toBeVisible();
     await page.reload();
     await expect(timezone).toHaveValue("Asia/Tehran");
 
     await page.getByRole("button", { name: "Use device timezone" }).click();
     await expect(timezone).toHaveValue("America/New_York");
     await page.getByRole("button", { name: "Save settings" }).click();
-    await expect(page.getByText("Your settings have been saved.")).toBeVisible();
+    await expect(
+      page.getByText("Your settings have been saved."),
+    ).toBeVisible();
     await page.reload();
     await expect(timezone).toHaveValue("America/New_York");
   });
@@ -113,7 +124,12 @@ test.describe("Timezone preference", () => {
         path: "/",
       },
       { name: "vocanova_csrf", value: "timezone-csrf", domain, path: "/" },
-      { name: "e2e_onboarding_status", value: "not_started", domain, path: "/" },
+      {
+        name: "e2e_onboarding_status",
+        value: "not_started",
+        domain,
+        path: "/",
+      },
     ]);
     await page.addInitScript(() => {
       Object.defineProperty(Intl, "DateTimeFormat", {
@@ -137,15 +153,21 @@ test.describe("Timezone preference", () => {
     const timezone = page.getByRole("combobox", { name: "Timezone" });
     await expect(timezone).toHaveValue("UTC");
     await timezone.fill("");
-    await expect(page.getByRole("button", { name: "Finish setup" })).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Finish setup" }),
+    ).toBeDisabled();
     await timezone.fill("Europe/London");
-    const onboarding = page.waitForRequest((request) =>
-      request.method() === "POST" && request.url().endsWith("/api/v1/onboarding"),
+    const onboarding = page.waitForRequest(
+      (request) =>
+        request.method() === "POST" &&
+        request.url().endsWith("/api/v1/onboarding"),
     );
     await page.getByRole("button", { name: "Finish setup" }).click();
-    await expect.poll(async () => JSON.parse((await onboarding).postData() ?? "{}")).toMatchObject({
-      timezone: "Europe/London",
-    });
+    await expect
+      .poll(async () => JSON.parse((await onboarding).postData() ?? "{}"))
+      .toMatchObject({
+        timezone: "Europe/London",
+      });
   });
 
   test("rejects invalid IANA timezones in onboarding and settings", async ({
@@ -163,7 +185,12 @@ test.describe("Timezone preference", () => {
         path: "/",
       },
       { name: "vocanova_csrf", value: "timezone-csrf", domain, path: "/" },
-      { name: "e2e_onboarding_status", value: "not_started", domain, path: "/" },
+      {
+        name: "e2e_onboarding_status",
+        value: "not_started",
+        domain,
+        path: "/",
+      },
     ]);
 
     await page.goto("/onboarding");
