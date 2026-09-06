@@ -22,7 +22,8 @@ async function authenticate(page: import("@playwright/test").Page, context: impo
 test("word detail saves on 401, signs in, and explicitly resumes only its matching sentence", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await authenticate(page, context, baseURL);
-  await page.request.post("http://127.0.0.1:8107/api/v1/auth/magic-links", {
+  const mockPort = process.env.MOCK_API_PORT ?? "8080";
+  await page.request.post(`http://127.0.0.1:${mockPort}/api/v1/auth/magic-links`, {
     data: { email: "learner@example.test", returnTo: "/discover/ordering-at-a-cafe/pour" },
   });
   const input = page.getByRole("textbox", { name: /Write a sentence using pour/ });

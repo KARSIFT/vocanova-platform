@@ -54,11 +54,11 @@ function validPath(value: unknown): value is string {
   try {
     const url = new URL(value, "http://vocanova.local");
     return (
-      (url.origin === "http://vocanova.local" &&
-        /^\/discover\/[a-z0-9-]+\/[a-z0-9-]+$/.test(url.pathname) &&
+      url.origin === "http://vocanova.local" &&
+      ((/^\/discover\/[a-z0-9-]+\/[a-z0-9-]+$/.test(url.pathname) &&
         !url.search) ||
-      (/^\/discover\/saved\/[^/]+$/.test(url.pathname) &&
-        /^\?meaning=[^&]+$/.test(url.search))
+        (/^\/discover\/saved\/[^/]+$/.test(url.pathname) &&
+          /^\?meaning=[^&]+$/.test(url.search)))
     );
   } catch {
     return false;

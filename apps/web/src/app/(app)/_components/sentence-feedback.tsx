@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { SentenceFeedbackResult } from "@vocanova/api-client";
 
@@ -23,6 +23,7 @@ interface SentenceFeedbackProps {
   onFeedbackSubmitted?: (result: SentenceFeedbackResult) => void;
   onPendingChange?: (isPending: boolean) => void;
   clearMismatchedRecovery?: boolean;
+  recoveryAttemptIds?: string[];
 }
 
 const AI_LIMITATION_COPY =
@@ -42,9 +43,14 @@ export function SentenceFeedback({
   onFeedbackSubmitted,
   onPendingChange,
   clearMismatchedRecovery = false,
+  recoveryAttemptIds,
 }: SentenceFeedbackProps) {
   const userId = useAuthenticatedUserId();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const returnPath = searchParams.size
+    ? `${pathname}?${searchParams.toString()}`
+    : pathname;
   const [sentence, setSentence] = useState("");
   const [recovered, setRecovered] = useState<string | null>(null);
   const [result, setResult] = useState<SentenceFeedbackResult | null>(null);
@@ -60,15 +66,16 @@ export function SentenceFeedback({
     const record = readSentenceRecovery(userId);
     if (!record) return;
     if (
-      record.path !== pathname ||
+      record.path !== returnPath ||
       record.source !== source ||
       record.attemptId !== attemptId ||
       record.targetWord !== targetWord
     ) {
       if (
         clearMismatchedRecovery &&
-        record.path === pathname &&
-        record.source === source
+        record.path === returnPath &&
+        record.source === source &&
+        (!recoveryAttemptIds || recoveryAttemptIds.includes(record.attemptId))
       )
         clearSentenceRecovery(userId);
       return;
@@ -77,10 +84,11 @@ export function SentenceFeedback({
   }, [
     attemptId,
     clearMismatchedRecovery,
-    pathname,
+    returnPath,
     source,
     targetWord,
     userId,
+    recoveryAttemptIds,
   ]);
 
   function discardRecovery() {
@@ -129,7 +137,7 @@ export function SentenceFeedback({
           ownerId: userId ?? "",
           source,
           attemptId,
-          path: pathname,
+          path: returnPath,
           targetWord,
           shortDefinition,
           sentence,
