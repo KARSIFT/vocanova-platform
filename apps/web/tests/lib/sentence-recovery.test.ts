@@ -58,6 +58,14 @@ it("clears records with invalid source, owner, target, definition, path, or futu
   }
 });
 
+it("accepts an encoded saved-word meaning path and rejects an external origin", () => {
+  installStorage();
+  saveSentenceRecovery(record({ path: "/discover/saved/tea%3Fpot?meaning=mean-pour" }));
+  assert.equal(readSentenceRecovery("user-a")?.path, "/discover/saved/tea%3Fpot?meaning=mean-pour");
+  storage.setItem(SENTENCE_RECOVERY_KEY, JSON.stringify({ ...record(), version: 1, createdAt: Date.now(), path: "https://attacker.test/discover/saved/tea?meaning=mean-pour" }));
+  assert.equal(readSentenceRecovery("user-a"), null);
+});
+
 it("fails closed when session storage is unavailable and clears on discard or success", () => {
   Object.defineProperty(globalThis, "window", { configurable: true, value: { get sessionStorage() { throw new Error("blocked"); } } });
   assert.doesNotThrow(() => saveSentenceRecovery(record()));

@@ -75,6 +75,47 @@ test("home restores selection and review restores the historical attempt without
   expect(reviewPosts).toBe(0);
 });
 
+test("Home recovers a daily-mission sentence through 401 reauthentication", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  const port = process.env.MOCK_API_PORT ?? "8080";
+  await authenticate(page, context, baseURL);
+  await page.request.post(`http://127.0.0.1:${port}/api/v1/auth/magic-links`, { data: { email: "home-recovery@example.test", returnTo: "/home" } });
+  await page.goto("/home");
+  const input = page.getByRole("textbox", { name: /Write a sentence using pour/ });
+  await input.fill("I pour coffee at home.");
+  await page.route("**/api/v1/sentence-feedback", (route) => route.fulfill({ status: 401, contentType: "application/problem+json", body: JSON.stringify({ detail: "authentication required" }) }));
+  await page.getByRole("button", { name: "Check my sentence" }).click();
+  await expect(page).toHaveURL(/\/signin/);
+  await page.unroute("**/api/v1/sentence-feedback");
+  await page.goto("/auth/magic?token=home&email=home-recovery%40example.test&returnTo=%2Fhome");
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+  await page.getByRole("button", { name: "Resume sentence" }).click();
+  await expect(input).toHaveValue("I pour coffee at home.");
+});
+
+test("Review recovers the historical attempt after 401 when the queue is empty", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  const port = process.env.MOCK_API_PORT ?? "8080";
+  await authenticate(page, context, baseURL);
+  await page.request.post(`http://127.0.0.1:${port}/api/v1/auth/magic-links`, { data: { email: "review-recovery@example.test", returnTo: "/reviews" } });
+  let reviewPosts = 0;
+  await page.route("**/api/v1/reviews/submissions", async (route) => { reviewPosts += 1; await route.continue(); });
+  await page.goto("/reviews");
+  await page.getByRole("button", { name: "Show answer" }).click();
+  await page.getByRole("button", { name: "Good", exact: true }).click();
+  const input = page.getByRole("textbox", { name: /Write a sentence using pour/ });
+  await input.fill("I pour coffee after review.");
+  await page.route("**/api/v1/sentence-feedback", (route) => route.fulfill({ status: 401, contentType: "application/problem+json", body: JSON.stringify({ detail: "authentication required" }) }));
+  await page.getByRole("button", { name: "Check my sentence" }).click();
+  await expect(page).toHaveURL(/\/signin/);
+  await page.unroute("**/api/v1/sentence-feedback");
+  await page.goto("/auth/magic?token=review&email=review-recovery%40example.test&returnTo=%2Freviews");
+  await expect(page.getByRole("heading", { name: "Resume sentence practice" })).toBeVisible();
+  await page.getByRole("button", { name: "Resume sentence" }).click();
+  await expect(input).toHaveValue("I pour coffee after review.");
+  expect(reviewPosts).toBe(1);
+});
+
 test("discard, successful feedback, and logout clear recovery", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await authenticate(page, context, baseURL);

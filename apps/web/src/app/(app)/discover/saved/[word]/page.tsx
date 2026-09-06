@@ -104,6 +104,8 @@ export default async function SavedWordPage({
           attemptId={meaning.userWordId!}
           source="word_detail"
           shortDefinition={meaning.shortDefinition}
+          clearMismatchedRecovery
+          recoveryAttemptIds={[meaning.userWordId!]}
         />
         <RemoveSavedMeaning
           meaningId={meaning.id}
