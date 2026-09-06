@@ -4,6 +4,7 @@ import { afterEach, it } from "node:test";
 import {
   clearSentenceRecovery,
   readSentenceRecovery,
+  saveSentenceDraft,
   saveSentenceRecovery,
   SENTENCE_RECOVERY_KEY,
 } from "../../src/lib/sentence-recovery";
@@ -72,5 +73,14 @@ it("fails closed when session storage is unavailable and clears on discard or su
   assert.equal(readSentenceRecovery("user-a"), null);
   installStorage(); saveSentenceRecovery(record());
   clearSentenceRecovery("user-a");
+  assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
+});
+
+it("stores only a normalized, bounded draft with its exact meaning", () => {
+  installStorage();
+  saveSentenceDraft(record({ meaningId: "mean-pour", sentence: "  I pour coffee.  " }));
+  assert.equal(readSentenceRecovery("user-a")?.sentence, "I pour coffee.");
+  assert.equal(readSentenceRecovery("user-a")?.meaningId, "mean-pour");
+  saveSentenceDraft(record({ meaningId: "mean-pour", sentence: "   " }));
   assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
 });

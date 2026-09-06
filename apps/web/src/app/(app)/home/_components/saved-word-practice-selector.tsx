@@ -36,6 +36,7 @@ export function SavedWordPracticeSelector({
       savedWords.some(
         (word) =>
           word.userWordId === record.attemptId &&
+          word.meaningId === record.meaningId &&
           word.wordText === record.targetWord,
       )
     )
@@ -132,6 +133,7 @@ export function SavedWordPracticeSelector({
       >
         <SentenceFeedback
           key={selectedWord.userWordId}
+          meaningId={selectedWord.meaningId}
           targetWord={selectedWord.wordText}
           attemptId={selectedWord.userWordId}
           source="daily_mission"

@@ -6,11 +6,17 @@ export interface SentenceRecoveryRecord {
   ownerId: string;
   source: "word_detail" | "review" | "daily_mission" | "free_practice";
   attemptId: string;
+  meaningId?: string;
+  reason?: "draft" | "session_expiry";
   path: string;
   targetWord: string;
   shortDefinition?: string;
   sentence: string;
   createdAt: number;
+}
+
+export function normalizeSentenceDraft(sentence: string): string {
+  return sentence.trim().slice(0, 300);
 }
 
 function storage(): Storage | null {
@@ -31,6 +37,10 @@ function valid(record: unknown): record is SentenceRecoveryRecord {
       value.source === "daily_mission" ||
       value.source === "free_practice") &&
     validString(value.attemptId, 200) &&
+    (value.meaningId === undefined || validString(value.meaningId, 200)) &&
+    (value.reason === undefined ||
+      value.reason === "draft" ||
+      value.reason === "session_expiry") &&
     validPath(value.path) &&
     validString(value.targetWord, 200) &&
     typeof value.sentence === "string" &&
@@ -78,11 +88,48 @@ export function saveSentenceRecovery(
   try {
     target.setItem(
       SENTENCE_RECOVERY_KEY,
-      JSON.stringify({ ...record, version: 1, createdAt: Date.now() }),
+      JSON.stringify({
+        ...record,
+        reason: record.reason ?? "session_expiry",
+        version: 1,
+        createdAt: Date.now(),
+      }),
     );
   } catch {
     // Storage failures never interrupt session recovery.
   }
+}
+
+/**
+ * Stores an unsubmitted sentence in session storage only. Drafts are bounded
+ * to the same public submission limit and never include credentials, feedback,
+ * or other form state.
+ */
+export function saveSentenceDraft(
+  record: Omit<SentenceRecoveryRecord, "version" | "createdAt" | "sentence"> & {
+    sentence: string;
+  },
+): void {
+  const sentence = normalizeSentenceDraft(record.sentence);
+  if (!sentence) {
+    clearSentenceRecovery(record.ownerId);
+    return;
+  }
+  saveSentenceRecovery({ ...record, sentence, reason: "draft" });
+}
+
+export function clearSentenceRecoveryForMeaning(
+  ownerId: string | undefined,
+  meaningId: string,
+): void {
+  if (!ownerId) {
+    // A successful removal before identity refresh completes must still leave
+    // no locally recoverable learner text on this browser session.
+    clearSentenceRecovery();
+    return;
+  }
+  const record = readSentenceRecovery(ownerId);
+  if (record?.meaningId === meaningId) clearSentenceRecovery(ownerId);
 }
 export function readSentenceRecovery(
   ownerId?: string,

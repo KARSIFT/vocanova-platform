@@ -323,6 +323,7 @@ export function ReviewSession({
           // width and Playwright reported it as hidden).
           <div className="mt-[var(--spacing-lg)] w-full max-w-[28rem] text-left">
             <SentenceFeedback
+              meaningId={lastReviewedCard.meaningId}
               targetWord={lastReviewedCard.wordText}
               attemptId={lastReviewAttemptId}
               source="review"

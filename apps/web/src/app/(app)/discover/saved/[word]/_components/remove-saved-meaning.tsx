@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
 import { handleApiError } from "@/lib/session";
+import { clearSentenceRecoveryForMeaning } from "@/lib/sentence-recovery";
+import { useAuthenticatedUserId } from "../../../../_components/identity-context";
 
 export function RemoveSavedMeaning({
   meaningId,
@@ -15,6 +17,7 @@ export function RemoveSavedMeaning({
   wordText: string;
 }) {
   const router = useRouter();
+  const userId = useAuthenticatedUserId();
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
   const [error, setError] = useState("");
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -35,6 +38,7 @@ export function RemoveSavedMeaning({
       await createApiClient().unsaveUserWord(meaningId, {
         headers: { "X-CSRF-Token": csrf },
       });
+      clearSentenceRecoveryForMeaning(userId, meaningId);
       router.push("/discover/saved");
       router.refresh();
     } catch (caught) {

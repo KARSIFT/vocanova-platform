@@ -11,6 +11,7 @@ export function ReviewRecoveryPanel() {
   const [attempt, setAttempt] = useState<{
     ownerId: string;
     attemptId: string;
+    meaningId: string;
     targetWord: string;
     shortDefinition?: string;
   } | null>(null);
@@ -24,6 +25,7 @@ export function ReviewRecoveryPanel() {
       setAttempt({
         ownerId: record.ownerId,
         attemptId: record.attemptId,
+        meaningId: record.meaningId ?? "",
         targetWord: record.targetWord,
         shortDefinition: record.shortDefinition,
       });
@@ -44,6 +46,7 @@ export function ReviewRecoveryPanel() {
         Resume sentence practice
       </h2>
       <SentenceFeedback
+        meaningId={attempt.meaningId}
         targetWord={attempt.targetWord}
         attemptId={attempt.attemptId}
         source="review"

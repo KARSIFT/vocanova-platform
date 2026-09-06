@@ -65,6 +65,9 @@ not to gate access behind a long survey.
    controls; cancel returns focus to the trigger, a failed send preserves the choice and focuses its
    retry action, and success replaces the form with a polite confirmation. See [09](../engineering/09-ai-features.md) for exact field-level behavior — this is the UI
    shell around that contract, not a re-specification of it.
+   A nonblank sentence draft is kept only in owner-bound session storage for a short time. On a
+   matching return, the learner chooses Resume or Discard; either choice puts keyboard focus in the
+   sentence field. Drafts are removed after confirmed feedback, logout, or removal of their target.
 5. **Progress** shows Confidence Points total, streak, and a simple day-by-day or week-by-week
    completion view — motivational, not analytical.
 

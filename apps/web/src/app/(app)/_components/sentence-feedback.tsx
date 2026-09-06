@@ -12,13 +12,15 @@ import { handleApiError, isSessionExpiredError } from "@/lib/session";
 import {
   clearSentenceRecovery,
   readSentenceRecovery,
+  saveSentenceDraft,
   saveSentenceRecovery,
+  type SentenceRecoveryRecord,
 } from "@/lib/sentence-recovery";
 import { consumeWordDetailPracticeFocus } from "@/lib/word-detail-practice-focus";
 import { useAuthenticatedUserId } from "./identity-context";
 
 interface SentenceFeedbackProps {
-  meaningId?: string;
+  meaningId: string;
   targetWord: string;
   attemptId: string;
   source: "word_detail" | "review" | "daily_mission" | "free_practice";
@@ -76,7 +78,9 @@ export function SentenceFeedback({
     ? `${pathname}?${searchParams.toString()}`
     : pathname;
   const [sentence, setSentence] = useState("");
-  const [recovered, setRecovered] = useState<string | null>(null);
+  const [recovered, setRecovered] = useState<SentenceRecoveryRecord | null>(
+    null,
+  );
   const [result, setResult] = useState<SentenceFeedbackResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -90,6 +94,8 @@ export function SentenceFeedback({
   const feedbackVersion = useRef(0);
   const ownerId = useRef(userId);
   const practiceHeadingRef = useRef<HTMLHeadingElement>(null);
+  const sentenceInputRef = useRef<HTMLTextAreaElement>(null);
+  const submissionErrorRef = useRef<HTMLParagraphElement>(null);
   const feedbackResultRef = useRef<HTMLDivElement>(null);
   const reportTriggerRef = useRef<HTMLButtonElement>(null);
   const reportFirstReasonRef = useRef<HTMLInputElement>(null);
@@ -120,6 +126,10 @@ export function SentenceFeedback({
   }, [reportStatus]);
 
   useEffect(() => {
+    if (errorMessage && !result) submissionErrorRef.current?.focus();
+  }, [errorMessage, result]);
+
+  useEffect(() => {
     if (!userId) return;
     const previousOwnerId = ownerId.current;
     ownerId.current = userId;
@@ -138,12 +148,14 @@ export function SentenceFeedback({
       setReportClassification(null);
       setReportStatus("idle");
     }
+    setRecovered(null);
     const record = readSentenceRecovery(userId);
     if (!record) return;
     if (
       record.path !== returnPath ||
       record.source !== source ||
       record.attemptId !== attemptId ||
+      record.meaningId !== meaningId ||
       record.targetWord !== targetWord
     ) {
       if (
@@ -155,13 +167,14 @@ export function SentenceFeedback({
         clearSentenceRecovery(userId);
       return;
     }
-    setRecovered(record.sentence);
+    setRecovered(record);
   }, [
     attemptId,
     clearMismatchedRecovery,
     returnPath,
     source,
     targetWord,
+    meaningId,
     userId,
     recoveryAttemptIds,
   ]);
@@ -170,6 +183,40 @@ export function SentenceFeedback({
     clearSentenceRecovery(userId);
     setRecovered(null);
     setSentence("");
+    requestAnimationFrame(() => sentenceInputRef.current?.focus());
+  }
+
+  function resumeRecovery() {
+    if (!recovered || !userId) return;
+    setSentence(recovered.sentence);
+    saveSentenceDraft({
+      ownerId: userId,
+      source,
+      attemptId,
+      meaningId,
+      path: returnPath,
+      targetWord,
+      shortDefinition,
+      sentence: recovered.sentence,
+    });
+    setRecovered(null);
+    requestAnimationFrame(() => sentenceInputRef.current?.focus());
+  }
+
+  function updateSentence(nextSentence: string) {
+    setSentence(nextSentence);
+    if (userId) {
+      saveSentenceDraft({
+        ownerId: userId,
+        source,
+        attemptId,
+        meaningId,
+        path: returnPath,
+        targetWord,
+        shortDefinition,
+        sentence: nextSentence,
+      });
+    }
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -209,6 +256,7 @@ export function SentenceFeedback({
           recovery?.path === returnPath &&
           recovery.source === source &&
           recovery.attemptId === attemptId &&
+          recovery.meaningId === meaningId &&
           recovery.targetWord === targetWord
         ) {
           clearSentenceRecovery(userId);
@@ -223,6 +271,7 @@ export function SentenceFeedback({
           ownerId: userId ?? "",
           source,
           attemptId,
+          meaningId,
           path: returnPath,
           targetWord,
           shortDefinition,
@@ -337,14 +386,15 @@ export function SentenceFeedback({
             role="status"
             className="rounded-md bg-amber-50 p-[var(--spacing-sm)] text-base text-amber-900"
           >
-            <p>Your sentence was saved when your session expired.</p>
+            <p>
+              {recovered.reason === "draft"
+                ? "Your saved sentence is ready to resume."
+                : "Your sentence was saved when your session expired."}
+            </p>
             <div className="mt-[var(--spacing-sm)] flex flex-wrap gap-[var(--spacing-sm)]">
               <button
                 type="button"
-                onClick={() => {
-                  setSentence(recovered);
-                  setRecovered(null);
-                }}
+                onClick={resumeRecovery}
                 className="inline-flex min-h-[var(--spacing-2xl)] min-w-[var(--spacing-2xl)] items-center justify-center px-[var(--spacing-sm)] text-base font-medium underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
               >
                 Resume sentence
@@ -365,12 +415,13 @@ export function SentenceFeedback({
             className="sr-only"
           >{`Write a sentence using ${targetWord}`}</label>
           <textarea
+            ref={sentenceInputRef}
             id={`sentence-input-${attemptId}`}
             name="sentence"
             aria-describedby={`sentence-privacy-${attemptId} sentence-count-${attemptId}`}
             value={sentence}
             onChange={(event) => {
-              setSentence(event.target.value);
+              updateSentence(event.target.value);
               if (result) {
                 feedbackVersion.current += 1;
                 setResult(null);
@@ -419,8 +470,10 @@ export function SentenceFeedback({
 
       {errorMessage && !hasResult ? (
         <p
+          ref={submissionErrorRef}
           role="alert"
           aria-live="polite"
+          tabIndex={-1}
           className="mt-[var(--spacing-md)] rounded-md bg-red-50 p-[var(--spacing-sm)] text-base text-red-700"
         >
           {errorMessage}

@@ -153,7 +153,9 @@ conflict rolls the complete batch back before bounded retry.
 Repositories always scope private reads and writes by the authenticated user. Foreign keys,
 `CHECK` constraints, unique/partial indexes, and application validation defend the same invariants at
 different layers. Dynamic values use bound parameters. Core business tables do not use broad
-cascading deletes.
+cascading deletes. The web client may keep one nonblank, 300-character-bounded unsubmitted sentence
+draft in owner-bound `sessionStorage` for short-lived reload recovery; it does not use `localStorage`,
+tokens, provider feedback, or analytics.
 
 ## 15. Operational metadata and conversion guard
 
