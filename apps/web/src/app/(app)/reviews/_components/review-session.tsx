@@ -9,8 +9,6 @@ import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
 import { handleApiError } from "@/lib/session";
 import { SentenceFeedback } from "../../_components/sentence-feedback";
-import { readSentenceRecovery } from "@/lib/sentence-recovery";
-import { useAuthenticatedUserId } from "../../_components/identity-context";
 
 type Rating = "again" | "hard" | "good" | "easy";
 
@@ -49,12 +47,6 @@ export function ReviewSession({
   reviewTarget,
   reviewsCompleted,
 }: ReviewSessionProps) {
-  const userId = useAuthenticatedUserId();
-  const [recoveryAttempt, setRecoveryAttempt] = useState<{
-    attemptId: string;
-    targetWord: string;
-    shortDefinition?: string;
-  } | null>(null);
   const initialSessionLimit = Math.min(
     Math.max(0, reviewTarget - reviewsCompleted),
     initialTotalCount,
@@ -87,16 +79,6 @@ export function ReviewSession({
   const completionHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const currentCard = dueWords[currentIndex];
-
-  useEffect(() => {
-    const record = readSentenceRecovery(userId);
-    if (record?.path === "/reviews" && record.source === "review")
-      setRecoveryAttempt({
-        attemptId: record.attemptId,
-        targetWord: record.targetWord,
-        shortDefinition: record.shortDefinition,
-      });
-  }, [userId]);
 
   const promptType = currentCard
     ? determinePromptType(dueWords, currentIndex)
@@ -392,19 +374,6 @@ export function ReviewSession({
 
   return (
     <div className="flex flex-col">
-      {recoveryAttempt ? (
-        <div className="mb-[var(--spacing-lg)]">
-          <h2 className="text-lg font-semibold text-neutral-900">
-            Resume sentence practice
-          </h2>
-          <SentenceFeedback
-            targetWord={recoveryAttempt.targetWord}
-            attemptId={recoveryAttempt.attemptId}
-            source="review"
-            shortDefinition={recoveryAttempt.shortDefinition}
-          />
-        </div>
-      ) : null}
       <div className="flex items-center justify-between">
         <p className="text-sm font-medium text-neutral-600">
           {Math.max(0, sessionLimit - completedReviewCount)} review

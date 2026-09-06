@@ -62,11 +62,8 @@ export function SentenceFeedback({
       record.source !== source ||
       record.attemptId !== attemptId ||
       record.targetWord !== targetWord
-    ) {
-      if (record.path === pathname && record.source === source)
-        clearSentenceRecovery(userId);
+    )
       return;
-    }
     setRecovered(record.sentence);
   }, [attemptId, pathname, source, targetWord, userId]);
 

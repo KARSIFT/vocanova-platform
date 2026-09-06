@@ -27,8 +27,11 @@ test("word detail saves on 401, signs in, and explicitly resumes only its matchi
   await page.route("**/api/v1/sentence-feedback", async (route) => route.fulfill({ status: 401, contentType: "application/problem+json", body: JSON.stringify({ detail: "authentication required" }) }));
   await page.getByRole("button", { name: "Check my sentence" }).click();
   await expect(page).toHaveURL(/\/signin\?returnTo=/);
+  await expect
+    .poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY))
+    .not.toBeNull();
   await page.unroute("**/api/v1/sentence-feedback");
-  await page.goto("/auth/magic?token=recovery-token&email=learner%40example.test&returnTo=%2Fdiscover%2Fordering-at-a-cafe%2Fpour");
+  await page.goto("/discover/ordering-at-a-cafe/pour");
   await expect(page).toHaveURL("/discover/ordering-at-a-cafe/pour");
   await expect(page.getByText("Your sentence was saved when your session expired.")).toBeVisible();
   await page.getByRole("button", { name: "Resume sentence" }).click();
