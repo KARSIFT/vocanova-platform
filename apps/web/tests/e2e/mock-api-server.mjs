@@ -1403,7 +1403,7 @@ const server = createServer(async (req, res) => {
         "Set-Cookie": [
           buildSessionCookie(sessionValue),
           buildCsrfCookie(csrfValue),
-        ].join(", "),
+        ],
       },
     );
     return;
@@ -1463,7 +1463,7 @@ const server = createServer(async (req, res) => {
     if (ONBOARDING_STATUSES.has(onboardingStatusOverride)) {
       logLine(req, 200, { onboardingStatus: onboardingStatusOverride });
       jsonResponse(res, 200, {
-        ...DEFAULT_USER,
+        ...buildCurrentUser(state, cookies),
         onboardingStatus: onboardingStatusOverride,
       });
       return;

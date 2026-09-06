@@ -12,10 +12,17 @@ import type {
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
-import { handleApiError } from "@/lib/session";
+import {
+  clearOnboardingRecovery,
+  readOnboardingRecovery,
+  saveOnboardingRecovery,
+  type OnboardingRecoveryRecord,
+} from "@/lib/onboarding-recovery";
+import { handleApiError, isSessionExpiredError } from "@/lib/session";
 
 interface OnboardingFormProps {
   defaultNativeLanguage?: string;
+  userId?: string;
 }
 
 type Status =
@@ -116,6 +123,7 @@ function isFormComplete(state: FormState): boolean {
 
 export function OnboardingForm({
   defaultNativeLanguage = "",
+  userId,
 }: OnboardingFormProps) {
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -124,6 +132,9 @@ export function OnboardingForm({
     nativeLanguage: defaultNativeLanguage,
   });
   const [status, setStatus] = useState<Status>({ type: "idle" });
+  const [recovery, setRecovery] = useState<OnboardingRecoveryRecord | null>(
+    null,
+  );
   useEffect(() => {
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -132,6 +143,9 @@ export function OnboardingForm({
       // UTC remains usable when device detection is unavailable.
     }
   }, []);
+  useEffect(() => {
+    setRecovery(readOnboardingRecovery(userId));
+  }, [userId]);
   const stepContentRef = useRef<HTMLDivElement>(null);
   const previousStepRef = useRef(step);
 
@@ -171,6 +185,26 @@ export function OnboardingForm({
     setStep((s) => Math.max(0, s - 1));
   }
 
+  function resumeRecovery() {
+    if (!recovery) return;
+    setState({
+      englishLevel: recovery.englishLevel,
+      nativeLanguage: recovery.nativeLanguage,
+      learningGoal: recovery.learningGoal,
+      mainUseCase: recovery.mainUseCase,
+      dailyReviewTarget: recovery.dailyReviewTarget,
+      timezone: recovery.timezone,
+    });
+    setStep(recovery.step);
+    setStatus({ type: "idle" });
+    setRecovery(null);
+  }
+
+  function discardRecovery() {
+    clearOnboardingRecovery(userId);
+    setRecovery(null);
+  }
+
   async function handleSubmit() {
     if (!isFormComplete(state)) {
       return;
@@ -198,23 +232,70 @@ export function OnboardingForm({
       await client.completeOnboarding(body, {
         headers: { "X-CSRF-Token": csrfToken },
       });
+      clearOnboardingRecovery(userId);
       // router.push + refresh ensures the Next.js cache for any
       // /me-derived page (e.g. /home) re-reads the additive
       // onboardingStatus field on next render.
       router.push("/home");
       router.refresh();
     } catch (error) {
-      // A 401 mid-onboarding means the session expired before the
-      // answers were saved. handleApiError routes the learner to
-      // re-auth; the per-step answers are still in component state so
-      // they survive the page transition. We never claim onboarding is
-      // complete when the server rejected the submission.
+      if (isSessionExpiredError(error)) {
+        saveOnboardingRecovery({
+          ownerId: userId ?? "",
+          englishLevel: body.englishLevel,
+          nativeLanguage: body.nativeLanguage,
+          learningGoal: body.learningGoal,
+          mainUseCase: body.mainUseCase,
+          dailyReviewTarget: body.dailyReviewTarget,
+          timezone: body.timezone ?? "",
+          step,
+        });
+      }
+      // A 401 mid-onboarding is saved before the shared handler sends the
+      // learner to sign in. Other failures remain an in-place retry.
       const message = handleApiError(
         error,
         "We couldn't save your answers. Please try again.",
       );
       setStatus({ type: "error", message });
     }
+  }
+
+  if (recovery) {
+    return (
+      <div className="space-y-[var(--spacing-lg)]">
+        <section
+          aria-labelledby="onboarding-recovery-heading"
+          className="space-y-[var(--spacing-sm)] rounded-md border border-primary-200 bg-primary-50 p-[var(--spacing-md)]"
+        >
+          <h2
+            id="onboarding-recovery-heading"
+            className="text-lg font-semibold text-neutral-900"
+          >
+            Resume your setup?
+          </h2>
+          <p className="text-base text-neutral-700">
+            Your answers were saved when your session expired.
+          </p>
+          <div className="flex flex-wrap gap-[var(--spacing-sm)]">
+            <button
+              type="button"
+              onClick={resumeRecovery}
+              className="inline-flex min-h-[var(--spacing-2xl)] items-center justify-center rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+            >
+              Resume setup
+            </button>
+            <button
+              type="button"
+              onClick={discardRecovery}
+              className="inline-flex min-h-[var(--spacing-2xl)] items-center justify-center rounded-md border border-neutral-300 bg-white px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-900 transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out)] hover:bg-neutral-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-700"
+            >
+              Discard saved answers
+            </button>
+          </div>
+        </section>
+      </div>
+    );
   }
 
   return (

@@ -45,7 +45,7 @@ export default async function OnboardingPage() {
             Settings.
           </p>
         </header>
-        <OnboardingForm />
+        <OnboardingForm userId={meResponse.data.userId} />
       </div>
     </main>
   );
