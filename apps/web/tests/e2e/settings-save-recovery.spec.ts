@@ -27,6 +27,25 @@ async function setRetryFixture(context: BrowserContext, baseURL: string) {
   ]);
 }
 
+async function setHeldPatchFixture(context: BrowserContext, baseURL: string) {
+  const domain = new URL(baseURL).hostname;
+  await context.addCookies([
+    {
+      name: "vocanova_session",
+      value: `settings-in-flight-${randomUUID()}`,
+      domain,
+      path: "/",
+    },
+    { name: "vocanova_csrf", value: "settings-csrf", domain, path: "/" },
+    {
+      name: "e2e_settings_patch_hold",
+      value: "1",
+      domain,
+      path: "/",
+    },
+  ]);
+}
+
 async function releaseSettingsPatch(page: Page) {
   const mockApiPort = process.env.MOCK_API_PORT ?? "8080";
   await expect
@@ -97,5 +116,72 @@ test.describe("Settings save recovery", () => {
     await page.reload();
     await expect(displayName).toHaveValue("Retry-safe learner");
     await expect(timezone).toHaveValue("Asia/Tehran");
+  });
+
+  test("keeps newer edits after a held save and submits them once", async ({
+    page,
+    context,
+  }, testInfo) => {
+    const baseURL = testInfo.project.use.baseURL;
+    if (!baseURL) {
+      throw new Error("Expected Playwright to configure a base URL.");
+    }
+    await setHeldPatchFixture(context, baseURL);
+    await page.goto("/settings");
+
+    const displayName = page.getByRole("textbox", { name: "Display name" });
+    const reviewTarget = page.getByRole("radiogroup", {
+      name: "Daily review target",
+    });
+    const patchRequests: string[] = [];
+    page.on("request", (request) => {
+      if (
+        request.method() === "PATCH" &&
+        request.url().endsWith("/api/v1/settings")
+      ) {
+        patchRequests.push(request.postData() ?? "");
+      }
+    });
+
+    await displayName.fill("Earlier saved name");
+    await reviewTarget.getByText("30", { exact: true }).click();
+    await page.getByRole("button", { name: "Save settings" }).click();
+    await expect(page.getByRole("button", { name: "Saving..." })).toBeDisabled();
+    await expect.poll(() => patchRequests).toHaveLength(1);
+    expect(JSON.parse(patchRequests[0]!)).toEqual({
+      displayName: "Earlier saved name",
+      dailyReviewTarget: 30,
+    });
+
+    await displayName.fill("Newer unsaved name");
+    await reviewTarget.getByText("50", { exact: true }).click();
+    await expect(displayName).toHaveValue("Newer unsaved name");
+    await expect(page.getByLabel("50")).toBeChecked();
+
+    await releaseSettingsPatch(page);
+    await expect(
+      page.getByRole("status").filter({
+        hasText:
+          "Your earlier settings changes have been saved. Your newer changes are ready to save.",
+      }),
+    ).toBeVisible();
+    await expect(displayName).toHaveValue("Newer unsaved name");
+    await expect(page.getByLabel("50")).toBeChecked();
+    await expect(page.getByRole("button", { name: "Save settings" })).toBeEnabled();
+    expect(patchRequests).toHaveLength(1);
+
+    await page.getByRole("button", { name: "Save settings" }).click();
+    await expect(
+      page.getByText("Your settings have been saved.", { exact: true }),
+    ).toBeVisible();
+    await expect.poll(() => patchRequests).toHaveLength(2);
+    expect(JSON.parse(patchRequests[1]!)).toEqual({
+      displayName: "Newer unsaved name",
+      dailyReviewTarget: 50,
+    });
+
+    await page.reload();
+    await expect(displayName).toHaveValue("Newer unsaved name");
+    await expect(page.getByLabel("50")).toBeChecked();
   });
 });

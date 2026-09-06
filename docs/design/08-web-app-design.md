@@ -73,7 +73,9 @@ practice is a component, not a route.
   Detail, and Review Completion; AI feedback includes result, correction, explanation, improvement
   tip (see [09](../engineering/09-ai-features.md) for the full contract).
 - **Progress**: simple, motivation-focused, backend-authoritative.
-- **Settings**: learning preferences, account basics, account deletion with confirmation.
+- **Settings**: learning preferences, account basics, account deletion with confirmation. A confirmed
+  save updates unchanged fields from the backend without discarding edits made while that request was
+  pending; retained edits stay ready for a separate save.
 
 ## API integration
 

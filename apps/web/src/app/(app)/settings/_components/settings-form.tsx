@@ -36,6 +36,7 @@ type SaveStatus =
   | { type: "idle" }
   | { type: "saving" }
   | { type: "saved" }
+  | { type: "changes-pending" }
   | { type: "error"; message: string };
 
 interface SettingsFormProps {
@@ -48,21 +49,21 @@ type FormState = Omit<Settings, "displayName" | "reviewIntervalPreset"> & {
 };
 
 export function SettingsForm({ initialSettings }: SettingsFormProps) {
+  const initialState = settingsToFormState(initialSettings);
   const savedSettings = useRef<Settings>(initialSettings);
-  const [state, setState] = useState<FormState>({
-    dailyReviewTarget: initialSettings.dailyReviewTarget,
-    reviewIntervalPreset: initialSettings.reviewIntervalPreset,
-    appLanguage: initialSettings.appLanguage,
-    notificationsEnabled: initialSettings.notificationsEnabled,
-    marketingEmailsEnabled: initialSettings.marketingEmailsEnabled,
-    timezone: initialSettings.timezone,
-    displayName: initialSettings.displayName,
-  });
+  const currentState = useRef<FormState>(initialState);
+  const [state, setState] = useState<FormState>(initialState);
   const [status, setStatus] = useState<SaveStatus>({ type: "idle" });
 
   function patch<K extends keyof FormState>(key: K, value: FormState[K]) {
-    setState((current) => ({ ...current, [key]: value }));
-    if (status.type === "saved" || status.type === "error") {
+    const next = { ...currentState.current, [key]: value };
+    currentState.current = next;
+    setState(next);
+    if (
+      status.type === "saved" ||
+      status.type === "changes-pending" ||
+      status.type === "error"
+    ) {
       setStatus({ type: "idle" });
     }
   }
@@ -70,7 +71,8 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!state.timezone.trim()) {
+    const submittedState = currentState.current;
+    if (!submittedState.timezone.trim()) {
       setStatus({
         type: "error",
         message: "Enter an IANA timezone before saving your settings.",
@@ -88,7 +90,7 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
       return;
     }
 
-    const body = buildUpdateBody(state, savedSettings.current);
+    const body = buildUpdateBody(submittedState, savedSettings.current);
     if (Object.keys(body).length === 0) {
       setStatus({ type: "saved" });
       return;
@@ -101,16 +103,18 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         headers: { "X-CSRF-Token": csrfToken },
       });
       savedSettings.current = data;
-      setState({
-        dailyReviewTarget: data.dailyReviewTarget,
-        reviewIntervalPreset: data.reviewIntervalPreset,
-        appLanguage: data.appLanguage,
-        notificationsEnabled: data.notificationsEnabled,
-        marketingEmailsEnabled: data.marketingEmailsEnabled,
-        timezone: data.timezone,
-        displayName: data.displayName,
-      });
-      setStatus({ type: "saved" });
+      const reconciledState = reconcileSavedSettings(
+        currentState.current,
+        submittedState,
+        data,
+      );
+      currentState.current = reconciledState;
+      setState(reconciledState);
+      setStatus(
+        formStatesMatch(reconciledState, settingsToFormState(data))
+          ? { type: "saved" }
+          : { type: "changes-pending" },
+      );
     } catch (error) {
       // A 401 mid-settings-write is the documented
       // session-expiry mid-flow case. handleApiError routes the
@@ -357,6 +361,17 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         </p>
       ) : null}
 
+      {status.type === "changes-pending" ? (
+        <p
+          role="status"
+          aria-live="polite"
+          className="rounded-md border border-primary-300 bg-primary-50 p-[var(--spacing-sm)] text-base text-primary-900"
+        >
+          Your earlier settings changes have been saved. Your newer changes are
+          ready to save.
+        </p>
+      ) : null}
+
       <div className="flex flex-wrap items-center justify-end gap-[var(--spacing-sm)]">
         <button
           type="submit"
@@ -368,6 +383,79 @@ export function SettingsForm({ initialSettings }: SettingsFormProps) {
         </button>
       </div>
     </form>
+  );
+}
+
+function settingsToFormState(settings: Settings): FormState {
+  return {
+    dailyReviewTarget: settings.dailyReviewTarget,
+    reviewIntervalPreset: settings.reviewIntervalPreset,
+    appLanguage: settings.appLanguage,
+    notificationsEnabled: settings.notificationsEnabled,
+    marketingEmailsEnabled: settings.marketingEmailsEnabled,
+    timezone: settings.timezone,
+    displayName: settings.displayName,
+  };
+}
+
+function reconcileSavedSettings(
+  current: FormState,
+  submitted: FormState,
+  confirmed: Settings,
+): FormState {
+  const server = settingsToFormState(confirmed);
+  return {
+    dailyReviewTarget: retainNewerValue(
+      current.dailyReviewTarget,
+      submitted.dailyReviewTarget,
+      server.dailyReviewTarget,
+    ),
+    reviewIntervalPreset: retainNewerValue(
+      current.reviewIntervalPreset,
+      submitted.reviewIntervalPreset,
+      server.reviewIntervalPreset,
+    ),
+    appLanguage: retainNewerValue(
+      current.appLanguage,
+      submitted.appLanguage,
+      server.appLanguage,
+    ),
+    notificationsEnabled: retainNewerValue(
+      current.notificationsEnabled,
+      submitted.notificationsEnabled,
+      server.notificationsEnabled,
+    ),
+    marketingEmailsEnabled: retainNewerValue(
+      current.marketingEmailsEnabled,
+      submitted.marketingEmailsEnabled,
+      server.marketingEmailsEnabled,
+    ),
+    timezone: retainNewerValue(
+      current.timezone,
+      submitted.timezone,
+      server.timezone,
+    ),
+    displayName: retainNewerValue(
+      current.displayName,
+      submitted.displayName,
+      server.displayName,
+    ),
+  };
+}
+
+function retainNewerValue<T>(current: T, submitted: T, confirmed: T): T {
+  return current === submitted ? confirmed : current;
+}
+
+function formStatesMatch(left: FormState, right: FormState): boolean {
+  return (
+    left.dailyReviewTarget === right.dailyReviewTarget &&
+    left.reviewIntervalPreset === right.reviewIntervalPreset &&
+    left.appLanguage === right.appLanguage &&
+    left.notificationsEnabled === right.notificationsEnabled &&
+    left.marketingEmailsEnabled === right.marketingEmailsEnabled &&
+    left.timezone === right.timezone &&
+    left.displayName === right.displayName
   );
 }
 
