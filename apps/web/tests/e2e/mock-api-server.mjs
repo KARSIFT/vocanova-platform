@@ -74,6 +74,7 @@
 //
 //   GET    /api/v1/journey-situations                -> 200 { items: [...] }
 //             `e2e_journey_fixture=empty` returns an empty catalog
+//             `e2e_journey_fixture=exact-page` returns a full terminal page
 //   GET    /api/v1/journey-situations/:slug          -> 200 SituationResponse
 //             `e2e_situation_fixture=empty` returns an empty word list
 //   GET    /api/v1/canonical-words/:slug             -> 200 WordDetailResponse
@@ -1136,6 +1137,9 @@ function buildJourneySituations(fixture, after) {
   if (fixture === "empty") {
     return { items: [] };
   }
+  if (fixture === "exact-page") {
+    return { items: JOURNEY_SITUATIONS.map((s) => ({ ...s })) };
+  }
   if (fixture === "paginated") {
     if (after === "e2e-journey-page-2") {
       return { items: [JOURNEY_SITUATIONS[1]] };
@@ -1610,6 +1614,11 @@ const server = createServer(async (req, res) => {
               }
       : cookies.e2e_saved_words_fixture === "truncated-page"
         ? TRUNCATED_SAVED_WORDS_RESPONSE
+        : cookies.e2e_saved_words_fixture === "exact-page"
+          ? {
+              items: TRUNCATED_SAVED_WORDS_RESPONSE.items,
+              nextCursor: undefined,
+            }
         : cookies.e2e_saved_words_fixture === "progress-shared-slug"
           ? PROGRESS_SHARED_SLUG_SAVED_WORDS_RESPONSE
           : cookies.e2e_saved_words_fixture === "long-content"

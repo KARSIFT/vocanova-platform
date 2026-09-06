@@ -35,7 +35,8 @@ segment; encoded separators, control characters, and nested encodings are reject
 
 Routes expose explicit DTOs rather than persistence rows. Validation is defined by each route's Zod
 schema; clients must not rely on undeclared fields being retained. Paginated responses contain
-`items` and may contain `nextCursor`.
+`items` and may contain `nextCursor`. When the Worker emits a cursor, at least one additional
+matching result exists after that page; clients can treat its absence as the end of the collection.
 
 Request failures use a problem-details-shaped response:
 

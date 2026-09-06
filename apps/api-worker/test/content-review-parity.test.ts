@@ -136,6 +136,7 @@ describe("Worker content, learning, and review parity", () => {
       "coffee",
     );
     expect(second.items.map((item) => item.meaningId)).toEqual([MEANING_A]);
+    expect(second.nextCursor).toBeUndefined();
 
     await expect(
       repository.listSavedWords(USER_A, first.nextCursor!, 1, "flat white"),
@@ -429,6 +430,58 @@ describe("Worker content, learning, and review parity", () => {
         { noteType: "register", noteText: "Common in cafe orders." },
       ],
     });
+  });
+
+  it("emits pagination cursors only when another Journey, saved word, or due review exists", async () => {
+    const allSituations = await repository.listSituations("", 2);
+    expect(allSituations.items.map((item) => item.slug)).toEqual([
+      "at-the-cafe",
+      "at-the-airport",
+    ]);
+    expect(allSituations.nextCursor).toBeUndefined();
+
+    const firstSituation = await repository.listSituations("", 1);
+    expect(firstSituation.nextCursor).toBeTruthy();
+    const finalSituation = await repository.listSituations(
+      firstSituation.nextCursor!,
+      1,
+    );
+    expect(finalSituation.items.map((item) => item.slug)).toEqual([
+      "at-the-airport",
+    ]);
+    expect(finalSituation.nextCursor).toBeUndefined();
+
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    await insertUserWord(USER_WORD_B, USER_A, MEANING_B, NOW);
+    const allSaved = await repository.listSavedWords(USER_A, "", 2);
+    expect(allSaved.items).toHaveLength(2);
+    expect(allSaved.nextCursor).toBeUndefined();
+
+    const firstSaved = await repository.listSavedWords(USER_A, "", 1);
+    expect(firstSaved.nextCursor).toBeTruthy();
+    const finalSaved = await repository.listSavedWords(
+      USER_A,
+      firstSaved.nextCursor!,
+      1,
+    );
+    expect(finalSaved.items).toHaveLength(1);
+    expect(finalSaved.nextCursor).toBeUndefined();
+
+    const allDue = await repository.listDueWords(USER_A, "", 2);
+    expect(allDue.totalCount).toBe(2);
+    expect(allDue.items).toHaveLength(2);
+    expect(allDue.nextCursor).toBeUndefined();
+
+    const firstDue = await repository.listDueWords(USER_A, "", 1);
+    expect(firstDue.nextCursor).toBeTruthy();
+    const finalDue = await repository.listDueWords(
+      USER_A,
+      firstDue.nextCursor!,
+      1,
+    );
+    expect(finalDue.totalCount).toBe(2);
+    expect(finalDue.items).toHaveLength(1);
+    expect(finalDue.nextCursor).toBeUndefined();
   });
 
   it("fails closed on malformed cursors and missing canonical records", async () => {

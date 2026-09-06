@@ -46,12 +46,13 @@ export class D1ContentLearningRepository {
            AND (?1 IS NULL OR display_order > ?1 OR (display_order = ?1 AND id > ?2))
          ORDER BY display_order ASC, id ASC LIMIT ?3`,
       )
-      .bind(cursor?.value ?? null, cursor?.id ?? "", limit)
+      .bind(cursor?.value ?? null, cursor?.id ?? "", limit + 1)
       .all<Row>();
-    const items = result.results.map(situationFromRow);
+    const hasMore = result.results.length > limit;
+    const items = result.results.slice(0, limit).map(situationFromRow);
     return {
       items,
-      ...(items.length === limit && {
+      ...(hasMore && {
         nextCursor: encodeCursor(
           "d",
           items.at(-1)!.displayOrder,
@@ -209,13 +210,14 @@ export class D1ContentLearningRepository {
         `%${escapeLike(query)}%`,
         cursor?.value ?? null,
         cursor?.id ?? "",
-        limit,
+        limit + 1,
       )
       .all<Row>();
-    const items = result.results.map(savedMeaningFromRow);
+    const hasMore = result.results.length > limit;
+    const items = result.results.slice(0, limit).map(savedMeaningFromRow);
     return {
       items,
-      ...(items.length === limit && {
+      ...(hasMore && {
         nextCursor: encodeCursor(
           "a",
           items.at(-1)!.addedAt,
@@ -355,7 +357,13 @@ export class D1ContentLearningRepository {
                   OR (coalesce(uw.next_review_at, '') = ?3 AND uw.id > ?4))
            ORDER BY coalesce(uw.next_review_at, '') ASC, uw.id ASC LIMIT ?5`,
         )
-        .bind(userId, timestamp, cursorTime ?? null, cursor?.id ?? "", limit)
+        .bind(
+          userId,
+          timestamp,
+          cursorTime ?? null,
+          cursor?.id ?? "",
+          limit + 1,
+        )
         .all<Row>(),
       this.database
         .prepare(
@@ -367,7 +375,9 @@ export class D1ContentLearningRepository {
         .bind(userId, timestamp)
         .first<{ next_review_at: string | null }>(),
     ]);
-    const items = result.results.map((row) => ({
+    const hasMore = result.results.length > limit;
+    const rows = result.results.slice(0, limit);
+    const items = rows.map((row) => ({
       userWordId: String(row.user_word_id),
       meaningId: String(row.meaning_id),
       wordId: String(row.word_id),
@@ -378,7 +388,7 @@ export class D1ContentLearningRepository {
       status: String(row.status),
       reviewStep: Number(row.review_step),
     }));
-    const last = result.results.at(-1);
+    const last = rows.at(-1);
     const totalCount = Number(count?.count ?? 0);
     return {
       items,
@@ -386,7 +396,7 @@ export class D1ContentLearningRepository {
       ...(totalCount === 0 && {
         nextReviewAt: nextScheduled?.next_review_at ?? null,
       }),
-      ...(items.length === limit &&
+      ...(hasMore &&
         last && {
           nextCursor: encodeCursor(
             "n",

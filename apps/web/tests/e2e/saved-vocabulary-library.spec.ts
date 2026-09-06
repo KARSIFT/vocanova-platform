@@ -124,6 +124,24 @@ test("offers Journey discovery when the saved library is empty", async ({
   ).toHaveAttribute("href", "/discover");
 });
 
+test("does not offer a false saved-vocabulary continuation for an exact terminal page", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await context.addCookies([
+    { name: "e2e_saved_words_fixture", value: "exact-page", url: baseURL },
+  ]);
+
+  await page.goto("/discover/saved");
+  await expect(page.getByText("arrival", { exact: true })).toBeVisible();
+  await expect(page.getByText("terminal", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Load more saved words" }),
+  ).toHaveCount(0);
+});
+
 test("searches saved meanings by normalized definition, focuses results, and clears a no-match filter", async ({
   page,
   context,
