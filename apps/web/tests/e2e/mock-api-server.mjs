@@ -338,6 +338,11 @@ const TRUNCATED_SAVED_WORDS_RESPONSE = {
   nextCursor: "e2e-saved-words-after-10",
 };
 
+const HOME_PRACTICE_SAVED_WORDS_RESPONSE = {
+  items: TRUNCATED_SAVED_WORDS_RESPONSE.items.slice(0, 2),
+  nextCursor: undefined,
+};
+
 const LONG_SAVED_WORDS_RESPONSE = {
   items: [
     {
@@ -665,6 +670,7 @@ function createInitialState() {
     consumedEmailChangeFailures: new Set(),
     emailChangeHolds: new Map(),
     completionSummaryDueFetches: 0,
+    paginationRetryDueFetches: 0,
   };
 }
 
@@ -842,11 +848,46 @@ function buildProgress(state) {
   return cloneProgress(state.progress);
 }
 
-function buildDailyMission(state) {
+function buildDailyMission(state, cookies = {}) {
+  const homeFixture = cookies.e2e_home_fixture;
   const streak = { ...state.progress.streak };
+  if (homeFixture === "mission-complete") {
+    return {
+      ...state.dailyMission,
+      reviewsCompleted: state.dailyMission.reviewTarget,
+      status: "completed",
+      completedAt: "2026-01-01T12:00:00.000Z",
+      streak,
+    };
+  }
+  if (homeFixture === "sentence-practice-needed") {
+    return {
+      ...state.dailyMission,
+      reviewsCompleted: state.dailyMission.reviewTarget,
+      newWordsCompleted: state.dailyMission.newWordTarget,
+      sentencePracticeTarget: 1,
+      sentencePracticesCompleted: 0,
+      status: "open",
+      streak,
+    };
+  }
+  const fixture = cookies.e2e_review_mission_fixture;
+  const fixtureMission =
+    fixture === "target-three"
+      ? { reviewTarget: 3, reviewsCompleted: 0 }
+      : fixture === "partially-completed"
+        ? { reviewTarget: 4, reviewsCompleted: 2 }
+        : fixture === "already-met"
+          ? { reviewTarget: 4, reviewsCompleted: 4 }
+          : fixture === "fewer-due-words"
+            ? { reviewTarget: 5, reviewsCompleted: 0 }
+            : undefined;
+
   return {
     ...state.dailyMission,
-    reviewsCompleted: state.reviewedCount,
+    ...fixtureMission,
+    reviewsCompleted:
+      (fixtureMission?.reviewsCompleted ?? 0) + state.reviewedCount,
     streak,
   };
 }
@@ -899,6 +940,12 @@ function buildDueWords(state, fixture) {
           : undefined,
       totalCount: Math.max(0, MULTIPLE_CHOICE_DUE_WORDS.length - start),
     };
+  }
+  if (fixture === "pagination-retry") {
+    const page = state.paginationRetryDueFetches;
+    state.paginationRetryDueFetches += 1;
+    const items = MULTIPLE_CHOICE_DUE_WORDS.slice(page, Math.min(page + 1, 2));
+    return { items, nextCursor: undefined, totalCount: Math.max(0, 2 - page) };
   }
   if (fixture === "multiple-choice") {
     return {
@@ -1457,7 +1504,13 @@ const server = createServer(async (req, res) => {
               : url.searchParams.get("after")
               ? { items: SAVED_LIBRARY_PAGE_TWO.filter((item) => !state.libraryRemovedMeaningIds.has(item.meaningId)), nextCursor: undefined }
               : { items: TRUNCATED_SAVED_WORDS_RESPONSE.items, nextCursor: "e2e-library-page-2" }
+          : cookies.e2e_home_fixture !== "new-learner" &&
+              cookies.e2e_home_fixture
+            ? HOME_PRACTICE_SAVED_WORDS_RESPONSE
           : buildSavedWords(state);
+    for (const item of data.items) {
+      state.feedbackTargets.set(item.userWordId, item.wordText);
+    }
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
@@ -1546,7 +1599,12 @@ const server = createServer(async (req, res) => {
       jsonResponse(res, 500, { error: "fixture_read_failure" });
       return;
     }
-    const data = buildDueWords(state, cookies.e2e_review_fixture);
+    const data =
+      cookies.e2e_home_fixture === "reviews-due" ||
+      cookies.e2e_home_fixture === "mission-complete" ||
+      cookies.e2e_home_fixture === "sentence-practice-needed"
+        ? { items: [], nextCursor: undefined, totalCount: 3 }
+        : buildDueWords(state, cookies.e2e_review_fixture);
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
@@ -1705,7 +1763,7 @@ const server = createServer(async (req, res) => {
     const state = getSessionState(cookies);
     const hold = waitForReadHold(state, cookies, "home");
     if (hold) await hold;
-    const mission = buildDailyMission(state);
+    const mission = buildDailyMission(state, cookies);
     logLine(req, 200, { reviewsCompleted: mission.reviewsCompleted });
     jsonResponse(res, 200, mission);
     return;

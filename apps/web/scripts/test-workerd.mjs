@@ -86,7 +86,7 @@ async function exerciseWorkerd(origin) {
   assert.equal(authenticatedHome.status, 200);
   const homeHtml = await authenticatedHome.text();
   assert.match(homeHtml, /Review target: <!-- -->13<!-- --> words/);
-  assert.match(homeHtml, /2<!-- --> words due today/);
+  assert.match(homeHtml, /2<!-- --> words due for review/);
 
   const apiFailure = await fetch(`${origin}/home`, {
     headers: { Cookie: "vocanova_session=api-error" },
