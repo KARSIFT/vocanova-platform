@@ -274,3 +274,48 @@ test("clears an older pending word choice after the learner clears the draft", a
   ).toHaveCount(0);
   await expect(page.getByRole("textbox")).toHaveValue("");
 });
+
+test("submits valid sentences for both selectable saved words", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+  await useHomeFixture(context, baseURL, "caught-up");
+  await page.goto("/home");
+  const selector = page.getByLabel("Choose a saved word to practice");
+  for (const [word, id, sentence] of [
+    ["arrival", "e2e-preview-user-word-01", "My arrival is at noon."],
+    [
+      "baggage",
+      "e2e-preview-user-word-02",
+      "My baggage is ready for the flight.",
+    ],
+  ]) {
+    await selector.selectOption(id!);
+    const discard = page.getByRole("button", {
+      name: "Discard draft and change word",
+    });
+    if (await discard.isVisible()) await discard.click();
+    await page
+      .getByRole("textbox", { name: `Write a sentence using ${word}` })
+      .fill(sentence!);
+    const feedback = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/v1/sentence-feedback") &&
+        response.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "Check my sentence" }).click();
+    const response = await feedback;
+    expect(response.request().postDataJSON()).toMatchObject({
+      attemptId: id,
+      source: "daily_mission",
+      sentenceText: sentence,
+    });
+    expect(response.ok()).toBeTruthy();
+    expect(await response.json()).toMatchObject({
+      status: "correct",
+      canRetry: false,
+    });
+  }
+});

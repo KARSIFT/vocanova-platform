@@ -1439,6 +1439,9 @@ const server = createServer(async (req, res) => {
               cookies.e2e_home_fixture
             ? HOME_PRACTICE_SAVED_WORDS_RESPONSE
           : buildSavedWords(state);
+    for (const item of data.items) {
+      state.feedbackTargets.set(item.userWordId, item.wordText);
+    }
     logLine(req, 200, { count: data.items.length });
     jsonResponse(res, 200, data);
     return;
