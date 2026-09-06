@@ -66,6 +66,13 @@ test("a sibling saved meaning does not clear another meaning's recovery", async 
   await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ path: "/discover/saved/bank?meaning=mean-bank-river", attemptId: "e2e-library-bank-river", targetWord: "bank" })]);
   await page.goto("/discover/saved/bank?meaning=mean-bank-money");
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
+  await page
+    .getByRole("textbox", { name: /Write a sentence using bank/ })
+    .fill("The bank approved my loan.");
+  await page.getByRole("button", { name: "Check my sentence" }).click();
+  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+  await page.reload();
+  await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
   await page.goto("/discover/saved/bank?meaning=mean-bank-river");
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
 });

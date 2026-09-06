@@ -126,7 +126,15 @@ export function SentenceFeedback({
         );
       } else {
         setErrorMessage(null);
-        clearSentenceRecovery(userId);
+        const recovery = readSentenceRecovery(userId);
+        if (
+          recovery?.path === returnPath &&
+          recovery.source === source &&
+          recovery.attemptId === attemptId &&
+          recovery.targetWord === targetWord
+        ) {
+          clearSentenceRecovery(userId);
+        }
         setRecovered(null);
       }
       onFeedbackSubmitted?.(data);
