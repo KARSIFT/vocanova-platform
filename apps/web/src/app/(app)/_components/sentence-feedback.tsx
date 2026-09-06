@@ -61,8 +61,24 @@ export function SentenceFeedback({
     "idle" | "loading" | "error"
   >("idle");
   const feedbackVersion = useRef(0);
+  const ownerId = useRef(userId);
 
   useEffect(() => {
+    const previousOwnerId = ownerId.current;
+    ownerId.current = userId;
+    if (
+      previousOwnerId !== userId &&
+      previousOwnerId !== undefined &&
+      userId !== undefined
+    ) {
+      feedbackVersion.current += 1;
+      setSentence("");
+      setRecovered(null);
+      setResult(null);
+      setErrorMessage(null);
+      setReported(false);
+      setReportStatus("idle");
+    }
     const record = readSentenceRecovery(userId);
     if (!record) return;
     if (

@@ -863,7 +863,10 @@ function cloneProgress(progress) {
 
 function buildCurrentUser(state, cookies = {}) {
   return {
-    userId: "user-fixture",
+    userId:
+      cookies.e2e_identity_fixture === "alternate"
+        ? "alternate-user-fixture"
+        : "user-fixture",
     email:
       cookies.e2e_account_email_fixture === "long"
         ? LONG_ACCOUNT_EMAIL
@@ -1891,6 +1894,20 @@ const server = createServer(async (req, res) => {
       logLine(req, 404, { slug });
       jsonResponse(res, 404, { error: "not_found", slug });
       return;
+    }
+    if (
+      cookies.e2e_saved_words_fixture === "library" &&
+      slug === "ordering-at-a-cafe"
+    ) {
+      response.meanings.push({
+        meaningId: "mean-bank-river",
+        wordId: "word-bank",
+        wordSlug: "bank",
+        wordText: "bank",
+        partOfSpeech: "noun",
+        shortDefinition: "land beside a river",
+        saved: true,
+      });
     }
     logLine(req, 200, { slug });
     jsonResponse(res, 200, response);

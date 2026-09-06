@@ -59,21 +59,47 @@ test("rejects different owners, target mismatch, malformed and expired recovery"
   }
 });
 
+test("a mounted form clears owner-bound state when the authenticated user changes", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  await context.addCookies([{ name: "vocanova_session", value: `identity-${randomUUID()}`, url: baseURL }, { name: "vocanova_csrf", value: "identity-csrf", url: baseURL }, { name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
+  await page.goto("/discover/ordering-at-a-cafe/bank");
+  const input = page.getByRole("textbox", { name: /Write a sentence using bank/ }).nth(1);
+  await input.fill("The bank approved my loan.");
+  await page.getByRole("button", { name: "Check my sentence" }).nth(1).click();
+  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "Remove bank from saved words" }).first().click();
+  const remainingInput = page.getByRole("textbox", { name: /Write a sentence using bank/ }).last();
+  await expect(remainingInput).toHaveValue("The bank approved my loan.");
+  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+
+  await context.addCookies([
+    { name: "e2e_identity_fixture", value: "alternate", url: baseURL },
+  ]);
+  await page.reload();
+
+  await expect(remainingInput).toHaveValue("");
+  await expect(page.getByText("Correct", { exact: true })).toHaveCount(0);
+});
+
 test("a sibling saved meaning does not clear another meaning's recovery", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await context.addCookies([{ name: "vocanova_session", value: `bank-${randomUUID()}`, url: baseURL }, { name: "vocanova_csrf", value: "bank-csrf", url: baseURL }, { name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
-  await page.goto("/discover/saved/bank?meaning=mean-bank-river");
-  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ path: "/discover/saved/bank?meaning=mean-bank-river", attemptId: "e2e-library-bank-river", targetWord: "bank" })]);
-  await page.goto("/discover/saved/bank?meaning=mean-bank-money");
+  const path = "/discover/ordering-at-a-cafe/bank";
+  await page.goto(path);
+  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ path, attemptId: "e2e-library-bank-river", targetWord: "bank" })]);
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
+
   await page
     .getByRole("textbox", { name: /Write a sentence using bank/ })
+    .nth(1)
     .fill("The bank approved my loan.");
-  await page.getByRole("button", { name: "Check my sentence" }).click();
+  await page.getByRole("button", { name: "Check my sentence" }).nth(1).click();
   await expect(page.getByText("Correct", { exact: true })).toBeVisible();
   await page.reload();
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
-  await page.goto("/discover/saved/bank?meaning=mean-bank-river");
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
 });
 
