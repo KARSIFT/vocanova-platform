@@ -254,11 +254,15 @@ test("opens a saved canonical word without Journey context and retains removal a
   await expect(remove).toBeFocused();
 });
 
-test("rejects a canonical meaning that is not saved", async ({ page }) => {
+test("recovers an incomplete saved-word link without exposing Journey navigation", async ({ page }) => {
   await page.goto("/discover/saved/pour?meaning=unknown-meaning");
   await expect(
-    page.getByRole("heading", { name: "Journey item not found", level: 1 }),
+    page.getByRole("heading", { name: "Saved item unavailable", level: 1 }),
   ).toBeVisible();
+  await expect(page.getByRole("link", { name: "Back to saved vocabulary" })).toHaveAttribute(
+    "href",
+    "/discover/saved",
+  );
 });
 
 test("keeps saved meanings for the same word distinct", async ({
@@ -351,7 +355,7 @@ test("keeps a saved meaning until a retry succeeds, then refreshes the library",
   ).toBeVisible();
   await page.goto("/discover/saved/bank?meaning=mean-bank-river");
   await expect(
-    page.getByRole("heading", { name: "Journey item not found", level: 1 }),
+    page.getByRole("heading", { name: "Saved item unavailable", level: 1 }),
   ).toBeVisible();
 });
 

@@ -114,6 +114,8 @@ Required for every screen with dynamic content:
   Saved Vocabulary identifies its own library or saved-word read failures, keeps retry in place,
   and offers a route back to the relevant Journey or library screen; it does not present those
   failures as a Journey read failure.
+  An unavailable saved-word link uses neutral, privacy-safe copy and leads back to Saved Vocabulary
+  without confirming why that item is unavailable.
 
 ## 10. Accessibility
 
