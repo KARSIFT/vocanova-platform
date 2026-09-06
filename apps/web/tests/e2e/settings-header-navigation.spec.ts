@@ -11,8 +11,16 @@ test("reaches Settings from every core surface and retains existing Settings nav
   const baseURL = testInfo.project.use.baseURL;
   if (!baseURL) throw new Error("Expected a Playwright base URL.");
   await context.addCookies([
-    { name: "vocanova_session", value: `settings-header-${randomUUID()}`, url: baseURL },
-    { name: "vocanova_csrf", value: `settings-header-csrf-${randomUUID()}`, url: baseURL },
+    {
+      name: "vocanova_session",
+      value: `settings-header-${randomUUID()}`,
+      url: baseURL,
+    },
+    {
+      name: "vocanova_csrf",
+      value: `settings-header-csrf-${randomUUID()}`,
+      url: baseURL,
+    },
   ]);
 
   for (const surface of coreSurfaces) {
@@ -22,16 +30,22 @@ test("reaches Settings from every core surface and retains existing Settings nav
     await settings.focus();
     await expect(settings).toBeFocused();
     await page.keyboard.press("Enter");
-    await expect(page.getByRole("heading", { name: "Settings", level: 1 })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Settings", level: 1 }),
+    ).toBeVisible();
     await page.getByRole("link", { name: "Back to Home" }).click();
     await expect(page).toHaveURL(/\/home$/);
   }
 
   await page.getByRole("link", { name: "Settings" }).click();
   await page.getByRole("link", { name: "Manage account" }).click();
-  await expect(page.getByRole("heading", { name: "Account", level: 1 })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Account", level: 1 }),
+  ).toBeVisible();
   await page.getByRole("link", { name: "Back to Settings" }).click();
-  await expect(page.getByRole("heading", { name: "Settings", level: 1 })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Settings", level: 1 }),
+  ).toBeVisible();
 });
 
 test("keeps Settings and logout usable after a mobile-sized logout failure", async ({
@@ -41,16 +55,29 @@ test("keeps Settings and logout usable after a mobile-sized logout failure", asy
   const baseURL = testInfo.project.use.baseURL;
   if (!baseURL) throw new Error("Expected a Playwright base URL.");
   await context.addCookies([
-    { name: "vocanova_session", value: `settings-header-logout-${randomUUID()}`, url: baseURL },
-    { name: "vocanova_csrf", value: `settings-header-logout-csrf-${randomUUID()}`, url: baseURL },
+    {
+      name: "vocanova_session",
+      value: `settings-header-logout-${randomUUID()}`,
+      url: baseURL,
+    },
+    {
+      name: "vocanova_csrf",
+      value: `settings-header-logout-csrf-${randomUUID()}`,
+      url: baseURL,
+    },
   ]);
-  await page.route("**/api/v1/auth/logout", (route) =>
-    route.fulfill({
+  let releaseLogout: (() => void) | undefined;
+  const logoutReleased = new Promise<void>((resolve) => {
+    releaseLogout = resolve;
+  });
+  await page.route("**/api/v1/auth/logout", async (route) => {
+    await logoutReleased;
+    await route.fulfill({
       status: 503,
       contentType: "application/problem+json",
       body: JSON.stringify({ detail: "temporarily unavailable" }),
-    }),
-  );
+    });
+  });
 
   await page.goto("/home");
   const header = page.getByRole("banner");
@@ -60,7 +87,10 @@ test("keeps Settings and logout usable after a mobile-sized logout failure", asy
   await expect(logout).toBeVisible();
   await logout.focus();
   await page.keyboard.press("Enter");
-  await expect(page.getByRole("button", { name: "Signing out..." })).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "Signing out..." }),
+  ).toBeDisabled();
+  releaseLogout?.();
   await expect(
     page.getByText("Unable to log out. Please try again.", { exact: true }),
   ).toBeVisible();
