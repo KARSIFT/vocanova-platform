@@ -181,7 +181,10 @@ export class D1AIFeedbackRepository {
              )
              AND (
                generation_expires_at <= ?2
-               OR (generation_expires_at IS NULL AND started_at <= ?6)
+               OR (
+                 generation_expires_at IS NULL
+                 AND COALESCE(started_at, created_at) <= ?6
+               )
              )`,
         )
         .bind(
@@ -442,6 +445,9 @@ export class D1AIFeedbackRepository {
       statements.push(
         ...(await this.rewardStatements(userId, pending, timestamp)),
       );
+    // Every statement after the guarded attempt update intentionally checks
+    // changes() from the preceding write. Keep the lease deletion last so a
+    // stale finalizer leaves its lease for normal expiry cleanup.
     statements.push(
       this.database
         .prepare(

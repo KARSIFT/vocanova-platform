@@ -112,7 +112,7 @@ describe("Worker AI feedback parity", () => {
     ).rejects.toMatchObject({ code: "target_not_found" });
   });
 
-  it("does not let an incorrectly scoped finalizer change or reward a pending attempt", async () => {
+  it("does not let a stale finalizer change, reward, or release a pending attempt", async () => {
     const repository = new D1AIFeedbackRepository(env.DB, () => new Date(NOW));
     const target = await repository.loadTarget(
       USER_A,
@@ -167,7 +167,7 @@ describe("Worker AI feedback parity", () => {
          JOIN learner_sentences s ON s.id = a.learner_sentence_id
          WHERE a.id = ?1`,
       )
-        .bind(pending.attemptId, USER_B)
+        .bind(pending.attemptId, USER_A)
         .first(),
     ).resolves.toEqual({
       status: "pending",
@@ -810,7 +810,9 @@ describe("Worker AI feedback parity", () => {
     );
     await vi.waitFor(() => expect(provider.generateCalls).toBe(1));
     await env.DB.prepare(
-      "UPDATE ai_feedback_attempts SET generation_expires_at = NULL WHERE status = 'pending'",
+      `UPDATE ai_feedback_attempts
+       SET generation_expires_at = NULL, started_at = NULL
+       WHERE status = 'pending'`,
     ).run();
 
     clock = new Date("2026-08-22T12:00:59.999Z");

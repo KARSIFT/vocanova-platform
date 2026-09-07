@@ -40,9 +40,9 @@ CREATE INDEX ai_feedback_attempts_pending_expiry_idx
 -- retired source-schema table. This keeps an original key replaying its
 -- terminal outcome when a fresh key replaces the same request hash.
 CREATE TABLE ai_feedback_idempotency_attempts (
-  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   key TEXT NOT NULL CHECK (length(key) BETWEEN 1 AND 200),
-  attempt_id TEXT NOT NULL REFERENCES ai_feedback_attempts(id) ON DELETE RESTRICT
+  attempt_id TEXT NOT NULL REFERENCES ai_feedback_attempts(id) ON DELETE CASCADE
     CHECK (length(attempt_id) = 36 AND attempt_id NOT GLOB '*[^0-9a-f-]*'),
   created_at TEXT NOT NULL CHECK (created_at GLOB '????-??-??T??:??:??.???Z'),
   PRIMARY KEY (user_id, key)
