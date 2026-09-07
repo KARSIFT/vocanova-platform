@@ -138,7 +138,7 @@ test("keeps one keyboard-selectable practice target and protects a draft", async
   ).toHaveCount(1);
 });
 
-test("does not infer completion from review progress when sentence practice remains", async ({
+test("celebrates a completed review target while keeping sentence practice as the next action", async ({
   page,
   context,
 }, testInfo) => {
@@ -161,8 +161,8 @@ test("does not infer completion from review progress when sentence practice rema
     page.getByRole("link", { name: "Review due words" }),
   ).toHaveAttribute("href", "/reviews");
   await expect(
-    page.getByText("Today's mission is complete.", { exact: true }),
-  ).toHaveCount(0);
+    page.getByRole("status", { name: "Mission celebration" }),
+  ).toContainText("today's review target is complete");
 });
 
 test("moves focus from the sentence-practice mission action to the saved-word selector", async ({
@@ -298,7 +298,7 @@ test("does not change the practice target while feedback is in flight", async ({
     page
       .getByRole("status")
       .filter({ hasText: "Keep this word selected until it is finished." }),
-  ).toContainText("Keep this word selected until it is finished.");
+  ).toBeVisible();
 
   releaseSubmission?.();
   await expect(
