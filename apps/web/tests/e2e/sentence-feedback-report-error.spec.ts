@@ -51,16 +51,23 @@ test.describe("Sentence feedback report errors", () => {
     });
 
     await page.getByRole("button", { name: "Report a problem" }).click();
+    await page
+      .getByRole("radio", { name: "The explanation is unclear" })
+      .check();
+    await page.getByRole("button", { name: "Send report" }).click();
 
     const reportFailure = page.getByRole("alert").filter({
       hasText: "Unable to report. Try again.",
     });
     await expect(reportFailure).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Report a problem" }),
-    ).toBeEnabled();
+      page.getByRole("radio", { name: "The explanation is unclear" }),
+    ).toBeChecked();
+    await expect(
+      page.getByRole("button", { name: "Try again" }),
+    ).toBeFocused();
 
-    await page.getByRole("button", { name: "Report a problem" }).click();
+    await page.getByRole("button", { name: "Try again" }).click();
     await expect(
       page.getByRole("status", { name: "Feedback report submitted" }),
     ).toBeVisible();

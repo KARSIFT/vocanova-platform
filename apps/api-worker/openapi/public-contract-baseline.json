@@ -445,8 +445,8 @@
         }
       ],
       "request": {
-        "properties": ["classification", "reason"],
-        "required": ["reason"]
+        "properties": ["classification"],
+        "required": ["classification"]
       },
       "response": null
     },
