@@ -92,6 +92,12 @@ canonical content: a stable-ID or natural-key collision aborts safely.
 records prompt type, objective result, optional learner rating, step transition, response time, and
 idempotent client attempt ID.
 
+`review_attempts.answered_at` preserves the client-reported answer time as evidence. The Worker
+captures one receipt timestamp for each accepted new attempt and uses it to derive the scheduler
+transition, `user_words.last_reviewed_at`, `user_words.next_review_at`, and the related mission and
+reward writes. Replays retain the originally derived schedule from immutable attempt evidence;
+client clocks never control the server schedule.
+
 The current scheduler uses steps `0..7` and ratings **Again / Hard / Good / Easy**:
 
 - Again moves back with a floor of 0.
