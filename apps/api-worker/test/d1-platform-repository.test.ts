@@ -32,6 +32,9 @@ describe("D1 platform repository", () => {
       .bind("ai_feedback_idempotency_attempts")
       .first<{ sql: string }>();
     expect(idempotencyAttemptTable?.sql).toContain("STRICT");
+    expect(idempotencyAttemptTable?.sql).toContain(
+      "REFERENCES ai_feedback_attempts",
+    );
     const starterCatalog = await env.DB.prepare(
       `SELECT slug FROM journey_situations
        WHERE slug IN ('travel-airport', 'daily-life-shopping', 'work-meetings', 'study-classroom')

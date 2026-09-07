@@ -29,6 +29,7 @@ import {
   type FeedbackProvider,
   type ModerationOutcome,
   type ModerationProvider,
+  type ProviderFeedback,
   type ProviderTask,
 } from "../src/domain/ai-feedback.js";
 import { HttpEmailSender } from "../src/identity/http-email-sender.js";
@@ -109,6 +110,80 @@ describe("Worker AI feedback parity", () => {
     await expect(
       repository.loadTarget(USER_B, "daily_mission", USER_WORD),
     ).rejects.toMatchObject({ code: "target_not_found" });
+  });
+
+  it("does not let an incorrectly scoped finalizer change or reward a pending attempt", async () => {
+    const repository = new D1AIFeedbackRepository(env.DB, () => new Date(NOW));
+    const target = await repository.loadTarget(
+      USER_A,
+      "word_detail",
+      USER_WORD,
+    );
+    const reservation = await repository.reserve(USER_A, {
+      enabled: true,
+      perMinute: 10,
+      perDay: 10,
+      globalPerDay: 10,
+      monthlyCostHardStopCents: 0,
+      requestCostCents: 0,
+      leaseSeconds: 15,
+    });
+    if (!reservation.ok)
+      throw new Error("expected an AI generation reservation");
+    const requestHash = "a".repeat(64);
+    const feedback: ProviderFeedback = {
+      status: "correct",
+      targetWordUsedCorrectly: true,
+      explanation: "The sentence uses the target word correctly.",
+    };
+    const pending = await repository.createPending(
+      USER_A,
+      submission("I work every day."),
+      target,
+      "i work every day",
+      "foreign-finalizer",
+      requestHash,
+      "test",
+      "test",
+      reservation.leaseId,
+      reservation.expiresAt,
+    );
+
+    await expect(
+      repository.finalize(
+        USER_A,
+        { ...pending, requestHash: "b".repeat(64) },
+        feedback,
+      ),
+    ).resolves.toBe(false);
+    await expect(repository.finalize(USER_B, pending, feedback)).resolves.toBe(
+      false,
+    );
+    await expect(
+      env.DB.prepare(
+        `SELECT a.status, s.status AS sentence_status,
+                (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?2) AS rewards
+         FROM ai_feedback_attempts a
+         JOIN learner_sentences s ON s.id = a.learner_sentence_id
+         WHERE a.id = ?1`,
+      )
+        .bind(pending.attemptId, USER_B)
+        .first(),
+    ).resolves.toEqual({
+      status: "pending",
+      sentence_status: "submitted",
+      rewards: 0,
+    });
+    await expect(
+      env.DB.prepare(
+        "SELECT lease_id FROM ai_generation_leases WHERE user_id = ?1",
+      )
+        .bind(USER_A)
+        .first(),
+    ).resolves.toEqual({ lease_id: reservation.leaseId });
+    await expect(repository.finalize(USER_A, pending, feedback)).resolves.toBe(
+      true,
+    );
   });
 
   it("persists the sentence before the provider call and replays the exact result once", async () => {

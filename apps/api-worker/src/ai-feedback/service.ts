@@ -308,6 +308,7 @@ export class AIFeedbackService {
           result: canonical,
           telemetry: this.record("stale", startedAt, canonical.status),
         };
+      return failure(ERROR.temporaryFailure, true);
     }
     return {
       result: {

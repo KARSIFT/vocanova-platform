@@ -408,7 +408,12 @@ export class D1AIFeedbackRepository {
           `UPDATE ai_feedback_attempts SET status = ?1, feedback_json = ?2,
              feedback_text = ?3, error_code = ?4, error_message = ?5,
              request_hash = COALESCE(?6, request_hash),
-             completed_at = ?7, updated_at = ?7 WHERE id = ?8 AND status = 'pending'`,
+             completed_at = ?7, updated_at = ?7
+           WHERE id = ?8 AND request_hash = ?9 AND status = 'pending'
+             AND EXISTS (
+               SELECT 1 FROM learner_sentences s
+               WHERE s.id = learner_sentence_id AND s.user_id = ?10
+             )`,
         )
         .bind(
           feedback ? "succeeded" : "failed",
@@ -419,6 +424,8 @@ export class D1AIFeedbackRepository {
           failedRequestHash ?? null,
           timestamp,
           pending.attemptId,
+          pending.requestHash,
+          userId,
         ),
       this.database
         .prepare(
