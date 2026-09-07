@@ -837,7 +837,7 @@ describe("Worker AI feedback parity", () => {
     ).toHaveLength(1);
     expect(
       recovered.filter(
-        (item) => item.result.errorCode === "AI_FEEDBACK_RATE_LIMITED",
+        (item) => item.result.errorCode === "AI_FEEDBACK_TEMPORARY_FAILURE",
       ),
     ).toHaveLength(1);
     finishAbandoned();

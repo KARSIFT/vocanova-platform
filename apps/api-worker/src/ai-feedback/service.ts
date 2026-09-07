@@ -161,10 +161,9 @@ export class AIFeedbackService {
           };
         stored = null;
       } else {
-        stored = await this.repository.findAttempt(
+        stored = await this.repository.findAttemptById(
           userId,
-          requestHash,
-          input.sentenceText,
+          stored.attemptId,
         );
       }
     }
