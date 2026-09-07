@@ -58,6 +58,9 @@ const allowedD1OnlyTables = [
   "platform_metadata",
   "review_state_reservations",
 ];
+const allowedD1OnlyFields = new Map([
+  ["review_attempts", new Map([["schedule_anchor_at", "TEXT"]])],
+]);
 assert.deepEqual(
   [...d1Tables.keys()].sort(),
   [...DATA_TABLE_NAMES, ...allowedD1OnlyTables].sort(),
@@ -72,6 +75,7 @@ for (const tableName of DATA_TABLE_NAMES) {
     ...(spec.sourceOnlyFields ?? []).map((field) => field.source),
   ];
   const targetFields = spec.fields.map((field) => field.target ?? field.source);
+  const runtimeOnlyFields = allowedD1OnlyFields.get(tableName) ?? new Map();
   const postgresTable = requireTable(postgresTables, tableName);
   const d1Table = requireTable(d1Tables, tableName);
   assert.deepEqual(
@@ -80,7 +84,7 @@ for (const tableName of DATA_TABLE_NAMES) {
     `${tableName}: PostgreSQL export fields drifted`,
   );
   assert.deepEqual(
-    [...targetFields].sort(),
+    [...targetFields, ...runtimeOnlyFields.keys()].sort(),
     [...d1Table.keys()].sort(),
     `${tableName}: D1 import fields drifted`,
   );
@@ -97,6 +101,13 @@ for (const tableName of DATA_TABLE_NAMES) {
       d1Table.get(target)?.toUpperCase(),
       d1TypeFor(field.kind),
       `${tableName}.${target}: D1 field kind drifted`,
+    );
+  }
+  for (const [field, type] of runtimeOnlyFields) {
+    assert.equal(
+      d1Table.get(field)?.toUpperCase(),
+      type,
+      `${tableName}.${field}: D1-only runtime field kind drifted`,
     );
   }
   assert.ok(

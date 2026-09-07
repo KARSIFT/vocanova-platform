@@ -1310,13 +1310,15 @@ describe("Worker content, learning, and review parity", () => {
     expect(clockCalls).toBe(1);
     await expect(
       env.DB.prepare(
-        `SELECT answered_at, created_at FROM review_attempts WHERE client_attempt_id = ?1`,
+        `SELECT answered_at, created_at, schedule_anchor_at
+         FROM review_attempts WHERE client_attempt_id = ?1`,
       )
         .bind("receipt-clock-future")
         .first(),
     ).resolves.toEqual({
       answered_at: futureAnsweredAt,
       created_at: receivedAt,
+      schedule_anchor_at: receivedAt,
     });
     await expect(
       env.DB.prepare(
@@ -1330,6 +1332,23 @@ describe("Worker content, learning, and review parity", () => {
       last_reviewed_at: receivedAt,
       updated_at: receivedAt,
     });
+    for (const invalidAnchor of [
+      "not-a-timestamp",
+      "2026-13-01T00:00:00.000Z",
+      "2026-02-30T00:00:00.000Z",
+      "2026-01-01T24:00:00.000Z",
+      "2026-01-01T00:60:00.000Z",
+      "2026-01-01T00:00:60.000Z",
+    ]) {
+      await expect(
+        env.DB.prepare(
+          `UPDATE review_attempts SET schedule_anchor_at = ?1
+           WHERE client_attempt_id = ?2`,
+        )
+          .bind(invalidAnchor, "receipt-clock-future")
+          .run(),
+      ).rejects.toThrow();
+    }
     await expect(
       env.DB.prepare(
         `SELECT local_date, timezone, created_at, updated_at
@@ -1408,6 +1427,58 @@ describe("Worker content, learning, and review parity", () => {
         .bind(USER_A, "delayed-replay-first-new-key")
         .first(),
     ).resolves.toEqual({ created_at: "2026-08-22T12:00:00.123Z" });
+  });
+
+  it("keeps legacy review replays on their original answered-at schedule", async () => {
+    const receivedAt = "2026-08-22T12:00:00.123Z";
+    const answeredAt = "2026-01-10T08:00:00.000Z";
+    const legacyNextReviewAt = "2026-01-10T09:00:00.000Z";
+    const receiptRepository = new D1ContentLearningRepository(
+      env.DB,
+      () => new Date(receivedAt),
+    );
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    const input = review({
+      answeredAt,
+      clientAttemptId: "legacy-schedule-replay",
+    });
+    await receiptRepository.submitReview(
+      USER_A,
+      input,
+      "legacy-schedule-original-key",
+    );
+    await env.DB.batch([
+      env.DB.prepare(
+        `UPDATE review_attempts SET schedule_anchor_at = NULL
+           WHERE user_id = ?1 AND client_attempt_id = ?2`,
+      ).bind(USER_A, input.clientAttemptId),
+      env.DB.prepare(
+        `UPDATE user_words SET next_review_at = ?1, last_reviewed_at = ?2
+           WHERE id = ?3 AND user_id = ?4`,
+      ).bind(legacyNextReviewAt, answeredAt, USER_WORD_A, USER_A),
+    ]);
+
+    const before = await env.DB.prepare(
+      `SELECT review_step, next_review_at, last_reviewed_at, total_review_count
+       FROM user_words WHERE id = ?1`,
+    )
+      .bind(USER_WORD_A)
+      .first();
+    await expect(
+      receiptRepository.submitReview(
+        USER_A,
+        input,
+        "legacy-schedule-replay-new-key",
+      ),
+    ).resolves.toMatchObject({ nextReviewAt: legacyNextReviewAt });
+    await expect(
+      env.DB.prepare(
+        `SELECT review_step, next_review_at, last_reviewed_at, total_review_count
+         FROM user_words WHERE id = ?1`,
+      )
+        .bind(USER_WORD_A)
+        .first(),
+    ).resolves.toEqual(before);
   });
 
   it("applies again, consecutive reset, hard, easy, and skipped transitions", async () => {

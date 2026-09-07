@@ -489,9 +489,9 @@ export class D1ContentLearningRepository {
            (id, user_id, user_word_id, meaning_id, attempt_type, prompt_type, result,
             rating, review_step_before, review_step_after, answered_at, response_time_ms,
             selected_option_meaning_id, typed_answer, was_hint_used, source,
-            client_attempt_id, metadata_json, created_at, updated_at)
+            client_attempt_id, metadata_json, created_at, updated_at, schedule_anchor_at)
            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12,
-                   ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?19)`,
+                   ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?19, ?19)`,
             )
             .bind(
               attemptId,
@@ -949,8 +949,8 @@ function attemptFromRow(row: Row): ReviewAttempt {
     wasHintUsed: row.was_hint_used === 1,
     source: String(row.source),
     clientAttemptId: String(row.client_attempt_id),
-    nextReviewAt: nextReviewAtFromReceipt(
-      String(row.created_at),
+    nextReviewAt: nextReviewAtFromAnchor(
+      String(row.schedule_anchor_at ?? row.answered_at),
       Number(row.review_step_after),
     ),
   };
@@ -1131,9 +1131,12 @@ const REVIEW_INTERVALS = [
   2_592_000_000, 5_184_000_000,
 ];
 
-function nextReviewAtFromReceipt(receivedAt: string, step: number): string {
+function nextReviewAtFromAnchor(
+  scheduleAnchorAt: string,
+  step: number,
+): string {
   return new Date(
-    Date.parse(receivedAt) + REVIEW_INTERVALS[step]!,
+    Date.parse(scheduleAnchorAt) + REVIEW_INTERVALS[step]!,
   ).toISOString();
 }
 
@@ -1184,6 +1187,6 @@ function applyReview(
     consecutiveCorrect,
     consecutiveIncorrect,
     lastRating,
-    nextReviewAt: nextReviewAtFromReceipt(receivedAt, after),
+    nextReviewAt: nextReviewAtFromAnchor(receivedAt, after),
   };
 }
