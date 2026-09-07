@@ -6,6 +6,7 @@ import type {
 
 export const ONBOARDING_RECOVERY_KEY = "vocanova.onboarding-recovery.v1";
 const MAX_AGE_MS = 30 * 60 * 1000;
+const MAX_SERIALIZED_LENGTH = 4_096;
 const ENGLISH_LEVELS = new Set<EnglishLevel>([
   "a1",
   "a2",
@@ -85,7 +86,9 @@ export function saveOnboardingRecovery(
   const recovery = { ...record, version: 1 as const, createdAt: Date.now() };
   if (!target || !valid(recovery)) return;
   try {
-    target.setItem(ONBOARDING_RECOVERY_KEY, JSON.stringify(recovery));
+    const serialized = JSON.stringify(recovery);
+    if (serialized.length > MAX_SERIALIZED_LENGTH) return;
+    target.setItem(ONBOARDING_RECOVERY_KEY, serialized);
   } catch {
     // Storage failures never interrupt the session-expiry redirect.
   }
@@ -107,6 +110,10 @@ export function readOnboardingRecovery(
   try {
     const raw = target.getItem(ONBOARDING_RECOVERY_KEY);
     if (!raw) return null;
+    if (raw.length > MAX_SERIALIZED_LENGTH) {
+      target.removeItem(ONBOARDING_RECOVERY_KEY);
+      return null;
+    }
     const record: unknown = JSON.parse(raw);
     if (
       !valid(record) ||

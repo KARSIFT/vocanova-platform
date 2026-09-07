@@ -67,6 +67,19 @@ it("rejects malformed, expired, future, and oversized records", () => {
   assert.equal(readOnboardingRecovery("user-a"), null);
   saveOnboardingRecovery(record({ nativeLanguage: "x".repeat(101) }));
   assert.equal(storage.getItem(ONBOARDING_RECOVERY_KEY), null);
+
+  const oversizedRecord = {
+    ...record(),
+    version: 1,
+    createdAt: Date.now(),
+    ignored: "x".repeat(4_096),
+  };
+  storage.setItem(ONBOARDING_RECOVERY_KEY, JSON.stringify(oversizedRecord));
+  assert.equal(readOnboardingRecovery("user-a"), null);
+  assert.equal(storage.getItem(ONBOARDING_RECOVERY_KEY), null);
+
+  saveOnboardingRecovery(record({ ignored: "x".repeat(4_096) }));
+  assert.equal(storage.getItem(ONBOARDING_RECOVERY_KEY), null);
 });
 
 it("fails safely with unavailable storage and clears after discard or success", () => {
