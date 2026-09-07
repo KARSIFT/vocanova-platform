@@ -137,6 +137,7 @@ export default async function WordDetailPage({ params }: WordDetailPageProps) {
 
                   {meaning.saved && meaning.userWordId ? (
                     <SentenceFeedback
+                      meaningId={meaning.id}
                       targetWord={wordData.text}
                       attemptId={meaning.userWordId}
                       source="word_detail"
