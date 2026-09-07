@@ -15,11 +15,26 @@ describe("D1 platform repository", () => {
     const migrationCount = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM d1_migrations",
     ).first<{ count: number }>();
-    expect(migrationCount?.count).toBe(12);
+    expect(migrationCount?.count).toBe(13);
     const scheduleAnchor = await env.DB.prepare(
       "SELECT name FROM pragma_table_info('review_attempts') WHERE name = 'schedule_anchor_at'",
     ).first<{ name: string }>();
     expect(scheduleAnchor?.name).toBe("schedule_anchor_at");
+    const feedbackAttemptTable = await env.DB.prepare(
+      "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?1",
+    )
+      .bind("ai_feedback_attempts")
+      .first<{ sql: string }>();
+    expect(feedbackAttemptTable?.sql).toContain("generation_expires_at");
+    const idempotencyAttemptTable = await env.DB.prepare(
+      "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?1",
+    )
+      .bind("ai_feedback_idempotency_attempts")
+      .first<{ sql: string }>();
+    expect(idempotencyAttemptTable?.sql).toContain("STRICT");
+    expect(idempotencyAttemptTable?.sql).toContain(
+      "REFERENCES ai_feedback_attempts",
+    );
     const starterCatalog = await env.DB.prepare(
       `SELECT slug FROM journey_situations
        WHERE slug IN ('travel-airport', 'daily-life-shopping', 'work-meetings', 'study-classroom')

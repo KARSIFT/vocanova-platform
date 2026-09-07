@@ -25,6 +25,7 @@ export type TableSpec = Readonly<{
   name: string;
   fields: readonly FieldSpec[];
   sourceOnlyFields?: readonly FieldSpec[];
+  targetOnlyFields?: readonly FieldSpec[];
 }>;
 
 const field = (
@@ -307,6 +308,9 @@ export const DATA_TABLES = [
       field("metadata", "json", { nullable: true, target: "metadata_json" }),
       ...lifecycle,
     ],
+    targetOnlyFields: [
+      field("schedule_anchor_at", "timestamp", { nullable: true }),
+    ],
   },
   {
     name: "daily_mission_snapshots",
@@ -381,6 +385,9 @@ export const DATA_TABLES = [
       field("started_at", "timestamp", { nullable: true }),
       field("completed_at", "timestamp", { nullable: true }),
       ...lifecycle,
+    ],
+    targetOnlyFields: [
+      field("generation_expires_at", "timestamp", { nullable: true }),
     ],
   },
   {

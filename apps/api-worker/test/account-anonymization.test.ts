@@ -92,6 +92,7 @@ describe("account anonymization", () => {
     for (const table of [
       "learner_sentences",
       "ai_feedback_attempts",
+      "ai_feedback_idempotency_attempts",
       "ai_feedback_reports",
       "review_attempts",
       "user_words",
@@ -229,6 +230,9 @@ async function seed(purgeAfter: string) {
     env.DB.prepare(
       "INSERT INTO ai_feedback_attempts (id, learner_sentence_id, status, provider, model, prompt_version, request_hash, feedback_text, created_at, updated_at) VALUES ('84000000-0000-4000-8000-000000000099', '83000000-0000-4000-8000-000000000099', 'pending', 'test', 'test', 'v1', ?1, 'private feedback', ?2, ?2)",
     ).bind("d".repeat(64), NOW),
+    env.DB.prepare(
+      "INSERT INTO ai_feedback_idempotency_attempts (user_id, key, attempt_id, created_at) VALUES (?1, 'private', '84000000-0000-4000-8000-000000000099', ?2)",
+    ).bind(USER, NOW),
     env.DB.prepare(
       "INSERT INTO ai_feedback_reports (id, attempt_id, user_id, reason, created_at) VALUES ('85000000-0000-4000-8000-000000000099', '84000000-0000-4000-8000-000000000099', ?1, 'private', ?2)",
     ).bind(USER, NOW),

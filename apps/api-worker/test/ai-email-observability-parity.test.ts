@@ -29,6 +29,7 @@ import {
   type FeedbackProvider,
   type ModerationOutcome,
   type ModerationProvider,
+  type ProviderFeedback,
   type ProviderTask,
 } from "../src/domain/ai-feedback.js";
 import { HttpEmailSender } from "../src/identity/http-email-sender.js";
@@ -109,6 +110,80 @@ describe("Worker AI feedback parity", () => {
     await expect(
       repository.loadTarget(USER_B, "daily_mission", USER_WORD),
     ).rejects.toMatchObject({ code: "target_not_found" });
+  });
+
+  it("does not let a stale finalizer change, reward, or release a pending attempt", async () => {
+    const repository = new D1AIFeedbackRepository(env.DB, () => new Date(NOW));
+    const target = await repository.loadTarget(
+      USER_A,
+      "word_detail",
+      USER_WORD,
+    );
+    const reservation = await repository.reserve(USER_A, {
+      enabled: true,
+      perMinute: 10,
+      perDay: 10,
+      globalPerDay: 10,
+      monthlyCostHardStopCents: 0,
+      requestCostCents: 0,
+      leaseSeconds: 15,
+    });
+    if (!reservation.ok)
+      throw new Error("expected an AI generation reservation");
+    const requestHash = "a".repeat(64);
+    const feedback: ProviderFeedback = {
+      status: "correct",
+      targetWordUsedCorrectly: true,
+      explanation: "The sentence uses the target word correctly.",
+    };
+    const pending = await repository.createPending(
+      USER_A,
+      submission("I work every day."),
+      target,
+      "i work every day",
+      "foreign-finalizer",
+      requestHash,
+      "test",
+      "test",
+      reservation.leaseId,
+      reservation.expiresAt,
+    );
+
+    await expect(
+      repository.finalize(
+        USER_A,
+        { ...pending, requestHash: "b".repeat(64) },
+        feedback,
+      ),
+    ).resolves.toBe(false);
+    await expect(repository.finalize(USER_B, pending, feedback)).resolves.toBe(
+      false,
+    );
+    await expect(
+      env.DB.prepare(
+        `SELECT a.status, s.status AS sentence_status,
+                (SELECT count(*) FROM confidence_point_ledger WHERE user_id = ?2) AS rewards
+         FROM ai_feedback_attempts a
+         JOIN learner_sentences s ON s.id = a.learner_sentence_id
+         WHERE a.id = ?1`,
+      )
+        .bind(pending.attemptId, USER_A)
+        .first(),
+    ).resolves.toEqual({
+      status: "pending",
+      sentence_status: "submitted",
+      rewards: 0,
+    });
+    await expect(
+      env.DB.prepare(
+        "SELECT lease_id FROM ai_generation_leases WHERE user_id = ?1",
+      )
+        .bind(USER_A)
+        .first(),
+    ).resolves.toEqual({ lease_id: reservation.leaseId });
+    await expect(repository.finalize(USER_A, pending, feedback)).resolves.toBe(
+      true,
+    );
   });
 
   it("persists the sentence before the provider call and replays the exact result once", async () => {
@@ -595,6 +670,188 @@ describe("Worker AI feedback parity", () => {
       "AI_FEEDBACK_GENERATION_DISABLED",
     );
     expect(unsafeLeaseProvider.generateCalls).toBe(0);
+  });
+
+  it("recovers an abandoned pending attempt only at its lease deadline and ignores its late finalizer", async () => {
+    let clock = new Date(NOW);
+    let finishAbandoned: () => void = () => undefined;
+    const provider = new ScriptedProvider((call) => {
+      if (call === 1)
+        return new Promise((resolve) => {
+          finishAbandoned = () => resolve(validFeedback());
+        });
+      return validFeedback();
+    });
+    const service = createService(
+      provider,
+      { limits: { perMinute: 10 } },
+      undefined,
+      env.DB,
+      () => clock,
+    );
+    const abandoned = service.submit(
+      USER_A,
+      submission("I work every day."),
+      "abandoned-original",
+    );
+    await vi.waitFor(() => expect(provider.generateCalls).toBe(1));
+    const pending = await env.DB.prepare(
+      `SELECT id, learner_sentence_id, generation_expires_at
+       FROM ai_feedback_attempts WHERE status = 'pending'`,
+    ).first<{
+      id: string;
+      learner_sentence_id: string;
+      generation_expires_at: string;
+    }>();
+    expect(pending?.generation_expires_at).toBe("2026-08-22T12:00:15.000Z");
+    for (const invalidExpiry of [
+      "not-a-timestamp",
+      "2026-13-01T00:00:00.000Z",
+      "2026-02-30T00:00:00.000Z",
+      "2026-01-01T24:00:00.000Z",
+    ]) {
+      await expect(
+        env.DB.prepare(
+          "UPDATE ai_feedback_attempts SET generation_expires_at = ?1 WHERE id = ?2",
+        )
+          .bind(invalidExpiry, pending?.id)
+          .run(),
+      ).rejects.toThrow();
+    }
+
+    const active = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "abandoned-active",
+    );
+    expect(active.result).toMatchObject({
+      attemptId: pending?.id,
+      errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE",
+      canRetry: true,
+    });
+    expect(provider.generateCalls).toBe(1);
+
+    clock = new Date("2026-08-22T12:00:15.000Z");
+    const replacement = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "abandoned-replacement",
+    );
+    expect(replacement.result).toMatchObject({ status: "correct" });
+    expect(replacement.result.attemptId).not.toBe(pending?.id);
+    expect(provider.generateCalls).toBe(2);
+    await expect(
+      env.DB.prepare(
+        `SELECT a.status, a.error_code, s.status AS sentence_status
+         FROM ai_feedback_attempts a
+         JOIN learner_sentences s ON s.id = a.learner_sentence_id
+         WHERE a.id = ?1`,
+      )
+        .bind(pending?.id)
+        .first<{
+          status: string;
+          error_code: string;
+          sentence_status: string;
+        }>(),
+    ).resolves.toEqual({
+      status: "failed",
+      error_code: "AI_FEEDBACK_TEMPORARY_FAILURE",
+      sentence_status: "feedback_failed",
+    });
+    const originalReplay = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "abandoned-original",
+    );
+    expect(originalReplay.result).toMatchObject({
+      errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE",
+      canRetry: true,
+    });
+
+    finishAbandoned();
+    await expect(abandoned).resolves.toMatchObject({
+      result: {
+        attemptId: pending?.id,
+        errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE",
+        canRetry: true,
+      },
+    });
+    expect(await counts()).toMatchObject({
+      sentences: 2,
+      attempts: 2,
+      pointRows: 2,
+      balance: 5,
+      activitySentences: 1,
+      activityFeedback: 1,
+    });
+  });
+
+  it("allows one replacement for concurrent recovery and uses the legacy 60-second deadline", async () => {
+    let clock = new Date(NOW);
+    let finishAbandoned: () => void = () => undefined;
+    const provider = new ScriptedProvider((call) => {
+      if (call === 1)
+        return new Promise((resolve) => {
+          finishAbandoned = () => resolve(validFeedback());
+        });
+      return validFeedback();
+    });
+    const service = createService(
+      provider,
+      { limits: { perMinute: 10 } },
+      undefined,
+      env.DB,
+      () => clock,
+    );
+    const abandoned = service.submit(
+      USER_A,
+      submission("I work every day."),
+      "legacy-original",
+    );
+    await vi.waitFor(() => expect(provider.generateCalls).toBe(1));
+    await env.DB.prepare(
+      `UPDATE ai_feedback_attempts
+       SET generation_expires_at = NULL, started_at = NULL
+       WHERE status = 'pending'`,
+    ).run();
+
+    clock = new Date("2026-08-22T12:00:59.999Z");
+    const beforeLegacyDeadline = await service.submit(
+      USER_A,
+      submission("I work every day."),
+      "legacy-active",
+    );
+    expect(beforeLegacyDeadline.result.errorCode).toBe(
+      "AI_FEEDBACK_TEMPORARY_FAILURE",
+    );
+    expect(provider.generateCalls).toBe(1);
+
+    clock = new Date("2026-08-22T12:01:00.000Z");
+    const recovered = await Promise.all([
+      service.submit(USER_A, submission("I work every day."), "legacy-one"),
+      service.submit(USER_A, submission("I work every day."), "legacy-two"),
+    ]);
+    expect(provider.generateCalls).toBe(2);
+    expect(
+      recovered.filter((item) => item.result.status === "correct"),
+    ).toHaveLength(1);
+    expect(
+      recovered.filter(
+        (item) => item.result.errorCode === "AI_FEEDBACK_TEMPORARY_FAILURE",
+      ),
+    ).toHaveLength(1);
+    finishAbandoned();
+    await expect(abandoned).resolves.toMatchObject({
+      result: { errorCode: "AI_FEEDBACK_TEMPORARY_FAILURE" },
+    });
+    expect(await counts()).toMatchObject({
+      sentences: 2,
+      attempts: 2,
+      pointRows: 2,
+      balance: 5,
+      activitySentences: 1,
+      activityFeedback: 1,
+    });
   });
 
   it("enforces rolling rate windows across UTC bucket boundaries", async () => {
@@ -1163,6 +1420,7 @@ async function seed(): Promise<void> {
 async function clearFeedbackState(): Promise<void> {
   for (const table of [
     "ai_feedback_reports",
+    "ai_feedback_idempotency_attempts",
     "ai_feedback_attempts",
     "learner_sentences",
     "ai_generation_leases",
@@ -1178,6 +1436,7 @@ async function clearFeedbackState(): Promise<void> {
 async function clearTables(): Promise<void> {
   for (const table of [
     "ai_feedback_reports",
+    "ai_feedback_idempotency_attempts",
     "ai_feedback_attempts",
     "learner_sentences",
     "ai_generation_leases",
