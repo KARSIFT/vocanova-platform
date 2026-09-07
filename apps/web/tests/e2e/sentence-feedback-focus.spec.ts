@@ -56,15 +56,20 @@ async function verifyPendingStatusAndFocusedResult(
   sentence: string,
 ) {
   const heldRequest = await holdSentenceFeedback(page);
-  const submit = page.getByRole("button", { name: "Check my sentence" });
+  const submit = input.locator("xpath=ancestor::form").getByRole("button");
 
   await input.fill(sentence);
   await submit.click();
   await heldRequest.requestStarted;
 
-  await expect(
-    page.getByRole("status", { name: "Checking sentence…" }),
-  ).toBeVisible();
+  // The live status is intentionally screen-reader-only. Verify its text and
+  // polite announcement semantics without treating it as a visual cue; the
+  // disabled "Checking..." control remains visible to sighted learners.
+  const pendingStatus = page
+    .locator('[role="status"]')
+    .filter({ hasText: "Checking sentence…" });
+  await expect(pendingStatus).toHaveText("Checking sentence…");
+  await expect(pendingStatus).toHaveAttribute("aria-live", "polite");
   await expect(submit).toBeDisabled();
 
   // A disabled native submit control cannot produce another form submission,
