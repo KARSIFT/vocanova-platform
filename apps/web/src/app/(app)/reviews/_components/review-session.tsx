@@ -86,6 +86,7 @@ export function ReviewSession({
   const nextActionRef = useRef<HTMLButtonElement>(null);
   const retrySubmissionRef = useRef<HTMLButtonElement>(null);
   const retryLoadingReviewsRef = useRef<HTMLButtonElement>(null);
+  const completeAfterNextPage = useRef(false);
 
   const currentCard = dueWords[currentIndex];
 
@@ -157,12 +158,18 @@ export function ReviewSession({
     void client
       .listDueWords({ limit: 50 })
       .then(({ data }) => {
+        const shouldComplete = completeAfterNextPage.current;
+        completeAfterNextPage.current = false;
         setNextReviewAt(data.nextReviewAt);
         if (data.items.length > 0) {
+          setRemainingCount(data.totalCount);
+          if (shouldComplete) {
+            setCompleted(true);
+            return;
+          }
           setPhase("prompt");
           setSelectedOption(null);
           setDueWords(data.items);
-          setRemainingCount(data.totalCount);
           setCurrentIndex(0);
         } else {
           setRemainingCount(0);
@@ -185,6 +192,7 @@ export function ReviewSession({
     nextRemainingCount: number,
   ) => {
     if (nextRemainingCount === 0) {
+      completeAfterNextPage.current = nextCompletedReviewCount >= sessionLimit;
       loadNextPage();
       return;
     }
@@ -199,6 +207,7 @@ export function ReviewSession({
       return;
     }
 
+    completeAfterNextPage.current = false;
     loadNextPage();
   };
 
@@ -217,6 +226,7 @@ export function ReviewSession({
     if (nextCardIndex < dueWords.length) {
       setCurrentIndex(nextCardIndex);
     } else {
+      completeAfterNextPage.current = false;
       loadNextPage();
     }
   };

@@ -101,7 +101,7 @@ test("replays a committed review and retries the due list without duplicate prog
     page.getByText("You completed 2 reviews in this session.", { exact: true }),
   ).toBeVisible();
   expect(submissionRequests).toBe(3);
-  expect(dueListRequests).toBe(2);
+  expect(dueListRequests).toBe(3);
   expect(submissionFingerprints).toHaveLength(3);
   expect(submissionFingerprints[1]).toEqual(submissionFingerprints[0]);
   expect(submissionFingerprints[2]).not.toEqual(submissionFingerprints[0]);

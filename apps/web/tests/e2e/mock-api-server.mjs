@@ -732,6 +732,7 @@ function createInitialState() {
     emailChangeHolds: new Map(),
     completionSummaryDueFetches: 0,
     completionScheduleDueFetches: 0,
+    completionAtLimitDueFetches: 0,
     paginationRetryDueFetches: 0,
     announcementMultipleChoiceDueFetches: 0,
   };
@@ -1031,6 +1032,21 @@ function buildDueWords(state, fixture) {
         : fixture === "completion-null-next-review"
           ? { items: [], nextCursor: undefined, totalCount: 0, nextReviewAt: null }
           : { items: [], nextCursor: undefined, totalCount: 0 };
+  }
+  if (fixture === "completion-at-limit-with-due") {
+    const page = state.completionAtLimitDueFetches;
+    state.completionAtLimitDueFetches += 1;
+    return page === 0
+      ? {
+          items: [MULTIPLE_CHOICE_DUE_WORDS[0]],
+          nextCursor: undefined,
+          totalCount: 1,
+        }
+      : {
+          items: [MULTIPLE_CHOICE_DUE_WORDS[1]],
+          nextCursor: undefined,
+          totalCount: 1,
+        };
   }
   if (fixture === "pagination-retry") {
     const page = state.paginationRetryDueFetches;
