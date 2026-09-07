@@ -7,6 +7,7 @@ import { DueWord, SubmitReviewBody } from "@vocanova/api-client";
 
 import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
+import { formatReviewDateTime } from "@/lib/review-schedule";
 import { handleApiError } from "@/lib/session";
 import { SentenceFeedback } from "../../_components/sentence-feedback";
 
@@ -39,6 +40,7 @@ interface ReviewSessionProps {
   initialTotalCount: number;
   reviewTarget: number;
   reviewsCompleted: number;
+  timezone?: string;
 }
 
 export function ReviewSession({
@@ -46,6 +48,7 @@ export function ReviewSession({
   initialTotalCount,
   reviewTarget,
   reviewsCompleted,
+  timezone,
 }: ReviewSessionProps) {
   const initialSessionLimit = Math.min(
     Math.max(0, reviewTarget - reviewsCompleted),
@@ -54,6 +57,9 @@ export function ReviewSession({
   const [dueWords, setDueWords] = useState<DueWord[]>(initialDueWords);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [remainingCount, setRemainingCount] = useState(initialTotalCount);
+  const [nextReviewAt, setNextReviewAt] = useState<string | null | undefined>(
+    undefined,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isRefetching, setIsRefetching] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -80,6 +86,7 @@ export function ReviewSession({
   const nextActionRef = useRef<HTMLButtonElement>(null);
   const retrySubmissionRef = useRef<HTMLButtonElement>(null);
   const retryLoadingReviewsRef = useRef<HTMLButtonElement>(null);
+  const completeAfterNextPage = useRef(false);
 
   const currentCard = dueWords[currentIndex];
 
@@ -151,11 +158,18 @@ export function ReviewSession({
     void client
       .listDueWords({ limit: 50 })
       .then(({ data }) => {
+        const shouldComplete = completeAfterNextPage.current;
+        completeAfterNextPage.current = false;
+        setNextReviewAt(data.nextReviewAt);
         if (data.items.length > 0) {
+          setRemainingCount(data.totalCount);
+          if (shouldComplete) {
+            setCompleted(true);
+            return;
+          }
           setPhase("prompt");
           setSelectedOption(null);
           setDueWords(data.items);
-          setRemainingCount(data.totalCount);
           setCurrentIndex(0);
         } else {
           setRemainingCount(0);
@@ -173,7 +187,16 @@ export function ReviewSession({
       });
   };
 
-  const advance = (nextCompletedReviewCount: number) => {
+  const advance = (
+    nextCompletedReviewCount: number,
+    nextRemainingCount: number,
+  ) => {
+    if (nextRemainingCount === 0) {
+      completeAfterNextPage.current = nextCompletedReviewCount >= sessionLimit;
+      loadNextPage();
+      return;
+    }
+
     if (nextCompletedReviewCount >= sessionLimit) {
       setCompleted(true);
       return;
@@ -184,6 +207,7 @@ export function ReviewSession({
       return;
     }
 
+    completeAfterNextPage.current = false;
     loadNextPage();
   };
 
@@ -202,6 +226,7 @@ export function ReviewSession({
     if (nextCardIndex < dueWords.length) {
       setCurrentIndex(nextCardIndex);
     } else {
+      completeAfterNextPage.current = false;
       loadNextPage();
     }
   };
@@ -271,11 +296,12 @@ export function ReviewSession({
       setLastReviewedCard(submission.card);
       setLastReviewAttemptId(data.attemptId);
       const nextCompletedReviewCount = completedReviewCount + 1;
+      const nextRemainingCount = Math.max(0, remainingCount - 1);
       setCompletedReviewCount(nextCompletedReviewCount);
       setTotalSuccessfulReviewCount((count) => count + 1);
-      setRemainingCount((count) => Math.max(0, count - 1));
+      setRemainingCount(nextRemainingCount);
       shouldFocusNextCard.current = true;
-      advance(nextCompletedReviewCount);
+      advance(nextCompletedReviewCount, nextRemainingCount);
     } catch (error) {
       setErrorMessage(
         handleApiError(
@@ -310,11 +336,13 @@ export function ReviewSession({
             : "Review target reached"}
         </h2>
         <p className="mt-[var(--spacing-sm)] text-base text-neutral-700">
-          {sessionWasStarted
-            ? reviewTargetReached
-              ? "You reached today’s review target."
-              : "No more due words are available for this session."
-            : "You’ve already reached today’s review target."}
+          {nextReviewAt
+            ? `Your next review is ${formatReviewDateTime(nextReviewAt, timezone)}.`
+            : sessionWasStarted
+              ? reviewTargetReached
+                ? "You reached today’s review target."
+                : "No more due words are available for this session."
+              : "You’ve already reached today’s review target."}
         </p>
         {sessionWasStarted ? (
           <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">

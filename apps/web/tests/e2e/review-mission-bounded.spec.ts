@@ -83,7 +83,27 @@ test("stops at the daily target without another fetch and counts an optional fin
   await expect(
     page.getByRole("heading", { name: /Practice with departure/ }),
   ).toBeVisible();
-  expect(extraReads).toBe(0);
+  expect(extraReads).toBe(1);
+});
+
+test("keeps the completed session visible when the schedule refresh finds another due word", async ({
+  page,
+  context,
+  baseURL,
+}) => {
+  await seed(context, baseURL!, "fewer-due-words", "completion-at-limit-with-due");
+  await page.goto("/reviews");
+  await answer(page, "arrival");
+
+  await expect(
+    page.getByRole("heading", { name: "Review session complete", exact: true }),
+  ).toBeFocused();
+  await expect(
+    page.getByRole("heading", { name: "baggage", exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Continue with up to 1 more review" }),
+  ).toBeVisible();
 });
 
 test("continues a partial mission across a failed next-page read and focuses the recovered card", async ({
@@ -130,7 +150,7 @@ test("continues a partial mission across a failed next-page read and focuses the
   await expect(page.getByRole("button", { name: /Continue with/ })).toHaveCount(
     0,
   );
-  expect(reads).toBe(2);
+  expect(reads).toBe(3);
 });
 
 test("reports a short due queue without claiming the review target was reached", async ({

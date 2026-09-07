@@ -731,6 +731,8 @@ function createInitialState() {
     consumedEmailChangeFailures: new Set(),
     emailChangeHolds: new Map(),
     completionSummaryDueFetches: 0,
+    completionScheduleDueFetches: 0,
+    completionAtLimitDueFetches: 0,
     paginationRetryDueFetches: 0,
     announcementMultipleChoiceDueFetches: 0,
   };
@@ -1007,6 +1009,45 @@ function buildDueWords(state, fixture) {
       totalCount: Math.max(0, MULTIPLE_CHOICE_DUE_WORDS.length - start),
     };
   }
+  if (
+    fixture === "completion-next-review" ||
+    fixture === "completion-without-next-review" ||
+    fixture === "completion-null-next-review"
+  ) {
+    const page = state.completionScheduleDueFetches;
+    state.completionScheduleDueFetches += 1;
+    return page === 0
+      ? {
+          items: [MULTIPLE_CHOICE_DUE_WORDS[0]],
+          nextCursor: undefined,
+          totalCount: 1,
+        }
+      : fixture === "completion-next-review"
+        ? {
+            items: [],
+            nextCursor: undefined,
+            totalCount: 0,
+            nextReviewAt: "2099-08-22T12:30:00.000Z",
+          }
+        : fixture === "completion-null-next-review"
+          ? { items: [], nextCursor: undefined, totalCount: 0, nextReviewAt: null }
+          : { items: [], nextCursor: undefined, totalCount: 0 };
+  }
+  if (fixture === "completion-at-limit-with-due") {
+    const page = state.completionAtLimitDueFetches;
+    state.completionAtLimitDueFetches += 1;
+    return page === 0
+      ? {
+          items: [MULTIPLE_CHOICE_DUE_WORDS[0]],
+          nextCursor: undefined,
+          totalCount: 1,
+        }
+      : {
+          items: [MULTIPLE_CHOICE_DUE_WORDS[1]],
+          nextCursor: undefined,
+          totalCount: 1,
+        };
+  }
   if (fixture === "pagination-retry") {
     const page = state.paginationRetryDueFetches;
     state.paginationRetryDueFetches += 1;
@@ -1026,10 +1067,11 @@ function buildDueWords(state, fixture) {
     };
   }
   if (fixture === "multiple-choice") {
+    const items = MULTIPLE_CHOICE_DUE_WORDS.slice(state.reviewedCount);
     return {
-      items: MULTIPLE_CHOICE_DUE_WORDS,
+      items,
       nextCursor: undefined,
-      totalCount: MULTIPLE_CHOICE_DUE_WORDS.length,
+      totalCount: items.length,
     };
   }
   const items = [];
