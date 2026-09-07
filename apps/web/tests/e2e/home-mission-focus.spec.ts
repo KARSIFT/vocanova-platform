@@ -294,9 +294,11 @@ test("does not change the practice target while feedback is in flight", async ({
 
   await selector.selectOption("e2e-preview-user-word-02");
   await expect(selector).toHaveValue("e2e-preview-user-word-01");
-  await expect(page.getByRole("status")).toContainText(
-    "Keep this word selected until it is finished.",
-  );
+  await expect(
+    page
+      .getByRole("status")
+      .filter({ hasText: "Keep this word selected until it is finished." }),
+  ).toContainText("Keep this word selected until it is finished.");
 
   releaseSubmission?.();
   await expect(
