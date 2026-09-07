@@ -31,6 +31,19 @@ export interface SentenceFeedbackResult {
   crisisResourceMessage?: string;
 }
 
+/** The privacy-bounded projection used by the learner's Progress screen. */
+export interface SentenceFeedbackHistoryItem {
+  attemptId: string;
+  completedAt: string;
+  originalSentence: string;
+  status: FeedbackStatus;
+  correctedSentence?: string;
+  explanation: string;
+  improvementTip?: string;
+  targetWord?: string;
+  targetMeaning?: string;
+}
+
 export interface FeedbackTarget {
   wordId: string;
   meaningId: string;
@@ -94,7 +107,8 @@ export class AIFeedbackError extends Error {
       | "idempotency_conflict"
       | "target_not_found"
       | "attempt_not_found"
-      | "invalid_report",
+      | "invalid_report"
+      | "invalid_cursor",
   ) {
     super(code);
     this.name = "AIFeedbackError";

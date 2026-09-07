@@ -17,8 +17,9 @@ completion criteria.
 Sentence practice is **not** a fourth tab — it's a reusable component surfaced from Home, Word
 Detail, and Review Completion. See [03](../design/03-ui-ux-design.md).
 
-There is **no dedicated sentence-history screen in MVP.** History is stored by the backend without
-a dedicated UI. Sentence-history insights are a named post-MVP opportunity, not cut work.
+There is **no dedicated sentence-history screen in MVP.** Progress includes a bounded recent
+sentence-practice section, while history remains part of the existing three-tab information
+architecture rather than a separate destination.
 
 ## 3. MVP completion criteria
 
