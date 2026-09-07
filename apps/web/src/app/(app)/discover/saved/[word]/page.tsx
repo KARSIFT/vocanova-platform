@@ -123,6 +123,7 @@ export default async function SavedWordPage({
           </>
         ) : null}
         <SentenceFeedback
+          meaningId={meaning.id}
           targetWord={canonical.data.word.text}
           attemptId={meaning.userWordId!}
           source="word_detail"

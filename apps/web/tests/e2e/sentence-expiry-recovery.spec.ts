@@ -8,7 +8,7 @@ const USER = "user-fixture";
 function recovery(overrides: Record<string, unknown> = {}) {
   return {
     version: 1, ownerId: USER, source: "word_detail", attemptId: "uw-mean-pour",
-    path: "/discover/ordering-at-a-cafe/pour", targetWord: "pour",
+    path: "/discover/ordering-at-a-cafe/pour", meaningId: "mean-pour", targetWord: "pour",
     shortDefinition: "to make a liquid flow", sentence: "I pour coffee every morning.", createdAt: Date.now(), ...overrides,
   };
 }
@@ -46,6 +46,27 @@ test("word detail saves on 401, signs in, and explicitly resumes only its matchi
   }
   await page.getByRole("button", { name: "Resume sentence" }).click();
   await expect(input).toHaveValue("I pour coffee every morning.");
+});
+
+test("an unsubmitted matching draft survives reload and Resume or Discard returns focus to the textarea", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  await authenticate(page, context, baseURL);
+  const input = page.getByRole("textbox", { name: /Write a sentence using pour/ });
+  await input.fill("  I pour coffee before work.  ");
+  await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
+
+  await page.reload();
+  await expect(page.getByText("Your saved sentence is ready to resume.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+  await page.getByRole("button", { name: "Resume sentence" }).click();
+  await expect(input).toHaveValue("I pour coffee before work.");
+  await expect(input).toBeFocused();
+
+  await page.reload();
+  await page.getByRole("button", { name: "Discard saved sentence" }).click();
+  await expect(input).toHaveValue("");
+  await expect(input).toBeFocused();
+  await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).toBeNull();
 });
 
 test("rejects different owners, target mismatch, malformed and expired recovery", async ({ page, context }, testInfo) => {
@@ -87,17 +108,15 @@ test("a sibling saved meaning does not clear another meaning's recovery", async 
   await context.addCookies([{ name: "vocanova_session", value: `bank-${randomUUID()}`, url: baseURL }, { name: "vocanova_csrf", value: "bank-csrf", url: baseURL }, { name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
   const path = "/discover/ordering-at-a-cafe/bank";
   await page.goto(path);
-  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ path, attemptId: "e2e-library-bank-river", targetWord: "bank" })]);
+  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ path, attemptId: "e2e-library-bank-river", meaningId: "mean-bank-river", targetWord: "bank" })]);
   await page.reload();
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
 
   await page
-    .getByRole("textbox", { name: /Write a sentence using bank/ })
+    .getByRole("button", { name: "Remove bank from saved words" })
     .nth(1)
-    .fill("The bank approved my loan.");
-  await page.getByRole("button", { name: "Check my sentence" }).nth(1).click();
-  await expect(page.getByText("Correct", { exact: true })).toBeVisible();
+    .click();
   await page.reload();
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
@@ -144,7 +163,7 @@ test("home preserves recovery for the second saved word while selections change"
   const baseURL = testInfo.project.use.baseURL!;
   await context.addCookies([{ name: "vocanova_session", value: `home-second-${randomUUID()}`, url: baseURL }, { name: "vocanova_csrf", value: "home-second-csrf", url: baseURL }, { name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
   await page.goto("/settings");
-  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ source: "daily_mission", attemptId: "e2e-preview-user-word-02", path: "/home", targetWord: "baggage" })]);
+  await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ source: "daily_mission", attemptId: "e2e-preview-user-word-02", meaningId: "e2e-preview-meaning-02", path: "/home", targetWord: "baggage" })]);
   await page.goto("/home");
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
 
@@ -154,6 +173,41 @@ test("home preserves recovery for the second saved word while selections change"
   await selector.selectOption("e2e-preview-user-word-01");
   await selector.selectOption("e2e-preview-user-word-02");
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+});
+
+test("Home clears a draft after the learner discards it to change practice targets", async ({ page, context }, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  await context.addCookies([
+    {
+      name: "vocanova_session",
+      value: `home-draft-${randomUUID()}`,
+      url: baseURL,
+    },
+    { name: "vocanova_csrf", value: "home-draft-csrf", url: baseURL },
+    { name: "e2e_home_fixture", value: "caught-up", url: baseURL },
+  ]);
+  await page.goto("/home");
+  const selector = page.getByRole("combobox", {
+    name: "Choose a saved word to practice",
+  });
+  await page
+    .getByRole("textbox", { name: /Write a sentence using arrival/ })
+    .fill("My arrival is before noon.");
+  await expect
+    .poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY))
+    .not.toBeNull();
+
+  await selector.selectOption("e2e-preview-user-word-02");
+  await page
+    .getByRole("button", { name: "Discard draft and change word" })
+    .click();
+  await expect(selector).toHaveValue("e2e-preview-user-word-02");
+  await expect
+    .poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY))
+    .toBeNull();
+
+  await selector.selectOption("e2e-preview-user-word-01");
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toHaveCount(0);
 });
 
 test("mounted review recovery clears when the authenticated user changes", async ({ page, context }, testInfo) => {
