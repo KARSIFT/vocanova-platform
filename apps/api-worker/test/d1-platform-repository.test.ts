@@ -15,7 +15,11 @@ describe("D1 platform repository", () => {
     const migrationCount = await env.DB.prepare(
       "SELECT COUNT(*) AS count FROM d1_migrations",
     ).first<{ count: number }>();
-    expect(migrationCount?.count).toBe(11);
+    expect(migrationCount?.count).toBe(12);
+    const scheduleAnchor = await env.DB.prepare(
+      "SELECT name FROM pragma_table_info('review_attempts') WHERE name = 'schedule_anchor_at'",
+    ).first<{ name: string }>();
+    expect(scheduleAnchor?.name).toBe("schedule_anchor_at");
     const starterCatalog = await env.DB.prepare(
       `SELECT slug FROM journey_situations
        WHERE slug IN ('travel-airport', 'daily-life-shopping', 'work-meetings', 'study-classroom')

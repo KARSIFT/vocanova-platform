@@ -1267,6 +1267,220 @@ describe("Worker content, learning, and review parity", () => {
     ]);
   });
 
+  it("anchors review scheduling and mission accounting to one Worker receipt instant", async () => {
+    const receivedAt = "2026-08-22T20:30:00.123Z";
+    let clockCalls = 0;
+    const receiptRepository = new D1ContentLearningRepository(env.DB, () => {
+      clockCalls += 1;
+      return new Date(receivedAt);
+    });
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    await env.DB.prepare(
+      `INSERT INTO user_settings
+       (id, user_id, timezone, daily_review_target, created_at, updated_at)
+       VALUES (?1, ?2, 'Asia/Tehran', 5, ?3, ?3)`,
+    )
+      .bind(crypto.randomUUID(), USER_A, NOW)
+      .run();
+    const futureAnsweredAt = "2099-01-01T00:00:00.000Z";
+    const first = await receiptRepository.submitReview(
+      USER_A,
+      review({
+        answeredAt: futureAnsweredAt,
+        clientAttemptId: "receipt-clock-future",
+      }),
+      "receipt-clock-future",
+    );
+
+    expect(first).toMatchObject({
+      answeredAt: futureAnsweredAt,
+      nextReviewAt: "2026-08-22T21:30:00.123Z",
+    });
+    expect(clockCalls).toBe(1);
+    await expect(
+      receiptRepository.submitReview(
+        USER_A,
+        review({
+          answeredAt: futureAnsweredAt,
+          clientAttemptId: "receipt-clock-future",
+        }),
+        "receipt-clock-future",
+      ),
+    ).resolves.toEqual(first);
+    expect(clockCalls).toBe(1);
+    await expect(
+      env.DB.prepare(
+        `SELECT answered_at, created_at, schedule_anchor_at
+         FROM review_attempts WHERE client_attempt_id = ?1`,
+      )
+        .bind("receipt-clock-future")
+        .first(),
+    ).resolves.toEqual({
+      answered_at: futureAnsweredAt,
+      created_at: receivedAt,
+      schedule_anchor_at: receivedAt,
+    });
+    await expect(
+      env.DB.prepare(
+        `SELECT next_review_at, last_reviewed_at, updated_at
+         FROM user_words WHERE id = ?1`,
+      )
+        .bind(USER_WORD_A)
+        .first(),
+    ).resolves.toEqual({
+      next_review_at: "2026-08-22T21:30:00.123Z",
+      last_reviewed_at: receivedAt,
+      updated_at: receivedAt,
+    });
+    for (const invalidAnchor of [
+      "not-a-timestamp",
+      "2026-13-01T00:00:00.000Z",
+      "2026-02-30T00:00:00.000Z",
+      "2026-01-01T24:00:00.000Z",
+      "2026-01-01T00:60:00.000Z",
+      "2026-01-01T00:00:60.000Z",
+    ]) {
+      await expect(
+        env.DB.prepare(
+          `UPDATE review_attempts SET schedule_anchor_at = ?1
+           WHERE client_attempt_id = ?2`,
+        )
+          .bind(invalidAnchor, "receipt-clock-future")
+          .run(),
+      ).rejects.toThrow();
+    }
+    await expect(
+      env.DB.prepare(
+        `SELECT local_date, timezone, created_at, updated_at
+         FROM daily_activity_summaries WHERE user_id = ?1`,
+      )
+        .bind(USER_A)
+        .first(),
+    ).resolves.toEqual({
+      local_date: "2026-08-23",
+      timezone: "Asia/Tehran",
+      created_at: receivedAt,
+      updated_at: receivedAt,
+    });
+    await expect(
+      env.DB.prepare(
+        `SELECT occurred_at, created_at, updated_at
+         FROM confidence_point_ledger WHERE user_id = ?1 AND reason = 'review_correct'`,
+      )
+        .bind(USER_A)
+        .first(),
+    ).resolves.toEqual({
+      occurred_at: receivedAt,
+      created_at: receivedAt,
+      updated_at: receivedAt,
+    });
+  });
+
+  it("keeps delayed review replays on their original receipt-derived schedule", async () => {
+    const receiptInstants = [
+      "2026-08-22T12:00:00.123Z",
+      "2026-08-22T13:00:00.456Z",
+    ];
+    let clockCalls = 0;
+    const receiptRepository = new D1ContentLearningRepository(env.DB, () => {
+      const instant = receiptInstants[clockCalls]!;
+      clockCalls += 1;
+      return new Date(instant);
+    });
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    const firstInput = review({
+      answeredAt: "1999-01-01T00:00:00.000Z",
+      clientAttemptId: "delayed-replay-first",
+    });
+    const first = await receiptRepository.submitReview(
+      USER_A,
+      firstInput,
+      "delayed-replay-first",
+    );
+    const second = await receiptRepository.submitReview(
+      USER_A,
+      review({
+        answeredAt: "2099-01-01T00:00:00.000Z",
+        clientAttemptId: "delayed-replay-second",
+      }),
+      "delayed-replay-second",
+    );
+
+    expect(first).toMatchObject({
+      answeredAt: "1999-01-01T00:00:00.000Z",
+      nextReviewAt: "2026-08-22T13:00:00.123Z",
+    });
+    expect(second.nextReviewAt).toBe("2026-08-23T13:00:00.456Z");
+    await expect(
+      receiptRepository.submitReview(
+        USER_A,
+        firstInput,
+        "delayed-replay-first-new-key",
+      ),
+    ).resolves.toEqual(first);
+    expect(clockCalls).toBe(2);
+    await expect(
+      env.DB.prepare(
+        `SELECT created_at FROM idempotency_keys
+         WHERE user_id = ?1 AND operation = 'reviews:submit' AND key = ?2`,
+      )
+        .bind(USER_A, "delayed-replay-first-new-key")
+        .first(),
+    ).resolves.toEqual({ created_at: "2026-08-22T12:00:00.123Z" });
+  });
+
+  it("keeps legacy review replays on their original answered-at schedule", async () => {
+    const receivedAt = "2026-08-22T12:00:00.123Z";
+    const answeredAt = "2026-01-10T08:00:00.000Z";
+    const legacyNextReviewAt = "2026-01-10T09:00:00.000Z";
+    const receiptRepository = new D1ContentLearningRepository(
+      env.DB,
+      () => new Date(receivedAt),
+    );
+    await insertUserWord(USER_WORD_A, USER_A, MEANING_A, NOW);
+    const input = review({
+      answeredAt,
+      clientAttemptId: "legacy-schedule-replay",
+    });
+    await receiptRepository.submitReview(
+      USER_A,
+      input,
+      "legacy-schedule-original-key",
+    );
+    await env.DB.batch([
+      env.DB.prepare(
+        `UPDATE review_attempts SET schedule_anchor_at = NULL
+           WHERE user_id = ?1 AND client_attempt_id = ?2`,
+      ).bind(USER_A, input.clientAttemptId),
+      env.DB.prepare(
+        `UPDATE user_words SET next_review_at = ?1, last_reviewed_at = ?2
+           WHERE id = ?3 AND user_id = ?4`,
+      ).bind(legacyNextReviewAt, answeredAt, USER_WORD_A, USER_A),
+    ]);
+
+    const before = await env.DB.prepare(
+      `SELECT review_step, next_review_at, last_reviewed_at, total_review_count
+       FROM user_words WHERE id = ?1`,
+    )
+      .bind(USER_WORD_A)
+      .first();
+    await expect(
+      receiptRepository.submitReview(
+        USER_A,
+        input,
+        "legacy-schedule-replay-new-key",
+      ),
+    ).resolves.toMatchObject({ nextReviewAt: legacyNextReviewAt });
+    await expect(
+      env.DB.prepare(
+        `SELECT review_step, next_review_at, last_reviewed_at, total_review_count
+         FROM user_words WHERE id = ?1`,
+      )
+        .bind(USER_WORD_A)
+        .first(),
+    ).resolves.toEqual(before);
+  });
+
   it("applies again, consecutive reset, hard, easy, and skipped transitions", async () => {
     await insertUserWord(
       USER_WORD_A,
