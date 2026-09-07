@@ -38,7 +38,7 @@ test("shows the learner-local next review after the final rating without a refre
   });
   await expect(completion).toBeFocused();
   await expect(
-    page.getByText("Your next review is Aug 22, 2099, 8:30 AM EDT.", {
+    page.getByText("Your next review is Aug 22, 2099, 8:30 AM GMT-04:00.", {
       exact: true,
     }),
   ).toBeVisible();

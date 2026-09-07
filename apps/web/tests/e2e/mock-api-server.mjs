@@ -1051,10 +1051,11 @@ function buildDueWords(state, fixture) {
     };
   }
   if (fixture === "multiple-choice") {
+    const items = MULTIPLE_CHOICE_DUE_WORDS.slice(state.reviewedCount);
     return {
-      items: MULTIPLE_CHOICE_DUE_WORDS,
+      items,
       nextCursor: undefined,
-      totalCount: MULTIPLE_CHOICE_DUE_WORDS.length,
+      totalCount: items.length,
     };
   }
   const items = [];

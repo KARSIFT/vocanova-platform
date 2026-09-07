@@ -184,11 +184,6 @@ export function ReviewSession({
     nextCompletedReviewCount: number,
     nextRemainingCount: number,
   ) => {
-    if (currentIndex + 1 < dueWords.length) {
-      setCurrentIndex((index) => index + 1);
-      return;
-    }
-
     if (nextRemainingCount === 0) {
       loadNextPage();
       return;
@@ -196,6 +191,11 @@ export function ReviewSession({
 
     if (nextCompletedReviewCount >= sessionLimit) {
       setCompleted(true);
+      return;
+    }
+
+    if (currentIndex + 1 < dueWords.length) {
+      setCurrentIndex((index) => index + 1);
       return;
     }
 
