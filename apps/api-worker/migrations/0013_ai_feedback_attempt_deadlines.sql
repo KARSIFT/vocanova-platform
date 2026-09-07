@@ -4,7 +4,33 @@
 -- which the repository recovers after its bounded fallback window.
 ALTER TABLE ai_feedback_attempts
   ADD COLUMN generation_expires_at TEXT
-  CHECK (generation_expires_at IS NULL OR generation_expires_at GLOB '????-??-??T??:??:??.???Z');
+  CHECK (
+    generation_expires_at IS NULL
+    OR (
+      length(generation_expires_at) = 24
+      AND substr(generation_expires_at, 5, 1) = '-'
+      AND substr(generation_expires_at, 8, 1) = '-'
+      AND substr(generation_expires_at, 11, 1) = 'T'
+      AND substr(generation_expires_at, 14, 1) = ':'
+      AND substr(generation_expires_at, 17, 1) = ':'
+      AND substr(generation_expires_at, 20, 1) = '.'
+      AND substr(generation_expires_at, 24, 1) = 'Z'
+      AND (
+        substr(generation_expires_at, 1, 4)
+        || substr(generation_expires_at, 6, 2)
+        || substr(generation_expires_at, 9, 2)
+        || substr(generation_expires_at, 12, 2)
+        || substr(generation_expires_at, 15, 2)
+        || substr(generation_expires_at, 18, 2)
+        || substr(generation_expires_at, 21, 3)
+      ) NOT GLOB '*[^0-9]*'
+      AND CAST(substr(generation_expires_at, 12, 2) AS INTEGER) BETWEEN 0 AND 23
+      AND CAST(substr(generation_expires_at, 15, 2) AS INTEGER) BETWEEN 0 AND 59
+      AND CAST(substr(generation_expires_at, 18, 2) AS INTEGER) BETWEEN 0 AND 59
+      AND strftime('%Y-%m-%dT%H:%M:%fZ', generation_expires_at) IS NOT NULL
+      AND strftime('%Y-%m-%dT%H:%M:%fZ', generation_expires_at) = generation_expires_at
+    )
+  );
 
 CREATE INDEX ai_feedback_attempts_pending_expiry_idx
   ON ai_feedback_attempts (generation_expires_at)

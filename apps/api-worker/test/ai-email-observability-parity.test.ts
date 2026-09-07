@@ -704,6 +704,20 @@ describe("Worker AI feedback parity", () => {
       generation_expires_at: string;
     }>();
     expect(pending?.generation_expires_at).toBe("2026-08-22T12:00:15.000Z");
+    for (const invalidExpiry of [
+      "not-a-timestamp",
+      "2026-13-01T00:00:00.000Z",
+      "2026-02-30T00:00:00.000Z",
+      "2026-01-01T24:00:00.000Z",
+    ]) {
+      await expect(
+        env.DB.prepare(
+          "UPDATE ai_feedback_attempts SET generation_expires_at = ?1 WHERE id = ?2",
+        )
+          .bind(invalidExpiry, pending?.id)
+          .run(),
+      ).rejects.toThrow();
+    }
 
     const active = await service.submit(
       USER_A,
