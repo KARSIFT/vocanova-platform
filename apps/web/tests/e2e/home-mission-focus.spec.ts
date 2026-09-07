@@ -198,6 +198,21 @@ test("moves focus from the sentence-practice mission action to the saved-word se
   }
 });
 
+test("focuses the saved-word selector on direct sentence-practice fragment entry", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL;
+  if (!baseURL) throw new Error("Expected a Playwright base URL.");
+
+  await useHomeFixture(context, baseURL, "sentence-practice-needed");
+  await page.goto("/home#saved-word-practice-heading");
+
+  const selector = page.getByLabel("Choose a saved word to practice");
+  await expect(selector).toBeFocused();
+  await expect(selector).toBeInViewport();
+});
+
 test("keeps Journey as the sentence-practice action when no saved words are available", async ({
   page,
   context,

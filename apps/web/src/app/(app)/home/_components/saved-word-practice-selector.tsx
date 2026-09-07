@@ -45,7 +45,7 @@ export function SavedWordPracticeSelector({
   useEffect(() => {
     function focusSelectorFromMissionAction() {
       if (window.location.hash !== "#saved-word-practice-heading") return;
-      selectorRef.current?.focus({ preventScroll: true });
+      selectorRef.current?.focus();
     }
 
     focusSelectorFromMissionAction();
