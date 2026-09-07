@@ -13,9 +13,7 @@ const ACTION_CLASS_NAME =
 export function MissionActionLink({ href, label }: MissionActionLinkProps) {
   function focusSentencePracticeSelector() {
     if (href !== "#saved-word-practice-heading") return;
-    document
-      .getElementById("home-practice-word")
-      ?.focus({ preventScroll: true });
+    document.getElementById("home-practice-word")?.focus();
   }
 
   return (
