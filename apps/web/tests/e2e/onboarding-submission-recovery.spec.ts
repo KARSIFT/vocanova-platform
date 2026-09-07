@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import { expect, test } from "@playwright/test";
 
+const ONBOARDING_RECOVERY_KEY = "vocanova.onboarding-recovery.v1";
+
 test("keeps complete onboarding answers through a failed final save and retries once", async ({
   page,
   context,
@@ -73,6 +75,11 @@ test("keeps complete onboarding answers through a failed final save and retries 
   await expect(
     page.getByRole("button", { name: "Finish setup" }),
   ).toBeEnabled();
+  await expect
+    .poll(() =>
+      page.evaluate((key) => sessionStorage.getItem(key as string), ONBOARDING_RECOVERY_KEY),
+    )
+    .toBeNull();
 
   await page.getByRole("button", { name: "Back" }).click();
   await expect(page.getByLabel("Daily life")).toBeChecked();
