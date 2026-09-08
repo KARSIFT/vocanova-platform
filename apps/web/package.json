@@ -32,13 +32,13 @@
     "@sentry/cloudflare": "10.69.0",
     "@sentry/react": "10.69.0",
     "@vocanova/api-client": "workspace:*",
-    "next": "16.3.0",
+    "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
-    "@next/eslint-plugin-next": "16.3.0",
+    "@next/eslint-plugin-next": "16.3.4",
     "@playwright/test": "1.62.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "26.1.2",

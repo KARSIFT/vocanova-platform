@@ -17,6 +17,8 @@ overrides:
   postcss: ">=8.5.23"
   # Patched release for GHSA-x5fp-wj9c-mxmx.
   qs: "6.16.0"
+  # Patched release for GHSA-rgj7-g3m4-5g8c.
+  sharp: "0.35.4"
   # Wrangler's embedded JavaScript API needs the esbuild deadlock fix.
   "wrangler>esbuild": "0.28.2"
 
