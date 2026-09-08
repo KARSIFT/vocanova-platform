@@ -24,7 +24,7 @@ export const FORCE_KILL_WAIT_MS = 2_000;
 export const READINESS_POLL_MS = 250;
 export const PROBE_TIMEOUT_MS = 2_000;
 
-const EXPECTED_NEXT_VERSION = "16.3.0";
+const EXPECTED_NEXT_VERSION = "16.3.4";
 const EXPECTED_OPENNEXT_VERSION = "1.20.2";
 const EXPECTED_TYPESCRIPT_VERSION = "6.0.3";
 const repositoryRoot = resolve(import.meta.dirname, "../..");
