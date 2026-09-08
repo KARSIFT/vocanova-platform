@@ -107,7 +107,7 @@ export class D1AIFeedbackRepository {
     const result = await this.database
       .prepare(
         `SELECT a.id AS attempt_id, a.completed_at, a.feedback_json,
-              s.sentence_text, s.submitted_at, cw.text AS word_text,
+      s.sentence_text, cw.text AS word_text,
               wm.short_definition
        FROM learner_sentences s
        JOIN ai_feedback_attempts a
@@ -115,20 +115,26 @@ export class D1AIFeedbackRepository {
        LEFT JOIN word_meanings wm ON wm.id = s.meaning_id
        LEFT JOIN canonical_words cw ON cw.id = wm.word_id
        WHERE s.user_id = ?1
-         AND (?2 IS NULL OR s.submitted_at < ?2
-           OR (s.submitted_at = ?2 AND a.id < ?3))
-       ORDER BY s.submitted_at DESC, a.id DESC LIMIT ?4`,
+         AND (?2 IS NULL OR a.completed_at < ?2
+           OR (a.completed_at = ?2 AND a.id < ?3))
+       ORDER BY a.completed_at DESC, a.id DESC LIMIT ?4`,
       )
-      .bind(userId, cursor?.submittedAt ?? null, cursor?.attemptId ?? "", limit)
+      .bind(
+        userId,
+        cursor?.completedAt ?? null,
+        cursor?.attemptId ?? "",
+        limit + 1,
+      )
       .all<Row>();
-    const items = result.results.map(historyItemFromRow);
-    const last = result.results.at(-1);
+    const pageRows = result.results.slice(0, limit);
+    const items = pageRows.map(historyItemFromRow);
+    const last = pageRows.at(-1);
     return {
       items,
-      ...(items.length === limit &&
+      ...(result.results.length > limit &&
         last && {
           nextCursor: encodeHistoryCursor(
-            String(last.submitted_at),
+            String(last.completed_at),
             String(last.attempt_id),
           ),
         }),
@@ -767,7 +773,7 @@ function encodeHistoryCursor(submittedAt: string, attemptId: string): string {
 
 function decodeHistoryCursor(
   value: string,
-): { submittedAt: string; attemptId: string } | null {
+): { completedAt: string; attemptId: string } | null {
   if (!value) return null;
   try {
     const parsed = JSON.parse(
@@ -780,7 +786,7 @@ function decodeHistoryCursor(
       !isUuid(parsed.i)
     )
       throw new Error();
-    return { submittedAt: parsed.h, attemptId: parsed.i };
+    return { completedAt: parsed.h, attemptId: parsed.i };
   } catch {
     throw new AIFeedbackError("invalid_cursor");
   }

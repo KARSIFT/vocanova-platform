@@ -608,6 +608,23 @@ describe("VocanovaClient", () => {
     assert.deepEqual(data, { items: [] });
   });
 
+  it("preserves an explicit sentence-feedback history limit", async () => {
+    const fetch = (url: string): Promise<Response> => {
+      assert.equal(
+        url,
+        "https://api.example.com/api/v1/sentence-feedback/history?limit=0",
+      );
+      return Promise.resolve(
+        new Response(JSON.stringify({ items: [] }), { status: 200 }),
+      );
+    };
+    const client = new VocanovaClient({
+      baseURL: "https://api.example.com",
+      fetch: fetch as typeof globalThis.fetch,
+    });
+    await client.listSentenceFeedbackHistory({ limit: 0 });
+  });
+
   it("sends GET /api/v1/daily-mission", async () => {
     const fetch = (url: string, init: RequestInit): Promise<Response> => {
       assert.equal(url, "https://api.example.com/api/v1/daily-mission");

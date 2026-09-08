@@ -103,12 +103,12 @@ describe("Worker AI feedback parity", () => {
 
   it("lists only the owner's completed feedback in stable cursor order without operational fields", async () => {
     const service = createService(new ScriptedProvider(() => validFeedback()));
-    await service.submit(
+    const earlierSubmission = await service.submit(
       USER_A,
       submission("I work every day."),
       "history-one",
     );
-    await service.submit(
+    const laterSubmission = await service.submit(
       USER_A,
       submission("We work every evening."),
       "history-two",
@@ -123,6 +123,20 @@ describe("Worker AI feedback parity", () => {
     )
       .bind(hidden.result.attemptId)
       .run();
+    await env.DB.batch([
+      env.DB.prepare(
+        "UPDATE learner_sentences SET submitted_at = ?1 WHERE id = (SELECT learner_sentence_id FROM ai_feedback_attempts WHERE id = ?2)",
+      ).bind("2026-01-01T10:00:00.000Z", earlierSubmission.result.attemptId),
+      env.DB.prepare(
+        "UPDATE ai_feedback_attempts SET completed_at = ?1 WHERE id = ?2",
+      ).bind("2026-01-01T12:00:00.000Z", earlierSubmission.result.attemptId),
+      env.DB.prepare(
+        "UPDATE learner_sentences SET submitted_at = ?1 WHERE id = (SELECT learner_sentence_id FROM ai_feedback_attempts WHERE id = ?2)",
+      ).bind("2026-01-01T11:00:00.000Z", laterSubmission.result.attemptId),
+      env.DB.prepare(
+        "UPDATE ai_feedback_attempts SET completed_at = ?1 WHERE id = ?2",
+      ).bind("2026-01-01T11:30:00.000Z", laterSubmission.result.attemptId),
+    ]);
     await env.DB.prepare(
       "UPDATE canonical_words SET status = 'archived' WHERE id = ?1",
     )
@@ -134,6 +148,9 @@ describe("Worker AI feedback parity", () => {
     const second = await repository.listHistory(USER_A, first.nextCursor!, 1);
     expect(first.items).toHaveLength(1);
     expect(second.items).toHaveLength(1);
+    expect(first.items[0]?.attemptId).toBe(earlierSubmission.result.attemptId);
+    expect(second.items[0]?.attemptId).toBe(laterSubmission.result.attemptId);
+    expect(second.nextCursor).toBeUndefined();
     expect(first.items[0]?.attemptId).not.toBe(second.items[0]?.attemptId);
     expect([...first.items, ...second.items]).toEqual(
       expect.arrayContaining([

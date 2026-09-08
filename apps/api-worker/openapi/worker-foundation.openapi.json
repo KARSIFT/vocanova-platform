@@ -2010,6 +2010,8 @@
             "required": false,
             "schema": {
               "default": 10,
+              "maximum": 50,
+              "minimum": 1,
               "type": "integer"
             }
           }

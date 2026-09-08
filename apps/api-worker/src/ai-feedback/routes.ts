@@ -155,7 +155,7 @@ export function registerAIFeedbackRoutes(
         name: "limit",
         in: "query",
         required: false,
-        schema: { type: "integer", default: 10 },
+        schema: { type: "integer", minimum: 1, maximum: 50, default: 10 },
       },
     ],
     responses: {

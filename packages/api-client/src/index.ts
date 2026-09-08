@@ -686,7 +686,7 @@ export class VocanovaClient {
   ): Promise<{ data: SentenceFeedbackHistory; response: Response }> {
     const query = new URLSearchParams();
     if (params?.after) query.set("after", params.after);
-    if (params?.limit) query.set("limit", String(params.limit));
+    if (params?.limit !== undefined) query.set("limit", String(params.limit));
     const response = await this.request(
       "GET",
       "/api/v1/sentence-feedback/history" +
