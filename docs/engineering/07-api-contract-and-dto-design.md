@@ -68,11 +68,13 @@ Sentence feedback is synchronous at the API boundary:
 ```text
 POST /api/v1/sentence-feedback
 POST /api/v1/sentence-feedback/{attemptId}/reports
+GET /api/v1/sentence-feedback/history
 ```
 
 A stored learning result may have status `correct`, `needs_improvement`, or `incorrect`. The result
 also reports retryability, report state, and optional business-error fields. Provider names,
-prompts, token usage, and costs are not public. See [09](09-ai-features.md) §9–10.
+prompts, token usage, and costs are not public. The history read is owner-scoped, cursor-paginated,
+and returns only completed learner-facing feedback fields. See [09](09-ai-features.md) §9–10.
 
 Account deletion immediately deactivates the user and revokes sessions. Its response contains the
 deletion request identifier, timestamps, and replay state; it does not expose internal purge-job
