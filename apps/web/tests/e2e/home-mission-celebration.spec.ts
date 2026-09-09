@@ -10,6 +10,7 @@ async function useHomeFixture(
   fixture:
     | "mission-complete"
     | "mission-complete-milestone"
+    | "mission-complete-over-target"
     | "mission-complete-zero-streak",
 ) {
   await context.addCookies([
@@ -69,6 +70,12 @@ test("celebrates completion without claiming a milestone for ordinary or zero st
     page.getByRole("status", { name: "Mission celebration" }),
   ).toContainText("Great work — today's review target is complete.");
   await expect(page.getByText(/streak milestone/)).toHaveCount(0);
+
+  await useHomeFixture(context, baseURL, "mission-complete-over-target");
+  await page.goto("/home");
+  await expect(
+    page.getByRole("status", { name: "Mission celebration" }),
+  ).toContainText("Great work — today's review target is complete.");
 
   await useHomeFixture(context, baseURL, "mission-complete-zero-streak");
   await page.goto("/home");

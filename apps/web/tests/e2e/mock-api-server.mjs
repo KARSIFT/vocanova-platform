@@ -992,6 +992,7 @@ function buildDailyMission(state, cookies = {}) {
   if (
     homeFixture === "mission-complete" ||
     homeFixture === "mission-complete-milestone" ||
+    homeFixture === "mission-complete-over-target" ||
     homeFixture === "mission-complete-zero-streak"
   ) {
     const completedStreak =
@@ -1006,7 +1007,10 @@ function buildDailyMission(state, cookies = {}) {
           : streak;
     return {
       ...state.dailyMission,
-      reviewsCompleted: state.dailyMission.reviewTarget,
+      reviewsCompleted:
+        homeFixture === "mission-complete-over-target"
+          ? state.dailyMission.reviewTarget + 1
+          : state.dailyMission.reviewTarget,
       status: "completed",
       completedAt: "2026-01-01T12:00:00.000Z",
       streak: completedStreak,
