@@ -1007,6 +1007,8 @@ function buildDailyMission(state, cookies = {}) {
           : streak;
     return {
       ...state.dailyMission,
+      newWordsCompleted: state.dailyMission.newWordTarget,
+      sentencePracticesCompleted: state.dailyMission.sentencePracticeTarget,
       reviewsCompleted:
         homeFixture === "mission-complete-over-target"
           ? state.dailyMission.reviewTarget + 1
