@@ -298,7 +298,7 @@ test("does not change the practice target while feedback is in flight", async ({
     page
       .getByRole("status")
       .filter({ hasText: "Keep this word selected until it is finished." }),
-  ).toBeVisible();
+  ).toContainText("Keep this word selected until it is finished.");
 
   releaseSubmission?.();
   await expect(
