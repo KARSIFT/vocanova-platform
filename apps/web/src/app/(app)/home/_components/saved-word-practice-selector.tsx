@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { SavedMeaning } from "@vocanova/api-client";
 
@@ -60,6 +60,10 @@ export function SavedWordPracticeSelector({
 
   const selectedWord = savedWords.find(
     (savedWord) => savedWord.userWordId === selectedUserWordId,
+  );
+  const recoveryAttemptIds = useMemo(
+    () => savedWords.map((word) => word.userWordId),
+    [savedWords],
   );
 
   if (!selectedWord) return null;
@@ -156,7 +160,7 @@ export function SavedWordPracticeSelector({
           shortDefinition={selectedWord.shortDefinition}
           onPendingChange={setIsSubmitting}
           clearMismatchedRecovery
-          recoveryAttemptIds={savedWords.map((word) => word.userWordId)}
+          recoveryAttemptIds={recoveryAttemptIds}
         />
       </div>
 

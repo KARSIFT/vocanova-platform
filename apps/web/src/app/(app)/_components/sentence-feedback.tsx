@@ -167,9 +167,7 @@ export function SentenceFeedback({
         clearMismatchedRecovery &&
         record.path === returnPath &&
         record.source === source &&
-        (record.attemptId === attemptId ||
-          !recoveryAttemptIds ||
-          !recoveryAttemptIds.includes(record.attemptId))
+        (!recoveryAttemptIds || !recoveryAttemptIds.includes(record.attemptId))
       )
         clearSentenceRecovery(userId);
       return;

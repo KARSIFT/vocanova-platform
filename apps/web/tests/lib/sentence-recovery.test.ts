@@ -3,6 +3,7 @@ import { afterEach, it } from "node:test";
 
 import {
   clearSentenceRecovery,
+  clearSentenceRecoveryForMeaning,
   readSentenceRecovery,
   saveSentenceDraft,
   saveSentenceRecovery,
@@ -83,6 +84,29 @@ it("stores only a normalized, bounded draft with its exact meaning", () => {
   saveSentenceDraft(record({ meaningId: "mean-pour", sentence: "  I pour coffee.  " }));
   assert.equal(readSentenceRecovery("user-a")?.sentence, "I pour coffee.");
   assert.equal(readSentenceRecovery("user-a")?.meaningId, "mean-pour");
+  saveSentenceDraft(record({ sentence: "x".repeat(301) }));
+  assert.equal(readSentenceRecovery("user-a")?.sentence, "x".repeat(300));
   saveSentenceDraft(record({ meaningId: "mean-pour", sentence: "   " }));
+  assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
+});
+
+it("clears recovery when its meaning matches", () => {
+  installStorage();
+  saveSentenceRecovery(record());
+  clearSentenceRecoveryForMeaning("user-a", "mean-pour");
+  assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
+});
+
+it("preserves recovery when its meaning does not match", () => {
+  installStorage();
+  saveSentenceRecovery(record());
+  clearSentenceRecoveryForMeaning("user-a", "mean-other");
+  assert.equal(readSentenceRecovery("user-a")?.meaningId, "mean-pour");
+});
+
+it("clears recovery without an owner before identity refresh completes", () => {
+  installStorage();
+  saveSentenceRecovery(record());
+  clearSentenceRecoveryForMeaning(undefined, "mean-other");
   assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
 });

@@ -110,12 +110,11 @@ test("an unsubmitted matching draft survives reload and Resume or Discard return
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).toBeNull();
 });
 
-test("rejects different owners, meanings, targets, malformed and expired recovery", async ({ page, context }, testInfo) => {
+test("rejects different owners, unavailable targets, malformed and expired recovery", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await authenticate(page, context, baseURL);
   for (const item of [
     recovery({ ownerId: "another-user" }),
-    recovery({ meaningId: "other-meaning" }),
     recovery({ attemptId: "other-target" }),
     { malformed: true },
     recovery({ createdAt: Date.now() - 30 * 60 * 1000 - 1 }),
@@ -231,14 +230,25 @@ test("a mounted form clears owner-bound state when the authenticated user change
   await expect(page.getByText("Correct", { exact: true })).toHaveCount(0);
 });
 
-test("a sibling saved meaning does not clear another meaning's recovery", async ({ page, context }, testInfo) => {
+test("does not display a sibling's recovery for the wrong meaning or erase it", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await context.addCookies([{ name: "vocanova_session", value: `bank-${randomUUID()}`, url: baseURL }, { name: "vocanova_csrf", value: "bank-csrf", url: baseURL }, { name: "e2e_saved_words_fixture", value: "library", url: baseURL }]);
   const path = "/discover/ordering-at-a-cafe/bank";
   await page.goto(path);
   await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, recovery({ path, attemptId: "e2e-library-bank-river", meaningId: "mean-bank-river", targetWord: "bank" })]);
   await page.reload();
-  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+  const riverPractice = page.locator(
+    "[aria-labelledby='sentence-feedback-heading-e2e-library-bank-river']",
+  );
+  const moneyPractice = page.locator(
+    "[aria-labelledby='sentence-feedback-heading-e2e-library-bank-money']",
+  );
+  await expect(
+    riverPractice.getByRole("button", { name: "Resume sentence" }),
+  ).toBeVisible();
+  await expect(
+    moneyPractice.getByRole("button", { name: "Resume sentence" }),
+  ).toHaveCount(0);
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
 
   await page
@@ -247,7 +257,9 @@ test("a sibling saved meaning does not clear another meaning's recovery", async 
     .click();
   await page.reload();
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).not.toBeNull();
-  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+  await expect(
+    riverPractice.getByRole("button", { name: "Resume sentence" }),
+  ).toBeVisible();
 });
 
 test("encoded saved-word return paths survive 401 reauthentication", async ({ page, context }, testInfo) => {
