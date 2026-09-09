@@ -49,12 +49,16 @@ const WCAG_22_AA_TAGS = [
  * `result.criticalOrSerious` for the test to pass; checking only
  * `result.violations` would let moderate/minor axe findings
  * silently ship, which the UI/UX design explicitly disallows at the
- * serious-or-worse threshold.
+ * serious-or-worse threshold. Pass `include` only to assess a bounded
+ * component whose recovery behavior is under test; it does not suppress
+ * rules or alter the WCAG 2.2 AA rule set.
  */
 export async function scanForAxeViolations(
   page: Page,
+  include?: string,
 ): Promise<AxeScanResult> {
   const builder = new AxeBuilder({ page }).withTags([...WCAG_22_AA_TAGS]);
+  if (include) builder.include(include);
   const results = await builder.analyze();
   const criticalOrSerious = results.violations.filter(
     (violation: AxeViolation) =>

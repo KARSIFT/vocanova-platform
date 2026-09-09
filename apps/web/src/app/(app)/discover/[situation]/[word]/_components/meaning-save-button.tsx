@@ -7,6 +7,8 @@ import { createApiClient } from "@/lib/api";
 import { CSRF_COOKIE_NAME, getCookieValue } from "@/lib/cookies";
 import { handleApiError } from "@/lib/session";
 import { requestWordDetailPracticeFocus } from "@/lib/word-detail-practice-focus";
+import { clearSentenceRecoveryForMeaning } from "@/lib/sentence-recovery";
+import { useAuthenticatedUserId } from "../../../../_components/identity-context";
 
 interface MeaningSaveButtonProps {
   meaningId: string;
@@ -24,6 +26,7 @@ export function MeaningSaveButton({
   shortDefinition,
 }: MeaningSaveButtonProps) {
   const router = useRouter();
+  const userId = useAuthenticatedUserId();
   const pathname = usePathname();
   const [saved, setSaved] = useState(initialSaved);
   const [status, setStatus] = useState<"idle" | "loading" | "error">("idle");
@@ -51,6 +54,7 @@ export function MeaningSaveButton({
         await client.unsaveUserWord(meaningId, {
           headers: { "X-CSRF-Token": csrfToken },
         });
+        clearSentenceRecoveryForMeaning(userId, meaningId);
         setSaved(false);
       } else {
         const idempotencyKey = generateIdempotencyKey();

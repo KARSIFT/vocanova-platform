@@ -68,6 +68,7 @@ test("keyboard saves focus the exact practice entry without clearing sibling sen
       ownerId: "user-fixture",
       source: "word_detail",
       attemptId: "uw-mean-bank-river",
+      meaningId: "mean-bank-river",
       path: "/discover/ordering-at-a-cafe/bank",
       targetWord: "bank",
       shortDefinition: "land beside a river",

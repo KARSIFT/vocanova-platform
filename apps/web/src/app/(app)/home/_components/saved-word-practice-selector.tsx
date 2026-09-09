@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { SavedMeaning } from "@vocanova/api-client";
 
 import { SentenceFeedback } from "../../_components/sentence-feedback";
-import { readSentenceRecovery } from "@/lib/sentence-recovery";
+import {
+  clearSentenceRecoveryForMeaning,
+  readSentenceRecovery,
+} from "@/lib/sentence-recovery";
 import { useAuthenticatedUserId } from "../../_components/identity-context";
 
 interface SavedWordPracticeSelectorProps {
@@ -36,6 +39,7 @@ export function SavedWordPracticeSelector({
       savedWords.some(
         (word) =>
           word.userWordId === record.attemptId &&
+          word.meaningId === record.meaningId &&
           word.wordText === record.targetWord,
       )
     )
@@ -56,6 +60,10 @@ export function SavedWordPracticeSelector({
 
   const selectedWord = savedWords.find(
     (savedWord) => savedWord.userWordId === selectedUserWordId,
+  );
+  const recoveryAttemptIds = useMemo(
+    () => savedWords.map((word) => word.userWordId),
+    [savedWords],
   );
 
   if (!selectedWord) return null;
@@ -79,7 +87,8 @@ export function SavedWordPracticeSelector({
   }
 
   function discardDraftAndChangeWord() {
-    if (!pendingUserWordId || isSubmitting) return;
+    if (!pendingUserWordId || isSubmitting || !selectedWord) return;
+    clearSentenceRecoveryForMeaning(userId, selectedWord.meaningId);
     hasDraftRef.current = false;
     setSelectionNotice(null);
     setSelectedUserWordId(pendingUserWordId);
@@ -144,13 +153,14 @@ export function SavedWordPracticeSelector({
       >
         <SentenceFeedback
           key={selectedWord.userWordId}
+          meaningId={selectedWord.meaningId}
           targetWord={selectedWord.wordText}
           attemptId={selectedWord.userWordId}
           source="daily_mission"
           shortDefinition={selectedWord.shortDefinition}
           onPendingChange={setIsSubmitting}
           clearMismatchedRecovery
-          recoveryAttemptIds={savedWords.map((word) => word.userWordId)}
+          recoveryAttemptIds={recoveryAttemptIds}
         />
       </div>
 

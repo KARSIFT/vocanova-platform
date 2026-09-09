@@ -3,7 +3,9 @@ import { afterEach, it } from "node:test";
 
 import {
   clearSentenceRecovery,
+  clearSentenceRecoveryForMeaning,
   readSentenceRecovery,
+  saveSentenceDraft,
   saveSentenceRecovery,
   SENTENCE_RECOVERY_KEY,
 } from "../../src/lib/sentence-recovery";
@@ -21,7 +23,7 @@ function installStorage(next = new MemoryStorage()) {
   Object.defineProperty(globalThis, "window", { configurable: true, value: { sessionStorage: storage } });
 }
 function record(overrides = {}) {
-  return { ownerId: "user-a", source: "word_detail" as const, attemptId: "uw-1", path: "/discover/ordering-at-a-cafe/pour", targetWord: "pour", sentence: "I pour coffee.", ...overrides };
+  return { ownerId: "user-a", source: "word_detail" as const, attemptId: "uw-1", meaningId: "mean-pour", path: "/discover/ordering-at-a-cafe/pour", targetWord: "pour", sentence: "I pour coffee.", ...overrides };
 }
 afterEach(() => { Reflect.deleteProperty(globalThis, "window"); });
 
@@ -45,14 +47,16 @@ it("rejects malformed, expired, missing-identity, and oversized records", () => 
   assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
 });
 
-it("clears records with invalid source, owner, target, definition, path, or future time", () => {
+it("clears records with invalid source, owner, meaning, target, definition, path, or future time", () => {
   installStorage();
+  const validRecord = { ...record(), version: 1, createdAt: Date.now() };
   for (const invalid of [
-    record({ source: "unknown" }), record({ ownerId: "" }), record({ targetWord: "" }),
-    record({ shortDefinition: 4 }), record({ path: "/settings" }),
-    record({ createdAt: Date.now() + 60_000 }),
+    { ...validRecord, source: "unknown" }, { ...validRecord, ownerId: "" },
+    { ...validRecord, meaningId: undefined }, { ...validRecord, targetWord: "" },
+    { ...validRecord, shortDefinition: 4 }, { ...validRecord, path: "/settings" },
+    { ...validRecord, createdAt: Date.now() + 60_000 },
   ]) {
-    storage.setItem(SENTENCE_RECOVERY_KEY, JSON.stringify({ ...invalid, version: 1 }));
+    storage.setItem(SENTENCE_RECOVERY_KEY, JSON.stringify(invalid));
     assert.equal(readSentenceRecovery("user-a"), null);
     assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
   }
@@ -72,5 +76,37 @@ it("fails closed when session storage is unavailable and clears on discard or su
   assert.equal(readSentenceRecovery("user-a"), null);
   installStorage(); saveSentenceRecovery(record());
   clearSentenceRecovery("user-a");
+  assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
+});
+
+it("stores only a normalized, bounded draft with its exact meaning", () => {
+  installStorage();
+  saveSentenceDraft(record({ meaningId: "mean-pour", sentence: "  I pour coffee.  " }));
+  assert.equal(readSentenceRecovery("user-a")?.sentence, "I pour coffee.");
+  assert.equal(readSentenceRecovery("user-a")?.meaningId, "mean-pour");
+  saveSentenceDraft(record({ sentence: "x".repeat(301) }));
+  assert.equal(readSentenceRecovery("user-a")?.sentence, "x".repeat(300));
+  saveSentenceDraft(record({ meaningId: "mean-pour", sentence: "   " }));
+  assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
+});
+
+it("clears recovery when its meaning matches", () => {
+  installStorage();
+  saveSentenceRecovery(record());
+  clearSentenceRecoveryForMeaning("user-a", "mean-pour");
+  assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
+});
+
+it("preserves recovery when its meaning does not match", () => {
+  installStorage();
+  saveSentenceRecovery(record());
+  clearSentenceRecoveryForMeaning("user-a", "mean-other");
+  assert.equal(readSentenceRecovery("user-a")?.meaningId, "mean-pour");
+});
+
+it("clears recovery without an owner before identity refresh completes", () => {
+  installStorage();
+  saveSentenceRecovery(record());
+  clearSentenceRecoveryForMeaning(undefined, "mean-other");
   assert.equal(storage.getItem(SENTENCE_RECOVERY_KEY), null);
 });
