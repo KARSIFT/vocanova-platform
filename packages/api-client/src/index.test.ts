@@ -574,8 +574,7 @@ describe("VocanovaClient", () => {
       assert.equal(
         init.body,
         JSON.stringify({
-          reason: "The feedback is incorrect.",
-          classification: "incorrect",
+          classification: "incorrect_correction",
         }),
       );
       return Promise.resolve(new Response(null, { status: 204 }));
@@ -587,7 +586,7 @@ describe("VocanovaClient", () => {
     });
     const { response } = await client.reportSentenceFeedback(
       "00000000-0000-0000-0000-000000000011",
-      { reason: "The feedback is incorrect.", classification: "incorrect" },
+      { classification: "incorrect_correction" },
     );
     assert.equal(response.status, 204);
   });

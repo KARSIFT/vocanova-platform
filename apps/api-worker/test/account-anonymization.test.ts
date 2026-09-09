@@ -234,7 +234,7 @@ async function seed(purgeAfter: string) {
       "INSERT INTO ai_feedback_idempotency_attempts (user_id, key, attempt_id, created_at) VALUES (?1, 'private', '84000000-0000-4000-8000-000000000099', ?2)",
     ).bind(USER, NOW),
     env.DB.prepare(
-      "INSERT INTO ai_feedback_reports (id, attempt_id, user_id, reason, created_at) VALUES ('85000000-0000-4000-8000-000000000099', '84000000-0000-4000-8000-000000000099', ?1, 'private', ?2)",
+      "INSERT INTO ai_feedback_reports (id, attempt_id, user_id, reason, classification, created_at) VALUES ('85000000-0000-4000-8000-000000000099', '84000000-0000-4000-8000-000000000099', ?1, 'Another quality problem.', 'other_quality_problem', ?2)",
     ).bind(USER, NOW),
     env.DB.prepare(
       "INSERT INTO daily_mission_snapshots (id, user_id, local_date, timezone, review_target, reviews_completed, policy_version, status, grace_applied, created_at, updated_at) VALUES ('86000000-0000-4000-8000-000000000099', ?1, '2026-09-01', 'UTC', 5, 0, 'test', 'open', 0, ?2, ?2)",

@@ -30,6 +30,10 @@ test("keeps feedback reporting reachable with a 44px touch target", async ({
   expect(reportButtonBox).not.toBeNull();
   expect(reportButtonBox?.height).toBeGreaterThanOrEqual(44);
   await reportButton.click();
+  await page
+    .getByRole("radio", { name: "The correction is wrong" })
+    .check();
+  await page.getByRole("button", { name: "Send report" }).click();
   await expect(
     page.getByRole("status", { name: "Feedback report submitted" }),
   ).toBeVisible();
