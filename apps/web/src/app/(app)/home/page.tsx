@@ -9,34 +9,23 @@ import { SavedWordPracticeSelector } from "./_components/saved-word-practice-sel
 
 export default async function HomePage() {
   const client = await createServerApiClient();
-  const [savedWordsResult, dueWordsResult, dailyMissionResult] =
-    await Promise.allSettled([
-      client.listSavedWords({ limit: 10 }),
-      client.listDueWords({ limit: 1 }),
+  let savedWordsResponse:
+    | Awaited<ReturnType<typeof client.listSavedWords>>
+    | null;
+  let dueResponse: Awaited<ReturnType<typeof client.listDueWords>> | null;
+  let dailyMissionResponse: Awaited<ReturnType<typeof client.getDailyMission>>;
+  try {
+    [savedWordsResponse, dueResponse, dailyMissionResponse] = await Promise.all([
+      recoverAuxiliaryRead(client.listSavedWords({ limit: 10 })),
+      recoverAuxiliaryRead(client.listDueWords({ limit: 1 })),
       client.getDailyMission(),
     ]);
-  const failedResults = [savedWordsResult, dueWordsResult, dailyMissionResult];
-  const unauthorizedResult = failedResults.find(
-    (result) =>
-      result.status === "rejected" &&
-      result.reason instanceof ApiResponseError &&
-      result.reason.status === 401,
-  );
-  if (unauthorizedResult?.status === "rejected") {
-    requireAuthRedirect(unauthorizedResult.reason, "/home");
-  }
-  if (dailyMissionResult.status === "rejected") {
-    requireAuthRedirect(dailyMissionResult.reason, "/home");
+  } catch (error) {
+    requireAuthRedirect(error, "/home");
   }
 
-  const savedWords =
-    savedWordsResult.status === "fulfilled"
-      ? savedWordsResult.value.data.items
-      : null;
-  const dueReviewWords =
-    dueWordsResult.status === "fulfilled"
-      ? dueWordsResult.value.data.totalCount
-      : null;
+  const savedWords = savedWordsResponse?.data.items ?? null;
+  const dueReviewWords = dueResponse?.data.totalCount ?? null;
   const {
     reviewTarget: missionTargetWords,
     reviewsCompleted: reviewedWordsToday,
@@ -46,7 +35,7 @@ export default async function HomePage() {
     sentencePracticesCompleted,
     status: missionStatus,
     streak,
-  } = dailyMissionResult.value.data;
+  } = dailyMissionResponse.data;
   const isReviewTargetComplete = reviewedWordsToday >= missionTargetWords;
   const isStreakMilestone =
     isReviewTargetComplete &&
@@ -216,6 +205,17 @@ export default async function HomePage() {
       )}
     </div>
   );
+}
+
+async function recoverAuxiliaryRead<T>(request: Promise<T>): Promise<T | null> {
+  try {
+    return await request;
+  } catch (error) {
+    if (error instanceof ApiResponseError && error.status === 401) {
+      throw error;
+    }
+    return null;
+  }
 }
 
 function getRemainingTarget(
