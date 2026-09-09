@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 
 import { expect, test } from "@playwright/test";
 
+import { formatViolations, scanForAxeViolations } from "./axe-helper.js";
+
 const KEY = "vocanova.sentence-recovery.v1";
 const USER = "user-fixture";
 
@@ -19,6 +21,29 @@ async function authenticate(page: import("@playwright/test").Page, context: impo
   await page.getByRole("button", { name: "Save" }).click();
 }
 
+async function expectRecoveryChoiceAccessible(
+  page: import("@playwright/test").Page,
+  surface: string,
+) {
+  const { criticalOrSerious } = await scanForAxeViolations(
+    page,
+    "[aria-labelledby^='sentence-feedback-heading-'] form",
+  );
+  expect(
+    criticalOrSerious,
+    `Expected no critical or serious axe violations for the ${surface} draft recovery decision; found:\n${formatViolations(
+      criticalOrSerious,
+    ).join("\n")}`,
+  ).toEqual([]);
+
+  for (const name of ["Resume sentence", "Discard saved sentence"]) {
+    const control = page.getByRole("button", { name });
+    expect((await control.boundingBox())?.height).toBeGreaterThanOrEqual(44);
+    await control.focus();
+    await expect(control).toBeFocused();
+  }
+}
+
 test("word detail saves on 401, signs in, and explicitly resumes only its matching sentence", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await authenticate(page, context, baseURL);
@@ -32,18 +57,26 @@ test("word detail saves on 401, signs in, and explicitly resumes only its matchi
   await page.getByRole("button", { name: "Check my sentence" }).click();
   await expect(page).toHaveURL(/\/signin\?returnTo=/);
   await expect
-    .poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY))
-    .not.toBeNull();
+    .poll(() =>
+      page.evaluate((key) => {
+        const raw = sessionStorage.getItem(key as string);
+        return raw ? JSON.parse(raw) : null;
+      }, KEY),
+    )
+    .toMatchObject({
+      attemptId: "uw-mean-pour",
+      meaningId: "mean-pour",
+      ownerId: USER,
+      path: "/discover/ordering-at-a-cafe/pour",
+      sentence: "I pour coffee every morning.",
+      source: "word_detail",
+      targetWord: "pour",
+    });
   await page.unroute("**/api/v1/sentence-feedback");
   await page.goto("/auth/magic?token=recovery-token&email=learner%40example.test&returnTo=%2Fdiscover%2Fordering-at-a-cafe%2Fpour");
   await expect(page).toHaveURL("/discover/ordering-at-a-cafe/pour");
   await expect(page.getByText("Your sentence was saved when your session expired.")).toBeVisible();
-  for (const name of ["Resume sentence", "Discard saved sentence"]) {
-    const control = page.getByRole("button", { name });
-    expect((await control.boundingBox())?.height).toBeGreaterThanOrEqual(44);
-    await control.focus();
-    await expect(control).toBeFocused();
-  }
+  await expectRecoveryChoiceAccessible(page, "Word Detail");
   await page.getByRole("button", { name: "Resume sentence" }).click();
   await expect(input).toHaveValue("I pour coffee every morning.");
 });
@@ -58,26 +91,121 @@ test("an unsubmitted matching draft survives reload and Resume or Discard return
   await page.reload();
   await expect(page.getByText("Your saved sentence is ready to resume.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
-  await page.getByRole("button", { name: "Resume sentence" }).click();
+  await expectRecoveryChoiceAccessible(page, "Word Detail");
+
+  const resume = page.getByRole("button", { name: "Resume sentence" });
+  await resume.focus();
+  await expect(resume).toBeFocused();
+  await resume.press("Enter");
   await expect(input).toHaveValue("I pour coffee before work.");
   await expect(input).toBeFocused();
 
   await page.reload();
-  await page.getByRole("button", { name: "Discard saved sentence" }).click();
+  const discard = page.getByRole("button", { name: "Discard saved sentence" });
+  await discard.focus();
+  await expect(discard).toBeFocused();
+  await discard.press("Enter");
   await expect(input).toHaveValue("");
   await expect(input).toBeFocused();
   await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).toBeNull();
 });
 
-test("rejects different owners, target mismatch, malformed and expired recovery", async ({ page, context }, testInfo) => {
+test("rejects different owners, meanings, targets, malformed and expired recovery", async ({ page, context }, testInfo) => {
   const baseURL = testInfo.project.use.baseURL!;
   await authenticate(page, context, baseURL);
-  for (const item of [recovery({ ownerId: "another-user" }), recovery({ attemptId: "other-target" }), { malformed: true }, recovery({ createdAt: Date.now() - 30 * 60 * 1000 - 1 })]) {
+  for (const item of [
+    recovery({ ownerId: "another-user" }),
+    recovery({ meaningId: "other-meaning" }),
+    recovery({ attemptId: "other-target" }),
+    { malformed: true },
+    recovery({ createdAt: Date.now() - 30 * 60 * 1000 - 1 }),
+  ]) {
     await page.evaluate(([key, value]) => sessionStorage.setItem(key as string, JSON.stringify(value)), [KEY, item]);
     await page.reload();
     await expect(page.getByText("Your sentence was saved when your session expired.")).toHaveCount(0);
     await expect.poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY)).toBeNull();
   }
+});
+
+test("Home restores a matching draft only after Resume and clears it on Discard", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  await authenticate(page, context, baseURL);
+  await page.goto("/home");
+  const input = page.getByRole("textbox", {
+    name: /Write a sentence using pour/,
+  });
+  await input.fill("I pour tea at home.");
+  await expect
+    .poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY))
+    .not.toBeNull();
+
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
+  await expectRecoveryChoiceAccessible(page, "Home");
+  const resume = page.getByRole("button", { name: "Resume sentence" });
+  await resume.focus();
+  await expect(resume).toBeFocused();
+  await resume.press("Enter");
+  await expect(input).toHaveValue("I pour tea at home.");
+  await expect(input).toBeFocused();
+
+  await page.reload();
+  const discard = page.getByRole("button", { name: "Discard saved sentence" });
+  await discard.focus();
+  await expect(discard).toBeFocused();
+  await discard.press("Enter");
+  await expect(input).toHaveValue("");
+  await expect(input).toBeFocused();
+  await expect
+    .poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY))
+    .toBeNull();
+});
+
+test("keeps a recoverable submission failure visible and recoverable after reload", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  await authenticate(page, context, baseURL);
+  const input = page.getByRole("textbox", {
+    name: /Write a sentence using pour/,
+  });
+  await input.fill("I pour coffee before work.");
+  await page.route("**/api/v1/sentence-feedback", (route) =>
+    route.fulfill({
+      status: 500,
+      contentType: "application/problem+json",
+      body: JSON.stringify({ detail: "temporary service failure" }),
+    }),
+  );
+  await page.getByRole("button", { name: "Check my sentence" }).click();
+  await expect(input).toHaveValue("I pour coffee before work.");
+  await expect(
+    page.getByText("Unable to check this sentence right now. Please try again."),
+  ).toBeFocused();
+  await expect
+    .poll(() =>
+      page.evaluate((key) => {
+        const raw = sessionStorage.getItem(key as string);
+        return raw ? JSON.parse(raw) : null;
+      }, KEY),
+    )
+    .toMatchObject({
+      attemptId: "uw-mean-pour",
+      meaningId: "mean-pour",
+      ownerId: USER,
+      path: "/discover/ordering-at-a-cafe/pour",
+      sentence: "I pour coffee before work.",
+      source: "word_detail",
+      targetWord: "pour",
+    });
+
+  await page.unroute("**/api/v1/sentence-feedback");
+  await page.reload();
+  await expect(page.getByRole("button", { name: "Resume sentence" })).toBeVisible();
 });
 
 test("a mounted form clears owner-bound state when the authenticated user changes", async ({ page, context }, testInfo) => {
@@ -287,6 +415,48 @@ test("Review recovers the historical attempt after 401 when the queue is empty",
   });
   await expect(page.getByText("Correct", { exact: true })).toBeVisible();
   expect(reviewPosts).toBe(1);
+});
+
+test("Review Completion restores a matching draft only after Resume and clears it on Discard", async ({
+  page,
+  context,
+}, testInfo) => {
+  const baseURL = testInfo.project.use.baseURL!;
+  await authenticate(page, context, baseURL);
+  await page.goto("/reviews");
+  await page.getByRole("button", { name: "Show answer" }).click();
+  await page.getByRole("button", { name: "Good", exact: true }).click();
+
+  const input = page.getByRole("textbox", {
+    name: /Write a sentence using pour/,
+  });
+  await input.fill("I pour tea after reviewing.");
+  await expect
+    .poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY))
+    .not.toBeNull();
+
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Resume sentence practice" }),
+  ).toBeVisible();
+  await expectRecoveryChoiceAccessible(page, "Review Completion");
+  const resume = page.getByRole("button", { name: "Resume sentence" });
+  await resume.focus();
+  await expect(resume).toBeFocused();
+  await resume.press("Enter");
+  await expect(input).toHaveValue("I pour tea after reviewing.");
+  await expect(input).toBeFocused();
+
+  await page.reload();
+  const discard = page.getByRole("button", { name: "Discard saved sentence" });
+  await discard.focus();
+  await expect(discard).toBeFocused();
+  await discard.press("Enter");
+  await expect(input).toHaveValue("");
+  await expect(input).toBeFocused();
+  await expect
+    .poll(() => page.evaluate((key) => sessionStorage.getItem(key as string), KEY))
+    .toBeNull();
 });
 
 test("discard, successful feedback, and logout clear recovery", async ({ page, context }, testInfo) => {
