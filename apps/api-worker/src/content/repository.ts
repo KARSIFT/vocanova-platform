@@ -18,7 +18,10 @@ type Row = Record<string, string | number | null>;
 interface Cursor<T> {
   value: T;
   id: string;
+  query?: string;
 }
+
+const MAX_SAVED_WORD_SEARCH_LENGTH = 100;
 
 export class D1ContentLearningRepository {
   constructor(
@@ -175,12 +178,16 @@ export class D1ContentLearningRepository {
     userId: string,
     after: string,
     requestedLimit: number,
+    rawQuery = "",
   ): Promise<{
     items: SavedMeaning[];
     nextCursor?: string;
   }> {
     const limit = normalizeLimit(requestedLimit);
+    const query = normalizeSavedWordsQuery(rawQuery);
     const cursor = decodeCursor<string>(after, "a");
+    if (cursor && (cursor.query ?? "") !== query)
+      throw new ContentLearningError("invalid_cursor");
     const result = await this.database
       .prepare(
         `SELECT uw.id AS user_word_id, uw.meaning_id,
@@ -190,10 +197,13 @@ export class D1ContentLearningRepository {
          FROM user_words uw JOIN word_meanings wm ON wm.id = uw.meaning_id
          JOIN canonical_words cw ON cw.id = wm.word_id
          WHERE uw.user_id = ?1 AND uw.deleted_at IS NULL
-           AND (?2 IS NULL OR uw.added_at < ?2 OR (uw.added_at = ?2 AND uw.id < ?3))
-         ORDER BY uw.added_at DESC, uw.id DESC LIMIT ?4`,
+           AND wm.status = 'active' AND cw.status = 'active'
+           AND (?2 = '' OR instr(lower(cw.normalized_text), ?2) > 0
+                OR instr(lower(wm.short_definition), ?2) > 0)
+           AND (?3 IS NULL OR uw.added_at < ?3 OR (uw.added_at = ?3 AND uw.id < ?4))
+         ORDER BY uw.added_at DESC, uw.id DESC LIMIT ?5`,
       )
-      .bind(userId, cursor?.value ?? null, cursor?.id ?? "", limit)
+      .bind(userId, query, cursor?.value ?? null, cursor?.id ?? "", limit)
       .all<Row>();
     const items = result.results.map(savedMeaningFromRow);
     return {
@@ -203,6 +213,7 @@ export class D1ContentLearningRepository {
           "a",
           items.at(-1)!.addedAt,
           items.at(-1)!.userWordId,
+          query,
         ),
       }),
     };
@@ -965,9 +976,17 @@ function encodeCursor(
   key: "a" | "d" | "n",
   value: number | string,
   id: string,
+  query?: string,
 ): string {
-  const json = JSON.stringify({ [key]: value, i: id });
-  return btoa(json).replace(/\+/g, "-").replace(/\//g, "_");
+  const json = JSON.stringify({
+    [key]: value,
+    i: id,
+    ...(query !== undefined && { q: query }),
+  });
+  const bytes = new TextEncoder().encode(json);
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_");
 }
 
 function decodeCursor<T>(
@@ -976,23 +995,43 @@ function decodeCursor<T>(
 ): Cursor<T> | null {
   if (!input) return null;
   try {
-    const parsed = JSON.parse(
+    const bytes = Uint8Array.from(
       atob(input.replace(/-/g, "+").replace(/_/g, "/")),
-    ) as Record<string, unknown>;
+      (character) => character.charCodeAt(0),
+    );
+    const parsed = JSON.parse(new TextDecoder().decode(bytes)) as Record<
+      string,
+      unknown
+    >;
     const value = parsed[key];
     if (
       !(key in parsed) ||
       typeof parsed.i !== "string" ||
       !zUuid(parsed.i) ||
+      (parsed.q !== undefined && typeof parsed.q !== "string") ||
       (key === "d"
         ? !Number.isInteger(value)
         : typeof value !== "string" || !Number.isFinite(Date.parse(value)))
     )
       throw new Error();
-    return { value: value as T, id: parsed.i };
+    return {
+      value: value as T,
+      id: parsed.i,
+      ...(typeof parsed.q === "string" && { query: parsed.q }),
+    };
   } catch {
     throw new ContentLearningError("invalid_cursor");
   }
+}
+
+function normalizeSavedWordsQuery(input: string): string {
+  if (Array.from(input).length > MAX_SAVED_WORD_SEARCH_LENGTH)
+    throw new ContentLearningError("invalid_input");
+  const normalized = input
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase("en-US");
+  return normalized;
 }
 
 function wordSlug(normalized: string): string {

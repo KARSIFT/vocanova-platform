@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { ApiResponseError } from "@vocanova/api-client";
 
 import { createServerApiClient, requireAuthRedirect } from "@/lib/api-server";
@@ -35,28 +33,11 @@ export default async function SavedVocabularyPage() {
       <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
         Review and manage every word you have saved.
       </p>
-      {items.length ? (
-        <SavedVocabularyList
-          initialItems={items}
-          initialNextCursor={nextCursor}
-          timezone={timezone}
-        />
-      ) : (
-        <section className="mt-[var(--spacing-lg)] rounded-md border border-neutral-200 bg-neutral-50 p-[var(--spacing-md)]">
-          <h2 className="text-lg font-semibold text-neutral-900">
-            No saved words yet
-          </h2>
-          <p className="mt-[var(--spacing-xs)] text-base text-neutral-700">
-            Save words from a journey to build your vocabulary library.
-          </p>
-          <Link
-            href="/discover"
-            className="mt-[var(--spacing-md)] inline-flex min-h-[var(--spacing-2xl)] items-center rounded-md bg-primary-600 px-[var(--spacing-md)] py-[var(--spacing-sm)] text-base font-medium text-neutral-50"
-          >
-            Explore journeys
-          </Link>
-        </section>
-      )}
+      <SavedVocabularyList
+        initialItems={items}
+        initialNextCursor={nextCursor}
+        timezone={timezone}
+      />
     </div>
   );
 }
